@@ -16,7 +16,7 @@ using namespace ObTools;
 class FooHandler: public CLI::Handler
 {
 public:
-  void handle(string args, istream& sin, ostream& sout)
+  void handle(string args, istream&, ostream& sout)
   {
     sout << "FOO [" << args << "]!\n";
   }
@@ -30,10 +30,10 @@ public:
   string t;
   BigClass(const string& _t): t(_t) {}
 
-  void fred_handler(string args, istream& sin, ostream& sout)
+  void fred_handler(string, istream&, ostream& sout)
   { sout << "Fred " << t << endl; }
 
-  void jim_handler(string args, istream& sin, ostream& sout)
+  void jim_handler(string, istream&, ostream& sout)
   { sout << "Jim " << t << endl; }
 };
 

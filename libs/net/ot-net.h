@@ -209,7 +209,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructors
-  Port(): host(), port(0), proto(Protocol::TCP) {}
+  Port(): host(), proto(Protocol::TCP), port(0) {}
   Port(IPAddress _host, Protocol _proto, int _port): 
     host(_host), proto(_proto), port(_port) {}
 

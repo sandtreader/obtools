@@ -45,7 +45,7 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
 //--------------------------------------------------------------------------
 // Main
 
-int main(int argc, char **argv)
+int main()
 {
   TestServer server;
   server.run();

@@ -31,7 +31,7 @@ public:
   //------------------------------------------------------------------------
   //Constructor
   TelnetServer(Registry& _registry, int port, const string& _prompt=">"): 
-    registry(_registry), prompt(_prompt), Net::TCPServer(port) {}
+    Net::TCPServer(port), registry(_registry), prompt(_prompt) {}
 
   //------------------------------------------------------------------------
   //Process a connection

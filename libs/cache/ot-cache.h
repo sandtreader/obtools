@@ -169,7 +169,7 @@ protected:
   // Internal state
 
   // Limit on entries, 0 if unlimited
-  int limit;
+  unsigned int limit;
 
   // Core map
   MapType cachemap;
@@ -181,7 +181,7 @@ protected:
   //--------------------------------------------------------------------------
   // Clear the given content - does nothing here, but implemented in
   // PointerCache to free pointers
-  virtual void clear(const MCType& mc) { }
+  virtual void clear(const MCType&) { }
 
 public:
   // Overall recursive mutex
@@ -191,8 +191,8 @@ public:
   // Constructor
   Cache(const TIDY_POLICY& _tpol, 
 	const EVICTOR_POLICY& _epol,
-	int _limit=0): 
-    tidy_policy(_tpol), evictor_policy(_epol), limit(_limit), mutex() {}
+	unsigned int _limit=0): 
+    limit(_limit), tidy_policy(_tpol), evictor_policy(_epol), mutex() {}
 
   //--------------------------------------------------------------------------
   // Add an item of content to the cache
@@ -277,7 +277,8 @@ public:
   bool evict()
   {
     MT::RLock lock(mutex);
-    int needed = cachemap.size() - limit + 1;  // Number we need to evict
+    // Number we need to evict
+    unsigned int needed = cachemap.size() - limit + 1;  
     if (needed <= 0) return true;
 
     while (needed)
@@ -351,7 +352,7 @@ public:
   //--------------------------------------------------------------------------
   // Virtual destructor 
   // (does nothing here, but PointerCache uses it to free pointers)
-  ~Cache() {}
+  virtual ~Cache() {}
 };
 
 //==========================================================================
@@ -455,7 +456,7 @@ public:
   // Constructor
   PointerCache(const TIDY_POLICY& _tpol,
 	       const EVICTOR_POLICY& _epol,
-	       int _limit=0): 
+	       unsigned int _limit=0): 
     Cache<ID, PointerContent<CONTENT>, 
           TIDY_POLICY, EVICTOR_POLICY>::Cache(_tpol, _epol, _limit) {}
 
@@ -541,7 +542,7 @@ public:
   //------------------------------------------------------------------------
   // Background check whether to keep an entry
   // Always says OK
-  bool keep_entry(const PolicyData& pd, time_t now)
+  bool keep_entry(const PolicyData&, time_t)
   { return true; }
 };
 
@@ -556,7 +557,7 @@ public:
   //------------------------------------------------------------------------
   // Eviction policy - find the oldest entry
   // Never says this is the 'worst' - hence nothing is ever evicted
-  bool check_worst(const PolicyData& current, const PolicyData& worst)
+  bool check_worst(const PolicyData&, const PolicyData&)
   { return false; }
 };
 

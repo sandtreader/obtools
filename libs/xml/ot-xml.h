@@ -40,7 +40,7 @@ private:
 
   //Prevent copy and assignment - don't want to do deep copy
   Element(const Element& e) {}
-  const Element& operator=(const Element& e) {}
+  const Element& operator=(const Element& e) { return e; }
 
 public:
   //Element name ('tag') - empty for data 'elements'
@@ -369,18 +369,18 @@ public:
   // Constructors & Destructor
   // s is output stream for parsing errors
   Parser(ostream &s, int f = PARSER_OPTIMISE_CONTENT):
-    serr(s), 
-    errors(0),
     root(0),
-    flags(f) 
+    serr(s), 
+    flags(f), 
+    errors(0)
   {}
 
   // Default - use cerr
   Parser(int f = PARSER_OPTIMISE_CONTENT):
-    serr(cerr), 
-    errors(0),
     root(0),
-    flags(f)
+    serr(cerr), 
+    flags(f),
+    errors(0)
   {}
 
   ~Parser();

@@ -16,7 +16,7 @@ using namespace ObTools;
 class FooHandler: public CLI::Handler
 {
 public:
-  void handle(string args, istream& sin, ostream& sout)
+  void handle(string, istream& sin, ostream& sout)
   {
     sout << "Type something:\n";
     string s;

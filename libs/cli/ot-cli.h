@@ -80,7 +80,7 @@ public:
   //Constructor
   Command(const string& _word, Handler *_handler, 
 	  const string& _help="", const string& _usage=""):
-    word(_word), handler(_handler), help(_help), usage(_usage) {}
+    handler(_handler), word(_word), help(_help), usage(_usage) {}
 
   //------------------------------------------------------------------------
   //Handle a command

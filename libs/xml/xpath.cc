@@ -78,8 +78,6 @@ Element *XPathProcessor::get_element(const string& path)
 // Returns def if anything not found
 string XPathProcessor::get_value(const string& path, const string& def)
 {
-  Element *final;
-
   // See if it's an attribute step at the end
   string::size_type att = path.rfind('@');
 

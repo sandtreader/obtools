@@ -141,7 +141,7 @@ ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
 { 
   ssize_t size = cwrite(buf, count);
-  if (size!=count) throw SocketError(errno);
+  if (size!=(ssize_t)count) throw SocketError(errno);
 }
 
 //--------------------------------------------------------------------------

@@ -14,7 +14,7 @@ namespace ObTools { namespace CLI {
 
 //------------------------------------------------------------------------
 //Process a connection
-void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint client)
+void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
 {
   // Create streams for input/output
   Net::TCPStream io(s);
