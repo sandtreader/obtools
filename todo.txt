@@ -4,11 +4,13 @@ Libs
 ----
 
 XML:
- - Better errors - count lines, show guilty tag names/lines (open and close)
+ - Implement CDATA marked section
 
 DB:
  - Transactions
  - Postgres last ID???  Maybe exec_insert(), returning ID inserted
+   (quote table name, field name, whether already in transaction 
+    - do insert, select max() within transaction)
 
 CLI:
  - Provide help in groups if not recognised
@@ -18,26 +20,39 @@ XMLMesh
 ------
 
 Current:
-  forward: otmp client transport - use client library
-  subscribe: ditto
+  tracking of requests;  ensure a response is received if not externally
+    routed
+
+  authentication/filtering of incoming msgs:
+    MD5 challenge (id, key)
+    Symmetric challenge for client to prove server authentic?
+
+  Optional CLI for server
+
+SOAP:
+  Proper intermediate/final node behaviour on receipt of SOAP
+  HTTP client and server - test against standard SOAP implementations
+
 
 Future:
-  ** Redesign dispatch - more configurable routing, thread management **
+  Dynamic loading of modules?
+  SSL
+  Allow long-term correlation for registration/multiple response?
 
-  authentication/filtering of incoming msgs
-
+  Persistent guaranteed storage
+  Persistent subscription
   Multipath resilience - keep time-limited map of message [orig,id], 
     suppress duplicates   
 
-  Allow long-term correlation for registration/multiple response?
+  Synchroniser module - respond immediately and allow asynchronous 
+    poll of real results later
 
-  Worker thread pool for dispatch??
-
-  Dynamic loading of modules?
-
-Client:
-  pure virtual call if info message received while waiting for 
-  request response?
+  Optimise XML parse for subject - just read start tag
+    OR
+  Optimise XML parse for headers - provide 'stop at end of XX' marker
+    - keep rest as special extra unparsed element, to allow changes to header
+    - spool unparsed element out at end
+    - hence alternatively, don't parse into env:Body
 
 XMITools
 --------
@@ -67,11 +82,27 @@ ObCache 2:
 - Distributed
 - Generalise transport mechanism
 
+- Object references are constructed XML, with MD5sum hash for fast lookup
+
+  // Plain object
+  <object class="foo" oid="5830809"/>
+
+  // Association
+  <association>
+    <source class="foo" oid="549594"/>
+    <dest class="bar" role="parent"/>
+    <filter type="xxx">...</filter>
+    <sort type="yyy">...</sort>
+  </association>
+
+  // MD5 hash
+  <fetch>
+    <hash type="md5">439ac23de4</hint>
+    <object .../>
+  </fetch>
 
 General
 -------
 
 - Licence on release
-- Improve Makefiles with standard library Makefile.std, foreach etc.
-- Build MT and non-MT libraries - define _REENTRANT
  
