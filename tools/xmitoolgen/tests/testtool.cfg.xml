@@ -94,12 +94,12 @@
     <directory>$=p.name=$</directory>
 
     <!-- C++ implementation output -->
-    <template name = "C++ implementation" scope="class">
-      <filename>$=c.name=$.cc</filename>
+    <template name = "C++ implementation" scope="class" var="myclass">
+      <filename>$=myclass.name=$.cc</filename>
       // Automatically generated code by xmi2cc
-      // $=c.name=$.cc
+      // $=myclass.name=$.cc
 
-      #include "$=c.name=$.h"
+      #include "$=myclass.name=$.h"
       <template name= "Method implementation" scope="operation">
 
       //---------------------------------------------------------

@@ -365,7 +365,8 @@ void process_script(const string& script, CPPT::Tags& tags, int& max_ci)
 
 //--------------------------------------------------------------------------
 // Generate code to call a template for all elements in its scope
-void generate_call(XML::Element& te, Scope parent_scope, 
+void generate_call(XML::Element& te, Scope parent_scope,
+		   const string& parent_svar,
 		   const string& parent_suffix, int i)
 {
   string sname = te.get_attr("scope", "class");
@@ -373,7 +374,6 @@ void generate_call(XML::Element& te, Scope parent_scope,
   string stype  = scope_type(scope);
   string nstype = scope_nstype(scope);
   string cvar = "child_"+scope_var(scope);
-  string pvar = scope_var(parent_scope);
 
   // Get my suffix appended to parent's
   ostringstream ssuf;
@@ -387,7 +387,8 @@ void generate_call(XML::Element& te, Scope parent_scope,
        || scope == SCOPE_RPACKAGE
        || scope == SCOPE_MODEL))
   {
-    cout << "  template" << suffix << "(sout, " << pvar << ", 0, path);\n";
+    cout << "  template" << suffix << "(sout, " << parent_svar 
+         << ", 0, path);\n";
   }
   else 
   {
@@ -405,7 +406,7 @@ void generate_call(XML::Element& te, Scope parent_scope,
     // Declare counter variable the first time
     cout << "  " << (i?"":"int ") << "i=0;\n";
     cout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << cvar << ",\n";
-    cout << "                      " << pvar << listop << ")\n"; 
+    cout << "                      " << parent_svar << listop << ")\n"; 
     cout << "    template" << suffix << "(sout, " << cvar << ", i++, path);\n";
     cout << "  OBTOOLS_UML_ENDFOR\n";
   }
@@ -419,6 +420,7 @@ void generate_template(XML::Element& te, CPPT::Tags& tags,
 {
   string scopename = te.get_attr("scope", "class");
   Scope scope = get_scope(scopename);
+  string svar = te.get_attr("var", scope_var(scope));
 
   // Special handling for rpackage - recurse on self first
   if (scope == SCOPE_RPACKAGE)
@@ -426,7 +428,7 @@ void generate_template(XML::Element& te, CPPT::Tags& tags,
     cout << "  // Recurse to sub-packages first\n";
     cout << "  int si=0;\n";
     cout << "  OBTOOLS_UML_FOREACH_PACKAGE(sub_p, " 
-	 << scope_var(scope) << ")\n";
+	 << svar << ")\n";
     cout << "    template" << suffix << "(sout, sub_p, si++, path);\n";
     cout << "  OBTOOLS_UML_ENDFOR\n";
   }
@@ -445,7 +447,7 @@ void generate_template(XML::Element& te, CPPT::Tags& tags,
     else if (ce.name == "template")
     {
       // Call to subtemplate, iterating over children
-      generate_call(ce, scope, suffix, i++);
+      generate_call(ce, scope, svar, suffix, i++);
     }
   OBTOOLS_XML_ENDFOR
 }
@@ -483,7 +485,11 @@ void template_funcs(XML::Element& root, CPPT::Tags& tags,
     // Useful variables for code generation
     string scopename = e.get_attr("scope", "class");
     Scope scope = get_scope(scopename);
-    string uparam = scope_nstype(scope) + "& " + scope_var(scope);
+
+    // Create scope element variable - allow them to override with 'var'
+    // attribute
+    string svar = e.get_attr("var", scope_var(scope));
+    string uparam = scope_nstype(scope) + "& " + svar;
     string streamname = "sout";
 
     if (fn_script.size())
@@ -528,7 +534,7 @@ void template_funcs(XML::Element& root, CPPT::Tags& tags,
     {
       // Generate path addition code
       cout << "  path += dn_template" << mysuffix << "("
-	   << scope_var(scope) << ") + \"/\";\n\n";
+	   << svar << ") + \"/\";\n\n";
 
       cout << "  // Make directory\n";
       cout << "  string _cmd = string(\"mkdir -p \\\"\")+path+\"\\\"\";\n";
@@ -545,7 +551,7 @@ void template_funcs(XML::Element& root, CPPT::Tags& tags,
       // the need to always preserve 'sout' as the output stream
       // Uses the ReGen rofstream to merge this with user changes
       cout << "  string _fn = path+fn_template" << mysuffix << "("
-	   << scope_var(scope) << ");\n";
+	   << svar << ");\n";
       cout << "  ObTools::ReGen::rofstream sout(_fn.c_str());\n";
       cout << "  if (!sout)\n";
       cout << "  {\n";
@@ -596,7 +602,7 @@ void do_main(XML::Configuration& config)
       ++p)
   {
     XML::Element& e = **p;
-    generate_call(e, SCOPE_ROOT, "", i++);
+    generate_call(e, SCOPE_ROOT, "model", "", i++);
   }
 
   cout<<"  return 0;\n";
