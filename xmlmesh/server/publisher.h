@@ -1,14 +1,14 @@
 //==========================================================================
-// ObTools::XMLMesh:Server: service-publish.h
+// ObTools::XMLMesh:Server: publisher.h
 //
-// Definition of 'publish' service 
+// Definition of 'publisher' service 
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLMESH_SERVICE_PUBLISH_H
-#define __OBTOOLS_XMLMESH_SERVICE_PUBLISH_H
+#ifndef __OBTOOLS_XMLMESH_PUBLISHER_H
+#define __OBTOOLS_XMLMESH_PUBLISHER_H
 
 #include "server.h"
 
@@ -18,11 +18,11 @@ namespace ObTools { namespace XMLMesh {
 using namespace std;
 
 //==========================================================================
-// Publish Service Factory
-class PublishServiceFactory: public ServiceFactory
+// Publisher Factory
+class PublisherFactory: public ServiceFactory
 {
   Service *create(Server& server, XML::Element& xml);
-  static PublishServiceFactory instance;  // singleton
+  static PublisherFactory instance;  // singleton
 
 public:
   static void register_into(Server& server);
@@ -31,7 +31,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLMESH_SERVICE_PUBLISH_H
+#endif // !__OBTOOLS_XMLMESH_PUBLISHER_H
 
 
 

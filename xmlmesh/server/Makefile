@@ -8,8 +8,8 @@
 TYPE	= exe
 NAME   	= xmlmesh-server
 HEADERS = server.h
-OBJS 	= main.o server.o distributor.o correlator.o			\
-	  transport-otmp-server.o service-publish.o
+OBJS 	= main.o server.o service.o mpath.o otmp-server.o correlator.o  \
+          publisher.o
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp net log mt xml text cache
 CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1

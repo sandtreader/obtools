@@ -21,194 +21,203 @@ namespace ObTools { namespace XMLMesh {
 //Make our lives easier without polluting anyone else
 using namespace std;
 
-class Transport;  // Forward
+class Service;  // Forward
 class Server;     
 
 //==========================================================================
-// Message queue data for incoming messages, and typedef for queue
-struct IncomingMessage
+// Signature of a client
+struct Client
 {
-  Transport *transport;        // Transport we received it from
-  Net::EndPoint client;        // Client on that transport
-  Message message;             // The message
+  Service *service;
+  Net::EndPoint client;
 
-  enum Flags
-  {
-    RESPONDED = 1,             // Set when someone responds
-    STARTED = 2,               // Set on empty message when client starting
-    FINISHED = 4,              // Set on empty message when client finished
-  }; 
+  // Constructor
+  Client(Service *_service, Net::EndPoint _client):
+    service(_service), client(_client) {}
 
-  int flags;
-
-  IncomingMessage(Transport *_transport, Net::EndPoint _client, 
-		  Message _message, int _flags=0):
-    transport(_transport), client(_client), message(_message),
-    flags(_flags) {}
+  // Comparators
+  bool operator==(const Client& o)
+  { return service==o.service && client==o.client; }
+  bool operator!=(const Client& o) 
+  { return service!=o.service || client!=o.client; }
 };
 
-typedef MT::Queue<IncomingMessage> IncomingMessageQueue;
-
 //==========================================================================
-// Message Handler (abstract interface)
-class MessageHandler
+// Path of a message through the system
+class MessagePath
 {
-public:
+  deque<string> path;
+
+ public:
   //------------------------------------------------------------------------
-  // Handle a message
-  // Returns whether message should continue to be distributed
-  virtual bool handle(IncomingMessage& msg) = 0;
+  // Constructors
+  MessagePath() {}  // empty
+  MessagePath(const string& s);  // From | delimited string (top last)
+
+  //------------------------------------------------------------------------
+  // Push a path level
+  void push(const string& s) { path.push_back(s); }
+
+  //------------------------------------------------------------------------
+  // Push a path level integer 
+  void push(int n);
+
+  //------------------------------------------------------------------------
+  // Pop a path level
+  string pop() { string s=path.back(); path.pop_back(); return s; }
+
+  //------------------------------------------------------------------------
+  // Pop a path level integer
+  int popi();
+
+  //------------------------------------------------------------------------
+  // Generate a | delimited string (top last)
+  string to_string();
 };
 
 //==========================================================================
-// Handler registration
-struct HandlerRegistration
+// Message to be routed through the system
+struct RoutingMessage
+{
+  Client client;               // Original client received from
+  Message message;             // The message
+  bool reversing;            // Is this a response going back up the chain?
+
+  MessagePath path;            // Path through the internal services
+                               // - built up for requests, stripped back for
+                               //   responses
+ 
+  //------------------------------------------------------------------------
+  // Constructor for inbound messages with empty path
+  RoutingMessage(Client& _client, Message _message):
+    client(_client), message(_message), reversing(false)
+  {}
+
+  //------------------------------------------------------------------------
+  // Constructor for returned messages, with reverse path
+  RoutingMessage(Client& _client, Message _message, MessagePath& _path):
+    client(_client), message(_message), reversing(true), path(_path)
+  {}
+};
+
+//==========================================================================
+// Onward message route
+struct MessageRoute
 {
   string subject_pattern;
-  MessageHandler& handler;
+  Service& service;
 
-  HandlerRegistration(const string& _pattern, MessageHandler& _handler):
-    subject_pattern(_pattern), handler(_handler) {}
+  MessageRoute(const string& _pattern, Service& _service):
+    subject_pattern(_pattern), service(_service) {}
 };
 
 //==========================================================================
-// Message Distributor
-class Distributor
-{
-private:
-  list<HandlerRegistration> handlers;       // List of active handlers
-
-public:
-  //------------------------------------------------------------------------
-  // Default Constructor 
-  Distributor() {}
-
-  //------------------------------------------------------------------------
-  // Attach a new message handler on the given subject pattern
-  void attach_handler(const string& subject, MessageHandler& h);
-
-  //------------------------------------------------------------------------
-  // Distribute a message
-  void distribute(IncomingMessage& msg);
-};
-
-//==========================================================================
-// Request-response correlator
-struct Correlation
-{
-  Transport *source_transport;   // Which transport the request came from
-  Net::EndPoint source_client;   // Which client on that transport
-  string source_id;              // Client's original message ID
-
-  Transport *dest_transport;     // Which transport we sent request to
-  Net::EndPoint dest_client;     // Which client on that transport
-  string dest_id;                // Our replacement ID sent onwards
-
-  Correlation(Transport *_source_transport, Net::EndPoint& _source_client,
-	      const string& _source_id,
-	      Transport *_dest_transport, Net::EndPoint& _dest_client,
-	      const string& _dest_id):
-    source_transport(_source_transport), source_client(_source_client), 
-    source_id(_source_id), dest_transport(_dest_transport),
-    dest_client(_dest_client), dest_id(_dest_id) {}
-};
-
-ostream& operator<<(ostream&s, const Correlation& c);
-
-// Correlator class (singleton per server)
-class Correlator
-{
-private:
-  Server& server;
-  unsigned long id_serial; 
-
-  // Cache: map of our ID to correlation
-  Cache::UseTimeoutPointerCache<string, Correlation> request_cache;
-
-public:
-  //------------------------------------------------------------------------
-  // Default Constructor 
-  static const int DEFAULT_TIMEOUT = 60;
-  Correlator(Server& _server): 
-    server(_server), id_serial(0), request_cache(DEFAULT_TIMEOUT) {}
-
-  //------------------------------------------------------------------------
-  // Handle a request message - remembers it in correlation map, alters
-  // ID to own so we can find responses
-  // Note transport & client are where it is being sent on to - source
-  // is in msg.transport/client
-  void handle_request(IncomingMessage& msg, Transport *transport,
-		      Net::EndPoint& client);
-
-  //------------------------------------------------------------------------
-  // Handle a response message - looks up correlation and sends it back to
-  // the given client, modifying ref back to the original
-  void handle_response(IncomingMessage& msg);
-
-  //------------------------------------------------------------------------
-  // Tick function - times out correlations
-  void tick();
-};
-
-//==========================================================================
-// Server Transport (abstract interface)
-// Low-level transport of raw data
-class Transport
-{
-protected:
-  IncomingMessageQueue *incoming_q;  
-
-public:
-  string name;
-
-  //------------------------------------------------------------------------
-  // Default constructor
-  Transport(const string& _name): name(_name), incoming_q(0) {}
-
-  //------------------------------------------------------------------------
-  // Attach to given incoming queue
-  void attach_incoming(IncomingMessageQueue& iq) { incoming_q = &iq; }
-
-  //------------------------------------------------------------------------
-  // Send a message to the given client - returns whether successful
-  virtual bool send(const Net::EndPoint& client, const string& data) = 0;
-};
-
-//==========================================================================
-// Server Transport Factory (abstract interface)
-class TransportFactory
+// Service thread for multi-threaded services
+class ServiceThread: public MT::PoolThread
 {
 public:
+  Service *service;
+  RoutingMessage *msg;
+  
+  ServiceThread(ObTools::MT::PoolReplacer<ServiceThread>& _rep):
+    PoolThread(_rep) {}
+
   //------------------------------------------------------------------------
-  // Create a server transport from the given XML element
-  // Returns 0 if failed
-  virtual Transport *create(XML::Element& xml) = 0;
+  // Run function - pass msg to service 
+  void run();
 };
 
 //==========================================================================
-// Service (abstract interface)
-// Enabling module providing various kinds of message service
+// Service (abstract) - a message receiver and/or generator
 class Service
 {
+private:
+  friend class ServiceThread;
+
+  list<MessageRoute> routes;    // List of routes for onward propagation
+  bool multithreaded;
+  MT::ThreadPool<ServiceThread> threads;
+
+  void work(RoutingMessage& msg);
+  bool forward(RoutingMessage& msg);
+  bool reverse(RoutingMessage& msg);
+
 protected:
-  Server& server;
+  Server &server;
+  string id;
+
+  //------------------------------------------------------------------------
+  // Virtual message handler to be implemented by subclasses
+  // Note:  This can get called in a worker thread!
+  // Act on / modify message as required.  Forwarding is automatic.
+  // Returns whether message should be forwarded
+  virtual bool handle(RoutingMessage& msg) = 0;
+
+  //------------------------------------------------------------------------
+  // Originate a new message - handles deletion when finished with
+  // Returns whether successful
+  bool originate(RoutingMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Return a message as a response to an existing one
+  // Returns whether successul
+  bool respond(Message& response, RoutingMessage& request);
+
+  //------------------------------------------------------------------------
+  // Return OK to an existing request
+  // Returns whether successul
+  bool respond(RoutingMessage& request);
+
+  //------------------------------------------------------------------------
+  // Return an error to an existing request
+  // Returns whether successul
+  bool respond(RoutingMessage& request,
+	       ErrorMessage::Severity severity,
+	       const string& text);
 
 public:
   //------------------------------------------------------------------------
-  // Constructor
-  Service(Server& _server): server(_server) {}
+  // Constructors
+  Service(Server& _server, const string& _id, 
+	  int _min_threads=1, int _max_threads=1): 
+    server(_server), id(_id), multithreaded(_max_threads>1), 
+    threads(_min_threads, _max_threads) 
+  {}
+
+  // From XML config
+  Service(Server& _server, XML::Element& cfg):
+    server(_server),
+    id(cfg["id"]),
+    multithreaded(cfg.get_attr_int("minthreads", 1) > 1),
+    threads(cfg.get_attr_int("minthreads", 1),
+	    cfg.get_attr_int("maxthreads", 1))
+  {}
 
   //------------------------------------------------------------------------
-  // Service signal that a client has started/finished
+  // Add a new route on the given subject pattern
+  void add_route(const string& subject, Service& service)
+  { routes.push_back(MessageRoute(subject, service)); }
+
+  //------------------------------------------------------------------------
+  // Accept a message 
+  // Performs local processing on messages (optionally in a worker thread)
+  // and then forwards it to routes (also optionally in worker threads)
+  void accept(RoutingMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Signal various global events, independent of message routing
+  // Does nothing by default, can be overridden
   enum Signal
   {
     CLIENT_STARTED,
     CLIENT_FINISHED
   };
-    
-  virtual void signal_client(Transport *transport, Net::EndPoint& client,
-			     Signal signal) = 0;
 
+  virtual void signal(Signal sig, Client& client) {}
+
+  //------------------------------------------------------------------------
+  // Tick function - does nothing by default, can be overridden
+  virtual void tick() {}
 };
 
 //==========================================================================
@@ -228,77 +237,32 @@ class Server
 {
 private:
   // Factories for use during configuration
-  map<string, TransportFactory *> transport_factories;
   map<string, ServiceFactory *>         service_factories;
 
   // List of active modules
-  list<Transport *> transports;            // List of active transports
-  map<string, Transport *> transport_ids;  // Map of transports ids
-
   list<Service *> services;                 // List of active services
+  map<string, Service *> service_ids;       // Map of service ids
 
-  // Internal state
-  Distributor distributor;                  // Message distributor
-  Correlator correlator;                    // Response correlator
-  IncomingMessageQueue incoming_q;          // Queue of incoming messages
-
-  bool create_transport(XML::Element& xml);
+  // Internal functions
   bool create_service(XML::Element& xml); 
+  bool create_route(XML::Element& xml); 
 
 public:
   //------------------------------------------------------------------------
   // Constructor 
-  Server();
-
-  //------------------------------------------------------------------------
-  // Register a transport type
-  void register_transport(const string& name, TransportFactory *factory);
+  Server() {}
 
   //------------------------------------------------------------------------
   // Register a service type
   void register_service(const string& name, ServiceFactory *factory);
 
   //------------------------------------------------------------------------
-  // Signal all services that a client has started or finished
-  void signal_services(Transport *transport, Net::EndPoint& client,
-		       Service::Signal signal);
+  // Signal all services a global event (e.g. clients starting and finishing)
+  void signal_services(Service::Signal sig, Client& client);
 
   //------------------------------------------------------------------------
-  // Look up a transport by name (use result only for comparison)
-  Transport *lookup_transport(const string& name);
-
-  //------------------------------------------------------------------------
-  // Attach a new message handler on the given subject pattern
-  void attach_handler(const string& subject, MessageHandler& h);
-
-  //------------------------------------------------------------------------
-  // Send a new message to the client on the transport given
-  // Returns whether successful
-  bool send(Message &msg, Transport *transport, Net::EndPoint& client);
-
-  //------------------------------------------------------------------------
-  // Return a message as a response to the request given
-  // Returns whether successul
-  bool respond(Message& response, IncomingMessage& request);
-
-  //------------------------------------------------------------------------
-  // Return OK to request given
-  // Returns whether successul
-  bool respond(IncomingMessage& request);
-
-  //------------------------------------------------------------------------
-  // Return an error to request given
-  // Returns whether successul
-  bool respond(ErrorMessage::Severity severity,
-	       const string& text,
-	       IncomingMessage& request);
-
-  //------------------------------------------------------------------------
-  // Show an incoming message to the correlator before forwarding it,
-  // in preparation for handling responses - may modify the message
-  // Note transport and client here are _outgoing_ client you are forwarding to
-  void correlate(IncomingMessage &msg, Transport *transport,
-		 Net::EndPoint& client);
+  // Look up a service by id
+  Service *lookup_service(const string& id);
 
   //------------------------------------------------------------------------
   // Load modules etc. from XML config
@@ -312,7 +276,6 @@ public:
   // Destructor
   ~Server();
 };
-
 
 
 //==========================================================================
