@@ -69,6 +69,10 @@ public:
   bool operator==(const IPAddress& o) const { return address == o.address; }
 
   //--------------------------------------------------------------------------
+  // != operator 
+  bool operator!=(const IPAddress& o) const { return address != o.address; }
+
+  //--------------------------------------------------------------------------
   // < operator to help with maps 
   bool operator<(const IPAddress& o) const { return address < o.address; }
 };
@@ -132,6 +136,11 @@ public:
   { return host == o.host && port == o.port; }
 
   //--------------------------------------------------------------------------
+  // != operator 
+  bool operator!=(const EndPoint& o) const 
+  { return host != o.host || port != o.port; }
+
+  //--------------------------------------------------------------------------
   // < operator to help with maps 
   bool operator<(const EndPoint& o) const 
   { return host < o.host || (host == o.host && port < o.port); }
@@ -170,6 +179,11 @@ public:
   // == operator 
   bool operator==(const Port& o) const 
   { return host == o.host && proto == o.proto && port == o.port; }
+
+  //--------------------------------------------------------------------------
+  // != operator 
+  bool operator!=(const Port& o) const 
+  { return host != o.host || proto != o.proto || port != o.port; }
 
   //--------------------------------------------------------------------------
   // < operator to help with maps 
