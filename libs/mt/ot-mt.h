@@ -44,15 +44,23 @@ public:
 
   //--------------------------------------------------------------------------
   // Join - caller waits for this thread to end
-  void join();
+  void join() { if (thread) pthread_join(thread, NULL); }
 
   //--------------------------------------------------------------------------
   // Detach - let it die silently when it ends, we aren't going to join with it
-  void detach();
+  void detach() { if (thread) pthread_detach(thread); }
 
   //--------------------------------------------------------------------------
   // Cancel - ask it to stop
   void cancel();
+
+  //--------------------------------------------------------------------------
+  // Allow Cancel - allow it to stop if asked
+  void allow_cancel() { pthread_testcancel(); }
+
+  //--------------------------------------------------------------------------
+  // Test if it has stopped
+  bool operator!() { return !thread; }
 
   //--------------------------------------------------------------------------
   // Destructor - ask it to cancel if started
@@ -65,6 +73,7 @@ class Mutex
 {
 private:
   pthread_mutex_t mutex;
+  friend class Condition;   // So it can use my mutex for cond_wait
 
 public:
   //--------------------------------------------------------------------------
@@ -121,12 +130,16 @@ public:
 
 //==========================================================================
 // Condition variable class (boolean condition)
+
+// Cancellation handler to unlock a mutex
+extern "C" void _unlock_mutex(void *m);
+
 class Condition
 {
 private:
   bool flag;
   pthread_cond_t cv;
-  pthread_mutex_t mutex;
+  Mutex mutex;
 
 public:
   //--------------------------------------------------------------------------
@@ -134,7 +147,6 @@ public:
   Condition(bool initial=false): flag(initial)
   { 
     pthread_cond_init(&cv, NULL); 
-    pthread_mutex_init(&mutex, NULL);
   }
   
   //--------------------------------------------------------------------------
@@ -142,43 +154,47 @@ public:
   ~Condition() 
   { 
     pthread_cond_destroy(&cv); 
-    pthread_mutex_destroy(&mutex);
   }
 
   //--------------------------------------------------------------------------
   // Wait on the condition to become as desired
   void wait(bool desired=true)
   { 
-    pthread_mutex_lock(&mutex);
+    Lock lock(mutex);       // Use locks to ensure exception safety
+
+    // But also, because C++ exceptions and thread cancellation isn't 
+    // integrated yet (grr), make sure that if the cond_wait is cancelled
+    // the mutex gets unlocked again
+    pthread_cleanup_push(_unlock_mutex, &mutex.mutex);
+
     while (flag!=desired) 
-      pthread_cond_wait(&cv, &mutex);
-    pthread_mutex_unlock(&mutex);
+      pthread_cond_wait(&cv, &mutex.mutex);
+
+    pthread_cleanup_pop(0);
   }
 
   //--------------------------------------------------------------------------
   // Signal the condition to become as stated
   void signal(bool value=true)
   { 
-    pthread_mutex_lock(&mutex);
+    Lock lock(mutex);
     if (flag != value)
     {
       flag = value;
       pthread_cond_signal(&cv);
     }
-    pthread_mutex_unlock(&mutex);
   }
 
   //--------------------------------------------------------------------------
   // Broadcast the condition to become as stated (multiple waiters)
   void broadcast(bool value=true)
   { 
-    pthread_mutex_lock(&mutex);
+    Lock lock(mutex);
     if (flag != value)
     {
       flag = value;
       pthread_cond_broadcast(&cv);
     }
-    pthread_mutex_unlock(&mutex);
   }
 
   //--------------------------------------------------------------------------
