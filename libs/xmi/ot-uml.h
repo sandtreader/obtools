@@ -364,13 +364,13 @@ protected:
   void print_header(ostream& sout);  
 
 public:
-  GeneralizableElement *parent;
-  GeneralizableElement *child;
+  GeneralizableElement *gparent;
+  GeneralizableElement *gchild;
 
   //Constructor - just does safety initialisation - no primitive data
   Generalization(XMI::Reader& rdr, XML::Element& xe):
-    parent(0),
-    child(0),
+    gparent(0),
+    gchild(0),
     Relationship(rdr, xe) {}
 };
 
@@ -400,7 +400,7 @@ public:
 	p!=generalizations.end();
 	p++)
     {
-      T *t = dynamic_cast<T *>((*p)->parent);
+      T *t = dynamic_cast<T *>((*p)->gparent);
       if (t) l.push_back(t);
     }
     return l;
@@ -413,7 +413,7 @@ public:
 	p!=specializations.end();
 	p++)
     {
-      T *t = dynamic_cast<T *>((*p)->child);
+      T *t = dynamic_cast<T *>((*p)->gchild);
       if (t) l.push_back(t);
     }
     return l;
@@ -522,6 +522,19 @@ public:
 };
 
 //==========================================================================
+// UML Association 
+class Association: public GeneralizableElement
+{
+public:
+  // We provide the following rather than a sugar function because it's
+  // such a common thing to index
+  vector<AssociationEnd *> connections;     //Always 2 or more
+
+  //Constructor 
+  Association(XMI::Reader& rdr, XML::Element& xe);
+};
+
+//==========================================================================
 // UML AssociationEnd 
 class AssociationEnd: public ModelElement
 {
@@ -541,21 +554,12 @@ public:
   //Get the 'other' end of the association (only works for 2 ends)
   AssociationEnd *get_other_end();
 
+  // Get the association we're part of
+  Association *get_association()
+  { return dynamic_cast<Association *>(parent); }
+
   //Constructor
   AssociationEnd(XMI::Reader& rdr, XML::Element& xe);
-};
-
-//==========================================================================
-// UML Association 
-class Association: public GeneralizableElement
-{
-public:
-  // We provide the following rather than a sugar function because it's
-  // such a common thing to index
-  vector<AssociationEnd *> connections;     //Always 2 or more
-
-  //Constructor 
-  Association(XMI::Reader& rdr, XML::Element& xe);
 };
 
 //==========================================================================
