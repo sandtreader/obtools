@@ -34,6 +34,10 @@ private:
   void append_descendants(const string& name, const string& prune, 
 			  list<Element *>& l);
 
+  //Prevent copy and assignment - don't want to do deep copy
+  Element(const Element& e) {}
+  const Element& operator=(const Element& e) {}
+
 public:
   //Element name ('tag') - empty for data 'elements'
   string name;
@@ -75,6 +79,11 @@ public:
   //------------------------------------------------------------------------
   // 'Optimise' single text sub-elements back to 'content' string here
   void optimise(); 
+
+  //--------------------------------------------------------------------------
+  // Find first (or only) child element, whatever it is
+  // Returns Element::none if there isn't one 
+  Element &get_child();
 
   //--------------------------------------------------------------------------
   // Find first (or only) child element of given name

@@ -159,6 +159,18 @@ void Element::optimise()
 }
 
 //--------------------------------------------------------------------------
+// Find first (or only) child element of any type
+// Returns Element::none if none
+Element& Element::get_child()
+{
+  list<Element *>::iterator p=children.begin();
+  if (p!=children.end())
+    return **p;
+  else
+    return Element::none;
+}
+
+//--------------------------------------------------------------------------
 // Find first (or only) child element of given name
 // Returns Element::none if none
 Element& Element::get_child(const string& ename)
