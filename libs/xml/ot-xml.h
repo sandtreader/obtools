@@ -129,9 +129,13 @@ public:
   // Get an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or "") if not present
-  // This exists to avoid creating the attribute when using attrs["foo"]
-  // when foo doesn't exist (a completely stupid specification of [], IMHO)
+  // This exists to avoid creating the attribute when using e.attrs["foo"]
+  // when foo doesn't exist - use e["foo"] instead
   string get_attr(const string& attname, const string& def="") const;
+
+  //--------------------------------------------------------------------------
+  // Handy [] operator to get attribute values
+  string operator[](const string& attr) const { return get_attr(attr); }
 
   //--------------------------------------------------------------------------
   // Get the boolean value of an attribute of the given name
