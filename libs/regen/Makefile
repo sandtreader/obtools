@@ -19,7 +19,11 @@ clean:
 test:	regen tests/example.h
 	./regen foo.gen tests/example.h
 	./regen foo.gen tests/example.h 
- 
+
+release: ot-regen.a
+	cp ot-regen.a $(RELEASEDIR) 
+	cp ot-regen.h $(RELEASEDIR) 
+
 #CLI app
 regen: regen.o ot-regen.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++

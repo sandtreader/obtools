@@ -21,6 +21,10 @@ clean:
 test:	test-log 
 	./test-log
 
+release: ot-log.a
+	cp ot-log.a $(RELEASEDIR) 
+	cp ot-log.h $(RELEASEDIR) 
+
 #Test harness:
 test-log: test-log.o ot-log.a ../text/ot-text.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++

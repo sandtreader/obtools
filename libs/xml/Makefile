@@ -30,6 +30,10 @@ config-test: test-config
 	LeakCheck ./test-config 
 	leak-analyze ./test-config
 
+release: ot-xml.a
+	cp ot-xml.a $(RELEASEDIR) 
+	cp ot-xml.h $(RELEASEDIR) 
+
 #Test harnesses:
 test-xml: test-xml.o ot-xml.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++

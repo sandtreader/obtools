@@ -20,6 +20,10 @@ test:	test-ws test-pattern
 	./test-ws
 	./test-pattern
 
+release: ot-text.a
+	cp ot-text.a $(RELEASEDIR) 
+	cp ot-text.h $(RELEASEDIR) 
+
 #Test harnesses:
 test-ws: test-ws.o ot-text.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++

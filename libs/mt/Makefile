@@ -20,6 +20,10 @@ test:	test-thread test-queue
 	./test-thread 10
 	./test-queue
 
+release: ot-mt.a
+	cp ot-mt.a $(RELEASEDIR) 
+	cp ot-mt.h $(RELEASEDIR) 
+
 #Test harnesses:
 test-thread: test-thread.o ot-mt.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread

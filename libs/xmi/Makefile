@@ -24,6 +24,11 @@ clean:
 test:	test-xmi
 	$(MAKE) -C tests test
 
+release: ot-xmi.a
+	cp ot-xmi.a $(RELEASEDIR) 
+	cp ot-xmi.h $(RELEASEDIR) 
+	cp ot-uml.h $(RELEASEDIR) 
+
 #Test harness:
 test-xmi: test-xmi.o ot-xmi.a ../xml/ot-xml.a 
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++

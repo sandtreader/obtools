@@ -21,7 +21,11 @@ test:	test-cppt tests/simple.cppt
 	cat _temp.cc
 	gcc _temp.cc -o _temp -lstdc++
 	./_temp
- 
+
+release: ot-cppt.a
+	cp ot-cppt.a $(RELEASEDIR) 
+	cp ot-cppt.h $(RELEASEDIR) 
+
 #Test harness:
 test-cppt: test-cppt.o ot-cppt.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++

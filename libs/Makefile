@@ -15,7 +15,7 @@ all:
 	$(MAKE) -C log
 
 clean: 
-	-@rm -f *~
+	-@rm -f *~ release/
 	$(MAKE) -C xml clean
 	$(MAKE) -C xmi clean
 	$(MAKE) -C cppt clean
@@ -34,6 +34,17 @@ test:
 	$(MAKE) -C mt test
 	$(MAKE) -C net test
 	$(MAKE) -C log test
+
+release: clean
+	mkdir -p release/
+	$(MAKE) -C xml   RELEASEDIR=../release/ release
+	$(MAKE) -C xmi   RELEASEDIR=../release/ release
+	$(MAKE) -C cppt  RELEASEDIR=../release/ release
+	$(MAKE) -C regen RELEASEDIR=../release/ release
+	$(MAKE) -C text  RELEASEDIR=../release/ release
+	$(MAKE) -C mt    RELEASEDIR=../release/ release
+	$(MAKE) -C net   RELEASEDIR=../release/ release
+	$(MAKE) -C log   RELEASEDIR=../release/ release
 
 
 

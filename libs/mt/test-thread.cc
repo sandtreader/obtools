@@ -13,10 +13,11 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Test thread class
-class TestThread: public ObTools::MT::Thread
+class TestThread: public MT::Thread
 {
   int n;
   virtual void run();
@@ -38,7 +39,6 @@ void TestThread::run()
 
 //--------------------------------------------------------------------------
 // Main
-
 int main(int argc, char **argv)
 {
   int numthreads = 10;

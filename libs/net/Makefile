@@ -21,6 +21,10 @@ clean:
 test:	test-client test-server
 	./test-client localhost
 
+release: ot-net.a
+	cp ot-net.a $(RELEASEDIR) 
+	cp ot-net.h $(RELEASEDIR) 
+
 #Test harnesses:
 test-client: test-client.o ot-net.a 
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
