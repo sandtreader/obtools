@@ -60,7 +60,11 @@ public:
   bool operator!() const { return address==BADADDR; }
 
   //--------------------------------------------------------------------------
-  // < operator to help with maps (note, normal bitwise == is fine)
+  // == operator 
+  bool operator==(const IPAddress& o) const { return address == o.address; }
+
+  //--------------------------------------------------------------------------
+  // < operator to help with maps 
   bool operator<(const IPAddress& o) const { return address < o.address; }
 };
 
