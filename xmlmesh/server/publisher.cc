@@ -26,10 +26,10 @@ class Subscription
 public:
   string subject;          // Subject pattern
   string path;             // Client return path
-  Client client;           // Originator's client reference
+  ServiceClient client;    // Originator's client reference
   
   Subscription(const string& _subject, const string& _path,
-	       Client& _client):
+	       ServiceClient& _client):
     subject(_subject), path(_path), client(_client) 
   {}
 };
@@ -44,10 +44,10 @@ private:
 
   bool handle_subscription(RoutingMessage& msg);
   bool subscribe(const string& subject, const string& path,
-		 Client& client);
+		 ServiceClient& client);
   void unsubscribe(const string& subject, const string& path,
-		   Client& client);
-  void unsubscribe_all(Client& client); 
+		   ServiceClient& client);
+  void unsubscribe_all(ServiceClient& client); 
 
 public:
   //------------------------------------------------------------------------
@@ -56,7 +56,7 @@ public:
 
   //------------------------------------------------------------------------
   // Signal various global events, independent of message routing
-  void signal(Signal sig, Client& client);
+  void signal(Signal sig, ServiceClient& client);
 
   //------------------------------------------------------------------------
   // Handle any message 
@@ -75,7 +75,7 @@ Publisher::Publisher(XML::Element& cfg):
 
 //------------------------------------------------------------------------
 // Signal various global events, independent of message routing
-void Publisher::signal(Signal sig, Client& client)
+void Publisher::signal(Signal sig, ServiceClient& client)
 {
   switch (sig)
   {
@@ -119,7 +119,7 @@ bool Publisher::handle(RoutingMessage& msg)
       // Create new RoutingMessage from the inbound one, with us
       // as originator, and with the same path, but set as response
       // Note however that the message isn't modified - no ref set
-      Client client(this, msg.client.client);
+      ServiceClient client(this, msg.client.client);
       RoutingMessage submsg(client, msg.message, msg.path);
       originate(submsg);
     }
@@ -175,7 +175,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
 // Subscribe a client
 bool Publisher::subscribe(const string& subject,
 			  const string& path,
-			  Client& client)
+			  ServiceClient& client)
 {
   // Check pattern is one we can accept subscription for
   if (Text::pattern_match(subject_pattern, subject))
@@ -201,7 +201,7 @@ bool Publisher::subscribe(const string& subject,
 // E.g. foo.* unsubscribes foo.blah.*, foo.splat as well as foo.*
 void Publisher::unsubscribe(const string& subject,
 			    const string& path,
-			    Client& client)
+			    ServiceClient& client)
 {
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();
@@ -226,7 +226,7 @@ void Publisher::unsubscribe(const string& subject,
 
 //------------------------------------------------------------------------
 // Unsubscribe a client entirely
-void Publisher::unsubscribe_all(Client& client)
+void Publisher::unsubscribe_all(ServiceClient& client)
 {
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();

@@ -3,17 +3,12 @@
 //
 // Implementation of OTMP client service for XMLMesh
 //
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2003-2004 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-
-///
-/// Use OTMP::Client - client thread just waits and then injects messages
-/// received back.  Handler just posts direct to client
-///
 #include "server.h"
-#include "ot-xmlmesh-otmp.h"
+#include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
 
 #include <unistd.h>
@@ -24,31 +19,31 @@ namespace ObTools { namespace XMLMesh {
 
 //==========================================================================
 // OTMP Client thread class
-class OTMPClient; //forward
+class OTMPClientService; //forward
 
 class OTMPClientThread: public MT::Thread
 {
-  OTMPClient& service;
+  OTMPClientService& service;
   void run();
 
 public:
-  OTMPClientThread(OTMPClient& _service):
+  OTMPClientThread(OTMPClientService& _service):
     service(_service) {}
 };
 
 //==========================================================================
 // OTMP Client Service
-class OTMPClient: public Service
+class OTMPClientService: public Service
 {
 private:
   Net::EndPoint host;
-  OTMP::Client otmp;
+  OTMPClient client;
   OTMPClientThread  client_thread;
 
 public:
   //------------------------------------------------------------------------
   // Constructor 
-  OTMPClient(XML::Element& cfg);
+  OTMPClientService(XML::Element& cfg);
 
   //--------------------------------------------------------------------------
   // OTMP Message dispatcher
@@ -62,33 +57,41 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor
-OTMPClient::OTMPClient(XML::Element& cfg):
+OTMPClientService::OTMPClientService(XML::Element& cfg):
   Service(cfg),
   host(Net::IPAddress(cfg["server"]),
        cfg.get_attr_int("port", OTMP::DEFAULT_PORT)),
-  otmp(host),
+  client(host),
   client_thread(*this)
 {
   client_thread.start();
 
   Log::Summary << "OTMP Client '" << id << "' to " << host << " started\n";
+
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(sube, cfg, "subscription")
+    string subject = sube["subject"];
+    if (client.subscribe(subject))
+      Log::Summary << "  Subscribed to " << subject << " at " << host << endl;
+    else
+      Log::Error << "OTMP Client to " << host << " can't subscribe to " 
+		 << subject << endl;
+  OBTOOLS_XML_ENDFOR
 }
 
 //--------------------------------------------------------------------------
 // OTMP Message dispatcher
 // Fetch OTMP messages and send into the system
-void OTMPClient::dispatch() 
+void OTMPClientService::dispatch() 
 { 
-  OTMP::Message otmp_msg;
+  Message msg;
 
-  if (otmp.wait(otmp_msg))
+  if (client.wait(msg))
   {
     // Create our reference for the 'client' - the host at the other end
-    Client client(this, host);
+    ServiceClient sclient(this, host);
 
     // Convert to routing message
-    Message msg(otmp_msg.data);
-    RoutingMessage rmsg(client, msg);
+    RoutingMessage rmsg(sclient, msg);
 
     // Send it into the system
     originate(rmsg);
@@ -98,10 +101,9 @@ void OTMPClient::dispatch()
 
 //------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
-bool OTMPClient::handle(RoutingMessage& msg)
+bool OTMPClientService::handle(RoutingMessage& msg)
 {
-  OTMP::Message otmp_msg(msg.message.get_text());
-  if (!otmp.send(otmp_msg))
+  if (!client.send(msg.message))
     Log::Error << "OTMP Client can't send message\n";  // Tell tracker!!!
 
   return false;  // Nowhere else to go
@@ -116,7 +118,7 @@ void OTMPClientThread::run()
 
 //==========================================================================
 // Auto-register
-OT_XMLMESH_REGISTER_SERVICE(OTMPClient, "otmp-client");
+OT_XMLMESH_REGISTER_SERVICE(OTMPClientService, "otmp-client");
 
 }} // namespaces
 

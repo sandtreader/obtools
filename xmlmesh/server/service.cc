@@ -126,7 +126,7 @@ bool Service::respond(Message& response, RoutingMessage& request)
 {
   // Create a new routing message from us, but with the same path as
   // that received
-  Client client(this, request.client.client);
+  ServiceClient client(this, request.client.client);
   RoutingMessage msg(client, response, request.path);
   return originate(msg);
 }

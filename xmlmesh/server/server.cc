@@ -126,7 +126,7 @@ void Server::run()
 
 //------------------------------------------------------------------------
 // Signal all services a global event (e.g. clients starting and finishing)
-void Server::signal_services(Service::Signal sig, Client& client)
+void Server::signal_services(Service::Signal sig, ServiceClient& client)
 {
   for(list<Service *>::iterator p=services.begin();
       p!=services.end();

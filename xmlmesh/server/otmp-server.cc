@@ -95,7 +95,7 @@ void OTMPServer::dispatch()
   OTMP::ClientMessage otmp_msg = receive_q.wait();
 
   // Create our reference for the client. 
-  Client client(this, otmp_msg.client);
+  ServiceClient client(this, otmp_msg.client);
 
   switch (otmp_msg.action)
   {

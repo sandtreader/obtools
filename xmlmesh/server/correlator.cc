@@ -19,11 +19,11 @@ namespace ObTools { namespace XMLMesh {
 struct Correlation
 {
   string id;                     // Request message ID
-  Client client;                 // Client we're acting for
+  ServiceClient client;          // Client we're acting for
   string source_path;            // Original path for the request 
 
   Correlation(const string& _id,
-	      Client& _client,
+	      ServiceClient& _client,
 	      const string& _source_path):
     id(_id), client(_client), source_path(_source_path) {}
 };
@@ -48,7 +48,7 @@ public:
 
   //------------------------------------------------------------------------
   // Signal various global events, independent of message routing
-  void signal(Signal sig, Client& client);
+  void signal(Signal sig, ServiceClient& client);
 
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
@@ -129,7 +129,7 @@ bool Correlator::handle(RoutingMessage& msg)
 
 //------------------------------------------------------------------------
 // Signal various global events, independent of message routing
-void Correlator::signal(Signal sig, Client& client)
+void Correlator::signal(Signal sig, ServiceClient& client)
 {
   switch (sig)
   {

@@ -27,19 +27,19 @@ class Server;
 
 //==========================================================================
 // Signature of a client
-struct Client
+struct ServiceClient
 {
   Service *service;
   Net::EndPoint client;
 
   // Constructor
-  Client(Service *_service, Net::EndPoint _client):
+  ServiceClient(Service *_service, Net::EndPoint _client):
     service(_service), client(_client) {}
 
   // Comparators
-  bool operator==(const Client& o)
+  bool operator==(const ServiceClient& o)
   { return service==o.service && client==o.client; }
-  bool operator!=(const Client& o) 
+  bool operator!=(const ServiceClient& o) 
   { return service!=o.service || client!=o.client; }
 };
 
@@ -80,9 +80,9 @@ class MessagePath
 // Message to be routed through the system
 struct RoutingMessage
 {
-  Client client;               // Original client received from
+  ServiceClient client;        // Original client received from
   Message message;             // The message
-  bool reversing;            // Is this a response going back up the chain?
+  bool reversing;              // Is this a response going back up the chain?
 
   MessagePath path;            // Path through the internal services
                                // - built up for requests, stripped back for
@@ -90,13 +90,13 @@ struct RoutingMessage
  
   //------------------------------------------------------------------------
   // Constructor for inbound messages with empty path
-  RoutingMessage(Client& _client, Message _message):
+  RoutingMessage(ServiceClient& _client, Message _message):
     client(_client), message(_message), reversing(false)
   {}
 
   //------------------------------------------------------------------------
   // Constructor for returned messages, with reverse path
-  RoutingMessage(Client& _client, Message _message, MessagePath& _path):
+  RoutingMessage(ServiceClient& _client, Message _message, MessagePath& _path):
     client(_client), message(_message), reversing(true), path(_path)
   {}
 };
@@ -213,7 +213,7 @@ public:
     CLIENT_FINISHED
   };
 
-  virtual void signal(Signal, Client&) {}
+  virtual void signal(Signal, ServiceClient&) {}
 
   //------------------------------------------------------------------------
   // Tick function - does nothing by default, can be overridden
@@ -247,7 +247,7 @@ public:
 
   //------------------------------------------------------------------------
   // Signal all services a global event (e.g. clients starting and finishing)
-  void signal_services(Service::Signal sig, Client& client);
+  void signal_services(Service::Signal sig, ServiceClient& client);
 
   //------------------------------------------------------------------------
   // Look up a service by id
