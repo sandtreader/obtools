@@ -42,8 +42,7 @@ public:
 
 //--------------------------------------------------------------------------
 // Main
-
-int main(int argc, char **argv)
+int main()
 {
   // Set up logging
   Log::StreamChannel   chan_out(cout);

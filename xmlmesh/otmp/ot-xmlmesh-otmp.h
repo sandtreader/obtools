@@ -77,7 +77,7 @@ struct Message
   string data;  
 
   Message(const string& _data="", int _flags=0): 
-    data(_data), flags(_flags) {}
+    flags(_flags), data(_data) {}
 };
 
 //==========================================================================
