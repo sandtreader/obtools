@@ -214,38 +214,6 @@ void Generator::process_script(const string& script, CPPT::Tags& tags,
 }
 
 //--------------------------------------------------------------------------
-// Generate xt:start include when [indexname] is zero
-void Generator::generate_start(XML::Element& te,
-			       CPPT::Tags& tags, 
-			       const string& indexname,
-			       const string& streamname)
-{
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(se, te, "xt:start")
-    sout << "  if (!" << indexname << ")\n  {\n  ";
-    string script;
-    int temp=0; // No stripping
-    generate_template(se, se, tags, temp, streamname, script);
-    sout << "  }\n";
-  OBTOOLS_XML_ENDFOR
-}
-			
-//--------------------------------------------------------------------------
-// Generate xt:end include if [indexname] is non-zero
-void Generator::generate_end(XML::Element& te,
-			     CPPT::Tags& tags, 
-			     const string& indexname,
-			     const string& streamname)
-{
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(se, te, "xt:end")
-    sout << "  if (" << indexname << ")\n  {\n  ";
-    string script;
-    int temp=0; // No stripping
-    generate_template(se, se, tags, temp, streamname, script);
-    sout << "  }\n";
-  OBTOOLS_XML_ENDFOR
-}
-
-//--------------------------------------------------------------------------
 // Generate use of a predefined 'macro' template
 // Accumulates script in script
 void Generator::generate_use(XML::Element& use_e, 
@@ -253,6 +221,7 @@ void Generator::generate_use(XML::Element& use_e,
 			     CPPT::Tags& tags, 
 			     const string& childname,
 			     const string& indexname,
+			     const string& countname,
 			     const string& streamname)
 {
   // Create script expansion for each parameter
@@ -275,7 +244,8 @@ void Generator::generate_use(XML::Element& use_e,
   // Generate call to template function
   sout << "  //Call to defined template '" << define_e["name"] << "'\n";
   sout << "  template_" << define_e["name"] << "(" << streamname << ", "
-       << childname << ", " << indexname << ", _path, _revpath";
+       << childname << ", " << indexname << ", " << countname
+       << ", _path, _revpath";
 
   // Check each parameter in the definition to see if we've provided it, 
   // and generate it, use default if not
@@ -300,6 +270,8 @@ void Generator::generate_use(XML::Element& use_e,
 void Generator::generate_template(XML::Element& e, XML::Element& te,
 				  CPPT::Tags& tags, 
 				  int& max_ci, 
+				  const string& indexname,
+				  const string& countname,
 				  const string& streamname,
 				  string& script)
 {
@@ -422,6 +394,31 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 	}
 	else serr << "No 'template' argument for xt:use\n";
       }
+      else if (ce.name == "xt:start")
+      {
+	// Process and clear script before conditional
+	process_script(script, tags, mystream, max_ci);
+	script.clear();
+
+	// Only output conditional if indexname is set
+	if (indexname.size()) sout << "  if (!" << indexname << ")\n  {\n  ";
+	generate_template(ce, te, tags, max_ci, indexname, countname, 
+			  mystream, script);
+	if (indexname.size()) sout << "  }\n";
+      }
+      else if (ce.name == "xt:end")
+      {
+	// Process and clear script before conditional
+	process_script(script, tags, mystream, max_ci);
+	script.clear();
+
+	// Only output conditional if countname is set
+	if (countname.size()) 
+	  sout << "  if ("<<indexname<<"+1 == "<<countname<<")\n  {\n  ";
+	generate_template(ce, te, tags, max_ci, indexname, countname, 
+			  mystream, script);
+	if (countname.size()) sout << "  }\n";
+      }
 
       // Recurse to sub-elements, except ignoring xt:xxx 
       if (ce.name.substr(0,3) != "xt:")
@@ -430,7 +427,8 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 	script += ce.start_to_string();
 
 	// Recurse to generate content, keeping 'te' set the same
-	generate_template(ce, te, tags, max_ci, mystream, script);
+	generate_template(ce, te, tags, max_ci, indexname, countname, 
+			  mystream, script);
 
 	// Process end tag as a script
 	script += ce.end_to_string();
@@ -485,10 +483,14 @@ void Generator::generate_defines()
     string p_type = get_parameter_type(te);
     string param = p_type + " " + p_var;
 
+    string indexname = p_var + "_index";
+    string countname = p_var + "_count";
+
     sout<<"//================================================================\n";
     sout << "// Defined template '" << name << "'\n";
     sout << "void template_" << name << "(ostream& sout, " << param << ",\n";
-    sout << "     int " << p_var << "_index, string _path, string _revpath";
+    sout << "     int " << indexname << ", int " << countname << ",\n";
+    sout << "     string _path, string _revpath";
 
     // Create parameter strings
     OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(pe, te, "xt:param")
@@ -498,7 +500,8 @@ void Generator::generate_defines()
 
     int max_ci = -1;
     string script;
-    generate_template(te, te, tags, max_ci, "sout", script);
+    generate_template(te, te, tags, max_ci, indexname, countname, 
+		      "sout", script);
     process_script(script, tags, "sout", max_ci);
     script.clear();
 

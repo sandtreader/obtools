@@ -51,26 +51,13 @@ protected:
 		      const string& streamname, int& max_ci);
   
   //--------------------------------------------------------------------------
-  // Generate xt:start include when [indexname] is zero
-  void generate_start(XML::Element& te,
-		      CPPT::Tags& tags, 
-		      const string& indexname,
-		      const string& streamname);
-
-  //--------------------------------------------------------------------------
-  // Generate xt:end include if [indexname] is non-zero
-  void generate_end(XML::Element& te,
-		    CPPT::Tags& tags, 
-		    const string& indexname,
-		    const string& streamname);
-
-  //--------------------------------------------------------------------------
   // Generate use of a predefined 'macro' template
   void generate_use(XML::Element& use_e,
 		    XML::Element& define_e,
 		    CPPT::Tags& tags, 
 		    const string& childname,
 		    const string& indexname,
+		    const string& countname,
 		    const string& streamname);
 
   //--------------------------------------------------------------------------
@@ -82,6 +69,8 @@ protected:
   void generate_template(XML::Element& te, XML::Element& parent,
 			 CPPT::Tags& tags, 
 			 int& max_ci, 
+			 const string& indexname,
+			 const string& countname,
 			 const string& streamname,
 			 string& script);
 
