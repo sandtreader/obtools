@@ -14,7 +14,7 @@ using namespace ObTools;
 //--------------------------------------------------------------------------
 // Main
 
-int main(int argc, char **argv)
+int main()
 {
   Log::StreamChannel chan_out(cout);
   Log::StreamChannel chan_err(cerr);

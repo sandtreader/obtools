@@ -14,7 +14,7 @@ namespace ObTools { namespace Log {
 //------------------------------------------------------------------------
 // LogStreamBuf Constructor 
 LogStreamBuf::LogStreamBuf(Channel& _channel, Level _level): 
-  channel(_channel), level(_level), closed(false)
+  closed(false), channel(_channel), level(_level)
 {
   // use unbuffered IO, since we're going to buffer it anyway
   setp(0,0); 

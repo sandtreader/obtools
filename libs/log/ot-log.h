@@ -103,7 +103,7 @@ private:
   Level level;
 
 public:
-  LevelFilter(Level _l, Channel& _next): level(_l), Filter(_next) {}
+  LevelFilter(Level _l, Channel& _next): Filter(_next), level(_l) {}
 
   void log(Message& msg);
 };
@@ -119,7 +119,7 @@ private:
 public:
   // Constructor takes Text::pattern_match (glob) format
   PatternFilter(const string& _p, Channel& _next): 
-    pattern(_p), Filter(_next) {}
+    Filter(_next), pattern(_p) {}
 
   void log(Message& msg);
 };
@@ -135,7 +135,7 @@ private:
 public:
   // Constructor takes strftime format
   TimestampFilter(const string& _format, Channel& _next): 
-    format(_format), Filter(_next) {}
+    Filter(_next), format(_format) {}
 
   void log(Message& msg);
 };

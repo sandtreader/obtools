@@ -33,7 +33,7 @@ static Init::AutoRegister<Super, Sub, int> ar(sr, "sub");
 
 //--------------------------------------------------------------------------
 // Main
-int main(int argc, char **argv)
+int main()
 {
   Init::Sequence::run();
 
