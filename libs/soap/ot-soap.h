@@ -39,11 +39,13 @@ const char RN_ULTIMATE_RECEIVER[] =
 class Parser: public XML::Parser
 {
 public:
+  //------------------------------------------------------------------------
+  // Constructor - use given stream for errors
+  Parser(ostream& s);
 
   //------------------------------------------------------------------------
-  // Constructor - use given stream for errors, set namespace
-  Parser(ostream& s): XML::Parser(s)
-  { fix_namespace(NS_ENVELOPE, "env"); }
+  // Verify the document is valid soap
+  bool verify();
 };
 
 //==========================================================================
@@ -58,10 +60,19 @@ struct Header
     ROLE_OTHER                 // Application defined
   };
 
-  XML::Element *content;  // The XML element
+  const XML::Element *content;  // The XML element
   Role role;
   bool must_understand;
   bool relay;
+
+  //------------------------------------------------------------------------
+  // Constructors
+  Header(): content(0), role(ROLE_NONE), must_understand(false), relay(false) 
+  {}
+
+  Header(const XML::Element *_content, Role _role, bool _mu, bool _relay):
+    content(_content), role(_role), must_understand(_mu), relay(_relay) 
+  {}
 };
 
 //==========================================================================
@@ -77,12 +88,17 @@ public:
   Message();
 
   //------------------------------------------------------------------------
-  // Constructor from XML text, using the given output stream for errors
-  Message(const string& text, ostream& err_s);
+  // Constructor from XML text, using the given parser
+  Message(const string& text, Parser& p);
 
   //------------------------------------------------------------------------
-  // Constructor from input stream, using the given output stream for errors
-  Message(istream& in_s, ostream& err_s);
+  // Constructor from input stream, using the given parser
+  Message(istream& in_s, Parser& p);
+
+  //------------------------------------------------------------------------
+  // Check for validity
+  bool valid() { return doc!=0; }
+  bool operator!() { return !valid(); }
 
   //------------------------------------------------------------------------
   // Add a namespace attribute to the envelope
@@ -141,19 +157,29 @@ public:
   //------------------------------------------------------------------------
   // Get first (or only) body element
   // Returns Element::none if none
-  XML::Element& get_body();
+  XML::Element& get_body() const;
+
+  //------------------------------------------------------------------------
+  // Get first (or only) body element of the given name
+  // Returns Element::none if none
+  XML::Element& get_body(const string& name) const;
 
   //------------------------------------------------------------------------
   // Get list of body elements
-  list<XML::Element *> get_bodies();
+  list<XML::Element *> get_bodies() const;
 
   //------------------------------------------------------------------------
   // Get list of headers, parsed out into Header structures
-  list<Header> get_headers();
+  list<Header> get_headers() const;
+
+  //------------------------------------------------------------------------
+  // Get a single header of a particular name
+  // Returns whether successful;  fills in h if so
+  bool Message::get_header(const string& name, Header& h) const;
 
   //------------------------------------------------------------------------
   // Destructor
-  ~Message() { if (doc) delete doc; }
+  virtual ~Message() { if (doc) delete doc; }
 };
 
 //------------------------------------------------------------------------
@@ -173,13 +199,18 @@ public:
     CODE_MUST_UNDERSTAND,
     CODE_DATA_ENCODING_UNKNOWN,
     CODE_SENDER,
-    CODE_RECEIVER
+    CODE_RECEIVER,
+    CODE_UNKNOWN
   };
   
   //------------------------------------------------------------------------
   // Constructor for outgoing faults 
   // Reason is the English (xml:lang="en") version - use add_reason for more
   Fault(Code code, const string& reason);
+
+  //------------------------------------------------------------------------
+  // Constructor from XML text, using the given parser
+  Fault(const string& text, Parser& p): Message(text, p) {}
 
   //------------------------------------------------------------------------
   // Set a subcode 
@@ -210,6 +241,19 @@ public:
   // Add a detail entry
   // Detail entries can be more or less anything
   void add_detail(XML::Element *detail);
+
+  //------------------------------------------------------------------------
+  // Get code string from incoming fault
+  // Returns empty string if no code found
+  string get_code_string();
+
+  //------------------------------------------------------------------------
+  // Get code from incoming fault
+  Code get_code();
+
+  //------------------------------------------------------------------------
+  // Get reason from incoming fault with language code given
+  string get_reason(const string& lang="en");
 };
 
 //==========================================================================

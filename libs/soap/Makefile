@@ -8,11 +8,11 @@
 TYPE	= lib
 NAME   	= ot-soap
 HEADERS = ot-soap.h
-OBJS  	= message.o fault.o
+OBJS  	= message.o fault.o parser.o
 DEPENDS = xml
 TESTS 	= test-soap
 TESTCMD	= ./test-soap < ../tests/soap1-2.xml
-#MT-VARIANTS = 1
+MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

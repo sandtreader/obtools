@@ -22,43 +22,29 @@ Message::Message()
 }
 
 //------------------------------------------------------------------------
-// Constructor from XML text, using the given output stream for errors
-Message::Message(const string& text, ostream& err_s)
+// Constructor from XML text, using the given parser
+Message::Message(const string& text, Parser& p): doc(0)
 {
-  Parser p(err_s);
-
   try
   {
     p.read_from(text);
+    if (p.verify()) doc = p.detach_root();
   }
   catch (ObTools::XML::ParseFailed)
-  {
-    err_s << "XML parse failed" << endl;
-    doc = 0;
-    return;
-  }
-
-  doc = p.detach_root();
+  {}
 }
 
 //------------------------------------------------------------------------
-// Constructor from input stream, using the given output stream for errors
-Message::Message(istream& in_s, ostream& err_s)
+// Constructor from input stream, using the given parser
+Message::Message(istream& in_s, Parser& p): doc(0)
 {
-  Parser p(err_s);
-
   try
   {
     in_s >> p;
+    if (p.verify()) doc = p.detach_root();
   }
   catch (ObTools::XML::ParseFailed)
-  {
-    err_s << "XML parse failed" << endl;
-    doc = 0;
-    return;
-  }
-
-  doc = p.detach_root();
+  {}
 }
 
 //------------------------------------------------------------------------
@@ -166,7 +152,7 @@ ostream& operator<<(ostream& s, const Message& m)
 //------------------------------------------------------------------------
 // Get first (or only) body element
 // Returns Element::none if none
-XML::Element& Message::get_body()
+XML::Element& Message::get_body() const
 {
   if (doc)
   {
@@ -178,8 +164,22 @@ XML::Element& Message::get_body()
 }
 
 //------------------------------------------------------------------------
+// Get first (or only) body element of the given name
+// Returns Element::none if none
+XML::Element& Message::get_body(const string& name) const
+{
+  if (doc)
+  {
+    XML::Element& body = doc->get_child("env:Body");
+    if (!!body) return body.get_child(name);
+  }
+
+  return XML::Element::none;
+}
+
+//------------------------------------------------------------------------
 // Get list of body elements
-list<XML::Element *> Message::get_bodies()
+list<XML::Element *> Message::get_bodies() const
 {
   if (doc)
   {
@@ -192,9 +192,32 @@ list<XML::Element *> Message::get_bodies()
 }
 
 //------------------------------------------------------------------------
-// Get list of header elements
-list<Header> Message::get_headers()
+// Convert a header element into a Header structure
+static Header _read_header(const XML::Element& he)
 {
+  bool must_understand = he.get_attr_bool("env:mustUnderstand");
+  bool relay           = he.get_attr_bool("env:relay");
+
+  string rs = he["env:role"];
+  Header::Role role;
+
+  if (rs == RN_NONE)
+    role = Header::ROLE_NONE;
+  else if (rs == RN_NEXT)
+    role = Header::ROLE_NEXT;
+  // UR is default - SOAP 1.2: 5.2.2
+  else if (rs.empty() || rs == RN_ULTIMATE_RECEIVER)  
+    role = Header::ROLE_ULTIMATE_RECEIVER;
+  else
+    role = Header::ROLE_OTHER;
+
+  return Header(&he, role, must_understand, relay);
+}
+
+//------------------------------------------------------------------------
+// Get list of header elements
+list<Header> Message::get_headers() const
+{ 
   list<Header> headers;
 
   if (doc)
@@ -203,28 +226,31 @@ list<Header> Message::get_headers()
 
     // Inspect all header blocks for standard attributes
     OBTOOLS_XML_FOREACH_CHILD(he, header)
-      Header h;
-      h.content = &he;
-      h.must_understand = he.get_attr_bool("env:mustUnderstand");
-      h.relay           = he.get_attr_bool("env:relay");
-
-      string rs = he["env:role"];
-
-      if (rs == RN_NONE)
-	h.role = Header::ROLE_NONE;
-      else if (rs == RN_NEXT)
-	h.role = Header::ROLE_NEXT;
-      // UR is default - SOAP 1.2: 5.2.2
-      else if (rs.empty() || rs == RN_ULTIMATE_RECEIVER)  
-	h.role = Header::ROLE_ULTIMATE_RECEIVER;
-      else
-	h.role = Header::ROLE_OTHER;
-
-      headers.push_back(h);
+      headers.push_back(_read_header(he));
     OBTOOLS_XML_ENDFOR
   }
 
   return headers;
 }
+
+//------------------------------------------------------------------------
+// Get a single header of a particular name
+// Returns whether successful;  fills in h if so
+bool Message::get_header(const string& name, Header& h) const
+{
+  if (doc)
+  {
+    XML::Element& header = doc->get_child("env:Header");
+    XML::Element& he = header.get_child(name);
+    if (!!he)
+    {
+      h = _read_header(he);
+      return true;
+    }
+  }
+
+  return false;
+}
+
 
 }} // namespaces

@@ -24,29 +24,38 @@ int main(int argc, char **argv)
   msg.add_header("xm:header2", "xm:role", false, true);
   msg.add_header("xm:header3", SOAP::Header::ROLE_ULTIMATE_RECEIVER, true);
   msg.add_body("xm:body");
-  cout << "Constructed message:\n" << msg;
+  cout << "Constructed message:\n" << msg << endl;
 
-  SOAP::Message msg2(cin, cerr);
-  cout << "\nRead message:\n" << msg2;
-
-  cout << "\nHeaders:\n";
-  list<SOAP::Header> headers = msg2.get_headers();
-  for(list<SOAP::Header>::iterator p = headers.begin();
-      p!= headers.end();
-      p++)
+  SOAP::Parser parser(cerr);
+  SOAP::Message msg2(cin, parser);
+  if (!!msg2)
   {
-    SOAP::Header h = *p;
-    cout << "- " << h.content->name;
-    if (h.must_understand) cout << " (must understand)";
-    cout << " (role " << (int)h.role << ")\n";
-  }
+    cout << "Read message:\n" << msg2;
 
-  cout << "\nBody elements:\n";
-  list<XML::Element *> bodies = msg2.get_bodies();
-  for(list<XML::Element *>::iterator p = bodies.begin();
-      p!= bodies.end();
-      p++)
-    cout << "- " << (*p)->name << endl;
+    cout << "\nHeaders:\n";
+    list<SOAP::Header> headers = msg2.get_headers();
+    for(list<SOAP::Header>::iterator p = headers.begin();
+	p!= headers.end();
+	p++)
+    {
+      SOAP::Header h = *p;
+      cout << "- " << h.content->name;
+      if (h.must_understand) cout << " (must understand)";
+      cout << " (role " << (int)h.role << ")\n";
+    }
+
+    cout << "\nBody elements:\n";
+    list<XML::Element *> bodies = msg2.get_bodies();
+    for(list<XML::Element *>::iterator p = bodies.begin();
+	p!= bodies.end();
+	p++)
+      cout << "- " << (*p)->name << endl;
+  }
+  else
+  {
+    cerr << "Can't read message from stdin\n";
+    return 2;
+  }
 
   cout << "\nConstructed Fault:\n";
   SOAP::Fault fault(SOAP::Fault::CODE_RECEIVER, "It went wrong");

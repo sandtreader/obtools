@@ -21,23 +21,23 @@ Fault::Fault(Code code, const string& reason): Message()
 
   switch (code)
   {
-    case Fault::CODE_VERSION_MISMATCH:
+    case CODE_VERSION_MISMATCH:
       c = "env:VersionMismatch";
       break;
 
-    case Fault::CODE_MUST_UNDERSTAND:
+    case CODE_MUST_UNDERSTAND:
       c = "env:MustUnderstand";
       break;
 
-    case Fault::CODE_DATA_ENCODING_UNKNOWN:
+    case CODE_DATA_ENCODING_UNKNOWN:
       c = "env:DataEncodingUnknown";
       break;
 
-    case Fault::CODE_SENDER:
+    case CODE_SENDER:
       c = "env:Sender";
       break;
 
-    case Fault::CODE_RECEIVER:
+    case CODE_RECEIVER:
       c = "env:Receiver";
       break;
   }
@@ -92,6 +92,46 @@ void Fault::set_role(const string& uri)
 void Fault::add_detail(XML::Element *detail)
 {
   get_body().make_child("env:Detail").add(detail);
+}
+
+//------------------------------------------------------------------------
+// Get code string from incoming fault
+// Returns empty string if no code found
+string Fault::get_code_string()
+{
+  return get_body("env:Fault").get_child("env:Code").get_child("env:Value").
+    get_content();
+}
+
+//------------------------------------------------------------------------
+// Get code from incoming fault
+Fault::Code Fault::get_code()
+{
+  string cs = get_code_string();
+  if (cs == "env:VersionMismatch")
+    return CODE_VERSION_MISMATCH;
+  else if (cs == "env::MustUnderstand")
+    return CODE_MUST_UNDERSTAND;
+  else if (cs == "env:DataEncodingUnknown")
+    return CODE_DATA_ENCODING_UNKNOWN;
+  else if (cs == "env:Sender")
+    return CODE_SENDER;
+  else if (cs == "env:Receiver")
+    return CODE_RECEIVER;
+  else
+    return CODE_UNKNOWN;
+}
+
+//------------------------------------------------------------------------
+// Get reason from incoming fault with language code given
+string Fault::get_reason(const string& lang)
+{
+  XML::Element& re = get_body("env:Fault").get_child("env:Reason");
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(te, re, "env:Text")
+    if (te["xml:lang"] == lang) return te.get_content();
+  OBTOOLS_XML_ENDFOR
+
+  return "";
 }
 
 //==========================================================================
