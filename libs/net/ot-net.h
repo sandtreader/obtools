@@ -40,8 +40,8 @@ public:
   IPAddress(uint32_t in): address(in) {}
 
   //--------------------------------------------------------------------------
-  // Name lookup constructor
-  IPAddress(const char *hostname);  // Resolves name
+  // Name lookup constructors
+  IPAddress(const string& hostname);
 
   //--------------------------------------------------------------------------
   // Get network byte order integer

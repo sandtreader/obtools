@@ -17,8 +17,9 @@ namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
 // Name lookup constructor
-IPAddress::IPAddress(const char *hostname)
+IPAddress::IPAddress(const string& hostname_s)
 {
+  const char *hostname = hostname_s.c_str();
   if (isdigit(*hostname))
   {
     address = ntohl(inet_addr(hostname));
