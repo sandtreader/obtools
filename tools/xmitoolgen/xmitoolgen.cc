@@ -311,7 +311,6 @@ void XMIGenerator::generate_main()
 
   sout<<"  // Load up XMI from input\n";
   sout<<"  ObTools::XMI::Reader reader;\n";
-  sout<<"  string _path;\n\n";
 
   sout<<"  try\n";
   sout<<"  {\n";

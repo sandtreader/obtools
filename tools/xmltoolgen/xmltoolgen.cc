@@ -194,8 +194,6 @@ void XMLGenerator::generate_main()
   sout<<"    return 2;\n";
   sout<<"  }\n\n";
 
-  sout<<"  string _path;\n\n";
-
   generate_roots();
 
   sout<<"  return 0;\n";
