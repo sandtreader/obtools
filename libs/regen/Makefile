@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = mfile.o master.o
+OBJS = mfile.o master.o regenbuf.o
 
 ifdef DEBUG
 CPPFLAGS += -g

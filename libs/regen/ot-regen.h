@@ -123,6 +123,48 @@ public:
 };
 
 //==========================================================================
+//Regenerating output file stream - replacement for ofstream which 
+//'magically' regenerates over existing files
+
+//regenerating streambuf
+class regenbuf: public streambuf
+{
+private:
+  string fn;
+  string buffer;
+  bool closed;
+  const char *marker;
+  int flags;
+
+protected:
+  // Streambuf overflow - handles characters
+  int overflow(int); 
+   
+public:
+  // Constructor/destructor
+  regenbuf(string _fn, const char *_marker="//~", int flags=0);
+  ~regenbuf();
+
+  // Close stream - does the actual write to the file
+  void close();
+};
+
+//Regenerating output file stream 
+class rofstream: public ostream
+{
+public:
+  // Constructor - like ofstream, also take MasterFile marker and flags
+  rofstream(string _fn, const char *_marker="//~", int _flags=0): 
+    ostream(new regenbuf(_fn, _marker, _flags)) {}
+
+  // Destructor
+  ~rofstream() { close(); delete rdbuf(); }
+
+  // Close - pass on to regenbuf to do
+  void close() { static_cast<regenbuf *>(rdbuf())->close(); }
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_REGEN_H
 

@@ -51,7 +51,6 @@ int main(int argc, char **argv)
   char *userfn = argv[i++];
   char *masterfn = argv[i++];
 
-  ifstream userfile(userfn);
   ifstream masterfile(masterfn);
 
   if (!masterfile)
@@ -60,45 +59,20 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  // Build new filename and output stream
-  string newfn(userfn);
-  newfn+="##";
-  ofstream outfile(newfn.c_str());
-  if (!outfile)
-  {
-    cerr << "Can't create temporary file " << newfn << endl;
-    return 2;
-  }
+  // Create regenerating output file
+  ObTools::ReGen::rofstream outfile(userfn, marker, flags);
 
-  // If userfile not readable, just spool master straight out
-  if (!userfile)
+  // Spool master file directly to it
+  while (masterfile)
   {
-    while (masterfile)
-    {
-      char c;
-      masterfile.get(c);
-      outfile << c;
-    }
+    char c;
+    masterfile.get(c);
+    outfile << c;
   }
-  else
-  {
-    // Merge with existing
-    ObTools::ReGen::MarkedFile ufile(userfile);
-    ObTools::ReGen::MasterFile mfile(masterfile, marker);
-
-    mfile.merge(ufile, outfile, flags);
-  }
-
-  // Close output and rename to existing file
-  userfile.close();
-  outfile.close();
   masterfile.close();
 
-  if (rename(newfn.c_str(), userfn))
-  {
-    cerr << "Rename of " << newfn << " to " << userfn << " failed - " << strerror(errno) << endl;
-    return 2;
-  }
+  // Close the output - this does all the work
+  outfile.close();
 
   return 0;
 }
