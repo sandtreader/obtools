@@ -26,10 +26,9 @@ test:
 	$(MAKE) -C server test
 
 release: 
-	mkdir -p release/
 	$(MAKE) -C core RELEASEDIR=../release/ release
 	$(MAKE) -C otmp RELEASEDIR=../release/ release
 	$(MAKE) -C client RELEASEDIR=../release/ release
 	$(MAKE) -C server RELEASEDIR=../release/ release
-
+	$(MAKE) -C release
 
