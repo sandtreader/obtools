@@ -82,9 +82,10 @@ public:
 
 //==========================================================================
 // Factory template
-// Abstract superclass for creating objects of type <T> with create parameters
-// <CP>.  Default create parameter is an XML element (e.g. from config)
-template<class T, class CP=XML::Element&> class Factory
+// Abstract superclass for creating objects of superclass <SUPER> with 
+// create parameters <CP>.  
+// Default create parameter is an XML element (e.g. from config)
+template<class SUPER, class CP=XML::Element&> class Factory
 {
 private:
 
@@ -95,31 +96,32 @@ public:
 
   //------------------------------------------------------------------------
   // Create method
-  virtual T *create(CP cp) = 0;
+  virtual SUPER *create(CP cp) = 0;
 };
 
 //==========================================================================
 // SelfFactory template
-// Factory for objects of type <T> with create parameters <CP>, where the
-// create method is a static method of the class <T>
+// Factory for objects of type <SUB> with superclass <SUPER> (used in registry)
+// with create parameters <CP>, where the create method is a static method of
+// the class <SUB>
 // Default create parameter is an XML element (e.g. from config)
-template<class T, class CP=XML::Element&> 
-  class SelfFactory: public Factory<T, CP>
+template<class SUPER, class SUB, class CP=XML::Element&> 
+  class SelfFactory: public Factory<SUPER, CP>
 {
 public:
   //------------------------------------------------------------------------
   // Create method
-  T *create(CP cp) { return T::create(cp); }
+  SUPER *create(CP cp) { return SUB::create(cp); }
 };
 
 //==========================================================================
 // Registry template
-// A place to register Factories for type <T> by name, with create parameters
-// CP
-template<class T, class CP=XML::Element&> class Registry
+// A place to register Factories for superclass <SUPER> by name, 
+// with create parameters CP
+template<class SUPER, class CP=XML::Element&> class Registry
 {
 private:
-  map<string, Factory<T, CP> *> factories;
+  map<string, Factory<SUPER, CP> *> factories;
 
 public:
   //------------------------------------------------------------------------
@@ -128,15 +130,16 @@ public:
 
   //------------------------------------------------------------------------
   // Register a factory by name
-  void add(const string& name, Factory<T, CP>& f)
+  void add(const string& name, Factory<SUPER, CP>& f)
   { factories[name] = &f; }
     
   //------------------------------------------------------------------------
   // Create an object by name
   // Returns the object, or 0 if no factories available or create fails
-  T *create(const string& name, CP cp)
+  SUPER *create(const string& name, CP cp)
   { 
-    typename map<string, Factory<T, CP> *>::iterator p = factories.find(name);
+    typename map<string, Factory<SUPER, CP> *>::iterator p;
+    p = factories.find(name);
     if (p!=factories.end())
       return p->second->create(cp);
     else
@@ -148,23 +151,26 @@ public:
 // AutoRegister template
 // Template for automatically registering a SelfFactory in the given name
 // on the given registry
-template<class T, class CP=XML::Element&> 
+// <SUPER> is the superclass used in the register
+// <SUB> is the subclass being initialised here
+template<class SUPER, class SUB, class CP=XML::Element&> 
   class AutoRegister: private AutoAction
 {
 private:
-  SelfFactory<T, CP> factory;
-  Registry<T, CP>& reg;
+  SelfFactory<SUPER, SUB, CP> factory;
+  Registry<SUPER, CP>& reg;
   string name;
 
 public:
   //------------------------------------------------------------------------
   // Constructor
-  AutoRegister(Registry<T, CP>& _reg, const string& _name):
+  AutoRegister(Registry<SUPER, CP>& _reg, const string& _name):
     reg(_reg), name(_name) {}
 
   //------------------------------------------------------------------------
   // Initialiser
-  void initialise() { reg.add(name, factory); }
+  void initialise() 
+  { reg.add(name, factory); }
 };
 
 //==========================================================================

@@ -15,18 +15,24 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Test types
-class Fred
+class Super
 {
 public:
   int a;
-  Fred(int _a): a(_a) {}
-
-  // Create factory method
-  static Fred *create(int a) { return new Fred(a); }
+  Super(int _a): a(_a) {}
 };
 
-Init::Registry<Fred, int> fr;
-static Init::AutoRegister<Fred, int> ar(fr, "fred");
+class Sub: public Super
+{
+public:
+  Sub(int _a): Super(_a+1) {}
+
+  // Create factory method
+  static Sub *create(int a) { return new Sub(a); }
+};
+
+Init::Registry<Super, int> sr;
+static Init::AutoRegister<Super, Sub, int> ar(sr, "sub");
 
 //--------------------------------------------------------------------------
 // Main
@@ -34,10 +40,9 @@ int main(int argc, char **argv)
 {
   Init::Sequence::run();
 
-  Fred *f = fr.create("fred", 99);
+  Super *s = sr.create("sub", 98);
 
-
-  cout << "Fred: " << f->a << endl;
+  cout << "Sub: " << s->a << endl;
   return 0;  
 }
 
