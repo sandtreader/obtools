@@ -1,7 +1,52 @@
 ObTools ToDo:
 
+Libs
+----
+
+XML:
+ - Better errors - count lines, show guilty tag names/lines (open and close)
+
+DB:
+ - Transactions
+ - Postgres last ID???  Maybe exec_insert(), returning ID inserted
+
+CLI:
+ - Provide help in groups if not recognised
+ - Show group prefix in help
+
+XMLMesh
+------
+
+Current:
+  forward: otmp client transport - use client library
+  subscribe: ditto
+
+Future:
+  ** Redesign dispatch - more configurable routing, thread management **
+
+  authentication/filtering of incoming msgs
+
+  Multipath resilience - keep time-limited map of message [orig,id], 
+    suppress duplicates   
+
+  Allow long-term correlation for registration/multiple response?
+
+  Worker thread pool for dispatch??
+
+  Dynamic loading of modules?
+
+Client:
+  pure virtual call if info message received while waiting for 
+  request response?
+
+XMITools
+--------
 Basic tool:
-- Handle associations
+ - Make regen optional
+ - Test tool - use some config items
+
+xmltoolgen:
+ - Fix %lt; issue? - accept and ignore subelements - use namespace?
 
 <RELEASE 1>
 
@@ -22,3 +67,11 @@ ObCache 2:
 - Distributed
 - Generalise transport mechanism
 
+
+General
+-------
+
+- Licence on release
+- Improve Makefiles with standard library Makefile.std, foreach etc.
+- Build MT and non-MT libraries - define _REENTRANT
+ 
