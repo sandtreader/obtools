@@ -108,7 +108,7 @@ void Generator::generate_legal()
   
   sout<<"//================================================================\n";
   sout<<"// Source 2: Code templates\n";
-  sout << config["legal"] << endl;
+  sout << config["xt:legal"] << endl;
   sout<<"//================================================================\n";
 }
 
@@ -474,12 +474,46 @@ void Generator::generate_defines()
 void Generator::generate_roots()
 {
   XML::Element& root = config.get_root();
+
+  // Expand all root templates
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ce, root, "xt:template")
     // Get my suffix 
     string script;
     int max_ci = -1;
+
+    // Give us a block context to avoid redeclarations
+    cout << "\n  {\n";
+
     // Call to template, iterating over children
     expand_inline(ce, root, tags, max_ci, "cout", script, true);
+
+    // Close block context
+    cout << "  }\n\n";
+  OBTOOLS_XML_ENDFOR
+
+  // Call all macros at root
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ce, root, "xt:use")
+    // Find defined template
+    string def = ce["template"];
+    if (def.size())
+    {
+      XML::Element *def_e = defines[def];
+      if (def_e)
+      {
+	XML::Element& de = *def_e;
+
+	// Give us a block context to avoid redeclarations
+	cout << "\n  {\n";
+
+	// Iterate all children through called template
+	expand_use(ce, de, root, tags, "cout", true);
+
+	// Close block context
+	cout << "  }\n\n";
+      }
+      else serr << "No such template defined: " << def << endl;
+    }
+    else serr << "No 'template' argument for xt:use\n";
   OBTOOLS_XML_ENDFOR
 }
 

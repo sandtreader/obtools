@@ -102,7 +102,8 @@ protected:
 			  XML::Element& define_e,
 			  XML::Element& parent,
 			  CPPT::Tags& tags,
-			  const string& streamname) = 0;
+			  const string& streamname,
+			  bool is_root = false) = 0;
 
   //--------------------------------------------------------------------------
   // Generate includes / file-level code 

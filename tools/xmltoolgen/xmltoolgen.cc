@@ -51,7 +51,8 @@ protected:
 			  XML::Element& define_e,
 			  XML::Element& parent,
 			  CPPT::Tags& tags,
-			  const string& streamname);
+			  const string& streamname,
+			  bool is_root = false);
 
   //--------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
@@ -119,34 +120,47 @@ void XMLGenerator::expand_use(XML::Element& use_e,
 			      XML::Element& define_e,
 			      XML::Element& parent,
 			      CPPT::Tags& tags,
-			      const string& streamname)
+			      const string& streamname,
+			      bool is_root)
 {
-  sout << "  //Call " << define_e["name"] << " templates\n";
-
-  string ename = define_e.get_attr("element");
-
   string child_var = get_parameter_name(define_e);
-  string parent_var = get_parameter_name(parent);
 
-  // Beware:  If we are called recursively, child_var and parent_var
-  // could be the same - spot this and modify for it
-  if (child_var == parent_var)
-    child_var = string("child_") + child_var;
+  if (is_root)
+  {
+    sout << "  //Call root template\n";
+    sout<<"  ObTools::XML::Element& " << child_var 
+	<< " = _parser.get_root();\n";
 
-  string index_var = child_var + "_index";
-
-  sout << "  int " << index_var << "=0;\n";
-  if (ename.empty()) // All children
-    sout << "  OBTOOLS_XML_FOREACH_CHILD(" 
-	 << child_var << ", " << parent_var << ")\n";
+    // Generate directly on the root element
+    generate_use(use_e, define_e, tags, child_var, "0", streamname);
+  }
   else
-    sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
-	 << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
+  {
+    sout << "  //Call " << define_e["name"] << " templates\n";
 
-  generate_use(use_e, define_e, tags, child_var, index_var, streamname);
+    string ename = define_e.get_attr("element");
+    string parent_var = get_parameter_name(parent);
 
-  sout << "  " << index_var << "++;\n";
-  sout << "  OBTOOLS_XML_ENDFOR\n";
+    // Beware:  If we are called recursively, child_var and parent_var
+    // could be the same - spot this and modify for it
+    if (child_var == parent_var)
+      child_var = string("child_") + child_var;
+
+    string index_var = child_var + "_index";
+
+    sout << "  int " << index_var << "=0;\n";
+    if (ename.empty()) // All children
+      sout << "  OBTOOLS_XML_FOREACH_CHILD(" 
+	   << child_var << ", " << parent_var << ")\n";
+    else
+      sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
+	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
+    
+    generate_use(use_e, define_e, tags, child_var, index_var, streamname);
+
+    sout << "  " << index_var << "++;\n";
+    sout << "  OBTOOLS_XML_ENDFOR\n";
+  }
 }
 
 //--------------------------------------------------------------------------
