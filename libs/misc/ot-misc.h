@@ -15,6 +15,7 @@
 #include <map>
 #include <stdint.h>
 #include <iostream>
+#include <sstream>
 
 namespace ObTools { namespace Misc { 
 
@@ -79,11 +80,56 @@ public:
   { insert(make_pair(name,value)); }  //Note, not using []
 
   //--------------------------------------------------------------------------
+  // Add a integer value
+  void add(const string& name, int value)
+  { 
+    ostringstream oss;
+    oss << value;
+    add(name, oss.str());
+  }
+
+  //--------------------------------------------------------------------------
+  // Add a boolean value
+  void add(const string& name, bool value)
+  { add(name, value?"true":"false"); }
+
+  //--------------------------------------------------------------------------
   // Get a value, with default
   string get(const string& name, const string& def="") const
   {
     const_iterator p = find(name);
     if (p!=end()) return p->second;
+    return def;
+  }
+
+  //--------------------------------------------------------------------------
+  // Get an integer value, with default
+  int get_int(const string& name, int def=0) const
+  {
+    string v = get(name);
+    if (!v.empty()) return atoi(v.c_str());
+    return def;
+  }
+
+  //--------------------------------------------------------------------------
+  // Get a boolean value, with default
+  // Anything beginning [TtYy] is assumed to be 'true', anything else 'false'
+  bool get_bool(const string& name, bool def=false) const
+  {
+    string v = get(name);
+    if (!v.empty())
+    {
+      switch(v[0])
+      {
+	case 'T': case 't':
+	case 'Y': case 'y':
+	  return true;
+
+	default:
+	  return false;
+      }
+    }
+
     return def;
   }
 
