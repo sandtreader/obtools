@@ -2,6 +2,7 @@
 # Makefile for ObTools XMI reader
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 OBJS =  assocend.o association.o attribute.o class.o classifier.o      \

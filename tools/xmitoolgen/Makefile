@@ -2,6 +2,7 @@
 # Makefile for ObTools XMI Tool Generator
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 ifdef DEBUG

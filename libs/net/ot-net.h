@@ -5,6 +5,7 @@
 // C++ wrapping of BSD sockets etc.
 // 
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #ifndef __OBTOOLS_NET_H

@@ -2,6 +2,7 @@
 # Makefile for ObTools XMLMesh server
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 OBJS = 	main.o server.o distributor.o correlator.o			\

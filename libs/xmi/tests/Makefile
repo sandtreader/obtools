@@ -2,6 +2,7 @@
 # Makefile for ObTools XMI reader tests
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 test:	test-poseidon test-argo

@@ -2,6 +2,7 @@
 # Makefile for ObTools XMLMesh core library
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 OBJS = message.o m-error.o m-subscription.o

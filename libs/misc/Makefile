@@ -2,6 +2,7 @@
 # Makefile for ObTools::Misc
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 OBJS = md5.o proplist.o

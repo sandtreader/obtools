@@ -4,6 +4,7 @@
 // Master file - reads master blocks and merges with user file
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "ot-regen.h"

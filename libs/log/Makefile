@@ -2,6 +2,7 @@
 # Makefile for ObTools::Log
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 OBJS = distributor.o filter.o logstream.o channel.o logger.o

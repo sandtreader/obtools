@@ -5,6 +5,7 @@
 // Generally useful text/matching extensions to standard C++ library:
 // 
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #ifndef __OBTOOLS_TEXT_H

@@ -2,6 +2,7 @@
 # Makefile for ObTools ReGen
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 OBJS = mfile.o master.o regenbuf.o

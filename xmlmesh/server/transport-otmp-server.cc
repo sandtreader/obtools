@@ -4,6 +4,7 @@
 // Implementation of OTMP server transport for XMLMesh
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "transport-otmp-server.h"

@@ -5,6 +5,7 @@
 // Only handles very basic x/y/z/@foo syntax (for now!)
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "ot-xml.h"

@@ -4,6 +4,7 @@
 // Example template for class
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 // These lines are perverse and should be ignored
