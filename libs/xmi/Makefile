@@ -4,8 +4,9 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = reader.o element.o package.o class.o association.o assocend.o \
-	attribute.o operation.o parameter.o
+OBJS =  assocend.o association.o attribute.o class.o classifier.o      \
+	element.o enum.o feature.o genelem.o general.o modelelem.o     \
+	operation.o package.o parameter.o reader.o types.o
 
 CPPFLAGS += -g -I../xml
 LDFLAGS += -g 

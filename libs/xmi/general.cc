@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::XMI: class.cc
+// ObTools::XMI: general.cc
 //
-// UML::Class and UML::Interface functionality
+// UML::Generalization functionality
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -10,20 +10,20 @@
 using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
-// Constructor
-Class::Class(XMI::Reader& rdr, XML::Element& xe)
-  :Classifier(rdr, xe)
+// Second-pass reference fix
+void Generalization::build_refs()
 {
-  //Get basic properties
-  is_active = get_bool_property("isActive", "UML:Class.isActive");
+  ModelElement::build_refs();
+
+  //!!! Get parent/child refs
+
 }
 
 //--------------------------------------------------------------------------
-// Printer - adds flags
-void Class::print_header(ostream& sout)
+// Printer
+void Generalization::print_header(ostream& sout)
 {
-  GeneralizableElement::print_header(sout);
+  ModelElement::print_header(sout);
 
-  if (is_active) sout << " (active)";
+  //!!! print parent, child
 }
-

@@ -13,38 +13,47 @@ using namespace ObTools::UML;
 //Constructor - build from XML element
 Element::Element(XMI::Reader& rdr, XML::Element& xe):
   reader(rdr),
-  source(xe)
+  source(xe),
+  parent(0)
 {
-  //Get id and name
+  //Get id 
   id = source.get_attr("xmi.id");
-  name = get_property("name", "UML:ModelElement.name");
-
-  //Get visibility
-  string vis = get_property("visibility", "UML:ModelElement.visibility");
-
-  if (vis.empty() || vis=="public")
-    visibility=UML::ELEMENT_PUBLIC;
-  else if (vis=="protected")
-    visibility=UML::ELEMENT_PROTECTED;
-  else if (vis=="private")
-    visibility=UML::ELEMENT_PRIVATE;
-  else
-  {
-    reader.warning("Unknown element visibility: ", vis);
-    visibility=UML::ELEMENT_PUBLIC;
-  }
 
   //If id is valid, add myself to the reader's idmap
   if (!id.empty()) reader.record_element(id, this);
 }    
+
+
+//--------------------------------------------------------------------------
+//Element sub-element reader
+//Support for subclass constructor functions - read all subelements
+//of given types from XML source, and uses factory func to create them
+//Ignores any elements without an 'xmi.id' attribute - these are refs
+//Prunes descendant tree at 'prune', if given
+void Element::read_subelements(const char *name, ElementFactoryFunc factory,
+			       const char *prune)
+{
+  //Fix 0 prune to empty before cast to string
+  if (!prune) prune="";
+
+  //Get all of this tag
+  OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(xe, source, name, prune)
+    if (xe.has_attr("xmi.id"))  // May be reference only
+    {
+      Element *e = factory(reader, xe);
+      subelements.push_back(e);
+      e->parent=this;
+    }
+  OBTOOLS_XML_ENDFOR
+}
 
 //------------------------------------------------------------------------
 //Function to build things that need valid references (second pass)
 //We just pass it down to children
 void Element::build_refs()
 {
-  for(list<Element *>::iterator p=elements.begin();
-      p!=elements.end();
+  for(list<Element *>::iterator p=subelements.begin();
+      p!=subelements.end();
       p++)
     (*p)->build_refs();
 }
@@ -190,8 +199,8 @@ Multiplicity Element::get_multiplicity()
 
 //--------------------------------------------------------------------------
 // Gets a type element from the type properties
-// Fills in Type structure, returns whether successful
-bool Element::get_type(Type& t)
+// Returns referenced Classifier, or 0 if not found
+Classifier *Element::get_type()
 {
   //!XMI: XMI 1.2/UML 1.3 DTD implies UML:Classifier allowed here, not
   //UML:Class and UML:DataType - but a Poseidon model is as below...
@@ -213,65 +222,43 @@ bool Element::get_type(Type& t)
 
   if (idref.empty())
   {
-    reader.warning("Type idref not found in ", name);
+    reader.warning("Type idref not found in id ", id);
     return false;
   }
 
   Element *e=reader.lookup_element(idref);
   if (!e)
   {
-    reader.warning("Non-connected type idref in ", name);
+    reader.warning("Non-connected type idref in id ", id);
     return false;
   }
 
-  // Find out what we caught - check actual types here rather than
-  // relying on reference name - 'type' is ambiguous anyway
-  t.c = dynamic_cast<Class *>(e);  
-  if (t.c)
-    t.is_class = true;
-  else
-  {
-    t.dt = dynamic_cast<DataType *>(e);
-    if (t.dt)
-      t.is_class = false;
-    else
-    {
-      reader.warning("Bogus type idref in ", name);
-      return false;
-    }
-  }
-
-  //Read multiplicity
-  t.multi = get_multiplicity();
-
-  return true;
+  // Make sure it really is some kind of Classifier before returning it
+  return dynamic_cast<Classifier *>(e);  
 }
 
 //--------------------------------------------------------------------------
-// Element sub-element printer
-void Element::print_subelements(ostream& sout, int indent)
+// Element header printer 
+void Element::print_header(ostream& sout)
 {
-  //Print elements through virtual printer
-  for(list<Element *>::iterator p=elements.begin();
-      p!=elements.end();
-      p++)
-    (*p)->print(sout, indent);
+  sout << source.name << "(" << id << ")";
 }
 
 //--------------------------------------------------------------------------
-// Element printer - defaults to XML name, id, name and sub-elements
+// Element printer - indents to indent, calls down to print_header, then 
+// prints sub-elements at indent+2
 void Element::print(ostream& sout, int indent)
 {
+  //Indent first line and downcall to child header printer
   sout << string(indent, ' ');
-  sout << source.name << " '" << name << "'";
-
-  if (!id.empty())
-    sout << " (" << id << ")";
-
+  print_header(sout);
   sout << endl;
 
-  //List subelements (if any)
-  print_subelements(sout, indent+2);
+  //Print elements through virtual printer
+  for(list<Element *>::iterator p=subelements.begin();
+      p!=subelements.end();
+      p++)
+    (*p)->print(sout, indent+2);
 }
 
 //--------------------------------------------------------------------------
@@ -279,8 +266,8 @@ void Element::print(ostream& sout, int indent)
 Element::~Element()
 {
   //Delete subelements through virtual destructor
-  for(list<Element *>::iterator p=elements.begin();
-      p!=elements.end();
+  for(list<Element *>::iterator p=subelements.begin();
+      p!=subelements.end();
       p++)
     delete *p;
 }

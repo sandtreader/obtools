@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::XMI: class.cc
+// ObTools::XMI: enumeration.cc
 //
-// UML::Class and UML::Interface functionality
+// UML::Enumeration functionality
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -11,19 +11,20 @@ using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
 // Constructor
-Class::Class(XMI::Reader& rdr, XML::Element& xe)
-  :Classifier(rdr, xe)
+Enumeration::Enumeration(XMI::Reader& rdr, XML::Element& xe)
+  :DataType(rdr, xe) 
 {
-  //Get basic properties
-  is_active = get_bool_property("isActive", "UML:Class.isActive");
+  //!!! Read literals
 }
 
 //--------------------------------------------------------------------------
-// Printer - adds flags
-void Class::print_header(ostream& sout)
+// Printer
+void Enumeration::print_header(ostream& sout)
 {
   GeneralizableElement::print_header(sout);
 
-  if (is_active) sout << " (active)";
+  //!!! print literals
 }
+
+
 

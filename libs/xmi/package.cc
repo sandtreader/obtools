@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::XMI: package.cc
 //
-// UML::Package functionality
+// UML::Package and UML::Model functionality
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -12,61 +12,28 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Constructor
 Package::Package(XMI::Reader& rdr, XML::Element& xe)
-  :Element(rdr, xe) //Element does the basics
+  :GeneralizableElement(rdr, xe) //Element does the basics
 {
-  //Get all classes at this package level (but ignoring XMI cruft
-  //inbetween) 
-  OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(ce, xe, "UML:Class", 
-						 "UML:Package")
-    if (ce.has_attr("xmi.id"))  // May be reference only
-    {
-      Class *c = new Class(rdr, ce);
-      elements.push_back(c);
-      classes.push_back(c);
-    }
-  OBTOOLS_XML_ENDFOR
-
-  //Likewise datatypes 
-  OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(de, xe, "UML:DataType", 
-						 "UML:Package")
-    if (de.has_attr("xmi.id"))  // May be reference only
-    {
-      DataType *t = new DataType(rdr, de);
-      elements.push_back(t);
-    }
-  OBTOOLS_XML_ENDFOR
-
-  //Likewise stereotypes 
-  OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(se, xe, "UML:Stereotype", 
-						 "UML:Package")
-    if (se.has_attr("xmi.id"))  // May be reference only
-    {
-      Stereotype *s = new Stereotype(rdr, se);
-      elements.push_back(s);
-    }
-  OBTOOLS_XML_ENDFOR
-
-  //Get all associations - assume all wanted
-  OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(ae, xe, "UML:Association",
-						 "UML:Package")
-    Association *a = new Association(rdr, ae);
-    elements.push_back(a);
-    associations.push_back(a);
-  OBTOOLS_XML_ENDFOR
-
-  //Get sub-packages, first level only (self-pruned)
-  OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(pe, xe, "UML:Package",
-						 "UML:Package")
-    Package *p = new Package(rdr, pe);
-    elements.push_back(p);
-    packages.push_back(p);
-  OBTOOLS_XML_ENDFOR
+  //Read all sub-elements I'm interested in, using their respective
+  //factories, pruning at UML:Package to avoid grabbing all
+  //sub-package contents as well
+  const char *p="UML:Package";
+  read_subelements("UML:Class",          create_element<Class>,          p);
+  read_subelements("UML:DataType",       create_element<DataType>,       p);
+  read_subelements("UML:Interface",      create_element<Interface>,      p);
+  read_subelements("UML:Stereotype",     create_element<Stereotype>,     p);
+  read_subelements("UML:Association",    create_element<Association>,    p);
+  read_subelements("UML:Generalization", create_element<Generalization>, p);
+  read_subelements("UML:Package",        create_element<Package>,        p);
 }
 
 //--------------------------------------------------------------------------
-// Printer
-void Package::print(ostream& sout, int indent=0)
+// Model printer - adds version
+void Model::print_header(ostream& sout)
 {
-  Element::print(sout, indent);
+  GeneralizableElement::print_header(sout);
+
+  if (uml_version) sout << " (UML version " << uml_version << ")";
 }
+
 

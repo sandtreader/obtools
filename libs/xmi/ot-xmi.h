@@ -46,9 +46,8 @@ private:
   void upgrade_to_1_1(XML::Element &root);
 
 public:
-  UML::Package *model;        
+  UML::Model *model;        
   double xmi_version;   // 0 if unknown  
-  double uml_version;   // ditto (and quite likely)
 
   //Log a warning
   void warning(const char *warn, const string& detail="");

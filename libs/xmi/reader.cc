@@ -16,8 +16,7 @@ Reader::Reader(ostream&s):
   serr(s),
   xml_parser(s),
   model(0),
-  xmi_version(0),
-  uml_version(0)
+  xmi_version(0)
 {
   // Add UML namespaces to parser (seen both of these!)
   xml_parser.fix_namespace("org.omg.xmi.namespace.UML", "UML");
@@ -139,6 +138,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
 
   //See if we can find XMI.header/XMI.metamodel
   XML::Element& xmi_header = root.get_child("XMI.header");
+  double uml_version = 0;
   if (xmi_header.valid())
   {
     XML::Element& xmi_metamodel = xmi_header.get_child("XMI.metamodel");
@@ -163,12 +163,8 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   XML::Element& modele = xmi_content.get_child("UML:Model");
   if (!modele.valid()) error("No <UML:Model> in <XMI.content>");
 
-  //Now read model into a UML Package
-  model = new UML::Package(*this, modele);
-
-  //Now all ids loaded, fix up things that require references
-  // - second pass to avoid forward reference problems
-  model->build_refs();
+  //Now read model into a UML Model
+  model = new UML::Model(*this, modele, uml_version);
 }
 
 //------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::XMI: assocend.cc
+// ObTools::XMI: operation.cc
 //
-// UML::AssociationEnd functionality
+// UML::Operation functionality
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -11,17 +11,60 @@ using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
 // Constructor
-AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe)
-  :Element(rdr, xe) //Element does the basics
+Operation::Operation(XMI::Reader& rdr, XML::Element& xe)
+  :BehaviouralFeature(rdr, xe) 
 {
+  //Read parameter sub-elements from XML source
+  read_subelements("UML:Parameter", create_element<Parameter>);
 
+  //Get basic properties
+  is_abstract = get_bool_property("isAbstract", 
+				  "UML:Operation.isAbstract");
 
+  is_root     = get_bool_property("isRoot", 
+				  "UML:Operation.isRoot");
+
+  is_leaf     = get_bool_property("isLeaf", 
+				  "UML:Operation.isLeaf");
+
+  string cck  = get_property("concurrency", "UML:Operation.concurrency");
+
+  if (cck=="sequential")
+    concurrency=CONCURRENCY_SEQUENTIAL;
+  else if (cck=="guarded")
+    concurrency=CONCURRENCY_GUARDED;
+  else if (cck.empty() || cck=="concurrent")
+    concurrency=CONCURRENCY_CONCURRENT;
+  else
+  {
+    reader.warning("Unknown operation concurrency: ", cck);
+    concurrency=CONCURRENCY_SEQUENTIAL;  // Safest
+  }
 }
 
 //--------------------------------------------------------------------------
 // Printer
-void AssociationEnd::print(ostream& sout, int indent=0)
+void Operation::print_header(ostream& sout)
 {
-  Element::print(sout, indent);
+  BehaviouralFeature::print_header(sout);
+
+  if (is_abstract) sout << " (abstract)";
+  if (is_root) sout << " (root)";
+  if (is_leaf) sout << " (leaf)";
+
+  switch (concurrency)
+  {
+    case CONCURRENCY_SEQUENTIAL:
+      sout << " (sequential)";
+      break;
+
+    case CONCURRENCY_GUARDED:
+      sout << " (guarded)";
+      break;
+
+    case CONCURRENCY_CONCURRENT:
+      // Default - don't clutter
+      break;
+  }
 }
 

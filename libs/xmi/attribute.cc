@@ -12,36 +12,17 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Constructor
 Attribute::Attribute(XMI::Reader& rdr, XML::Element& xe)
-  :Element(rdr, xe) //Element does the basics
+  :StructuralFeature(rdr, xe) 
 {
-
-
+  //!!! Read initial value
 }
+
 
 //--------------------------------------------------------------------------
-// Second-pass reference fix
-void Attribute::build_refs()
+// Printer - adds initial value
+void Attribute::print_header(ostream& sout)
 {
-  //Get type
-  if (!get_type(type))
-    reader.error("No type specified for attribute id ", id);
+  StructuralFeature::print_header(sout);
+
+  //!!! print initial value
 }
-
-//--------------------------------------------------------------------------
-// Printer
-void Attribute::print(ostream& sout, int indent=0)
-{
-  sout << string(indent, ' ');
-  sout << "Attribute '" << name << "': ";
-
-  if (type.is_class && type.c)
-    sout << "class " << type.c->name;
-  else if (type.dt)
-    sout << "type " << type.dt->name;
-
-  if (type.multi.lower!=1 || type.multi.upper!=1)
-    sout << '[' << type.multi.lower << ".." << type.multi.upper << ']';
-
-  sout << endl;
-}
-
