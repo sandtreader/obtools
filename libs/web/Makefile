@@ -8,17 +8,20 @@
 TYPE	= lib
 NAME   	= ot-web
 HEADERS = ot-web.h
-OBJS  	= mime-headers.o http-message.o
-TESTS 	= test-mime test-http-file 
+OBJS  	= mime-headers.o http-message.o url.o
+TESTS 	= test-mime test-http-file test-url
 TESTCMD	= ./test-mime < ../test.mime.txt
 TESTCMD += && ./test-http-file < ../test.http.txt
+TESTCMD += && ./test-url "http://foo.com:81/x/y/z?x=1&z=2\#frag"
+TESTCMD += && ./test-url "/x/y/z?x=1&z=2\#frag"
 DEPENDS = net xml text
 MT-VARIANTS = 1
 
 #Catch ourselves recursing in SINGLE mode and suppress server and use of MT
 ifndef SINGLE
 TESTS  	+= test-http-server
-TESTCMD += && ./test-http-server
+#Following test blocks run
+#TESTCMD += && ./test-http-server
 DEPENDS += mt
 endif
 

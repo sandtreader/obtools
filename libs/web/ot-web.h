@@ -109,6 +109,77 @@ public:
 };
 
 //==========================================================================
+// URL parser (url.cc)
+// Parses a URL into an XML structure
+
+// Create the URL parser around a root XML element:
+// e.g.
+//   XML::Element root("url");
+//   Web::URLParser urlp(root);
+//   string url = "http://foo.com:81/x/y/z?bar#1";
+//   urlp.parse(url);
+//   ... use sub-elements of root, e.g. through XPath ...
+
+// the root element is given subelements as follows
+//   scheme    Scheme (e.g. http) - lower cased
+//   host      Host/domain (if present) - lower cased
+//   port      Port number (if present)
+//   path      URL path (including '/' if absolute) (as specified)
+//   fragment  Fragment following #
+//   query     Query following ?
+//
+// <url scheme="http">
+//   <domain>foo.com</domain>
+//   <port>81</port>
+//   <path>/x/y/z</path>
+//   <query>bar=4&foo=1</query>
+//   <fragment>1</fragment>
+// </url>
+class URLParser
+{
+private:
+  XML::Element& root;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor/Destructor
+  URLParser(XML::Element& _root): root(_root) {}
+  ~URLParser() {}
+
+  //--------------------------------------------------------------------------
+  // Parse a URL string
+  // Returns whether successful
+  bool parse(const string& url);
+};
+
+//==========================================================================
+// URL generator (url.cc)
+// Generates a URL from an XML structure
+
+// Create the URL parser around a root XML element:
+// e.g.
+//   XML::Element root("url");
+//   Web::URLGenerator urlg(root);
+//   string url = urlp.generate();
+
+// The generator takes the same input XML as the URLParser generates, above
+class URLGenerator
+{
+private:
+  XML::Element& root;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor/Destructor
+  URLGenerator(XML::Element& _root): root(_root) {}
+  ~URLGenerator() {}
+
+  //--------------------------------------------------------------------------
+  // Generate a URL string
+  string generate();
+};
+
+//==========================================================================
 // HTTP message parser (http-message.cc)
 // Reads an HTTP request/response message from the stream
 // Also usable for other HTTP-like protocols - e.g. RTSP
