@@ -7,13 +7,17 @@
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
+
+// !!! This is very ugly, inefficient, and needs implementing with proper 
+// buffers!
+
 #include "ot-net.h"
 
 namespace ObTools { namespace Net {
 
 //------------------------------------------------------------------------
 // TCPStreamBuf Constructor 
-  TCPStreamBuf::TCPStreamBuf(TCPSocket& _s): s(_s), bufc(-1)
+TCPStreamBuf::TCPStreamBuf(TCPSocket& _s): s(_s), bufc(-1), held(false)
 {
   // use unbuffered IO, since the socket buffers anyway
   setp(0,0); 
@@ -35,6 +39,12 @@ int TCPStreamBuf::overflow(int c)
 // TCPStreamBuf underflow() function
 int TCPStreamBuf::underflow()
 {
+  if (held)
+  {
+    held = false;
+    return bufc;
+  }
+
   // Force a character into the 'buffer'
   if (bufc<0) uflow();
   if (bufc>=0)
@@ -48,11 +58,31 @@ int TCPStreamBuf::underflow()
 int TCPStreamBuf::uflow()
 {
   char cc;
-  if (s.cread(&cc, 1) == 1)
+  if (held)
+  {
+    held = false;
+    return bufc;
+  }
+  else if (s.cread(&cc, 1) == 1)
     return bufc=cc;
   else
     return traits_type::eof();
 }
+
+//------------------------------------------------------------------------
+// TCPStreamBuf pbackfail() function
+// We need this otherwise putback doesn't work with no buffering
+int TCPStreamBuf::pbackfail(int c)
+{
+  if (held)
+    return traits_type::eof();
+  else
+  {
+    held = true;
+    return bufc=c;
+  }
+}
+
 
 }} // namespaces
 

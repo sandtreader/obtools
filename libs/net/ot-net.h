@@ -355,6 +355,9 @@ class SocketError
 public:
   int error;  // errno value, or 0
   SocketError(int e=0): error(e) {}
+
+  // Get error string
+  string get_string();
 };
 
 //------------------------------------------------------------------------
@@ -459,6 +462,7 @@ class TCPStreamBuf: public streambuf
 private:
   TCPSocket& s;
   int bufc;           // One-character buffer
+  bool held;          // True if we're holding a putback
 
 protected:
   // Streambuf overflow - handles characters
@@ -467,6 +471,7 @@ protected:
   // Streambuf underflows - see STL manual for awful details
   int underflow();
   int uflow();
+  int pbackfail(int c);
 
 public:
   // Constructor

@@ -85,6 +85,16 @@ bool Socket::bind(int port)
 // Socket exceptions
 
 //------------------------------------------------------------------------
+// Get error string
+string SocketError::get_string()
+{
+  if (error)
+    return string(strerror(error));
+  else
+    return string("EOF");
+}
+
+//------------------------------------------------------------------------
 // << operator to write SocketError to ostream
 // e.g. cout << e;
 ostream& operator<<(ostream& s, const SocketError& e)

@@ -29,9 +29,9 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
 
   try
   {
-    // Just reflect
+    // Just output what we get
     string buf;
-    while (s >> buf) s << buf;
+    while (s >> buf) cout << buf;
 
     cerr << "Connection from " << client << " ended\n";
   }
