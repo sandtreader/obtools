@@ -97,6 +97,10 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
   upgrade["Model_Management.Package"]     = "UML:Package";
   upgrade["Foundation.Core.Class"]        = "UML:Class";
   upgrade["Foundation.Core.DataType"]     = "UML:DataType";
+  upgrade["Foundation.Core.Enumeration"]  = "UML:Enumeration";
+  upgrade["Foundation.Core.EnumerationLiteral"]  = 
+          "UML:EnumerationLiteral";
+  upgrade["Foundation.Core.Primitive"]    = "UML:Primitive";
   upgrade["Foundation.Core.Stereotype"]   = "UML:Stereotype";
   upgrade["Foundation.Core.Attribute"]    = "UML:Attribute";
   upgrade["Foundation.Core.Operation"]    = "UML:Operation";
@@ -149,6 +153,8 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
           "UML:StructuralFeature.type";
   upgrade["Foundation.Core.StructuralFeature.ordering"] = 
           "UML:StructuralFeature.ordering";
+  upgrade["Foundation.Core.Attribute.initialValue"] = 
+          "UML:Attribute.initialValue";
   upgrade["Foundation.Core.BehaviouralFeature.isQuery"] = 
           "UML:BehaviouralFeature.isQuery";
 
@@ -166,6 +172,12 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
     "UML:MultiplicityRange.lower";
   upgrade["Foundation.Data_Types.MultiplicityRange.upper"] = 
     "UML:MultiplicityRange.upper";
+
+  upgrade["Foundation.Data_Types.Expression"] = "UML:Expression";
+  upgrade["Foundation.Data_Types.Expression.language"] = 
+          "UML:Expression.language";
+  upgrade["Foundation.Data_Types.Expression.body"] = 
+          "UML:Expression.body";
 
   // Translate
   root.translate(upgrade);
