@@ -189,9 +189,9 @@ ifdef RELEASE
 ifdef RELEASEDIR
 ifdef RELEASABLE
 	cp $(RELEASABLE) ../$(RELEASEDIR)/$(RELEASE-NAME) 
+endif
 ifeq ($(TYPE), lib)
 	cp $(patsubst %,../%,$(HEADERS)) ../$(RELEASEDIR) 
-endif
 endif
 endif
 endif
