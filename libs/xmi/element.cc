@@ -193,11 +193,7 @@ Element *Element::get_element_property(const string& attr_name,
     idref = get_idref_property(attr_name, subelement_name,
 			       "UML:DataType");
 
-  if (idref.empty())
-  {
-    reader.warning("Type idref not found in id ", id);
-    return 0;
-  }
+  if (idref.empty()) return 0;
 
   Element *e=reader.lookup_element(idref);
   if (e) return e;

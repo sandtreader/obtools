@@ -44,8 +44,15 @@ void AssociationEnd::build_refs()
 {
   ModelElement::build_refs();
 
+  // Try UML1.4 participant first
   participant = get_classifier_property("participant", 
 					"UML:AssociationEnd.participant");
+
+  //If not there, try UML1.3 'type'
+  if (!participant)
+    participant = get_classifier_property("type", 
+					  "UML:AssociationEnd.type");
+
   if (!participant)
     reader.error("Can't get participant in AssociationEnd id ", id);
 

@@ -67,19 +67,6 @@ UML::Element *Reader::lookup_element(const string& id)
 }
 
 //------------------------------------------------------------------------
-// Translate UML1.3 concepts into UML1.4
-void Reader::upgrade_uml_to_1_4(XML::Element &root)
-{
-  map<string, string> upgrade;
-
-  //Map association end 'type' to 'participant'
-  upgrade["UML:AssociationEnd.type"] = "UML:AssociationEnd.participant";
-
-  // Translate
-  root.translate(upgrade);
-}
-
-//------------------------------------------------------------------------
 // Translate XMI 1.0 fully qualified elements into XMI 1.1+ namespace ones
 void Reader::upgrade_xmi_to_1_1(XML::Element &root)
 {
@@ -227,9 +214,6 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   //Before delving into UML, check for 1.0 and upgrade to 1.1 names
   //Do this even if version unknown - can't do any harm
   if (xmi_version < 1.1) upgrade_xmi_to_1_1(root);
-
-  //Likewise, upgrade UML1.3 concepts to UML1.4
-  if (uml_version < 1.4) upgrade_uml_to_1_4(root);
 
   //Get UML model - assume only one
   XML::Element& modele = xmi_content.get_child("UML:Model");
