@@ -6,11 +6,11 @@
 #==========================================================================
 
 TYPE	= exe
-NAME   	= obdoc
-OBJS 	= _obdoc.o
+NAME   	= obdoc-html
+OBJS 	= _obdoc-html.o
 DEPENDS = xml regen text
-TESTCMD = ./obdoc < ../test.obdoc.xml
-VARIANTS = debug
+TESTCMD = ./obdoc-html < ../test.obdoc.xml
+VARIANTS = release debug
 VARIANT-debug = DEBUG
 
 ROOT    = ../..
@@ -20,7 +20,8 @@ include $(ROOT)/build/std.mk
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-_obdoc.cc: ../obdoc.cfg.xml $(DIR-xmltoolgen)/build-debug/xmltoolgen Makefile
-	$(DIR-xmltoolgen)/build-debug/xmltoolgen ../obdoc.cfg.xml > _obdoc.cc
+_obdoc-html.cc: ../obdoc-html.cfg.xml  \
+                $(DIR-xmltoolgen)/build-release/xmltoolgen Makefile
+	$(DIR-xmltoolgen)/build-release/xmltoolgen ../obdoc-html.cfg.xml > _obdoc-html.cc
 
 
