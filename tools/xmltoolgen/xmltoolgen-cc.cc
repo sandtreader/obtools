@@ -89,8 +89,8 @@ void legal(const char *config_file, XML::Configuration& config)
 // Output configuration variables from, er, configuration variables 
 void config_vars(XML::Configuration& config)
 {
-  list<XML::Element *> maps = config.get_elements("config/map");
-  list<XML::Element *> vars = config.get_elements("config/var");
+  list<XML::Element *> maps = config.get_elements("xt:config/xt:map");
+  list<XML::Element *> vars = config.get_elements("xt:config/xt:var");
 
   cout<<"//================================================================\n";
   cout<<"// Configuration items\n\n";
@@ -116,30 +116,30 @@ void config_vars(XML::Configuration& config)
     cout << "  " << type << " " << e->get_attr("name") << ";\n";
   }
 
-  cout << "} config;\n\n";
+  cout << "} _config;\n\n";
 }
 
 //--------------------------------------------------------------------------
-// Read script tags from root containing <script> element
+// Read script tags from root containing <xt:script> element
 // Using given tags as defaults
 CPPT::Tags read_tags(XML::Element& root, CPPT::Tags& defaults)
 {
   XML::XPathProcessor xpath(root);
   CPPT::Tags tags;
 
-  tags.start_code = xpath.get_value("script/tags/start-code", 
+  tags.start_code = xpath.get_value("xt:script/xt:tags/xt:start-code", 
 				    defaults.start_code);
-  tags.end_code   = xpath.get_value("script/tags/end-code",
+  tags.end_code   = xpath.get_value("xt:script/xt:tags/xt:end-code",
 				    defaults.end_code);
 
-  tags.start_expr = xpath.get_value("script/tags/start-expr",
+  tags.start_expr = xpath.get_value("xt:script/xt:tags/xt:start-expr",
 				    defaults.start_expr);
-  tags.end_expr   = xpath.get_value("script/tags/end-expr",
+  tags.end_expr   = xpath.get_value("xt:script/xt:tags/xt:end-expr",
 				    defaults.end_expr);
 
-  tags.start_comment = xpath.get_value("script/tags/start-comment",
+  tags.start_comment = xpath.get_value("xt:script/xt:tags/xt:start-comment",
 				       defaults.start_comment);
-  tags.end_comment   = xpath.get_value("script/tags/end-comment", 
+  tags.end_comment   = xpath.get_value("xt:script/xt:tags/xt:end-comment", 
 				       defaults.end_comment);
 
   return tags;
@@ -158,34 +158,31 @@ void process_script(const string& script, CPPT::Tags& tags, int& max_ci)
   {
     // Remove common indent, up to max_ci
     int ci = Text::get_common_indent(myscript);
+
+    cerr << "[" << myscript << "]: " << max_ci << "," << ci << endl;
+
     if (max_ci < 0) max_ci = ci;   // Capture first text as max strip
     if (ci > max_ci) ci=max_ci;    // Limit to max strip anyway
-    myscript = Text::remove_indent(myscript, ci);
+    if (ci < max_ci) max_ci = ci;  // Fix up if our first guess was wrong
 
-    cout << endl;  // Separate code (not output!)
+    myscript = Text::remove_indent(myscript, ci);
 
     // Run it through CPPT
     istringstream sscr(myscript);
-    CPPT::Processor processor(sscr, cout, tags, "sout");
+    CPPT::Processor processor(sscr, cout, tags, "_sout");
     processor.process();
   }
 }
 
 //--------------------------------------------------------------------------
 // Generate code to call a template for all elements of given name
-void generate_call(XML::Element& te, const string& parent_suffix, int i,
+void generate_call(XML::Element& te, const string& suffix,
+		   const string& parent_var,
 		   bool is_root = false)
 {
   string ename = te.get_attr("element");
 
-  // Get my suffix appended to parent's
-  ostringstream ssuf;
-  ssuf << parent_suffix << '_' << i+1;
-  string suffix = ssuf.str();
-
   cout << "\n  //Call " << (ename.empty()?"all":ename) << " templates\n";
-  // Declare counter variable the first time
-  cout << "  " << (i?"":"int ") << "i=0;\n";
 
   if (is_root)
   {
@@ -194,12 +191,13 @@ void generate_call(XML::Element& te, const string& parent_suffix, int i,
   }
   else 
   {
+    cout << "  _i=0;\n";
     if (ename.empty()) // All children
-      cout << "  OBTOOLS_XML_FOREACH_CHILD(child_e, e)\n";
+      cout << "  OBTOOLS_XML_FOREACH_CHILD(_child_e, " << parent_var << ")\n";
     else
-      cout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(child_e, e, \"" 
-	   << ename << "\")\n";
-    cout << "    template" << suffix << "(sout, child_e, i++, path);\n";
+      cout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(_child_e, " 
+	   << parent_var << ", \"" << ename << "\")\n";
+    cout << "    template" << suffix << "(_sout, _child_e, _i++, _path);\n";
     cout << "  OBTOOLS_XML_ENDFOR\n";
   }
 }
@@ -207,25 +205,54 @@ void generate_call(XML::Element& te, const string& parent_suffix, int i,
 //--------------------------------------------------------------------------
 // Generate code for a particular template element
 // max_ci is maximum indent to strip from code
+// Accumulates script in script, dumps it on hitting a sub-template
 void generate_template(XML::Element& te, CPPT::Tags& tags, 
-		       int& max_ci, const string& suffix)
+		       int& max_ci, const string& suffix,
+		       const string& var,
+		       string& script)
 {
   // Check for optimised content
-  if (te.content.size()) process_script(te.content, tags, max_ci);
+  if (te.content.size()) script += te.content;
 
   // Iterate all child elements
   int i=0;
   OBTOOLS_XML_FOREACH_CHILD(ce, te)
     if (ce.name.empty())
     {
-      // It's script
-      process_script(ce.content, tags, max_ci);
+      // Add content to script
+      script += ce.content;
     }
-    else if (ce.name == "template")
+    else 
     {
-      // Call to subtemplate, iterating over children
-      generate_call(ce, suffix, i++);
+      // Get my suffix appended to parent's
+      ostringstream ssuf;
+      ssuf << suffix << '_' << i+1;
+      string mysuffix = ssuf.str();
+
+      if (ce.name == "xt:template")
+      {
+	// Process and clear script before calling sub-template
+	process_script(script, tags, max_ci);
+	script.clear();
+
+	// Call to subtemplate, iterating over children
+	generate_call(ce, mysuffix, var);
+      }
+
+      // Recurse to sub-elements, except ignoring xt:xxx 
+      if (ce.name.substr(0,3) != "xt:")
+      {
+	// Add start tag to script
+	script += ce.start_to_string();
+
+	// Recurse to generate content
+	generate_template(ce, tags, max_ci, mysuffix, var, script);
+
+	// Process end tag as a script
+	script += ce.end_to_string();
+      }
     }
+    i++;
   OBTOOLS_XML_ENDFOR
 }
 
@@ -234,103 +261,126 @@ void generate_template(XML::Element& te, CPPT::Tags& tags,
 void template_funcs(XML::Element& root, CPPT::Tags& tags,
 		    int& max_ci, const string& suffix="")
 {
-  list<XML::Element *> templates = root.get_children("template");
-
   int i=0;
-  for(list<XML::Element *>::iterator p = templates.begin();
-      p!=templates.end();
-      ++p, ++i)
-  {
-    XML::Element& e = **p;
-
-    // Get my suffix appended to any existing
-    ostringstream ssuf;
-    ssuf << suffix << '_' << i+1;
-    string mysuffix = ssuf.str();
-
-    // Check for tag override in this element
-    CPPT::Tags mytags = read_tags(e, tags); 
-
-    // Produce sub-templates first
-    template_funcs(e, mytags, max_ci, mysuffix);
-
-    // Now my code - depends whether we need to open a new file or not
-    XML::XPathProcessor xpath(e);
-    string fn_script = xpath["filename"];
-    string dir_script = xpath["directory"];
-
-    string streamname = "sout";
-
-    if (fn_script.size())
+  OBTOOLS_XML_FOREACH_CHILD(e, root)
+    if (e.name.size())  // Ignore raw content
     {
-      // Generate function to build filename
-      cout<<"//----------------------------------------------------------------\n";
-      cout << "// Filename builder for " << e.get_attr("name") << endl;
-      cout << "string fn_template" << mysuffix 
-	   << "(ObTools::XML::Element& e)\n";
-      cout << "{\n";
-      cout << "  ostringstream sout;\n";
-      int temp=0; // No stripping
-      process_script(fn_script, tags, temp);
-      cout << "  return sout.str();\n";
-      cout << "}\n\n";
+      // Get my suffix appended to any existing
+      ostringstream ssuf;
+      ssuf << suffix << '_' << i+1;
+      string mysuffix = ssuf.str();
 
-      // Rename template function stream parameter so we can replace it
-      streamname = "_sout";
+      // Check for template
+      if (e.name == "xt:template")
+      {
+	// Now my code - depends whether we need to open a new file or not
+	XML::XPathProcessor xpath(e);
+	string fn_script = xpath["xt:file"];
+	string dir_script = xpath["xt:dir"];
+
+	string streamname = "_sout";
+
+	// Check for tag override in this element
+	CPPT::Tags mytags = read_tags(e, tags); 
+
+	// Get child variable - default to same as element, or use child
+	// if no element (all children)
+	string var = e.get_attr("var", e["element"]);
+	if (var.empty()) var = "child";
+
+	int old_max_ci = max_ci;
+	if (fn_script.size())
+	{
+	  // Generate function to build filename
+	  cout<<"//----------------------------------------------------------------\n";
+	  cout << "// Filename builder for " << e.get_attr("name") << endl;
+	  cout << "string fn_template" << mysuffix 
+	       << "(ObTools::XML::Element& " << var << ")\n";
+	  cout << "{\n";
+	  cout << "  ostringstream _sout;\n";
+	  int temp=0; // No stripping
+	  process_script(fn_script, tags, temp);
+	  cout << "  return _sout.str();\n";
+	  cout << "}\n\n";
+
+	  // Rename template function stream parameter so we can replace it
+	  streamname = "_sout2";
+
+	  // Reset max common indent for new file
+	  max_ci = -1;
+	}
+
+	if (dir_script.size())
+	{
+	  // Generate function to build dirname
+	  cout<<"//----------------------------------------------------------------\n";
+	  cout << "// Directory name builder for " << e.get_attr("name") << endl;
+	  cout << "string dn_template" << mysuffix 
+	       << "(ObTools::XML::Element& " << var << ")\n";
+	  cout << "{\n";
+	  cout << "  ostringstream _sout;\n";
+	  int temp=0; // No stripping
+	  process_script(dir_script, tags, temp);
+	  cout << "  return _sout.str();\n";
+	  cout << "}\n\n";
+	}
+
+	// Recurse to children 
+	template_funcs(e, mytags, max_ci, mysuffix);
+
+	cout<<"//----------------------------------------------------------------\n";
+	cout <<"// " << e.get_attr("name") << endl;
+	cout << "void template" << mysuffix << "(ostream& " << streamname 
+	     << ", ObTools::XML::Element& " << var 
+	     << ", int _index, string _path)\n";
+	cout << "{\n";
+	cout << "  int _i;\n";
+
+	if (dir_script.size())
+	{
+	  // Generate path addition code
+	  cout <<"  _path += dn_template" << mysuffix 
+	       <<"(" << var << ") + \"/\";\n\n";
+
+	  cout <<"  // Make directory\n";
+	  cout <<"  string _cmd = string(\"mkdir -p \\\"\")+_path+\"\\\"\";\n";
+	  cout <<"  if (system(_cmd.c_str()))\n";
+	  cout <<"  {\n";
+	  cout <<"    cerr << \"Could not \" << _cmd << endl;\n";
+	  cout <<"    exit(2);\n";
+	  cout <<"  }\n\n";
+	}
+
+	if (fn_script.size())
+	{
+	  // Generate file open code for sout 
+	  cout << "  string _fn = _path+fn_template" << mysuffix 
+	       << "(" << var << ");\n";
+	  cout << "  ofstream _sout(_fn.c_str());\n";
+	  cout << "  if (!_sout)\n";
+	  cout << "  {\n";
+	  cout << "    cerr << \"Can't create file: \" << _fn << endl;\n";
+	  cout << "    exit(4);\n";
+	  cout << "  }\n\n";
+	}
+
+	string script;
+	generate_template(e, mytags, max_ci, mysuffix, var, script);
+	process_script(script, mytags, max_ci);
+
+	cout << "}\n\n";
+
+	// Return common indent for outer file
+	if (fn_script.size()) max_ci = old_max_ci;
+      }
+      else
+      {
+	// Just recurse
+	template_funcs(e, tags, max_ci, mysuffix);
+      }
     }
-
-    if (dir_script.size())
-    {
-      // Generate function to build dirname
-      cout<<"//----------------------------------------------------------------\n";
-      cout << "// Directory name builder for " << e.get_attr("name") << endl;
-      cout << "string dn_template" << mysuffix 
-	   << "(ObTools::XML::Element& e)\n";
-      cout << "{\n";
-      cout << "  ostringstream sout;\n";
-      int temp=0; // No stripping
-      process_script(dir_script, tags, temp);
-      cout << "  return sout.str();\n";
-      cout << "}\n\n";
-    }
-
-    cout<<"//----------------------------------------------------------------\n";
-    cout <<"// " << e.get_attr("name") << endl;
-    cout << "void template" << mysuffix << "(ostream& " << streamname 
-	 << ", ObTools::XML::Element& e, int index, string path)\n";
-    cout << "{\n";
-
-    if (dir_script.size())
-    {
-      // Generate path addition code
-      cout << "  path += dn_template" << mysuffix << "(e) + \"/\";\n\n";
-
-      cout << "  // Make directory\n";
-      cout << "  string _cmd = string(\"mkdir -p \\\"\")+path+\"\\\"\";\n";
-      cout << "  if (system(_cmd.c_str()))\n";
-      cout << "  {\n";
-      cout << "    cerr << \"Could not \" << _cmd << endl;\n";
-      cout << "    exit(2);\n";
-      cout << "  }\n\n";
-    }
-
-    if (fn_script.size())
-    {
-      // Generate file open code for sout - this is a bit evil, because of
-      // the need to always preserve 'sout' as the output stream
-      cout << "  string _fn = path+fn_template" << mysuffix << "(e);\n";
-      cout << "  ofstream sout(_fn.c_str());\n";
-      cout << "  if (!sout)\n";
-      cout << "  {\n";
-      cout << "    cerr << \"Can't create file: \" << _fn << endl;\n";
-      cout << "    exit(4);\n";
-      cout << "  }\n\n";
-    }
-
-    generate_template(e, mytags, max_ci, mysuffix);
-
-    cout << "}\n\n";
-  }
+    i++;
+  OBTOOLS_XML_ENDFOR
 }
 
 //--------------------------------------------------------------------------
@@ -359,15 +409,22 @@ void do_main(XML::Configuration& config)
 
   cout<<"  // Call all the template functions with cout\n";
 
-  list<XML::Element *> templates = config.get_elements("template");
+  // Iterate all child elements
+  XML::Element& root = config.get_root();
   int i=0;
-  for(list<XML::Element *>::iterator p = templates.begin();
-      p!=templates.end();
-      ++p)
-  {
-    XML::Element& e = **p;
-    generate_call(e, "", i++, true);
-  }
+  OBTOOLS_XML_FOREACH_CHILD(ce, root)
+    if (ce.name == "xt:template")
+    {
+      // Get my suffix 
+      ostringstream ssuf;
+      ssuf << '_' << i+1;
+      string suffix = ssuf.str();
+
+      // Call to subtemplate, iterating over children
+      generate_call(ce, suffix, "root", true);
+    }
+    i++;
+  OBTOOLS_XML_ENDFOR
 
   cout<<"  return 0;\n";
   cout<<"}\n";
@@ -392,10 +449,11 @@ int main(int argc, char **argv)
   // Read config file
   XML::Configuration config(config_file, XML::PARSER_OPTIMISE_CONTENT
 			               | XML::PARSER_PRESERVE_WHITESPACE);
-  if (!config.read("xmltool")) return 2;
+  config.fix_namespace("xt", "obtools.com/ns/tools");
+  if (!config.read("xt:tool")) return 2;
 
   // Check for correct language
-  if (config["script/@language"] != "C++")
+  if (config["xt:script/@language"] != "C++")
     die("Wrong script language - I do C++");
 
   // Get standard tags
@@ -418,11 +476,11 @@ int main(int argc, char **argv)
   config_vars(config);
 
   // Their custom code
-  string code = Text::strip_blank_lines(config["code"]);
+  string code = Text::strip_blank_lines(config["xt:code"]);
   if (code.size())
   {
     cout<<"//================================================================\n";
-    cout << "// Custom code from " << config_file << " <code> section\n\n";
+    cout << "// Custom code from " << config_file << " <xt:code> section\n\n";
 
     code = Text::remove_indent(code, Text::get_common_indent(code));
     cout << code << endl;
@@ -430,7 +488,8 @@ int main(int argc, char **argv)
 
   // Template functions
   cout<<"//================================================================\n";
-  cout<<"// Template scripts from "<< config_file <<" <template> sections\n\n";
+  cout<<"// Template scripts from "<< config_file 
+      <<" <xt:template> sections\n\n";
   int max_ci = -1;
   template_funcs(root, tags, max_ci);
 
