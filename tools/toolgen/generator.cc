@@ -221,9 +221,10 @@ void Generator::generate_start(XML::Element& te,
 			       const string& streamname)
 {
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(se, te, "xt:start")
-    int temp=0; // No stripping
     sout << "  if (!" << indexname << ")\n  {\n  ";
-    process_script(*se, tags, streamname, temp);
+    string script;
+    int temp=0; // No stripping
+    generate_template(se, se, tags, temp, streamname, script);
     sout << "  }\n";
   OBTOOLS_XML_ENDFOR
 }
@@ -236,9 +237,10 @@ void Generator::generate_end(XML::Element& te,
 			     const string& streamname)
 {
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(se, te, "xt:end")
-    int temp=0; // No stripping
     sout << "  if (" << indexname << ")\n  {\n  ";
-    process_script(*se, tags, streamname, temp);
+    string script;
+    int temp=0; // No stripping
+    generate_template(se, se, tags, temp, streamname, script);
     sout << "  }\n";
   OBTOOLS_XML_ENDFOR
 }
