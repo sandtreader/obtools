@@ -95,6 +95,57 @@ public:
 ostream& operator<<(ostream& s, const IPAddress& ip);
 
 //==========================================================================
+// Masked address - IP address and netmask
+class MaskedAddress
+{
+public:
+  IPAddress address;
+  IPAddress mask;
+
+  //--------------------------------------------------------------------------
+  // Basic constructors
+  MaskedAddress(): address(), mask() {}
+  MaskedAddress(uint32_t _address, uint32_t _mask): 
+    address(_address), mask(_mask) {}
+  MaskedAddress(IPAddress _address, IPAddress _mask): 
+    address(_address), mask(_mask) {}
+  MaskedAddress(IPAddress _address):         // Host mask
+    address(_address), mask() {}
+
+  //--------------------------------------------------------------------------
+  // Name lookup constructors - mask is dotted-quad
+  MaskedAddress(const string& hostname, const string& mask_dq):
+    address(hostname), mask(mask_dq) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor from CIDR-form a.b.c.d/xx or a.b.c.d/A.B.C.D
+  // - e.g. 192.168.1.0/24 or 192.168.1.0/255.255.255.0
+  MaskedAddress(const string& cidr);
+
+  //--------------------------------------------------------------------------
+  // Comparators - same if both are the same
+  // == operator 
+  bool operator==(const MaskedAddress& o) const 
+  { return address == o.address && mask == o.mask; }
+
+  // != operator 
+  bool operator!=(const MaskedAddress& o) const 
+  { return address != o.address || mask != o.mask; }
+
+  //--------------------------------------------------------------------------
+  // Match operator - see if given address fits within masked subnet
+  bool operator==(const IPAddress& o) const
+  { return (address & mask) == (o & mask); }
+
+};
+
+//------------------------------------------------------------------------
+// << operator to write MaskedAddress to ostream
+// e.g. cout << addr;
+// Always outputs in DQ mask form
+ostream& operator<<(ostream& s, const MaskedAddress& ip);
+
+//==========================================================================
 // IP Protocol 
 // Tries to be as near as possible an enum with extra
 class Protocol
@@ -531,6 +582,13 @@ public:
   // Run server
   // Doesn't return unless it all falls apart.
   void run();
+
+  //--------------------------------------------------------------------------
+  // Virtual function to verify acceptability of a client before spawning
+  // the worker thread.  This function operates in the dispatcher thread
+  // and should be fast!
+  // Defaults to allowing anything
+  virtual bool verify(EndPoint) { return true; }
 
   //--------------------------------------------------------------------------
   // Virtual function to process a single connection on the given socket.  

@@ -38,6 +38,16 @@ void TCPServer::run()
     {
       EndPoint client(saddr);
 
+      // Check it's allowed - we do this as soon as possible to prevent
+      // any userland DoS through nobbling all the threads
+      // Any kernel susceptibility to DoS remains, of course - if only
+      // there was a way to pass an allowed-list to the kernel...
+      if (!verify(client))
+      {
+	::close(fd);
+	continue;
+      }
+
       // Get a thread
       TCPWorkerThread *thread = threadpool.remove();
       if (thread)

@@ -73,6 +73,57 @@ ostream& operator<<(ostream& s, const IPAddress& ip)
   return s;
 }
 
+//==========================================================================
+// Masked addresses
+
+//--------------------------------------------------------------------------
+// Constructor from CIDR-form a.b.c.d/xx or a.b.c.d/A.B.C.D
+// - e.g. 192.168.1.0/24 or 192.168.1.0/255.255.255.0
+MaskedAddress::MaskedAddress(const string& cidr):
+  address(), mask()
+{
+  string::size_type p = cidr.find('/');
+  if (p != string::npos)
+  {
+    string addr_s(cidr, 0, p);
+    address = IPAddress(addr_s);
+
+    string mask_s(cidr, p+1);
+
+    // Check for dots
+    if (mask_s.find('.') != string::npos)
+    {
+      // It's DQ
+      mask = IPAddress(mask_s);
+    }
+    else
+    {
+      // It's a bit count
+      int n = atoi(mask_s.c_str());
+      uint32_t maskbits;
+
+      // Work out mask bits from number of bits
+      if (!n)
+	maskbits = 0;
+      else
+	maskbits = ~((1 << (32-n))- 1);  // Beware: Dark Arts
+
+      mask = IPAddress(maskbits);
+    }
+  }
+  else address = IPAddress(cidr);
+}
+
+//------------------------------------------------------------------------
+// << operator to write MaskedAddress to ostream
+// e.g. cout << addr;
+// Always outputs in DQ mask form
+ostream& operator<<(ostream& s, const MaskedAddress& ip)
+{
+  s << ip.address;
+  if (!!ip.mask) s << '/' << ip.mask;
+  return s;
+}
 
 //==========================================================================
 // End-points
