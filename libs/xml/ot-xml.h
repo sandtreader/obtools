@@ -74,6 +74,9 @@ public:
 
   //------------------------------------------------------------------------
   // Constructors 
+  // Default - no name, no content, for later filling in
+  Element() { }
+
   // One string: just the name
   Element(const string& n):name(n) { }
 
