@@ -87,7 +87,7 @@ class Processor
 private:
   istream &sin;
   ostream &sout;
-  const char *sname;
+  string sname;
   Tags tags;
 
   ProcessorState state;
@@ -113,7 +113,7 @@ public:
   //streamname is the name of the stream for boilerplate text output
   Processor(istream& instream, ostream& outstream,
 	    const Tags& ts,
-	    const char *streamname="cout");
+	    const string& streamname="cout");
 
   //------------------------------------------------------------------------
   //Process the instream into the outstream until EOF
