@@ -1,0 +1,8 @@
+<project name="obtools">
+<title>ObTools</title>
+<desc>
+<p>The ObTools project aims to provide high-performance, easily-used infrastructure for large projects in C++ on Unix.  In particular the ObTools code provides a foundation for large resilient distributed systems and Web interfaces.</p>
+</desc>
+
+
+
