@@ -18,6 +18,7 @@
 ZEND_BEGIN_MODULE_GLOBALS(xmlmesh)
 	 char *mesh_host;
 	 int mesh_port;
+	 OT_XMLMesh_Conn conn;  // !!! Should be per process!
 ZEND_END_MODULE_GLOBALS(xmlmesh)
 
 ZEND_DECLARE_MODULE_GLOBALS(xmlmesh)
@@ -85,6 +86,7 @@ static void php_xmlmesh_init_globals(zend_xmlmesh_globals *xmlmesh_globals)
 {
   xmlmesh_globals->mesh_port = 0;
   xmlmesh_globals->mesh_host = NULL;
+  xmlmesh_globals->conn = NULL;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -93,11 +95,10 @@ ZEND_MINIT_FUNCTION(xmlmesh)
 {
   ZEND_INIT_MODULE_GLOBALS(xmlmesh, php_xmlmesh_init_globals, NULL);
   REGISTER_INI_ENTRIES();
+  XMLMESH_G(conn) = NULL;
 
-  if (ot_xmlmesh_init(XMLMESH_G(mesh_host), XMLMESH_G(mesh_port)))
-    return SUCCESS;
-  else
-    return FAILURE;
+  ot_xmlmesh_init();
+  return SUCCESS;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -105,6 +106,11 @@ ZEND_MINIT_FUNCTION(xmlmesh)
 ZEND_MSHUTDOWN_FUNCTION(xmlmesh)
 {
   UNREGISTER_INI_ENTRIES();
+  if (XMLMESH_G(conn))
+  {
+    ot_xmlmesh_close(XMLMESH_G(conn));
+    XMLMESH_G(conn) = NULL;
+  }
   ot_xmlmesh_shutdown();
   return SUCCESS;
 }
@@ -113,7 +119,13 @@ ZEND_MSHUTDOWN_FUNCTION(xmlmesh)
 /* Request init function                                                   */
 ZEND_RINIT_FUNCTION(xmlmesh)
 {
-  return SUCCESS;
+  // Create connection if not already made
+  // This should happen in the post-fork instance
+  if (!XMLMESH_G(conn))
+    XMLMESH_G(conn) = ot_xmlmesh_open(XMLMESH_G(mesh_host), 
+				      XMLMESH_G(mesh_port));
+
+  return XMLMESH_G(conn)?SUCCESS:FAILURE;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -147,16 +159,17 @@ ZEND_FUNCTION(xmlmesh_request)
   char *xml;
   int xml_len;
 
+  if (!XMLMESH_G(conn))
+  {
+    zend_printf("XMLMesh request failed - no connection\n");
+    RETURN_FALSE;
+  }
+
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
 			    &subject, &subject_len,
 			    &xml, &xml_len) == FAILURE) return;
 
-  zend_printf("XMLMesh-Request to %s:%d: '%s'\n",
-	      XMLMESH_G(mesh_host),
-	      XMLMESH_G(mesh_port),
-	      subject);
-
-  if (ot_xmlmesh_send(subject, xml))
+  if (ot_xmlmesh_send(XMLMESH_G(conn), subject, xml))
   {
     RETURN_TRUE;
   }
