@@ -454,14 +454,14 @@ public:
 // process()
 class TCPServer;  //forward
 
-class TCPServerThread: public MT::PoolThread
+class TCPWorkerThread: public MT::PoolThread
 {
 public:
   TCPServer *server;
   int client_fd;
   EndPoint client_ep;
 
-  TCPServerThread(MT::PoolReplacer<TCPServerThread>& _rep):
+  TCPWorkerThread(MT::PoolReplacer<TCPWorkerThread>& _rep):
     MT::PoolThread(_rep) {}
   virtual void run();
 };
@@ -471,7 +471,7 @@ class TCPServer: public TCPSocket
 private:
   int port;
   int backlog;
-  MT::ThreadPool<TCPServerThread> threadpool;
+  MT::ThreadPool<TCPWorkerThread> threadpool;
 
 public:
   //--------------------------------------------------------------------------
@@ -492,6 +492,20 @@ public:
   virtual void process(TCPSocket &s, EndPoint client)=0;
 };
 
+//==========================================================================
+// TCPServer thread class
+// Runs TCP server in the background
+class TCPServerThread: public MT::Thread
+{
+  TCPServer& server;
+  void run()
+  {
+    server.run();
+  }
+
+public:
+  TCPServerThread(TCPServer &s): server(s) { start(); }
+};
 
 //==========================================================================
 }} //namespaces

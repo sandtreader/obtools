@@ -38,7 +38,7 @@ void TCPServer::run()
       EndPoint client(saddr);
 
       // Get a thread
-      TCPServerThread *thread = threadpool.remove();
+      TCPWorkerThread *thread = threadpool.remove();
       if (thread)
       {
 	// Fill in parameters
@@ -59,8 +59,8 @@ void TCPServer::run()
 }
 
 //--------------------------------------------------------------------------
-// Server thread 'run' function
-void TCPServerThread::run()
+// Worker thread 'run' function
+void TCPWorkerThread::run()
 {
   // Create wrapped socket which will also close on exit
   TCPSocket s(client_fd);
