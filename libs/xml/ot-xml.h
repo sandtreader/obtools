@@ -336,8 +336,6 @@ class Parser
 {
 private:
   //Persistent state
-  ostream& serr;       //error output stream
-  int flags;
   map<string, string> user_ns_map;  //Map of full name->prefix
 
   //Transient per-document state
@@ -359,6 +357,10 @@ private:
   void initial_processing(Element *e);
   void final_processing(Element *e);
   void substitute_name(string& name, bool usedef=false);
+
+protected:
+  ostream& serr;       //error output stream
+  int flags;
 
 public:
   int errors;
