@@ -8,6 +8,7 @@
 
 #include "ot-xml.h"
 #include <ctype.h>
+#include <sstream>
 
 using namespace ObTools::XML;
 
@@ -458,6 +459,31 @@ bool Element::has_attr(const string& attname) const
     return false;
   else
     return true;
+}
+
+//--------------------------------------------------------------------------
+// Set an attribute (string)
+void Element::set_attr(const string& attname, const string& value)
+{
+  attrs[attname] = value;
+}
+
+//--------------------------------------------------------------------------
+// Set an attribute (integer)
+// (_int qualifier not strictly necessary here, but matches get_attr_int)
+void Element::set_attr_int(const string& attname, int value)
+{
+  ostringstream oss;
+  oss << value;
+  attrs[attname] = oss.str();
+}
+
+//--------------------------------------------------------------------------
+// Set an attribute (bool)
+// (_bool qualifier not strictly necessary here, but matches get_attr_bool)
+void Element::set_attr_bool(const string& attname, bool value)
+{
+  attrs[attname] = value?"yes":"no";
 }
 
 //--------------------------------------------------------------------------

@@ -153,6 +153,20 @@ public:
   bool has_attr(const string& attname) const;
 
   //--------------------------------------------------------------------------
+  // Set an attribute (string)
+  void set_attr(const string& attname, const string& value);
+
+  //--------------------------------------------------------------------------
+  // Set an attribute (integer)
+  // (_int qualifier not strictly necessary here, but matches get_attr_int)
+  void set_attr_int(const string& attname, int value);
+
+  //--------------------------------------------------------------------------
+  // Set an attribute (bool)
+  // (_bool qualifier not strictly necessary here, but matches get_attr_bool)
+  void set_attr_bool(const string& attname, bool value);
+
+  //--------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements
