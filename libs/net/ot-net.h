@@ -26,7 +26,7 @@ using namespace std;
 //==========================================================================
 // IP Address (address.cc)
 // Designed to be upgradeable to IPv6
-class IP_Address
+class IPAddress
 {
 private:
   uint32_t address;   // Host byte order
@@ -34,12 +34,12 @@ private:
  
 public:
   // Basic constructors
-  IP_Address(): address(BADADDR) {}
-  IP_Address(uint32_t in): address(in) {}
+  IPAddress(): address(BADADDR) {}
+  IPAddress(uint32_t in): address(in) {}
 
   //--------------------------------------------------------------------------
   // Name lookup constructor
-  IP_Address(const char *hostname);  // Resolves name
+  IPAddress(const char *hostname);  // Resolves name
 
   //--------------------------------------------------------------------------
   // Get network byte order integer
@@ -59,9 +59,9 @@ public:
 };
 
 //------------------------------------------------------------------------
-// << operator to write IP_Address to ostream
+// << operator to write IPAddress to ostream
 // e.g. cout << ip;
-ostream& operator<<(ostream& s, const IP_Address& e);
+ostream& operator<<(ostream& s, const IPAddress& e);
 
 //==========================================================================
 // Abstract Socket (socket.cc)
@@ -109,12 +109,16 @@ ostream& operator<<(ostream& s, const SocketError& e);
 
 //==========================================================================
 // TCP Socket (socket.cc)
-class TCP_Socket: public Socket
+class TCPSocket: public Socket
 {
 public:
   //--------------------------------------------------------------------------
-  // Constructor - allocates socket
-  TCP_Socket();
+  // Default constructor - allocates socket
+  TCPSocket();
+
+  //--------------------------------------------------------------------------
+  // Explicit constructor - for use when (e.g.) accept() created an fd already
+  TCPSocket(int _fd): Socket(_fd) {}
 
   //--------------------------------------------------------------------------
   // Raw stream read wrapper
@@ -145,7 +149,7 @@ public:
   //--------------------------------------------------------------------------
   // Read everything to stream close, blocking until finished
   // Throws SocketError on failure
-  void TCP_Socket::readall(string& s) throw (SocketError);
+  void TCPSocket::readall(string& s) throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Write the given string to the socket, blocking until finished
@@ -155,31 +159,31 @@ public:
   //--------------------------------------------------------------------------
   // Write the given C string to the socket, blocking until finished
   // Throws SocketError on failure
-  void TCP_Socket::write(const char *p) throw(SocketError);
+  void TCPSocket::write(const char *p) throw(SocketError);
 
 };
 
 //--------------------------------------------------------------------------
-// << operator to write strings to TCP_Sockets
+// << operator to write strings to TCPSockets
 // NOTE: Not a general stream operator!
 // e.g. s << "HELO\n";
-TCP_Socket& operator<<(TCP_Socket& s, const string& t);
+TCPSocket& operator<<(TCPSocket& s, const string& t);
 
 //--------------------------------------------------------------------------
-// >> operator to read strings from TCP_Sockets
+// >> operator to read strings from TCPSockets
 // Return whether stream still open - hence not chainable
 // NOTE: Not a general stream operator!
 // e.g. while (s >> buf) cout << buf;
-bool operator>>(TCP_Socket& s, string& t);
+bool operator>>(TCPSocket& s, string& t);
 
 //==========================================================================
 // UDP Socket (socket.cc)
-class UDP_Socket: public Socket
+class UDPSocket: public Socket
 {
 public:
   //--------------------------------------------------------------------------
   // Constructor - allocates socket
-  UDP_Socket();
+  UDPSocket();
 
   //--------------------------------------------------------------------------
   // Raw datagram recv wrapper
@@ -195,23 +199,23 @@ public:
   // If address_p and/or port_p are non-null, sets them to the source of the
   // datagram
   ssize_t crecvfrom(void *buf, size_t len, int flags,
-		    IP_Address *address_p, int *port_p);
+		    IPAddress *address_p, int *port_p);
 
   //--------------------------------------------------------------------------
   // Raw datagram sendto wrapper
   int csendto(const void *msg, size_t len, int flags,
-	      IP_Address address, int port);
+	      IPAddress address, int port);
 
   //--------------------------------------------------------------------------
   // Safe datagram recv wrapper
   // Throws SocketError on failure
-  ssize_t UDP_Socket::recv(void *buf, size_t len, int flags=0) 
+  ssize_t UDPSocket::recv(void *buf, size_t len, int flags=0) 
     throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Safe datagram send wrapper
   // Throws SocketError on failure
-  int UDP_Socket::send(const void *buf, size_t len, int flags=0)
+  int UDPSocket::send(const void *buf, size_t len, int flags=0)
     throw (SocketError);
 
   //--------------------------------------------------------------------------
@@ -219,8 +223,8 @@ public:
   // If address_p and/or port_p are non-null, sets them to the source of the
   // datagram
   // Throws SocketError on failure
-  ssize_t UDP_Socket::recvfrom(void *buf, size_t len, int flags,
-			       IP_Address *address_p, int *port_p)
+  ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
+			       IPAddress *address_p, int *port_p)
     throw (SocketError);
 
   //--------------------------------------------------------------------------
@@ -228,23 +232,23 @@ public:
   // If address_p and/or port_p are non-null, sets them to the source of the
   // datagram
   // Throws SocketError on failure
-  ssize_t UDP_Socket::sendto(const void *buf, size_t len, int flags,
-			     IP_Address address, int port)
+  ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
+			     IPAddress address, int port)
     throw (SocketError);
 };
 
 //==========================================================================
 // TCP client
-class TCP_Client: public TCP_Socket
+class TCPClient: public TCPSocket
 {
-  IP_Address server_addr;
+  IPAddress server_addr;
   int server_port;
   bool connected;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor 
-  TCP_Client(IP_Address addr, int port);
+  TCPClient(IPAddress addr, int port);
 
   //--------------------------------------------------------------------------
   // Test for badness
@@ -252,19 +256,26 @@ public:
 };
 
 //==========================================================================
-// TCP server (single client at a time; not very useful)
-class TCP_Single_Server: public TCP_Socket
-{
-public:
-  TCP_Single_Server(int port);
-};
-
-//==========================================================================
 // TCP server (multi-threaded, multiple clients at once)
-class TCP_Multi_Server: public TCP_Socket
+// This is an abstract class which should be subclassed to implement
+// process()
+class TCPServer: public TCPSocket
 {
+private:
+  int port;
+  int backlog;
+
 public:
-  TCP_Multi_Server(int port);
+  //--------------------------------------------------------------------------
+  // Constructor.  Starts listening immediately and doesn't return unless
+  // it all falls apart.
+  TCPServer(int _port, int _backlog=5);
+
+  //--------------------------------------------------------------------------
+  // Virtual function to process a single connection on the given socket.  
+  // Called in its own thread, this use blocking IO to read and write the
+  // socket, and should just return when the socket ends or when bored
+  virtual void process(TCPSocket &s) = 0;
 };
 
 

@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   int port = 80;
   if (argc > 2) port = atoi(argv[2]);
 
-  ObTools::Net::IP_Address addr(host);
+  ObTools::Net::IPAddress addr(host);
   if (!addr)
   {
     cerr << "Can't resolve host: " << host << endl;
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
   cout << "Host: " << addr << " (" << addr.get_hostname() << ")" << endl;
 
-  ObTools::Net::TCP_Client client(addr, port);
+  ObTools::Net::TCPClient client(addr, port);
 
   if (!client)
   {

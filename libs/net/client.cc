@@ -15,19 +15,18 @@ namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
 // Constructor 
-TCP_Client::TCP_Client(IP_Address addr, int port):
+TCPClient::TCPClient(IPAddress addr, int port):
   server_addr(addr),
   server_port(port),
   connected(false)
 {
-  struct sockaddr_in serv_addr;
+  struct sockaddr_in saddr;
 
-  /* Connect with automatic bind (any old port this end) */
-  serv_addr.sin_family      = AF_INET;
-  serv_addr.sin_addr.s_addr = server_addr.nbo();
-  serv_addr.sin_port        = htons(server_port);
+  saddr.sin_family      = AF_INET;
+  saddr.sin_addr.s_addr = server_addr.nbo();
+  saddr.sin_port        = htons(server_port);
 
-  if (fd>=0 && !connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)))
+  if (fd>=0 && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
     connected = true;
 }
 

@@ -56,14 +56,14 @@ ostream& operator<<(ostream& s, const SocketError& e)
 
 //--------------------------------------------------------------------------
 // Constructor - allocates socket
-TCP_Socket::TCP_Socket()
+TCPSocket::TCPSocket()
 {
   fd = socket(PF_INET, SOCK_STREAM, 0); 
 }
 
 //--------------------------------------------------------------------------
 // Raw stream read wrapper
-ssize_t TCP_Socket::cread(void *buf, size_t count)
+ssize_t TCPSocket::cread(void *buf, size_t count)
 { 
   ssize_t size;
 
@@ -79,7 +79,7 @@ ssize_t TCP_Socket::cread(void *buf, size_t count)
 
 //--------------------------------------------------------------------------
 // Raw stream write wrapper
-ssize_t TCP_Socket::cwrite(const void *buf, size_t count)
+ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 { 
   ssize_t size;
 
@@ -96,7 +96,7 @@ ssize_t TCP_Socket::cwrite(const void *buf, size_t count)
 //--------------------------------------------------------------------------
 // Safe stream read wrapper
 // Throws SocketError on failure
-ssize_t TCP_Socket::read(void *buf, size_t count) throw (SocketError)
+ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 { 
   ssize_t size = cread(buf, count);
   if (size < 0) throw SocketError(errno);
@@ -106,7 +106,7 @@ ssize_t TCP_Socket::read(void *buf, size_t count) throw (SocketError)
 //--------------------------------------------------------------------------
 // Safe stream write wrapper
 // Throws SocketError on failure
-void TCP_Socket::write(const void *buf, size_t count) throw (SocketError)
+void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
 { 
   ssize_t size = cwrite(buf, count);
   if (size!=count) throw SocketError(errno);
@@ -117,7 +117,7 @@ void TCP_Socket::write(const void *buf, size_t count) throw (SocketError)
 // Appends whatever read data is available to the given string 
 // Returns whether stream has closed (last size was 0)
 // Throws SocketError on failure
-bool TCP_Socket::read(string& s) throw (SocketError)
+bool TCPSocket::read(string& s) throw (SocketError)
 {
   char buf[SOCKET_BUFFER_SIZE+1];
   ssize_t size = read(buf, SOCKET_BUFFER_SIZE);
@@ -132,7 +132,7 @@ bool TCP_Socket::read(string& s) throw (SocketError)
 //--------------------------------------------------------------------------
 // Read everything to stream close, blocking until finished
 // Throws SocketError on failure
-void TCP_Socket::readall(string& s) throw (SocketError)
+void TCPSocket::readall(string& s) throw (SocketError)
 {
   while (read(s))
     ;
@@ -141,7 +141,7 @@ void TCP_Socket::readall(string& s) throw (SocketError)
 //--------------------------------------------------------------------------
 // Write the given string to the socket, blocking until finished
 // Throws SocketError on failure
-void TCP_Socket::write(const string &s) throw(SocketError)
+void TCPSocket::write(const string &s) throw(SocketError)
 {
   const char *p = s.data();
   write(p, s.size());
@@ -150,26 +150,26 @@ void TCP_Socket::write(const string &s) throw(SocketError)
 //--------------------------------------------------------------------------
 // Write the given C string to the socket, blocking until finished
 // Throws SocketError on failure
-void TCP_Socket::write(const char *p) throw(SocketError)
+void TCPSocket::write(const char *p) throw(SocketError)
 {
   write(p, strlen(p));
 }
 
 //--------------------------------------------------------------------------
-// << operator to write strings to TCP_Sockets
+// << operator to write strings to TCPSockets
 // NOTE: Not a general stream operator!
 // e.g. s << "HELO\n";
-TCP_Socket& operator<<(TCP_Socket& s, const string& t)
+TCPSocket& operator<<(TCPSocket& s, const string& t)
 {
   s.write(t);
 }
 
 //--------------------------------------------------------------------------
-// >> operator to read strings from TCP_Sockets
+// >> operator to read strings from TCPSockets
 // Return whether stream still open - hence not chainable
 // NOTE: Not a general stream operator!
 // e.g. while (s >> buf) cout << buf;
-bool operator>>(TCP_Socket& s, string& t)
+bool operator>>(TCPSocket& s, string& t)
 {
   return s.read(t);
 }
@@ -179,14 +179,14 @@ bool operator>>(TCP_Socket& s, string& t)
 
 //--------------------------------------------------------------------------
 // Constructor - allocates socket
-UDP_Socket::UDP_Socket()
+UDPSocket::UDPSocket()
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
 }
 
 //--------------------------------------------------------------------------
 // Raw datagram recv wrapper
-ssize_t UDP_Socket::crecv(void *buf, size_t len, int flags)
+ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
 { 
   ssize_t size;
 
@@ -202,7 +202,7 @@ ssize_t UDP_Socket::crecv(void *buf, size_t len, int flags)
 
 //--------------------------------------------------------------------------
 // Raw datagram send wrapper
-int UDP_Socket::csend(const void *msg, size_t len, int flags)
+int UDPSocket::csend(const void *msg, size_t len, int flags)
 { 
   int res;
 
@@ -220,8 +220,8 @@ int UDP_Socket::csend(const void *msg, size_t len, int flags)
 // Raw datagram recvfrom wrapper
 // If address_p and/or port_p are non-null, sets them to the source of the
 // datagram
-ssize_t UDP_Socket::crecvfrom(void *buf, size_t len, int flags,
-			      IP_Address *address_p, int *port_p)
+ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
+			      IPAddress *address_p, int *port_p)
 {
   struct sockaddr_in saddr;
   socklen_t slen = sizeof(saddr);
@@ -237,7 +237,7 @@ ssize_t UDP_Socket::crecvfrom(void *buf, size_t len, int flags,
 
   if (size >= 0)
   {
-    if (address_p) *address_p = IP_Address(ntohl(saddr.sin_addr.s_addr));
+    if (address_p) *address_p = IPAddress(ntohl(saddr.sin_addr.s_addr));
     if (*port_p)   *port_p    = ntohs(saddr.sin_port);
   }
   
@@ -246,8 +246,8 @@ ssize_t UDP_Socket::crecvfrom(void *buf, size_t len, int flags,
 
 //--------------------------------------------------------------------------
 // Raw datagram sendto wrapper
-int UDP_Socket::csendto(const void *msg, size_t len, int flags,
-			IP_Address address, int port)
+int UDPSocket::csendto(const void *msg, size_t len, int flags,
+			IPAddress address, int port)
 {
   struct sockaddr_in saddr;
 
@@ -269,7 +269,7 @@ int UDP_Socket::csendto(const void *msg, size_t len, int flags,
 //--------------------------------------------------------------------------
 // Safe datagram recv wrapper
 // Throws SocketError on failure
-ssize_t UDP_Socket::recv(void *buf, size_t len, int flags) throw (SocketError)
+ssize_t UDPSocket::recv(void *buf, size_t len, int flags) throw (SocketError)
 {
   ssize_t size = crecv(buf, len, flags);
   if (size < 0) throw SocketError(errno);
@@ -279,7 +279,7 @@ ssize_t UDP_Socket::recv(void *buf, size_t len, int flags) throw (SocketError)
 //--------------------------------------------------------------------------
 // Safe datagram send wrapper
 // Throws SocketError on failure
-int UDP_Socket::send(const void *buf, size_t len, int flags) 
+int UDPSocket::send(const void *buf, size_t len, int flags) 
   throw (SocketError)
 {
   int res = csend(buf, len, flags);
@@ -292,8 +292,8 @@ int UDP_Socket::send(const void *buf, size_t len, int flags)
 // If address_p and/or port_p are non-null, sets them to the source of the
 // datagram
 // Throws SocketError on failure
-ssize_t UDP_Socket::recvfrom(void *buf, size_t len, int flags,
-			     IP_Address *address_p, int *port_p)
+ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
+			     IPAddress *address_p, int *port_p)
                                throw (SocketError)
 {
   ssize_t size = crecvfrom(buf, len, flags, address_p, port_p);
@@ -306,8 +306,8 @@ ssize_t UDP_Socket::recvfrom(void *buf, size_t len, int flags,
 // If address_p and/or port_p are non-null, sets them to the source of the
 // datagram
 // Throws SocketError on failure
-ssize_t UDP_Socket::sendto(const void *buf, size_t len, int flags,
-			   IP_Address address, int port)
+ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
+			   IPAddress address, int port)
                              throw (SocketError)
 {
   int res = csendto(buf, len, flags, address, port);

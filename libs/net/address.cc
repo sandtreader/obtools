@@ -17,7 +17,7 @@ namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
 // Name lookup constructor
-IP_Address::IP_Address(const char *hostname)
+IPAddress::IPAddress(const char *hostname)
 {
   if (isdigit(*hostname))
   {
@@ -37,7 +37,7 @@ IP_Address::IP_Address(const char *hostname)
 
 //--------------------------------------------------------------------------
 // Get hostname (reverse lookup), or dotted quad
-string IP_Address::get_hostname() const
+string IPAddress::get_hostname() const
 {
   struct hostent *host;
   uint32_t nbo_addr = htonl(address);
@@ -50,8 +50,8 @@ string IP_Address::get_hostname() const
 }
 
 //--------------------------------------------------------------------------
-// Dotted quad output
-void IP_Address::output_dotted_quad(ostream& s) const
+// Output dotted quad to given stream
+void IPAddress::output_dotted_quad(ostream& s) const
 {
   uint32_t nbo_addr = htonl(address);
   s << inet_ntoa(*(struct in_addr *)&nbo_addr);
@@ -59,7 +59,7 @@ void IP_Address::output_dotted_quad(ostream& s) const
 
 //--------------------------------------------------------------------------
 // Dotted quad output operator
-ostream& operator<<(ostream& s, const IP_Address& e)
+ostream& operator<<(ostream& s, const IPAddress& e)
 {
   e.output_dotted_quad(s);
 }
