@@ -6,7 +6,7 @@
 
 <xt:tool xmlns:xt="obtools.com/ns/tools">
 
-  <!-- Setup of script processing for rest of file -->
+  <!-- ===== Setup of script processing for rest of file ===== -->
   <xt:script language="C++">
     <!-- Tags to support C++ in XML - $ isn't significant to either -->
     <xt:tags>
@@ -17,7 +17,7 @@
     </xt:tags>
   </xt:script>
 
-  <!-- Helper code -->
+  <!-- =============== Helper code =================  -->
   <xt:code>
     // Make a string safe for HTML
     string htmlise(string s)
@@ -27,8 +27,39 @@
       s = ObTools::Text::subst(s, "&lt;", "&amp;lt;");
       return s;
     }
+
+    // Map of classes to file locations, relative to top of project
+    map&lt;string, string> class_files;
+
+    // Note the definition of a class in the given file
+    void define_class(string cls, string file)
+    { 
+      class_files[cls] = file;
+    }
+
+    // Generate a type with an optional reference link
+    // dir is path to top of project from linking file
+    string show_type(ObTools::XML::Element& e, string dir="../../")
+    {
+      string result;
+      if (e.has_attr("ref"))
+      {
+        string ref = e["ref"];
+	string href = class_files[ref];
+	if (!href.size()) href=string("UNKNOWN REF: ")+ref;
+
+	result += "&lt;A HREF='";
+	result += dir;
+	result += href;
+	result += "'>";
+      }
+      result += htmlise(e["type"]);
+      if (e.has_attr("ref")) result+="&lt;/A>";
+      return result;
+    }
   </xt:code>
 
+  <!-- =============== Handy macro templates =================  -->
   <!-- Macro define for description text at all levels -->
   <xt:define name="Desc" element="desc">
     <DIV CLASS="desc">
@@ -38,10 +69,9 @@
 
   <!-- Macro define for file HEAD title -->
   <xt:define name="Title_HEAD" element="title">
-    <xt:arg name="prefix" default=""/>
-    <xt:arg name="dir" default=""/>
+    <xt:param name="prefix" default=""/>
     <HEAD>
-    <LINK REL="STYLESHEET" HREF="$= dir =$../../obdoc.css" 
+    <LINK REL="STYLESHEET" HREF="$= _revpath =$obdoc.css" 
           TITLE="ObDoc Stylesheet"/> 
     <TITLE>$( if (prefix.size()) sout << prefix << ": "; )$
            $= *title =$</TITLE>
@@ -50,16 +80,113 @@
  
   <!-- Macro define for file BODY title -->
   <xt:define name="Title_BODY" element="title">
-    <xt:arg name="prefix" default=""/>
+    <xt:param name="prefix" default=""/>
     <H1>$( if (prefix.size()) sout << prefix << ": "; )$
            $= *title =$</H1>
   </xt:define>
 
-  <!-- Top-level project template -->
-  <xt:template name="Project" element="project">
+  <!-- =============== Function/Method template ===============  -->
+  <xt:define name="Function" element="function">
+    <xt:param name="type" default="Method"/>
+    <xt:start><H2>$= type =$s</H2></xt:start>
+    <DIV CLASS="function">
+    <H3><xt:template element="result">
+      $= show_type(result) =$</xt:template>
+      $= function["name"] =$(
+      <xt:template element="arg">$= (arg_index?",":"") =$
+	$= show_type(arg) =$ $= arg["name"] =$</xt:template>):
+    <xt:template element="title">$= *title =$</xt:template></H3>
+    <xt:use template="Desc"/>
+    </DIV>
+  </xt:define>
+
+  <!-- ================= Class file template ==================  -->
+  <xt:define name="Class" element="class" var="cls">
+    <xt:file>$= cls["name"] =$.html</xt:file>
+
+    <HTML>
+    <xt:use template="Title_HEAD">
+      <xt:arg name="prefix">$= cls["name"] =$</xt:arg>
+      <xt:arg name="dir">../</xt:arg>
+    </xt:use>
+
+    <BODY>
+    <!-- Class title H1 -->
+    <xt:use template="Title_BODY">
+      <xt:arg name="prefix">$= cls["name"] =$</xt:arg>
+    </xt:use>
+
+    <!-- Class description -->
+    <xt:use template="Desc"/>
+
+    <!-- Members -->
+    <H2>Class members</H2>
+    <xt:template element="member">
+      <DIV CLASS="member">
+      <H3>$= show_type(member) =$ $= member["name"] =$:
+	<xt:template element="title">$= *title =$</xt:template></H3>
+	<xt:use template="Desc"/>
+      </DIV>
+    </xt:template>
+
+    <!-- Functions -->
+    <xt:use template="Function"/>
+
+    </BODY></HTML>
+  </xt:define>
+
+  <!-- ============= Library directory template =============  -->
+  <xt:define name="Library" element="library" var="lib">
+    <xt:dir>$= lib["name"] =$</xt:dir>
+    <xt:file>index.html</xt:file>
+
+    <!-- Class files -->
+    <xt:use template="Class"/>
+
+    <HTML>
+    <xt:use template="Title_HEAD">
+      <xt:arg name="prefix">'$= lib["name"] =$'</xt:arg>
+    </xt:use>
+
+    <BODY>
+    <!-- Library title H1 -->
+    <xt:use template="Title_BODY">
+      <xt:arg name="prefix">'$= lib["name"] =$'</xt:arg>
+    </xt:use>     
+
+    <!-- Library description -->
+    <xt:use template="Desc"/>
+
+    <!-- Class links -->
+    <xt:template element="class" var="cls">
+      <xt:start><H2>Classes</H2>&lt;UL></xt:start>
+      <LI><A HREF='$= cls["name"] =$.html'>
+	$= cls["name"] =$: 
+	<xt:template element="title">$= *title =$</xt:template>
+      </A></LI>
+      <xt:end>&lt;/UL></xt:end>
+    </xt:template>
+
+    <!-- Static functions -->
+    <xt:use template="Function">
+      <xt:arg name="type">Static Function</xt:arg>
+    </xt:use>
+
+    </BODY></HTML>
+  </xt:define>
+
+  <!-- ========= Recursive project directory template =============  -->
+  <xt:define name="Project" element="project">
     <xt:dir>$= project["name"] =$</xt:dir>
     <xt:file>index.html</xt:file>
 
+    <!-- Run recursively for sub-projects -->
+    <xt:use template="Project"/>
+
+    <!-- Library directories -->
+    <xt:use template="Library"/>
+
+    <!-- Main project index page -->
     <HTML>
     <xt:use template="Title_HEAD"/>     
 
@@ -70,93 +197,43 @@
     <!-- Project description -->
     <xt:use template="Desc"/>
 
-    <!-- Library links -->
-    <H2>Libraries</H2>
-    <UL>
-    <xt:template element="library" var="lib">
-      <LI><A HREF='$= lib["dir"] =$/index.html'>
+    <!-- Sub-project links -->
+    <xt:template element="project" var="proj">
+      <xt:start><H2>Sub-projects</H2>&lt;UL></xt:start>
+      <LI><A HREF='$= proj["name"] =$/index.html'>'$= proj["name"] =$':
         <xt:template element="title">$= *title =$</xt:template>
       </A></LI>
+      <xt:end>&lt;/UL></xt:end>
     </xt:template>
-    </UL>
+
+    <!-- Library links -->
+    <xt:template element="library" var="lib">
+      <xt:start><H2>Libraries</H2>&lt;UL></xt:start>
+      <LI><A HREF='$= lib["name"] =$/index.html'>'$= lib["name"] =$':
+        <xt:template element="title">$= *title =$</xt:template>
+      </A></LI>
+      <xt:end>&lt;/UL></xt:end>
+    </xt:template>
+
     </BODY></HTML>
+  </xt:define>
+
+  <!-- Pre-pass to get class references (no code generated) -->
+  <xt:template name="Project" element="project">
+    <xt:dir>$= project["name"] =$</xt:dir>
 
     <!-- Library directory -->
     <xt:template name="Library" element="library" var="lib">
-      <xt:dir>$= lib["dir"] =$</xt:dir>
-      <xt:file>index.html</xt:file>
+      <xt:dir>$= lib["name"] =$</xt:dir>
 
-      <HTML>
-      <xt:use template="Title_HEAD">
-        <xt:param name="dir">../</xt:param>
-      </xt:use>
-
-      <BODY>
-      <!-- Library title H1 -->
-      <xt:use template="Title_BODY"/>     
-
-      <!-- Library description -->
-      <xt:use template="Desc"/>
-
-      <!-- Class links -->
-      <H2>Classes</H2>
-      <UL>
+      <!-- Class files -->
       <xt:template element="class" var="cls">
-	<LI><A HREF='$= cls["name"] =$.html'>
-	  $= cls["name"] =$: 
-	  <xt:template element="title">$= *title =$</xt:template>
-	</A></LI>
-      </xt:template>
-      </UL>
-      </BODY></HTML>
-
-      <!-- Class file -->
-      <xt:template name="Class" element="class" var="cls">
-	<xt:file>$= cls["name"] =$.html</xt:file>
-
-	<HTML>
-        <xt:use template="Title_HEAD">
-	  <xt:param name="prefix">$= cls["name"] =$</xt:param>
-          <xt:param name="dir">../</xt:param>
-        </xt:use>
-
-	<BODY>
-	<!-- Class title H1 -->
-        <xt:use template="Title_BODY">
-	  <xt:param name="prefix">$= cls["name"] =$</xt:param>
-	</xt:use>
-
-	<!-- Class description -->
-        <xt:use template="Desc"/>
-
-	<!-- Members -->
-	<H2>Class members</H2>
-	<xt:template element="member">
-	  <DIV CLASS="member">
-	  <H3>$= member["type"] =$ $= member["name"] =$:
-            <xt:template element="title">$= *title =$</xt:template></H3>
-	    <xt:use template="Desc"/>
-          </DIV>
-	</xt:template>
- 	
-	<!-- Function -->
-	<H2>Functions</H2>
-	<xt:template element="function">
-	  <DIV CLASS="function">
-	  <H3><xt:template element="result">$= htmlise(result["type"]) 
-                 =$</xt:template>
-            $= function["name"] =$(
-            <xt:template element="arg">$= (arg_index?",":"") =$ 
-              $= htmlise(arg["type"]) =$ 
-              $= arg["name"] =$</xt:template>):
-          <xt:template element="title">$= *title =$</xt:template></H3>
-          <xt:use template="Desc"/>
-          </DIV>
-	</xt:template>
-
-        </BODY></HTML>
+        $( define_class(cls["name"], _path+cls["name"]+".html"); )$
       </xt:template>
     </xt:template>
   </xt:template>
+
+  <!-- Second pass - run main Project template over top-level project -->
+  <xt:use template="Project"/>
 </xt:tool>  
 
