@@ -31,6 +31,7 @@ clean:
 release: $(LIBS)
 	cp $(LIBS) $(RELEASEDIR) 
 	cp ot-db.h $(RELEASEDIR) 
+	cp ot-db-pgsql.h $(RELEASEDIR)
 
 test: $(TESTS)
 	$(PGTEST)
