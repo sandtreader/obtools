@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMLBus: server.cc
+// ObTools::XMLBus:OTMP: server.cc
 //
 // Implementation of raw OTMP server 
 //
@@ -20,15 +20,14 @@ namespace ObTools { namespace XMLBus { namespace OTMP {
 // Pulls messages off the given queue and sends them to the given socket
 class SendThread: public MT::Thread
 {
-  MT::Queue<Message>& send_q;
-  Net::TCPSocket& socket;
+  ClientSession& session;
 
   void run() 
   { 
     for(;;)
     {
       // Block for a message
-      Message msg = send_q.wait();
+      Message msg = session.send_q.wait();
 
       // Deal with it
       if (Log::debug_ok)
@@ -40,12 +39,12 @@ class SendThread: public MT::Thread
       try // Handle SocketErrors
       {
 	// Write chunk header
-	socket.write_nbo_int(TAG_MESSAGE);
-	socket.write_nbo_int(msg.data.size());
-	socket.write_nbo_int(msg.flags); // Flags
+	session.socket.write_nbo_int(TAG_MESSAGE);
+	session.socket.write_nbo_int(msg.data.size());
+	session.socket.write_nbo_int(msg.flags); // Flags
 
 	// Write data
-	socket.write(msg.data);
+	session.socket.write(msg.data);
       }
       catch (Net::SocketError se)
       {
@@ -56,21 +55,23 @@ class SendThread: public MT::Thread
   }
 
 public:
-  SendThread(MT::Queue<Message>& q, Net::TCPSocket &s): 
-    send_q(q), socket(s) { start(); }
+  SendThread(ClientSession& _session): session(_session) { start(); }
 };
 
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
 void Server::process(Net::TCPSocket& socket, 
-			 Net::EndPoint client)
+		     Net::EndPoint client)
 {
   const char *obit = "ended";
 
   Log::Summary << "OTMP(serv): Got connection from " << client << endl;
-  
+
+  // Create client session and map it (autoremoved on destruction)
+  ClientSession session(socket, client, client_sessions);
+
   // Start send thread
-  SendThread send_thread(send_q, socket);
+  SendThread send_thread(session);
 
   // Loop receiving messages and posting to receive_q
   // Stop if send thread unhappy, too
@@ -104,7 +105,7 @@ void Server::process(Net::TCPSocket& socket,
 	if (Log::dump_ok) Log::Dump << content << endl;
 
 	// Post up a message
-	Message msg(content, flags);
+	ClientMessage msg(client, content, flags);
 	receive_q.send(msg);
       }
       else
@@ -136,7 +137,7 @@ void Server::process(Net::TCPSocket& socket,
 
 //------------------------------------------------------------------------
 // Constructor
-Server::Server(MT::Queue<Message>& receive_queue,
+Server::Server(MT::Queue<ClientMessage>& receive_queue,
 		       int port, int backlog, 
 		       int min_spare_threads, int max_threads):
   receive_q(receive_queue),
@@ -150,10 +151,18 @@ Server::Server(MT::Queue<Message>& receive_queue,
 //------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full
 // Whether message queued
-bool Server::send(Message& msg)
+bool Server::send(ClientMessage& msg)
 {
-  send_q.send(msg);  // Never fails, will eat all memory first
-  return true;  
+  // Look up client in map, and queue it on there
+  SessionMap::iterator p = client_sessions.find(msg.client);
+  if (p != client_sessions.end())
+  {
+    ClientSession *cs = p->second;
+    cs->send_q.send(msg.msg);
+    return true;  
+  }
+
+  return false;
 }
 
 }}} // namespaces

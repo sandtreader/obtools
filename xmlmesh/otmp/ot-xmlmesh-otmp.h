@@ -10,6 +10,7 @@
 #define __OBTOOLS_XMLBUS_OTMP_H
 
 #include <string>
+#include <map>
 #include "ot-net.h"
 #include "ot-mt.h"
 
@@ -72,7 +73,8 @@ struct Message
   uint32_t flags;
   string data;  
 
-  Message(const string& d="", int f=0): data(d), flags(f) {}
+  Message(const string& _data="", int _flags=0): 
+    data(_data), flags(_flags) {}
 };
 
 //==========================================================================
@@ -125,6 +127,49 @@ public:
 };
 
 //==========================================================================
+// Handy typedef of a session map - maps endpoints to sessions
+typedef map<Net::EndPoint, struct ClientSession *> SessionMap;
+
+//==========================================================================
+// Client Session structure - record of a single connection held by server
+struct ClientSession
+{
+  Net::TCPSocket& socket;
+  Net::EndPoint client;
+  SessionMap& map;
+
+  // Thread and queue stuff
+  MT::Queue<Message> send_q;  
+
+  // Constructor
+  // Adds this session to the given map - destructor removes it again
+  ClientSession(Net::TCPSocket& _socket, Net::EndPoint _client,
+		SessionMap& _map):
+    socket(_socket), client(_client), map(_map)
+  { _map[_client] = this; }
+
+  // Destructor
+  // Ensures removal from the map on exception
+  ~ClientSession() { map.erase(client); }
+};
+
+//==========================================================================
+// Client-specific Message Structure - includes client endpoint
+// Note:  It's tempting to put a ClientSession ref in here so we can send
+// stuff back directly;  however this causes major garbage collection 
+// headaches if the session dies while something still has a handle on this
+// message;  it's safer to re-lookup the endpoint each time.
+struct ClientMessage
+{
+  Net::EndPoint client;
+  Message msg;
+
+  // Constructor
+  ClientMessage(Net::EndPoint _client, const string& _data="", int _flags=0):
+    client(_client), msg(_data,_flags) {}
+};
+
+//==========================================================================
 // OTMP server
 // Note, unlike the client it delivers messages to a given message queue
 // rather than providing a poll/wait interface;  this is because it is
@@ -134,19 +179,15 @@ public:
 class Server: public Net::TCPServer
 {
 private:
-  // Thread and queue stuff
-  MT::Thread *send_thread;
-  MT::Queue<Message> send_q;  
-
-  MT::Thread *receive_thread;
-  MT::Queue<Message>& receive_q;  // Note:  Not mine
+  MT::Queue<ClientMessage>& receive_q;  // Note:  Not mine
+  SessionMap client_sessions;  // Map of sessions
 
 public:
   //------------------------------------------------------------------------
   // Constructor - takes receive queue for incoming messages
   // port=0 means take default port for protocol
   // The rest is thread/socket tuning - see Net::TCPServer
-  Server(MT::Queue<Message>& receive_queue,
+  Server(MT::Queue<ClientMessage>& receive_queue,
 	 int port=0, int backlog=5, 
 	 int min_spare_threads=1, int max_threads=10);
 
@@ -162,8 +203,9 @@ public:
 
   //------------------------------------------------------------------------
   // Send a message - never blocks, but can fail if the queue is full
+  // Sends the message to the endpoint given (most likely where it came from)
   // Whether message queued
-  bool send(Message& msg);
+  bool send(ClientMessage& msg);
 };
 
 

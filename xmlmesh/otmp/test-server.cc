@@ -18,14 +18,14 @@ using namespace ObTools;
 class ReflectorThread: public MT::Thread
 {
   XMLBus::OTMP::Server& server;
-  MT::Queue<XMLBus::OTMP::Message>& receive_q;
+  MT::Queue<XMLBus::OTMP::ClientMessage>& receive_q;
 
   void run() 
   { 
     for(;;)
     {
       // Block for a message
-      XMLBus::OTMP::Message msg = receive_q.wait();
+      XMLBus::OTMP::ClientMessage msg = receive_q.wait();
 
       // Send it back
       server.send(msg);
@@ -34,7 +34,7 @@ class ReflectorThread: public MT::Thread
 
 public:
   ReflectorThread(XMLBus::OTMP::Server &s, 
-		  MT::Queue<XMLBus::OTMP::Message>& q): 
+		  MT::Queue<XMLBus::OTMP::ClientMessage>& q): 
     server(s), receive_q(q) { start(); }
 };
 
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
 
   // Create unified receive queue
-  MT::Queue<XMLBus::OTMP::Message> q;
+  MT::Queue<XMLBus::OTMP::ClientMessage> q;
 
   // Create server 
   XMLBus::OTMP::Server server(q);
