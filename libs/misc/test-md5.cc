@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::Text: test-md5.cc
 //
-// Test harness for text library md5 functions
+// Test harness for Misc library md5 functions
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED

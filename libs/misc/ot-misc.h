@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::Misc: ot-misc.h
 //
-// Public definitions for ObTools::Text 
+// Public definitions for ObTools::Misc
 // Miscellaneous useful classes
 // 
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
