@@ -97,6 +97,11 @@ public:
   //--------------------------------------------------------------------------
   // Go blocking (the default)
   void go_blocking();
+
+  //--------------------------------------------------------------------------
+  // Bind to a local port (TCP or UDP servers)
+  // Whether successful
+  bool bind(int port);
 };
 
 //==========================================================================
@@ -211,6 +216,10 @@ public:
   //--------------------------------------------------------------------------
   // Constructor - allocates socket
   UDPSocket();
+
+  //--------------------------------------------------------------------------
+  // Constructor - allocates socket and binds to local port (UDP server)
+  UDPSocket(int port);
 
   //--------------------------------------------------------------------------
   // Raw datagram recv wrapper

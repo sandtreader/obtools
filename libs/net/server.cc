@@ -21,22 +21,18 @@ void TCPServer::run()
   int one = 1;
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int));
 
-  // Bind to local port, allow any remote address or port 
-  struct sockaddr_in saddr;
-  saddr.sin_family      = AF_INET;
-  saddr.sin_addr.s_addr = INADDR_ANY;
-  saddr.sin_port        = htons(port);
-
-  if (bind(fd, (struct sockaddr *)&saddr, sizeof(saddr))) return;
+  // Bind to local port (this is Socket::bind())
+  if (!bind(port)) return;
 
   // Start listing with backlog
-  if (listen(fd, backlog)) return;
+  if (::listen(fd, backlog)) return;
 
   // Now loop accepting connections into new threads
   while (1)
   {
+    struct sockaddr_in saddr;
     socklen_t len = sizeof(saddr);
-    int new_fd = accept(fd, (struct sockaddr *)&saddr, &len);
+    int new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
     if (new_fd >= 0)
     {
       IPAddress client_address(htonl(saddr.sin_addr.s_addr));

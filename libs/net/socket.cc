@@ -52,6 +52,20 @@ void Socket::go_blocking()
   ioctl(fd, FIONBIO, &n);
 }
 
+//--------------------------------------------------------------------------
+// Bind to a local port (TCP or UDP servers)
+// Whether successful
+bool Socket::bind(int port)
+{
+  // Bind to local port, allow any remote address or port 
+  struct sockaddr_in saddr;
+  saddr.sin_family      = AF_INET;
+  saddr.sin_addr.s_addr = INADDR_ANY;
+  saddr.sin_port        = htons(port);
+
+  return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+}
+
 //==========================================================================
 // Socket exceptions
 
@@ -255,6 +269,14 @@ void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
 UDPSocket::UDPSocket()
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
+}
+
+//--------------------------------------------------------------------------
+// Constructor - allocates socket and binds to local port (UDP server)
+UDPSocket::UDPSocket(int port)
+{
+  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  Socket::bind(port);
 }
 
 //--------------------------------------------------------------------------
