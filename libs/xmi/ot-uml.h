@@ -80,6 +80,7 @@ protected:
   string get_idref_property(const string& attr_name,
 			    const string& subelement_name,
 			    const string& subsubelement_name="");
+  Multiplicity get_multiplicity();
   bool get_type(Type& t);
   void print_subelements(ostream& sout, int indent);
 

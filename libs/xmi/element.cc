@@ -136,6 +136,15 @@ string Element::get_idref_property(const string& attr_name,
 }
 
 //--------------------------------------------------------------------------
+// Reads multiplicity from properties
+// Returns default (1,1) if not found
+Multiplicity Element::get_multiplicity()
+{
+
+
+}
+
+//--------------------------------------------------------------------------
 // Gets a type element from the type properties
 // Fills in Type structure, returns whether successful
 bool Element::get_type(Type& t)
@@ -143,20 +152,14 @@ bool Element::get_type(Type& t)
   //!XMI: XMI 1.2/UML 1.3 DTD implies UML:Classifier allowed here, not
   //UML:Class and UML:DataType - but a Poseidon model is as below...
 
-  //Try class ref
-  bool is_class = true;
+  //Try 'type' attribute, or UML:Class or UML:Datatype subelements
   string idref = get_idref_property("type",
 				    "UML:StructuralFeature.type",
 				    "UML:Class");
   if (idref.empty())
-  {
-    is_class = false;
-
-    //Try datatype ref
     idref = get_idref_property("type",
 			       "UML:StructuralFeature.type",
 			       "UML:DataType");
-  }
 
   if (idref.empty())
   {
@@ -167,21 +170,25 @@ bool Element::get_type(Type& t)
   Element *e=reader.lookup_element(idref);
   if (!e)
   {
-    reader.warning("Bad idref in ", name);
+    reader.warning("Non-connected type idref in ", name);
     return false;
   }
 
-  t.is_class = is_class;
-
-  if (is_class)
-  {
-    t.c = dynamic_cast<Class *>(e);  
-    if (!t.c) reader.error("Bogus idref in Class ", name);
-  }
+  // Find out what we caught - check actual types here rather than
+  // relying on reference name - 'type' is ambiguous anyway
+  t.c = dynamic_cast<Class *>(e);  
+  if (t.c)
+    t.is_class = true;
   else
   {
     t.dt = dynamic_cast<DataType *>(e);
-    if (!t.dt) reader.error("Bogus idref in DataType ", name);
+    if (t.dt)
+      t.is_class = false;
+    else
+    {
+      reader.warning("Bogus type idref in ", name);
+      return false;
+    }
   }
 
   //Read multiplicity!
