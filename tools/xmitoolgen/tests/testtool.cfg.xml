@@ -9,10 +9,10 @@
 
 -->
 
-<xmitool xmlns="obtools.com/ns/xmitool">
+<xt:tool xmlns:xt="obtools.com/ns/xmitool">
   <!-- Legal info transferred into header - note xmitoolgen will also
   apply its own copyright and license for portions generated solely by it -->
-  <legal>
+  <xt:legal>
 // Sample XMITool configuration
 // Copyright (c) 2003 xMill Consulting Limited
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
@@ -35,21 +35,21 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-  </legal>
+  </xt:legal>
 
   <!-- Setup of script processing for rest of file -->
-  <script language="C++">
+  <xt:script language="C++">
     <!-- Tags to support C++ in XML - $ isn't significant to either -->
-    <tags>
-      <start-code>$(</start-code>
-      <end-code>)$</end-code>
-      <start-expr>$=</start-expr>
-      <end-expr>=$</end-expr>
-    </tags>
-  </script>
+    <xt:tags>
+      <xt:start-code>$(</xt:start-code>
+      <xt:end-code>)$</xt:end-code>
+      <xt:start-expr>$=</xt:start-expr>
+      <xt:end-expr>=$</xt:end-expr>
+    </xt:tags>
+  </xt:script>
 
   <!-- Support code to be added to tool -->
-  <code>
+  <xt:code>
     //Routine to return method signature of operation
     //full - for code;  not full - for regen marker
     string xmicc_op_sig(ObTools::UML::Operation&amp; op, bool full=false)
@@ -103,26 +103,26 @@
       else
 	return "list&lt;" + type + " *> " + name +"s"; 
     }
-  </code>
+  </xt:code>
 
   <!-- Config items for tool -->
-  <config file="xmi2cc.cfg.xml">
-    <map name="typemap" path="types/map"/>
-    <var name="association_type" path="association-type"/>
-    <var name="overwrite" path="overwrite" type="bool"/>
-  </config>
+  <xt:config file="xmi2cc.cfg.xml">
+    <xt:map name="typemap" path="types/map"/>
+    <xt:var name="association_type" path="association-type"/>
+    <xt:var name="overwrite" path="overwrite" type="bool"/>
+  </xt:config>
 
-  <template name="Package directories" scope="rpackage">
-    <directory>$=p.name=$</directory>
+  <xt:template name="Package directories" scope="rpackage">
+    <xt:dir>$=p.name=$</xt:dir>
 
     <!-- C++ implementation output -->
-    <template name = "C++ implementation" scope="class" var="myclass">
-      <filename>$=myclass.name=$.cc</filename>
+    <xt:template name = "C++ implementation" scope="class" var="myclass">
+      <xt:file>$=myclass.name=$.cc</xt:file>
       // Automatically generated code by xmi2cc
       // $=myclass.name=$.cc
 
       #include "$=myclass.name=$.h"
-      <template name= "Method implementation" scope="operation">
+      <xt:template name= "Method implementation" scope="operation">
 
       //---------------------------------------------------------
       //~[ Method $= xmicc_op_sig(o) =$
@@ -133,12 +133,12 @@
         //v~ ---------------------------------
       }
       //~]
-      </template>
-    </template>
+      </xt:template>
+    </xt:template>
 
     <!-- C++ header output -->
-    <template name = "C++ header" scope="class">
-      <filename>$= c.name =$.h</filename>
+    <xt:template name = "C++ header" scope="class">
+      <xt:file>$= c.name =$.h</xt:file>
       // Automatically generated code by xmi2cc
       // $= c.name =$.h
 
@@ -146,20 +146,20 @@
       //~[ class $= c.name =$
 
       class $= c.name =$
-      <template name = "Inheritance" scope="generalization">
-	$= (index?",":":") =$$= g.gparent->name =$
-      </template>
+      <xt:template name = "Inheritance" scope="generalization">
+	$= (_index?",":":") =$$= g.gparent->name =$
+      </xt:template>
       {
       private:
-      <template name = "Private attribute declaration" scope="attribute" 
+      <xt:template name = "Private attribute declaration" scope="attribute" 
 		visibility="private">
         $= a.type->name =$ $= a.name =$;
-      </template>
+      </xt:template>
 
-      <template name = "Private associations" scope="association_end" 
+      <xt:template name = "Private associations" scope="association_end" 
 		visibility="private">
         $= xmicc_assoc_end(a) =$;
-      </template>
+      </xt:template>
 
         //~^ ----- Manually added private methods ------
 
@@ -167,15 +167,15 @@
         //~v -------------------------------------------
 
       public:
-      <template name = "Public method declaration" scope="operation" 
+      <xt:template name = "Public method declaration" scope="operation" 
                 visibility="public">
         $= xmicc_op_sig(o) =$;
-      </template>
+      </xt:template>
       };
       //~]
-    </template>
-  </template>
-</xmitool>  
+    </xt:template>
+  </xt:template>
+</xt:tool>  
 
 
 
