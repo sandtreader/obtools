@@ -50,6 +50,7 @@ public:
 class OTMPServer: public Service
 {
 private:
+  int port;
   OTMP::Server otmp;
   OTMPServerThread  server_thread;
   OTMPMessageThread message_thread;
@@ -74,14 +75,16 @@ public:
 // Constructor
 OTMPServer::OTMPServer(XML::Element& cfg):
   Service(cfg),
-  otmp(receive_q, cfg.get_attr_int("port", OTMP::DEFAULT_PORT)), 
+  port(cfg.get_attr_int("port", OTMP::DEFAULT_PORT)),
+  otmp(receive_q, port), 
   server_thread(otmp), 
   message_thread(*this)
 {
   server_thread.start();
   message_thread.start();
 
-  Log::Summary << "OTMP Server started\n";
+  Log::Summary << "OTMP Server '" << id << "' started on port " 
+	       << port << endl;
 }
 
 //--------------------------------------------------------------------------
@@ -157,6 +160,8 @@ bool OTMPServer::handle(RoutingMessage& msg)
   }
 
   Net::EndPoint client(host, port); 
+
+  Log::Debug << "OTMP Server: responding to " << client << endl;
 
   OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
   if (!otmp.send(otmp_msg))
