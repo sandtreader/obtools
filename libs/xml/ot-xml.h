@@ -366,6 +366,11 @@ public:
   // Returns def if anything not found
   string get_value(const string& path, const char *def="");
 
+  //------------------------------------------------------------------------
+  // [] operator to make things easy
+  // e.g. xpath["foo/bar"]
+  string operator[](const string& path) { return get_value(path); }
+
   //--------------------------------------------------------------------------
   // Boolean value fetch
   // Defaults to default value given (or false) if not present
@@ -392,9 +397,12 @@ public:
   //------------------------------------------------------------------------
   // Constructors
   // Single filename
-  Configuration(const string& fn) { filenames.push_back(fn); }
+  Configuration(const string& fn, int parse_flags=PARSER_OPTIMISE_CONTENT)
+    :parser(parse_flags) { filenames.push_back(fn); }
+
   // List of filenames - front() is tried first
-  Configuration(list<string>& fns): filenames(fns) {}
+  Configuration(list<string>& fns, int parse_flags=PARSER_OPTIMISE_CONTENT)
+    :filenames(fns), parser(parse_flags) {}
 
   //------------------------------------------------------------------------
   // Read configuration file
@@ -408,10 +416,24 @@ public:
   Element& get_root() { return parser.get_root(); }
 
   //------------------------------------------------------------------------
+  // Element list fetch - all elements matching final child step.
+  // Only first element of intermediate steps is used - list is not merged!
+  list<Element *> get_elements(const string& path);
+
+  //------------------------------------------------------------------------
+  // Single element fetch - first of list, if any, or 0
+  Element *get_element(const string& path);
+
+  //------------------------------------------------------------------------
   // XPath value fetch - either attribute or content of single (first) element
   // Returns def if anything not found
   // Note all get_value methods still work, and return def, if file read fails
   string get_value(const string& path, const char *def="");
+
+  //------------------------------------------------------------------------
+  // [] operator to make things easy
+  // e.g. config["foo/bar"]
+  string operator[](const string& path) { return get_value(path); }
 
   //--------------------------------------------------------------------------
   // XPath Boolean value fetch

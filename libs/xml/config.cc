@@ -53,6 +53,23 @@ bool Configuration::read(const string& ename)
 }
 
 //------------------------------------------------------------------------
+// Element list fetch - all elements matching final child step.
+// Only first element of intermediate steps is used - list is not merged!
+list<Element *> Configuration::get_elements(const string& path)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.get_elements(path);
+}
+
+//------------------------------------------------------------------------
+// Single element fetch - first of list, if any, or 0
+Element *Configuration::get_element(const string& path)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.get_element(path);
+}
+
+//------------------------------------------------------------------------
 // XPath value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
 // Note all get_value methods still work, and return def, if file read fails
