@@ -65,13 +65,15 @@ Correlator::Correlator(XML::Element& cfg):
     Service(cfg), 
     request_cache(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT)) 
 {
-  Log::Summary << "Correlator Service '" << id << "' started\n"; 
+  log.summary << "Correlator Service '" << id << "' started\n"; 
 }
 
 //------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
 bool Correlator::handle(RoutingMessage& msg)
 {
+  Log::Streams tlog;   // Thread-safe log
+
   // Work out if it's a response or not
   string our_ref = msg.message.get_ref();
 
@@ -86,7 +88,7 @@ bool Correlator::handle(RoutingMessage& msg)
     Correlation *cr = request_cache.lookup(our_ref);
     if (cr)
     {
-      Log::Detail << "Correlator: Found correlation:\n  " << *cr << endl;
+      tlog.detail << "Correlator: Found correlation:\n  " << *cr << endl;
 
       // Create new copy message to be re-originated here
       ServiceClient client(this, msg.client.client);
@@ -102,7 +104,7 @@ bool Correlator::handle(RoutingMessage& msg)
     }
     else
     {
-      Log::Error << "Can't find correlation for response ref:" 
+      tlog.error << "Can't find correlation for response ref:" 
 		 << our_ref << endl;
       return false;
     }
@@ -124,7 +126,7 @@ bool Correlator::handle(RoutingMessage& msg)
       request_cache.add(id, cr);
       
       // Log it
-      Log::Detail << "Correlator: Opened correlation:\n  " << *cr << endl;
+      tlog.detail << "Correlator: Opened correlation:\n  " << *cr << endl;
     }
   }
 
@@ -151,8 +153,10 @@ void Correlator::signal(Signal sig, ServiceClient& client)
 	CacheType::iterator q = p++;  // Protect while deleting
 	if (client == q->client)
 	{
-	  Log::Summary << "Deleted correlation " << *q 
-		       << " for finished client\n";
+	  Log::Stream summary_log(Log::logger, Log::LEVEL_SUMMARY);
+
+	  summary_log << "Deleted correlation " << *q 
+		      << " for finished client\n";
 	  request_cache.remove(q.id());
 	}
       }

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   XML::Configuration config(cfg);
   if (!config.read("xmlmesh"))
   {
-    Log::Error << "Can't read configuration file\n";
+    cerr << "Can't read configuration file\n";
     return 2;
   }
 
@@ -41,7 +41,9 @@ int main(int argc, char **argv)
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
   Log::logger.connect(level_out);
-  Log::Summary << "xmlmesh-server starting\n";
+  Log::Streams log;
+
+  log.summary << "xmlmesh-server starting\n";
   
   // Configure server 
   server.configure(config);

@@ -86,7 +86,7 @@ OTMPServer::OTMPServer(XML::Element& cfg):
     string addr = filter["address"];
     Net::MaskedAddress ma(addr);
 
-    Log::Summary << "  Connections allowed from " << ma << endl;
+    log.summary << "  Connections allowed from " << ma << endl;
     otmp.allow(ma);
     filtered = true;
   OBTOOLS_XML_ENDFOR
@@ -95,14 +95,14 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   if (!filtered)
   {
     otmp.allow(Net::MaskedAddress("localhost"));
-    Log::Summary << "  Default filtering:  localhost only\n";
+    log.summary << "  Default filtering:  localhost only\n";
   }
 
   server_thread.start();
   message_thread.start();
 
-  Log::Summary << "OTMP Server '" << id << "' started on port " 
-	       << port << endl;
+  log.summary << "OTMP Server '" << id << "' started on port " 
+	      << port << endl;
 }
 
 //--------------------------------------------------------------------------
@@ -153,9 +153,11 @@ void OTMPServer::dispatch()
 // Note this only gets called for reversing messages coming back out
 bool OTMPServer::handle(RoutingMessage& msg)
 {
+  Log::Streams tlog;  // Local log - can be called in any worker thread
+
   if (!msg.reversing)
   {
-    Log::Error << "OTMP Server received forward routing\n";
+    tlog.error << "OTMP Server received forward routing\n";
     return false;
   }
 
@@ -165,25 +167,26 @@ bool OTMPServer::handle(RoutingMessage& msg)
   
   if (!port || !hosts.size())
   {
-    Log::Error << "OTMP Server received bogus reverse path\n";
+    tlog.error << "OTMP Server received bogus reverse path\n";
     return false;
   }
 
   Net::IPAddress host(hosts);
   if (!host)
   {
-    Log::Error << "OTMP Server can't lookup reverse path host: " 
+    tlog.error << "OTMP Server can't lookup reverse path host: " 
 	       << hosts << endl;
     return false;
   }
 
   Net::EndPoint client(host, port); 
 
-  Log::Debug << "OTMP Server: responding to " << client << endl;
+  OBTOOLS_LOG_IF_DEBUG(tlog.debug << "OTMP Server: responding to " 
+		       << client << endl;)
 
   OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
   if (!otmp.send(otmp_msg))
-    Log::Error << "OTMP Server can't send message\n";  // Tell tracker!!!
+    tlog.error << "OTMP Server can't send message\n";  // Tell tracker!!!
 
   return false;  // Nowhere else to go
 }

@@ -32,7 +32,9 @@ void Service::accept(RoutingMessage& msg)
     }
     else
     {
-      Log::Error << "Service " << id << "has no spare threads - serialising\n";
+      // Might get called in another service's thread - use local log 
+      Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+      error_log << "Service " << id << "has no spare threads - serialising\n";
     }
   }
 
@@ -103,7 +105,8 @@ bool Service::reverse(RoutingMessage& msg)
   }
   else
   {
-    Log::Error << "No such service " << rid << " in reverse routing\n";
+    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR); 
+    error_log << "No such service " << rid << " in reverse routing\n";
     return false;
   }
 }

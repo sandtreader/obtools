@@ -42,12 +42,12 @@ private:
   string subject_pattern;            // Pattern of allowed subjects
   list<Subscription> subscriptions;
 
-  bool handle_subscription(RoutingMessage& msg);
+  bool handle_subscription(RoutingMessage& msg, Log::Streams& tlog);
   bool subscribe(const string& subject, const string& path,
-		 ServiceClient& client);
+		 ServiceClient& client, Log::Streams& tlog);
   void unsubscribe(const string& subject, const string& path,
-		   ServiceClient& client);
-  void unsubscribe_all(ServiceClient& client); 
+		   ServiceClient& client, Log::Streams& tlog);
+  void unsubscribe_all(ServiceClient& client, Log::Streams& tlog); 
 
 public:
   //------------------------------------------------------------------------
@@ -69,8 +69,8 @@ Publisher::Publisher(XML::Element& cfg):
   Service(cfg), 
   subject_pattern(cfg.get_attr("subject", "*"))
 {
-  Log::Summary << "Publish Service '" << id << "' started for subjects '"
-	       << subject_pattern << "'\n";
+  log.summary << "Publish Service '" << id << "' started for subjects '"
+	      << subject_pattern << "'\n";
 }
 
 //------------------------------------------------------------------------
@@ -85,10 +85,11 @@ void Publisher::signal(Signal sig, ServiceClient& client)
 
     case Service::CLIENT_FINISHED:
       // Force unsubscription on everything
-      Log::Summary << "Forcibly unsubscribing client " 
+      Log::Streams tlog;
+      tlog.summary << "Forcibly unsubscribing client " 
 		   << client.client << "\n";
 
-      unsubscribe_all(client);
+      unsubscribe_all(client, tlog);
       break;
   }
 }
@@ -98,14 +99,15 @@ void Publisher::signal(Signal sig, ServiceClient& client)
 bool Publisher::handle(RoutingMessage& msg)
 {
   string subject = msg.message.get_subject();
+  Log::Streams tlog;
 
-  Log::Detail << "Publish service received message subject " << subject 
+  tlog.detail << "Publish service received message subject " << subject 
 	      << " from client " << msg.client.client << endl;
 
   // Check for xmlmesh.subscription messages first - note we let them
   // continue to other subscribers if they're not bogus
   if (Text::pattern_match("xmlmesh.subscription.*", subject)
-      && !handle_subscription(msg))
+      && !handle_subscription(msg, tlog))
     return false;
 
   // Try each subscription in turn to see if it wants it
@@ -131,27 +133,27 @@ bool Publisher::handle(RoutingMessage& msg)
 
 //------------------------------------------------------------------------
 // Handle an xmlmesh.subscription message
-bool Publisher::handle_subscription(RoutingMessage& msg)
+bool Publisher::handle_subscription(RoutingMessage& msg, Log::Streams& tlog)
 {
   // Unpack it 
   SubscriptionMessage smsg(msg.message);
   string path = msg.path.to_string();
-  
+
   if (!smsg)
   {
-    Log::Error << "Subscription: Bogus message from " << path << " dropped\n";
+    tlog.error << "Subscription: Bogus message from " << path << " dropped\n";
     respond(msg, SOAP::Fault::CODE_SENDER, "Illegal subscription message");
     return false;
   }
 
-  Log::Summary << "Subscription request from " << path << ":\n";
-  Log::Summary << smsg << endl;
+  tlog.summary << "Subscription request from " << path << ":\n";
+  tlog.summary << smsg << endl;
 
   // Handle it
   switch (smsg.operation)
   {
     case SubscriptionMessage::JOIN:
-      if (subscribe(smsg.subject, path, msg.client))
+      if (subscribe(smsg.subject, path, msg.client, tlog))
       {
 	respond(msg);
 	return false;  // Take it
@@ -159,7 +161,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
       break;
 
     case SubscriptionMessage::LEAVE:
-      unsubscribe(smsg.subject, path, msg.client);
+      unsubscribe(smsg.subject, path, msg.client, tlog);
       respond(msg);
       return false;
 
@@ -176,19 +178,20 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
 // Subscribe a client
 bool Publisher::subscribe(const string& subject,
 			  const string& path,
-			  ServiceClient& client)
+			  ServiceClient& client,
+			  Log::Streams& tlog)
 {
   // Check pattern is one we can accept subscription for
   if (Text::pattern_match(subject_pattern, subject))
   {
     // Unsubscribe from this first
-    unsubscribe(subject, path, client);
+    unsubscribe(subject, path, client, tlog);
 
     // (Re)subscribe
     Subscription sub(subject, path, client);
     subscriptions.push_back(sub);
 
-    Log::Detail << "Client " << path << " subscribed to "
+    tlog.detail << "Client " << path << " subscribed to "
 		<< subject << "\n";
 
     return true;
@@ -202,7 +205,8 @@ bool Publisher::subscribe(const string& subject,
 // E.g. foo.* unsubscribes foo.blah.*, foo.splat as well as foo.*
 void Publisher::unsubscribe(const string& subject,
 			    const string& path,
-			    ServiceClient& client)
+			    ServiceClient& client,
+			    Log::Streams& tlog)
 {
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();
@@ -217,7 +221,7 @@ void Publisher::unsubscribe(const string& subject,
 	&& sub.client == client
 	&& Text::pattern_match(subject, sub.subject))
     {
-      Log::Detail << "Client " << path << " unsubscribed from "
+      tlog.detail << "Client " << path << " unsubscribed from "
 		  << sub.subject << "\n";
 
       subscriptions.erase(q);
@@ -227,7 +231,8 @@ void Publisher::unsubscribe(const string& subject,
 
 //------------------------------------------------------------------------
 // Unsubscribe a client entirely
-void Publisher::unsubscribe_all(ServiceClient& client)
+void Publisher::unsubscribe_all(ServiceClient& client,
+				Log::Streams& tlog)
 {
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();
@@ -237,7 +242,7 @@ void Publisher::unsubscribe_all(ServiceClient& client)
     Subscription& sub = *q;
     if (sub.client == client)
     {
-      Log::Detail << "Client " << sub.path << " unsubscribed from "
+      tlog.detail << "Client " << sub.path << " unsubscribed from "
 		  << sub.subject << "\n";
 
       subscriptions.erase(q);

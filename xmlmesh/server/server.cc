@@ -24,7 +24,7 @@ void Server::configure(XML::Configuration& config)
   
   OBTOOLS_XML_FOREACH_CHILD(se, services)
     if (!create_service(se))
-      Log::Error << "Failed to create service from XML:\n" << se;
+      log.error << "Failed to create service from XML:\n" << se;
   OBTOOLS_XML_ENDFOR
 
   // Read all routes
@@ -32,7 +32,7 @@ void Server::configure(XML::Configuration& config)
 
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(re, routes, "route")
     if (!create_route(re))
-      Log::Error << "Failed to create route from XML:\n" << re;
+      log.error << "Failed to create route from XML:\n" << re;
   OBTOOLS_XML_ENDFOR
 }
 
@@ -62,28 +62,28 @@ bool Server::create_route(XML::Element& xml)
   string from = xml["from"];
   if (!from.size())
   {
-    Log::Error << "No 'from' quoted in route\n";
+    log.error << "No 'from' quoted in route\n";
     return false;
   }
 
   Service *from_s = lookup_service(from);
   if (!from_s)
   {
-    Log::Error << "No such 'from' service in route: '" << from << "'\n";
+    log.error << "No such 'from' service in route: '" << from << "'\n";
     return false;
   }
 
   string to = xml["to"];
   if (!to.size())
   {
-    Log::Error << "No 'to' quoted in route\n";
+    log.error << "No 'to' quoted in route\n";
     return false;
   }
 
   Service *to_s = lookup_service(to);
   if (!to_s)
   {
-    Log::Error << "No such 'to' service in route: '" << to << "'\n";
+    log.error << "No such 'to' service in route: '" << to << "'\n";
     return false;
   }
 
@@ -92,8 +92,8 @@ bool Server::create_route(XML::Element& xml)
   // Add route to 'from' side
   from_s->add_route(subject, *to_s);
 
-  Log::Summary << "Created route from '" << from << "' to '" << to
-	       << "' for subjects '" << subject << "'\n";
+  log.summary << "Created route from '" << from << "' to '" << to
+	      << "' for subjects '" << subject << "'\n";
   return true;
 }
 
