@@ -172,15 +172,19 @@ bool Element::get_type(Type& t)
   }
 
   t.is_class = is_class;
-#if 0
-  //!!! Sort this out!
-  if (is_class)
-    t.u.c = dynamic_cast<Class *>e;  //!!! Some sort of check required!
-  else
-    t.u.dt = dynamic_cast<DataType *>e;
-#endif
-  //Read multiplicity!
 
+  if (is_class)
+  {
+    t.c = dynamic_cast<Class *>(e);  
+    if (!t.c) reader.error("Bogus idref in Class ", name);
+  }
+  else
+  {
+    t.dt = dynamic_cast<DataType *>(e);
+    if (!t.dt) reader.error("Bogus idref in DataType ", name);
+  }
+
+  //Read multiplicity!
 
   return true;
 }

@@ -41,10 +41,7 @@ struct Multiplicity
   int upper;  // -1 for *
 
   //Default constructor sets to 1-1
-  Multiplicity():
-    lower(1),
-    upper(1)
-  {}
+  Multiplicity(): lower(1), upper(1) {}
 };
 
 //==========================================================================
@@ -54,10 +51,13 @@ struct Type
   bool is_class;  //Otherwise datatype
   union 
   {
-    Class *c;
     DataType *dt;
-  } u;
+    Class *c;
+  };
   Multiplicity multi;
+
+  //Default constructor for safety
+  Type(): is_class(false), dt(0), multi() {} 
 };
 
 //==========================================================================

@@ -31,6 +31,14 @@ void Attribute::build_refs()
 // Printer
 void Attribute::print(ostream& sout, int indent=0)
 {
-  Element::print(sout, indent);
+  sout << string(indent, ' ');
+  sout << "Attribute '" << name << "': ";
+
+  if (type.is_class && type.c)
+    sout << "class " << type.c->name;
+  else if (type.dt)
+    sout << "type " << type.dt->name;
+
+  sout << endl;
 }
 
