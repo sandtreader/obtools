@@ -24,6 +24,7 @@ clean:
 
 release: xmlmesh-server
 	cp xmlmesh-server $(RELEASEDIR) 
+	cp xmlmesh.cfg.xml $(RELEASEDIR) 
 
 #Test harnesses:
 xmlmesh-server:	$(OBJS)    					        \
