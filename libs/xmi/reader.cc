@@ -8,7 +8,7 @@
 
 #include "ot-xmi.h"
 using namespace ObTools::XMI;
-using namespace ObTools::UML;
+using namespace ObTools; 
 
 //--------------------------------------------------------------------------
 // Destructor
@@ -34,9 +34,21 @@ void Reader::error(const char *err, const string& detail)
 }
 
 //------------------------------------------------------------------------
+// Lookup a class in the classmap by ID
+// Returns 0 if failed
+UML::Class *Reader::lookup_class(const string& id)
+{
+  map<string,UML::Class *>::iterator p=classmap.find(id);
+  if (p!=classmap.end())
+    return p->second;
+  else
+    return 0;
+}
+
+//------------------------------------------------------------------------
 // Read an attribute from given <UML:Attribute> element
 // Returns 0 if failed
-Attribute *Reader::read_attribute(ObTools::XML::Element& ae)
+UML::Attribute *Reader::read_attribute(XML::Element& ae)
 {
   //It must have a name
   string name = ae.get_attr("name");
@@ -46,41 +58,69 @@ Attribute *Reader::read_attribute(ObTools::XML::Element& ae)
     return 0;
   }
 
-  //  Attribute *a = new Attribute(id, !!!class from map);
+  //Find 'UML:StructuralFeature.type' part
+  //  XML::
+
+
+  //  UML::Attribute *a = new UML::Attribute(id, !!!class from map);
 
   return 0;
 }
 
 //------------------------------------------------------------------------
-// Read a class from given <UML:Class> element
-// Returns 0 if failed
-Class *Reader::read_class(ObTools::XML::Element& ce)
+// Capture the class from given <UML:Class> element
+// First pass - just grabs name and enters id into the classmap
+// read_class does the real work later
+void Reader::scan_class(XML::Element& ce)
 {
   //Class definitions must have an ID - otherwise it's a reference
   //Silently ignore references
   string id = ce.get_attr("xmi.id");
-  if (id.empty()) return 0;
+  if (id.empty()) return;
   
   //It must have a name
   string name = ce.get_attr("name");
   if (name.empty())
   {
     warning("Class with no name ignored - id ", id);
-    return 0;
+    return;
   }
 
   //That's enough to commit to
-  Class *c = new Class(id, name);
+  UML::Class *c = new UML::Class(id, name);
+
+  // Enter in the classmap
+  classmap[id]=c;
+}
+
+//------------------------------------------------------------------------
+// Read a class from given <UML:Class> element
+// Returns 0 if failed
+// Second pass - fills in details now classmap is full
+UML::Class *Reader::read_class(XML::Element& ce)
+{
+  //Class definitions must have an ID - otherwise it's a reference
+  //Silently ignore references
+  string id = ce.get_attr("xmi.id");
+  if (id.empty()) return 0;
+  
+  //Lookup class by id
+  UML::Class *c = lookup_class(id);
+  if (!c)
+  {
+    warning("Classmap entry disappeared for id ", id);
+    return 0;
+  }
 
   if (ce.get_attr_bool("isAbstract"))
-    c->kind = CLASS_ABSTRACT;
+    c->kind = UML::CLASS_ABSTRACT;
 
   if (ce.has_attr("stereotype"))
     c->stereotype = ce.get_attr("stereotype");
 
   //Look for attributes
   OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(ae, ce, "UML:Attribute")
-    Attribute *a = read_attribute(ae);
+    UML::Attribute *a = read_attribute(ae);
     if (a) c->attributes.push_back(a);
   OBTOOLS_XML_ENDFOR
 
@@ -90,7 +130,7 @@ Class *Reader::read_class(ObTools::XML::Element& ce)
 //------------------------------------------------------------------------
 // Read an association from given <UML:Association> element
 // Returns 0 if failed
-Association *Reader::read_association(ObTools::XML::Element& ae)
+UML::Association *Reader::read_association(XML::Element& ae)
 {
   return 0;
 }
@@ -98,7 +138,7 @@ Association *Reader::read_association(ObTools::XML::Element& ae)
 //------------------------------------------------------------------------
 // Read a package from given <UML:Model> or <UML:Package> element
 // Returns 0 if failed
-Package *Reader::read_package(ObTools::XML::Element& pe)
+UML::Package *Reader::read_package(XML::Element& pe)
 {
   if (!pe.has_attr("name"))
   {
@@ -106,27 +146,27 @@ Package *Reader::read_package(ObTools::XML::Element& pe)
     return 0;
   }
 
-  Package *package = new Package(pe.get_attr("name"));
+  UML::Package *package = new UML::Package(pe.get_attr("name"));
 
   //Get all classes at this package level (but ignoring XMI cruft
-  //inbetween)
+  //inbetween) 
   OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(ce, pe, "UML:Class", 
 						 "UML:Package")
-    Class *c = read_class(ce);
+    UML::Class *c = read_class(ce);
     if (c) package->classes.push_back(c);
   OBTOOLS_XML_ENDFOR
 
   //Get all associations, likewise
   OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(ae, pe, "UML:Association",
 						 "UML:Package")
-    Association *a = read_association(ae);
+    UML::Association *a = read_association(ae);
     if (a) package->associations.push_back(a);
   OBTOOLS_XML_ENDFOR
 
   //Get sub-packages, first level only (self-pruned)
   OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(spe, pe, "UML:Package",
 						 "UML:Package")
-    Package *p = read_package(spe);
+    UML::Package *p = read_package(spe);
     if (p) package->packages.push_back(p);
   OBTOOLS_XML_ENDFOR
 
@@ -137,7 +177,7 @@ Package *Reader::read_package(ObTools::XML::Element& pe)
 // Parse from given input stream
 void Reader::read_from(istream& s) throw (ParseFailed)
 {
-  ObTools::XML::Parser parser;
+  XML::Parser parser;
 
   // Add UML namespaces (seen both of these!)
   parser.fix_namespace("org.omg.xmi.namespace.UML", "UML");
@@ -147,25 +187,31 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   {
     s >> parser;
   }
-  catch (ObTools::XML::ParseFailed)
+  catch (XML::ParseFailed)
   {
     error("XML parsing failed");
   }
 
-  ObTools::XML::Element& root=parser.get_root();
+  XML::Element& root=parser.get_root();
 
   //Make sure it's XMI
   if (root.name != "XMI") error("Not an <XMI> file - root element is ", root.name);
 
   //Get XMI.content
-  ObTools::XML::Element &xmi_content = root.get_child("XMI.content");
+  XML::Element &xmi_content = root.get_child("XMI.content");
   if (!xmi_content.valid()) error("No <XMI.content> in <XMI>");
 
   //Get UML model - assume only one
-  ObTools::XML::Element &uml_model = xmi_content.get_child("UML:Model");
-  if (!uml_model.valid()) error("No <UML:Model> in <XMI.content>");
-  
-  model = read_package(uml_model);
+  XML::Element &modele = xmi_content.get_child("UML:Model");
+  if (!modele.valid()) error("No <UML:Model> in <XMI.content>");
+
+  //Prescan for class ids throughout the model, and build class map
+  OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(ce, modele, "UML:Class")
+    scan_class(ce);
+  OBTOOLS_XML_ENDFOR
+
+  //Now read model properly
+  model = read_package(modele);
 }
 
 //------------------------------------------------------------------------

@@ -14,11 +14,11 @@
 #include <iostream>
 #include "ot-xml.h"
 #include "ot-uml.h"
-using namespace std;
 
 namespace ObTools { namespace XMI {
 
-using namespace ObTools::UML;
+using namespace std;
+using namespace ObTools;
 
 //==========================================================================
 // XMI exceptions
@@ -29,17 +29,20 @@ class ParseFailed {};
 class Reader
 {
 private:
-  ostream& serr;       //error output stream
+  ostream& serr;                  //error output stream
+  map<string, UML::Class *> classmap;  //map of ids to classes
 
   void warning(const char *warn, const string& detail);
   void error(const char *err, const string& detail="") throw (ParseFailed);
-  Attribute *read_attribute(ObTools::XML::Element& ae);
-  Class *read_class(ObTools::XML::Element& ce);
-  Association *read_association(ObTools::XML::Element& ae); 
-  Package *read_package(ObTools::XML::Element& pe);
+  UML::Class *lookup_class(const string& id);
+  UML::Attribute *read_attribute(ObTools::XML::Element& ae);
+  void scan_class(ObTools::XML::Element& ce);
+  UML::Class *read_class(ObTools::XML::Element& ce);
+  UML::Association *read_association(ObTools::XML::Element& ae); 
+  UML::Package *read_package(ObTools::XML::Element& pe);
 
 public:
-  Package *model;        
+  UML::Package *model;        
 
   //------------------------------------------------------------------------
   // Constructors & Destructor
