@@ -220,6 +220,7 @@ string scope_var(Scope scope)
     case SCOPE_OPERATION: return "o";
     case SCOPE_PARAMETER: return "p";
     case SCOPE_ASSOCIATION:    return "a";
+    case SCOPE_ASSOCIATION_END:return "a";
     case SCOPE_GENERALIZATION: return "g";
     default: return "";
   }
