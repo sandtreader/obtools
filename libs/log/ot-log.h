@@ -241,7 +241,8 @@ extern Distributor logger;
 // *** get weird unpredictable crashes when two threads log at the same time
 // *** This is potentially such a Bad Thing that I have disabled these 
 // *** globals for all multi-threaded code - subvert at your peril!
-// *** Use a thread-local Log::Streams structure (see below) instead
+// *** Use a thread-local Log::Streams structure (see below) instead,
+// *** or make your own temporary Stream
 #if defined(_SINGLE)
 extern Stream Error;
 extern Stream Summary;
