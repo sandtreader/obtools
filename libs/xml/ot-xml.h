@@ -61,10 +61,11 @@ public:
   static Element none;
 
   //--------------------------------------------------------------------------
-  // Validity check
+  // Validity checks
   // Easy way of checking if you've got Element::none
   // Don't use (e!=Element::none) - that compares values!
   bool valid() { return this!=&none; }
+  bool operator!() { return !valid(); }
 
   //------------------------------------------------------------------------
   // Constructors & Destructors
