@@ -81,6 +81,45 @@ void Message::add_header(XML::Element *header)
 }
 
 //------------------------------------------------------------------------
+// Add a header element with given role string
+// header is taken and will be deleted with message
+// Element is modified with role and mustUnderstand attributes
+void Message::add_header(XML::Element *header, const string& role,
+			 bool must_understand)
+{
+  header->set_attr("env:role", role);
+
+  // Only add mustUnderstand if true (SOAP 1.2: 5.2.3)
+  if (must_understand) header->set_attr_bool("env:mustUnderstand", true);
+  add_header(header);
+}
+
+//------------------------------------------------------------------------
+// Add a header element with given standard role
+// header is taken and will be deleted with message
+// Element is modified with role and mustUnderstand attributes
+void Message::add_header(XML::Element *header, Header::Role role,
+			 bool must_understand)
+{
+  switch (role)
+  {
+    case Header::ROLE_NONE:
+      add_header(header, RN_NONE, must_understand);
+      break;
+
+    case Header::ROLE_NEXT:
+      add_header(header, RN_NEXT, must_understand);
+      break;
+
+    case Header::ROLE_ULTIMATE_RECEIVER:
+      // UR is the default;  don't add it - SOAP 1.2: 5.2.2
+      if (must_understand) header->set_attr_bool("env:mustUnderstand", true);
+      add_header(header);
+      break;
+  }
+}
+
+//------------------------------------------------------------------------
 // Add a body element
 // body is taken and will be deleted with message
 void Message::add_body(XML::Element *body)
@@ -157,16 +196,36 @@ list<XML::Element *> Message::get_bodies()
 
 //------------------------------------------------------------------------
 // Get list of header elements
-list<XML::Element *> Message::get_headers()
+list<Header> Message::get_headers()
 {
+  list<Header> headers;
+
   if (doc)
   {
     XML::Element& header = doc->get_child("env:Header");
-    return header.children;  // Whatever they are (empty if header is invalid)
+
+    // Inspect all header blocks for standard attributes
+    OBTOOLS_XML_FOREACH_CHILD(he, header)
+      Header h;
+      h.content = &he;
+      h.must_understand = he.get_attr_bool("env:mustUnderstand");
+      string rs = he["env:role"];
+
+      if (rs == RN_NONE)
+	h.role = Header::ROLE_NONE;
+      else if (rs == RN_NEXT)
+	h.role = Header::ROLE_NEXT;
+      // UR is default - SOAP 1.2: 5.2.2
+      else if (rs.empty() || rs == RN_ULTIMATE_RECEIVER)  
+	h.role = Header::ROLE_ULTIMATE_RECEIVER;
+      else
+	h.role = Header::ROLE_OTHER;
+
+      headers.push_back(h);
+    OBTOOLS_XML_ENDFOR
   }
 
-  list<XML::Element *> empty;
-  return empty;
+  return headers;
 }
 
 }} // namespaces

@@ -23,7 +23,15 @@ using namespace std;
 
 //==========================================================================
 // Specification constants
+
+// Namespaces
 const char NS_ENVELOPE[] = "http://www.w3.org/2003/05/soap-envelope";
+
+// Role names
+const char RN_NONE[] = "http://www.w3.org/2003/05/soap-envelope/role/none";
+const char RN_NEXT[] = "http://www.w3.org/2003/05/soap-envelope/role/next";
+const char RN_ULTIMATE_RECEIVER[] = 
+  "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver";
 
 //==========================================================================
 // SOAP XML parser
@@ -36,6 +44,23 @@ public:
   // Constructor - use given stream for errors, set namespace
   Parser(ostream& s): XML::Parser(s)
   { fix_namespace(NS_ENVELOPE, "env"); }
+};
+
+//==========================================================================
+// SOAP Header information
+struct Header
+{
+  enum Role
+  {
+    ROLE_NONE,
+    ROLE_NEXT,
+    ROLE_ULTIMATE_RECEIVER,
+    ROLE_OTHER                 // Application defined
+  };
+
+  XML::Element *content;  // The XML element
+  bool must_understand;
+  Role role;
 };
 
 //==========================================================================
@@ -59,9 +84,23 @@ public:
   Message(istream& in_s, ostream& err_s);
 
   //------------------------------------------------------------------------
-  // Add a header element
+  // Add a header element (fully formed)
   // header is taken and will be deleted with message
   void add_header(XML::Element *header);
+
+  //------------------------------------------------------------------------
+  // Add a header element with given role string
+  // header is taken and will be deleted with message
+  // Element is modified with role and mustUnderstand attributes
+  void add_header(XML::Element *header, const string& role,
+		  bool must_understand = true);
+
+  //------------------------------------------------------------------------
+  // Add a header element with given standard role
+  // header is taken and will be deleted with message
+  // Element is modified with role and mustUnderstand attributes
+  void add_header(XML::Element *header, Header::Role role,
+		  bool must_understand = true);
 
   //------------------------------------------------------------------------
   // Add a body element
@@ -86,8 +125,8 @@ public:
   list<XML::Element *> get_bodies();
 
   //------------------------------------------------------------------------
-  // Get list of header elements
-  list<XML::Element *> get_headers();
+  // Get list of headers, parsed out into Header structures
+  list<Header> get_headers();
 
   //------------------------------------------------------------------------
   // Destructor

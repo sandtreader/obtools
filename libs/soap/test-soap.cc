@@ -19,20 +19,25 @@ using namespace ObTools;
 int main(int argc, char **argv)
 {
   SOAP::Message msg;
-  msg.add_header(new XML::Element("xm:header1"));
-  msg.add_header(new XML::Element("xm:header2"));
+  msg.add_header(new XML::Element("xm:header1"), SOAP::Header::ROLE_NEXT);
+  msg.add_header(new XML::Element("xm:header2"), "xm:role", false);
   msg.add_body(new XML::Element("xm:body"));
   cout << "Constructed message:\n" << msg;
 
   SOAP::Message msg2(cin, cerr);
   cout << "\nRead message:\n" << msg2;
 
-  cout << "\nHeader elements:\n";
-  list<XML::Element *> headers = msg2.get_headers();
-  for(list<XML::Element *>::iterator p = headers.begin();
+  cout << "\nHeaders:\n";
+  list<SOAP::Header> headers = msg2.get_headers();
+  for(list<SOAP::Header>::iterator p = headers.begin();
       p!= headers.end();
       p++)
-    cout << "- " << (*p)->name << endl;
+  {
+    SOAP::Header h = *p;
+    cout << "- " << h.content->name;
+    if (h.must_understand) cout << " (must understand)";
+    cout << " (role " << (int)h.role << ")\n";
+  }
 
   cout << "\nBody elements:\n";
   list<XML::Element *> bodies = msg2.get_bodies();
