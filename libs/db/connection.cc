@@ -16,7 +16,7 @@ namespace ObTools { namespace DB {
 //Returns whether successful - row is filled in if so
 bool Connection::query(const string& sql, Row& row)
 {
-  Result& result = query(sql);
+  Result result = query(sql);
   if (!result) return false;
   return result.fetch(row);
 }
@@ -26,7 +26,7 @@ bool Connection::query(const string& sql, Row& row)
 //Returns whether successful - value is filled in if so
 bool Connection::query(const string& sql, string& value)
 {
-  Result& result = query(sql);
+  Result result = query(sql);
   if (!result) return false;
   return result.fetch(value);
 }

@@ -4,28 +4,41 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
+POSTGRES = 1
+
 OBJS = connection.o row.o
+
+ifdef POSTGRES
+CPPFLAGS += -I/usr/include/postgresql/
+LIBS += ot-db-pgsql.a
+TESTS += test-pgsql
+PGTEST = ./test-pgsql
+LIBPQ = /usr/lib/libpq.so
+endif
 
 ifdef DEBUG
 CPPFLAGS += -g
 LDFLAGS += -g
 endif
 
-all: test-pgsql
+CPPFLAGS += -I../log -I../mt
+
+all: $(TESTS)
 
 clean: 
-	-@rm -f *.o *.a *~ test-*
+	-@rm -f *.o *.a *~ $(TESTS)
 
-release: ot-db-pgsql.a
-	cp ot-db-pgsql.a $(RELEASEDIR) 
+release: $(LIBS)
+	cp $(LIBS) $(RELEASEDIR) 
 	cp ot-db.h $(RELEASEDIR) 
 
-test: test-pgsql
-	./test-pgsql
+test: $(TESTS)
+	$(PGTEST)
 
 #Test harnesses:
-test-pgsql: test-pgsql.o ot-db-pgsql.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+test-pgsql: test-pgsql.o ot-db-pgsql.a ../log/ot-log.a ../mt/ot-mt.a \
+		../text/ot-text.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ $(LIBPQ)
 
 #DB libraries
 ot-db-pgsql.a: $(OBJS) db-pgsql.o

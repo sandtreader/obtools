@@ -57,20 +57,9 @@ public:
 
 //==========================================================================
 // Database result set (abstract)
-class Result
+class ResultSet
 {
-protected:
-  bool valid;
-
 public:
-  //------------------------------------------------------------------------
-  //Constructor
-  Result(): valid(false) {}
-
-  //------------------------------------------------------------------------
-  //Handy ! operator to check for (in)validity
-  bool operator!() const { return !valid; }
-
   //------------------------------------------------------------------------
   //Get number of rows in result set
   virtual int count()=0;
@@ -87,14 +76,93 @@ public:
 
   //------------------------------------------------------------------------
   //Virtual destructor
-  virtual ~Result() {}
+  virtual ~ResultSet() {}
 };
 
 //==========================================================================
-// Database connection (abstract interface)
+// Database result auto-ptr wrapper
+// Allows inheritance of ResultSet while preserving single abstract interface
+class Result
+{
+private:
+  ResultSet *rset;
+
+  // Helper to allow copy-by-value (see auto_ptr for source of this hack)
+  struct Ref
+  {
+    ResultSet *rset;
+    explicit Ref(ResultSet *r): rset(r) {}
+  };
+
+public:
+  //------------------------------------------------------------------------
+  //Constructors 
+  Result(): rset(0) {}               // Invalid result
+  Result(ResultSet *r): rset(r) {}   // Valid result
+
+  //------------------------------------------------------------------------
+  //Copy constructor and assignment operators
+  // - detach rset from old one - note non-const
+  Result(Result& r): rset(r.rset) { r.rset=0; }
+  Result& operator=(Result& r) 
+  { 
+    if (rset && rset!=r.rset) delete rset;
+    rset=r.rset; r.rset=0;
+    return *this; 
+  }
+
+  //------------------------------------------------------------------------
+  //Ditto from 'Ref' helper - combination of the two is claimed to allow
+  //assignment by value - e.g.
+  // Result res = my_func_returning_result();
+  Result(Ref r): rset(r.rset) { }
+  Result& operator=(Ref& r) 
+  { 
+    if (rset && rset!=r.rset) delete rset;
+    rset=r.rset; 
+    return *this; 
+  }
+  operator Ref() { ResultSet *t = rset; rset=0; return Ref(t); }
+
+  //------------------------------------------------------------------------
+  //Handy ! operator to check for (in)validity
+  bool operator!() const { return !rset; }
+
+  //------------------------------------------------------------------------
+  //Get number of rows in result set
+  int count() { return rset?rset->count():0; }
+
+  //------------------------------------------------------------------------
+  //Get next row from result set
+  //Whether another was found - if so, writes into row
+  bool fetch(Row& row) { return rset?rset->fetch(row):false; }
+
+  //------------------------------------------------------------------------
+  //Get first value of next row from result set
+  //Whether another was found - if so, writes into value
+  bool fetch(string& value) { return rset?rset->fetch(value):false; }
+
+  //------------------------------------------------------------------------
+  //Destructor - delete result set
+  ~Result() { if (rset) delete rset; }
+};
+
+//==========================================================================
+// Database connection (abstract)
 class Connection
 {
+protected:
+  bool valid;
+
 public:
+  //------------------------------------------------------------------------
+  //Constructor
+  Connection(): valid(false) {}
+
+  //------------------------------------------------------------------------
+  //Handy ! operator to check for (in)validity
+  bool operator!() const { return !valid; }
+
   //==========================================================================
   // Virtual functions implemented by driver subclass
 
@@ -106,7 +174,7 @@ public:
   //------------------------------------------------------------------------
   //Execute a query and get result (e.g. SELECT)
   //Returns result - check this for validity
-  virtual Result& query(const string& sql)=0;
+  virtual Result query(const string& sql)=0;
 
   //------------------------------------------------------------------------
   //Get integer ID of last INSERT
