@@ -35,6 +35,7 @@ private:
   static const uint32_t BADADDR = 0xffffffff;
  
 public:
+  //--------------------------------------------------------------------------
   // Basic constructors
   IPAddress(): address(BADADDR) {}
   IPAddress(uint32_t in): address(in) {}
@@ -71,7 +72,59 @@ public:
 //------------------------------------------------------------------------
 // << operator to write IPAddress to ostream
 // e.g. cout << ip;
-ostream& operator<<(ostream& s, const IPAddress& e);
+ostream& operator<<(ostream& s, const IPAddress& ip);
+
+//==========================================================================
+// Protocol endpoint (address.cc) - IP Address and port identifying client
+class EndPoint
+{
+private:
+  IPAddress address;
+  int port;              // Host Byte Order
+
+public: 
+  //--------------------------------------------------------------------------
+  // Constructors
+  EndPoint(): address(), port(0) {}
+  EndPoint(IPAddress _address, int _port): address(_address), port(_port) {}
+  EndPoint(uint32_t in, int _port): address(in), port(_port) {}
+
+  // Constructor from a sockaddr_in - note ntohl/ntohs here!
+  EndPoint(const struct sockaddr_in& saddr):
+    address(ntohl(saddr.sin_addr.s_addr)), port(ntohs(saddr.sin_port)) {}
+
+  //--------------------------------------------------------------------------
+  // Export to sockaddr_in - note htonl/htons here!
+  void set(struct sockaddr_in& saddr)
+  {
+    saddr.sin_family = AF_INET;
+    saddr.sin_addr.s_addr = address.nbo();
+    saddr.sin_port = htons(port);
+  }
+
+  //--------------------------------------------------------------------------
+  // Output to given stream
+  void output(ostream& s) const;
+
+  //--------------------------------------------------------------------------
+  // Test for badness
+  bool operator!() const { return !address; }
+
+  //--------------------------------------------------------------------------
+  // == operator 
+  bool operator==(const EndPoint& o) const 
+  { return address == o.address && port == o.port; }
+
+  //--------------------------------------------------------------------------
+  // < operator to help with maps 
+  bool operator<(const EndPoint& o) const 
+  { return address < o.address || port < o.port; }
+};
+
+//------------------------------------------------------------------------
+// << operator to write EndPoint to ostream
+// e.g. cout << ep;
+ostream& operator<<(ostream& s, const EndPoint& ep);
 
 //==========================================================================
 // Abstract Socket (socket.cc)
@@ -240,15 +293,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Raw datagram recvfrom wrapper
-  // If address_p and/or port_p are non-null, sets them to the source of the
-  // datagram
-  ssize_t crecvfrom(void *buf, size_t len, int flags,
-		    IPAddress *address_p, int *port_p);
+  // If endpoint_p is non-null, sets it to the source of the datagram
+  ssize_t crecvfrom(void *buf, size_t len, int flags, EndPoint *endpoint_p);
 
   //--------------------------------------------------------------------------
   // Raw datagram sendto wrapper
-  int csendto(const void *msg, size_t len, int flags,
-	      IPAddress address, int port);
+  int csendto(const void *msg, size_t len, int flags, EndPoint endpoint);
 
   //--------------------------------------------------------------------------
   // Safe datagram recv wrapper
@@ -264,18 +314,15 @@ public:
 
   //--------------------------------------------------------------------------
   // Safe datagram recvfrom wrapper
-  // If address_p and/or port_p are non-null, sets them to the source of the
-  // datagram
+  // If endpoint_p is non-null, sets it to the source of the datagram
   // Throws SocketError on failure
-  ssize_t recvfrom(void *buf, size_t len, int flags,
-		   IPAddress *address_p, int *port_p)
+  ssize_t recvfrom(void *buf, size_t len, int flags, EndPoint *endpoint_p)
     throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Safe datagram sendto wrapper
   // Throws SocketError on failure
-  ssize_t sendto(const void *buf, size_t len, int flags,
-		 IPAddress address, int port)
+  ssize_t sendto(const void *buf, size_t len, int flags, EndPoint endpoint)
     throw (SocketError);
 };
 
@@ -283,14 +330,13 @@ public:
 // TCP client
 class TCPClient: public TCPSocket
 {
-  IPAddress server_addr;
-  int server_port;
+  EndPoint server;
   bool connected;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor 
-  TCPClient(IPAddress addr, int port);
+  TCPClient(EndPoint endpoint);
 
   //--------------------------------------------------------------------------
   // Test for badness
@@ -308,8 +354,7 @@ class TCPServerThread: public MT::PoolThread
 public:
   TCPServer *server;
   int client_fd;
-  IPAddress client_address;
-  int client_port;
+  EndPoint client_ep;
 
   TCPServerThread(MT::PoolReplacer<TCPServerThread>& _rep):
     MT::PoolThread(_rep) {}
@@ -339,8 +384,7 @@ public:
   // Virtual function to process a single connection on the given socket.  
   // Called in its own thread, this use blocking IO to read and write the
   // socket, and should just return when the socket ends or when bored
-  virtual void process(TCPSocket &s, IPAddress client_address,
-		       int client_port)=0;
+  virtual void process(TCPSocket &s, EndPoint client)=0;
 };
 
 

@@ -34,7 +34,8 @@ int main(int argc, char **argv)
 
   cout << "Host: " << addr << " (" << addr.get_hostname() << ")" << endl;
 
-  ObTools::Net::TCPClient client(addr, port);
+  ObTools::Net::EndPoint ep(addr, port);
+  ObTools::Net::TCPClient client(ep);
 
   if (!client)
   {

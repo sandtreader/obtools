@@ -15,16 +15,12 @@ namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
 // Constructor 
-TCPClient::TCPClient(IPAddress addr, int port):
-  server_addr(addr),
-  server_port(port),
+TCPClient::TCPClient(EndPoint endpoint):
+  server(endpoint),
   connected(false)
 {
   struct sockaddr_in saddr;
-
-  saddr.sin_family      = AF_INET;
-  saddr.sin_addr.s_addr = server_addr.nbo();
-  saddr.sin_port        = htons(server_port);
+  server.set(saddr);
 
   if (fd>=0 && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
     connected = true;

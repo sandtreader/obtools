@@ -15,6 +15,9 @@ namespace ObTools { namespace Net {
 
 //!!! Consider MT issues here - may need global resolver lock
 
+//==========================================================================
+// IP Addresses
+
 //--------------------------------------------------------------------------
 // Name lookup constructor
 IPAddress::IPAddress(const string& hostname_s)
@@ -60,11 +63,28 @@ void IPAddress::output_dotted_quad(ostream& s) const
 
 //--------------------------------------------------------------------------
 // Dotted quad output operator
-ostream& operator<<(ostream& s, const IPAddress& e)
+ostream& operator<<(ostream& s, const IPAddress& ip)
 {
-  e.output_dotted_quad(s);
+  ip.output_dotted_quad(s);
 }
 
+
+//==========================================================================
+// End-points
+
+//--------------------------------------------------------------------------
+// Output to given stream
+void EndPoint::output(ostream& s) const
+{
+  s << address << ":" << port;
+}
+
+//--------------------------------------------------------------------------
+// Dotted quad output operator
+ostream& operator<<(ostream& s, const EndPoint& ep)
+{
+  ep.output(s);
+}
 
 }} // namespaces
 

@@ -35,8 +35,7 @@ void TCPServer::run()
     int new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
     if (new_fd >= 0)
     {
-      IPAddress client_address(htonl(saddr.sin_addr.s_addr));
-      int client_port = ntohs(saddr.sin_port);
+      EndPoint client(saddr);
 
       // Get a thread
       TCPServerThread *thread = threadpool.remove();
@@ -45,8 +44,7 @@ void TCPServer::run()
 	// Fill in parameters
 	thread->server         = this;
 	thread->client_fd      = new_fd;
-	thread->client_address = client_address;
-	thread->client_port    = client_port;
+	thread->client_ep      = client;
 
 	// Start it off
 	thread->kick();
@@ -68,7 +66,7 @@ void TCPServerThread::run()
   TCPSocket s(client_fd);
 
   // Just pass them to the server's process function
-  server->process(s, client_address, client_port);
+  server->process(s, client_ep);
 }
 
 }} // namespaces

@@ -18,16 +18,13 @@ public:
   TestServer(): ObTools::Net::TCPServer(5000) {}
 
   void process(ObTools::Net::TCPSocket& s, 
-	       ObTools::Net::IPAddress client_address,
-	       int client_port);
+	       ObTools::Net::EndPoint client);
 };
 
 void TestServer::process(ObTools::Net::TCPSocket& s, 
-			 ObTools::Net::IPAddress client_address,
-			 int client_port)
+			 ObTools::Net::EndPoint client)
 {
-  cerr << "Got connection from " << client_address << ":" << client_port 
-       << endl;
+  cerr << "Got connection from " << client << endl;
 
   try
   {
@@ -35,8 +32,7 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
     string buf;
     while (s >> buf) s << buf;
 
-    cerr << "Connection from " << client_address << ":" << client_port 
-	 << " ended\n";
+    cerr << "Connection from " << client << " ended\n";
   }
   catch (ObTools::Net::SocketError se)
   {

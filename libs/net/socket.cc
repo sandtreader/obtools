@@ -313,10 +313,10 @@ int UDPSocket::csend(const void *msg, size_t len, int flags)
 
 //--------------------------------------------------------------------------
 // Raw datagram recvfrom wrapper
-// If address_p and/or port_p are non-null, sets them to the source of the
+// If endpoint_p is non-null, sets it to the source of the
 // datagram
 ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
-			      IPAddress *address_p, int *port_p)
+			     EndPoint *endpoint_p)
 {
   struct sockaddr_in saddr;
   socklen_t slen = sizeof(saddr);
@@ -330,11 +330,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
   }
   while (size<0 && errno == EINTR);
 
-  if (size >= 0)
-  {
-    if (address_p) *address_p = IPAddress(ntohl(saddr.sin_addr.s_addr));
-    if (port_p)    *port_p    = ntohs(saddr.sin_port);
-  }
+  if (size >= 0 && endpoint_p) *endpoint_p = EndPoint(saddr);
   
   return size;
 }
@@ -342,13 +338,10 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
 //--------------------------------------------------------------------------
 // Raw datagram sendto wrapper
 int UDPSocket::csendto(const void *msg, size_t len, int flags,
-			IPAddress address, int port)
+		       EndPoint endpoint)
 {
   struct sockaddr_in saddr;
-
-  saddr.sin_family = AF_INET;
-  saddr.sin_addr.s_addr = address.nbo();
-  saddr.sin_port = htons(port);
+  endpoint.set(saddr);
   int res;
 
   do
@@ -384,14 +377,13 @@ int UDPSocket::send(const void *buf, size_t len, int flags)
 
 //--------------------------------------------------------------------------
 // Safe datagram recvfrom wrapper
-// If address_p and/or port_p are non-null, sets them to the source of the
-// datagram
+// If endpoint_p is non-null, sets them to the source of the datagram
 // Throws SocketError on failure
 ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
-			     IPAddress *address_p, int *port_p)
+			    EndPoint *endpoint_p)
                                throw (SocketError)
 {
-  ssize_t size = crecvfrom(buf, len, flags, address_p, port_p);
+  ssize_t size = crecvfrom(buf, len, flags, endpoint_p);
   if (size < 0) throw SocketError(errno);
   return size;
 }
@@ -400,10 +392,10 @@ ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
 // Safe datagram sendto wrapper
 // Throws SocketError on failure
 ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
-			   IPAddress address, int port)
+			  EndPoint endpoint)
                              throw (SocketError)
 {
-  int res = csendto(buf, len, flags, address, port);
+  int res = csendto(buf, len, flags, endpoint);
   if (res < 0) throw SocketError(errno);
   return res;
 }
