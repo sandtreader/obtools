@@ -34,8 +34,8 @@ class TokenRecogniser
 {
 private:
   list<string> tokens;
-  int index;
-  int longest_valid;
+  unsigned int index;
+  unsigned int longest_valid;
   string current_token;
 
 public:
@@ -106,7 +106,6 @@ private:
   void close_code();
   void close_expr();
   void strip_eol();
-  void process_char(char c);
 
 public:
   //------------------------------------------------------------------------

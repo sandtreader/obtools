@@ -16,8 +16,8 @@ Processor::Processor(istream& instream, ostream& outstream,
 		     const Tags& ts, const char *streamname):
     sin(instream),
     sout(outstream),
-    tags(ts),
-    sname(streamname)
+    sname(streamname),
+    tags(ts)
 {
   // Put start tags in normal TR
   tr_normal.add_token(tags.start_code);
@@ -130,12 +130,6 @@ void Processor::strip_eol()
       return;
     }
   }
-}
-
-//--------------------------------------------------------------------------
-// Process a single character
-void Processor::process_char(char c)
-{
 }
 
 //--------------------------------------------------------------------------
