@@ -89,7 +89,12 @@ public:
 
   //--------------------------------------------------------------------------
   //Get XML content, still owned by Message, will be destroyed with it
-  XML::Element& get_xml();
+  const XML::Element& get_xml();
+
+  //--------------------------------------------------------------------------
+  //Get XML content for modification - clears textual copy if any.
+  //XML is still owned by Message, will be destroyed with it
+  XML::Element& get_modifiable_xml();
 
   //--------------------------------------------------------------------------
   //Get XML content to keep after Message is destroyed

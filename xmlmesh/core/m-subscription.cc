@@ -44,10 +44,10 @@ SubscriptionMessage::SubscriptionMessage(Message& msg):
   Message(msg.get_text())  // Copy text
 {
   // Get the XML
-  XML::Element& xml = get_xml();
+  const XML::Element& xml = get_xml();
 
   // Get xmlmesh.join/leave elements
-  XML::Element& xsub = xml.get_child();
+  const XML::Element& xsub = xml.get_child();
 
   if (xsub.name == "xmlmesh:join")
     operation = JOIN;

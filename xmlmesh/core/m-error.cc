@@ -48,10 +48,10 @@ ErrorMessage::ErrorMessage(Message& msg):
   Message(msg.get_text())  // Copy text
 {
   // Get the XML
-  XML::Element& xml = get_xml();
+  const XML::Element& xml = get_xml();
 
   // Get xmlmesh.error element
-  XML::Element& xerr = xml.get_child("xmlmesh:error");
+  const XML::Element& xerr = xml.get_child("xmlmesh:error");
 
   if (xerr.valid())
   {

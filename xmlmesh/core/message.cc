@@ -111,7 +111,7 @@ string Message::get_text()
 
 //--------------------------------------------------------------------------
 //Get XML content, still owned by Message, will be destroyed with it
-XML::Element& Message::get_xml()
+const XML::Element& Message::get_xml()
 {
   // If we've already got it, return immediately
   if (xml_message) return *xml_message;
@@ -149,6 +149,24 @@ XML::Element& Message::get_xml()
 }
 
 //--------------------------------------------------------------------------
+//Get XML content for modification - clears textual copy if any
+//XML is still owned by Message, will be destroyed with it
+XML::Element& Message::get_modifiable_xml()
+{
+  // Make sure we have XML form available
+  get_xml();
+
+  // Delete the textual form
+  textual_message = "";
+
+  // Return XML
+  if (xml_message)
+    return *xml_message;
+  else
+    return XML::Element::none;
+}
+
+//--------------------------------------------------------------------------
 //Get XML content to keep after Message is destroyed
 //Can return 0 if XML parse failed
 XML::Element *Message::detach_xml()
@@ -170,7 +188,7 @@ XML::Element *Message::detach_xml()
 //Get subject of a message
 string Message::get_subject()
 {
-  XML::Element& xml = get_xml();
+  const XML::Element& xml = get_xml();
   return xml.get_attr("subject");
 }
 
@@ -178,7 +196,7 @@ string Message::get_subject()
 //Get id of a message
 string Message::get_id()
 {
-  XML::Element& xml = get_xml();
+  const XML::Element& xml = get_xml();
   return xml.get_attr("id");
 }
 
@@ -186,7 +204,7 @@ string Message::get_id()
 //Get whether the message requires a response
 bool Message::get_rsvp()
 {
-  XML::Element& xml = get_xml();
+  const XML::Element& xml = get_xml();
   return xml.get_attr_bool("rsvp");
 }
 
@@ -194,7 +212,7 @@ bool Message::get_rsvp()
 //Get reference of a message
 string Message::get_ref()
 {
-  XML::Element& xml = get_xml();
+  const XML::Element& xml = get_xml();
   return xml.get_attr("ref");
 }
 
