@@ -137,9 +137,9 @@ void Server::process(Net::TCPSocket& socket,
 
 //------------------------------------------------------------------------
 // Constructor
-Server::Server(MT::Queue<ClientMessage>& receive_queue,
-		       int port, int backlog, 
-		       int min_spare_threads, int max_threads):
+Server::Server(ClientMessageQueue& receive_queue,
+	       int port, int backlog, 
+	       int min_spare_threads, int max_threads):
   receive_q(receive_queue),
   TCPServer((port?port:DEFAULT_PORT), backlog, 
 	    min_spare_threads, max_threads)

@@ -170,6 +170,10 @@ struct ClientMessage
 };
 
 //==========================================================================
+// Handy typedef for client message queues
+typedef MT::Queue<ClientMessage> ClientMessageQueue;
+
+//==========================================================================
 // OTMP server
 // Note, unlike the client it delivers messages to a given message queue
 // rather than providing a poll/wait interface;  this is because it is
@@ -179,7 +183,7 @@ struct ClientMessage
 class Server: public Net::TCPServer
 {
 private:
-  MT::Queue<ClientMessage>& receive_q;  // Note:  Not mine
+  ClientMessageQueue& receive_q;  // Note:  Not mine
   SessionMap client_sessions;  // Map of sessions
 
 public:
@@ -187,7 +191,7 @@ public:
   // Constructor - takes receive queue for incoming messages
   // port=0 means take default port for protocol
   // The rest is thread/socket tuning - see Net::TCPServer
-  Server(MT::Queue<ClientMessage>& receive_queue,
+  Server(ClientMessageQueue& receive_queue,
 	 int port=0, int backlog=5, 
 	 int min_spare_threads=1, int max_threads=10);
 
