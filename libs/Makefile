@@ -4,6 +4,8 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
+.PHONY: release clean test all
+
 all: 
 	$(MAKE) -C xml
 	$(MAKE) -C xmi
@@ -35,7 +37,7 @@ test:
 	$(MAKE) -C net test
 	$(MAKE) -C log test
 
-release: clean
+release: 
 	mkdir -p release/
 	$(MAKE) -C xml   RELEASEDIR=../release/ release
 	$(MAKE) -C xmi   RELEASEDIR=../release/ release
