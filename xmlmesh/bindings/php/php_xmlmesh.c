@@ -44,11 +44,15 @@ PHP_INI_END()
 /* ======================================================================= */
 /* Public functions                                                        */
 
+ZEND_FUNCTION(xmlmesh_send);
 ZEND_FUNCTION(xmlmesh_request);
+ZEND_FUNCTION(xmlmesh_simple_request);
 
 zend_function_entry xmlmesh_functions[] = 
 {
+  ZEND_FE(xmlmesh_send, NULL)
   ZEND_FE(xmlmesh_request, NULL)
+  ZEND_FE(xmlmesh_simple_request, NULL)
   {NULL, NULL, NULL}	
 };
 
@@ -150,9 +154,9 @@ ZEND_MINFO_FUNCTION(xmlmesh)
 /* Public function implementations                                         */
 
 /* ----------------------------------------------------------------------- */
-/* Send an XML Request and return XML response                             */
-/* bool xmlmesh_request(string subject, string xml);                       */
-ZEND_FUNCTION(xmlmesh_request)
+/* Send a one-way XML message with no response                             */
+/* bool xmlmesh_send(string subject, string xml);                          */
+ZEND_FUNCTION(xmlmesh_send)
 {
   char *subject;
   int subject_len;
@@ -161,7 +165,7 @@ ZEND_FUNCTION(xmlmesh_request)
 
   if (!XMLMESH_G(conn))
   {
-    zend_printf("XMLMesh request failed - no connection\n");
+    zend_printf("XMLMesh send failed - no connection\n");
     RETURN_FALSE;
   }
 
@@ -179,6 +183,70 @@ ZEND_FUNCTION(xmlmesh_request)
   }
 }
 
+/* ----------------------------------------------------------------------- */
+/* Send an XML Request and return XML response                             */
+/* string xmlmesh_request(string subject, string xml);                     */
+/* Returns empty string if request failed                                  */
+ZEND_FUNCTION(xmlmesh_request)
+{
+  char *subject;
+  int subject_len;
+  char *xml;
+  int xml_len;
+  char *response;
+
+  if (!XMLMESH_G(conn))
+  {
+    zend_printf("XMLMesh request failed - no connection\n");
+    RETURN_EMPTY_STRING();
+  }
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+			    &subject, &subject_len,
+			    &xml, &xml_len) == FAILURE) return;
+
+  if (ot_xmlmesh_request(XMLMESH_G(conn), subject, xml, &response))
+  {
+    // Copy it to estrdup and free it - inefficient!
+    RETVAL_STRING(response, 1);
+    free(response);
+    return;
+  }
+  else
+  {
+    RETURN_EMPTY_STRING();
+  }
+}
+
+/* ----------------------------------------------------------------------- */
+/* Send an XML Request and check for OK or error                           */
+/* bool xmlmesh_simple_request(string subject, string xml);                */
+ZEND_FUNCTION(xmlmesh_simple_request)
+{
+  char *subject;
+  int subject_len;
+  char *xml;
+  int xml_len;
+
+  if (!XMLMESH_G(conn))
+  {
+    zend_printf("XMLMesh request failed - no connection\n");
+    RETURN_FALSE;
+  }
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+			    &subject, &subject_len,
+			    &xml, &xml_len) == FAILURE) return;
+
+  if (ot_xmlmesh_request(XMLMESH_G(conn), subject, xml, NULL))
+  {
+    RETURN_TRUE;
+  }
+  else
+  {
+    RETURN_FALSE;
+  }
+}
 
 
 
