@@ -218,11 +218,21 @@ Element& Element::get_child(const string& ename)
 }
 
 //--------------------------------------------------------------------------
+// Ensure the existence of a child of the given name, and return it
+// Creates new child element of the given name if one doesn't already exist
+Element& Element::make_child(const string& ename)
+{
+  Element& child = get_child(ename);
+  if (!!child) return child;
+  return add(ename);
+}
+
+//--------------------------------------------------------------------------
 // Find first (or only) descendant of given name
 // Returns Element::none if there isn't one 
 // (Like get_child() but ignoring intervening cruft)
 // Const and non-const implementations
-const Element &Element::get_descendant(const string& ename) const
+const Element& Element::get_descendant(const string& ename) const
 {
   for(list<Element *>::const_iterator p=children.begin();
       p!=children.end();
@@ -239,7 +249,7 @@ const Element &Element::get_descendant(const string& ename) const
   return Element::none;
 }
 
-Element &Element::get_descendant(const string& ename)
+Element& Element::get_descendant(const string& ename)
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();

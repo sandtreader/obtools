@@ -72,18 +72,39 @@ public:
   bool operator!() const { return !valid(); }
 
   //------------------------------------------------------------------------
-  // Constructors & Destructors
-  Element(string n):name(n) { }
-  Element(string n, string c):name(n), content(c) {  }
-  ~Element();
+  // Constructors 
+  // One string: just the name
+  Element(const string& n):name(n) { }
+
+  // Two strings: name and textual content
+  Element(const string& n, const string& c):name(n), content(c) {  }
+
+  // Three strings: name and one attribute - e.g. namespace
+  Element(const string& n, const string& a, const string& v): name(n) 
+    { set_attr(a,v); }
+
+  // Four strings: name, one attribute and content
+  Element(const string& n, const string& a, const string& v, const string& c):
+    name(n), content(c) { set_attr(a,v); }
 
   //------------------------------------------------------------------------
   // Add a child element
-  Element *add(Element *child) { children.push_back(child); return child; }
+  Element& add(Element *child) { children.push_back(child); return *child; }
  
   //------------------------------------------------------------------------
   // Add a new empty child element by name
-  Element *add(const string& cname) { return add(new Element(cname)); }
+  // Also 2-, 3- and 4-string options (see constructors above)
+  Element& add(const string& n) { return add(new Element(n)); }
+
+  Element& add(const string& n, const string& c) 
+  { return add(new Element(n, c)); }
+
+  Element& add(const string& n, const string& a, const string& v) 
+  { return add(new Element(n, a, v)); }
+
+  Element& add(const string& n, const string& a, 
+	       const string& v, const string& c) 
+  { return add(new Element(n, a, v, c)); }
 
   //------------------------------------------------------------------------
   // Dump to given output stream
@@ -101,8 +122,8 @@ public:
   // Find first (or only) child element, whatever it is
   // Returns Element::none if there isn't one 
   // Const and non-const implementations (likewise rest of accessors)
-  const Element &get_child() const;
-  Element &get_child();
+  const Element& get_child() const;
+  Element& get_child();
 
   //--------------------------------------------------------------------------
   // Find first (or only) child element of given name
@@ -111,15 +132,20 @@ public:
   //     XML::Element& e = get_child(root, "foo");
   //     if (e.valid())
   //       //Use e
-  const Element &get_child(const string& ename) const;
-  Element &get_child(const string& ename);
+  const Element& get_child(const string& ename) const;
+  Element& get_child(const string& ename);
+
+  //--------------------------------------------------------------------------
+  // Ensure the existence of a child of the given name, and return it
+  // Creates new child element of the given name if one doesn't already exist
+  Element& make_child(const string& ename);
 
   //--------------------------------------------------------------------------
   // Find first (or only) descendant of given name
   // Returns Element::none if there isn't one 
   // (Like get_child() but ignoring intervening cruft)
-  const Element &get_descendant(const string& ename) const;
-  Element &get_descendant(const string& ename);
+  const Element& get_descendant(const string& ename) const;
+  Element& get_descendant(const string& ename);
 
   //--------------------------------------------------------------------------
   // Find all child elements of given name
@@ -215,6 +241,10 @@ public:
   // net effect being that names mapped to "" are (deep) deleted from
   // the document.  
   bool translate(map<string, string>& trans_map);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Element();
 };
 
 //==========================================================================
