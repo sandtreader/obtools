@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = socket.o address.o client.o server.o
+OBJS = socket.o address.o client.o server.o stream.o
 
 ifdef DEBUG
 CPPFLAGS += -g

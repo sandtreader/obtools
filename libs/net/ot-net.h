@@ -329,7 +329,7 @@ public:
 
 //--------------------------------------------------------------------------
 // << operator to write strings to TCPSockets
-// NOTE: Not a general stream operator!
+// NOTE: Not a general stream operator - use TCPStream below
 // e.g. s << "HELO\n";
 TCPSocket& operator<<(TCPSocket& s, const string& t);
 
@@ -337,9 +337,42 @@ TCPSocket& operator<<(TCPSocket& s, const string& t);
 // >> operator to read strings from TCPSockets
 // Return whether stream still open - hence not chainable
 // Erases string before appending
-// NOTE: Not a general stream operator!
+// NOTE: Not a general stream operator - use TCPStream below
 // e.g. while (s >> buf) cout << buf;
 bool operator>>(TCPSocket& s, string& t);
+
+//==========================================================================
+// TCP Socket streams
+class TCPStreamBuf: public streambuf
+{
+private:
+  TCPSocket& s;
+  int bufc;           // One-character buffer
+
+protected:
+  // Streambuf overflow - handles characters
+  int overflow(int); 
+   
+  // Streambuf underflows - see STL manual for awful details
+  int underflow();
+  int uflow();
+
+public:
+  // Constructor
+  TCPStreamBuf(TCPSocket& _s);
+};
+
+//TCP stream
+class TCPStream: public iostream
+{
+public:
+  // Constructor - like fstream
+  TCPStream(TCPSocket& s): 
+    iostream(new TCPStreamBuf(s)) {}
+
+  // Destructor
+  ~TCPStream() { delete rdbuf(); }
+};
 
 //==========================================================================
 // UDP Socket (socket.cc)
@@ -351,7 +384,7 @@ public:
   UDPSocket();
 
   //--------------------------------------------------------------------------
-  // Constructor - allocates socket and binds to local port (UDP server)
+  // Constructor - allocatebs socket and binds to local port (UDP server)
   UDPSocket(int port);
 
   //--------------------------------------------------------------------------
