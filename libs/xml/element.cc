@@ -173,6 +173,27 @@ Element& Element::get_child(const string& ename)
 }
 
 //--------------------------------------------------------------------------
+// Find first (or only) descendant of given name
+// Returns Element::none if there isn't one 
+// (Like get_child() but ignoring intervening cruft)
+Element &Element::get_descendant(const string& ename)
+{
+  for(list<Element *>::iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    Element& se = **p;
+    if (se.name == ename) return se;
+
+    //Not child, but ask it to search below itself
+    Element& sse = se.get_descendant(ename);
+    if (sse.valid()) return sse;
+  }
+
+  return Element::none;
+}
+
+//--------------------------------------------------------------------------
 // Find all child elements of given name
 // Returns list of pointers
 list<Element *> Element::get_children(const string& ename)
