@@ -19,7 +19,7 @@ using namespace std;
 namespace ObTools { namespace XMI {
 
 //==========================================================================
-// XMI general element (parent of all model elements)
+// UML general element (parent of all model elements)
 enum ElementVisibility
 {
   ELEMENT_PUBLIC,
@@ -70,7 +70,7 @@ struct Multiplicity
 class Class;
 
 //==========================================================================
-// XMI Attribute class
+// UML Attribute class
 class Attribute: Element
 {
 public:
@@ -89,7 +89,7 @@ public:
 };
 
 //==========================================================================
-// XMI operation parameter class
+// UML operation parameter class
 enum ParameterKind
 {
   PARAMETER_IN,
@@ -118,7 +118,7 @@ public:
 
 
 //==========================================================================
-// XMI Operation class
+// UML Operation class
 class Operation: Element
 {
 public:
@@ -133,21 +133,20 @@ public:
 };
 
 //==========================================================================
-// XMI Class class
+// UML Class class
 // Also used for Datatypes
 enum ClassKind
 {
   CLASS_CONCRETE,  // Normal user-defined class
   CLASS_ABSTRACT,  // Abstract user-defined class
-  CLASS_PRIMITIVE, // System-defined datatype
-  CLASS_OTHER      // See stereotype string
+  CLASS_PRIMITIVE  // System-defined datatype
 };
 
 class Class: Element
 {
 public:
   ClassKind kind;
-  string stereotype;         // If CLASS_TYPE_OTHER
+  string stereotype;        
   list <Class *> parents;  // Generalisations
   list <Class *> children; // Specialisations
   list <Attribute> attributes;
@@ -162,18 +161,20 @@ public:
     kind(k)
   {}
 
-  //'Other' stereotype
-  Class(string& i, string& n, string& st,
+  //With stereotype
+  Class(string& i, string& n, 
+	string& st,
+	ClassKind k=CLASS_CONCRETE,
 	ElementVisibility v=ELEMENT_PUBLIC):
     Element(i,n,v),
-    kind(CLASS_OTHER),
+    kind(k),
     stereotype(st)
   {}
 
 };
 
 //==========================================================================
-// XMI AssociationEnd class
+// UML AssociationEnd class
 enum AggregationKind
 {
   AGGREGATION_NONE,
@@ -228,7 +229,7 @@ public:
 };
 
 //==========================================================================
-// XMI Association class
+// UML Association class
 class Association: Element
 {
 public:
@@ -250,7 +251,7 @@ public:
 };
 
 //==========================================================================
-// XMI Package class
+// UML Package class
 class Package: Element
 {
 public:
@@ -264,7 +265,7 @@ public:
 };
 
 //==========================================================================
-// XMI Model class
+// UML Model class
 // Essentially the root package, but versioned
 class Model: Package
 {
