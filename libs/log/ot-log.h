@@ -217,30 +217,6 @@ public:
 };
 
 //==========================================================================
-// Null stream for use for channels above global maximum level
-
-//Null streambuf
-class NullBuf: public streambuf
-{
-protected:
-  int overflow(int) { return 0; }
-   
-public:
-  NullBuf() {}
-  ~NullBuf() {}
-  void close() {}
-};
-
-//Null stream
-class NullStream: public ostream
-{
-public:
-  NullStream(): ostream(new NullBuf()) {}
-  ~NullStream() { delete rdbuf(); }
-  void close() { }
-};
-
-//==========================================================================
 // Singleton Distributor for simple Logs
 extern Distributor logger;
 
