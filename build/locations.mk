@@ -25,6 +25,7 @@ OT-LIBS = cli:libs/cli     			\
           mt:libs/mt       			\
           net:libs/net     			\
           regen:libs/regen 			\
+	  soap:libs/soap			\
           text:libs/text   			\
           xmi:libs/xmi     			\
           xml:libs/xml     			\
