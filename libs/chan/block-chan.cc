@@ -15,7 +15,7 @@ namespace ObTools { namespace Channel {
 // Block Reader
 
 // Read implementation
-size_t BlockReader::try_read(void *buf, size_t count) throw (Error)
+size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
 {
   // Limit to length available
   if (length < count) count = length;
@@ -34,7 +34,7 @@ size_t BlockReader::try_read(void *buf, size_t count) throw (Error)
 // Block Writer
 
 // Write implementation
-void BlockWriter::write(const void *buf, size_t count) throw (Error)
+void BlockWriter::basic_write(const void *buf, size_t count) throw (Error)
 {
   // Must fit, or error
   if (count <= length)

@@ -48,7 +48,7 @@ public:
   // Read as much data as is available, up to 'count' bytes
   // Returns amount read
   // Throws Error on failure (not EOF)
-  virtual size_t try_read(void *buf, size_t count) throw (Error) = 0;
+  virtual size_t basic_read(void *buf, size_t count) throw (Error) = 0;
 
   //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a binary buffer
@@ -84,14 +84,14 @@ class Writer
 {
 public:
   //--------------------------------------------------------------------------
-  // Basic constructor
+  // Basic constructor, destructor
   Writer() {}
   virtual ~Writer() {}
 
   //--------------------------------------------------------------------------
   // Write exact amount of data to the channel from a binary buffer
   // Throws Error on failure
-  virtual void write(const void *buf, size_t count) throw (Error) = 0;
+  virtual void basic_write(const void *buf, size_t count) throw (Error) = 0;
 
   //--------------------------------------------------------------------------
   // Write a string to the channel
@@ -126,7 +126,7 @@ public:
   TCPSocketReader(Net::TCPSocket& _s): s(_s) {}
 
   // Read implementations
-  virtual size_t try_read(void *buf, size_t count) throw (Error);
+  virtual size_t basic_read(void *buf, size_t count) throw (Error);
 };
 
 //==========================================================================
@@ -141,7 +141,7 @@ public:
   TCPSocketWriter(Net::TCPSocket& _s): s(_s) {}
 
   // Write implementation
-  virtual void write(const void *buf, size_t count) throw (Error);
+  virtual void basic_write(const void *buf, size_t count) throw (Error);
 };
 
 //==========================================================================
@@ -159,7 +159,7 @@ public:
     data(_data), length(_length) {}
 
   // Read implementations
-  virtual size_t try_read(void *buf, size_t count) throw (Error);
+  virtual size_t basic_read(void *buf, size_t count) throw (Error);
 };
 
 //==========================================================================
@@ -176,7 +176,7 @@ public:
     data(_data), length(_length) {}
 
   // Write implementation
-  virtual void write(const void *buf, size_t count) throw (Error);
+  virtual void basic_write(const void *buf, size_t count) throw (Error);
 
   // Get length remaining in block
   size_t remaining() { return length; }

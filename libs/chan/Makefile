@@ -10,7 +10,7 @@ NAME   	= ot-chan
 HEADERS = ot-chan.h
 DEPENDS = mt net
 OBJS  	= reader.o writer.o tcp-chan.o block-chan.o
-TESTS 	= 
+TESTS 	= test-block
 MT-VARIANTS = 1
 
 ROOT    = ../..

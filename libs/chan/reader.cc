@@ -31,7 +31,7 @@ bool Reader::read(void *buf, size_t count) throw (Error)
 
   while (done < count)
   {
-    size_t size = try_read(p, count-done);
+    size_t size = basic_read(p, count-done);
     if (size)
     {
       p += size;
@@ -58,7 +58,7 @@ bool Reader::read(string& s, size_t count) throw (Error)
     size_t n = CHANNEL_BUFFER_SIZE;
     if (count-done < n) n = count-done;
 
-    size_t size = try_read(buf, n);
+    size_t size = basic_read(buf, n);
     if (size)
     {
       s.append(buf, size);

@@ -19,12 +19,28 @@
 namespace ObTools { namespace Channel {
 
 //--------------------------------------------------------------------------
+// Write a string to the channel
+// Throws Error on failure
+void Writer::write(const string& s) throw (Error)
+{
+  basic_write(s.c_str(), s.size());
+}
+
+//--------------------------------------------------------------------------
+// Write the given C string to the channel
+// Throws Error on failure
+void Writer::write(const char *p) throw(Error)
+{
+  basic_write(p, strlen(p));
+}
+
+//--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 4-byte integer to the channel
 // Throws Error on failure
 void Writer::write_nbo_32(uint32_t i) throw (Error)
 {
   uint32_t n = htonl(i);
-  write(&n, 4);
+  basic_write(&n, 4);
 }
 
 //--------------------------------------------------------------------------
