@@ -118,8 +118,6 @@ public:
   // Convert to HH:MM:SS string - never goes into days or higher
   // Can output fractional seconds - rounds to nearest millisecond
   string hms() const;
-
-
 };
 
 //==========================================================================
@@ -180,7 +178,7 @@ public:
   //------------------------------------------------------------------------
   // Subtract two stamps to get duration between
   Duration operator-(const Stamp& o) const
-  { return Duration::from_ntp(o.t-t); }
+  { return Duration::from_ntp(t-o.t); }
 
   //------------------------------------------------------------------------
   // Add a Duration to a stamp
