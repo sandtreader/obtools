@@ -10,6 +10,8 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
+#define SOCKET_BUFFER_SIZE 1024
+
 namespace ObTools { namespace Net {
 
 //==========================================================================
@@ -39,10 +41,21 @@ void Socket::go_blocking()
 }
 
 //==========================================================================
+// Socket exceptions
+
+//------------------------------------------------------------------------
+// << operator to write SocketError to ostream
+// e.g. cout << e;
+ostream& operator<<(ostream& s, const SocketError& e)
+{ 
+  s << "Socket Error (" << e.error << "): " << strerror(e.error); 
+}
+
+//==========================================================================
 // TCP Socket 
 
 //--------------------------------------------------------------------------
-// Constructor - allocate socket
+// Constructor - allocates socket
 TCP_Socket::TCP_Socket()
 {
   fd = socket(PF_INET, SOCK_STREAM, 0); 
@@ -52,14 +65,32 @@ TCP_Socket::TCP_Socket()
 // Raw stream read wrapper
 ssize_t TCP_Socket::cread(void *buf, size_t count)
 { 
-  return ::read(fd, buf, count); 
+  ssize_t size;
+
+  // Silently loop on EINTR
+  do
+  {
+    size = ::read(fd, buf, count); 
+  }
+  while (size<0 && errno == EINTR);
+
+  return size;
 }
 
 //--------------------------------------------------------------------------
 // Raw stream write wrapper
-ssize_t TCP_Socket::cwrite(void *buf, size_t count)
+ssize_t TCP_Socket::cwrite(const void *buf, size_t count)
 { 
-  return ::write(fd, buf, count); 
+  ssize_t size;
+
+  // Silently loop on EINTR
+  do
+  {
+    size = ::write(fd, buf, count); 
+  }
+  while (size<0 && errno == EINTR);
+
+  return size;
 }
 
 //--------------------------------------------------------------------------
@@ -67,7 +98,7 @@ ssize_t TCP_Socket::cwrite(void *buf, size_t count)
 // Throws SocketError on failure
 ssize_t TCP_Socket::read(void *buf, size_t count) throw (SocketError)
 { 
-  ssize_t size = ::read(fd, buf, count);
+  ssize_t size = cread(buf, count);
   if (size < 0) throw SocketError(errno);
   return size;
 }
@@ -75,18 +106,79 @@ ssize_t TCP_Socket::read(void *buf, size_t count) throw (SocketError)
 //--------------------------------------------------------------------------
 // Safe stream write wrapper
 // Throws SocketError on failure
-ssize_t TCP_Socket::write(void *buf, size_t count) throw (SocketError)
+void TCP_Socket::write(const void *buf, size_t count) throw (SocketError)
 { 
-  ssize_t size = ::write(fd, buf, count);
-  if (size < 0) throw SocketError(errno);
-  return size;
+  ssize_t size = cwrite(buf, count);
+  if (size!=count) throw SocketError(errno);
+}
+
+//--------------------------------------------------------------------------
+// Read data from the socket into a string
+// Appends whatever read data is available to the given string 
+// Returns whether stream has closed (last size was 0)
+// Throws SocketError on failure
+bool TCP_Socket::read(string& s) throw (SocketError)
+{
+  char buf[SOCKET_BUFFER_SIZE+1];
+  ssize_t size = read(buf, SOCKET_BUFFER_SIZE);
+  if (size)
+  {
+    s.append(buf, size);
+    return true;
+  }
+  else return false;
+}
+
+//--------------------------------------------------------------------------
+// Read everything to stream close, blocking until finished
+// Throws SocketError on failure
+void TCP_Socket::readall(string& s) throw (SocketError)
+{
+  while (read(s))
+    ;
+}
+ 
+//--------------------------------------------------------------------------
+// Write the given string to the socket, blocking until finished
+// Throws SocketError on failure
+void TCP_Socket::write(const string &s) throw(SocketError)
+{
+  const char *p = s.data();
+  write(p, s.size());
+}
+
+//--------------------------------------------------------------------------
+// Write the given C string to the socket, blocking until finished
+// Throws SocketError on failure
+void TCP_Socket::write(const char *p) throw(SocketError)
+{
+  write(p, strlen(p));
+}
+
+//--------------------------------------------------------------------------
+// << operator to write strings to TCP_Sockets
+// NOTE: Not a general stream operator!
+// e.g. s << "HELO\n";
+TCP_Socket& operator<<(TCP_Socket& s, const string& t)
+{
+  s.write(t);
+}
+
+//--------------------------------------------------------------------------
+// >> operator to read strings from TCP_Sockets
+// Return whether stream still open - hence not chainable
+// NOTE: Not a general stream operator!
+// e.g. while (s >> buf) cout << buf;
+bool operator>>(TCP_Socket& s, string& t)
+{
+  return s.read(t);
 }
 
 //==========================================================================
 // UDP Socket 
 
 //--------------------------------------------------------------------------
-// Constructor - allocate socket
+// Constructor - allocates socket
 UDP_Socket::UDP_Socket()
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
@@ -96,14 +188,32 @@ UDP_Socket::UDP_Socket()
 // Raw datagram recv wrapper
 ssize_t UDP_Socket::crecv(void *buf, size_t len, int flags)
 { 
-  return ::recv(fd, buf, len, flags); 
+  ssize_t size;
+
+  // Silently loop on EINTR
+  do
+  {
+    size = ::recv(fd, buf, len, flags); 
+  }
+  while (size<0 && errno == EINTR);
+
+  return size;
 }
 
 //--------------------------------------------------------------------------
 // Raw datagram send wrapper
-int UDP_Socket::csend(void *msg, size_t len, int flags)
+int UDP_Socket::csend(const void *msg, size_t len, int flags)
 { 
-  return ::send(fd, msg, len, flags); 
+  int res;
+
+  // Silently loop on EINTR
+  do
+  {
+    res = ::send(fd, msg, len, flags); 
+  }
+  while (res<0 && errno == EINTR);
+
+  return res;
 }
 
 //--------------------------------------------------------------------------
@@ -115,22 +225,28 @@ ssize_t UDP_Socket::crecvfrom(void *buf, size_t len, int flags,
 {
   struct sockaddr_in saddr;
   socklen_t slen = sizeof(saddr);
+  ssize_t size;
 
-  ssize_t size = ::recvfrom(fd, buf, len, flags, 
-			    (struct sockaddr *)&saddr, &slen); 
+  // Silently loop on EINTR
+  do
+  {
+    size = ::recvfrom(fd, buf, len, flags, 
+		      (struct sockaddr *)&saddr, &slen); 
+  }
+  while (size<0 && errno == EINTR);
 
   if (size >= 0)
   {
     if (address_p) *address_p = IP_Address(ntohl(saddr.sin_addr.s_addr));
     if (*port_p)   *port_p    = ntohs(saddr.sin_port);
   }
-
+  
   return size;
 }
 
 //--------------------------------------------------------------------------
 // Raw datagram sendto wrapper
-int UDP_Socket::csendto(void *msg, size_t len, int flags,
+int UDP_Socket::csendto(const void *msg, size_t len, int flags,
 			IP_Address address, int port)
 {
   struct sockaddr_in saddr;
@@ -138,9 +254,16 @@ int UDP_Socket::csendto(void *msg, size_t len, int flags,
   saddr.sin_family = AF_INET;
   saddr.sin_addr.s_addr = address.nbo();
   saddr.sin_port = htons(port);
+  int res;
 
-  return ::sendto(fd, msg, len, flags, 
+  do
+  {
+    res = ::sendto(fd, msg, len, flags, 
 		  (struct sockaddr *)&saddr, sizeof(saddr)); 
+  }
+  while (res<0 && errno == EINTR);
+
+  return res;
 };
 
 //--------------------------------------------------------------------------
@@ -148,7 +271,7 @@ int UDP_Socket::csendto(void *msg, size_t len, int flags,
 // Throws SocketError on failure
 ssize_t UDP_Socket::recv(void *buf, size_t len, int flags) throw (SocketError)
 {
-  ssize_t size = ::recv(fd, buf, len, flags);
+  ssize_t size = crecv(buf, len, flags);
   if (size < 0) throw SocketError(errno);
   return size;
 }
@@ -156,9 +279,10 @@ ssize_t UDP_Socket::recv(void *buf, size_t len, int flags) throw (SocketError)
 //--------------------------------------------------------------------------
 // Safe datagram send wrapper
 // Throws SocketError on failure
-int UDP_Socket::send(void *buf, size_t len, int flags) throw (SocketError)
+int UDP_Socket::send(const void *buf, size_t len, int flags) 
+  throw (SocketError)
 {
-  int res = ::send(fd, buf, len, flags);
+  int res = csend(buf, len, flags);
   if (res < 0) throw SocketError(errno);
   return res;
 }
@@ -182,7 +306,7 @@ ssize_t UDP_Socket::recvfrom(void *buf, size_t len, int flags,
 // If address_p and/or port_p are non-null, sets them to the source of the
 // datagram
 // Throws SocketError on failure
-ssize_t UDP_Socket::sendto(void *buf, size_t len, int flags,
+ssize_t UDP_Socket::sendto(const void *buf, size_t len, int flags,
 			   IP_Address address, int port)
                              throw (SocketError)
 {

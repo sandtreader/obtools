@@ -36,7 +36,7 @@ IP_Address::IP_Address(const char *hostname)
 }
 
 //--------------------------------------------------------------------------
-// Reverse lookup
+// Get hostname (reverse lookup), or dotted quad
 string IP_Address::get_hostname() const
 {
   struct hostent *host;

@@ -33,20 +33,27 @@ private:
   static const uint32_t BADADDR = 0xffffffff;
  
 public:
-  // Constructors
+  // Basic constructors
   IP_Address(): address(BADADDR) {}
   IP_Address(uint32_t in): address(in) {}
+
+  //--------------------------------------------------------------------------
+  // Name lookup constructor
   IP_Address(const char *hostname);  // Resolves name
 
+  //--------------------------------------------------------------------------
   // Get network byte order integer
   uint32_t nbo() const { return ::htonl(address); }
 
+  //--------------------------------------------------------------------------
   // Get hostname (reverse lookup), or dotted quad
   string get_hostname() const;
 
+  //--------------------------------------------------------------------------
   // Output dotted quad to given stream
   void output_dotted_quad(ostream& s) const;
 
+  //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return address==BADADDR; }
 };
@@ -73,13 +80,17 @@ protected:
   virtual ~Socket();
 
 public:
+  //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return fd<0; }
 
-  // Go non-blocking/blocking (blocking is default)
+  //--------------------------------------------------------------------------
+  // Go non-blocking
   void go_nonblocking();
-  void go_blocking();
 
+  //--------------------------------------------------------------------------
+  // Go blocking (the default)
+  void go_blocking();
 };
 
 //==========================================================================
@@ -88,55 +99,136 @@ class SocketError
 {
 public:
   int error;  // errno value
-
   SocketError(int e): error(e) {}
 };
+
+//------------------------------------------------------------------------
+// << operator to write SocketError to ostream
+// e.g. cout << e;
+ostream& operator<<(ostream& s, const SocketError& e);
 
 //==========================================================================
 // TCP Socket (socket.cc)
 class TCP_Socket: public Socket
 {
 public:
+  //--------------------------------------------------------------------------
+  // Constructor - allocates socket
   TCP_Socket();
 
-  // Raw stream read/write wrappers
+  //--------------------------------------------------------------------------
+  // Raw stream read wrapper
+  // NOTE:  All wrappers silently handle EINTR
   ssize_t cread(void *buf, size_t count);
-  ssize_t cwrite(void *buf, size_t count);
 
-  // Safe stream read/write wrappers
+  //--------------------------------------------------------------------------
+  // Raw stream write wrapper
+  ssize_t cwrite(const void *buf, size_t count);
+
+  //--------------------------------------------------------------------------
+  // Safe stream read wrapper
+  // Throws SocketError on failure
   ssize_t read(void *buf, size_t count) throw (SocketError);
-  ssize_t write(void *buf, size_t count) throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Safe stream write wrapper
+  // Throws SocketError on failure
+  void write(const void *buf, size_t count) throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Read data from the socket into a string
+  // Appends whatever read data is available to the given string 
+  // Returns whether stream has closed (last size was 0)
+  // Throws SocketError on failure
+  bool read(string& s) throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Read everything to stream close, blocking until finished
+  // Throws SocketError on failure
+  void TCP_Socket::readall(string& s) throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Write the given string to the socket, blocking until finished
+  // Throws SocketError on failure
+  void write(const string &s) throw(SocketError);
+
+  //--------------------------------------------------------------------------
+  // Write the given C string to the socket, blocking until finished
+  // Throws SocketError on failure
+  void TCP_Socket::write(const char *p) throw(SocketError);
+
 };
+
+//--------------------------------------------------------------------------
+// << operator to write strings to TCP_Sockets
+// NOTE: Not a general stream operator!
+// e.g. s << "HELO\n";
+TCP_Socket& operator<<(TCP_Socket& s, const string& t);
+
+//--------------------------------------------------------------------------
+// >> operator to read strings from TCP_Sockets
+// Return whether stream still open - hence not chainable
+// NOTE: Not a general stream operator!
+// e.g. while (s >> buf) cout << buf;
+bool operator>>(TCP_Socket& s, string& t);
 
 //==========================================================================
 // UDP Socket (socket.cc)
 class UDP_Socket: public Socket
 {
 public:
+  //--------------------------------------------------------------------------
+  // Constructor - allocates socket
   UDP_Socket();
 
-  // Raw datagram recv/send/recvfrom/sendto wrappers
-  ssize_t crecv(void *buf, size_t len, int flags);
+  //--------------------------------------------------------------------------
+  // Raw datagram recv wrapper
+  // NOTE:  All wrappers silently handle EINTR
+  ssize_t crecv(void *buf, size_t len, int flags=0);
 
-  int csend(void *msg, size_t len, int flags);
+  //--------------------------------------------------------------------------
+  // Raw datagram send wrapper
+  int csend(const void *msg, size_t len, int flags=0);
 
+  //--------------------------------------------------------------------------
+  // Raw datagram recvfrom wrapper
+  // If address_p and/or port_p are non-null, sets them to the source of the
+  // datagram
   ssize_t crecvfrom(void *buf, size_t len, int flags,
 		    IP_Address *address_p, int *port_p);
 
-  int csendto(void *msg, size_t len, int flags,
+  //--------------------------------------------------------------------------
+  // Raw datagram sendto wrapper
+  int csendto(const void *msg, size_t len, int flags,
 	      IP_Address address, int port);
 
-  // Safe datagram recv/send/recvfrom/sendto wrappers
-  ssize_t UDP_Socket::recv(void *buf, size_t len, int flags) 
+  //--------------------------------------------------------------------------
+  // Safe datagram recv wrapper
+  // Throws SocketError on failure
+  ssize_t UDP_Socket::recv(void *buf, size_t len, int flags=0) 
     throw (SocketError);
 
-  int UDP_Socket::send(void *buf, size_t len, int flags) throw (SocketError);
+  //--------------------------------------------------------------------------
+  // Safe datagram send wrapper
+  // Throws SocketError on failure
+  int UDP_Socket::send(const void *buf, size_t len, int flags=0)
+    throw (SocketError);
 
+  //--------------------------------------------------------------------------
+  // Safe datagram recvfrom wrapper
+  // If address_p and/or port_p are non-null, sets them to the source of the
+  // datagram
+  // Throws SocketError on failure
   ssize_t UDP_Socket::recvfrom(void *buf, size_t len, int flags,
 			       IP_Address *address_p, int *port_p)
     throw (SocketError);
 
-  ssize_t UDP_Socket::sendto(void *buf, size_t len, int flags,
+  //--------------------------------------------------------------------------
+  // Safe datagram sendto wrapper
+  // If address_p and/or port_p are non-null, sets them to the source of the
+  // datagram
+  // Throws SocketError on failure
+  ssize_t UDP_Socket::sendto(const void *buf, size_t len, int flags,
 			     IP_Address address, int port)
     throw (SocketError);
 };
@@ -150,8 +242,11 @@ class TCP_Client: public TCP_Socket
   bool connected;
 
 public:
+  //--------------------------------------------------------------------------
+  // Constructor 
   TCP_Client(IP_Address addr, int port);
 
+  //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !connected; }
 };

@@ -1,7 +1,8 @@
 //==========================================================================
-// ObTools::Net: test-socket.cc
+// ObTools::Net: test-client.cc
 //
-// Test harness for network library socket functions
+// Test harness for network library client functions
+// Simulates a dumb Web client
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -15,11 +16,13 @@ int main(int argc, char **argv)
 {
   if (argc < 2)
   {
-    cerr << "Give a hostname\n" << endl;
+    cerr << "Give a hostname and optional port\n" << endl;
     return 2;
   }
 
   char *host = argv[1];
+  int port = 80;
+  if (argc > 2) port = atoi(argv[2]);
 
   ObTools::Net::IP_Address addr(host);
   if (!addr)
@@ -30,7 +33,7 @@ int main(int argc, char **argv)
 
   cout << "Host: " << addr << " (" << addr.get_hostname() << ")" << endl;
 
-  ObTools::Net::TCP_Client client(addr, 80);
+  ObTools::Net::TCP_Client client(addr, port);
 
   if (!client)
   {
@@ -41,20 +44,15 @@ int main(int argc, char **argv)
   try
   {
     // Write HTTP request
-    char *out = "GET / HTTP/1.0\r\n\r\n";
-    client.write(out, strlen(out));
+    client << "GET / HTTP/1.0\r\n\r\n";
 
-    char buf[81];
-    int size;
-    while ((size = client.read(buf, 80)) > 0)
-    {
-      buf[size] = 0;
-      cout << buf;
-    }
+    // Read the result back
+    string s;
+    while (client >> s) cout << s;
   }
   catch (ObTools::Net::SocketError se)
   {
-    cerr << "Socket error: " << strerror(se.error) << endl;
+    cerr << se << endl;
     return 1;
   }
    
