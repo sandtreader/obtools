@@ -52,5 +52,29 @@ string Random::generate_hex(int n)
   return oss.str();
 }
 
+//------------------------------------------------------------------------
+// Get a random 32-bit number
+uint32_t Random::generate_32()
+{
+  unsigned char buf[4];
+  _get_random_bytes(4, buf);
+  return *(uint32_t *)buf;  // Big endian, little endian, who cares?
+}
+
+//------------------------------------------------------------------------
+// Get a random 64-bit number
+uint64_t Random::generate_64()
+{
+  unsigned char buf[8];
+  _get_random_bytes(8, buf);
+  return *(uint64_t *)buf;  
+}
+
+//------------------------------------------------------------------------
+// Get a random number in the range 0 and (n-1)
+unsigned int Random::generate_up_to(unsigned int n)
+{
+  return generate_32() % n;
+}
 
 }} // namespaces

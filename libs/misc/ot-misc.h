@@ -115,6 +115,18 @@ public:
   //------------------------------------------------------------------------
   // Get a random hex string up to N bytes (N*2 hex digits) long
   string generate_hex(int n);
+
+  //------------------------------------------------------------------------
+  // Get a random 32-bit number
+  uint32_t generate_32();
+
+  //------------------------------------------------------------------------
+  // Get a random 64-bit number
+  uint64_t generate_64();
+
+  //------------------------------------------------------------------------
+  // Get a random number in the range 0 and (n-1)
+  unsigned int generate_up_to(unsigned int n);
 };
  
 //==========================================================================
