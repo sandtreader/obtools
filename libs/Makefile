@@ -6,6 +6,7 @@
 #==========================================================================
 
 SUBS = xml xmi cppt regen misc text mt net log cache db cli init soap
+ROOT = ..
 include ../build/dir.mk
 
 
