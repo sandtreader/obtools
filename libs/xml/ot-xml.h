@@ -197,6 +197,50 @@ public:
 };
 
 //==========================================================================
+// XML syntactic support macros (inlines won't do this, sorry)
+// e.g.
+//    OBTOOLS_XML_FOREACH_CHILD_TAG(s, root, "section")
+//      cout << s.get_attr("name");
+//    OBTOOLS_XML_ENDFOR
+
+// Do block for every direct child of a parent
+// (Read as 'for each child <v> of parent <p>')
+#define OBTOOLS_XML_FOREACH_CHILD(_childvar, _parent)                     \
+  {                                                                       \
+    list<ObTools::XML::Element *>& _elems=(_parent).children;             \
+    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      ObTools::XML::Element& _childvar=**_p;
+
+// Do block for every direct child with a given tag
+// (Read as 'for each child <v> of parent <p> with tag <tag>')
+#define OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(_childvar, _parent, _tag)      \
+  {                                                                       \
+    list<ObTools::XML::Element *> _elems=(_parent).get_children(_tag);    \
+    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      ObTools::XML::Element& _childvar=**_p;
+
+// Do block for every descendant with a given tag
+// (Read as 'for each descendant <v> of parent <p> with tag <tag>')
+#define OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
+  {                                                                       \
+    list<ObTools::XML::Element *> _elems=(_parent).get_descendants(_tag); \
+    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      ObTools::XML::Element& _childvar=**_p;
+
+ 
+// End block for any kind of FOREACH
+#define OBTOOLS_XML_ENDFOR }}
+
+//==========================================================================
 // XML stream operators
 
 //------------------------------------------------------------------------
