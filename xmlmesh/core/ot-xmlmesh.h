@@ -32,12 +32,22 @@ private:
 
   string allocate_id();
 
+protected:
+  // Create from text content
+  void create(const string& subject, const string& content,
+	      bool rsvp=false, const string& ref="");
+
 public:
+  //--------------------------------------------------------------------------
+  // Default constructor - assumes we will set the message text later
+  Message(): xml_message(0) {}
+
   //--------------------------------------------------------------------------
   // Basic constructor from text for outgoing messages
   // ID is manufactured here
   Message(const string& subject, const string& text_content,
-	  bool rsvp = false, const string& ref="");
+	  bool rsvp = false, const string& ref=""): xml_message(0)
+  { create(subject, text_content, rsvp, ref); }
 
   //--------------------------------------------------------------------------
   // Constructor from XML for outgoing messages
@@ -52,7 +62,29 @@ public:
   Message(const string& message_text);
 
   //--------------------------------------------------------------------------
-  // Get <message> text
+  // Copy constructor - don't transfer ownership of XML form
+  // Note, uses to_text to ensure there is a textual form, since we aren't
+  // taking the XML
+  Message(const Message& m):
+    xml_message(0), textual_message(m.to_text()) {}
+
+  //--------------------------------------------------------------------------
+  // Assignment operator, likewise
+  Message& operator=(const Message &m)
+  {
+    // Check for old XML
+    if (xml_message) delete xml_message;
+
+    xml_message = 0;
+    textual_message = m.to_text();
+  }
+
+  //--------------------------------------------------------------------------
+  // Get <message> text, but don't cache it
+  string Message::to_text() const;
+
+  //--------------------------------------------------------------------------
+  // Get <message> text and cache it
   string Message::get_text();
 
   //--------------------------------------------------------------------------
@@ -84,6 +116,98 @@ public:
   //Destructor - kills xml data if not detached
   ~Message();
 };
+
+//------------------------------------------------------------------------
+// << operator to write Message to ostream
+ostream& operator<<(ostream& s, const Message& m);
+
+//==========================================================================
+// Standard messages - xmlmesh.ok
+class OKMessage: public Message
+{
+public:
+  //--------------------------------------------------------------------------
+  // Constructor given string ref, for responses
+  OKMessage(const string& _ref):
+    Message("xmlmesh.ok", "<xmlmesh.ok/>", false, _ref) {}
+
+  //--------------------------------------------------------------------------
+  // Down-cast constructor from general message on receipt
+  // No data of interest, so don't include anything
+  OKMessage(const Message& msg): Message() {}
+};
+
+//==========================================================================
+// Standard messages - xmlmesh.error
+
+class ErrorMessage: public Message
+{
+public:
+  // Severity of error
+  enum Severity
+  {
+    WARNING,
+    ERROR,
+    SERIOUS,
+    FATAL,
+    BOGUS          // Used if error can't be parsed
+  };
+
+  Severity severity;
+  string text;
+
+  //--------------------------------------------------------------------------
+  // Constructor for responses
+  ErrorMessage(const string& _ref, Severity _severity, 
+	       const string& _text);
+
+  //--------------------------------------------------------------------------
+  // Down-cast constructor from general message on receipt
+  // Note: not const Message& because we may modify it by getting text
+  ErrorMessage(Message& msg);
+
+  //--------------------------------------------------------------------------
+  //Test for badness
+  bool operator!() { return severity == BOGUS; }
+};
+
+//------------------------------------------------------------------------
+// << operator to write ErrorMessage to ostream
+ostream& operator<<(ostream& s, const ErrorMessage& m);
+
+//==========================================================================
+// Standard messages - xmlmesh.subscription
+class SubscriptionMessage: public Message
+{
+public:
+  // Subscription operation
+  enum Operation
+  {
+    JOIN,
+    LEAVE,
+    BOGUS          // Used if operation can't be parsed
+  };
+
+  Operation operation;
+  string subject;
+
+  //--------------------------------------------------------------------------
+  // Constructor for requests
+  SubscriptionMessage(Operation _operation, const string& _subject);
+
+  //--------------------------------------------------------------------------
+  // Down-cast constructor from general message on receipt
+  // Note: not const Message& because we may modify it by getting text
+  SubscriptionMessage(Message& msg);
+
+  //--------------------------------------------------------------------------
+  //Test for badness
+  bool operator!() { return operation == BOGUS; }
+};
+
+//------------------------------------------------------------------------
+// << operator to write SubscriptionMessage to ostream
+ostream& operator<<(ostream& s, const SubscriptionMessage& m);
 
 //==========================================================================
 }} //namespaces
