@@ -147,11 +147,10 @@ public:
   //   If present but mapped to "", leave it return false (=> delete me)
   //   If present and mapped to non empty, change to mapped string
   // 
-  // If recurse is set (default), it recurses to sub-elements and deletes
-  // them if they return false - net effect begin that names mapped to ""
-  // are (deep) deleted from the document.  Otherwise, only this element
-  // is touched
-  bool translate(map<string, string>& trans_map, bool recurse=true);
+  // Recurses to sub-elements and deletes them if they return false -
+  // net effect begin that names mapped to "" are (deep) deleted from
+  // the document.  
+  bool translate(map<string, string>& trans_map);
 };
 
 //==========================================================================

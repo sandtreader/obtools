@@ -354,10 +354,10 @@ bool Element::has_attr(const string& attname)
 //   If present but mapped to "", leave it return false (=> delete me)
 //   If present and mapped to non empty, change to mapped string
 // 
-// If recurse is set (default), it recurses to sub-elements and deletes
-// them if they return false - net effect begin that names mapped to ""
-// are (deep) deleted from the document
-bool Element::translate(map<string, string>& trans_map, bool recurse)
+// Recurses to sub-elements and deletes them if they return false -
+// net effect begin that names mapped to "" are (deep) deleted from
+// the document
+bool Element::translate(map<string, string>& trans_map)
 {
   //Ignore (and keep) data elements
   if (name.empty()) return true;
@@ -370,22 +370,19 @@ bool Element::translate(map<string, string>& trans_map, bool recurse)
   if (tp!=trans_map.end() && tp->second.empty())
     return false;  //Delete me
 
-  //Recurse to sub-elements first, if asked for
-  if (recurse)
+  //Recurse to sub-elements first
+  for(list<Element *>::iterator p=children.begin();
+      p!=children.end();
+      )  //Incremented in body to avoid invalidity after erase
   {
-    for(list<Element *>::iterator p=children.begin();
-	p!=children.end();
-	)  //Incremented in body to avoid invalidity after erase
-    {
-      Element& se = **p;
+    Element& se = **p;
 
-      if (!se.translate(trans_map, true))
-      {
-	delete *p;
-	p=children.erase(p);
-      }
-      else p++;
+    if (!se.translate(trans_map))
+    {
+      delete *p;
+      p=children.erase(p);
     }
+    else p++;
   }
 
   if (tp==trans_map.end()) return true;  // Leave me alone
