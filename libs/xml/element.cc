@@ -308,7 +308,7 @@ string Element::get_deep_content()
 // Defaults to default value given (or "") if not present
 // This exists to avoid modifying the attribute when using attrs["foo"]
 // when foo doesn't exist (a completely stupid specification of [], IMHO)
-string Element::get_attr(const string& attname, const char *def)
+string Element::get_attr(const string& attname, const string& def)
 {
   map<string,string>::iterator p=attrs.find(attname);
   if (p!=attrs.end())

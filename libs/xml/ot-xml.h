@@ -112,7 +112,7 @@ public:
   // Defaults to default value given (or "") if not present
   // This exists to avoid creating the attribute when using attrs["foo"]
   // when foo doesn't exist (a completely stupid specification of [], IMHO)
-  string get_attr(const string& attname, const char *def="");
+  string get_attr(const string& attname, const string& def="");
 
   //--------------------------------------------------------------------------
   // Get the boolean value of an attribute of the given name
@@ -364,7 +364,7 @@ public:
   //------------------------------------------------------------------------
   // Value fetch - either attribute or content of single (first) element
   // Returns def if anything not found
-  string get_value(const string& path, const char *def="");
+  string get_value(const string& path, const string& def="");
 
   //------------------------------------------------------------------------
   // [] operator to make things easy
@@ -428,7 +428,7 @@ public:
   // XPath value fetch - either attribute or content of single (first) element
   // Returns def if anything not found
   // Note all get_value methods still work, and return def, if file read fails
-  string get_value(const string& path, const char *def="");
+  string get_value(const string& path, const string& def="");
 
   //------------------------------------------------------------------------
   // [] operator to make things easy

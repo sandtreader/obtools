@@ -75,7 +75,7 @@ Element *XPathProcessor::get_element(const string& path)
 //------------------------------------------------------------------------
 // Value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
-string XPathProcessor::get_value(const string& path, const char *def)
+string XPathProcessor::get_value(const string& path, const string& def)
 {
   Element *final;
 

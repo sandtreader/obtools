@@ -73,7 +73,7 @@ Element *Configuration::get_element(const string& path)
 // XPath value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
 // Note all get_value methods still work, and return def, if file read fails
-string Configuration::get_value(const string& path, const char *def="")
+string Configuration::get_value(const string& path, const string& def)
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value(path, def); 
