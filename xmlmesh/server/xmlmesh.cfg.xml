@@ -9,7 +9,7 @@
 <!--    <authenticate subject="*" usermap="xmlmesh.passwd"/>  -->
 <!--    <filter subject="log.*" transport="server" address="localhost"/>  -->
 
-    <publish subject="info.*" transport="server"/>
+    <publish subject="*" transport="server"/>
 <!--    <forward subject="log.*"  transport="log"/> -->
 <!--    <subscribe subject="info.*" transport="info"/> -->
   </services>
