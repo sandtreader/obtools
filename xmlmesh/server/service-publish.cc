@@ -136,7 +136,10 @@ bool PublishService::handle(IncomingMessage& msg)
     Subscription& sub = *p;
     if (Text::pattern_match(sub.subject, subject))
     {
-      // Send to subscribed client
+      // Show it to correlator in case there is a response
+      server.correlate(msg, sub.transport, sub.client);
+
+      // Send to subscribed client 
       server.send(msg.message, sub.transport, sub.client);
     }
   }

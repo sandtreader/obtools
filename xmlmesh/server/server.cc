@@ -8,6 +8,9 @@
 
 #include "server.h"
 #include "ot-log.h"
+#include <time.h>
+
+#define CORRELATOR_TICK_DELAY 30
 
 namespace ObTools { namespace XMLMesh { 
 
@@ -108,6 +111,8 @@ bool Server::create_service(XML::Element& xml)
 // Pull messages off receive queue and distributes them
 void Server::run() 
 { 
+  time_t last_tick = time(0);
+
   for(;;)
   {
     // Block for a message
@@ -150,7 +155,6 @@ void Server::run()
       {
 	Log::Detail << "Response requested, ID is " 
 		    << msg.message.get_id() << endl;
-	correlator.handle_request(msg);
       }
 
       // Deal with it
@@ -159,6 +163,14 @@ void Server::run()
       // If response was required and no-one did, respond with our own error
       if (msg.message.get_rsvp() && !(msg.flags & IncomingMessage::RESPONDED))
 	respond(ErrorMessage::ERROR, "No response available", msg);
+    }
+
+    // Tick correlator timeout if we haven't done it for a while
+    time_t now = time(0);
+    if (now-last_tick >= CORRELATOR_TICK_DELAY)
+    {
+      correlator.tick();
+      last_tick = now;
     }
   }
 }
@@ -240,6 +252,18 @@ bool Server::respond(ErrorMessage::Severity severity,
 {
   ErrorMessage errm(request.message.get_id(), severity, text);
   return respond(errm, request);
+}
+
+//------------------------------------------------------------------------
+// Show an incoming message to the correlator before forwarding it,
+// in preparation for handling responses - may modify the message
+// Note transport and client here are _outgoing_ client you are forwarding to
+void Server::correlate(IncomingMessage &msg, Transport *transport,
+		       Net::EndPoint& client)
+{
+  // Check if response required, and if so, correlate it
+  if (msg.message.get_rsvp()) 
+    correlator.handle_request(msg, transport, client);
 }
 
 //------------------------------------------------------------------------

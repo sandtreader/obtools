@@ -12,6 +12,7 @@
 #include <string>
 #include "ot-net.h"
 #include "ot-mt.h"
+#include "ot-cache.h"
 #include "ot-xmlmesh.h"
 
 namespace ObTools { namespace XMLMesh {
@@ -92,38 +93,60 @@ public:
 
 //==========================================================================
 // Request-response correlator
-struct CorrelatedRequest
+struct Correlation
 {
-  Transport *transport;     // Which transport the request came from
-  Net::EndPoint client;     // Which client on that transport
-  string client_id;         // Client's original message ID
+  Transport *source_transport;   // Which transport the request came from
+  Net::EndPoint source_client;   // Which client on that transport
+  string source_id;              // Client's original message ID
 
-  CorrelatedRequest(Transport *_transport, Net::EndPoint& _client,
-		    const string& _id):
-    transport(_transport), client(_client), client_id(_id) {}
+  Transport *dest_transport;     // Which transport we sent request to
+  Net::EndPoint dest_client;     // Which client on that transport
+  string dest_id;                // Our replacement ID sent onwards
+
+  Correlation(Transport *_source_transport, Net::EndPoint& _source_client,
+	      const string& _source_id,
+	      Transport *_dest_transport, Net::EndPoint& _dest_client,
+	      const string& _dest_id):
+    source_transport(_source_transport), source_client(_source_client), 
+    source_id(_source_id), dest_transport(_dest_transport),
+    dest_client(_dest_client), dest_id(_dest_id) {}
 };
 
+ostream& operator<<(ostream&s, const Correlation& c);
+
+// Correlator class (singleton per server)
 class Correlator
 {
 private:
   Server& server;
   unsigned long id_serial; 
-  map<string, CorrelatedRequest> requests;  // Map of my ID back to client
+
+  // Cache: map of our ID to correlation
+  Cache::UseTimeoutPointerCache<string, Correlation> request_cache;
 
 public:
   //------------------------------------------------------------------------
   // Default Constructor 
-  Correlator(Server& _server): server(_server), id_serial(0) {}
+  static const int DEFAULT_TIMEOUT = 60;
+  Correlator(Server& _server): 
+    server(_server), id_serial(0), request_cache(DEFAULT_TIMEOUT) {}
 
   //------------------------------------------------------------------------
   // Handle a request message - remembers it in correlation map, alters
   // ID to own so we can find responses
-  void handle_request(IncomingMessage& msg);
+  // Note transport & client are where it is being sent on to - source
+  // is in msg.transport/client
+  void handle_request(IncomingMessage& msg, Transport *transport,
+		      Net::EndPoint& client);
 
   //------------------------------------------------------------------------
   // Handle a response message - looks up correlation and sends it back to
-  // the given client, modifying ID back to the original
+  // the given client, modifying ref back to the original
   void handle_response(IncomingMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Tick function - times out correlations
+  void tick();
 };
 
 //==========================================================================
@@ -268,6 +291,13 @@ public:
   bool respond(ErrorMessage::Severity severity,
 	       const string& text,
 	       IncomingMessage& request);
+
+  //------------------------------------------------------------------------
+  // Show an incoming message to the correlator before forwarding it,
+  // in preparation for handling responses - may modify the message
+  // Note transport and client here are _outgoing_ client you are forwarding to
+  void correlate(IncomingMessage &msg, Transport *transport,
+		 Net::EndPoint& client);
 
   //------------------------------------------------------------------------
   // Load modules etc. from XML config

@@ -14,7 +14,7 @@ LDFLAGS += -g
 endif
 
 CPPFLAGS += -I../../libs/mt/ -I../../libs/net/ -I../../libs/log 
-CPPFLAGS += -I../../libs/xml -I../../libs/text/
+CPPFLAGS += -I../../libs/xml -I../../libs/text/ -I../../libs/cache/
 CPPFLAGS += -I../core -I../otmp -I../client
 
 all: xmlmesh-server
