@@ -148,6 +148,15 @@ void Element::write_to(ostream &s) const
 }
 
 //--------------------------------------------------------------------------
+// Convert to a string
+string Element::to_string() const
+{
+  ostringstream oss;
+  write_to(oss);
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
 // Optimise for ease of access so a single content child element becomes
 // a simple content string within us - and kill the child
 void Element::optimise()

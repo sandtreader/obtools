@@ -76,10 +76,22 @@ public:
   Element(string n):name(n) { }
   Element(string n, string c):name(n), content(c) {  }
   ~Element();
+
+  //------------------------------------------------------------------------
+  // Add a child element
+  Element *add(Element *child) { children.push_back(child); return child; }
  
   //------------------------------------------------------------------------
-  // Dump to given input stream
+  // Add a new empty child element by name
+  Element *add(const string& cname) { return add(new Element(cname)); }
+
+  //------------------------------------------------------------------------
+  // Dump to given output stream
   void write_to(ostream& s) const; 
+
+  //--------------------------------------------------------------------------
+  // Convert to a string
+  string to_string() const;
 
   //------------------------------------------------------------------------
   // 'Optimise' single text sub-elements back to 'content' string here
