@@ -167,6 +167,9 @@ public:
 
   // Write implementation
   virtual void write(const void *buf, size_t count) throw (Error);
+
+  // Get length remaining in block
+  size_t remaining() { return length; }
 };
 
 //==========================================================================
