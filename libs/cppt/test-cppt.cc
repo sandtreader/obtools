@@ -13,7 +13,10 @@
 
 int main()
 {
-  ObTools::CPPT::Processor processor(cin, cout, "cout");
+  ObTools::CPPT::Tags tags = 
+  { "<?", "?>", "<?=", "?>", "<?#", "?>" };
+
+  ObTools::CPPT::Processor processor(cin, cout, tags, "cout");
   cout << "#include <iostream>\n";
   cout << "int main()\n";
   cout << "{\n";

@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = processor.o
+OBJS = processor.o tokenr.o
 
 ifdef DEBUG
 CPPFLAGS += -g
