@@ -129,6 +129,15 @@ uint64_t Reader::read_nbo_64() throw (Error)
   return (n<<32) + read_nbo_32();
 }
 
+//--------------------------------------------------------------------------
+// Skip to given alignment (bytes) from current offset
+void Reader::align(int n)
+{ 
+  int i = n*((offset+n-1)/n) - offset;  // Bytes to skip
+  char c;
+  while (i--) basic_read(&c, 1); 
+}
+
 }} // namespaces
 
 

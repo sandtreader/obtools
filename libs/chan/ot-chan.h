@@ -38,15 +38,18 @@ ostream& operator<<(ostream& s, const Error& e);
 // Abstract Channel Reader
 class Reader
 {
+protected:
+  size_t offset;
+
 public:
   //--------------------------------------------------------------------------
   // Basic constructor, destructor
-  Reader() {}
+  Reader(): offset(0) {}
   virtual ~Reader() {}
 
   //--------------------------------------------------------------------------
   // Read as much data as is available, up to 'count' bytes
-  // Returns amount read
+  // Returns amount read, also adjusts offset
   // Throws Error on failure (not EOF)
   virtual size_t basic_read(void *buf, size_t count) throw (Error) = 0;
 
@@ -91,20 +94,32 @@ public:
   // Read a network byte order (MSB-first) 8-byte integer from the channel
   // Throws SocketError on failure or EOF
   uint64_t read_nbo_64() throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Get current offset
+  size_t get_offset() { return offset; }
+
+  //--------------------------------------------------------------------------
+  // Skip to given alignment (bytes) from current offset
+  void align(int n);
 };
 
 //==========================================================================
 // Abstract Channel Writer
 class Writer
 {
+protected:
+  size_t offset;
+
 public:
   //--------------------------------------------------------------------------
   // Basic constructor, destructor
-  Writer() {}
+  Writer(): offset(0) {}
   virtual ~Writer() {}
 
   //--------------------------------------------------------------------------
   // Write exact amount of data to the channel from a binary buffer
+  // Also adjusts offset
   // Throws Error on failure
   virtual void basic_write(const void *buf, size_t count) throw (Error) = 0;
 
@@ -142,6 +157,14 @@ public:
   // Write a network byte order (MSB-first) 8-byte integer to the channel
   // Throws Error on failure
   void write_nbo_64(uint64_t i) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Get current offset
+  size_t get_offset() { return offset; }
+
+  //--------------------------------------------------------------------------
+  // Pad to given alignment (bytes) from given current offset
+  void align(int n);
 };
 
 //==========================================================================
@@ -209,7 +232,7 @@ public:
   virtual void basic_write(const void *buf, size_t count) throw (Error);
 
   // Get length remaining in block
-  size_t remaining() { return length; }
+  size_t get_remaining() { return length-offset; }
 };
 
 //==========================================================================

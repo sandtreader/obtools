@@ -81,6 +81,15 @@ void Writer::write_nbo_64(uint64_t i) throw (Error)
   write_nbo_32((uint32_t)(i & 0xFFFFFFFF));
 }
 
+//--------------------------------------------------------------------------
+// Pad to given alignment (bytes) from current offset
+void Writer::align(int n)
+{ 
+  char c = 0;
+  int i = n*((offset+n-1)/n) - offset;  // Bytes to pad
+  while (i--) basic_write(&c, 1); 
+}
+
 }} // namespaces
 
 

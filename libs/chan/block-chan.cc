@@ -18,13 +18,13 @@ namespace ObTools { namespace Channel {
 size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
 {
   // Limit to length available
-  if (length < count) count = length;
+  if (length-offset < count) count = length-offset;
 
   if (count)
   {
     memcpy(buf, data, count);
     data += count;
-    length -= count;
+    offset += count;
   }
 
   return count;
@@ -37,11 +37,11 @@ size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
 void BlockWriter::basic_write(const void *buf, size_t count) throw (Error)
 {
   // Must fit, or error
-  if (count <= length)
+  if (count <= length-offset)
   {
     memcpy(data, buf, count);
     data += count;
-    length -= count;
+    offset += count;
   }
   else throw Error(1, "Data block overflowed");
 }
