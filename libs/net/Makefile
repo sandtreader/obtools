@@ -16,7 +16,7 @@ CPPFLAGS += -I../mt
 all: test-client test-server
 
 clean: 
-	-@rm -f *.o *.a *~ test-client
+	-@rm -f *.o *.a *~ test-client test-server
 
 test:	test-client test-server
 	./test-client localhost
