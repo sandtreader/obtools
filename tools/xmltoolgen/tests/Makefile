@@ -20,7 +20,7 @@ include $(ROOT)/build/std.mk
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-_testtool.cc: ../testtool.cfg.xml ../../build-debug/xmltoolgen-cc Makefile
-	../../build-debug/xmltoolgen-cc ../testtool.cfg.xml > _testtool.cc
+_testtool.cc: ../testtool.cfg.xml ../../build-debug/xmltoolgen Makefile
+	../../build-debug/xmltoolgen ../testtool.cfg.xml > _testtool.cc
 
 

@@ -6,9 +6,9 @@
 #==========================================================================
 
 TYPE	= exe
-NAME   	= xmltoolgen-cc
-OBJS 	= xmltoolgen-cc.o
-DEPENDS = cppt xml text
+NAME   	= xmltoolgen
+OBJS 	= xmltoolgen.o
+DEPENDS = toolgen cppt xml text
 CLEANCMD = $(MAKE) -C tests clean
 TESTCMD = $(MAKE) -C ../tests test
 
