@@ -87,14 +87,18 @@ bool Correlator::handle(RoutingMessage& msg)
     if (cr)
     {
       Log::Detail << "Correlator: Found correlation:\n  " << *cr << endl;
-      
-      // Substitute original path and make it a response so it goes into
-      // reverse routing
-      msg.path = MessagePath(cr->source_path);
-      msg.reversing = true;
 
+      // Create new copy message to be re-originated here
+      ServiceClient client(this, msg.client.client);
+      MessagePath path(cr->source_path);
+      RoutingMessage newmsg(client, msg.message, path);
+      originate(newmsg);
+       
       // Remove it from cache
       request_cache.remove(our_ref);
+
+      // Don't continue with this message in normal routing
+      return false;
     }
     else
     {
