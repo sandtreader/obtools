@@ -22,6 +22,8 @@ Package::Package(XMI::Reader& rdr, XML::Element& xe)
   const char *p="UML:Package";
   read_subelements("UML:Class",          create_element<Class>, true, p);
   read_subelements("UML:DataType",       create_element<DataType>, true, p);
+  read_subelements("UML:Enumeration",    create_element<Enumeration>, true, p);
+  read_subelements("UML:Primitive",      create_element<Primitive>, true, p);
   read_subelements("UML:Interface",      create_element<Interface>, true, p);
   read_subelements("UML:Stereotype",     create_element<Stereotype>, true, p);
   read_subelements("UML:Association",    create_element<Association>, true, p);

@@ -14,7 +14,12 @@ using namespace ObTools::UML;
 Enumeration::Enumeration(XMI::Reader& rdr, XML::Element& xe)
   :DataType(rdr, xe) 
 {
-  //!!! Read literals
+  //Read all EnumerationLiterals (ignoring UML:Enumeration.literal cruft)
+  OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(lite, xe, 
+						 "UML:EnumerationLiteral")
+    string litname = lite.get_attr("name");
+    if (!litname.empty()) literals.push_back(litname);
+  OBTOOLS_XML_ENDFOR
 }
 
 //--------------------------------------------------------------------------
@@ -23,7 +28,14 @@ void Enumeration::print_header(ostream& sout)
 {
   GeneralizableElement::print_header(sout);
 
-  //!!! print literals
+  sout << " [ ";
+
+  for(list<string>::iterator p = literals.begin();
+      p!=literals.end();
+      p++)
+    sout << "'" << *p << "' ";
+
+  sout << "]";
 }
 
 
