@@ -32,7 +32,7 @@ class IPAddress
 {
 private:
   uint32_t address;   // Host byte order
-  static const uint32_t BADADDR = 0;
+  static const uint32_t BADADDR = 0xffffffff;
  
 public:
   //--------------------------------------------------------------------------
