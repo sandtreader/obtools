@@ -118,6 +118,22 @@ public:
   string get_ref();
 
   //--------------------------------------------------------------------------
+  //Set id of a message
+  void set_subject(const string& new_subject);
+
+  //--------------------------------------------------------------------------
+  //Set id of a message
+  void set_id(const string& new_id);
+
+  //--------------------------------------------------------------------------
+  //Set rsvp of a message
+  void set_rsvp(bool new_rsvp);
+
+  //--------------------------------------------------------------------------
+  //Set ref of a message
+  void set_ref(const string& new_ref);
+
+  //--------------------------------------------------------------------------
   //Destructor - kills xml data if not detached
   ~Message();
 };

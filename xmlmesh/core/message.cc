@@ -216,6 +216,37 @@ string Message::get_ref()
   return xml.get_attr("ref");
 }
 
+//--------------------------------------------------------------------------
+//Set id of a message
+void Message::set_subject(const string& new_subject)
+{
+  XML::Element& xml = get_modifiable_xml();
+  xml.set_attr("subject", new_subject);
+}
+
+//--------------------------------------------------------------------------
+//Set id of a message
+void Message::set_id(const string& new_id)
+{
+  XML::Element& xml = get_modifiable_xml();
+  xml.set_attr("id", new_id);
+}
+
+//--------------------------------------------------------------------------
+//Set rsvp of a message
+void Message::set_rsvp(bool new_rsvp)
+{
+  XML::Element& xml = get_modifiable_xml();
+  xml.set_attr_bool("rsvp", new_rsvp);
+}
+
+//--------------------------------------------------------------------------
+//Set ref of a message
+void Message::set_ref(const string& new_ref)
+{
+  XML::Element& xml = get_modifiable_xml();
+  xml.set_attr("ref", new_ref);
+}
 
 //--------------------------------------------------------------------------
 //Destructor - kills xml data if not detached
