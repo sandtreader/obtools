@@ -14,6 +14,7 @@ OBJS	= assocend.o association.o attribute.o class.o classifier.o      \
 DEPENDS = xml
 TESTS 	= test-xmi
 TESTCMD	= $(MAKE) -C ../tests test
+CLEANCMD = $(MAKE) -C tests clean
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

@@ -8,10 +8,10 @@
 test:	test-poseidon test-argo
 
 test-poseidon:	test-model.xmi
-	../build.debug/test-xmi < test-model.xmi
+	../build-debug/test-xmi < test-model.xmi
 
 test-argo:	test-argo_.xmi
-	../build.debug/test-xmi < test-argo_.xmi
+	../build-debug/test-xmi < test-argo_.xmi
 
 clean: 
 	-@rm -f *~ *.bak test-model.xmi test-argo_.xmi
