@@ -34,7 +34,11 @@ void TCPServer::run()
     struct sockaddr_in saddr;
     socklen_t len = sizeof(saddr);
     int new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
+#if defined(__WIN32__)
+    if (new_fd != INVALID_SOCKET)
+#else
     if (new_fd >= 0)
+#endif
     {
       EndPoint client(saddr);
 

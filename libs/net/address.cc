@@ -9,8 +9,11 @@
 
 #include "ot-net.h"
 #include <ctype.h>
+
+#if !defined(__WIN32__)
 #include <netdb.h>
 #include <arpa/inet.h>
+#endif
 
 namespace ObTools { namespace Net {
 

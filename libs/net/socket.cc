@@ -8,7 +8,21 @@
 //==========================================================================
 
 #include "ot-net.h"
+#ifdef __WIN32__
+#include <io.h>
+#define SOCKCLOSE closesocket
+#define SOCKIOCTL ioctlsocket
+#define SOCKERRNO WSAGetLastError()
+#define CHECKFD(fd) if (fd == INVALID_SOCKET) fd=-1;
+typedef int socklen_t;
+#else
 #include <sys/ioctl.h>
+#define SOCKCLOSE close
+#define SOCKIOCTL ioctl
+#define SOCKERRNO errno
+#define CHECKFD(fd)
+#endif
+
 #include <errno.h>
 #include <stdint.h>
 
@@ -32,7 +46,7 @@ void Socket::close()
 {
   if (fd>=0)
   {
-    ::close(fd);
+    ::SOCKCLOSE(fd);
     fd = -1;
   }
 }
@@ -42,7 +56,7 @@ void Socket::close()
 void Socket::go_nonblocking()
 {
   unsigned long n = 1;
-  ioctl(fd, FIONBIO, &n);
+  SOCKIOCTL(fd, FIONBIO, &n);
 }
 
 //--------------------------------------------------------------------------
@@ -50,7 +64,7 @@ void Socket::go_nonblocking()
 void Socket::go_blocking()
 {
   unsigned long n = 0;
-  ioctl(fd, FIONBIO, &n);
+  SOCKIOCTL(fd, FIONBIO, &n);
 }
 
 //--------------------------------------------------------------------------
@@ -91,6 +105,7 @@ ostream& operator<<(ostream& s, const SocketError& e)
 TCPSocket::TCPSocket()
 {
   fd = socket(PF_INET, SOCK_STREAM, 0); 
+  CHECKFD(fd)
 }
 
 //--------------------------------------------------------------------------
@@ -99,12 +114,17 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
 { 
   ssize_t size;
 
+#ifdef __WIN32__
+  size = ::recv(fd, (char *)buf, count, 0);
+  if (size == SOCKET_ERROR) size = -1;
+#else
   // Silently loop on EINTR
   do
   {
     size = ::read(fd, buf, count); 
   }
   while (size<0 && errno == EINTR);
+#endif
 
   return size;
 }
@@ -115,12 +135,17 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 { 
   ssize_t size;
 
+#ifdef __WIN32__
+  size = ::send(fd, (const char *)buf, count, 0);
+  if (size == SOCKET_ERROR) size = -1;
+#else
   // Silently loop on EINTR
   do
   {
     size = ::write(fd, buf, count); 
   }
   while (size<0 && errno == EINTR);
+#endif
 
   return size;
 }
@@ -131,7 +156,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 { 
   ssize_t size = cread(buf, count);
-  if (size < 0) throw SocketError(errno);
+  if (size < 0) throw SocketError(SOCKERRNO);
   return size;
 }
 
@@ -141,7 +166,7 @@ ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
 { 
   ssize_t size = cwrite(buf, count);
-  if (size!=(ssize_t)count) throw SocketError(errno);
+  if (size!=(ssize_t)count) throw SocketError(SOCKERRNO);
 }
 
 //--------------------------------------------------------------------------
@@ -273,6 +298,7 @@ void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
 UDPSocket::UDPSocket()
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  CHECKFD(fd)
 }
 
 //--------------------------------------------------------------------------
@@ -280,6 +306,7 @@ UDPSocket::UDPSocket()
 UDPSocket::UDPSocket(int port)
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  CHECKFD(fd)
   if (!Socket::bind(port)) close();
 }
 
@@ -289,12 +316,17 @@ ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
 { 
   ssize_t size;
 
+#ifdef __WIN32__
+  size = ::recv(fd, (char *)buf, len, flags); 
+  if (size == SOCKET_ERROR) size = -1;
+#else
   // Silently loop on EINTR
   do
   {
     size = ::recv(fd, buf, len, flags); 
   }
   while (size<0 && errno == EINTR);
+#endif
 
   return size;
 }
@@ -305,12 +337,17 @@ int UDPSocket::csend(const void *msg, size_t len, int flags)
 { 
   int res;
 
+#ifdef __WIN32__
+  res = ::send(fd, (const char *)msg, len, flags); 
+  if (res == SOCKET_ERROR) res = -1;
+#else
   // Silently loop on EINTR
   do
   {
     res = ::send(fd, msg, len, flags); 
   }
   while (res<0 && errno == EINTR);
+#endif
 
   return res;
 }
@@ -326,6 +363,11 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
   socklen_t slen = sizeof(saddr);
   ssize_t size;
 
+#ifdef __WIN32__
+  size = ::recvfrom(fd, (char *)buf, len, flags,
+		    (struct sockaddr *)&saddr, &slen); 
+  if (size == SOCKET_ERROR) size = -1;
+#else
   // Silently loop on EINTR
   do
   {
@@ -333,6 +375,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
 		      (struct sockaddr *)&saddr, &slen); 
   }
   while (size<0 && errno == EINTR);
+#endif
 
   if (size >= 0 && endpoint_p) *endpoint_p = EndPoint(saddr);
   
@@ -348,12 +391,18 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
   endpoint.set(saddr);
   int res;
 
+#ifdef __WIN32__
+  res = ::sendto(fd, (const char *)msg, len, flags,
+		  (struct sockaddr *)&saddr, sizeof(saddr)); 
+  if (res == SOCKET_ERROR) res = -1;
+#else
   do
   {
     res = ::sendto(fd, msg, len, flags, 
 		  (struct sockaddr *)&saddr, sizeof(saddr)); 
   }
   while (res<0 && errno == EINTR);
+#endif
 
   return res;
 };

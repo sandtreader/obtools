@@ -26,6 +26,10 @@ int main(int argc, char **argv)
   int port = 80;
   if (argc > 2) port = atoi(argv[2]);
 
+#ifdef __WIN32__
+  winsock_initialise();
+#endif
+
   ObTools::Net::IPAddress addr(host);
   if (!addr)
   {

@@ -11,13 +11,27 @@
 #ifndef __OBTOOLS_NET_H
 #define __OBTOOLS_NET_H
 
+#include <stdint.h>
+#include <iostream>
+#include <string>
+
+#if defined(__WIN32__)
+
+// Windows headers & fixes
+#include <winsock.h>
+typedef int ssize_t;
+
+// Winsock initialisation
+extern bool winsock_initialise();
+
+#else
+
+// Unix headers
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include <stdint.h>
-#include <iostream>
-#include <string>
+#endif
 
 #if !defined(_SINGLE)
 #include "ot-mt.h"
