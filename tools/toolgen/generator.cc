@@ -104,6 +104,18 @@ void Generator::generate_legal()
 }
 
 //--------------------------------------------------------------------------
+// Generate includes / file-level code 
+void Generator::generate_includes()
+{
+  sout << "\n#include \"ot-xml.h\"\n";
+
+  sout << "#include <fstream>\n";
+  sout << "#include <sstream>\n";
+  sout << "#include <cstdlib>\n\n";
+  sout << "using namespace std;\n\n";
+}
+
+//--------------------------------------------------------------------------
 // Output configuration variables from, er, configuration variables 
 void Generator::generate_config_vars()
 {
@@ -407,12 +419,7 @@ void Generator::generate()
   generate_legal();
 
   // Some header stuff
-  sout << "\n#include \"ot-xml.h\"\n";
-
-  sout << "#include <fstream>\n";
-  sout << "#include <sstream>\n";
-  sout << "#include <cstdlib>\n\n";
-  sout << "using namespace std;\n\n";
+  generate_includes();
 
   // Their config items
   generate_config_vars();

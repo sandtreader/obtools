@@ -30,10 +30,6 @@ private:
 
   CPPT::Tags read_tags(XML::Element& root, CPPT::Tags& defaults);
   void process_script(const string& script, CPPT::Tags& tags, int& max_ci);
-  void generate_template(XML::Element& te, XML::Element& parent,
-			 CPPT::Tags& tags, 
-			 int& max_ci, const string& suffix,
-			 string& script);
   void template_funcs(XML::Element& root, CPPT::Tags& tags,
 		      int& max_ci, const string& suffix="");
   void generate_legal();
@@ -60,8 +56,23 @@ protected:
 			     bool is_root = false) = 0;
 
   //--------------------------------------------------------------------------
+  // Generate code for a particular template element
+  // e is the current element, te is the most locally enclosing template
+  //  (which may be the same)
+  // max_ci is maximum indent to strip from code
+  // Accumulates script in script, dumps it on hitting a sub-template
+  virtual void generate_template(XML::Element& te, XML::Element& parent,
+				 CPPT::Tags& tags, 
+				 int& max_ci, const string& suffix,
+				 string& script);
+
+  //--------------------------------------------------------------------------
   // Generate code to call root templates
   void generate_roots();
+
+  //--------------------------------------------------------------------------
+  // Generate includes / file-level code 
+  virtual void generate_includes();
 
   //--------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
