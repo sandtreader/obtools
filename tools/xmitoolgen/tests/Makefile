@@ -8,7 +8,7 @@
 TYPE	= exe
 NAME   	= testtool
 OBJS 	= _testtool.o
-DEPENDS = xmi xml regen
+DEPENDS = xmi xml regen text
 TESTCMD = ./testtool < ../test.xmi
 VARIANTS = debug
 VARIANT-debug = DEBUG

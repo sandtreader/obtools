@@ -147,7 +147,7 @@
 
       class $= c.name =$
       <xt:template name = "Inheritance" scope="generalization">
-	$= (_index?",":":") =$$= g.gparent->name =$
+	$= (g_index?",":":") =$$= g.gparent->name =$
       </xt:template>
       {
       private:

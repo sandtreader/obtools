@@ -68,19 +68,11 @@ protected:
   //--------------------------------------------------------------------------
   // Generate code to call a template for all elements of given name
   virtual void generate_call(XML::Element& te, XML::Element& parent,
-			     const string& suffix,
+			     CPPT::Tags& tags,
+			     int& max_ci,
+			     const string& streamname,
+			     string& script,
 			     bool is_root = false);
-
-  //--------------------------------------------------------------------------
-  // Generate code for a particular template element
-  // e is the current element, te is the most locally enclosing template
-  //  (which may be the same)
-  // max_ci is maximum indent to strip from code
-  // Accumulates script in script, dumps it on hitting a sub-template
-  virtual void generate_template(XML::Element& te, XML::Element& parent,
-				 CPPT::Tags& tags, 
-				 int& max_ci, const string& suffix,
-				 string& script);
 
   //--------------------------------------------------------------------------
   // Generate includes / file-level code 
@@ -171,18 +163,27 @@ string XMIGenerator::scope_var(Scope scope)
 //--------------------------------------------------------------------------
 // Generate code to call a template for all elements of given name
 void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
-				 const string& suffix,
+				 CPPT::Tags& tags,
+				 int& max_ci,
+				 const string& streamname,
+				 string& script,
 				 bool is_root)
 {
   string sname = te.get_attr("scope", "class");
   Scope scope = get_scope(sname);
   string stype  = scope_type(scope);
   string nstype = scope_nstype(scope);
-  string cvar = "_child_"+scope_var(scope);
+  string c_var = get_parameter_name(te);
 
   string p_sname = parent.get_attr("scope", "class");
   Scope p_scope = get_scope(p_sname);
   string p_var = get_parameter_name(parent);  // cope with 'var' override
+
+  sout << "\n  //Call " << sname << " templates\n";
+  string index_var = c_var + "_index";
+
+  sout << "  {\n";
+  sout << "  int " << index_var << "=0;\n";
 
   // Special handling for model/package at root - call on self, since model is
   // a package
@@ -191,7 +192,22 @@ void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
        || scope == SCOPE_RPACKAGE
        || scope == SCOPE_MODEL))
   {
-    cout << "  template" << suffix << "(cout, model, 0, \"\");\n";
+    // Special handling for rpackage - recurse on self first
+    if (scope == SCOPE_RPACKAGE)
+    {
+      sout << "  // Recurse to sub-packages first\n";
+      sout << "  OBTOOLS_UML_FOREACH_PACKAGE(" 
+	   << c_var << ", *reader.model)\n";
+      generate_template(te, te, tags, max_ci, streamname, script);
+      sout << "  " << index_var << "++;\n";
+      sout << "  OBTOOLS_UML_ENDFOR\n";
+    }
+    else
+    {
+      // Generate directly using the model as a package
+      sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
+      generate_template(te, te, tags, max_ci, streamname, script);
+    }
   }
   else 
   {
@@ -205,42 +221,19 @@ void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
     else
       listop = ".filter_subelements<" + nstype + ">()";
 
-    cout << "\n  //Call " << sname << " templates\n";
-    cout << "  _i=0;\n";
-    cout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << cvar << ",\n";
-    cout << "                      " << p_var << listop << ")\n"; 
-    cout << "    template" << suffix << "(_sout, " << cvar << ", _i++, _path);\n";
-    cout << "  OBTOOLS_UML_ENDFOR\n";
-  }
-}
 
-//--------------------------------------------------------------------------
-// Generate code for a particular template element
-// Overridden here for special RPACKAGE handling
-void XMIGenerator::generate_template(XML::Element& e, XML::Element& te,
-				     CPPT::Tags& tags, 
-				     int& max_ci, const string& suffix,
-				     string& script)
-{
-  // Only add extra when at top level of each template
-  if (&e == &te)
-  {
-    string scopename = te.get_attr("scope", "class");
-    Scope scope = get_scope(scopename);
-    string svar = te.get_attr("var", scope_var(scope));
+    sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
+    sout << "                      " << p_var << listop << ")\n"; 
 
-    // Special handling for rpackage - recurse on self first
-    if (scope == SCOPE_RPACKAGE)
-    {
-      sout << "  // Recurse to sub-packages first\n";
-      sout << "  int _si=0;\n";
-      sout << "  OBTOOLS_UML_FOREACH_PACKAGE(_sub_p, " << svar << ")\n";
-      sout << "    template" << suffix << "(_sout, _sub_p, _si++, _path);\n";
-      sout << "  OBTOOLS_UML_ENDFOR\n";
-    }
+    generate_template(te, te, tags, max_ci, streamname, script);
+    process_script(script, tags, streamname, max_ci);
+    script.clear();
+
+    sout << "  " << index_var << "++;\n";
+    sout << "  OBTOOLS_UML_ENDFOR\n";
   }
 
-  Generator::generate_template(e, te, tags, max_ci, suffix, script);
+  sout << "  }\n";
 }
 
 //--------------------------------------------------------------------------
@@ -262,7 +255,8 @@ void XMIGenerator::generate_main()
   sout<<"{\n";
 
   sout<<"  // Load up XMI from input\n";
-  sout<<"  ObTools::XMI::Reader reader;\n\n";
+  sout<<"  ObTools::XMI::Reader reader;\n";
+  sout<<"  string _path;\n\n";
 
   sout<<"  try\n";
   sout<<"  {\n";
@@ -275,7 +269,6 @@ void XMIGenerator::generate_main()
   sout<<"  }\n\n";
 
   sout<<"  if (!reader.model) return 4;\n";
-  sout<<"  ObTools::UML::Model& model = *reader.model;\n\n";
 
   sout<<"  // Call all the template functions with cout\n";
 
