@@ -311,13 +311,13 @@ ostream& operator<<(ostream&s, const PointerContent<CONTENT>& pc)
 template<class ID, class CONTENT, class POLICY> class PointerCache:
   public Cache<ID, PointerContent<CONTENT>, POLICY>  
 {
+protected:
   // Evil typedefs to allow us to access parent structs/typedefs
   typedef typename 
     Cache<ID, PointerContent<CONTENT>, POLICY>::MapIterator PMapIterator;
   typedef typename 
     Cache<ID, PointerContent<CONTENT>, POLICY>::MapContent PMapContent;
 
-protected:
   //--------------------------------------------------------------------------
   // Clear the given content - frees pointer
   virtual void clear(const PMapContent& mc)
