@@ -19,6 +19,7 @@ int main(int argc, char **argv)
   char *res;
   char *host;
   int port = 29167;
+  OT_XMLMesh_Conn conn;
 
   if (argc < 2)
   {
@@ -30,27 +31,33 @@ int main(int argc, char **argv)
   if (argc > 2) port = atoi(argv[2]);
 
   // Initialise library
-  if (!ot_xmlmesh_init(host, port))
+  ot_xmlmesh_init();
+  atexit(ot_xmlmesh_shutdown);
+
+  // Create connection
+  conn = ot_xmlmesh_open(host, port);
+  if (!conn)
   {
     fprintf(stderr, "XMLMesh won't initialise\n");
     return 4;
   }
 
   // Send a simple message
-  if (ot_xmlmesh_send("Test", "<foo/>"))
+  if (ot_xmlmesh_send(conn, "Test", "<foo/>"))
   {
     printf("Simple message sent OK\n");
   }
   else
   {
     fprintf(stderr, "Can't send message\n");
-    ot_xmlmesh_shutdown();
+    ot_xmlmesh_close(conn);
     return 2;
   }
 
   // Send a simple request
   // Happens to be a subscription request which the server will respond to
-  if (ot_xmlmesh_request("xmlmesh.subscription.join", 
+  if (ot_xmlmesh_request(conn,
+			 "xmlmesh.subscription.join", 
 			 "<xmlmesh:join subject='foo'/>",
 			 &res))
   {
@@ -60,11 +67,11 @@ int main(int argc, char **argv)
   else
   {
     fprintf(stderr, "Subscription request failed\n");
-    ot_xmlmesh_shutdown();
+    ot_xmlmesh_close(conn);
     return 2;
   }
 
-  ot_xmlmesh_shutdown();
+  ot_xmlmesh_close(conn);
   return 0;  
 }
 

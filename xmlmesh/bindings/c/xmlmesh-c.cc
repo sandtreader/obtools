@@ -15,15 +15,11 @@ using namespace ObTools;
 
 extern "C" {
 
-//--------------------------------------------------------------------------
-// Globals
-// Note:  This isn't remotely thread-safe - use C++ version if you want that
-static XMLMesh::OTMPClient *client = 0;
+#include "ot-xmlmesh-c.h"
 
 //--------------------------------------------------------------------------
-// Initialise the client - connect to the given host & port
-// Whether successful (1=OK)
-int ot_xmlmesh_init(const char *host, int port)
+// Initialise the client library
+void ot_xmlmesh_init()
 {
   // Set up logging
   // Use statics to keep them outside this routine, but no-one else
@@ -32,7 +28,12 @@ int ot_xmlmesh_init(const char *host, int port)
   static Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
   static Log::LevelFilter     level_out(Log::LEVEL_SUMMARY, tsfilter);
   Log::logger.connect(level_out);
+}
 
+//--------------------------------------------------------------------------
+// Open an XMLMesh connection
+OT_XMLMesh_Conn ot_xmlmesh_open(const char *host, int port)
+{
   // Resolve name
   Net::IPAddress addr(host);
   if (!addr)
@@ -43,18 +44,19 @@ int ot_xmlmesh_init(const char *host, int port)
 
   // Start client
   Net::EndPoint server(addr, port);
-  client = new XMLMesh::OTMPClient(server);
-  return 1;
+  XMLMesh::OTMPClient *client = new XMLMesh::OTMPClient(server);
+  return (OT_XMLMesh_Conn)client;
 }
 
 //--------------------------------------------------------------------------
 // Send a message with no response expected
 // Returns whether successful (1 = OK)
-int ot_xmlmesh_send(const char *subject, const char *xml)
+int ot_xmlmesh_send(OT_XMLMesh_Conn conn, const char *subject, const char *xml)
 {
+  XMLMesh::OTMPClient *client = (XMLMesh::OTMPClient *)conn;
   if (!client)
   {
-    cerr << "XMLMesh C library called but not initialised!\n";
+    cerr << "Bogus XMLMesh connection pointer!\n";
     return 0;
   }
 
@@ -68,11 +70,13 @@ int ot_xmlmesh_send(const char *subject, const char *xml)
 // If result_p is not NULL, sets it to malloc'ed result string if successful
 // Caller should free(*result_p) when done
 // If result_p is NULL, simply checks for OK or error, and fails on error
-int ot_xmlmesh_request(const char *subject, const char *xml, char **result_p)
+int ot_xmlmesh_request(OT_XMLMesh_Conn conn,
+		       const char *subject, const char *xml, char **result_p)
 {
+  XMLMesh::OTMPClient *client = (XMLMesh::OTMPClient *)conn;
   if (!client)
   {
-    cerr << "XMLMesh C library called but not initialised!\n";
+    cerr << "Bogus XMLMesh connection pointer!\n";
     return 0;
   }
 
@@ -101,14 +105,24 @@ int ot_xmlmesh_request(const char *subject, const char *xml, char **result_p)
 }
 
 //--------------------------------------------------------------------------
+// Close a connection
+void ot_xmlmesh_close(OT_XMLMesh_Conn conn)
+{
+  XMLMesh::OTMPClient *client = (XMLMesh::OTMPClient *)conn;
+  if (!client)
+  {
+    cerr << "Bogus XMLMesh connection pointer!\n";
+  }
+  else
+  {
+    delete client;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Shutdown
 void ot_xmlmesh_shutdown()
 {
-  if (client)
-  {
-    delete client;
-    client = 0;
-  }
 }
 
 // extern "C"
