@@ -92,7 +92,7 @@ CPPFLAGS += -fpic
 endif
 
 #Set standard flags
-CPPFLAGS += -W #-Wall
+CPPFLAGS += -W -Wall
 
 # Check if we want multithreading and/or debugging
 ifdef MULTI
