@@ -161,6 +161,16 @@ void Element::optimise()
 //--------------------------------------------------------------------------
 // Find first (or only) child element of any type
 // Returns Element::none if none
+// Const and non-const implementations
+const Element& Element::get_child() const
+{
+  list<Element *>::const_iterator p=children.begin();
+  if (p!=children.end())
+    return **p;
+  else
+    return Element::none;
+}
+
 Element& Element::get_child()
 {
   list<Element *>::iterator p=children.begin();
@@ -173,6 +183,18 @@ Element& Element::get_child()
 //--------------------------------------------------------------------------
 // Find first (or only) child element of given name
 // Returns Element::none if none
+// Const and non-const implementations
+const Element& Element::get_child(const string& ename) const
+{
+  for(list<Element *>::const_iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    if ((*p)->name==ename) return **p;
+  }
+  return Element::none;
+}
+
 Element& Element::get_child(const string& ename)
 {
   for(list<Element *>::iterator p=children.begin();
@@ -188,6 +210,24 @@ Element& Element::get_child(const string& ename)
 // Find first (or only) descendant of given name
 // Returns Element::none if there isn't one 
 // (Like get_child() but ignoring intervening cruft)
+// Const and non-const implementations
+const Element &Element::get_descendant(const string& ename) const
+{
+  for(list<Element *>::const_iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    const Element& se = **p;
+    if (se.name == ename) return se;
+
+    //Not child, but ask it to search below itself
+    const Element& sse = se.get_descendant(ename);
+    if (sse.valid()) return sse;
+  }
+
+  return Element::none;
+}
+
 Element &Element::get_descendant(const string& ename)
 {
   for(list<Element *>::iterator p=children.begin();
@@ -208,6 +248,19 @@ Element &Element::get_descendant(const string& ename)
 //--------------------------------------------------------------------------
 // Find all child elements of given name
 // Returns list of pointers
+// Const and non-const implementations
+list<const Element *> Element::get_children(const string& ename) const
+{
+  list<const Element *>l;
+  for(list<Element *>::const_iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    if ((*p)->name==ename) l.push_back(*p);
+  }
+  return l;
+}
+
 list<Element *> Element::get_children(const string& ename)
 {
   list<Element *>l;
@@ -225,6 +278,15 @@ list<Element *> Element::get_children(const string& ename)
 // Returns flat list of pointers
 // Prunes tree walk at 'prune' tags if set - use for recursive structures
 // where you want to deal with each level independently
+// Const and non-const implementations
+list<const Element *> Element::get_descendants(const string& ename,
+					       const string& prune) const
+{
+  list<const Element *>l;
+  append_descendants(ename, prune, l);
+  return l;
+}
+
 list<Element *> Element::get_descendants(const string& ename,
 					 const string& prune)
 {
@@ -238,6 +300,23 @@ list<Element *> Element::get_descendants(const string& ename,
 // Prune walk at elements matching 'prune'
 // Ename and prune can be the same - then returns only first level of 
 // <ename>s, not <ename>s within <ename>s
+// Const and non-const implementations
+void Element::append_descendants(const string& ename, const string& prune,
+				 list<const Element *>& l) const
+{
+  for(list<Element *>::const_iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    if ((*p)->name==ename) 
+      l.push_back(*p);
+
+    //Look for descendants, even within a match
+    if ((*p)->name!=prune)
+      (*p)->append_descendants(ename, prune, l);
+  }
+}
+
 void Element::append_descendants(const string& ename, const string& prune,
 				 list<Element *>& l)
 {
@@ -259,18 +338,18 @@ void Element::append_descendants(const string& ename, const string& prune,
 // Returns optimised content if available, otherwise iterates children
 // collecting text from data elements
 // Strings from separate elements are separately with '\n'
-string Element::get_content()
+string Element::get_content() const
 {
   // Return content directly if available
   if (content != "") return content;
 
   // Otherwise iterate all elements
   string s;
-  for(list<Element *>::iterator p=children.begin();
+  for(list<Element *>::const_iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    Element &e=**p;
+    const Element &e=**p;
 
     // Look for absence of tag rather than presence of content - this
     // might be optimised and we don't want to collect second-level stuff
@@ -289,18 +368,18 @@ string Element::get_content()
 // Returns optimised content if available, otherwise iterates children
 // collecting text from data elements, and recursing into subchildren
 // Strings from separate elements are separately with '\n'
-string Element::get_deep_content()
+string Element::get_deep_content() const
 {
   // Return content directly if available
   if (content != "") return content;
 
   // Otherwise iterate all elements
   string s;
-  for(list<Element *>::iterator p=children.begin();
+  for(list<Element *>::const_iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    Element &e=**p;
+    const Element &e=**p;
 
     // Extract content from this, recursively
     string ss=e.get_deep_content();
@@ -320,9 +399,9 @@ string Element::get_deep_content()
 // Defaults to default value given (or "") if not present
 // This exists to avoid modifying the attribute when using attrs["foo"]
 // when foo doesn't exist (a completely stupid specification of [], IMHO)
-string Element::get_attr(const string& attname, const string& def)
+string Element::get_attr(const string& attname, const string& def) const
 {
-  map<string,string>::iterator p=attrs.find(attname);
+  map<string,string>::const_iterator p=attrs.find(attname);
   if (p!=attrs.end())
     return p->second;
   else
@@ -334,9 +413,9 @@ string Element::get_attr(const string& attname, const string& def)
 // Returns attribute value
 // Defaults to default value given (or false) if not present
 // Recognises words beginning [TtYy] as true, everything else is false
-bool Element::get_attr_bool(const string& attname, bool def)
+bool Element::get_attr_bool(const string& attname, bool def) const
 {
-  map<string,string>::iterator p=attrs.find(attname);
+  map<string,string>::const_iterator p=attrs.find(attname);
   if (p!=attrs.end())
   {
     char c=0;
@@ -361,9 +440,9 @@ bool Element::get_attr_bool(const string& attname, bool def)
 // Returns attribute value
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Element::get_attr_int(const string& attname, int def)
+int Element::get_attr_int(const string& attname, int def) const
 {
-  map<string,string>::iterator p=attrs.find(attname);
+  map<string,string>::const_iterator p=attrs.find(attname);
   if (p!=attrs.end()) return atoi(p->second.c_str());
 
   return def;
@@ -372,9 +451,9 @@ int Element::get_attr_int(const string& attname, int def)
 //--------------------------------------------------------------------------
 // Tests whether the element has an attribute of the given name
 // Quicker than !get_attr("foo").empty()
-bool Element::has_attr(const string& attname)
+bool Element::has_attr(const string& attname) const
 {
-  map<string,string>::iterator p=attrs.find(attname);
+  map<string,string>::const_iterator p=attrs.find(attname);
   if (p==attrs.end())
     return false;
   else

@@ -32,6 +32,8 @@ private:
   void write_indented(int indent, ostream &s) const;
   string escape(const string &v, bool escquote) const;
   void append_descendants(const string& name, const string& prune, 
+			  list<const Element *>& l) const;
+  void append_descendants(const string& name, const string& prune, 
 			  list<Element *>& l);
 
   //Prevent copy and assignment - don't want to do deep copy
@@ -64,8 +66,8 @@ public:
   // Validity checks
   // Easy way of checking if you've got Element::none
   // Don't use (e!=Element::none) - that compares values!
-  bool valid() { return this!=&none; }
-  bool operator!() { return !valid(); }
+  bool valid() const { return this!=&none; }
+  bool operator!() const { return !valid(); }
 
   //------------------------------------------------------------------------
   // Constructors & Destructors
@@ -84,6 +86,8 @@ public:
   //--------------------------------------------------------------------------
   // Find first (or only) child element, whatever it is
   // Returns Element::none if there isn't one 
+  // Const and non-const implementations (likewise rest of accessors)
+  const Element &get_child() const;
   Element &get_child();
 
   //--------------------------------------------------------------------------
@@ -93,17 +97,20 @@ public:
   //     XML::Element& e = get_child(root, "foo");
   //     if (e.valid())
   //       //Use e
+  const Element &get_child(const string& ename) const;
   Element &get_child(const string& ename);
 
   //--------------------------------------------------------------------------
   // Find first (or only) descendant of given name
   // Returns Element::none if there isn't one 
   // (Like get_child() but ignoring intervening cruft)
+  const Element &get_descendant(const string& ename) const;
   Element &get_descendant(const string& ename);
 
   //--------------------------------------------------------------------------
   // Find all child elements of given name
   // Returns list of pointers
+  list<const Element *> get_children(const string& ename) const;
   list<Element *> get_children(const string& ename);
 
   //--------------------------------------------------------------------------
@@ -113,6 +120,8 @@ public:
   // where you want to deal with each level independently
   // Ename and prune can be the same - then returns only first level of 
   // <ename>s, not <ename>s within <ename>s
+  list<const Element *> get_descendants(const string& ename,
+					const string& prune="") const;
   list<Element *> get_descendants(const string& ename,
 				  const string& prune="");
 
@@ -122,40 +131,40 @@ public:
   // Defaults to default value given (or "") if not present
   // This exists to avoid creating the attribute when using attrs["foo"]
   // when foo doesn't exist (a completely stupid specification of [], IMHO)
-  string get_attr(const string& attname, const string& def="");
+  string get_attr(const string& attname, const string& def="") const;
 
   //--------------------------------------------------------------------------
   // Get the boolean value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy] as true, everything else is false
-  bool get_attr_bool(const string& attname, bool def=false);
+  bool get_attr_bool(const string& attname, bool def=false) const;
 
   //--------------------------------------------------------------------------
   // Get the integer value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_attr_int(const string& attname, int def=0);
+  int get_attr_int(const string& attname, int def=0) const;
 
   //--------------------------------------------------------------------------
   // Tests whether the element has an attribute of the given name
   // Quicker than !get_attr("foo").empty()
-  bool has_attr(const string& attname);
+  bool has_attr(const string& attname) const;
 
   //--------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements
   // Strings from separate elements are separately with '\n'
-  string get_content();
+  string get_content() const;
 
   //--------------------------------------------------------------------------
   // Get all text content from the entire tree accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements, and recursing into subchildren
   // Strings from separate elements are separately with '\n'
-  string get_deep_content();
+  string get_deep_content() const;
 
   //--------------------------------------------------------------------------
   // Translate name using given map:
