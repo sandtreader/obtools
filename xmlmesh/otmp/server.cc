@@ -13,14 +13,14 @@
 #include <netinet/in.h>
 #include <sstream>
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLBus { namespace OTMP {
 
 //--------------------------------------------------------------------------
 // Send handler thread class
 // Pulls messages off the given queue and sends them to the given socket
 class SendThread: public MT::Thread
 {
-  MT::Queue<OTMPMessage>& send_q;
+  MT::Queue<Message>& send_q;
   Net::TCPSocket& socket;
 
   void run() 
@@ -28,7 +28,7 @@ class SendThread: public MT::Thread
     for(;;)
     {
       // Block for a message
-      OTMPMessage msg = send_q.wait();
+      Message msg = send_q.wait();
 
       // Deal with it
       if (Log::debug_ok)
@@ -40,7 +40,7 @@ class SendThread: public MT::Thread
       try // Handle SocketErrors
       {
 	// Write chunk header
-	socket.write_nbo_int(OTMP_TAG_MESSAGE);
+	socket.write_nbo_int(TAG_MESSAGE);
 	socket.write_nbo_int(msg.data.size());
 	socket.write_nbo_int(msg.flags); // Flags
 
@@ -56,13 +56,13 @@ class SendThread: public MT::Thread
   }
 
 public:
-  SendThread(MT::Queue<OTMPMessage>& q, Net::TCPSocket &s): 
+  SendThread(MT::Queue<Message>& q, Net::TCPSocket &s): 
     send_q(q), socket(s) { start(); }
 };
 
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
-void OTMPServer::process(Net::TCPSocket& socket, 
+void Server::process(Net::TCPSocket& socket, 
 			 Net::IPAddress client_address,
 			 int client_port)
 {
@@ -84,7 +84,7 @@ void OTMPServer::process(Net::TCPSocket& socket,
       uint32_t tag;
       if (!socket.read_nbo_int(tag)) break;  // Clean shutdown
 
-      if (tag == OTMP_TAG_MESSAGE)
+      if (tag == TAG_MESSAGE)
       {
 	// Handle a TLV block
 	uint32_t len   = socket.read_nbo_int();
@@ -106,7 +106,7 @@ void OTMPServer::process(Net::TCPSocket& socket,
 	if (Log::dump_ok) Log::Dump << content << endl;
 
 	// Post up a message
-	OTMPMessage msg(content, flags);
+	Message msg(content, flags);
 	receive_q.send(msg);
       }
       else
@@ -138,11 +138,11 @@ void OTMPServer::process(Net::TCPSocket& socket,
 
 //------------------------------------------------------------------------
 // Constructor
-OTMPServer::OTMPServer(MT::Queue<OTMPMessage>& receive_queue,
+Server::Server(MT::Queue<Message>& receive_queue,
 		       int port, int backlog, 
 		       int min_spare_threads, int max_threads):
   receive_q(receive_queue),
-  TCPServer((port?port:OTMP_DEFAULT_PORT), backlog, 
+  TCPServer((port?port:DEFAULT_PORT), backlog, 
 	    min_spare_threads, max_threads)
 {
 
@@ -152,13 +152,13 @@ OTMPServer::OTMPServer(MT::Queue<OTMPMessage>& receive_queue,
 //------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full
 // Whether message queued
-bool OTMPServer::send(OTMPMessage& msg)
+bool Server::send(Message& msg)
 {
   send_q.send(msg);  // Never fails, will eat all memory first
   return true;  
 }
 
-}} // namespaces
+}}} // namespaces
 
 
 

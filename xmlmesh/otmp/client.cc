@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMLBus: client.cc
+// ObTools::XMLBus:OTMP: client.cc
 //
 // Implementation of raw OTMP client 
 //
@@ -16,7 +16,7 @@
 // Time to sleep for if socket dies and won't come back
 #define DEAD_SOCKET_SLEEP_TIME 10
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLBus { namespace OTMP {
 
 //==========================================================================
 // Background traffic handler threads
@@ -26,7 +26,7 @@ namespace ObTools { namespace XMLBus {
 // Just repeatedly calls back into receive_messages
 class ReceiveThread: public MT::Thread
 {
-  OTMPClient& client;
+  Client& client;
 
   void run() 
   { 
@@ -44,13 +44,13 @@ class ReceiveThread: public MT::Thread
   }
 
 public:
-  ReceiveThread(OTMPClient &_client): client(_client) { start(); }
+  ReceiveThread(Client &_client): client(_client) { start(); }
 };
 
 //------------------------------------------------------------------------
 // Receive some messages, if any
 // Blocks waiting for incoming messages, returns whether everything OK
-bool OTMPClient::receive_messages()
+bool Client::receive_messages()
 {
   // Check socket exists and is connected - if not, try to reconnect it
   if ((!socket || !*socket) && !restart_socket()) return false;
@@ -61,7 +61,7 @@ bool OTMPClient::receive_messages()
     // Read a 4-byte tag
     uint32_t tag = socket->read_nbo_int();
 
-    if (tag == OTMP_TAG_MESSAGE)
+    if (tag == TAG_MESSAGE)
     {
       // Handle a TLV block
       uint32_t len   = socket->read_nbo_int();
@@ -82,7 +82,7 @@ bool OTMPClient::receive_messages()
       if (Log::dump_ok) Log::Dump << content << endl;
 
       // Post up a message
-      OTMPMessage msg(content, flags);
+      Message msg(content, flags);
       receive_q.send(msg);
     }
     else
@@ -108,7 +108,7 @@ bool OTMPClient::receive_messages()
 // Just repeatedly calls back into send_messages
 class SendThread: public MT::Thread
 {
-  OTMPClient& client;
+  Client& client;
 
   void run() 
   { 
@@ -126,19 +126,19 @@ class SendThread: public MT::Thread
   }
 
 public:
-  SendThread(OTMPClient &_client): client(_client) { start(); }
+  SendThread(Client &_client): client(_client) { start(); }
 };
 
 //------------------------------------------------------------------------
 // Send out some messages, if any
 // Blocks waiting for outgoing messages, returns whether everything OK
-bool OTMPClient::send_messages()
+bool Client::send_messages()
 {
   // Check socket exists and is connected - if not, try to reconnect it
   if ((!socket || !*socket) && !restart_socket()) return false;
 
   // Wait for message to go out, and send it
-  OTMPMessage msg = send_q.wait();
+  Message msg = send_q.wait();
  
   // Deal with it
   if (Log::debug_ok)
@@ -149,7 +149,7 @@ bool OTMPClient::send_messages()
   try // Handle SocketErrors
   {
     // Write chunk header
-    socket->write_nbo_int(OTMP_TAG_MESSAGE);
+    socket->write_nbo_int(TAG_MESSAGE);
     socket->write_nbo_int(msg.data.size());
     socket->write_nbo_int(msg.flags); // Flags
 
@@ -168,7 +168,7 @@ bool OTMPClient::send_messages()
 
 //------------------------------------------------------------------------
 // Restart a dead or non-existent socket
-bool OTMPClient::restart_socket()
+bool Client::restart_socket()
 {
   // Lock client global mutex while we mess with this
   MT::Lock lock(mutex);
@@ -207,9 +207,9 @@ bool OTMPClient::restart_socket()
 
 //------------------------------------------------------------------------
 // Constructors
-OTMPClient::OTMPClient(Net::IPAddress address, int port):
+Client::Client(Net::IPAddress address, int port):
   server_address(address),
-  server_port(port?port:OTMP_DEFAULT_PORT) 
+  server_port(port?port:DEFAULT_PORT) 
 {
   socket = 0;
 
@@ -225,7 +225,7 @@ OTMPClient::OTMPClient(Net::IPAddress address, int port):
 //------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full
 // Whether message queued
-bool OTMPClient::send(OTMPMessage& msg)
+bool Client::send(Message& msg)
 {
   send_q.send(msg);  // Never fails, will eat all memory first
   return true;  
@@ -233,7 +233,7 @@ bool OTMPClient::send(OTMPMessage& msg)
 
 //------------------------------------------------------------------------
 // Check whether a message is available before blocking in wait()
-bool OTMPClient::poll()
+bool Client::poll()
 {
   return receive_q.poll();
 }
@@ -241,7 +241,7 @@ bool OTMPClient::poll()
 //------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
 // Returns whether one was read - will only return false if something fails
-bool OTMPClient::wait(OTMPMessage& msg)
+bool Client::wait(Message& msg)
 {
   msg = receive_q.wait();  // Never fails
   return true;
@@ -249,14 +249,14 @@ bool OTMPClient::wait(OTMPMessage& msg)
 
 //------------------------------------------------------------------------
 // Destructor
-OTMPClient::~OTMPClient()
+Client::~Client()
 {
   delete receive_thread;
   delete send_thread;
   if (socket) delete socket;
 }
 
-}} // namespaces
+}}} // namespaces
 
 
 

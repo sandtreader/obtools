@@ -13,7 +13,7 @@
 #include "ot-net.h"
 #include "ot-mt.h"
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLBus { namespace OTMP { 
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -56,28 +56,28 @@ using namespace std;
 //     and an error logged
 
 // Standard protocol port
-const int OTMP_DEFAULT_PORT = 29167;
+const int DEFAULT_PORT = 29167;
 
 // Standard OTMP tags
-enum OTMPTag
+enum Tag
 {
-  OTMP_TAG_MESSAGE = 0x4f544d53   // OTMS - Message carrying
+  TAG_MESSAGE = 0x4f544d53   // OTMS - Message carrying
 };
 
 // Internal struct for carrying messages 
 // This is NOT used for directly encoding the stream!
-struct OTMPMessage
+struct Message
 {
   // Length is implicit in data.size()
   uint32_t flags;
   string data;  
 
-  OTMPMessage(const string& d="", int f=0): data(d), flags(f) {}
+  Message(const string& d="", int f=0): data(d), flags(f) {}
 };
 
 //==========================================================================
 // OTMP client
-class OTMPClient
+class Client
 {
 private:
   // Network stuff
@@ -89,10 +89,10 @@ private:
   MT::Mutex mutex;             // Global client mutex used for socket
                                // creation and restart
   MT::Thread *send_thread;
-  MT::Queue<OTMPMessage> send_q;
+  MT::Queue<Message> send_q;
 
   MT::Thread *receive_thread;
-  MT::Queue<OTMPMessage> receive_q;
+  MT::Queue<Message> receive_q;
 
   bool restart_socket();
 
@@ -100,7 +100,7 @@ public:
   //------------------------------------------------------------------------
   // Constructors - take server address
   // port=0 means use default port for protocol
-  OTMPClient(Net::IPAddress address, int port=0);
+  Client(Net::IPAddress address, int port=0);
 
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
@@ -110,7 +110,7 @@ public:
   //------------------------------------------------------------------------
   // Send a message - never blocks, but can fail if the queue is full
   // Whether message queued
-  bool send(OTMPMessage& msg);
+  bool send(Message& msg);
 
   //------------------------------------------------------------------------
   // Check whether a message is available before blocking in wait()
@@ -119,11 +119,11 @@ public:
   //------------------------------------------------------------------------
   // Receive a message - blocks waiting for one to arrive
   // Returns whether one was read - will only return false if something fails
-  bool wait(OTMPMessage& msg);
+  bool wait(Message& msg);
 
   //------------------------------------------------------------------------
   // Destructor
-  virtual ~OTMPClient();
+  virtual ~Client();
 };
 
 //==========================================================================
@@ -133,24 +133,24 @@ public:
 // expecting to aggregate its messages with a number of other servers
 // Also, unlike the client, this _is_ a TCPServer, rather than owning
 // one
-class OTMPServer: public Net::TCPServer
+class Server: public Net::TCPServer
 {
 private:
   // Thread and queue stuff
   MT::Thread *send_thread;
-  MT::Queue<OTMPMessage> send_q;  
+  MT::Queue<Message> send_q;  
 
   MT::Thread *receive_thread;
-  MT::Queue<OTMPMessage>& receive_q;  // Note:  Not mine
+  MT::Queue<Message>& receive_q;  // Note:  Not mine
 
 public:
   //------------------------------------------------------------------------
   // Constructor - takes receive queue for incoming messages
   // port=0 means take default port for protocol
   // The rest is thread/socket tuning - see Net::TCPServer
-  OTMPServer(MT::Queue<OTMPMessage>& receive_queue,
-	     int port=0, int backlog=5, 
-	     int min_spare_threads=1, int max_threads=10);
+  Server(MT::Queue<Message>& receive_queue,
+	 int port=0, int backlog=5, 
+	 int min_spare_threads=1, int max_threads=10);
 
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
@@ -166,12 +166,12 @@ public:
   //------------------------------------------------------------------------
   // Send a message - never blocks, but can fail if the queue is full
   // Whether message queued
-  bool send(OTMPMessage& msg);
+  bool send(Message& msg);
 };
 
 
 //==========================================================================
-}} //namespaces
+}}} //namespaces
 #endif // !__OBTOOLS_XMLBUS_OTMP_H
 
 

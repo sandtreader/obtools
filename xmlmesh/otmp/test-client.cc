@@ -46,13 +46,13 @@ int main(int argc, char **argv)
     " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
-  XMLBus::OTMPClient client(addr, port);
+  XMLBus::OTMP::Client client(addr, port);
 
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)
   {
     sleep(1);
-    XMLBus::OTMPMessage msg("This is a test message");
+    XMLBus::OTMP::Message msg("This is a test message");
 
     client.send(msg);
 

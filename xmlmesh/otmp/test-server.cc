@@ -17,15 +17,15 @@ using namespace ObTools;
 // Pulls messages off the given queue and sends them to the given socket
 class ReflectorThread: public MT::Thread
 {
-  XMLBus::OTMPServer& server;
-  MT::Queue<XMLBus::OTMPMessage>& receive_q;
+  XMLBus::OTMP::Server& server;
+  MT::Queue<XMLBus::OTMP::Message>& receive_q;
 
   void run() 
   { 
     for(;;)
     {
       // Block for a message
-      XMLBus::OTMPMessage msg = receive_q.wait();
+      XMLBus::OTMP::Message msg = receive_q.wait();
 
       // Send it back
       server.send(msg);
@@ -33,7 +33,8 @@ class ReflectorThread: public MT::Thread
   }
 
 public:
-  ReflectorThread(XMLBus::OTMPServer &s, MT::Queue<XMLBus::OTMPMessage>& q): 
+  ReflectorThread(XMLBus::OTMP::Server &s, 
+		  MT::Queue<XMLBus::OTMP::Message>& q): 
     server(s), receive_q(q) { start(); }
 };
 
@@ -49,10 +50,10 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
 
   // Create unified receive queue
-  MT::Queue<XMLBus::OTMPMessage> q;
+  MT::Queue<XMLBus::OTMP::Message> q;
 
   // Create server 
-  XMLBus::OTMPServer server(q);
+  XMLBus::OTMP::Server server(q);
 
   // Start reflector thread
   ReflectorThread reflector(server, q);
