@@ -208,11 +208,11 @@ public:
   //--------------------------------------------------------------------------
   // Translate name using given map:
   //   If not present, leave it and return true 
-  //   If present but mapped to "", leave it return false (=> delete me)
+  //   If present but mapped to "", leave it & return false (=> delete me)
   //   If present and mapped to non empty, change to mapped string
   // 
   // Recurses to sub-elements and deletes them if they return false -
-  // net effect begin that names mapped to "" are (deep) deleted from
+  // net effect being that names mapped to "" are (deep) deleted from
   // the document.  
   bool translate(map<string, string>& trans_map);
 };
