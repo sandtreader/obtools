@@ -138,8 +138,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
 }
 
 // More C++ friendly version
-bool pattern_match(const string& pattern, const string& text, 
-		   bool cased=true)
+bool pattern_match(const string& pattern, const string& text, bool cased)
 { 
   return pattern_match(pattern.c_str(), text.c_str(), cased); 
 }

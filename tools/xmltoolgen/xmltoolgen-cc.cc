@@ -15,6 +15,7 @@
 #include <cstdlib>
 
 using namespace ObTools;
+using namespace std;
 
 //--------------------------------------------------------------------------
 // Fatal error handler
@@ -410,6 +411,7 @@ int main(int argc, char **argv)
   cout << "#include <fstream>\n";
   cout << "#include <sstream>\n";
   cout << "#include <cstdlib>\n\n";
+  cout << "using namespace std;\n\n";
 
   // Their config items
   config_vars(config);

@@ -83,7 +83,7 @@ string Configuration::get_value(const string& path, const string& def)
 // XPath Boolean value fetch
 // Defaults to default value given (or false) if not present
 // Recognises words beginning [TtYy] as true, everything else is false
-bool Configuration::get_value_bool(const string& path, bool def=false)
+bool Configuration::get_value_bool(const string& path, bool def)
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_bool(path, def); 
@@ -93,7 +93,7 @@ bool Configuration::get_value_bool(const string& path, bool def=false)
 // Integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Configuration::get_value_int(const string& path, int def=0)
+int Configuration::get_value_int(const string& path, int def)
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_int(path, def); 

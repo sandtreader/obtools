@@ -7,6 +7,7 @@
 //==========================================================================
 
 #include "ot-text.h"
+using namespace std;
 
 string text = "Alpha.Beta.Gamma";
 

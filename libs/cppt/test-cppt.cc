@@ -7,6 +7,7 @@
 //==========================================================================
 
 #include "ot-cppt.h"
+using namespace std;
 
 //--------------------------------------------------------------------------
 // Main
@@ -18,6 +19,7 @@ int main()
 
   ObTools::CPPT::Processor processor(cin, cout, tags, "cout");
   cout << "#include <iostream>\n";
+  cout << "using namespace std;\n\n";
   cout << "int main()\n";
   cout << "{\n";
 

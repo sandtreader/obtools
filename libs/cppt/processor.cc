@@ -12,7 +12,7 @@ using namespace ObTools::CPPT;
 //------------------------------------------------------------------------
 //Constructor
 Processor::Processor(istream& instream, ostream& outstream,
-		     const Tags& ts, const char *streamname="cout"):
+		     const Tags& ts, const char *streamname):
     sin(instream),
     sout(outstream),
     tags(ts),

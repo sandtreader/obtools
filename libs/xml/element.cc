@@ -322,7 +322,7 @@ string Element::get_attr(const string& attname, const string& def)
 // Returns attribute value
 // Defaults to default value given (or false) if not present
 // Recognises words beginning [TtYy] as true, everything else is false
-bool Element::get_attr_bool(const string& attname, bool def=false)
+bool Element::get_attr_bool(const string& attname, bool def)
 {
   map<string,string>::iterator p=attrs.find(attname);
   if (p!=attrs.end())
@@ -349,7 +349,7 @@ bool Element::get_attr_bool(const string& attname, bool def=false)
 // Returns attribute value
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Element::get_attr_int(const string& attname, int def=0)
+int Element::get_attr_int(const string& attname, int def)
 {
   map<string,string>::iterator p=attrs.find(attname);
   if (p!=attrs.end()) return atoi(p->second.c_str());
