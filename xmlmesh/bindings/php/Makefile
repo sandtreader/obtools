@@ -1,0 +1,21 @@
+#==========================================================================
+# Makefile for ObTools XMLMesh PHP binding
+#
+# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+#==========================================================================
+
+TYPE	= dlmod
+NAME   	= php_xmlmesh
+OBJS 	= php_xmlmesh.o
+DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
+	  net log xml text cache
+PHP	= /usr/include/php4
+EXTINCS = $(PHP) $(PHP)/TSRM $(PHP)/main $(PHP)/Zend
+
+#Only current works single-threaded, due to Apache fork/pthread weirdness
+SINGLE = 1
+
+ROOT    = ../../..
+include $(ROOT)/build/std.mk
+
