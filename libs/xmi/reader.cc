@@ -34,6 +34,24 @@ void Reader::error(const char *err, const string& detail)
 }
 
 //------------------------------------------------------------------------
+// Read an attribute from given <UML:Attribute> element
+// Returns 0 if failed
+Attribute *Reader::read_attribute(ObTools::XML::Element& ae)
+{
+  //It must have a name
+  string name = ae.get_attr("name");
+  if (name.empty())
+  {
+    warning("Attribute with no name ignored - id ", ae.get_attr("xmi.id"));
+    return 0;
+  }
+
+  //  Attribute *a = new Attribute(id, !!!class from map);
+
+  return 0;
+}
+
+//------------------------------------------------------------------------
 // Read a class from given <UML:Class> element
 // Returns 0 if failed
 Class *Reader::read_class(ObTools::XML::Element& ce)
@@ -54,8 +72,6 @@ Class *Reader::read_class(ObTools::XML::Element& ce)
   //That's enough to commit to
   Class *c = new Class(id, name);
 
-  cout << "Got a class: " << name << "," << id << endl;
-
   if (ce.get_attr_bool("isAbstract"))
     c->kind = CLASS_ABSTRACT;
 
@@ -63,8 +79,9 @@ Class *Reader::read_class(ObTools::XML::Element& ce)
     c->stereotype = ce.get_attr("stereotype");
 
   //Look for attributes
-  OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(atte, ce, "UML:Attribute")
-    cout << "  attribute: " << atte.get_attr("name") << endl;
+  OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(ae, ce, "UML:Attribute")
+    Attribute *a = read_attribute(ae);
+    if (a) c->attributes.push_back(a);
   OBTOOLS_XML_ENDFOR
 
   return c;
@@ -75,7 +92,6 @@ Class *Reader::read_class(ObTools::XML::Element& ce)
 // Returns 0 if failed
 Association *Reader::read_association(ObTools::XML::Element& ae)
 {
-  cout << "Got an association: " << ae.get_attr("xmi.id") << endl;
   return 0;
 }
 
@@ -149,8 +165,6 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   ObTools::XML::Element &uml_model = xmi_content.get_child("UML:Model");
   if (!uml_model.valid()) error("No <UML:Model> in <XMI.content>");
   
-  cout << "Got a model: " << uml_model.get_attr("name") << endl;
-
   model = read_package(uml_model);
 }
 

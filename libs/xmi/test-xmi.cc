@@ -24,6 +24,11 @@ int main()
     cerr << "XMI parse failed" << endl;
     return 2;
   }
+
+  //Now we should have a model
+  if (reader.model)
+    reader.model->print(cout);
+
   return 0;  
 }
 

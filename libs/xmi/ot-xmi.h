@@ -79,7 +79,9 @@ public:
   Class *type;
   Multiplicity multi;
 
-  //------------------------------------------------------------------------
+  //Printer
+  void print(ostream& sout, int indent=0);
+
   //Constructor
   Attribute(const string& n, Class *t, 
 	    ElementVisibility v=ELEMENT_PRIVATE,
@@ -107,7 +109,6 @@ public:
   Class *type;
   Multiplicity multi;
 
-  //------------------------------------------------------------------------
   //Constructor
   Parameter(const string& n, Class *t, ParameterKind k=PARAMETER_IN,
 	    Multiplicity m=Multiplicity()):
@@ -126,12 +127,17 @@ class Operation: public Element
 public:
   list<Parameter *> parameters;  //Including return
 
-  //------------------------------------------------------------------------
+  //Printer
+  void print(ostream& sout, int indent=0);
+
   //Constructor
   Operation(const string& n, 
 	    ElementVisibility v=ELEMENT_PUBLIC):
     Element(n,v)
   {}
+
+  //Destructor
+  ~Operation();
 };
 
 //==========================================================================
@@ -154,14 +160,19 @@ public:
   list <Attribute *> attributes;
   list <Operation *> operations;
 
-  //------------------------------------------------------------------------
-  //Constructors
+  //Printer
+  void print(ostream& sout, int indent=0);
+
+  //Constructor
   Class(const string& i, const string& n,
 	ClassKind k=CLASS_CONCRETE,
 	ElementVisibility v=ELEMENT_PUBLIC):
     Element(i,n,v),
     kind(k)
   {}
+
+  //Destructor
+  ~Class();
 };
 
 //==========================================================================
@@ -227,6 +238,9 @@ public:
   Class *type;               // For association classes, usually 0
   AssociationEnd ends[2];
 
+  //Printer
+  void print(ostream& sout, int indent=0);
+
   //------------------------------------------------------------------------
   //Constructors
   Association(Class *t=0):
@@ -250,6 +264,9 @@ public:
   list<Class *> classes;     
   list<Association *> associations;
 
+  //Printer
+  void print(ostream& sout, int indent=0);
+
   //Constructor
   Package(const string& n): Element(n) {}
 
@@ -270,6 +287,7 @@ private:
 
   void warning(const char *warn, const string& detail);
   void error(const char *err, const string& detail="") throw (ParseFailed);
+  Attribute *read_attribute(ObTools::XML::Element& ae);
   Class *read_class(ObTools::XML::Element& ce);
   Association *read_association(ObTools::XML::Element& ae); 
   Package *read_package(ObTools::XML::Element& pe);
