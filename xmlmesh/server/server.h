@@ -15,6 +15,7 @@
 #include "ot-mt.h"
 #include "ot-cache.h"
 #include "ot-xmlmesh.h"
+#include "ot-init.h"
 
 namespace ObTools { namespace XMLMesh {
 
@@ -143,7 +144,6 @@ private:
   bool reverse(RoutingMessage& msg);
 
 protected:
-  Server &server;
   string id;
 
   //------------------------------------------------------------------------
@@ -178,15 +178,14 @@ protected:
 public:
   //------------------------------------------------------------------------
   // Constructors
-  Service(Server& _server, const string& _id, 
+  Service(const string& _id, 
 	  int _min_threads=1, int _max_threads=1): 
-    server(_server), id(_id), multithreaded(_max_threads>1), 
+    id(_id), multithreaded(_max_threads>1), 
     threads(_min_threads, _max_threads) 
   {}
 
   // From XML config
-  Service(Server& _server, XML::Element& cfg):
-    server(_server),
+  Service(XML::Element& cfg):
     id(cfg["id"]),
     multithreaded(cfg.get_attr_int("minthreads", 1) > 1),
     threads(cfg.get_attr_int("minthreads", 1),
@@ -221,24 +220,10 @@ public:
 };
 
 //==========================================================================
-// Service Factory (abstract interface)
-class ServiceFactory
-{
-public:
-  //------------------------------------------------------------------------
-  // Create a service from the given XML element
-  // Returns 0 if failed
-  virtual Service *create(Server& server, XML::Element& xml) = 0;
-};
-
-//==========================================================================
 // General XML Bus server using any number of transports
 class Server
 {
 private:
-  // Factories for use during configuration
-  map<string, ServiceFactory *>         service_factories;
-
   // List of active modules
   list<Service *> services;                 // List of active services
   map<string, Service *> service_ids;       // Map of service ids
@@ -248,13 +233,12 @@ private:
   bool create_route(XML::Element& xml); 
 
 public:
+  // Factories for use during configuration
+  Init::Registry<Service> service_registry;
+
   //------------------------------------------------------------------------
   // Constructor 
   Server() {}
-
-  //------------------------------------------------------------------------
-  // Register a service type
-  void register_service(const string& name, ServiceFactory *factory);
 
   //------------------------------------------------------------------------
   // Signal all services a global event (e.g. clients starting and finishing)
@@ -277,6 +261,13 @@ public:
   ~Server();
 };
 
+// Global server instance
+extern Server server;
+
+// Macro for auto-registration of services into registry
+#define OT_XMLMESH_REGISTER_SERVICE(_subclass, _name)  \
+static Init::AutoRegister<Service, _subclass> \
+  __ar(server.service_registry, _name);
 
 //==========================================================================
 }} //namespaces

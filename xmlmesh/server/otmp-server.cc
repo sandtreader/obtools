@@ -7,7 +7,7 @@
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-#include "otmp-server.h"
+#include "server.h"
 #include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
 
@@ -58,7 +58,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - default to standard OTMP port
-  OTMPServer(Server& server, XML::Element& cfg);
+  OTMPServer(XML::Element& cfg);
 
   //--------------------------------------------------------------------------
   // OTMP Message dispatcher
@@ -72,8 +72,8 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor
-OTMPServer::OTMPServer(Server& server, XML::Element& cfg):
-  Service(server, cfg),
+OTMPServer::OTMPServer(XML::Element& cfg):
+  Service(cfg),
   otmp(receive_q, cfg.get_attr_int("port", OTMP::DEFAULT_PORT)), 
   server_thread(otmp), 
   message_thread(*this)
@@ -173,25 +173,8 @@ void OTMPMessageThread::run()
 }
 
 //==========================================================================
-// OTMP Server Factory
-
-//------------------------------------------------------------------------
-//Singleton instance
-OTMPServerFactory OTMPServerFactory::instance;
-
-//------------------------------------------------------------------------
-//Create method
-Service *OTMPServerFactory::create(Server& server, XML::Element& xml)
-{
-  return new OTMPServer(server, xml);
-}
-
-//------------------------------------------------------------------------
-//Registration method
-void OTMPServerFactory::register_into(Server& server)
-{
-  server.register_service("otmp-server", &instance);
-}
+// Auto-register
+OT_XMLMESH_REGISTER_SERVICE(OTMPServer, "otmp-server");
 
 }} // namespaces
 

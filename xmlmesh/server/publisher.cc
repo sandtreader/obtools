@@ -7,7 +7,7 @@
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-#include "publisher.h"
+#include "server.h"
 #include "ot-log.h"
 #include "ot-text.h"
 
@@ -52,7 +52,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  Publisher(Server& _server, XML::Element& cfg);
+  Publisher(XML::Element& cfg);
 
   //------------------------------------------------------------------------
   // Signal various global events, independent of message routing
@@ -65,8 +65,8 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor - take subject and transport to attach to 
-Publisher::Publisher(Server& server, XML::Element& cfg):
-  Service(server, cfg), 
+Publisher::Publisher(XML::Element& cfg):
+  Service(cfg), 
   subject_pattern(cfg.get_attr("subject", "*"))
 {
   Log::Summary << "Publish Service '" << id << "' started for subjects '"
@@ -243,25 +243,8 @@ void Publisher::unsubscribe_all(Client& client)
 }
 
 //==========================================================================
-// Publish Service Factory
-
-//------------------------------------------------------------------------
-//Singleton instance
-PublisherFactory PublisherFactory::instance;
-
-//------------------------------------------------------------------------
-//Create method
-Service *PublisherFactory::create(Server& server, XML::Element& xml)
-{
-  return new Publisher(server, xml);
-}
-
-//------------------------------------------------------------------------
-//Registration method
-void PublisherFactory::register_into(Server& server)
-{
-  server.register_service("publisher", &instance);
-}
+// Auto-register
+OT_XMLMESH_REGISTER_SERVICE(Publisher, "publisher");
 
 }} // namespaces
 

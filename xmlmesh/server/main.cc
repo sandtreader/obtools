@@ -8,20 +8,23 @@
 //==========================================================================
 
 #include "server.h"
-#include "otmp-server.h"
-#include "correlator.h"
-#include "publisher.h"
 #include "ot-log.h"
 
 using namespace std;
 using namespace ObTools;
 using namespace ObTools::XMLMesh;
 
+// Global server instance
+Server ObTools::XMLMesh::server;
+
 //--------------------------------------------------------------------------
 // Main
 
 int main(int argc, char **argv)
 {
+  // Run initialisation sequence (auto-registration of modules etc.)
+  Init::Sequence::run();
+
   // Read config
   char *cfg = "xmlmesh.cfg.xml";
   if (argc > 1) cfg = argv[1];
@@ -40,14 +43,6 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
   Log::Summary << "xmlmesh-server starting\n";
   
-  // Create server 
-  Server server;
-
-  // Register service modules
-  OTMPServerFactory::register_into(server);
-  CorrelatorFactory::register_into(server);
-  PublisherFactory::register_into(server);
-
   // Configure server 
   server.configure(config);
 

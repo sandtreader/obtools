@@ -8,7 +8,6 @@
 //==========================================================================
 
 #include "server.h"
-#include "correlator.h"
 #include "ot-log.h"
 #include "ot-text.h"
 #include <sstream>
@@ -49,8 +48,8 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  // Default Constructor 
-  Correlator(Server& server, XML::Element& cfg);
+  // Constructor 
+  Correlator(XML::Element& cfg);
 
   //------------------------------------------------------------------------
   // Signal various global events, independent of message routing
@@ -67,8 +66,8 @@ public:
 
 //------------------------------------------------------------------------
 // Default Constructor 
-Correlator::Correlator(Server& server, XML::Element& cfg): 
-    Service(server, cfg), 
+Correlator::Correlator(XML::Element& cfg): 
+    Service(cfg), 
     id_serial(0), 
     request_cache(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT)) 
 {
@@ -194,25 +193,8 @@ ostream& operator<<(ostream&s, const Correlation& c)
 }
 
 //==========================================================================
-// Correlator Factory
-
-//------------------------------------------------------------------------
-//Singleton instance
-CorrelatorFactory CorrelatorFactory::instance;
-
-//------------------------------------------------------------------------
-//Create method
-Service *CorrelatorFactory::create(Server& server, XML::Element& xml)
-{
-  return new Correlator(server, xml);
-}
-
-//------------------------------------------------------------------------
-//Registration method
-void CorrelatorFactory::register_into(Server& server)
-{
-  server.register_service("correlator", &instance);
-}
+// Auto-register
+OT_XMLMESH_REGISTER_SERVICE(Correlator, "correlator");
 
 }} // namespaces
 

@@ -16,13 +16,6 @@
 namespace ObTools { namespace XMLMesh { 
 
 //------------------------------------------------------------------------
-// Register a service type
-void Server::register_service(const string& name, ServiceFactory *factory)
-{
-  service_factories[name] = factory;
-}
-
-//------------------------------------------------------------------------
 // Load modules etc. from XML config
 void Server::configure(XML::Configuration& config)
 {
@@ -50,14 +43,8 @@ void Server::configure(XML::Configuration& config)
 // Returns whether successful
 bool Server::create_service(XML::Element& xml)
 {
-  // Find tag name in registry
-  map<string, ServiceFactory *>::iterator p;
-  p = service_factories.find(xml.name);
-  if (p==service_factories.end()) return false;
-
-  // Call factory to create service
-  ServiceFactory *factory = p->second;
-  Service *s = factory->create(*this, xml);
+  Service *s = server.service_registry.create(xml.name, xml);
+  if (!s) return false;
   
   // Store it
   services.push_back(s);

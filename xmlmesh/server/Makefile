@@ -10,7 +10,8 @@ NAME   	= xmlmesh-server
 HEADERS = server.h
 OBJS 	= main.o server.o service.o mpath.o otmp-server.o correlator.o  \
           publisher.o
-DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp net log mt xml text cache
+DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
+          net log mt xml text cache init
 CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1
 
