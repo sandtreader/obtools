@@ -95,7 +95,7 @@ bool Server::create_service(XML::Element& xml)
 
   // Call factory to create service
   ServiceFactory *factory = p->second;
-  Service *s = factory->create(xml);
+  Service *s = factory->create(*this, xml);
   
   // Store it
   services.push_back(s);
@@ -113,9 +113,119 @@ void Server::run()
     // Block for a message
     IncomingMessage msg = incoming_q.wait();
 
-    // Deal with it
-    distributor.distribute(msg);
+    if (msg.flags & IncomingMessage::STARTED)
+    {
+      // Log it
+      Log::Summary << "Client " << msg.transport->name
+		   << ":" << msg.client << " starting\n"; 
+
+      // Signal start of client 
+      signal_services(msg.transport, msg.client, Service::CLIENT_STARTED);
+    }
+    else if (msg.flags & IncomingMessage::FINISHED)
+    {
+      // Log it
+      Log::Summary << "Client " << msg.transport->name
+		   << ":" << msg.client << " finished\n"; 
+
+      // Signal end of client 
+      signal_services(msg.transport, msg.client, Service::CLIENT_FINISHED);
+    }
+    else
+    {
+      // Log it
+      Log::Detail << "Received message from " << msg.transport->name
+		  << ":" << msg.client << ", subject " 
+		  << msg.message.get_subject() << ":\n";
+      Log::Detail << msg.message.to_text() << endl;
+
+      // Deal with it
+      distributor.distribute(msg);
+
+      // If response was required and no-one did, respond with our own error
+      if (msg.message.get_rsvp() && !(msg.flags & IncomingMessage::RESPONDED))
+	respond(ErrorMessage::ERROR, "No response available", msg);
+    }
   }
+}
+
+//------------------------------------------------------------------------
+// Look up a transport by name 
+Transport *Server::lookup_transport(const string& name)
+{
+  map<string, Transport *>::iterator p = transport_ids.find(name);
+  if (p!=transport_ids.end())
+    return p->second;
+  else
+    return 0;
+}
+
+//------------------------------------------------------------------------
+// Signal all services that a client has started or finished
+void Server::signal_services(Transport *transport, Net::EndPoint& client,
+			     Service::Signal signal)
+{
+  for(list<Service *>::iterator p=services.begin();
+      p!=services.end();
+      p++)
+    (*p)->signal_client(transport, client, signal);
+}
+
+//------------------------------------------------------------------------
+// Attach a new message handler on the given subject pattern
+// Handlers will be deleted on destruction
+void Server::attach_handler(const string& subject, MessageHandler& h)
+{
+  distributor.attach_handler(subject, h);
+}
+
+//------------------------------------------------------------------------
+// Send a new message to the client on the transport given
+// Returns whether successful
+bool Server::send(Message &msg, Transport *transport, Net::EndPoint& client)
+{
+  transport->send(client, msg.get_text());
+}
+
+//------------------------------------------------------------------------
+// Return a message as a response to the request given
+// Returns whether successul
+bool Server::respond(Message& response, IncomingMessage& request)
+{
+  if (!(request.flags & IncomingMessage::RESPONDED))
+  {
+    request.flags |= IncomingMessage::RESPONDED;
+    return send(response, request.transport, request.client);
+  }
+  else
+  {
+    Log::Error << "Duplicate reponse to " << request.transport->name 
+	       << ":" << request.client << ":\n";
+    Log::Error << response << endl;
+    Log::Error << "Original request was:\n";
+    Log::Error << request.message << endl;
+    return false;
+  }
+}
+
+//------------------------------------------------------------------------
+// Return OK to request given
+// Returns whether successul
+bool Server::respond(IncomingMessage& request)
+{
+  OKMessage okm(request.message.get_id());
+  return respond(okm, request);
+}
+
+//------------------------------------------------------------------------
+// Return an error to request given
+// Returns whether successul
+bool Server::respond(ErrorMessage::Severity severity,
+		     const string& text,
+		     IncomingMessage& request)
+{
+  ErrorMessage errm(request.message.get_id(), severity, text);
+  return respond(errm, request);
 }
 
 //------------------------------------------------------------------------

@@ -8,6 +8,7 @@
 
 #include "server.h"
 #include "transport-otmp-server.h"
+#include "service-publish.h"
 #include "ot-log.h"
 
 using namespace std;
@@ -41,6 +42,9 @@ int main(int argc, char **argv)
 
   // Register transport modules
   OTMPServerTransportFactory::register_into(server);
+
+  // Register service modules
+  PublishServiceFactory::register_into(server);
 
   // Configure server 
   server.configure(config);

@@ -72,11 +72,15 @@ public:
 //------------------------------------------------------------------------
 // Constructor
 OTMPServerTransport::OTMPServerTransport(int port):
+  Transport("otmps"),
   otmp(receive_q, port), server_thread(otmp), 
   message_thread(*this)
 {
   server_thread.start();
   message_thread.start();
+
+  Log::Summary << "OTMP Server Transport started on port "
+	       << (port?port:OTMP::DEFAULT_PORT) << endl;
 }
 
 //--------------------------------------------------------------------------
@@ -88,9 +92,35 @@ void OTMPServerTransport::dispatch()
   {
     OTMP::ClientMessage otmp_msg = receive_q.wait();
 
-    // Convert to generic message
-    IncomingMessage imsg(otmp_msg.client, Message(otmp_msg.msg.data));
-    incoming_q->send(imsg);
+    switch (otmp_msg.action)
+    {
+      case OTMP::ClientMessage::STARTED:
+      {
+	// Send up STARTING message
+	IncomingMessage imsg(this, otmp_msg.client, Message(), 
+			     IncomingMessage::STARTED);
+	incoming_q->send(imsg);
+	break;
+      }
+
+      case OTMP::ClientMessage::MESSAGE:
+      {
+	// Convert to generic message
+	IncomingMessage imsg(this, otmp_msg.client, 
+			     Message(otmp_msg.msg.data));
+	incoming_q->send(imsg);
+	break;
+      }
+
+      case OTMP::ClientMessage::FINISHED:
+      {
+	// Send up FINISHED message
+	IncomingMessage imsg(this, otmp_msg.client, Message(), 
+			     IncomingMessage::FINISHED);
+	incoming_q->send(imsg);
+	break;
+      }
+    }
   }
 }
 

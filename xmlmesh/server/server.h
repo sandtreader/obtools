@@ -19,15 +19,29 @@ namespace ObTools { namespace XMLMesh {
 //Make our lives easier without polluting anyone else
 using namespace std;
 
+class Transport;  // Forward
+
 //==========================================================================
 // Message queue data for incoming messages, and typedef for queue
 struct IncomingMessage
 {
-  Net::EndPoint client;
-  Message message;
+  Transport *transport;        // Transport we received it from
+  Net::EndPoint client;        // Client on that transport
+  Message message;             // The message
 
-  IncomingMessage(Net::EndPoint _client, Message _message):
-    client(_client), message(_message) {}
+  enum Flags
+  {
+    RESPONDED = 1,             // Set when someone responds
+    STARTED = 2,               // Set on empty message when client starting
+    FINISHED = 4,              // Set on empty message when client finished
+  }; 
+
+  int flags;
+
+  IncomingMessage(Transport *_transport, Net::EndPoint _client, 
+		  Message _message, int _flags=0):
+    transport(_transport), client(_client), message(_message),
+    flags(_flags) {}
 };
 
 typedef MT::Queue<IncomingMessage> IncomingMessageQueue;
@@ -84,9 +98,11 @@ protected:
   IncomingMessageQueue *incoming_q;  
 
 public:
+  string name;
+
   //------------------------------------------------------------------------
   // Default constructor
-  Transport(): incoming_q(0) {}
+  Transport(const string& _name): name(_name), incoming_q(0) {}
 
   //------------------------------------------------------------------------
   // Attach to given incoming queue
@@ -124,8 +140,16 @@ public:
   Service(Server& _server): server(_server) {}
 
   //------------------------------------------------------------------------
-  // Initialise service - returns whether successful
-  virtual bool initialise() = 0;
+  // Service signal that a client has started/finished
+  enum Signal
+  {
+    CLIENT_STARTED,
+    CLIENT_FINISHED
+  };
+    
+  virtual void signal_client(Transport *transport, Net::EndPoint& client,
+			     Signal signal) = 0;
+
 };
 
 //==========================================================================
@@ -136,7 +160,7 @@ public:
   //------------------------------------------------------------------------
   // Create a service from the given XML element
   // Returns 0 if failed
-  virtual Service *create(XML::Element& xml) = 0;
+  virtual Service *create(Server& server, XML::Element& xml) = 0;
 };
 
 //==========================================================================
@@ -173,6 +197,41 @@ public:
   //------------------------------------------------------------------------
   // Register a service type
   void register_service(const string& name, ServiceFactory *factory);
+
+  //------------------------------------------------------------------------
+  // Signal all services that a client has started or finished
+  void signal_services(Transport *transport, Net::EndPoint& client,
+		       Service::Signal signal);
+
+  //------------------------------------------------------------------------
+  // Look up a transport by name (use result only for comparison)
+  Transport *lookup_transport(const string& name);
+
+  //------------------------------------------------------------------------
+  // Attach a new message handler on the given subject pattern
+  void attach_handler(const string& subject, MessageHandler& h);
+
+  //------------------------------------------------------------------------
+  // Send a new message to the client on the transport given
+  // Returns whether successful
+  bool send(Message &msg, Transport *transport, Net::EndPoint& client);
+
+  //------------------------------------------------------------------------
+  // Return a message as a response to the request given
+  // Returns whether successul
+  bool respond(Message& response, IncomingMessage& request);
+
+  //------------------------------------------------------------------------
+  // Return OK to request given
+  // Returns whether successul
+  bool respond(IncomingMessage& request);
+
+  //------------------------------------------------------------------------
+  // Return an error to request given
+  // Returns whether successul
+  bool respond(ErrorMessage::Severity severity,
+	       const string& text,
+	       IncomingMessage& request);
 
   //------------------------------------------------------------------------
   // Load modules etc. from XML config
