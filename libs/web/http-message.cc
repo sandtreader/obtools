@@ -13,23 +13,14 @@
 
 namespace ObTools { namespace Web {
 
-//==========================================================================
-// HTTPMessageParser
-
 //--------------------------------------------------------------------------
-// Parse a message
+// Read from a stream
 // Returns whether successful
-bool HTTPMessageParser::parse()
+bool HTTPMessage::read(istream &in)
 {
-  // Create <header> sub-element for MIME header parser
-  XML::Element& headers = root.add("headers");
-
-  // Build MIME header parser
-  MIMEHeaderParser mhp(headers, in);
-
   // Read first line
   string line;
-  if (!mhp.getline(line)) return false;
+  if (!MIMEHeaders::getline(in, line)) return false;
 
   // Split line into method, URI and version, and set in root
   string::size_type sp1 = line.find(' ');
@@ -40,46 +31,39 @@ bool HTTPMessageParser::parse()
   if (first.find('/') != string::npos)
   {
     // It's a response - get first word as version
-    root.set_attr("version", first);
+    version = first;
 
     // Next word is code
     string::size_type sp2 = line.find(' ', sp1+1);
     if (sp2 == string::npos) return false;
-    string code(string(line, sp1+1, sp2-sp1-1));
-    root.set_attr("code", code);
+    code = atoi(string(line, sp1+1, sp2-sp1-1).c_str());
 
-    // Rest is reason (subelement)
-    root.add("reason", string(line, sp2+1));
+    // Rest is reason 
+    reason = string(line, sp2+1);
   }
   else
   {
     // It's a request
-    root.set_attr("method", first);
+    method = first;
 
-    // URI
+    // URI is next
     string::size_type sp2 = line.find(' ', sp1+1);
     if (sp2 == string::npos) return false;
-    string uri(string(line, sp1+1, sp2-sp1-1));
-    root.set_attr("uri", uri);
+    url.text = string(line, sp1+1, sp2-sp1-1);
 
-    // Split URI into URL subelement
-    XML::Element& url = root.add("url");
-    URLParser urlp(url);
-    if (!urlp.parse(uri)) return false;
-
-    // Version
-    root.set_attr("version", string(line, sp2+1));
+    // Version is the rest
+    version = string(line, sp2+1);
   }
 
   // Now read headers
-  if (!mhp.parse()) return false;
+  if (!headers.read(in)) return false;
 
   // Finally read body - check for Content-Length header and use to limit 
   // length if present
-  XML::XPathProcessor xpath(headers);
-  int length = xpath.get_value_int("content-length", 0);
+  int length = atoi(headers.get("content-length").c_str());
   
   // !!! For now, assume lack of content-length means no body at all!
+  // This is true of RTSP, but not HTTP in general
   // This is potentially protocol-specific - some methods never have bodies,
   // some can have.  Old HTTP clients implementing POST may not provide
   // a Content-Length!
@@ -88,9 +72,6 @@ bool HTTPMessageParser::parse()
   // is still in here
   if (length)
   {
-    // Create <body> sub-element
-    XML::Element& body = root.add("body");
-
     // Try to read this much or up to end of stream
     int count = 0;
     while (!in.fail() && (!length || count<length))
@@ -105,7 +86,7 @@ bool HTTPMessageParser::parse()
       if (length && wanted != got) return false;  // Failed early
 
       // Add to body content
-      body.content.append(buf, got);
+      body.append(buf, got);
       count += got;
     }
   }
@@ -113,52 +94,55 @@ bool HTTPMessageParser::parse()
   return true;
 }
 
-//==========================================================================
-// HTTPMessageGenerator
-
 //--------------------------------------------------------------------------
-// Generate a message
+// Write to a stream
 // Returns whether successful
-bool HTTPMessageGenerator::generate()
+bool HTTPMessage::write(ostream &out) const
 {
   // Check stream is OK
   if (out.fail()) return false;
 
   // Check for request or response
-  if (root.has_attr("method"))
+  if (method.size())
   {
     // Request
-    out << root["method"] << ' ' << root["uri"] << ' ' 
-	<< root["version"] << "\r\n";
+    out << method << ' ' << url << ' ' << version << "\r\n";
   }
   else
   {
     // Response
-    XML::Element& reason = root.get_child("reason");
-    out << root["version"] << ' ' << root["code"] << ' ' 
-	<< reason.content << "\r\n";
+    out << version << ' ' << code << ' ' << reason << "\r\n";
   }
-
-  // If body exists, add content-length header
-  XML::Element& headers = root.get_child("headers");
-  XML::Element& body = root.get_child("body");
 
   // Check for a content-length header, and if not present, add one
-  if (!headers.get_child("content-length"))
-  {
-    ostringstream oss;
-    oss << body.content.size();
-    headers.add("content-length", oss.str());
-  }
+  if (!headers.has("content-length"))
+    out << "Content-length: " << body.size() << "\r\n";
 
   // Output headers
-  MIMEHeaderGenerator mhg(headers, out);
-  if (!mhg.generate()) return false;
-  
+  if (!headers.write(out)) return false;
+
   // Output body (if any)
-  if (body.valid()) out << body.content;
+  out << body;
 
   return !out.fail();
+}
+
+//------------------------------------------------------------------------
+// >> operator to read HTTPMessage from istream
+// e.g. cin >> url;
+istream& operator>>(istream& s, HTTPMessage& msg)
+{
+  msg.read(s);  // !!! Check for failure?
+  return s;
+}
+
+//------------------------------------------------------------------------
+// << operator to write HTTPMessage to ostream
+// e.g. cout << url;
+ostream& operator<<(ostream& s, const HTTPMessage& msg)
+{
+  msg.write(s);
+  return s;
 }
 
 }} // namespaces

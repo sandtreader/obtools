@@ -15,26 +15,30 @@ using namespace std;
 
 int main()
 {
-  ObTools::XML::Element root("HTTP");
-  ObTools::Web::HTTPMessageParser hmp(root, cin);
+  ObTools::Web::HTTPMessage msg;
 
-  if (!hmp.parse())
+  if (!msg.read(cin))
   {
     cerr << "Parse failed\n";
     return 2;
   }
 
-  cout << "\n--- XML form\n";
-  cout << root;
- 
-  cout << "\n--- Regenerated\n";
-  ObTools::Web::HTTPMessageGenerator hmg(root, cout);
-  if (!hmg.generate())
+  if (msg.is_request())
   {
-    cerr << "Generate failed\n";
-    return 2;
+    cout << msg.version << " request: " << msg.method << " for " 
+	 << msg.url << endl;
   }
-  
+  else
+  {
+    cout << msg.version << " response: " << msg.code << " - " 
+	 << msg.reason << endl;
+  }
+
+  cout << msg.headers.xml;
+  if (msg.body.size()) cout << "Body:\n" << msg.body << endl;
+
+  cout << "\n--- Regenerated\n";
+  cout << msg << endl;
  
   return 0;  
 }

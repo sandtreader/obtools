@@ -21,12 +21,13 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  cout << "\n---\nSplitting URL: " << argv[1] << endl;
+  string urls(argv[1]);
+  ObTools::Web::URL url(urls);
+
+  cout << "\n---\nSplitting URL: " << url << endl;
 
   ObTools::XML::Element root("url");
-  ObTools::Web::URLParser urlp(root);
-
-  if (!urlp.parse(string(argv[1])))
+  if (!url.split(root))
   {
     cerr << "Parse failed\n";
     return 2;
@@ -36,8 +37,8 @@ int main(int argc, char **argv)
   cout << root;
  
   cout << "\n--- Regenerated\n";
-  ObTools::Web::URLGenerator urlg(root);
-  cout << urlg.generate() << endl;
+  ObTools::Web::URL url2(root);
+  cout << url2 << endl;
  
   return 0;  
 }

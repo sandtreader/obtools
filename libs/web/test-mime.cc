@@ -15,25 +15,19 @@ using namespace std;
 
 int main()
 {
-  ObTools::XML::Element root("MIME");
-  ObTools::Web::MIMEHeaderParser mhp(root, cin);
+  ObTools::Web::MIMEHeaders headers;
 
-  if (!mhp.parse())
+  if (!headers.read(cin))
   {
     cerr << "Parse failed\n";
     return 2;
   }
 
   cout << "\n--- XML form\n";
-  cout << root;
+  cout << headers.xml;
 
   cout << "\n--- Regenerated\n";
-  ObTools::Web::MIMEHeaderGenerator mhg(root, cout);
-  if (!mhg.generate())
-  {
-    cerr << "Generate failed\n";
-    return 2;
-  }
+  cout << headers;
   
   return 0;  
 }

@@ -30,25 +30,21 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
   try
   {
     ObTools::Net::TCPStream ss(s);
-    ObTools::XML::Element root("HTTP");
-    ObTools::Web::HTTPMessageParser hmp(root, ss);
+    ObTools::Web::HTTPMessage msg;
 
-    if (hmp.parse())
+    if (msg.read(ss))
     {
-      cout << root;
+      cout << msg.version << " request: " << msg.method << " for " 
+	   << msg.url << endl;
+      cout << msg.headers.xml;
+      if (msg.body.size()) cout << "Body:\n" << msg.body << endl;
 
       // Send back a nice response
-      string body = "<TITLE>That worked</TITLE><P>Thanks!</P>\n";
-      ObTools::XML::Element response("HTTP");
-      response.set_attr("code", "200");
-      response.set_attr("version", "HTTP/1.0");
-      response.add("reason", "OK");
-      ObTools::XML::Element& headers = response.add("headers");
-      headers.add("server", "ObTools Web test server");
-      response.add("body", body);
+      ObTools::Web::HTTPMessage response(200, "OK");
+      response.headers.put("server", "ObTools Web test server");
+      response.body = "<TITLE>That worked</TITLE><P>Thanks!</P>\n";
 
-      ObTools::Web::HTTPMessageGenerator hmg(response, ss);
-      if (!hmg.generate())
+      if (!response.write(ss))
       {
 	cerr << "HTTP response generation failed\n";
       }

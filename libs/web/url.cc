@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::Web: url.cc
 //
-// Parser/Generator for URLs
+// Representation of URL, and split/combine to/from XML
 //
 // Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
@@ -13,84 +13,12 @@
 
 namespace ObTools { namespace Web {
 
-//==========================================================================
-// URLParser
-
 //--------------------------------------------------------------------------
-// Parse a URL string
-// Returns whether successful
-bool URLParser::parse(const string& url)
-{
-  string::size_type length = url.size();
-
-  // Extract scheme
-  string::size_type p = url.find(':');
-  if (p != string::npos)
-  {
-    if (length < p+3 || url[p+1]!='/' || url[p+2]!='/') return false;
-    root.add("scheme", string(url, 0, p));
-
-    // Extract host and optional port
-    string::size_type slash = url.find('/', p+3);
-    string host;
-    if (slash == string::npos)
-      host = string(url, p+3);
-    else
-      host = string(url, p+3, slash-p-3);
-
-    p = host.find(':');
-    if (p == string::npos)
-      root.add("host", host);
-    else
-    {
-      root.add("host", string(host, 0, p));
-      root.add("port", string(host, p+1));
-    }
-
-    p = slash;
-  }
-  else p=0;
-
-  // If no slash, that's it
-  if (p == string::npos) return true;
-
-  // Extract path and query
-  string::size_type query = url.find('?', p);
-  string::size_type hash;
-  if (query == string::npos)
-  {
-    hash = url.find('#', p);
-    if (hash == string::npos)
-      root.add("path", string(url, p));
-    else
-      root.add("path", string(url, p, hash-p));
-  }
-  else
-  {
-    root.add("path", string(url, p, query-p));
-    hash = url.find('#', query+1);
-    if (hash == string::npos)
-      root.add("query", string(url, query+1));
-    else
-      root.add("query", string(url, query+1, hash-query-1));
-  }
-
-  // Extract hash to end
-  if (hash != string::npos)
-    root.add("fragment", string(url, hash+1));
-
-  return true;
-}
-
-//==========================================================================
-// URLGenerator
-
-//--------------------------------------------------------------------------
-// Generate a URL string
-string URLGenerator::generate()
+// Constructor from XML format
+URL::URL(XML::Element& xml)
 {
   ostringstream urls;
-  XML::XPathProcessor xpath(root);
+  XML::XPathProcessor xpath(xml);
   string scheme = xpath["scheme"];
   if (scheme.size())
   {
@@ -110,7 +38,81 @@ string URLGenerator::generate()
   string frag = xpath["fragment"];
   if (frag.size()) urls << "#" << frag;
 
-  return urls.str();
+  text = urls.str();
+}
+
+//--------------------------------------------------------------------------
+// Split text into XML
+bool URL::split(XML::Element& xml)
+{
+  string::size_type length = text.size();
+
+  // Extract scheme
+  string::size_type p = text.find(':');
+  if (p != string::npos)
+  {
+    if (length < p+3 || text[p+1]!='/' || text[p+2]!='/') return false;
+    xml.add("scheme", string(text, 0, p));
+
+    // Extract host and optional port
+    string::size_type slash = text.find('/', p+3);
+    string host;
+    if (slash == string::npos)
+      host = string(text, p+3);
+    else
+      host = string(text, p+3, slash-p-3);
+
+    p = host.find(':');
+    if (p == string::npos)
+      xml.add("host", host);
+    else
+    {
+      xml.add("host", string(host, 0, p));
+      xml.add("port", string(host, p+1));
+    }
+
+    p = slash;
+  }
+  else p=0;
+
+  // If no slash, that's it
+  if (p == string::npos) return true;
+
+  // Extract path and query
+  string::size_type query = text.find('?', p);
+  string::size_type hash;
+  if (query == string::npos)
+  {
+    hash = text.find('#', p);
+    if (hash == string::npos)
+      xml.add("path", string(text, p));
+    else
+      xml.add("path", string(text, p, hash-p));
+  }
+  else
+  {
+    xml.add("path", string(text, p, query-p));
+    hash = text.find('#', query+1);
+    if (hash == string::npos)
+      xml.add("query", string(text, query+1));
+    else
+      xml.add("query", string(text, query+1, hash-query-1));
+  }
+
+  // Extract hash to end
+  if (hash != string::npos)
+    xml.add("fragment", string(text, hash+1));
+
+  return true;
+}
+
+//------------------------------------------------------------------------
+// << operator to write URL to ostream
+// e.g. cout << url;
+ostream& operator<<(ostream& s, const URL& u) 
+{ 
+  s<<u.text; 
+  return s; 
 }
 
 }} // namespaces

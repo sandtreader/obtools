@@ -12,13 +12,10 @@
 
 namespace ObTools { namespace Web {
 
-//==========================================================================
-// MIMEHeaderParser
-
 //--------------------------------------------------------------------------
 // Get a line
 // Returns true if read OK - even if blank
-bool MIMEHeaderParser::getline(string& s)
+bool MIMEHeaders::getline(istream& in, string& s)
 {
   unsigned int count = 0;
 
@@ -52,17 +49,17 @@ bool MIMEHeaderParser::getline(string& s)
 }
 
 //--------------------------------------------------------------------------
-// Parse a stream
+// Parse headers from a stream
 // Returns whether successful
 // Skips the blank line delimiter, leaving stream ready to read message
 // body (if any)
-bool MIMEHeaderParser::parse()
+bool MIMEHeaders::read(istream& in)
 {
   // Read lines
   while (!in.fail())
   {
     string line;
-    if (!getline(line)) return false;
+    if (!getline(in, line)) return false;
     
     if (line.empty()) 
       return true;
@@ -82,7 +79,7 @@ bool MIMEHeaderParser::parse()
 	if (c==' ' || c=='\t')
 	{
 	  string extra;
-	  if (!getline(extra)) return false;
+	  if (!getline(in, extra)) return false;
 
 	  // DoS protection - just in case someone is 'clever' enough
 	  // to send folded headers, each of which is within the length,
@@ -107,25 +104,22 @@ bool MIMEHeaderParser::parse()
 
       // If anything sensible left, add it to the XML structure
       if (!name.empty() && !value.empty())
-	root.add(name, value);
+	xml.add(name, value);
     }
   }
 
   return false;
 }
 
-//==========================================================================
-// MIMEHeaderGenerator
-
 //--------------------------------------------------------------------------
-// Generates the stream
+// Generates headers to a stream
 // Returns whether successful (can only fail if stream fails)
 // Includes the blank line delimiter, leaving stream ready to write message
 // body (if any)
-bool MIMEHeaderGenerator::generate()
+bool MIMEHeaders::write(ostream& out) const
 {
-  // Iterate over each child of root
-  OBTOOLS_XML_FOREACH_CHILD(e, root)
+  // Iterate over each child of root xml
+  OBTOOLS_XML_FOREACH_CHILD(e, xml)
     string name = e.name;
     string value = e.content;
 
@@ -168,6 +162,24 @@ bool MIMEHeaderGenerator::generate()
   out << "\r\n";
 
   return true;
+}
+
+//------------------------------------------------------------------------
+// >> operator to read MIMEHeaders from istream
+// e.g. cin >> url;
+istream& operator>>(istream& s, MIMEHeaders& mh)
+{
+  mh.read(s);  // !!! Check for failure?
+  return s;
+}
+
+//------------------------------------------------------------------------
+// << operator to write MIMEHeaders to ostream
+// e.g. cout << url;
+ostream& operator<<(ostream& s, const MIMEHeaders& mh)
+{
+  mh.write(s);
+  return s;
 }
 
 
