@@ -34,6 +34,9 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
     // Just reflect
     string buf;
     while (s >> buf) s << buf;
+
+    cerr << "Connection from " << client_address << ":" << client_port 
+	 << " ended\n";
   }
   catch (ObTools::Net::SocketError se)
   {

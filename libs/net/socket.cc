@@ -18,10 +18,10 @@ namespace ObTools { namespace Net {
 // Abstract Socket 
 
 //--------------------------------------------------------------------------
-// Default destructor - do nothing
-// NOTE:  Does NOT close the fd - that causes nightmares in assignment ops 
+// Default destructor - close
 Socket::~Socket()
 {
+  close();
 }
 
 //--------------------------------------------------------------------------
@@ -178,10 +178,12 @@ TCPSocket& operator<<(TCPSocket& s, const string& t)
 //--------------------------------------------------------------------------
 // >> operator to read strings from TCPSockets
 // Return whether stream still open - hence not chainable
+// Erases string before appending
 // NOTE: Not a general stream operator!
 // e.g. while (s >> buf) cout << buf;
 bool operator>>(TCPSocket& s, string& t)
 {
+  t.erase();
   return s.read(t);
 }
 

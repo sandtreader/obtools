@@ -78,7 +78,7 @@ protected:
   // Default constructor - set bad initially
   Socket(): fd(-1) {}
  
-  // Virtual destructor
+  // Virtual destructor - default just closes
   virtual ~Socket();
 
 public:
@@ -178,6 +178,7 @@ TCPSocket& operator<<(TCPSocket& s, const string& t);
 //--------------------------------------------------------------------------
 // >> operator to read strings from TCPSockets
 // Return whether stream still open - hence not chainable
+// Erases string before appending
 // NOTE: Not a general stream operator!
 // e.g. while (s >> buf) cout << buf;
 bool operator>>(TCPSocket& s, string& t);
@@ -259,10 +260,6 @@ public:
   //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !connected; }
-
-  //--------------------------------------------------------------------------
-  // Destructor (closes socket)
-  TCPClient::~TCPClient();
 };
 
 //==========================================================================
@@ -275,7 +272,7 @@ class TCPServerThread: public MT::PoolThread
 {
 public:
   TCPServer *server;
-  TCPSocket client_socket;
+  int client_fd;
   IPAddress client_address;
   int client_port;
 

@@ -39,7 +39,6 @@ void TCPServer::run()
     int new_fd = accept(fd, (struct sockaddr *)&saddr, &len);
     if (new_fd >= 0)
     {
-      TCPSocket client_socket(new_fd);
       IPAddress client_address(htonl(saddr.sin_addr.s_addr));
       int client_port = ntohs(saddr.sin_port);
 
@@ -49,7 +48,7 @@ void TCPServer::run()
       {
 	// Fill in parameters
 	thread->server         = this;
-	thread->client_socket  = client_socket;
+	thread->client_fd      = new_fd;
 	thread->client_address = client_address;
 	thread->client_port    = client_port;
 
@@ -59,7 +58,7 @@ void TCPServer::run()
       else
       {
 	// Dump it
-	client_socket.close();
+	::close(new_fd);
       }
     }
   }
@@ -69,8 +68,11 @@ void TCPServer::run()
 // Server thread 'run' function
 void TCPServerThread::run()
 {
+  // Create wrapped socket which will also close on exit
+  TCPSocket s(client_fd);
+
   // Just pass them to the server's process function
-  server->process(client_socket, client_address, client_port);
+  server->process(s, client_address, client_port);
 }
 
 }} // namespaces

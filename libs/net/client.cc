@@ -30,12 +30,6 @@ TCPClient::TCPClient(IPAddress addr, int port):
     connected = true;
 }
 
-//--------------------------------------------------------------------------
-// Destructor
-TCPClient::~TCPClient()
-{
-  Socket::close();
-}
 
 
 }} // namespaces
