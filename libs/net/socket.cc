@@ -127,7 +127,7 @@ void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
 //--------------------------------------------------------------------------
 // Read data from the socket into a string
 // Appends whatever read data is available to the given string 
-// Returns whether stream has closed (last size was 0)
+// Returns whether successful (socket hasn't closed)
 // Throws SocketError on failure
 bool TCPSocket::read(string& s) throw (SocketError)
 {
@@ -139,6 +139,33 @@ bool TCPSocket::read(string& s) throw (SocketError)
     return true;
   }
   else return false;
+}
+
+//--------------------------------------------------------------------------
+// Read exact amount of data from the socket into a string
+// Returns whether stream has closed (last size was 0)
+// Throws SocketError on failure
+bool TCPSocket::read(string& s, size_t count) throw (SocketError)
+{
+  char buf[SOCKET_BUFFER_SIZE+1];
+  size_t done = 0;
+
+  while (done < count)
+  {
+    // Limit read to buffer size, or what's wanted
+    size_t n = SOCKET_BUFFER_SIZE;
+    if (count-done < n) n = count-done;
+
+    ssize_t size = read(buf, n);
+    if (size)
+    {
+      s.append(buf, size);
+      done += size;
+    }
+    else return false;
+  }
+  
+  return true;
 }
 
 //--------------------------------------------------------------------------

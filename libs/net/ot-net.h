@@ -148,9 +148,15 @@ public:
   //--------------------------------------------------------------------------
   // Read data from the socket into a string
   // Appends whatever read data is available to the given string 
-  // Returns whether stream has closed (last size was 0)
+  // Returns whether successful (socket hasn't closed)
   // Throws SocketError on failure
   bool read(string& s) throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Read exact amount of data from the socket into a string
+  // Whether successful - all data was read before socket closed
+  // Throws SocketError on failure
+  bool read(string& s, size_t count) throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Read everything to stream close, blocking until finished
