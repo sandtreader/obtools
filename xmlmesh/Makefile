@@ -4,6 +4,8 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
+.PHONY: release clean test all
+
 all: 
 	$(MAKE) -C core
 	$(MAKE) -C otmp
@@ -23,5 +25,10 @@ test:
 	$(MAKE) -C client test
 	$(MAKE) -C server test
 
+release: 
+	mkdir -p release/
+	$(MAKE) -C core RELEASEDIR=../release/ release
+	$(MAKE) -C otmp RELEASEDIR=../release/ release
+	$(MAKE) -C client RELEASEDIR=../release/ release
 
 

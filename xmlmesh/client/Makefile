@@ -22,6 +22,11 @@ clean:
 test:	test-client 
 	./test-client localhost
 
+release: ot-xmlmesh-client.a
+	cp ot-xmlmesh-client.a $(RELEASEDIR) 
+	cp ot-xmlmesh-client.h $(RELEASEDIR) 
+	cp ot-xmlmesh-client-otmp.h $(RELEASEDIR) 
+
 #Test harnesses:
 test-client:	test-client.o ot-xmlmesh-client.a	                \
 		../otmp/ot-xmlmesh-otmp.a				\

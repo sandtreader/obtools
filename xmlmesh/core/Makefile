@@ -19,6 +19,10 @@ all: ot-xmlmesh-core.a
 clean: 
 	-@rm -f *.o *.a *~ test-client 
 
+release: ot-xmlmesh-core.a
+	cp ot-xmlmesh-core.a $(RELEASEDIR) 
+	cp ot-xmlmesh.h $(RELEASEDIR) 
+
 #Core library
 ot-xmlmesh-core.a: $(OBJS)
 	$(AR) r $@ $^
