@@ -13,6 +13,7 @@
 
 #include <map>
 #include <iostream>
+#include <stdint.h>
 
 namespace ObTools { namespace DB { 
 
@@ -55,6 +56,10 @@ public:
   //------------------------------------------------------------------------
   //Get integer value of field of given name, or default if not found
   int get_int(string fieldname, int def=0) const;
+
+  //------------------------------------------------------------------------
+  //Get 64-bit value of field of given name, or default if not found
+  uint64_t get_int64(string fieldname, uint64_t def=0) const;
 
   //------------------------------------------------------------------------
   //Get boolean value of field of given name, or default if not found

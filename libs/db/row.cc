@@ -33,6 +33,18 @@ int Row::get_int(string fieldname, int def) const
 }
 
 //------------------------------------------------------------------------
+//Get 64-bit value of field of given name, or default if not found
+uint64_t Row::get_int64(string fieldname, uint64_t def) const
+{
+  map<string,string>::const_iterator p=fields.find(fieldname);
+
+  // atoq is a glibc extension - porting needed for non glibc environments!
+  if (p!=fields.end()) return atoll(p->second.c_str());
+
+  return def;
+}
+
+//------------------------------------------------------------------------
 //Get boolean value of field of given name, or default if not found
 bool Row::get_bool(string fieldname, bool def) const
 {
