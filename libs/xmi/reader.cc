@@ -229,6 +229,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
 istream& ObTools::XMI::operator>>(istream& s, Reader& p) throw (ParseFailed)
 { 
   p.read_from(s);
+  return s;
 }
 
 

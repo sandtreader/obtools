@@ -370,9 +370,9 @@ public:
 
   //Constructor - just does safety initialisation - no primitive data
   Generalization(XMI::Reader& rdr, XML::Element& xe):
+    Relationship(rdr, xe),
     gparent(0),
-    gchild(0),
-    Relationship(rdr, xe) {}
+    gchild(0) {}
 };
 
 //==========================================================================
@@ -646,8 +646,8 @@ public:
   //Constructor - after everything loaded up, we call build_refs to 
   //fix up references
   Model(XMI::Reader& rdr, XML::Element& xe, double version=0):
-    uml_version(version),
-    Package(rdr, xe) 
+    Package(rdr, xe), 
+    uml_version(version)
   { build_refs(); }
 };
 
