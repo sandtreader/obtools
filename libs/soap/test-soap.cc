@@ -16,7 +16,7 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Main
-int main(int argc, char **argv)
+int main()
 {
   SOAP::Message msg;
   msg.add_namespace("xmlns:xm", "http://www.obtools.com/foo");

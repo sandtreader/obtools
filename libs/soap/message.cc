@@ -107,9 +107,10 @@ XML::Element& Message::add_header(const string& name, Header::Role role,
     case Header::ROLE_ULTIMATE_RECEIVER:
       // UR is the default;  don't add it - SOAP 1.2: 5.2.2
       return add_header(name, "", must_understand, relay);
-  }
 
-  return XML::Element::none;
+    default:
+      return XML::Element::none;
+  }
 }
 
 //------------------------------------------------------------------------

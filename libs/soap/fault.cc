@@ -40,6 +40,8 @@ Fault::Fault(Code code, const string& reason): Message()
     case CODE_RECEIVER:
       c = "env:Receiver";
       break;
+
+    default:;
   }
 
   fault.add("env:Code").add("env:Value", c);
