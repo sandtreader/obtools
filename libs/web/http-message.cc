@@ -39,7 +39,13 @@ bool HTTPMessageParser::parse()
   // URI
   string::size_type sp2 = line.find(' ', sp1+1);
   if (sp2 == string::npos) return false;
-  root.set_attr("uri", string(line, sp1+1, sp2-sp1-1));
+  string uri(string(line, sp1+1, sp2-sp1-1));
+  root.set_attr("uri", uri);
+
+  // Split URI into URL subelement
+  XML::Element& url = root.add("url");
+  URLParser urlp(url);
+  if (!urlp.parse(uri)) return false;
 
   // Version
   root.set_attr("version", string(line, sp2+1));

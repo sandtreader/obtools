@@ -1,5 +1,6 @@
-GET /foo/bar.php HTTP/1.0
+GET /foo/bar.php?p1=x&p2=y HTTP/1.0
 Header: Value
 Header2: Value2
+Content-Length: 16
 
 This is the body

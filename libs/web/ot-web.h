@@ -194,6 +194,7 @@ public:
 // the root element is given a tag equal to the request method ('verb'), and
 // attributes 'uri' and 'version' from the rest of the first line
 
+// The URI is also split into a <url> sub-element as per URLParser above
 // Headers are read into sub-elements of a sub-element <headers> as above
 
 // Body (if any) is read into the content of a sub-element <body> - this
@@ -202,6 +203,9 @@ public:
 
 // e.g.
 // <POST uri="/foo/register.ccp" version="HTTP/1.0">
+//   <url>
+//     ...
+//   </url>
 //   <headers>
 //     <host>www.xmill.com</host>
 //     <user-agent>Bizarre Browser</user-agent>
