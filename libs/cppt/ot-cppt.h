@@ -20,7 +20,8 @@ enum ProcessorState
 {
   PS_NORMAL,  // Passing through text
   PS_BLOCK,   // In C++ block code (inside <? ?>)
-  PS_EXPR     // In C++ expr code (inside <?= ?>)
+  PS_EXPR,    // In C++ expr code (inside <?= ?>)
+  PS_COMMENT  // In template comment (inside <?-- ?>)
 };
 
 //==========================================================================

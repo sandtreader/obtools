@@ -38,8 +38,9 @@ void Processor::text_char(char c)
 	started_text = false;
 	break;
 
-      case '"':  // Back-slashify quotes
-	sout << "\\\"";
+      case '"':  // Back-slashify quotes and backslashes
+      case '\\':
+	sout << "\\" << c;
 	break;
 
       default:
@@ -113,7 +114,7 @@ void Processor::process()
     switch (state)
     {
       case PS_NORMAL:
-	// Look for <? or <?=
+	// Look for <?, <?= or <?#
 	if (c=='<')
 	{
 	  c=0;
@@ -122,17 +123,22 @@ void Processor::process()
 	  {
 	    c=0;
 	    sin.get(c);
-	    if (c=='=')
+	    switch (c)
 	    {
-	      open_expr();
-	      state = PS_EXPR;
-	    }
-	    else
-	    {
-	      open_block();
-	      state = PS_BLOCK;
-	      sin.unget();
-	      strip_eol();
+	      case '=':
+		open_expr();
+		state = PS_EXPR;
+		break;
+
+	      case '#':
+		state = PS_COMMENT;
+		break;
+
+	      default:
+		open_block();
+		state = PS_BLOCK;
+		sin.unget();
+		strip_eol();
 	    }
 	  }
 	  else 
@@ -173,6 +179,21 @@ void Processor::process()
 	  }
 	}
 	else sout << c;
+	break;
+
+      case PS_COMMENT:
+	// Look for ?>
+	if (c=='?')
+	{
+	  c=0;
+	  sin.get(c);
+	  if (c=='>')
+	  {
+	    state = PS_NORMAL;
+	    strip_eol();
+	  }
+	}
+	// Swallow all characters in the meanwhile
 	break;
     }
   }
