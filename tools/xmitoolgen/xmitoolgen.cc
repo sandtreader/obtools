@@ -26,7 +26,6 @@ private:
     SCOPE_ROOT,   // Internal use
     SCOPE_MODEL,
     SCOPE_PACKAGE,
-    SCOPE_RPACKAGE,
     SCOPE_CLASS,
     SCOPE_ATTRIBUTE,
     SCOPE_OPERATION,
@@ -66,13 +65,23 @@ protected:
   }
 
   //--------------------------------------------------------------------------
-  // Generate code to call a template for all elements of given name
-  virtual void generate_call(XML::Element& te, XML::Element& parent,
+  // Iterate over child elements, expanding template inline
+  // Accumulates expanded script in 'script'
+  virtual void expand_inline(XML::Element& te, XML::Element& parent,
 			     CPPT::Tags& tags,
 			     int& max_ci,
 			     const string& streamname,
 			     string& script,
 			     bool is_root = false);
+
+  //--------------------------------------------------------------------------
+  // Iterate over child elements, calling predefined template
+  virtual void expand_use(XML::Element& use_e, 
+			  XML::Element& define_e,
+			  XML::Element& parent,
+			  CPPT::Tags& tags,
+			  const string& streamname,
+			  bool is_root = false);
 
   //--------------------------------------------------------------------------
   // Generate includes / file-level code 
@@ -98,7 +107,6 @@ XMIGenerator::Scope XMIGenerator::get_scope(const string& name)
 {
   if      (name == "model")     return SCOPE_MODEL;
   else if (name == "package")   return SCOPE_PACKAGE;
-  else if (name == "rpackage")  return SCOPE_RPACKAGE;
   else if (name == "class")     return SCOPE_CLASS;
   else if (name == "attribute") return SCOPE_ATTRIBUTE;
   else if (name == "operation") return SCOPE_OPERATION;
@@ -119,8 +127,7 @@ string XMIGenerator::scope_type(Scope scope)
   switch (scope)
   {
     case SCOPE_MODEL:     return "Model";
-    case SCOPE_PACKAGE:
-    case SCOPE_RPACKAGE:  return "Package";
+    case SCOPE_PACKAGE:   return "Package";
     case SCOPE_CLASS:     return "Class";
     case SCOPE_ATTRIBUTE: return "Attribute";
     case SCOPE_OPERATION: return "Operation";
@@ -147,8 +154,7 @@ string XMIGenerator::scope_var(Scope scope)
   {
     case SCOPE_ROOT:      return "model";
     case SCOPE_MODEL:     return "m";
-    case SCOPE_PACKAGE:
-    case SCOPE_RPACKAGE:  return "p";
+    case SCOPE_PACKAGE:   return "p";
     case SCOPE_CLASS:     return "c";
     case SCOPE_ATTRIBUTE: return "a";
     case SCOPE_OPERATION: return "o";
@@ -161,8 +167,9 @@ string XMIGenerator::scope_var(Scope scope)
 }
 
 //--------------------------------------------------------------------------
-// Generate code to call a template for all elements of given name
-void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
+// Iterate over child elements, expanding template inline
+// Accumulates expanded script in 'script'
+void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 				 CPPT::Tags& tags,
 				 int& max_ci,
 				 const string& streamname,
@@ -180,34 +187,16 @@ void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
   string p_var = get_parameter_name(parent);  // cope with 'var' override
 
   sout << "\n  //Call " << sname << " templates\n";
-  string index_var = c_var + "_index";
-
-  sout << "  {\n";
-  sout << "  int " << index_var << "=0;\n";
 
   // Special handling for model/package at root - call on self, since model is
   // a package
   if (is_root
       && (scope == SCOPE_PACKAGE 
-       || scope == SCOPE_RPACKAGE
        || scope == SCOPE_MODEL))
   {
-    // Special handling for rpackage - recurse on self first
-    if (scope == SCOPE_RPACKAGE)
-    {
-      sout << "  // Recurse to sub-packages first\n";
-      sout << "  OBTOOLS_UML_FOREACH_PACKAGE(" 
-	   << c_var << ", *reader.model)\n";
-      generate_template(te, te, tags, max_ci, streamname, script);
-      sout << "  " << index_var << "++;\n";
-      sout << "  OBTOOLS_UML_ENDFOR\n";
-    }
-    else
-    {
-      // Generate directly using the model as a package
-      sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
-      generate_template(te, te, tags, max_ci, streamname, script);
-    }
+    // Generate directly using the model as a package
+    sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
+    generate_template(te, te, tags, max_ci, streamname, script);
   }
   else 
   {
@@ -221,7 +210,8 @@ void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
     else
       listop = ".filter_subelements<" + nstype + ">()";
 
-
+    string index_var = c_var + "_index";
+    sout << "  int " << index_var << "=0;\n";
     sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
     sout << "                      " << p_var << listop << ")\n"; 
 
@@ -232,8 +222,65 @@ void XMIGenerator::generate_call(XML::Element& te, XML::Element& parent,
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_UML_ENDFOR\n";
   }
+}
 
-  sout << "  }\n";
+//--------------------------------------------------------------------------
+// Iterate over child elements, calling predefined template
+void XMIGenerator::expand_use(XML::Element& use_e, 
+			      XML::Element& define_e,
+			      XML::Element& parent,
+			      CPPT::Tags& tags,
+			      const string& streamname,
+			      bool is_root)
+{
+  string sname = define_e.get_attr("scope", "class");
+  Scope scope = get_scope(sname);
+  string stype  = scope_type(scope);
+  string nstype = scope_nstype(scope);
+  string c_var = get_parameter_name(define_e);
+
+  string p_sname = parent.get_attr("scope", "class");
+  Scope p_scope = get_scope(p_sname);
+  string p_var = get_parameter_name(parent);  // cope with 'var' override
+
+  sout << "\n  //Call " << sname << " templates\n";
+
+  // Beware:  If we are called recursively, child_var and parent_var
+  // could be the same - spot this and modify for it
+  if (c_var == p_var) c_var = string("child_") + c_var;
+
+  // Special handling for model/package at root - call on self, since model is
+  // a package
+  if (is_root
+      && (scope == SCOPE_PACKAGE 
+       || scope == SCOPE_MODEL))
+  {
+    // Generate directly using the model as a package
+    sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
+    generate_use(use_e, define_e, tags, c_var, "0", streamname);
+  }
+  else 
+  {
+    string listop;
+    // Special handling for generalizations and associations within classes
+    // - not child elements
+    if (p_scope == SCOPE_CLASS && scope == SCOPE_GENERALIZATION)
+      listop = ".generalizations";
+    else if (p_scope == SCOPE_CLASS && scope == SCOPE_ASSOCIATION_END)
+      listop = ".association_ends";
+    else
+      listop = ".filter_subelements<" + nstype + ">()";
+
+    string index_var = c_var + "_index";
+    sout << "  int " << index_var << "=0;\n";
+    sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
+    sout << "                      " << p_var << listop << ")\n"; 
+
+    generate_use(use_e, define_e, tags, c_var, index_var, streamname);
+    
+    sout << "  " << index_var << "++;\n";
+    sout << "  OBTOOLS_UML_ENDFOR\n";
+  }
 }
 
 //--------------------------------------------------------------------------

@@ -112,8 +112,12 @@
     <xt:var name="overwrite" path="overwrite" type="bool"/>
   </xt:config>
 
-  <xt:template name="Package directories" scope="rpackage">
+  <!-- Recursive 'macro' template for packages -->
+  <xt:define name="Package" scope="package">
     <xt:dir>$=p.name=$</xt:dir>
+
+    <!-- Recurse to sub-packages -->
+    <xt:use template="Package"/>
 
     <!-- C++ implementation output -->
     <xt:template name = "C++ implementation" scope="class" var="myclass">
@@ -174,7 +178,10 @@
       };
       //~]
     </xt:template>
-  </xt:template>
+  </xt:define>
+
+  <!-- Use recursive package macro on top-level model -->
+  <xt:use template="Package"/>
 </xt:tool>  
 
 
