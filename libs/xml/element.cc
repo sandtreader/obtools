@@ -161,13 +161,13 @@ void Element::optimise()
 //--------------------------------------------------------------------------
 // Find first (or only) child element of given name
 // Returns Element::none if none
-Element& Element::get_child(const string& name)
+Element& Element::get_child(const string& ename)
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    if ((*p)->name==name) return **p;
+    if ((*p)->name==ename) return **p;
   }
   return Element::none;
 }
@@ -175,14 +175,14 @@ Element& Element::get_child(const string& name)
 //--------------------------------------------------------------------------
 // Find all child elements of given name
 // Returns list of pointers
-list<Element *> Element::get_children(const string& name)
+list<Element *> Element::get_children(const string& ename)
 {
   list<Element *>l;
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    if ((*p)->name==name) l.push_back(*p);
+    if ((*p)->name==ename) l.push_back(*p);
   }
   return l;
 }
@@ -192,32 +192,32 @@ list<Element *> Element::get_children(const string& name)
 // Returns flat list of pointers
 // Prunes tree walk at 'prune' tags if set - use for recursive structures
 // where you want to deal with each level independently
-list<Element *> Element::get_descendants(const string& name,
+list<Element *> Element::get_descendants(const string& ename,
 					 const string& prune)
 {
   list<Element *>l;
-  append_descendants(name, prune, l);
+  append_descendants(ename, prune, l);
   return l;
 }
 
 //--------------------------------------------------------------------------
 // Dump all descendant elements of given name into given list
 // Prune walk at elements matching 'prune'
-// Name and prune can be the same - then returns only first level of 
-// <name>s, not <name>s within <name>s
-void Element::append_descendants(const string& name, const string& prune,
+// Ename and prune can be the same - then returns only first level of 
+// <ename>s, not <ename>s within <ename>s
+void Element::append_descendants(const string& ename, const string& prune,
 				 list<Element *>& l)
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    if ((*p)->name==name) 
+    if ((*p)->name==ename) 
       l.push_back(*p);
 
     //Look for descendants, even within a match
     if ((*p)->name!=prune)
-      (*p)->append_descendants(name, prune, l);
+      (*p)->append_descendants(ename, prune, l);
   }
 }
 
@@ -287,9 +287,9 @@ string Element::get_deep_content()
 // Defaults to default value given (or "") if not present
 // This exists to avoid modifying the attribute when using attrs["foo"]
 // when foo doesn't exist (a completely stupid specification of [], IMHO)
-string Element::get_attr(const string& name, const char *def)
+string Element::get_attr(const string& attname, const char *def)
 {
-  map<string,string>::iterator p=attrs.find(name);
+  map<string,string>::iterator p=attrs.find(attname);
   if (p!=attrs.end())
     return p->second;
   else
@@ -301,9 +301,9 @@ string Element::get_attr(const string& name, const char *def)
 // Returns attribute value
 // Defaults to default value given (or false) if not present
 // Recognises words beginning [TtYy] as true, everything else is false
-bool Element::get_attr_bool(const string& name, bool def=false)
+bool Element::get_attr_bool(const string& attname, bool def=false)
 {
-  map<string,string>::iterator p=attrs.find(name);
+  map<string,string>::iterator p=attrs.find(attname);
   if (p!=attrs.end())
   {
     char c=0;
@@ -328,9 +328,9 @@ bool Element::get_attr_bool(const string& name, bool def=false)
 // Returns attribute value
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Element::get_attr_int(const string& name, int def=0)
+int Element::get_attr_int(const string& attname, int def=0)
 {
-  map<string,string>::iterator p=attrs.find(name);
+  map<string,string>::iterator p=attrs.find(attname);
   if (p!=attrs.end()) return atoi(p->second.c_str());
 
   return def;
@@ -339,13 +339,60 @@ int Element::get_attr_int(const string& name, int def=0)
 //--------------------------------------------------------------------------
 // Tests whether the element has an attribute of the given name
 // Quicker than !get_attr("foo").empty()
-bool Element::has_attr(const string& name)
+bool Element::has_attr(const string& attname)
 {
-  map<string,string>::iterator p=attrs.find(name);
+  map<string,string>::iterator p=attrs.find(attname);
   if (p==attrs.end())
     return false;
   else
     return true;
+}
+
+//--------------------------------------------------------------------------
+// Translate name using given map:
+//   If not present, leave it and return true
+//   If present but mapped to "", leave it return false (=> delete me)
+//   If present and mapped to non empty, change to mapped string
+// 
+// If recurse is set (default), it recurses to sub-elements and deletes
+// them if they return false - net effect begin that names mapped to ""
+// are (deep) deleted from the document
+bool Element::translate(map<string, string>& trans_map, bool recurse)
+{
+  //Ignore (and keep) data elements
+  if (name.empty()) return true;
+
+  //Lookup current name in translation map
+  map<string,string>::iterator tp=trans_map.find(name);
+
+  //Check for map to empty first - no point in recursing if we're going
+  //to be deleted anyway
+  if (tp!=trans_map.end() && tp->second.empty())
+    return false;  //Delete me
+
+  //Recurse to sub-elements first, if asked for
+  if (recurse)
+  {
+    for(list<Element *>::iterator p=children.begin();
+	p!=children.end();
+	)  //Incremented in body to avoid invalidity after erase
+    {
+      Element& se = **p;
+
+      if (!se.translate(trans_map, true))
+      {
+	delete *p;
+	p=children.erase(p);
+      }
+      else p++;
+    }
+  }
+
+  if (tp==trans_map.end()) return true;  // Leave me alone
+
+  //We know it's not empty - change name
+  name = tp->second;
+  return true;  // Leave me alone now
 }
 
 //--------------------------------------------------------------------------

@@ -56,6 +56,12 @@ public:
   // Non-element marker
   static Element none;
 
+  //--------------------------------------------------------------------------
+  // Validity check
+  // Easy way of checking if you've got Element::none
+  // Don't use (e!=Element::none) - that compares values!
+  bool valid() { return this!=&none; }
+
   //------------------------------------------------------------------------
   // Constructors & Destructors
   Element(string n):name(n) { }
@@ -77,21 +83,21 @@ public:
   //     XML::Element& e = get_child(root, "foo");
   //     if (e.valid())
   //       //Use e
-  Element &get_child(const string& name);
+  Element &get_child(const string& ename);
 
   //--------------------------------------------------------------------------
   // Find all child elements of given name
   // Returns list of pointers
-  list<Element *> get_children(const string& name);
+  list<Element *> get_children(const string& ename);
 
   //--------------------------------------------------------------------------
   // Find all descendant elements of given name - recursive
   // Returns flat list of pointers
   // Prunes tree walk at 'prune' tags if set - use for recursive structures
   // where you want to deal with each level independently
-  // Name and prune can be the same - then returns only first level of 
-  // <name>s, not <name>s within <name>s
-  list<Element *> get_descendants(const string& name,
+  // Ename and prune can be the same - then returns only first level of 
+  // <ename>s, not <ename>s within <ename>s
+  list<Element *> get_descendants(const string& ename,
 				  const string& prune="");
 
   //--------------------------------------------------------------------------
@@ -100,26 +106,26 @@ public:
   // Defaults to default value given (or "") if not present
   // This exists to avoid creating the attribute when using attrs["foo"]
   // when foo doesn't exist (a completely stupid specification of [], IMHO)
-  string get_attr(const string& name, const char *def="");
+  string get_attr(const string& attname, const char *def="");
 
   //--------------------------------------------------------------------------
   // Get the boolean value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy] as true, everything else is false
-  bool get_attr_bool(const string& name, bool def=false);
+  bool get_attr_bool(const string& attname, bool def=false);
 
   //--------------------------------------------------------------------------
   // Get the integer value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_attr_int(const string& name, int def=0);
+  int get_attr_int(const string& attname, int def=0);
 
   //--------------------------------------------------------------------------
   // Tests whether the element has an attribute of the given name
   // Quicker than !get_attr("foo").empty()
-  bool has_attr(const string& name);
+  bool has_attr(const string& attname);
 
   //--------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
@@ -136,10 +142,16 @@ public:
   string get_deep_content();
 
   //--------------------------------------------------------------------------
-  // Validity check
-  // Easy way of checking if you've got Element::none
-  // Don't use (e!=Element::none) - that compares values!
-  bool valid() { return this!=&none; }
+  // Translate name using given map:
+  //   If not present, leave it and return true 
+  //   If present but mapped to "", leave it return false (=> delete me)
+  //   If present and mapped to non empty, change to mapped string
+  // 
+  // If recurse is set (default), it recurses to sub-elements and deletes
+  // them if they return false - net effect begin that names mapped to ""
+  // are (deep) deleted from the document.  Otherwise, only this element
+  // is touched
+  bool translate(map<string, string>& trans_map, bool recurse=true);
 };
 
 //==========================================================================

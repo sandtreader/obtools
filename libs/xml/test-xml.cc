@@ -69,8 +69,20 @@ int main()
     }
   }
 
-  cout << endl << "Here it is back again:" << endl;
+  cout << endl << "Here it is back again (with namespaces fixed):" << endl;
   cout << root;
+
+  //Now translate it
+  map<string,string> trans_map;
+  trans_map["wombat"]="animal.small.furry";  // Translate
+  trans_map["ns1:bing"]="";                  // Delete
+  
+  root.translate(trans_map);
+
+  cout << endl;
+  cout << "Here it is translated (wombats renamed, ns1:bing removed):" << endl;
+  cout << root;
+
   return 0;  
 }
 
