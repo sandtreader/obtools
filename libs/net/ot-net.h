@@ -256,8 +256,6 @@ public:
 
   //--------------------------------------------------------------------------
   // Safe datagram sendto wrapper
-  // If address_p and/or port_p are non-null, sets them to the source of the
-  // datagram
   // Throws SocketError on failure
   ssize_t sendto(const void *buf, size_t len, int flags,
 		 IPAddress address, int port)
