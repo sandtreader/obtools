@@ -32,7 +32,7 @@ class IPAddress
 {
 private:
   uint32_t address;   // Host byte order
-  static const uint32_t BADADDR = 0xffffffff;
+  static const uint32_t BADADDR = 0;
  
 public:
   //--------------------------------------------------------------------------
@@ -63,6 +63,15 @@ public:
   //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return address==BADADDR; }
+
+  //--------------------------------------------------------------------------
+  // & operator - get network number given a mask
+  IPAddress operator&(const IPAddress& mask) const 
+  { return IPAddress(address & mask.address); }
+
+  //--------------------------------------------------------------------------
+  // ~ operator - complement mask to get host mask
+  IPAddress operator~() const { return IPAddress(~address); }
 
   //--------------------------------------------------------------------------
   // == operator 
