@@ -36,7 +36,22 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
     if (hmp.parse())
     {
       cout << root;
-      ss << "200 OK\r\n";
+
+      // Send back a nice response
+      string body = "<TITLE>That worked</TITLE><P>Thanks!</P>\n";
+      ObTools::XML::Element response("HTTP");
+      response.set_attr("code", "200");
+      response.set_attr("version", "HTTP/1.0");
+      response.add("reason", "OK");
+      ObTools::XML::Element& headers = response.add("headers");
+      headers.add("server", "ObTools Web test server");
+      response.add("body", body);
+
+      ObTools::Web::HTTPMessageGenerator hmg(response, ss);
+      if (!hmg.generate())
+      {
+	cerr << "HTTP response generation failed\n";
+      }
     }
     else
     {
