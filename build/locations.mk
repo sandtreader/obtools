@@ -13,17 +13,35 @@
 # ObTools libraries - get all lower-case directories (ignoring CVS)
 OT-LIBS = $(notdir $(wildcard $(ROOT)/libs/[a-z]*))
 
+# XMLMesh libraries
+XMLMESH-LIBS = core otmp client
+
 # Template for standard ObTools library
 define lib_template
 DIR-$(1) = $$(ROOT)/libs/$(1)
 INCS-$(1) = $$(DIR-$(1))/ot-$(1).h
+ifneq ($(1), cache)  # Hack to remove non-existing library
 LIBS-$(1)-release = $$(DIR-$(1))/build.release/ot-$(1).a
 LIBS-$(1)-debug   = $$(DIR-$(1))/build.debug/ot-$(1).a
 LIBS-$(1)-single-release = $$(DIR-$(1))/build.single.release/ot-$(1).a
 LIBS-$(1)-single-debug = $$(DIR-$(1))/build.single.debug/ot-$(1).a
+endif
 endef
 
 # Run template for each library
 $(foreach lib,$(OT-LIBS),$(eval $(call lib_template,$(lib))))
+
+# Template for XMLMesh library
+define xmlmesh_template
+DIR-xmlmesh-$(1) = $$(ROOT)/xmlmesh/$(1)
+LIBS-xmlmesh-$(1)-release = $$(DIR-xmlmesh-$(1))/build.release/ot-xmlmesh-$(1).a
+LIBS-xmlmesh-$(1)-debug   = $$(DIR-xmlmesh-$(1))/build.debug/ot-xmlmesh-$(1).a
+LIBS-xmlmesh-$(1)-single-release = $$(DIR-xmlmesh-$(1))/build.single.release/ot-xmlmesh-$(1).a
+LIBS-xmlmesh-$(1)-single-debug = $$(DIR-xmlmesh-$(1))/build.single.debug/ot-xmlmesh-$(1).a
+endef
+
+# Run template for each XMLMesh part
+$(foreach lib,$(XMLMESH-LIBS),$(eval $(call xmlmesh_template,$(lib))))
+
 
 
