@@ -116,42 +116,6 @@ bool Element::get_int_property(const string& attr_name,
   return atoi(v.c_str());
 }
 
-//--------------------------------------------------------------------------
-// Reads multiplicity from properties
-// Returns default (1,1) if not found
-Multiplicity Element::get_multiplicity()
-{
-  Multiplicity m;
-  XML::Element& me = source.get_descendant("UML:Multiplicity");
-  if (me.valid())
-  {
-    XML::Element& mr = me.get_descendant("UML:MultiplicityRange");
-    if (mr.valid())
-    {
-      //Look either in attributes or sub-elements
-      if (mr.has_attr("lower"))
-	m.lower = mr.get_attr_int("lower");
-      else
-      {
-	XML::Element &mrl = mr.get_child("UML:MultiplicityRange.lower");
-	if (mrl.valid() && !mrl.content.empty()) 
-	  m.lower = atoi(mrl.content.c_str());
-      }
-
-      if (mr.has_attr("upper"))
-	m.upper = mr.get_attr_int("upper");
-      else
-      {
-	XML::Element &mru = mr.get_child("UML:MultiplicityRange.upper");
-	if (mru.valid() && !mru.content.empty()) 
-	  m.upper = atoi(mru.content.c_str());
-      }
-    }
-  }
-
-  return m;
-}
-
 //------------------------------------------------------------------------
 // Gets a reference 'property', either from given attribute of source
 // or 'xmi.idref' attribute of given sub-sub-element of given sub-element of

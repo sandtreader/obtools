@@ -48,9 +48,25 @@ struct Multiplicity
 
   //Default constructor sets to 1-1
   Multiplicity(): lower(1), upper(1) {}
+
+  // Reads multiplicity from UML:Multiplicity subelement
+  // Returns default (1,1) if not found
+  static Multiplicity read_from(XML::Element& pare);
 };
 
 ostream& operator<<(ostream& s, const Multiplicity& m);
+
+//--------------------------------------------------------------------------
+// Expression
+// (we don't bother with all the subclasses)
+struct Expression
+{
+  string language;
+  string body;
+
+  //Method to read from XMI - pass parent element of UML:Expression
+  static Expression read_from(XML::Element &pare);
+};
 
 //--------------------------------------------------------------------------
 // Visibility
@@ -79,15 +95,6 @@ enum AggregationKind
   AGGREGATION_NONE,
   AGGREGATION_AGGREGATE,
   AGGREGATION_COMPOSITE
-};
-
-//--------------------------------------------------------------------------
-// Expression
-// (we don't bother with all the subclasses)
-struct Expression
-{
-  string language;
-  string body;
 };
 
 //--------------------------------------------------------------------------
@@ -306,9 +313,16 @@ protected:
 public:
   bool is_query;
 
-  //Sugar function to get parameters
-  list<Parameter *> get_parameters()
-    { return filter_subelements<Parameter>(); }
+  //Sugar function to 'return' pseudo-parameter - only takes first
+  //Returns 0 if no return (void)
+  Parameter *get_return();
+
+  //Sugar function to get parameters - also removes 'return' pseudo-parameter
+  list<Parameter *> get_parameters();
+
+  // Sugar macro for above 
+  #define OBTOOLS_UML_FOREACH_PARAMETER(_var, _f) \
+    OBTOOLS_UML_FOREACH(Parameter, _var, (_f).get_parameters())
 
   //Constructor
   BehaviouralFeature(XMI::Reader& rdr, XML::Element& xe);
@@ -328,126 +342,6 @@ public:
   
   //Constructor
   Operation(XMI::Reader& rdr, XML::Element& xe);
-};
-
-//==========================================================================
-// UML GeneralizableElement (creates inheritance structure)
-// (sorry, fellow GB folk, decided to use the US spelling as in the standard)
-class GeneralizableElement: public ModelElement   //abstract
-{
-protected:
-  void print_header(ostream& sout);  
-
-public:
-  bool is_root;
-  bool is_leaf;
-  bool is_abstract;
-
-  // List of pointers to Generalization objects
-  list<Generalization *> generalizations; 
-  list<Generalization *> specializations; 
-
-  //Constructor
-  GeneralizableElement(XMI::Reader &rdr, XML::Element& xe);
-};
-
-//==========================================================================
-// UML Classifier - Class, DataType or Interface
-// Handles associations and features
-class Classifier: public GeneralizableElement  // abstract
-{
-public:
-  list<AssociationEnd *> association_ends;  // That refer to us
-
-  //Sugar functions to get list of Attributes and Operations
-  list<Attribute *> get_attributes()
-    { return filter_subelements<Attribute>(); }
-  list<Operation *> get_operations()
-    { return filter_subelements<Operation>(); }
-
-  //Constructor
-  Classifier(XMI::Reader &rdr, XML::Element& xe);
-};
-
-//==========================================================================
-// UML Class 
-// (most functionality comes from Classifier)
-class Class: public Classifier
-{
-protected:
-  void print_header(ostream& sout);  
-
-public:
-  bool is_active;
-
-  // Sugar functions to get simple inheritance structure 
-  list<Class *> get_parents();
-  list<Class *> get_children();
-
-  //Constructor
-  Class(XMI::Reader& rdr, XML::Element& xe);
-};
-
-//==========================================================================
-// UML DataType
-// (all functionality comes from Classifier)
-class DataType: public Classifier
-{
-public:
-  //Assume DataTypes don't inherit
-
-  //Constructor
-  DataType(XMI::Reader& rdr, XML::Element& xe):
-    Classifier(rdr, xe) {}
-};
-
-//==========================================================================
-// UML Interface
-// (all functionality comes from Classifier)
-class Interface: public Classifier
-{
-public:
-  // Sugar functions to get simple inheritance structure 
-  list<Interface *> get_parents();
-  list<Interface *> get_children();
-
-  //Constructor
-  Interface(XMI::Reader& rdr, XML::Element& xe):
-    Classifier(rdr, xe) {}
-};
-
-//==========================================================================
-// UML AssociationEnd 
-class AssociationEnd: public ModelElement
-{
-protected:
-  void build_refs();                        //Capture participant
-  void print_header(ostream& sout);  
-
-public:
-  bool is_navigable;
-  bool is_ordered;
-  AggregationKind aggregation;
-  Multiplicity multiplicity;
-  Classifier *participant;                  //Thing we connect to
-  int connection_index;                     //Which end we are in the 
-                                            // association - 0..n
-
-  //Constructor
-  AssociationEnd(XMI::Reader& rdr, XML::Element& xe);
-};
-
-//==========================================================================
-// UML Association 
-class Association: public GeneralizableElement
-{
-public:
-  // We provide the following rather than a sugar function because it's
-  // such a common thing to index
-  vector<AssociationEnd *> connections;     //Always 2 or more
-
-  //Constructor 
-  Association(XMI::Reader& rdr, XML::Element& xe);
 };
 
 //==========================================================================
@@ -478,6 +372,190 @@ public:
     parent(0),
     child(0),
     Relationship(rdr, xe) {}
+};
+
+//==========================================================================
+// UML GeneralizableElement (creates inheritance structure)
+// (sorry, fellow GB folk, decided to use the US spelling as in the standard)
+class GeneralizableElement: public ModelElement   //abstract
+{
+protected:
+  void print_header(ostream& sout);  
+
+public:
+  bool is_root;
+  bool is_leaf;
+  bool is_abstract;
+
+  // List of pointers to Generalization objects
+  list<Generalization *> generalizations; 
+  list<Generalization *> specializations; 
+
+  // Template functions for sugar functions to get parents/children of
+  // particular types
+  template<class T> list<T *> filter_parents()
+  {
+    list<T *> l;
+    for(list<Generalization *>::iterator p=generalizations.begin();
+	p!=generalizations.end();
+	p++)
+    {
+      T *t = dynamic_cast<T *>((*p)->parent);
+      if (t) l.push_back(t);
+    }
+    return l;
+  }
+
+  template<class T> list<T *> filter_children()
+  {
+    list<T *> l;
+    for(list<Generalization *>::iterator p=specializations.begin();
+	p!=specializations.end();
+	p++)
+    {
+      T *t = dynamic_cast<T *>((*p)->child);
+      if (t) l.push_back(t);
+    }
+    return l;
+  }
+
+  //Constructor
+  GeneralizableElement(XMI::Reader &rdr, XML::Element& xe);
+};
+
+//==========================================================================
+// UML Classifier - Class, DataType or Interface
+// Handles associations and features
+class Classifier: public GeneralizableElement  // abstract
+{
+public:
+  list<AssociationEnd *> association_ends;  // That refer to us
+
+  // Sugar macro for above 
+  #define OBTOOLS_UML_FOREACH_ASSOCIATION_END(_var, _c) \
+    OBTOOLS_UML_FOREACH(AssociationEnd, _var, (_c).association_ends)
+
+  //Sugar functions to get list of Attributes and Operations
+  list<Attribute *> get_attributes()
+    { return filter_subelements<Attribute>(); }
+  list<Operation *> get_operations()
+    { return filter_subelements<Operation>(); }
+
+  // Sugar macros for above 
+  #define OBTOOLS_UML_FOREACH_ATTRIBUTE(_var, _c) \
+    OBTOOLS_UML_FOREACH(Attribute, _var, (_c).get_attributes())
+  #define OBTOOLS_UML_FOREACH_OPERATION(_var, _c) \
+    OBTOOLS_UML_FOREACH(Operation, _var, (_c).get_operations())
+
+  // Sugar functions to get simple inheritance structure 
+  list<Classifier *> get_parents()
+    { return filter_parents<Classifier>(); }
+  list<Classifier *> get_children()
+    { return filter_children<Classifier>(); }
+  
+  // Sugar macros for above 
+  #define OBTOOLS_UML_FOREACH_PARENT_CLASSIFIER(_var, _c) \
+    OBTOOLS_UML_FOREACH(Classifier, _var, (_c).get_parents())
+  #define OBTOOLS_UML_FOREACH_CHILD_CLASSIFIER(_var, _c) \
+    OBTOOLS_UML_FOREACH(Classifier, _var, (_c).get_children())
+
+  //Constructor
+  Classifier(XMI::Reader &rdr, XML::Element& xe);
+};
+
+//==========================================================================
+// UML Class 
+// (most functionality comes from Classifier)
+class Class: public Classifier
+{
+protected:
+  void print_header(ostream& sout);  
+
+public:
+  bool is_active;
+
+  // Overridden sugar function to get children - assume they can only
+  // be Classes. get_parents() is still the Classifier one above, because
+  // parents might be Interfaces
+  list<Class *> get_children()
+    { return filter_children<Class>(); }
+
+  #define OBTOOLS_UML_FOREACH_CHILD_CLASS(_var, _c) \
+    OBTOOLS_UML_FOREACH(Class, _var, (_c).get_children())
+
+  //Constructor
+  Class(XMI::Reader& rdr, XML::Element& xe);
+};
+
+//==========================================================================
+// UML DataType
+// (all functionality comes from Classifier)
+class DataType: public Classifier
+{
+public:
+  //Assume DataTypes don't inherit
+
+  //Constructor
+  DataType(XMI::Reader& rdr, XML::Element& xe):
+    Classifier(rdr, xe) {}
+};
+
+//==========================================================================
+// UML Interface
+// (all functionality comes from Classifier)
+class Interface: public Classifier
+{
+public:
+  // Overridden sugar function to get parents - assume they can only
+  // be Interfaces. get_children() is still the Classifier one above, because
+  // children might be Classes
+  list<Interface *> get_parents()
+    { return filter_parents<Interface>(); }
+
+  // Sugar macro for above 
+  #define OBTOOLS_UML_FOREACH_PARENT_INTERFACE(_var, _i) \
+    OBTOOLS_UML_FOREACH(Interface, _var, (_i).get_parents())
+
+  //Constructor
+  Interface(XMI::Reader& rdr, XML::Element& xe):
+    Classifier(rdr, xe) {}
+};
+
+//==========================================================================
+// UML AssociationEnd 
+class AssociationEnd: public ModelElement
+{
+protected:
+  void build_refs();                        //Capture participant
+  void print_header(ostream& sout);  
+
+public:
+  bool is_navigable;
+  bool is_ordered;
+  AggregationKind aggregation;
+  Multiplicity multiplicity;
+  Classifier *participant;                  //Thing we connect to
+  int connection_index;                     //Which end we are in the 
+                                            // association - 0..n
+
+  //Get the 'other' end of the association (only works for 2 ends)
+  AssociationEnd *get_other_end();
+
+  //Constructor
+  AssociationEnd(XMI::Reader& rdr, XML::Element& xe);
+};
+
+//==========================================================================
+// UML Association 
+class Association: public GeneralizableElement
+{
+public:
+  // We provide the following rather than a sugar function because it's
+  // such a common thing to index
+  vector<AssociationEnd *> connections;     //Always 2 or more
+
+  //Constructor 
+  Association(XMI::Reader& rdr, XML::Element& xe);
 };
 
 //==========================================================================
@@ -536,6 +614,16 @@ public:
   list<Association *> get_associations()
     { return filter_subelements<Association>(); }
 
+  //Sugar macros for above
+  #define OBTOOLS_UML_FOREACH_PACKAGE(_var, _p) \
+    OBTOOLS_UML_FOREACH(Package, _var, (_p).get_subpackages())
+  #define OBTOOLS_UML_FOREACH_CLASS(_var, _p) \
+    OBTOOLS_UML_FOREACH(Class, _var, (_p).get_classes())
+  #define OBTOOLS_UML_FOREACH_INTERFACE(_var, _p) \
+    OBTOOLS_UML_FOREACH(Interface, _var, (_p).get_interfaces())
+  #define OBTOOLS_UML_FOREACH_ASSOCIATION(_var, _p) \
+    OBTOOLS_UML_FOREACH(Association, _var, (_p).get_associations())
+
   //Constructor 
   Package(XMI::Reader& rdr, XML::Element& xe);
 };
@@ -557,6 +645,28 @@ public:
     Package(rdr, xe) 
   { build_refs(); }
 };
+
+//==========================================================================
+// XMI iteration support macros (pray to the C++ gods for anonymous
+// functions one day!)
+//
+// e.g. 
+//    OBTOOLS_UML_FOREACH(Attribute, a, cls.get_attributes())
+//      cout << a.name << endl;
+//    OBTOOLS_UML_ENDFOR
+// 
+// Sugared further within each class, above
+
+#define OBTOOLS_UML_FOREACH(_cls, _var, _list)                            \
+  {                                                                       \
+    const list<ObTools::UML::_cls *>& _elems=(_list);                     \
+    for(list<ObTools::UML::_cls *>::const_iterator _p=_elems.begin();     \
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      ObTools::UML::_cls& _var=**_p;
+
+#define OBTOOLS_UML_ENDFOR }}
 
 //==========================================================================
 }} //namespaces

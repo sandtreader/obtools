@@ -21,7 +21,7 @@ AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe):
   is_navigable = get_bool_property("isNavigable", 
 				  "UML:AssociationEnd.isNavigable");
 
-  multiplicity = get_multiplicity();
+  multiplicity = Multiplicity::read_from(source);
 
   string ak  = get_property("aggregation", "UML:AssociationEnd.aggregation");
 
@@ -84,4 +84,14 @@ void AssociationEnd::print_header(ostream& sout)
   }
 }
 
+//--------------------------------------------------------------------------
+//Get the 'other' end of the association (only works for 2 ends)
+AssociationEnd *AssociationEnd::get_other_end()
+{
+  Association *pa = dynamic_cast<Association *>(parent);
+  if (!pa) return 0;
 
+  if (pa->connections.size() != 2) return 0;
+
+  return pa->connections[1-connection_index];
+}

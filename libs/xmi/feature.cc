@@ -39,10 +39,10 @@ StructuralFeature::StructuralFeature(XMI::Reader& rdr, XML::Element& xe):
   Feature(rdr, xe), type(0)
 {
   //Get basic properties
-  multiplicity = get_multiplicity();
   is_ordered = (get_property("ordering", "UML:StructuralFeature.ordering")
 		== "ordered");
 
+  multiplicity = Multiplicity::read_from(source);
 }
 
 //--------------------------------------------------------------------------
@@ -87,6 +87,38 @@ void BehaviouralFeature::print_header(ostream& sout)
   Feature::print_header(sout);
 
   if (is_query) sout << " (query)";
+}
+
+//--------------------------------------------------------------------------
+//Sugar function to 'return' pseudo-parameter - only takes first
+//Returns 0 if no return (void)
+Parameter *BehaviouralFeature::get_return()
+{
+  for(list<Element *>::iterator p=subelements.begin();
+      p!=subelements.end();
+      p++)
+  {
+    Parameter *par = dynamic_cast<Parameter *>(*p);
+    if (par && par->kind == PARAMETER_RETURN) return par;
+  }
+
+  return 0;
+}
+
+//--------------------------------------------------------------------------
+//Sugar function to get parameters - also removes 'return' pseudo-parameter
+list<Parameter *> BehaviouralFeature::get_parameters()
+{
+  list<Parameter *>l;
+  for(list<Element *>::iterator p=subelements.begin();
+      p!=subelements.end();
+      p++)
+  {
+    Parameter *par = dynamic_cast<Parameter *>(*p);
+    if (par && par->kind != PARAMETER_RETURN) l.push_back(par);
+  }
+  
+  return l;
 }
 
 

@@ -30,6 +30,10 @@ Parameter::Parameter(XMI::Reader& rdr, XML::Element& xe)
     reader.warning("Unknown parameter kind: ", pdk);
     kind=PARAMETER_IN;  // Safest
   }
+
+  XML::Element& dve = source.get_child("UML:Attribute.defaultValue");
+  if (dve.valid())
+    default_value = Expression::read_from(dve);
 }
 
 //--------------------------------------------------------------------------
@@ -52,6 +56,12 @@ void Parameter::print_header(ostream& sout)
   if (type)
     sout << " " << type->name;
 
+  if (!default_value.body.empty())
+    sout << " = '" << default_value.body << "'";
+
+  if (!default_value.language.empty())
+    sout << " <" << default_value.language << ">";
+
   switch (kind)
   {
     case PARAMETER_IN:
@@ -71,3 +81,4 @@ void Parameter::print_header(ostream& sout)
       break;
   }
 }
+
