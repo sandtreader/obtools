@@ -277,9 +277,13 @@ public:
   }
 
   //--------------------------------------------------------------------------
-  // Virtual destructor - does nothing here, but PointerCache uses it to
-  // free pointers
-  virtual ~Cache() {}
+  // Virtual destructor - clears all entries
+  // (does nothing here, but PointerCache uses it to free pointers)
+  virtual ~Cache() 
+  {
+    for(MapIterator p = cachemap.begin(); p!=cachemap.end(); p++)
+      clear(p->second); 
+  }
 };
 
 //==========================================================================
@@ -373,14 +377,6 @@ public:
       return r;
     }
     else return 0;
-  }
-
-  //--------------------------------------------------------------------------
-  // Destructor - delete all pointers
-  ~PointerCache()
-  {
-    for(PMapIterator p = cachemap.begin(); p!=cachemap.end(); p++)
-      delete p->second.content.ptr; 
   }
 };
 
