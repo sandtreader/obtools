@@ -281,12 +281,14 @@ public:
   // Constructors & Destructor
   // s is output stream for parsing errors
   Reader(ostream &s):
-    serr(s)
+    serr(s),
+    model(0)
   {}
 
   // Default - use cerr
   Reader():
-    serr(cerr)
+    serr(cerr),
+    model(0)
   {}
 
   ~Reader();
