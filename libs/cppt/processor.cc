@@ -63,6 +63,12 @@ void Processor::open_expr()
 {
   if (started_text)
     sout << "\" << ";
+  else
+  {
+    //Start one, in expression state
+    sout << "  " << sname << " << ";
+    started_text = true;
+  }
 }
 
 //--------------------------------------------------------------------------
