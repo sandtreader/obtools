@@ -19,6 +19,7 @@ OT-LIBS = cli:libs/cli     			\
           cppt:libs/cppt   			\
           db-pgsql:libs/db:-pgsql 		\
 	  cache:libs/cache:NOLIB  		\
+	  chan:libs/chan			\
 	  init:libs/init			\
 	  log:libs/log     			\
 	  misc:libs/misc   			\
@@ -27,6 +28,7 @@ OT-LIBS = cli:libs/cli     			\
           regen:libs/regen 			\
 	  soap:libs/soap			\
           text:libs/text   			\
+	  web:libs/web				\
           xmi:libs/xmi     			\
           xml:libs/xml     			\
           xmlmesh-core:xmlmesh/core  		\
