@@ -100,6 +100,7 @@ ostream& operator<<(ostream&s, const Correlation& c)
     << "(" << c.source_id << ") -> "
     << c.dest_transport->name << ":" << c.dest_client 
     << "(" << c.dest_id << ") ]";
+  return s;
 }
 
 }} // namespaces

@@ -260,6 +260,7 @@ Message::~Message()
 ostream& operator<<(ostream& s, const Message& m)
 {
   s << m.to_text();
+  return s;
 }
 
 }} // namespaces

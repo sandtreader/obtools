@@ -78,6 +78,7 @@ ostream& operator<<(ostream& s, const SubscriptionMessage& m)
   }
 
   s << m.subject << ")";
+  return s;
 }
 
 }} // namespaces

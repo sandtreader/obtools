@@ -100,6 +100,7 @@ ostream& operator<<(ostream& s, const ErrorMessage& m)
   }
 
   s << m.text;
+  return s;
 }
 
 }} // namespaces
