@@ -159,6 +159,33 @@ public:
   bool parse();
 };
 
+//==========================================================================
+// HTTP message generator (http-message.cc)
+// Generates an HTTP request/response message to a stream
+// Also usable for other HTTP-like protocols - e.g. RTSP
+
+// Works as inverse of HTTPMessageParser, above
+// Body is only generated if it exists, and a Content-Length header is
+// added to suit
+
+class HTTPMessageGenerator
+{
+private:
+  XML::Element& root;
+  ostream& out;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor/Destructor
+  HTTPMessageGenerator(XML::Element& _root, ostream& _out): 
+    root(_root), out(_out) {}
+
+  //--------------------------------------------------------------------------
+  // Generate the stream
+  // Returns whether successful
+  bool generate();
+};
+
 
 //==========================================================================
 }} //namespaces

@@ -26,7 +26,16 @@ int main()
 
   cout << "\n--- XML form\n";
   cout << root;
+ 
+  cout << "\n--- Regenerated\n";
+  ObTools::Web::HTTPMessageGenerator hmg(root, cout);
+  if (!hmg.generate())
+  {
+    cerr << "Generate failed\n";
+    return 2;
+  }
   
+ 
   return 0;  
 }
 

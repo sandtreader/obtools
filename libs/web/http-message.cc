@@ -9,6 +9,7 @@
 
 #include "ot-web.h"
 #include "ot-text.h"
+#include <sstream>
 
 namespace ObTools { namespace Web {
 
@@ -83,6 +84,40 @@ bool HTTPMessageParser::parse()
   }
 
   return true;
+}
+
+//==========================================================================
+// HTTPMessageGenerator
+
+//--------------------------------------------------------------------------
+// Generate a message
+// Returns whether successful
+bool HTTPMessageGenerator::generate()
+{
+  // Check stream is OK
+  if (out.fail()) return false;
+
+  // Output first line
+  out << root.name << ' ' << root["uri"] << ' ' << root["version"] << "\r\n";
+
+  // If body exists, add content-length header
+  XML::Element& headers = root.get_child("headers");
+  XML::Element& body = root.get_child("body");
+  if (body.valid())
+  {
+    ostringstream oss;
+    oss << body.content.size();
+    headers.add("content-length", oss.str());
+  }
+
+  // Output headers
+  MIMEHeaderGenerator mhg(headers, out);
+  if (!mhg.generate()) return false;
+  
+  // Output body (if any)
+  if (body.valid()) out << body.content;
+
+  return !out.fail();
 }
 
 }} // namespaces
