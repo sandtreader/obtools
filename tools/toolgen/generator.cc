@@ -275,7 +275,7 @@ void Generator::generate_use(XML::Element& use_e,
   // Generate call to template function
   sout << "  //Call to defined template '" << define_e["name"] << "'\n";
   sout << "  template_" << define_e["name"] << "(" << streamname << ", "
-       << childname << ", " << indexname << ", _path";
+       << childname << ", " << indexname << ", _path, _revpath";
 
   // Check each argument in the definition to see if we've provided it, 
   // and generate it, use default if not
@@ -327,7 +327,9 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 
     // Generate path addition code
     sout <<"  string _oldpath = _path;\n";
-    sout <<"  _path += _dirname + \"/\";\n\n";
+    sout <<"  string _oldrevpath = _revpath;\n";
+    sout <<"  _path += _dirname + \"/\";\n";
+    sout <<"  _revpath += \"../\";\n\n";
 
     sout <<"  // Make directory\n";
     sout <<"  string _cmd = string(\"mkdir -p \\\"\")+_path+\"\\\"\";\n";
@@ -442,7 +444,7 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 
   // Output code to restore path
   if (dir_script.size())
-    sout <<"  _path = _oldpath;\n";
+    sout <<"  _path = _oldpath;\n  _revpath = _oldrevpath;\n";
 
   // Return common indent for outer file
   if (fn_script.size()) max_ci = old_max_ci;
@@ -486,7 +488,7 @@ void Generator::generate_defines()
     sout<<"//================================================================\n";
     sout << "// Defined template '" << name << "'\n";
     sout << "void template_" << name << "(ostream& sout, " << param << ",\n";
-    sout << "     int " << p_var << "_index, string _path";
+    sout << "     int " << p_var << "_index, string _path, string _revpath";
 
     // Create argument strings
     OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, te, "xt:arg")
@@ -509,6 +511,9 @@ void Generator::generate_defines()
 void Generator::generate_roots()
 {
   XML::Element& root = config.get_root();
+
+  // Path variables
+  cout << "string _path, _revpath;\n";
 
   // Expand all root templates
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ce, root, "xt:template")
