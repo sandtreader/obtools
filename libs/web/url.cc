@@ -32,7 +32,11 @@ bool URLParser::parse(const string& url)
 
     // Extract host and optional port
     string::size_type slash = url.find('/', p+3);
-    string host(url, p+3, slash-p-3);
+    string host;
+    if (slash == string::npos)
+      host = string(url, p+3);
+    else
+      host = string(url, p+3, slash-p-3);
 
     p = host.find(':');
     if (p == string::npos)
@@ -47,19 +51,28 @@ bool URLParser::parse(const string& url)
   }
   else p=0;
 
+  // If no slash, that's it
+  if (p == string::npos) return true;
+
   // Extract path and query
   string::size_type query = url.find('?', p);
   string::size_type hash;
   if (query == string::npos)
   {
     hash = url.find('#', p);
-    root.add("path", string(url, p, hash-p));
+    if (hash == string::npos)
+      root.add("path", string(url, p));
+    else
+      root.add("path", string(url, p, hash-p));
   }
   else
   {
     root.add("path", string(url, p, query-p));
     hash = url.find('#', query+1);
-    root.add("query", string(url, query+1, hash-query-1));
+    if (hash == string::npos)
+      root.add("query", string(url, query+1));
+    else
+      root.add("query", string(url, query+1, hash-query-1));
   }
 
   // Extract hash to end
