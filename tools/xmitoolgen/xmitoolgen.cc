@@ -196,7 +196,9 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
   {
     // Generate directly using the model as a package
     sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
+    generate_start(te, tags, "0", streamname);
     generate_template(te, te, tags, max_ci, streamname, script);
+    generate_end(te, tags, "1", streamname);
   }
   else 
   {
@@ -215,12 +217,14 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
     sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
     sout << "                      " << p_var << listop << ")\n"; 
 
+    generate_start(te, tags, index_var, streamname);
     generate_template(te, te, tags, max_ci, streamname, script);
     process_script(script, tags, streamname, max_ci);
     script.clear();
 
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_UML_ENDFOR\n";
+    generate_end(te, tags, index_var, streamname);
   }
 }
 
@@ -257,7 +261,9 @@ void XMIGenerator::expand_use(XML::Element& use_e,
   {
     // Generate directly using the model as a package
     sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
+    generate_start(define_e, tags, "0", streamname);
     generate_use(use_e, define_e, tags, c_var, "0", streamname);
+    generate_end(define_e, tags, "1", streamname);
   }
   else 
   {
@@ -276,10 +282,12 @@ void XMIGenerator::expand_use(XML::Element& use_e,
     sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
     sout << "                      " << p_var << listop << ")\n"; 
 
+    generate_start(define_e, tags, index_var, streamname);
     generate_use(use_e, define_e, tags, c_var, index_var, streamname);
     
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_UML_ENDFOR\n";
+    generate_end(define_e, tags, index_var, streamname);
   }
 }
 
