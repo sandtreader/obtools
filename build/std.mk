@@ -25,6 +25,7 @@
 # VARIANT-xx: Flags for each variant
 # DIRTY:     Extra things to delete on 'make clean' (as well as build- dirs)
 # CLEANCMD:  Extra clean command on 'make clean'
+# DOCFILE:   File (relative to ROOT) to append documentation to
 
 # This recurses on itself with target 'exe'
 
@@ -132,7 +133,7 @@ CPPFLAGS += $(patsubst %,-I%,$(EXTINCS))
 EXTRALIBS += $(EXTLIBS)
 
 # Pseudo targets
-.PHONY: all targets clean test release
+.PHONY: all targets clean test release doc
 
 # Account for moving down into build directories
 vpath % ..
@@ -154,6 +155,11 @@ release: $(patsubst %,release-%,$(VARIANTS))
 ifdef CONFIGS
 	cp $(CONFIGS) $(RELEASEDIR) 
 endif
+
+# Documentation target - simply append the local obdoc.xml file (if it exists)
+# the DOCFILE (relative to ROOT)
+docfile:
+	-@cat obdoc.xml >> $(ROOT)/$(DOCFILE)
 
 # Build targets
 define build_template
