@@ -59,6 +59,20 @@ public:
   ServerSendThread(ClientSession& _session): session(_session) { start(); }
 };
 
+//--------------------------------------------------------------------------
+// TCPServer verify method
+bool Server::verify(Net::EndPoint ep)
+{
+  // Check host against filters
+  for(list<Net::MaskedAddress>::iterator p = filters.begin();
+      p!=filters.end();
+      p++)
+    if (*p == ep.host) return true;
+
+  Log::Error << "OTMP(serv): Rejected connection from " << ep << endl;
+  return false;
+}
+
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
 void Server::process(Net::TCPSocket& socket, 

@@ -55,6 +55,7 @@ int main()
 
   // Create server 
   XMLMesh::OTMP::Server server(q);
+  server.open();
 
   // Start reflector thread
   ReflectorThread reflector(server, q);

@@ -208,6 +208,7 @@ class Server: public Net::TCPServer
 private:
   ClientMessageQueue& receive_q;  // Note:  Not mine
   SessionMap client_sessions;  // Map of sessions
+  list<Net::MaskedAddress> filters;  // List of allowed client masks
 
 public:
   //------------------------------------------------------------------------
@@ -217,6 +218,19 @@ public:
   Server(ClientMessageQueue& receive_queue,
 	 int port=0, int backlog=5, 
 	 int min_spare_threads=1, int max_threads=10);
+
+  //--------------------------------------------------------------------------
+  // Allow a given client address to connect (optionally with netmask)
+  void allow(Net::MaskedAddress addr)
+  { filters.push_back(addr); }
+
+  //--------------------------------------------------------------------------
+  // Allow any client
+  void open() { filters.push_back(Net::MaskedAddress(0,0)); }
+
+  //--------------------------------------------------------------------------
+  // TCPServer verify method
+  bool verify(Net::EndPoint ep);
 
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
