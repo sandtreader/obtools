@@ -91,6 +91,54 @@ public:
 };
 
 //==========================================================================
+// Cache Iterator template
+// Sugars evil map iterator
+template <class ID, class CONTENT> struct CacheIterator
+{
+  // Standard iterator typedefs
+  typedef bidirectional_iterator_tag iterator_category;
+  typedef ptrdiff_t difference_type;
+  typedef CONTENT value_type;
+  typedef CONTENT& reference;
+  typedef CONTENT *pointer;
+
+  // Other handy typedefs
+  typedef map<ID, MapContent<CONTENT> > MapType;
+  typedef typename MapType::iterator MapIteratorType;
+
+  // My state - just uses map's iterator
+  MapIteratorType map_iterator;
+
+  // Constructors
+  CacheIterator() {}
+  CacheIterator(const MapIteratorType& mi): map_iterator(mi) {}
+  CacheIterator(const CacheIterator& ci): map_iterator(ci.map_iterator) {}
+
+  // Incrementors - note p++ requires a temporary: use ++p in preference
+  CacheIterator& operator++() { map_iterator++; return *this; }
+  CacheIterator operator++(int) 
+  { CacheIterator t = *this; map_iterator++; return t; }
+    
+  CacheIterator& operator--() { map_iterator--; return *this; }
+  CacheIterator operator--(int) 
+  { CacheIterator t = *this; map_iterator--; return t; }
+
+  // Comparators
+  bool operator==(const CacheIterator& o) const
+  { return map_iterator == o.map_iterator; }
+  bool operator!=(const CacheIterator& o) const
+  { return map_iterator != o.map_iterator; }
+
+  // Standard dereference
+  // * operator gets content ref
+  reference operator*() const { return map_iterator->second.content; }
+  pointer operator->() const { return &(operator*()); }
+
+  // ID accessor
+  const ID& id() const { return map_iterator->first; }
+};
+
+//==========================================================================
 // Cache template
 
 // Template arguments:
@@ -147,7 +195,7 @@ protected:
       // Show the policy all the entries, let them choose the worst
       for(MapIterator p = cachemap.begin();
 	  p!=cachemap.end();
-	  p++)
+	  ++p)
       {
 	MapContent<CONTENT> &mc = p->second;
 	if (evictor_policy.check_worst(mc.policy_data, worst_data))
@@ -252,11 +300,11 @@ public:
       if (!tidy_policy.keep_entry(mc.policy_data, now))
       {
 	MapIterator q=p;
-	p++;  // Protect from deletion
+	++p;  // Protect from deletion
 	clear(q->second);
 	cachemap.erase(q);
       }
-      else p++;
+      else ++p;
     }
   }
 
@@ -280,7 +328,7 @@ public:
     s << "Cache size " << cachemap.size() << ", limit " << limit << ":\n";
     for(MapIterator p = cachemap.begin();
 	p!=cachemap.end();
-	p++)
+	++p)
     {
       MCType &mc = p->second;
       PolicyData &pd = mc.policy_data;
@@ -293,18 +341,23 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Iterators
+  typedef CacheIterator<ID, CONTENT> iterator;
+  iterator begin() { return iterator(cachemap.begin()); }
+  iterator end() { return iterator(cachemap.end()); }
+
+  //--------------------------------------------------------------------------
   // Virtual destructor - clears all entries
   // (does nothing here, but PointerCache uses it to free pointers)
   virtual ~Cache() 
   {
-    for(MapIterator p = cachemap.begin(); p!=cachemap.end(); p++)
+    for(MapIterator p = cachemap.begin(); p!=cachemap.end(); ++p)
       clear(p->second); 
   }
 };
 
 //==========================================================================
-// PointerCache template
-// Like Cache, but assuming larger objects requiring dynamic allocation
+// PointerContent template
 
 // It's tempting to define an auto_ptr-like thing as the CONTENT here,
 // rather than a plain pointer, but we then have to worry about every
@@ -326,6 +379,57 @@ ostream& operator<<(ostream&s, const PointerContent<CONTENT>& pc)
 {
   if (pc.ptr) s << *(pc.ptr);
 }
+
+//==========================================================================
+// PointerCache Iterator template
+// Like CacheIterator, but sugars deref
+template <class ID, class CONTENT> struct PointerCacheIterator
+{
+  // Standard iterator typedefs
+  typedef CONTENT *value_type;
+  typedef CONTENT& reference;
+  typedef CONTENT *pointer;
+
+  // Other handy typedefs
+  typedef map<ID, MapContent<PointerContent<CONTENT> > > MapType;
+  typedef typename MapType::iterator MapIteratorType;
+
+  // My state - just uses map's iterator
+  MapIteratorType map_iterator;
+
+  // Constructors
+  PointerCacheIterator() {}
+  PointerCacheIterator(const MapIteratorType& mi): map_iterator(mi) {}
+  PointerCacheIterator(const PointerCacheIterator& ci): 
+    map_iterator(ci.map_iterator) {}
+
+  // Incrementors - note p++ requires a temporary: use ++p in preference
+  PointerCacheIterator& operator++() { map_iterator++; return *this; }
+  PointerCacheIterator operator++(int) 
+  { PointerCacheIterator t = *this; map_iterator++; return t; }
+    
+  PointerCacheIterator& operator--() { map_iterator--; return *this; }
+  PointerCacheIterator operator--(int) 
+  { PointerCacheIterator t = *this; map_iterator--; return t; }
+
+  // Comparators
+  bool operator==(const PointerCacheIterator& o) const
+  { return map_iterator == o.map_iterator; }
+  bool operator!=(const PointerCacheIterator& o) const
+  { return map_iterator != o.map_iterator; }
+
+  // Standard dereference
+  // NB: * operator gets content ref
+  pointer operator->() const { return map_iterator->second.content.ptr; }
+  reference operator*() const { return *(operator->()); }
+
+  // ID accessor
+  const ID& id() const { return map_iterator->first; }
+};
+
+//==========================================================================
+// PointerCache template
+// Like Cache, but assuming larger objects requiring dynamic allocation
 
 // Main PointerCache template
 template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY> 
@@ -398,6 +502,12 @@ public:
     }
     else return 0;
   }
+
+  //--------------------------------------------------------------------------
+  // Iterators
+  typedef PointerCacheIterator<ID, CONTENT> iterator;
+  iterator begin() { return iterator(cachemap.begin()); }
+  iterator end() { return iterator(cachemap.end()); }
 };
 
 ////////////////////////////////////////////////////////////////////////////

@@ -35,7 +35,12 @@ int main()
   cache.add("foo", new Wombat("Foo", 1));
   cache.add("bar", new Wombat("Bar", 2));
 
-  cache.dump(cout);
+  // Iterator cache 
+  for(LRUEvictionPointerCache<string, Wombat>::iterator p = cache.begin();
+      p!=cache.end();
+      ++p)
+  { cout << p.id() << ": " << *p << endl; }
+  cout << endl;
 
   Wombat *f = cache.lookup("foo");
   if (f)
