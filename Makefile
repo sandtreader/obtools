@@ -7,17 +7,17 @@
 all: 
 	$(MAKE) -C libs
 	$(MAKE) -C tools
-	$(MAKE) -C xmlbus
+	$(MAKE) -C xmlmesh
 
 clean: 
 	-@rm -f *~
 	$(MAKE) -C libs clean
 	$(MAKE) -C tools clean
-	$(MAKE) -C xmlbus clean
+	$(MAKE) -C xmlmesh clean
 
 test: 
 	$(MAKE) -C libs test
 	$(MAKE) -C tools test
-	$(MAKE) -C xmlbus test
+	$(MAKE) -C xmlmesh test
 
 
