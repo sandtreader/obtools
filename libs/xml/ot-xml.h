@@ -29,7 +29,8 @@ class Element
 private:
   void write_indented(int indent, ostream &s) const;
   string escape(const string &v, bool escquote) const;
-  void append_descendants(const string& name, list<Element *>& l);
+  void append_descendants(const string& name, const string& prune, 
+			  list<Element *>& l);
 
 public:
   //Element name ('tag') - empty for data 'elements'
@@ -84,7 +85,12 @@ public:
   //--------------------------------------------------------------------------
   // Find all descendant elements of given name - recursive
   // Returns flat list of pointers
-  list<Element *> get_descendants(const string& name);
+  // Prunes tree walk at 'prune' tags if set - use for recursive structures
+  // where you want to deal with each level independently
+  // Name and prune can be the same - then returns only first level of 
+  // <name>s, not <name>s within <name>s
+  list<Element *> get_descendants(const string& name,
+				  const string& prune="");
 
   //--------------------------------------------------------------------------
   // Get an attribute of the given name
@@ -93,6 +99,25 @@ public:
   // This exists to avoid creating the attribute when using attrs["foo"]
   // when foo doesn't exist (a completely stupid specification of [], IMHO)
   string get_attr(const string& name, const char *def="");
+
+  //--------------------------------------------------------------------------
+  // Get the boolean value of an attribute of the given name
+  // Returns attribute value
+  // Defaults to default value given (or false) if not present
+  // Recognises words beginning [TtYy] as true, everything else is false
+  bool get_attr_bool(const string& name, bool def=false);
+
+  //--------------------------------------------------------------------------
+  // Get the integer value of an attribute of the given name
+  // Returns attribute value
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_attr_int(const string& name, int def=0);
+
+  //--------------------------------------------------------------------------
+  // Tests whether the element has an attribute of the given name
+  // Quicker than !get_attr("foo").empty()
+  bool has_attr(const string& name);
 
   //--------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
@@ -244,6 +269,20 @@ public:
 #define OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
   {                                                                       \
     list<ObTools::XML::Element *> _elems=(_parent).get_descendants(_tag); \
+    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      ObTools::XML::Element& _childvar=**_p;
+
+// Do block for every descendant with a given tag, but pruned at given tag
+// (Read as 'for each descendant <v> of parent <p> with tag <tag>, 
+//  pruned at <prune>s')
+#define OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
+                                                        _tag, _prune)     \
+  {                                                                       \
+    list<ObTools::XML::Element *> _elems=                                 \
+       (_parent).get_descendants(_tag, _prune);                           \
     for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
         _p!=_elems.end();                                                 \
         _p++)                                                             \

@@ -190,16 +190,23 @@ list<Element *> Element::get_children(const string& name)
 //--------------------------------------------------------------------------
 // Find all descendant elements of given name - recursive
 // Returns flat list of pointers
-list<Element *> Element::get_descendants(const string& name)
+// Prunes tree walk at 'prune' tags if set - use for recursive structures
+// where you want to deal with each level independently
+list<Element *> Element::get_descendants(const string& name,
+					 const string& prune)
 {
   list<Element *>l;
-  append_descendants(name, l);
+  append_descendants(name, prune, l);
   return l;
 }
 
 //--------------------------------------------------------------------------
 // Dump all descendant elements of given name into given list
-void Element::append_descendants(const string& name, list<Element *>& l)
+// Prune walk at elements matching 'prune'
+// Name and prune can be the same - then returns only first level of 
+// <name>s, not <name>s within <name>s
+void Element::append_descendants(const string& name, const string& prune,
+				 list<Element *>& l)
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
@@ -209,7 +216,8 @@ void Element::append_descendants(const string& name, list<Element *>& l)
       l.push_back(*p);
 
     //Look for descendants, even within a match
-    (*p)->append_descendants(name, l);
+    if ((*p)->name!=prune)
+      (*p)->append_descendants(name, prune, l);
   }
 }
 
@@ -286,6 +294,58 @@ string Element::get_attr(const string& name, const char *def)
     return p->second;
   else
     return def;
+}
+
+//--------------------------------------------------------------------------
+// Get the boolean value of an attribute of the given name
+// Returns attribute value
+// Defaults to default value given (or false) if not present
+// Recognises words beginning [TtYy] as true, everything else is false
+bool Element::get_attr_bool(const string& name, bool def=false)
+{
+  map<string,string>::iterator p=attrs.find(name);
+  if (p!=attrs.end())
+  {
+    char c=0;
+    if (!p->second.empty()) c=p->second[0];
+      
+    switch(c)
+    {
+      case 'T': case 't':
+      case 'Y': case 'y':
+	return true;
+
+      default:
+	return false;
+    }
+  }
+
+  return def;
+}
+
+//--------------------------------------------------------------------------
+// Get the integer value of an attribute of the given name
+// Returns attribute value
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+int Element::get_attr_int(const string& name, int def=0)
+{
+  map<string,string>::iterator p=attrs.find(name);
+  if (p!=attrs.end()) return atoi(p->second.c_str());
+
+  return def;
+}
+
+//--------------------------------------------------------------------------
+// Tests whether the element has an attribute of the given name
+// Quicker than !get_attr("foo").empty()
+bool Element::has_attr(const string& name)
+{
+  map<string,string>::iterator p=attrs.find(name);
+  if (p==attrs.end())
+    return false;
+  else
+    return true;
 }
 
 //--------------------------------------------------------------------------
