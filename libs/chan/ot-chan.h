@@ -65,12 +65,17 @@ public:
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the channel
   // Throws SocketError on failure or EOF
-  uint32_t read_nbo_int() throw (Error);
+  uint32_t read_nbo_32() throw (Error);
 
   //--------------------------------------------------------------------------
   // Ditto, but allowing the possibility of failure at EOF
   // Throws Error on non-EOF failure
-  bool read_nbo_int(uint32_t& n) throw (Error);
+  bool read_nbo_32(uint32_t& n) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Read a network byte order (MSB-first) 8-byte integer from the channel
+  // Throws SocketError on failure or EOF
+  uint64_t read_nbo_64() throw (Error);
 };
 
 //==========================================================================
@@ -101,7 +106,12 @@ public:
   //--------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 4-byte integer to the channel
   // Throws Error on failure
-  void write_nbo_int(uint32_t i) throw (Error);
+  void write_nbo_32(uint32_t i) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Write a network byte order (MSB-first) 8-byte integer to the channel
+  // Throws Error on failure
+  void write_nbo_64(uint64_t i) throw (Error);
 };
 
 //==========================================================================

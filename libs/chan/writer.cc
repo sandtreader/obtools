@@ -21,10 +21,19 @@ namespace ObTools { namespace Channel {
 //--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 4-byte integer to the channel
 // Throws Error on failure
-void Writer::write_nbo_int(uint32_t i) throw (Error)
+void Writer::write_nbo_32(uint32_t i) throw (Error)
 {
   uint32_t n = htonl(i);
   write(&n, 4);
+}
+
+//--------------------------------------------------------------------------
+// Write a network byte order (MSB-first) 8-byte integer to the channel
+// Throws Error on failure
+void Writer::write_nbo_64(uint64_t i) throw (Error)
+{
+  write_nbo_32((uint32_t)(i >> 32));
+  write_nbo_32((uint32_t)(i & 0xFFFFFFFF));
 }
 
 }} // namespaces

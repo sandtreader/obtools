@@ -73,7 +73,7 @@ bool Reader::read(string& s, size_t count) throw (Error)
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 4-byte integer from the socket
 // Throws SocketError on failure or EOF
-uint32_t Reader::read_nbo_int() throw (Error)
+uint32_t Reader::read_nbo_32() throw (Error)
 {
   uint32_t n;
   if (!read(&n, 4)) throw Error(0, "EOF");
@@ -83,11 +83,20 @@ uint32_t Reader::read_nbo_int() throw (Error)
 //--------------------------------------------------------------------------
 // Ditto, but allowing the possibility of failure at EOF
 // Throws Error on non-EOF failure
-bool Reader::read_nbo_int(uint32_t& n) throw (Error)
+bool Reader::read_nbo_32(uint32_t& n) throw (Error)
 {
   if (!read(&n, 4)) return false;
   n=ntohl(n);
   return true;
+}
+
+//--------------------------------------------------------------------------
+// Read a network byte order (MSB-first) 8-byte integer from the socket
+// Throws SocketError on failure or EOF
+uint64_t Reader::read_nbo_64() throw (Error)
+{
+  uint64_t n = read_nbo_32();
+  return (n<<32) + read_nbo_32();
 }
 
 }} // namespaces
