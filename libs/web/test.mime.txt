@@ -1,0 +1,12 @@
+Header: Value
+Header:    Value   with   LWS   in it
+Another:  Very long value which due to its extreme length
+          has had to be split across 
+ several lines
+Blank:
+Dodgy: This line ends with LF
+Final: That's all folks
+
+This is the body
+And this is some more
+

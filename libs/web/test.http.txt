@@ -1,0 +1,5 @@
+GET /foo/bar.php HTTP/1.0
+Header: Value
+Header2: Value2
+
+This is the body
