@@ -186,13 +186,19 @@ public:
 
 // Create the message parser around the root XML element:
 // e.g.
-//   XML::Element root;
+//   XML::Element root("HTTP");
 //   Web::HTTPMessageParser hmp(root, cin);
 //   hmp.parse();
 //   ... use sub-elements of root, e.g. through XPath ...
 
-// the root element is given a tag equal to the request method ('verb'), and
-// attributes 'uri' and 'version' from the rest of the first line
+// For requests, the root element is given attributes 'method',
+// 'uri' and 'version' from the first line.
+
+// For responses, the root element is given attributes 'code' and 'version'
+// from the first line, and sub-element <reason>.
+
+// In bidirectional protocols like RTSP, responses are distinguished from
+// requests by virtue of the first word containing a '/'
 
 // The URI is also split into a <url> sub-element as per URLParser above
 // Headers are read into sub-elements of a sub-element <headers> as above
@@ -202,7 +208,7 @@ public:
 // the XML!
 
 // e.g.
-// <POST uri="/foo/register.ccp" version="HTTP/1.0">
+// <http method="POST" uri="/foo/register.ccp" version="HTTP/1.0">
 //   <url>
 //     ...
 //   </url>
@@ -213,7 +219,11 @@ public:
 //   <body>
 //     name=fred&id=23453&foo=bar
 //   </body>
-// </POST>
+// </http>
+//
+// <http code="404" version="HTTP/1.0">
+//   <reason>File not found</reason>
+// </http>
 
 class HTTPMessageParser
 {

@@ -30,7 +30,7 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
   try
   {
     ObTools::Net::TCPStream ss(s);
-    ObTools::XML::Element root;
+    ObTools::XML::Element root("HTTP");
     ObTools::Web::HTTPMessageParser hmp(root, ss);
 
     if (hmp.parse())

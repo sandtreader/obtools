@@ -34,21 +34,42 @@ bool HTTPMessageParser::parse()
   // Split line into method, URI and version, and set in root
   string::size_type sp1 = line.find(' ');
   if (sp1 == string::npos) return false;
-  root.name = string(line, 0, sp1);
+  string first(line, 0, sp1);
 
-  // URI
-  string::size_type sp2 = line.find(' ', sp1+1);
-  if (sp2 == string::npos) return false;
-  string uri(string(line, sp1+1, sp2-sp1-1));
-  root.set_attr("uri", uri);
+  // Check for '/' in first word, indicating response
+  if (first.find('/') != string::npos)
+  {
+    // It's a response - get first word as version
+    root.set_attr("version", first);
 
-  // Split URI into URL subelement
-  XML::Element& url = root.add("url");
-  URLParser urlp(url);
-  if (!urlp.parse(uri)) return false;
+    // Next word is code
+    string::size_type sp2 = line.find(' ', sp1+1);
+    if (sp2 == string::npos) return false;
+    string code(string(line, sp1+1, sp2-sp1-1));
+    root.set_attr("code", code);
 
-  // Version
-  root.set_attr("version", string(line, sp2+1));
+    // Rest is reason (subelement)
+    root.add("reason", string(line, sp2+1));
+  }
+  else
+  {
+    // It's a request
+    root.set_attr("method", first);
+
+    // URI
+    string::size_type sp2 = line.find(' ', sp1+1);
+    if (sp2 == string::npos) return false;
+    string uri(string(line, sp1+1, sp2-sp1-1));
+    root.set_attr("uri", uri);
+
+    // Split URI into URL subelement
+    XML::Element& url = root.add("url");
+    URLParser urlp(url);
+    if (!urlp.parse(uri)) return false;
+
+    // Version
+    root.set_attr("version", string(line, sp2+1));
+  }
 
   // Now read headers
   if (!mhp.parse()) return false;
@@ -103,18 +124,24 @@ bool HTTPMessageGenerator::generate()
   // Check stream is OK
   if (out.fail()) return false;
 
-  // Output first line
-  out << root.name << ' ' << root["uri"] << ' ' << root["version"] << "\r\n";
+  // Check for request or response
+  if (root.has_attr("method"))
+  {
+    // Request
+    out << root["method"] << ' ' << root["uri"] << ' ' 
+	<< root["version"] << "\r\n";
+  }
+  else
+  {
+    // Response
+    XML::Element& reason = root.get_child("reason");
+    out << root["version"] << ' ' << root["code"] << ' ' 
+	<< reason.content << "\r\n";
+  }
 
   // If body exists, add content-length header
   XML::Element& headers = root.get_child("headers");
   XML::Element& body = root.get_child("body");
-  if (body.valid())
-  {
-    ostringstream oss;
-    oss << body.content.size();
-    headers.add("content-length", oss.str());
-  }
 
   // Output headers
   MIMEHeaderGenerator mhg(headers, out);

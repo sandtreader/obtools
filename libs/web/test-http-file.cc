@@ -15,7 +15,7 @@ using namespace std;
 
 int main()
 {
-  ObTools::XML::Element root;
+  ObTools::XML::Element root("HTTP");
   ObTools::Web::HTTPMessageParser hmp(root, cin);
 
   if (!hmp.parse())

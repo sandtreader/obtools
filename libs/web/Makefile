@@ -12,6 +12,7 @@ OBJS  	= mime-headers.o http-message.o url.o
 TESTS 	= test-mime test-http-file test-url
 TESTCMD	= ./test-mime < ../test.mime.txt
 TESTCMD += && ./test-http-file < ../test.http.txt
+TESTCMD += && ./test-http-file < ../test.http2.txt
 TESTCMD += && ./test-url "http://foo.com:81/x/y/z?x=1&z=2\#frag"
 TESTCMD += && ./test-url "/x/y/z?x=1&z=2\#frag"
 DEPENDS = net xml text
