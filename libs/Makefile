@@ -16,6 +16,7 @@ all:
 	$(MAKE) -C net
 	$(MAKE) -C log
 	$(MAKE) -C cache
+	$(MAKE) -C db
 
 clean: 
 	-@rm -f *~ release/
@@ -28,6 +29,7 @@ clean:
 	$(MAKE) -C net clean
 	$(MAKE) -C log clean
 	$(MAKE) -C cache clean
+	$(MAKE) -C db clean
 
 test: 
 	$(MAKE) -C xml test
@@ -39,6 +41,7 @@ test:
 	$(MAKE) -C net test
 	$(MAKE) -C log test
 	$(MAKE) -C cache test
+	$(MAKE) -C db test
 
 release: 
 	mkdir -p release/
@@ -51,6 +54,7 @@ release:
 	$(MAKE) -C net   RELEASEDIR=../release/ release
 	$(MAKE) -C log   RELEASEDIR=../release/ release
 	$(MAKE) -C cache RELEASEDIR=../release/ release
+	$(MAKE) -C db    RELEASEDIR=../release/ release
 
 
 
