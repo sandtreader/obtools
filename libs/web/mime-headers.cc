@@ -49,6 +49,107 @@ bool MIMEHeaders::getline(istream& in, string& s)
 }
 
 //--------------------------------------------------------------------------
+// Split multi-value headers at commas
+// Reads all headers of name 'name', and splits any with commas at
+// comma to give a flattened list of values
+list<string> MIMEHeaders::get_all(const string& name)
+{
+  list<string> l;
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(e, xml, name)
+    string value = e.content;
+
+    // Loop over all values in each header
+    for(;;)
+    {
+      // Check for comma, and split if so
+      string::size_type comma = value.find(',');
+
+      if (comma == string::npos) break;
+
+      // Split here, store it and chop for next round
+      string sub(value, 0, comma);
+      sub = Text::canonicalise_space(sub);
+      if (!sub.empty()) l.push_back(sub);
+      value.erase(0, comma+1);
+    }
+
+    // Add (remaining) value to the list (too)
+    value = Text::canonicalise_space(value);
+    if (!value.empty()) l.push_back(value);
+
+  OBTOOLS_XML_ENDFOR
+
+  return l;
+}
+
+//--------------------------------------------------------------------------
+// Split a header value (e.g. from get or get_all) into a prime value
+// and parameters delineated by ';'
+// Parameters without a value are given the value '1'
+// The value is modified to be without parameters
+
+// Useful for Content-Type (HTTP), Transport (RTSP) etc.
+// e.g.
+//   Content-Type: text/html; charset=ISO-8859-1; pure
+//
+// Leaves 'text/html' in value, and property list:
+//   charset     ISO-8859-1
+//   pure        1
+Misc::PropertyList MIMEHeaders::split_parameters(string& value)
+{
+  Misc::PropertyList pl;
+  string::size_type p = 0;
+  string remaining;
+
+  // Loop over parameters
+  for(;;)
+  {
+    string element;
+
+    // Look for ';'
+    string::size_type semi = value.find(';', p);
+    if (semi == string::npos)
+      element = string(value, p);
+    else
+      element = string(value, p, semi-p);
+
+    element = Text::canonicalise_space(element);
+
+    if (!element.empty())
+    {
+      // Treat first specially - capture into remaining 
+      if (!p)
+	remaining = element;
+      else
+      {
+	// Split at = if present
+	string::size_type eq = element.find('=');
+	if (eq == string::npos)  // No equal - set to 1
+	  pl.add(element, "1");
+	else
+	{
+	  // Split 
+	  string pn(element, 0, eq);
+	  string pv(element, eq+1);
+	  pn = Text::canonicalise_space(pn);
+	  pv = Text::canonicalise_space(pv);
+	  if (!pn.empty()) pl.add(pn, pv);
+	}
+      }
+    }
+
+    // Move to next
+    if (semi != string::npos)
+      p = semi+1;
+    else
+      break;
+  }
+
+  value = remaining;
+  return pl;
+}
+
+//--------------------------------------------------------------------------
 // Parse headers from a stream
 // Returns whether successful
 // Skips the blank line delimiter, leaving stream ready to read message

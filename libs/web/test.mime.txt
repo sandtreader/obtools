@@ -3,6 +3,10 @@ Header:    Value   with   LWS   in it
 Another:  Very long value which due to its extreme length
           has had to be split across 
  several lines
+Foo: Value1, Value2,Value3
+Foo: Value4,
+Foo: Value5
+Split: Main thing;one=one;  two  =  two;blank=;alone; 
 Blank:
 Dodgy: This line ends with LF
 Final: That's all folks

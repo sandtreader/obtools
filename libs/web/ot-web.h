@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include "ot-xml.h"
+#include "ot-misc.h"
 
 #if !defined(_SINGLE)
 #include "ot-mt.h"
@@ -107,6 +108,27 @@ public:
   // Insert a header
   void put(const string& name, const string& value)
   { xml.add(name, value); }
+
+  //--------------------------------------------------------------------------
+  // Split multi-value headers at commas
+  // Reads all headers of name 'name', and splits any with commas at
+  // comma to give a flattened list of values
+  list<string> get_all(const string& name);
+
+  //--------------------------------------------------------------------------
+  // Split a header value (e.g. from get or get_all) into a prime value
+  // and parameters delineated by ';'
+  // Parameters without a value are given the value '1'
+  // The value is modified to be without parameters
+
+  // Useful for Content-Type (HTTP), Transport (RTSP) etc.
+  // e.g.
+  //   Content-Type: text/html; charset=ISO-8859-1; pure
+  //
+  // Leaves 'text/html' in value, and property list:
+  //   charset     ISO-8859-1
+  //   pure        1
+  static Misc::PropertyList split_parameters(string& value);
 
   //--------------------------------------------------------------------------
   // Parse headers from a stream

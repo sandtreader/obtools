@@ -26,6 +26,19 @@ int main()
   cout << "\n--- XML form\n";
   cout << headers.xml;
 
+  cout << "\n--- Foo headers, split at commas:\n";
+  list<string> foos = headers.get_all("foo");
+  for(list<string>::iterator p=foos.begin();
+      p!=foos.end();
+      p++)
+    cout << "Foo: " << *p << endl;
+
+  cout << "\n--- Split header, split:\n";
+  string s = headers.get("split");
+  ObTools::Misc::PropertyList pl = headers.split_parameters(s);
+  cout << "First: " << s << endl;
+  cout << "Parameters:\n" << pl; 
+
   cout << "\n--- Regenerated\n";
   cout << headers;
   
