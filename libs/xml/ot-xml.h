@@ -155,7 +155,7 @@ public:
   // Get the boolean value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or false) if not present
-  // Recognises words beginning [TtYy] as true, everything else is false
+  // Recognises words beginning [TtYy1] as true, everything else is false
   bool get_attr_bool(const string& attname, bool def=false) const;
 
   //--------------------------------------------------------------------------
