@@ -155,7 +155,7 @@ public:
   //--------------------------------------------------------------------------
   // Read everything to stream close, blocking until finished
   // Throws SocketError on failure
-  void TCPSocket::readall(string& s) throw (SocketError);
+  void readall(string& s) throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Write the given string to the socket, blocking until finished
@@ -165,8 +165,17 @@ public:
   //--------------------------------------------------------------------------
   // Write the given C string to the socket, blocking until finished
   // Throws SocketError on failure
-  void TCPSocket::write(const char *p) throw(SocketError);
+  void write(const char *p) throw(SocketError);
 
+  //--------------------------------------------------------------------------
+  // Read a network byte order (MSB-first) 4-byte integer from the socket
+  // Throws SocketError on failure
+  uint32_t read_nbo_int() throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Write a network byte order (MSB-first) 4-byte integer to the socket
+  // Throws SocketError on failure
+  void write_nbo_int(uint32_t i) throw (SocketError);
 };
 
 //--------------------------------------------------------------------------
@@ -216,13 +225,13 @@ public:
   //--------------------------------------------------------------------------
   // Safe datagram recv wrapper
   // Throws SocketError on failure
-  ssize_t UDPSocket::recv(void *buf, size_t len, int flags=0) 
+  ssize_t recv(void *buf, size_t len, int flags=0) 
     throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Safe datagram send wrapper
   // Throws SocketError on failure
-  int UDPSocket::send(const void *buf, size_t len, int flags=0)
+  int send(const void *buf, size_t len, int flags=0)
     throw (SocketError);
 
   //--------------------------------------------------------------------------
@@ -230,8 +239,8 @@ public:
   // If address_p and/or port_p are non-null, sets them to the source of the
   // datagram
   // Throws SocketError on failure
-  ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
-			       IPAddress *address_p, int *port_p)
+  ssize_t recvfrom(void *buf, size_t len, int flags,
+		   IPAddress *address_p, int *port_p)
     throw (SocketError);
 
   //--------------------------------------------------------------------------
@@ -239,8 +248,8 @@ public:
   // If address_p and/or port_p are non-null, sets them to the source of the
   // datagram
   // Throws SocketError on failure
-  ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
-			     IPAddress address, int port)
+  ssize_t sendto(const void *buf, size_t len, int flags,
+		 IPAddress address, int port)
     throw (SocketError);
 };
 

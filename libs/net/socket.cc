@@ -9,6 +9,7 @@
 #include "ot-net.h"
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <stdint.h>
 
 #define SOCKET_BUFFER_SIZE 1024
 
@@ -185,6 +186,25 @@ bool operator>>(TCPSocket& s, string& t)
 {
   t.erase();
   return s.read(t);
+}
+
+//--------------------------------------------------------------------------
+// Read a network byte order (MSB-first) 4-byte integer from the socket
+// Throws SocketError on failure
+uint32_t TCPSocket::read_nbo_int() throw (SocketError)
+{
+  uint32_t n;
+  read(&n, 4);
+  return ntohl(n);
+}
+
+//--------------------------------------------------------------------------
+// Write a network byte order (MSB-first) 4-byte integer to the socket
+// Throws SocketError on failure
+void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
+{
+  uint32_t n = htonl(i);
+  write(&n, 4);
 }
 
 //==========================================================================
