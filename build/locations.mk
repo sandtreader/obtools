@@ -33,7 +33,9 @@ OT-LIBS = cli:libs/cli     			\
           xmlmesh-otmp:xmlmesh/otmp  		\
           xmlmesh-client:xmlmesh/client 	\
           xmlmesh-c:xmlmesh/bindings/c  	\
-	  toolgen:tools/toolgen
+	  toolgen:tools/toolgen     		\
+	  xmitoolgen:tools/xmitoolgen		\
+	  xmltoolgen:tools/xmltoolgen
 
 #==========================================================================
 # Template for standard Obtools library
