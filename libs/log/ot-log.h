@@ -246,8 +246,16 @@ extern Distributor logger;
 extern Stream Error;
 extern Stream Summary;
 extern Stream Detail;
+
+// Only provide debug streams if allowed - this forces people to use the
+// LOG_IF_DEBUG/DUMP macros to optimise out code which would otherwise
+// still generate the logging, but get thrown away at the LevelFilter
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
 extern Stream Debug;
+#endif
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
 extern Stream Dump;
+#endif
 #endif
 
 //==========================================================================
@@ -263,29 +271,44 @@ struct Streams
   Stream error;
   Stream summary;
   Stream detail;
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
   Stream debug;
+#endif
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
   Stream dump;
+#endif
 
   Streams():
     error  (logger, LEVEL_ERROR),
     summary(logger, LEVEL_SUMMARY),
     detail (logger, LEVEL_DETAIL),
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
     debug  (logger, LEVEL_DEBUG),
-    dump   (logger, LEVEL_DUMP) {}
+#endif
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
+    dump   (logger, LEVEL_DUMP) 
+#endif
+    {}
 };
 
 //==========================================================================
-// Useful constants for optimising out high log levels
+// Useful macros for optimising out high log levels
 //
 // e.g.
-//   if (ObTools::Log::dump_ok)
-//     ObTools::Log::Dump << "The entire packet is: " << packet;
+//  OBTOOLS_LOG_IF_DUMP(ObTools::Log::Dump << "Packet: " << packet;)
 
-const bool error_ok   = (OBTOOLS_LOG_MAX_LEVEL >= LEVEL_ERROR);
-const bool summary_ok = (OBTOOLS_LOG_MAX_LEVEL >= LEVEL_SUMMARY);
-const bool detail_ok  = (OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DETAIL);
-const bool debug_ok   = (OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG);
-const bool dump_ok    = (OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP);
+#
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
+#define OBTOOLS_LOG_IF_DEBUG(_s) _s
+#else
+#define OBTOOLS_LOG_IF_DEBUG(_s)
+#endif
+
+#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
+#define OBTOOLS_LOG_IF_DUMP(_s) _s
+#else
+#define OBTOOLS_LOG_IF_DUMP(_s)
+#endif
 
 //==========================================================================
 }} //namespaces
