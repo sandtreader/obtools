@@ -63,13 +63,11 @@ public:
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
 void Server::process(Net::TCPSocket& socket, 
-			 Net::IPAddress client_address,
-			 int client_port)
+			 Net::EndPoint client)
 {
   const char *obit = "ended";
 
-  Log::Summary << "OTMP(serv): Got connection from " << client_address 
-	       << ":" << client_port << endl;
+  Log::Summary << "OTMP(serv): Got connection from " << client << endl;
   
   // Start send thread
   SendThread send_thread(send_q, socket);
@@ -131,8 +129,8 @@ void Server::process(Net::TCPSocket& socket,
   else
     obit = "failed (send)";
 
-  Log::Summary << "OTMP(serv): Connection from " << client_address 
-	       << ":" << client_port << " " << obit << endl;
+  Log::Summary << "OTMP(serv): Connection from " << client
+	       << " " << obit << endl;
 } 
 
 

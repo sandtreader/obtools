@@ -182,20 +182,18 @@ bool Client::restart_socket()
   }
 
   // Try and get a new one
-  socket = new Net::TCPClient(server_address, server_port);
+  socket = new Net::TCPClient(server);
 
   if (!*socket)
   {
     delete socket;
     socket = 0;
-    Log::Error << "OTMP: Can't open socket to " 
-	       << server_address << " port " << server_port << endl;
+    Log::Error << "OTMP: Can't open socket to " << server << endl;
     return false;
   }
   else
   {
-    Log::Summary << "OTMP: Opened socket to " 
-		 << server_address << " port " << server_port << endl;
+    Log::Summary << "OTMP: Opened socket to " << server << endl;
 
     return true;
   }
@@ -207,9 +205,7 @@ bool Client::restart_socket()
 
 //------------------------------------------------------------------------
 // Constructors
-Client::Client(Net::IPAddress address, int port):
-  server_address(address),
-  server_port(port?port:DEFAULT_PORT) 
+Client::Client(Net::EndPoint _server): server(_server)
 {
   socket = 0;
 

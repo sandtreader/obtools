@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   }
 
   char *host = argv[1];
-  int port = 0;
+  int port = XMLBus::OTMP::DEFAULT_PORT;
   if (argc > 2) port = atoi(argv[2]);
 
   // Set up logging
@@ -46,7 +46,8 @@ int main(int argc, char **argv)
     " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
-  XMLBus::OTMP::Client client(addr, port);
+  Net::EndPoint server(addr, port);
+  XMLBus::OTMP::Client client(server);
 
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)

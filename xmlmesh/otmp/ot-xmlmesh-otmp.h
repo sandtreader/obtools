@@ -81,8 +81,7 @@ class Client
 {
 private:
   // Network stuff
-  Net::IPAddress server_address;
-  int server_port;
+  Net::EndPoint server;
   Net::TCPClient *socket;
 
   // Thread and queue stuff
@@ -98,9 +97,8 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  // Constructors - take server address
-  // port=0 means use default port for protocol
-  Client(Net::IPAddress address, int port=0);
+  // Constructors - takes server endpoint (address+port)
+  Client(Net::EndPoint _server);
 
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
@@ -155,8 +153,7 @@ public:
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
   void process(ObTools::Net::TCPSocket& s, 
-	       ObTools::Net::IPAddress client_address,
-	       int client_port);
+	       ObTools::Net::EndPoint client);
 
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
