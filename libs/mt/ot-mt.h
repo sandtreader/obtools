@@ -213,7 +213,7 @@ public:
   }
 
   //--------------------------------------------------------------------------
-  // See if any message is available before potentially blocking on receive()
+  // See if any message is available before potentially blocking on wait()
   bool poll() { return (!q.empty()); }
 
   //--------------------------------------------------------------------------
