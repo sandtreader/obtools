@@ -118,7 +118,7 @@ public:
   //--------------------------------------------------------------------------
   // < operator to help with maps 
   bool operator<(const EndPoint& o) const 
-  { return address < o.address || port < o.port; }
+  { return address < o.address || (address == o.address && port < o.port); }
 };
 
 //------------------------------------------------------------------------
