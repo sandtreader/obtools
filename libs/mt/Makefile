@@ -1,0 +1,41 @@
+#==========================================================================
+# Makefile for ObTools::MT
+#
+# Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+#==========================================================================
+
+OBJS = thread.o
+
+ifdef DEBUG
+CPPFLAGS += -g
+LDFLAGS += -g
+endif
+
+all: test-thread test-queue
+
+clean: 
+	-@rm -f *.o *.a *~ test-thread test-queue
+
+test:	test-thread test-queue
+	./test-thread 10
+	./test-queue
+
+#Test harnesses:
+test-thread: test-thread.o ot-mt.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
+
+test-queue: test-queue.o ot-mt.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
+
+#Core library
+ot-mt.a: $(OBJS)
+	$(AR) r $@ $^
+
+#Objects
+$(OBJS): ot-mt.h Makefile
+test-thread.o: ot-mt.h Makefile
+test-queue.o: ot-mt.h Makefile
+
+
+
+
