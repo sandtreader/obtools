@@ -79,8 +79,9 @@ bool pattern_match(const string& pattern, const string& text,
 //==========================================================================
 // Substitution functions (subst.cc)
 // Global String replace - equivalent to s/old/rep/g
-// Returns whether any replaced
-bool subst(string& text, const string& old, const string& rep);
+// Case sensitive
+// Handles case where new string includes old
+string subst(string text, const string& old, const string& rep);
  
 //==========================================================================
 // Case functions (case.cc)

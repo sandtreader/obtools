@@ -15,24 +15,21 @@ namespace ObTools { namespace Text {
 //==========================================================================
 // Replace functions
 // Global String replace - equivalent to s/old/rep/g
-// Returns whether any replaced
 // Case sensitive
 // Handles case where new string includes old
-bool subst(string& text, const string& old, const string& rep)
+string subst(string text, const string& old, const string& rep)
 {
   string::size_type p=0;
   string::size_type old_l = old.size();
   string::size_type rep_l = rep.size();
-  bool found = false;
 
   while (p<text.size() && (p=text.find(old,p))!=string::npos) 
   {
     text.replace(p,old_l,rep);
     p+=rep_l;
-    found = true;
   }
 
-  return found;
+  return text;
 }
 
 }} // namespaces

@@ -21,10 +21,8 @@ int main()
   string text = "foo bar foo fo";
 
   cout << "Original: " << text << endl;
-  if (Text::subst(text, "foo", "fool"))
-    cout << "s/foo/fool/g: " << text << endl;
-  else
-    return 2;
+  text = Text::subst(text, "foo", "fool");
+  cout << "s/foo/fool/g: " << text << endl;
 
   return 0;  
 }
