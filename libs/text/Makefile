@@ -8,9 +8,9 @@
 TYPE	= lib
 NAME   	= ot-text
 HEADERS = ot-text.h 
-OBJS  	= ws.o pattern.o case.o 
-TESTS 	= test-ws test-pattern test-case
-TESTCMD	= ./test-ws && ./test-pattern && ./test-case
+OBJS  	= ws.o pattern.o case.o subst.o
+TESTS 	= test-ws test-pattern test-case test-subst
+TESTCMD	= ./test-ws && ./test-pattern && ./test-case && ./test-subst
 MT-VARIANTS = 1
 
 ROOT    = ../..
