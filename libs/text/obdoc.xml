@@ -1,0 +1,123 @@
+<library name="text">
+  <title>Miscellaneous text-handling functions</title>
+  <desc>
+  <p>The text library is the simplest of all the libraries, and just
+     holds some useful functions for handling text.  If you're used to PHP
+     and missing all its nice builtin functions in C++, you might find some
+     useful bits here!</p> 
+  <p>Note that the text library is non-object code - so no classes 
+     here, just global functions.</p>
+</desc>
+
+<!-- Whitespace -->
+<function-group name="Whitespace functions">
+<desc>
+  <p>These functions provide useful support for dealing with whitespace
+     in text strings</p>
+</desc>
+
+<function name="strip_blank_lines">
+  <title>Strip single blank lines from text</title>
+  <arg name="text" type="const string&amp;"/>
+  <result type="string"/>
+  <desc>
+    <p>Strips a single leading and/or trailing blank line from a string</p>
+    <p>The main point of this is to tidy up block text from XML documents, 
+       where the formatting is likely to add a blank line top and bottom</p>
+  </desc>
+</function>
+
+<function name="get_common_indent">
+  <title>Find the common indent of some text</title>
+  <arg name="text" type="const string&amp;"/>
+  <result type="int"/>
+  <desc>
+    <p>Finds the minimum leading whitespace of all lines of the given text</p>
+    <p>The point of this is to remove indendation put in to make the text
+       look 'pretty' in XML - use with remove_indent to chop it</p>
+    <p>Tabs are treated as 8 spaces.  Will never return more than 80.</p>
+  </desc>
+</function>
+
+<function name="remove_indent">
+  <title>Remove indentation from text</title>
+  <arg name="text" type="const string&amp;"/>
+  <arg name="indent" type="int"/>
+  <result type="string"/>
+  <desc>
+    <p>Removes leading whitespace from all lines of the given text</p>
+    <p>Removes up to 'indent' spaces from each line.  If a line doesn't
+       have that many spaces, all the spaces that are there are removed.</p>
+  </desc>
+</function>
+
+<function name="canonicalise_space">
+  <title>Canonicalise whitespace in text</title>
+  <arg name="text" type="const string&amp;"/>
+  <result type="string"/>
+  <desc>
+    <p>'Canonicalise' whitespace in strings.  Removes leading and trailing whitespace, and shortens all other whitespace strings into a single space.</p>
+    <p>This is similar to the behaviour of an HTML browser, and is also useful for comparison between strings ignoring whitespace differences.</p>
+  </desc>
+</function>
+
+<function name="remove_word">
+  <title>Split off the first word of some text</title>
+  <arg name="text" type="string&amp;"/>
+  <result type="string"/>
+  <desc>
+    <p>Removes the first word from some text.  The word is returned, and the remaining text (minus the word and separating space) is left in 'text' (modified parameter).</p>
+    <p>The text must be 'canonical' before calling this function - see 'canonicalise_space' above.</p>
+  </desc>
+</function>
+</function-group>
+
+<!-- Pattern match -->
+<function-group name="Pattern matching functions">
+<desc>
+  <p>These functions provide a simple pattern match similar to a Unix filename 'glob'.  These are not regexp functions!</p>
+  <p>The pattern can contain:</p>
+  <table>
+  <column name="Character"/>
+  <column name="Matches"/>
+  <row><item>*</item><item>Any number of characters, or none</item></row>
+  <row><item>?</item><item>Any single character</item></row>
+  <row><item>[abc]</item>
+       <item>Any character in set. Ranges x-y allowed</item></row>
+  <row><item>[!abc]</item>
+       <item>Any character not in set.  Ranges x-y allowed</item></row>
+  <row><item>\</item> 
+       <item>The special character which follows</item></row>
+  </table>
+</desc>
+<desc>
+<p>The two functions are identical except for the form the text is passed in - one in 'C' form, one in 'C++'</p>
+</desc>
+
+<function name="pattern_match">
+  <title>Match a pattern against a string (C)</title>
+  <arg name="pattern" type="const char *"/>
+  <arg name="text" type="const char *"/>
+  <arg name="cased" type="bool" default="true"/>
+  <result type="bool"/>
+  <desc>
+    <p>Returns true if the text matches the 'glob' pattern given.</p>
+    <p>If 'cased' is true (it is by default), then the match is case-sensitive</p>
+  </desc>
+</function>
+
+<function name="pattern_match">
+  <title>Match a pattern against a string (C++)</title>
+  <arg name="pattern" type="const string&amp;"/>
+  <arg name="text" type="const string&amp;"/>
+  <arg name="cased" type="bool" default="true"/>
+  <result type="bool"/>
+  <desc>
+    <p>Returns true if the text matches the 'glob' pattern given.</p>
+    <p>If 'cased' is true (it is by default), then the match is case-sensitive</p>
+  </desc>
+</function>
+
+</function-group>
+
+</library>
