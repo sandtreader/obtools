@@ -24,7 +24,9 @@ Generator::Generator(const string& _config_file,
   config_file(_config_file),
   ok(false),
   config(_config_file, 
-	 XML::PARSER_OPTIMISE_CONTENT | XML::PARSER_PRESERVE_WHITESPACE),
+	 XML::PARSER_OPTIMISE_CONTENT 
+       | XML::PARSER_PRESERVE_WHITESPACE
+       | XML::PARSER_BE_LENIENT),
   sout(_sout), serr(_serr)
 {
   config.fix_namespace("xt", "obtools.com/ns/tools");
