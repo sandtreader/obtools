@@ -83,6 +83,7 @@ public:
 
     soap_message = 0;
     textual_message = m.to_text();
+    return *this;
   }
 
   //--------------------------------------------------------------------------
