@@ -214,6 +214,36 @@ void Generator::process_script(const string& script, CPPT::Tags& tags,
 }
 
 //--------------------------------------------------------------------------
+// Generate xt:start include when [indexname] is zero
+void Generator::generate_start(XML::Element& te,
+			       CPPT::Tags& tags, 
+			       const string& indexname,
+			       const string& streamname)
+{
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(se, te, "xt:start")
+    int temp=0; // No stripping
+    sout << "  if (!" << indexname << ")\n  {\n  ";
+    process_script(*se, tags, streamname, temp);
+    sout << "  }\n";
+  OBTOOLS_XML_ENDFOR
+}
+			
+//--------------------------------------------------------------------------
+// Generate xt:end include if [indexname] is non-zero
+void Generator::generate_end(XML::Element& te,
+			     CPPT::Tags& tags, 
+			     const string& indexname,
+			     const string& streamname)
+{
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(se, te, "xt:end")
+    int temp=0; // No stripping
+    sout << "  if (" << indexname << ")\n  {\n  ";
+    process_script(*se, tags, streamname, temp);
+    sout << "  }\n";
+  OBTOOLS_XML_ENDFOR
+}
+
+//--------------------------------------------------------------------------
 // Generate use of a predefined 'macro' template
 // Accumulates script in script
 void Generator::generate_use(XML::Element& use_e, 
