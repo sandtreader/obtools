@@ -10,8 +10,8 @@
 #define __OBTOOLS_XML_H
 
 #include <string>
-#include <vector>
 #include <deque>
+#include <list>
 #include <map>
 #include <iostream>
 using namespace std;
@@ -29,7 +29,7 @@ class Element
 private:
   void write_indented(int indent, ostream &s) const;
   string escape(const string &v, bool escquote) const;
-  void append_descendants(const string& name, vector<Element *>& v);
+  void append_descendants(const string& name, list<Element *>& l);
 
 public:
   //Element name ('tag') - empty for data 'elements'
@@ -46,8 +46,8 @@ public:
   //you need to restream the input
   map<string,string> attrs;
 
-  //Vector of sub-elements
-  vector<Element *> children;
+  //List of sub-elements
+  list<Element *> children;
 
   //--------------------------------------------------------------------------
   // Non-element marker
@@ -78,13 +78,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Find all child elements of given name
-  // Returns vector of pointers
-  vector<Element *> get_children(const string& name);
+  // Returns list of pointers
+  list<Element *> get_children(const string& name);
 
   //--------------------------------------------------------------------------
   // Find all descendant elements of given name - recursive
-  // Returns flat vector of pointers
-  vector<Element *> get_descendants(const string& name);
+  // Returns flat list of pointers
+  list<Element *> get_descendants(const string& name);
 
   //--------------------------------------------------------------------------
   // Get an attribute of the given name

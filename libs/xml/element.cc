@@ -79,7 +79,7 @@ void Element::write_indented(int indent, ostream &s) const
     {
       s << '>' << endl;
 
-      for(vector<Element *>::const_iterator p=children.begin();
+      for(list<Element *>::const_iterator p=children.begin();
 	  p!=children.end();
 	  p++)
       {
@@ -163,7 +163,7 @@ void Element::optimise()
 // Returns Element::none if none
 Element& Element::get_child(const string& name)
 {
-  for(vector<Element *>::iterator p=children.begin();
+  for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
@@ -174,42 +174,42 @@ Element& Element::get_child(const string& name)
 
 //--------------------------------------------------------------------------
 // Find all child elements of given name
-// Returns vector of pointers
-vector<Element *> Element::get_children(const string& name)
+// Returns list of pointers
+list<Element *> Element::get_children(const string& name)
 {
-  vector<Element *>v;
-  for(vector<Element *>::iterator p=children.begin();
+  list<Element *>l;
+  for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    if ((*p)->name==name) v.push_back(*p);
+    if ((*p)->name==name) l.push_back(*p);
   }
-  return v;
+  return l;
 }
 
 //--------------------------------------------------------------------------
 // Find all descendant elements of given name - recursive
-// Returns flat vector of pointers
-vector<Element *> Element::get_descendants(const string& name)
+// Returns flat list of pointers
+list<Element *> Element::get_descendants(const string& name)
 {
-  vector<Element *>v;
-  append_descendants(name, v);
-  return v;
+  list<Element *>l;
+  append_descendants(name, l);
+  return l;
 }
 
 //--------------------------------------------------------------------------
-// Dump all descendant elements of given name into given vector
-void Element::append_descendants(const string& name, vector<Element *>& v)
+// Dump all descendant elements of given name into given list
+void Element::append_descendants(const string& name, list<Element *>& l)
 {
-  for(vector<Element *>::iterator p=children.begin();
+  for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
     if ((*p)->name==name) 
-      v.push_back(*p);
+      l.push_back(*p);
 
     //Look for descendants, even within a match
-    (*p)->append_descendants(name, v);
+    (*p)->append_descendants(name, l);
   }
 }
 
@@ -233,7 +233,7 @@ string Element::get_attr(const string& name, const char *def)
 // Recursively destroys children
 Element::~Element()
 {
-  for(vector<Element *>::iterator p=children.begin();
+  for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
     delete *p;

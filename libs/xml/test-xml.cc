@@ -42,11 +42,11 @@ int main()
     cout << "No wombats today!" << endl;
 
   //Look for lots of wombats
-  vector<ObTools::XML::Element *> wombats = root.get_children("wombat");
+  list<ObTools::XML::Element *> wombats = root.get_children("wombat");
   if (wombats.size())
   {
     cout << "Wombats on the menu today:" << endl;
-    for(vector<ObTools::XML::Element *>::const_iterator p=wombats.begin();
+    for(list<ObTools::XML::Element *>::const_iterator p=wombats.begin();
 	p!=wombats.end();
 	p++)
     {
@@ -60,7 +60,7 @@ int main()
   if (wombats.size())
   {
     cout << "Wombats in the cellars today:" << endl;
-    for(vector<ObTools::XML::Element *>::const_iterator p=wombats.begin();
+    for(list<ObTools::XML::Element *>::const_iterator p=wombats.begin();
 	p!=wombats.end();
 	p++)
     {
