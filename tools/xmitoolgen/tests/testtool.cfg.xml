@@ -52,7 +52,7 @@
   <xt:code>
     //Routine to return method signature of operation
     //full - for code;  not full - for regen marker
-    string xmicc_op_sig(ObTools::UML::Operation&amp; op, bool full=false)
+    string xmicc_op_sig(ObTools::UML::Operation& op, bool full=false)
     {
       string s;
       if (full)
@@ -84,7 +84,7 @@
     }
 
     //Routine to return pointer/list members for association ends
-    string xmicc_assoc_end(ObTools::UML::AssociationEnd&amp; a)
+    string xmicc_assoc_end(ObTools::UML::AssociationEnd& a)
     {
       if (!a.is_navigable) return "";
 
@@ -101,7 +101,7 @@
       if (other->multiplicity.upper == 1)
         return type + " *" + name;
       else
-	return "list&lt;" + type + " *> " + name +"s"; 
+	return "list<" + type + " *> " + name +"s"; 
     }
   </xt:code>
 
