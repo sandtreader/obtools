@@ -17,14 +17,17 @@ Package::Package(XMI::Reader& rdr, XML::Element& xe)
   //Read all sub-elements I'm interested in, using their respective
   //factories, pruning at UML:Package to avoid grabbing all
   //sub-package contents as well
+  //Note we set id_required to avoid grabbing reference elements for things
+  //that can be referenced
   const char *p="UML:Package";
-  read_subelements("UML:Class",          create_element<Class>,          p);
-  read_subelements("UML:DataType",       create_element<DataType>,       p);
-  read_subelements("UML:Interface",      create_element<Interface>,      p);
-  read_subelements("UML:Stereotype",     create_element<Stereotype>,     p);
-  read_subelements("UML:Association",    create_element<Association>,    p);
-  read_subelements("UML:Generalization", create_element<Generalization>, p);
-  read_subelements("UML:Package",        create_element<Package>,        p);
+  read_subelements("UML:Class",          create_element<Class>, true, p);
+  read_subelements("UML:DataType",       create_element<DataType>, true, p);
+  read_subelements("UML:Interface",      create_element<Interface>, true, p);
+  read_subelements("UML:Stereotype",     create_element<Stereotype>, true, p);
+  read_subelements("UML:Association",    create_element<Association>, true, p);
+  read_subelements("UML:Generalization", create_element<Generalization>, true, 
+		                                                           p);
+  read_subelements("UML:Package",        create_element<Package>, p);
 }
 
 //--------------------------------------------------------------------------

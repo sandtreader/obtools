@@ -38,8 +38,9 @@ void Parameter::build_refs()
 {
   ModelElement::build_refs();
 
-  //!!! Get type ref
-
+  type = get_classifier_property("type", "UML:Parameter.type");
+  if (!type)
+    reader.error("Can't get type of parameter ", id);
 }
 
 //--------------------------------------------------------------------------
@@ -48,7 +49,8 @@ void Parameter::print_header(ostream& sout)
 {
   ModelElement::print_header(sout);
 
-  //!!! Print type
+  if (type)
+    sout << " " << type->name;
 
   switch (kind)
   {

@@ -35,8 +35,8 @@ void Feature::print_header(ostream& sout)
 //==========================================================================
 // UML::StructuralFeature class
 
-StructuralFeature::StructuralFeature(XMI::Reader& rdr, XML::Element& xe)
-  :Feature(rdr, xe)
+StructuralFeature::StructuralFeature(XMI::Reader& rdr, XML::Element& xe):
+  Feature(rdr, xe), type(0)
 {
   //Get basic properties
   multiplicity = get_multiplicity();
@@ -51,7 +51,9 @@ void StructuralFeature::build_refs()
 {
   ModelElement::build_refs();
 
-  //Find type!!!
+  type = get_classifier_property("type", "UML:StructuralFeature.type");
+  if (!type)
+    reader.error("Can't get type of attribute ", id);
 }
 
 //--------------------------------------------------------------------------
@@ -61,9 +63,11 @@ void StructuralFeature::print_header(ostream& sout)
   Feature::print_header(sout);
 
   if (is_ordered) sout << " (ordered)";
-  sout << " " << multiplicity;
 
-  //!!! print type!!!
+  if (type)
+    sout << " " << type->name;
+
+  sout << multiplicity;
 }
 
 //==========================================================================

@@ -15,8 +15,17 @@ void Generalization::build_refs()
 {
   ModelElement::build_refs();
 
-  //!!! Get parent/child refs
+  parent = get_ge_property("parent", "UML:Generalization.parent");
+  if (!parent)
+    reader.error("Can't get parent of generalization ", id);
 
+  child = get_ge_property("child", "UML:Generalization.child");
+  if (!child)
+    reader.error("Can't get child of generalization ", id);
+
+  //Fix up GeneralizableElement lists of child and parent to point to me
+  child->generalizations.push_back(this);
+  parent->specializations.push_back(this);
 }
 
 //--------------------------------------------------------------------------
@@ -25,5 +34,6 @@ void Generalization::print_header(ostream& sout)
 {
   ModelElement::print_header(sout);
 
-  //!!! print parent, child
+  if (child) sout << " " << child->name;
+  if (parent) sout << "->" << parent->name;
 }

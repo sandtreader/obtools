@@ -43,11 +43,13 @@ private:
   //(and our model's) lifetime
   XML::Parser xml_parser;              
 
-  void upgrade_to_1_1(XML::Element &root);
+  void upgrade_xmi_to_1_1(XML::Element &root);
+  void upgrade_uml_to_1_4(XML::Element &root);
 
 public:
   UML::Model *model;        
   double xmi_version;   // 0 if unknown  
+  map<string, UML::Classifier *> classmap;  //Public map of classifiers
 
   //Log a warning
   void warning(const char *warn, const string& detail="");

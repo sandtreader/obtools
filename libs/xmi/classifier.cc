@@ -16,18 +16,13 @@ Classifier::Classifier(XMI::Reader& rdr, XML::Element& xe)
   :GeneralizableElement(rdr, xe)
 {
   //Read attribute and operation sub-elements from XML source
-  read_subelements("UML:Attribute", create_element<Attribute>);
-  read_subelements("UML:Operation", create_element<Operation>);
+  //They must have xmi.id's, otherwise they may be references
+  read_subelements("UML:Attribute", create_element<Attribute>, true);
+  read_subelements("UML:Operation", create_element<Operation>, true);
+
+  //Log me in the reader's classmap for instant access
+  reader.classmap[name] = this;
 }
 
-//--------------------------------------------------------------------------
-// Second-pass reference fix
-void Classifier::build_refs()
-{
-  GeneralizableElement::build_refs();
-
-  //Find association ends
-  //!!!
-}
 
 

@@ -11,8 +11,8 @@ using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
 // Constructor
-AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe)
-  :ModelElement(rdr, xe) 
+AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe):
+  ModelElement(rdr, xe), participant(0), connection_index(0)
 {
   //Get basic properties
   is_ordered = (get_property("ordering", "UML:AssociationEnd.ordering")
@@ -44,15 +44,25 @@ void AssociationEnd::build_refs()
 {
   ModelElement::build_refs();
 
-  //Find participant!!!
-}
+  participant = get_classifier_property("participant", 
+					"UML:AssociationEnd.participant");
+  if (!participant)
+    reader.error("Can't get participant in AssociationEnd id ", id);
 
+  //Fix up Classifier's associations list to point back to me
+  participant->association_ends.push_back(this);
+}
 
 //--------------------------------------------------------------------------
 // Printer
 void AssociationEnd::print_header(ostream& sout)
 {
   ModelElement::print_header(sout);
+
+  if (participant)
+    sout << " -> " << participant->name;
+
+  sout << multiplicity;
 
   if (is_ordered) sout << " (ordered)";
   //It's actually more interesting if it's _not_ navigable!
@@ -72,10 +82,6 @@ void AssociationEnd::print_header(ostream& sout)
       sout << " (composite)";
       break;
   }
-
-  //!!!Print participant
-
-  sout << " " << multiplicity;
 }
 
 

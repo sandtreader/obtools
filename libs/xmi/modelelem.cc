@@ -12,7 +12,7 @@ using namespace ObTools::UML;
 //------------------------------------------------------------------------
 //Constructor - build from XML element
 ModelElement::ModelElement(XMI::Reader& rdr, XML::Element& xe):
-  Element(rdr, xe)
+  Element(rdr, xe), stereotype(0)
 {
   //Get  name
   name = get_property("name", "UML:ModelElement.name");
@@ -42,7 +42,21 @@ void ModelElement::build_refs()
   Element::build_refs();
 
   //Get stereotype ref
-  //!!!
+  string idref = get_idref_property("stereotype", 
+				    "UML:ModelElement.stereotype",
+				    "UML:Stereotype");
+  if (!idref.empty())
+  {
+    Element *e=reader.lookup_element(idref);
+    if (e)
+    {
+      stereotype = dynamic_cast<Stereotype *>(e);
+      if (!stereotype)
+	reader.warning("Bogus stereotype idref in id ", id);
+    }
+    else
+      reader.warning("Non-connected stereotype idref in id ", id);
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -72,7 +86,8 @@ void ModelElement::print_header(ostream& sout)
 
   sout << " '" << name << "'";
 
-  //Print stereotype!!!
+  if (stereotype) 
+    sout << " <<" << stereotype->name << ">>";
 }
 
 

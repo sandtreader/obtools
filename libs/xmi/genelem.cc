@@ -27,16 +27,6 @@ GeneralizableElement::GeneralizableElement(XMI::Reader& rdr, XML::Element& xe)
 }
 
 //--------------------------------------------------------------------------
-// Second-pass reference fix
-void GeneralizableElement::build_refs()
-{
-  ModelElement::build_refs();
-
-  //!!! Get generalization refs
-
-}
-
-//--------------------------------------------------------------------------
 // Printer - adds flags
 void GeneralizableElement::print_header(ostream& sout)
 {

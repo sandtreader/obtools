@@ -31,14 +31,14 @@ Element::Element(XMI::Reader& rdr, XML::Element& xe):
 //Ignores any elements without an 'xmi.id' attribute - these are refs
 //Prunes descendant tree at 'prune', if given
 void Element::read_subelements(const char *name, ElementFactoryFunc factory,
-			       const char *prune)
+			       bool id_required, const char *prune)
 {
   //Fix 0 prune to empty before cast to string
   if (!prune) prune="";
 
   //Get all of this tag
   OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(xe, source, name, prune)
-    if (xe.has_attr("xmi.id"))  // May be reference only
+    if (!id_required || xe.has_attr("xmi.id"))  // May be reference only
     {
       Element *e = factory(reader, xe);
       subelements.push_back(e);
@@ -116,51 +116,6 @@ bool Element::get_int_property(const string& attr_name,
   return atoi(v.c_str());
 }
 
-//------------------------------------------------------------------------
-// Gets a reference 'property', either from given attribute of source
-// or 'xmi.idref' attribute of given sub-sub-element of given sub-element of
-// source (phew!)
-// e.g.
-//
-//   <UML:Class stereotype='a6' ...>
-// or
-//   <UML:Class ...>
-//     ...
-//     <UML:ModelElement.stereotype>
-//       <UML:Stereotype xmi.idref = 'a6'/>
-//     </UML:ModelElement.stereotype>
-//     ...
-//
-// Attributes take priority
-// sub-sub-element is optional, to cope with single-layer form 
-// Returns "" if not found
-string Element::get_idref_property(const string& attr_name,
-				   const string& subelement_name,
-				   const string& subsubelement_name)
-{
-  //Try attribute
-  string v = source.get_attr(attr_name);
-  if (!v.empty()) return v;
-
-  //Read through subelement
-  XML::Element& sube = source.get_child(subelement_name);
-  if (sube.valid())
-  {
-    //If subsubelement not given, go for this one
-    if (subsubelement_name.empty())
-      return sube.get_attr("xmi.idref");
-    else
-    {
-      //Try to open subsubelement
-      XML::Element& subsube = sube.get_child(subsubelement_name);
-      if (subsube.valid())
-	return subsube.get_attr("xmi.idref");
-    }
-  }
-
-  return "";
-}
-
 //--------------------------------------------------------------------------
 // Reads multiplicity from properties
 // Returns default (1,1) if not found
@@ -197,44 +152,130 @@ Multiplicity Element::get_multiplicity()
   return m;
 }
 
-//--------------------------------------------------------------------------
-// Gets a type element from the type properties
-// Returns referenced Classifier, or 0 if not found
-Classifier *Element::get_type()
+//------------------------------------------------------------------------
+// Gets a reference 'property', either from given attribute of source
+// or 'xmi.idref' attribute of given sub-sub-element of given sub-element of
+// source (phew!)
+// e.g.
+//
+//   <UML:Class stereotype='a6' ...>
+// or
+//   <UML:Class ...>
+//     ...
+//     <UML:ModelElement.stereotype>
+//       <UML:Classifier xmi.idref = 'a6'/>
+//     </UML:ModelElement.stereotype>
+//     ...
+//
+// Attributes take priority
+// sub-sub-element is optional, to cope with single-layer form 
+// Returns "" if not found
+string Element::get_idref_property(const string& attr_name,
+				   const string& subelement_name,
+				   const string& subsubelement_name)
 {
-  //!XMI: XMI 1.2/UML 1.3 DTD implies UML:Classifier allowed here, not
-  //UML:Class and UML:DataType - but a Poseidon model is as below...
-  //We allow any of them and work out the type later
+  //Try attribute
+  string v = source.get_attr(attr_name);
+  if (!v.empty()) return v;
 
-  //Try 'type' attribute, or UML:Class or UML:Datatype subelements
-  string idref = get_idref_property("type",
-				    "UML:StructuralFeature.type",
-				    "UML:Class");
+  //Read through subelement
+  XML::Element& sube = source.get_child(subelement_name);
+  if (sube.valid())
+  {
+    //If subsubelement not given, go for this one
+    if (subsubelement_name.empty())
+      return sube.get_attr("xmi.idref");
+    else
+    {
+      //Try to open subsubelement
+      XML::Element& subsube = sube.get_child(subsubelement_name);
+      if (subsube.valid())
+	return subsube.get_attr("xmi.idref");
+    }
+  }
+
+  return "";
+}
+
+//--------------------------------------------------------------------------
+// Gets a cross-referenced element from an idref property
+// Allow allows (broken?) Netbeans MDR form with Class/Datatype 
+// Returns referenced Element, or 0 if not found
+Element *Element::get_element_property(const string& attr_name,
+				       const string& subelement_name,
+				       const string& subsubelement_name)
+{
+  //Try requested subsubelement
+  string idref = get_idref_property(attr_name, subelement_name,
+				    subsubelement_name);
+
+  //!XMI: XMI 1.2/UML 1.3 DTD implies only superclass (UML:Classifier,
+  //UML:GeneralizableElement) allowed here, but Netbeans MDR (as used
+  //in Poseidon) uses UML:Class, UML:DataType etc.  It feels like a
+  //misdrafting of the spec (other places do expand superclasses into
+  //set-of-all-subclasses for XML), which MDR have unilaterally fixed
+  //- but comments welcome!
+
+  //Note we only make allowances for Class, Interface and DataType;
+  //Poseidon doesn't issue true Enumerations and Primitives and anything
+  //more correct should be using superclasses for everything
   if (idref.empty())
-    idref = get_idref_property("type",
-			       "UML:StructuralFeature.type",
+    idref = get_idref_property(attr_name, subelement_name,
+			       "UML:Class");
+  if (idref.empty())
+    idref = get_idref_property(attr_name, subelement_name,
+			       "UML:Interface");
+  if (idref.empty())
+    idref = get_idref_property(attr_name, subelement_name,
 			       "UML:DataType");
-
-  if (idref.empty())
-    idref = get_idref_property("type",
-			       "UML:StructuralFeature.type",
-			       "UML:Classifier");
 
   if (idref.empty())
   {
     reader.warning("Type idref not found in id ", id);
-    return false;
+    return 0;
   }
 
   Element *e=reader.lookup_element(idref);
-  if (!e)
-  {
-    reader.warning("Non-connected type idref in id ", id);
-    return false;
-  }
+  if (e) return e;
+
+  reader.warning("Non-connected type idref in id ", id);
+  return 0;
+}
+
+//--------------------------------------------------------------------------
+// Ditto, but check to be a UML:Classifier
+// Looks for UML:Classifier element (and MDR mistakes)
+Classifier *Element::get_classifier_property(const string& attr_name,
+					     const string& subelement_name)
+{
+  Element *e = get_element_property(attr_name, subelement_name,
+				    "UML:Classifier");
+  if (!e) return 0;
 
   // Make sure it really is some kind of Classifier before returning it
-  return dynamic_cast<Classifier *>(e);  
+  Classifier *c = dynamic_cast<Classifier *>(e);  
+  if (c) return c;
+
+  reader.warning("Bogus classifier idref found in id ", id);
+  return 0;
+}
+
+//--------------------------------------------------------------------------
+// Ditto, but check to be a UML:GeneralizableElement
+// Looks for UML:GeneralizableElement element (and MDR mistakes)
+GeneralizableElement *Element::get_ge_property(const string& attr_name,
+					       const string& subelement_name)
+{
+  Element *e = get_element_property(attr_name, subelement_name,
+				    "UML:GeneralizableElement");
+  if (!e) return 0;
+
+  // Make sure it really is some kind of GE before returning it
+  GeneralizableElement *ge = dynamic_cast<GeneralizableElement *>(e);  
+  if (ge) return ge;
+
+  reader.warning("Bogus GE idref found in id ", id);
+  return 0;
 }
 
 //--------------------------------------------------------------------------

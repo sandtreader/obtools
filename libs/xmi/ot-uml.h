@@ -22,6 +22,7 @@
 //before including it
 namespace ObTools { namespace UML { 
 class Element; 
+class Classifier;
 class Model;
 }};
 #include "ot-xmi.h"
@@ -103,6 +104,7 @@ enum CallConcurrency
 class Element;
 class Classifier;
 class Stereotype;
+class GeneralizableElement;
 class Generalization;
 class Association;
 class AssociationEnd;
@@ -145,15 +147,22 @@ protected:
   string get_idref_property(const string& attr_name,
 			    const string& subelement_name,
 			    const string& subsubelement_name="");
+  Element *get_element_property(const string& attr_name,
+				const string& subelement_name,
+				const string& subsubelement_name="");
+  Classifier *get_classifier_property(const string& attr_name,
+				      const string& subelement_name);
+  GeneralizableElement *get_ge_property(const string& attr_name,
+					const string& subelement_name);
   Multiplicity get_multiplicity();
-  Classifier *get_type();
 
   //Support for subclass constructor functions - read all subelements
   //of given types from XML source, and uses factory func to create them
-  //Ignores any elements without an 'xmi.id' attribute - these are refs
+  //If id_required is set (false by default), it ignores any elements 
+  //without an 'xmi.id' attribute - these are refs 
   //Prunes descendant tree at 'prune', if given
   void read_subelements(const char *name, ElementFactoryFunc factory,
-			const char *prune=0);
+			bool id_required = false, const char *prune=0);
 
   // Element header printer - print header line
   // Override this in subclass: upcall to parent, then to add your info 
@@ -327,7 +336,6 @@ public:
 class GeneralizableElement: public ModelElement   //abstract
 {
 protected:
-  void build_refs();                        //Capture gen/spec refs
   void print_header(ostream& sout);  
 
 public:
@@ -348,9 +356,6 @@ public:
 // Handles associations and features
 class Classifier: public GeneralizableElement  // abstract
 {
-protected:
-  void build_refs();                        //Capture assoc-ends 
-
 public:
   list<AssociationEnd *> association_ends;  // That refer to us
 

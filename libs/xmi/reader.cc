@@ -67,8 +67,21 @@ UML::Element *Reader::lookup_element(const string& id)
 }
 
 //------------------------------------------------------------------------
+// Translate UML1.3 concepts into UML1.4
+void Reader::upgrade_uml_to_1_4(XML::Element &root)
+{
+  map<string, string> upgrade;
+
+  //Map association end 'type' to 'participant'
+  upgrade["UML:AssociationEnd.type"] = "UML:AssociationEnd.participant";
+
+  // Translate
+  root.translate(upgrade);
+}
+
+//------------------------------------------------------------------------
 // Translate XMI 1.0 fully qualified elements into XMI 1.1+ namespace ones
-void Reader::upgrade_to_1_1(XML::Element &root)
+void Reader::upgrade_xmi_to_1_1(XML::Element &root)
 {
   map<string, string> upgrade;
 
@@ -88,18 +101,64 @@ void Reader::upgrade_to_1_1(XML::Element &root)
   upgrade["Foundation.Core.Attribute"]    = "UML:Attribute";
   upgrade["Foundation.Core.Operation"]    = "UML:Operation";
   upgrade["Foundation.Core.Parameter"]    = "UML:Parameter";
-  upgrade["Foundation.Core.AssociationClass"]  = "UML:Association";
+  upgrade["Foundation.Core.Association"]  = "UML:Association";
+  upgrade["Foundation.Core.AssociationClass"]  = "UML:AssociationClass";
   upgrade["Foundation.Core.AssociationEnd"]    = "UML:AssociationEnd";
- 
+  upgrade["Foundation.Core.Classifier"]        = "UML:Classifier";
+  upgrade["Foundation.Core.Generalization"]    = "UML:Generalization";
+  upgrade["Foundation.Core.GeneralizableElement"] = "UML:GeneralizableElement";
+
   // 'Property' names
   upgrade["Foundation.Core.ModelElement.name"] = "UML:ModelElement.name";
-  upgrade["Foundation.Core.ModelElement.visibility"] 
-    = "UML:ModelElement.visibility";
-  upgrade["Foundation.Core.GeneralizableElement.isAbstract"]
-    = "UML:GeneralizableElement.isAbstract";
-  upgrade["Foundation.Core.StructuralFeature.type"]
-    = "UML:StructuralFeature.type";
-  upgrade["Foundation.Core.Classifier"] = "UML:Classifier";
+  upgrade["Foundation.Core.ModelElement.visibility"] = 
+          "UML:ModelElement.visibility";
+  upgrade["Foundation.Core.ModelElement.stereotype"] = 
+          "UML:ModelElement.stereotype";
+
+  upgrade["Foundation.Core.GeneralizableElement.isAbstract"] = 
+          "UML:GeneralizableElement.isAbstract";
+  upgrade["Foundation.Core.GeneralizableElement.isRoot"] = 
+          "UML:GeneralizableElement.isRoot";
+  upgrade["Foundation.Core.GeneralizableElement.isLeaf"] = 
+          "UML:GeneralizableElement.isLeaf";
+
+  upgrade["Foundation.Core.Generalization.parent"] = 
+          "UML:Generalization.parent";
+  upgrade["Foundation.Core.Generalization.child"] = 
+          "UML:Generalization.child";
+
+  upgrade["Foundation.Core.Class.isActive"] = "UML:Class.isActive";
+
+  upgrade["Foundation.Core.AssociationEnd.ordering"] =
+          "UML:AssociationEnd.ordering";
+  upgrade["Foundation.Core.AssociationEnd.aggregation"] =
+          "UML:AssociationEnd.aggregation";
+  upgrade["Foundation.Core.AssociationEnd.multiplicity"] =
+          "UML:AssociationEnd.multiplicity";
+  upgrade["Foundation.Core.AssociationEnd.isNavigable"] =
+          "UML:AssociationEnd.isNavigable";
+  upgrade["Foundation.Core.AssociationEnd.participant"] =
+          "UML:AssociationEnd.participant";
+  //Also cope with UML1.3 'type' - conversion to 'participant' happens
+  //in UML upgrade
+  upgrade["Foundation.Core.AssociationEnd.type"] =
+          "UML:AssociationEnd.type";
+
+  upgrade["Foundation.Core.Feature.ownerScope"] = "UML:Feature.ownerScope";
+  upgrade["Foundation.Core.StructuralFeature.type"] = 
+          "UML:StructuralFeature.type";
+  upgrade["Foundation.Core.StructuralFeature.ordering"] = 
+          "UML:StructuralFeature.ordering";
+  upgrade["Foundation.Core.BehaviouralFeature.isQuery"] = 
+          "UML:BehaviouralFeature.isQuery";
+
+  upgrade["Foundation.Core.Operation.isAbstract"] = "UML:Operation.isAbstract";
+  upgrade["Foundation.Core.Operation.isRoot"] = "UML:Operation.isRoot";
+  upgrade["Foundation.Core.Operation.isLeaf"] = "UML:Operation.isLeaf";
+  upgrade["Foundation.Core.Operation.concurrency"] = 
+          "UML:Operation.concurrency";
+  upgrade["Foundation.Core.Parameter.kind"] = "UML:Parameter.kind";
+  upgrade["Foundation.Core.Parameter.type"] = "UML:Parameter.type";
 
   upgrade["Foundation.Data_Types.Multiplicity"] = "UML:Multiplicity";
   upgrade["Foundation.Data_Types.MultiplicityRange"] = "UML:MultiplicityRange";
@@ -110,8 +169,6 @@ void Reader::upgrade_to_1_1(XML::Element &root)
 
   // Translate
   root.translate(upgrade);
-
-  cout << root;
 }
 
 //------------------------------------------------------------------------
@@ -157,7 +214,10 @@ void Reader::read_from(istream& s) throw (ParseFailed)
 
   //Before delving into UML, check for 1.0 and upgrade to 1.1 names
   //Do this even if version unknown - can't do any harm
-  if (xmi_version < 1.1) upgrade_to_1_1(root);
+  if (xmi_version < 1.1) upgrade_xmi_to_1_1(root);
+
+  //Likewise, upgrade UML1.3 concepts to UML1.4
+  if (uml_version < 1.4) upgrade_uml_to_1_4(root);
 
   //Get UML model - assume only one
   XML::Element& modele = xmi_content.get_child("UML:Model");
