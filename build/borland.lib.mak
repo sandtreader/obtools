@@ -10,7 +10,7 @@ AR = tlib
 # -w-inl:  Turn off "[code] in function is not expanded inline" warnings
 #            (a.k.a., "this compiler generates bad code for common idioms")
 
-CPPFLAGS = -P -w-inl
+CPPFLAGS = -P -w-inl $(CPPDEFS)
 
 !ifdef INCDEPS
 INCS = -I$(INCDEPS)
@@ -24,7 +24,15 @@ clean:
 
 !ifdef TESTS
 test:  $(TESTS)
+!ifdef TESTCMD
+	$(TESTCMD)
+	$(TESTCMD2)
+	$(TESTCMD3)
+	$(TESTCMD4)
+	$(TESTCMD5)
+!else
 	&$**
+!endif
 
 # Test EXEs
 $(TESTS): $(LIB)
@@ -34,8 +42,10 @@ $(TESTS): $(LIB)
 	$(CC) $< $(LIB) $(LIBDEPS)
 
 # Library
+!ifdef LIB
 $(LIB):  $(OBJS) 
     $(AR) /u "$@" $?
+!endif
 
 .cc.obj:
 	$(CC) $(CPPFLAGS) -c $(INCS) $<
