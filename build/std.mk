@@ -109,7 +109,7 @@ endif
 endif
 
 ifdef DEBUG
-CPPFLAGS += -g
+CPPFLAGS += -g -DOBTOOLS_LOG_MAX_LEVEL=5
 LDFLAGS += -g
 LIB-DEBUGP = -debug
 else
