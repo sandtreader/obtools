@@ -258,17 +258,17 @@ void Generator::generate_use(XML::Element& use_e,
   // Create script expansion for each parameter
   map <string, bool> params_used;
 
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(pe, use_e, "xt:param")
-    string pn = pe["name"];
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, use_e, "xt:arg")
+    string pn = ae["name"];
 
-    // Generate param stream name
-    string psn = string("_param_s_")+pn;
+    // Generate arg stream name
+    string asn = string("_arg_s_")+pn;
  
-    // Generate code to build dirname
-    sout << "  ostringstream " << psn << ";\n";
+    // Generate code to build argument value
+    sout << "  ostringstream " << asn << ";\n";
     int temp=0; // No stripping
-    process_script(*pe, tags, psn, temp);
-    sout << "  string _param_" << pn << " = " << psn << ".str();\n";
+    process_script(*ae, tags, asn, temp);
+    sout << "  string _arg_" << pn << " = " << asn << ".str();\n";
     params_used[pn] = true;
   OBTOOLS_XML_ENDFOR
 
@@ -277,15 +277,15 @@ void Generator::generate_use(XML::Element& use_e,
   sout << "  template_" << define_e["name"] << "(" << streamname << ", "
        << childname << ", " << indexname << ", _path, _revpath";
 
-  // Check each argument in the definition to see if we've provided it, 
+  // Check each parameter in the definition to see if we've provided it, 
   // and generate it, use default if not
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, define_e, "xt:arg")
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(pe, define_e, "xt:param")
     sout << ",\n    ";
-    string an = ae["name"];
-    if (params_used[an])
-      sout << "_param_" << an;
+    string pn = pe["name"];
+    if (params_used[pn])
+      sout << "_arg_" << pn;
     else
-      sout << "\"" << ae["default"] << "\"";
+      sout << "\"" << pe["default"] << "\"";
   OBTOOLS_XML_ENDFOR
 
   sout << ");\n";
@@ -490,9 +490,9 @@ void Generator::generate_defines()
     sout << "void template_" << name << "(ostream& sout, " << param << ",\n";
     sout << "     int " << p_var << "_index, string _path, string _revpath";
 
-    // Create argument strings
-    OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, te, "xt:arg")
-      sout << ",\n     string " << ae["name"];
+    // Create parameter strings
+    OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(pe, te, "xt:param")
+      sout << ",\n     string " << pe["name"];
     OBTOOLS_XML_ENDFOR
     sout << ")\n{\n";
 
