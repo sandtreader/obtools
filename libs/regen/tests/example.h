@@ -21,7 +21,6 @@ private:
 
   //~^ ----- Manually added private methods ------
 
-  int new_method();
 
   //~v -------------------------------------------
 
