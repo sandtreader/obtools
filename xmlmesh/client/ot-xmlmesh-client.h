@@ -29,16 +29,23 @@ using namespace std;
 class ClientTransport
 {
 public:
+  //------------------------------------------------------------------------
   // Send a message - returns whether successful
   virtual bool send(const string& data) = 0;
 
+  //------------------------------------------------------------------------
   // Check whether a message is available before blocking in wait()
   virtual bool poll() = 0;
 
+  //------------------------------------------------------------------------
   // Wait for a message - blocking.
   // Returns false if the transport was restarted and subscriptions
   // (and messages) may have been lost
   virtual bool wait(string& data) = 0;
+
+  //------------------------------------------------------------------------
+  // Virtual destructor - does nothing here
+  virtual ~ClientTransport() {}
 };
 
 //==========================================================================

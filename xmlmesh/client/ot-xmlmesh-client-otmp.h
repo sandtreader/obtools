@@ -47,7 +47,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor - take server address
   // port=0 means use default port for protocol
-  OTMPClient(Net::EndPoint server): transport(server), Client(transport) {}
+  OTMPClient(Net::EndPoint server): Client(transport), transport(server) {}
 };
 
 #if !defined(_SINGLE)
@@ -65,7 +65,7 @@ public:
   // NB: MultiClient is constructed before transport whatever we say
   // - therefore leave starting it to constructor body
   OTMPMultiClient(Net::EndPoint server): 
-    transport(server), MultiClient(transport) { start(); }
+    MultiClient(transport), transport(server) { start(); }
 };
 #endif // !_SINGLE
 
