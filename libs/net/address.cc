@@ -95,13 +95,51 @@ ostream& operator<<(ostream& s, const EndPoint& ep)
 // Protocol
 
 //------------------------------------------------------------------------
+// Constructor from string
+Protocol::Protocol(const string& ps)
+{
+  if (ps=="TCP" || ps=="tcp")
+    proto = PROTO_TCP;
+  else if (ps=="UDP" || ps=="udp")
+    proto = PROTO_UDP;
+  else
+    proto = PROTO_UNKNOWN;
+}
+
+//------------------------------------------------------------------------
+// Output to ostream
+void Protocol::output(ostream& s) const
+{
+  switch (proto)
+  {
+    case PROTO_TCP:
+      s << "TCP";
+      break;
+
+    case PROTO_UDP:
+      s << "UDP";
+      break;
+
+    default:
+      s << "?UKNOWN?";
+      break;
+  }
+}
+
+//------------------------------------------------------------------------
 // << operator to write Protocol to ostream
 // e.g. cout << proto;
 ostream& operator<<(ostream& s, const Protocol& p)
 {
-  s << ((p==TCP)?"TCP":"UDP");
+  p.output(s);
   return s;
 }
+
+//------------------------------------------------------------------------
+// Standard protocols
+Protocol Protocol::TCP(Protocol::PROTO_TCP);
+Protocol Protocol::UDP(Protocol::PROTO_UDP);
+Protocol Protocol::UNKNOWN(Protocol::PROTO_UNKNOWN);
 
 //==========================================================================
 // Ports

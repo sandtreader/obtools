@@ -84,10 +84,43 @@ ostream& operator<<(ostream& s, const IPAddress& ip);
 
 //==========================================================================
 // IP Protocol 
-enum Protocol
+// Tries to be as near as possible an enum with extra
+class Protocol
 {
-  TCP,
-  UDP
+private:
+  enum Proto
+  {
+    PROTO_UNKNOWN,
+    PROTO_TCP,
+    PROTO_UDP
+  } proto;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  Protocol(Proto _proto): proto(_proto) {}
+  Protocol(const Protocol& p): proto(p.proto) {}
+  Protocol(const string& ps);
+
+  //------------------------------------------------------------------------
+  //Comparison
+  bool operator==(const Protocol& p) const { return p.proto == proto; }
+  bool operator!=(const Protocol& p) const { return p.proto != proto; }
+  bool operator<(const Protocol& p)  const { return p.proto  < proto; }
+
+  //------------------------------------------------------------------------
+  // ! operator to test for unknownness
+  bool operator!() { return proto==PROTO_UNKNOWN; }
+
+  //------------------------------------------------------------------------
+  // Output to ostream
+  void output(ostream& s) const;
+
+  //------------------------------------------------------------------------
+  // Standard protocols
+  static Protocol UNKNOWN;
+  static Protocol TCP;
+  static Protocol UDP;
 };
 
 //------------------------------------------------------------------------
@@ -163,7 +196,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructors
-  Port(): host(), port(0), proto(TCP) {}
+  Port(): host(), port(0), proto(Protocol::TCP) {}
   Port(IPAddress _host, Protocol _proto, int _port): 
     host(_host), proto(_proto), port(_port) {}
 
