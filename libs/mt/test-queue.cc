@@ -31,7 +31,7 @@ void ReceiveThread::run()
   // Just pull numbers off the queue
   for(;;)
   {
-    int m = mq.receive();
+    int m = mq.wait();
     cout << "RX(" << n << "): " << m << endl;
   }
 }

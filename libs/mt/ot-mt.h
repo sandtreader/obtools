@@ -217,8 +217,8 @@ public:
   bool poll() { return (!q.empty()); }
 
   //--------------------------------------------------------------------------
-  // Receive a message (blocking)
-  T receive()
+  // Wait to receive a message (blocking)
+  T wait()
   {
     // Can loop if someone else gets it
     for(;;)
