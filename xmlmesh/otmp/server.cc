@@ -19,7 +19,7 @@ namespace ObTools { namespace XMLMesh { namespace OTMP {
 //--------------------------------------------------------------------------
 // Send handler thread class
 // Pulls messages off the given queue and sends them to the given socket
-class SendThread: public MT::Thread
+class ServerSendThread: public MT::Thread
 {
   ClientSession& session;
 
@@ -56,7 +56,7 @@ class SendThread: public MT::Thread
   }
 
 public:
-  SendThread(ClientSession& _session): session(_session) { start(); }
+  ServerSendThread(ClientSession& _session): session(_session) { start(); }
 };
 
 //------------------------------------------------------------------------
@@ -72,7 +72,7 @@ void Server::process(Net::TCPSocket& socket,
   ClientSession session(socket, client, client_sessions);
 
   // Start send thread
-  SendThread send_thread(session);
+  ServerSendThread send_thread(session);
 
   // Tell the queue the client has arrived
   ClientMessage bmsg(client, ClientMessage::STARTED);

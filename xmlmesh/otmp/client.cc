@@ -25,7 +25,7 @@ namespace ObTools { namespace XMLMesh { namespace OTMP {
 //--------------------------------------------------------------------------
 // Receive handler thread class
 // Just repeatedly calls back into receive_messages
-class ReceiveThread: public MT::Thread
+class ClientReceiveThread: public MT::Thread
 {
   Client& client;
 
@@ -45,7 +45,7 @@ class ReceiveThread: public MT::Thread
   }
 
 public:
-  ReceiveThread(Client &_client): client(_client) { start(); }
+  ClientReceiveThread(Client &_client): client(_client) { start(); }
 };
 
 //------------------------------------------------------------------------
@@ -146,7 +146,7 @@ bool Client::receive_messages()
 //--------------------------------------------------------------------------
 // Send handler thread class
 // Just repeatedly calls back into send_messages
-class SendThread: public MT::Thread
+class ClientSendThread: public MT::Thread
 {
   Client& client;
 
@@ -156,7 +156,7 @@ class SendThread: public MT::Thread
   }
 
 public:
-  SendThread(Client &_client): client(_client) { start(); }
+  ClientSendThread(Client &_client): client(_client) { start(); }
 };
 
 //------------------------------------------------------------------------
@@ -215,8 +215,8 @@ Client::Client(Net::EndPoint _server): server(_server)
   socket = 0;
 
   //Start send and receive threads - receive thread will 'restart' socket
-  receive_thread = new ReceiveThread(*this);
-  send_thread    = new SendThread(*this);
+  receive_thread = new ClientReceiveThread(*this);
+  send_thread    = new ClientSendThread(*this);
 }
 
 
