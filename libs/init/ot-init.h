@@ -100,18 +100,18 @@ public:
 };
 
 //==========================================================================
-// SelfFactory template
+// NewFactory template
 // Factory for objects of type <SUB> with superclass <SUPER> (used in registry)
-// with create parameters <CP>, where the create method is a static method of
-// the class <SUB>
+// with create parameters <CP>, where the create method is simply the
+// constructor with parameters <CP>
 // Default create parameter is an XML element (e.g. from config)
 template<class SUPER, class SUB, class CP=XML::Element&> 
-  class SelfFactory: public Factory<SUPER, CP>
+  class NewFactory: public Factory<SUPER, CP>
 {
 public:
   //------------------------------------------------------------------------
   // Create method
-  SUPER *create(CP cp) { return SUB::create(cp); }
+  SUPER *create(CP cp) { return new SUB(cp); }
 };
 
 //==========================================================================
@@ -149,7 +149,7 @@ public:
 
 //==========================================================================
 // AutoRegister template
-// Template for automatically registering a SelfFactory in the given name
+// Template for automatically registering a NewFactory in the given name
 // on the given registry
 // <SUPER> is the superclass used in the register
 // <SUB> is the subclass being initialised here
@@ -157,7 +157,7 @@ template<class SUPER, class SUB, class CP=XML::Element&>
   class AutoRegister: private AutoAction
 {
 private:
-  SelfFactory<SUPER, SUB, CP> factory;
+  NewFactory<SUPER, SUB, CP> factory;
   Registry<SUPER, CP>& reg;
   string name;
 

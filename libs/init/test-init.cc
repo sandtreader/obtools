@@ -26,9 +26,6 @@ class Sub: public Super
 {
 public:
   Sub(int _a): Super(_a+1) {}
-
-  // Create factory method
-  static Sub *create(int a) { return new Sub(a); }
 };
 
 Init::Registry<Super, int> sr;
