@@ -45,6 +45,10 @@ public:
   IPAddress(const string& hostname);
 
   //--------------------------------------------------------------------------
+  // Get host byte order integer
+  uint32_t hbo() const { return address; }
+
+  //--------------------------------------------------------------------------
   // Get network byte order integer
   uint32_t nbo() const { return ::htonl(address); }
 
