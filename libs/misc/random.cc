@@ -47,6 +47,8 @@ string Random::generate_hex(int n)
   ostringstream oss;
   for(int i=0; i<n; i++)
     oss << hex << setfill('0') << setw(2) << (unsigned)p[i];
+
+  delete[] p;
   return oss.str();
 }
 
