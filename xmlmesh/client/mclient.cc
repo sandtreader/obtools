@@ -27,6 +27,7 @@ class DispatchThread: public MT::Thread
 {
   MultiClient& client;
   ClientTransport& transport;
+  Log::Streams log;  // Thread-local log streams
 
   void run() 
   { 
@@ -36,12 +37,12 @@ class DispatchThread: public MT::Thread
       if (transport.wait(data))
       {
 	Message msg(data);  // Construct message from XML <message> data
-	client.dispatch(msg);
+	client.dispatch(msg, log);
       }
       else
       {
-	Log::Summary << "Transport restarted - resubscribing\n";
-	client.resubscribe();
+	log.summary << "Transport restarted - resubscribing\n";
+	client.resubscribe(log);
       }
     }
   }
@@ -53,7 +54,7 @@ public:
 
 //------------------------------------------------------------------------
 // Dispatch a message (background thread)
-void MultiClient::dispatch(Message &msg)
+void MultiClient::dispatch(Message &msg, Log::Streams& log)
 {
   string ref = msg.get_ref();
   MT::RLock l(mutex);
@@ -70,7 +71,7 @@ void MultiClient::dispatch(Message &msg)
     }
     else
     {
-      Log::Error << "Response with unknown ref ignored: " << ref << endl;
+      log.error << "Response with unknown ref ignored: " << ref << endl;
     }
   }
   else
@@ -93,14 +94,14 @@ void MultiClient::dispatch(Message &msg)
 
     // Complain if no-one wanted it
     if (!handled)
-      Log::Error << "Unhandled message received with subject " 
-		 << subject << endl;
+      log.error << "Unhandled message received with subject " 
+		<< subject << endl;
   }
 }
 
 //------------------------------------------------------------------------
 // Resubscribe for all subjects we should be subscribed to
-void MultiClient::resubscribe()
+void MultiClient::resubscribe(Log::Streams& log)
 {
   // We take the mutex to lock everything out until this is sorted
   MT::RLock l(mutex);
@@ -135,17 +136,17 @@ retry:
 	  // Check it for OK
 	  if (msg.get_subject() == "xmlmesh.ok") break;
 
-	  Log::Error << "Error response to resubscribe:\n" << data << endl;
+	  log.error << "Error response to resubscribe:\n" << data << endl;
 	}
 	else
 	{
 	  // Dispatch to others and continue
-	  dispatch(msg);
+	  dispatch(msg, log);
 	}
       }
       else
       {
-	Log::Summary << "Transport failed during resubscribe - retrying\n";
+	log.summary << "Transport failed during resubscribe - retrying\n";
 	goto retry;  // Try it all again
       }
     }
@@ -217,7 +218,8 @@ bool MultiClient::request(Message& req, Message& response)
   // Send message
   if (!send(req))
   {
-    Log::Error << "Sending request failed\n";
+    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    error_log << "Sending request failed\n";
     MT::RLock l(mutex);
     requests.erase(id);
     return false;
@@ -249,15 +251,16 @@ bool MultiClient::request(Message& req)
 
   // Handle error
   FaultMessage errm(response);
+  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
   if (!errm)
   {
-    Log::Error << "Weird response received:\n";
-    Log::Error << response << endl;
+    error_log << "Weird response received:\n";
+    error_log << response << endl;
   }
   else
   {
-    Log::Error << "Request error:\n";
-    Log::Error << errm << endl;
+    error_log << "Request error:\n";
+    error_log << errm << endl;
   }
   return false;
 }
@@ -274,7 +277,10 @@ void MultiClient::register_subscriber(Subscriber *sub)
   // Subscribe for that subject
   SubscriptionMessage msg(SubscriptionMessage::JOIN, sub->subject);
   if (!request(msg))
-    Log::Error << "Unable to subscribe for " << sub->subject << endl;
+  {
+    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    error_log << "Unable to subscribe for " << sub->subject << endl;
+  }
 }
 
 //------------------------------------------------------------------------
@@ -284,7 +290,10 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
   // Unsubscribe for that subject
   SubscriptionMessage msg(SubscriptionMessage::LEAVE, sub->subject);
   if (!request(msg))
-    Log::Error << "Unable to unsubscribe for " << sub->subject << endl;
+  {
+    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    error_log << "Unable to unsubscribe for " << sub->subject << endl;
+  }
 
   {
     MT::RLock l(mutex);

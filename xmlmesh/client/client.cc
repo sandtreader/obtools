@@ -63,7 +63,7 @@ bool Client::wait(Message& msg)
   string data;
   if (!transport.wait(data))
   {
-    Log::Summary << "Transport restarted - resubscribing\n";
+    log.summary << "Transport restarted - resubscribing\n";
     resubscribe();
     return false;
   }
@@ -100,7 +100,7 @@ bool Client::request(Message& req, Message& response)
   // Send message
   if (!send(req))
   {
-    Log::Error << "Sending request failed\n";
+    log.error << "Sending request failed\n";
     return false;
   }
 
@@ -111,7 +111,7 @@ bool Client::request(Message& req, Message& response)
     string data;
     if (!transport.wait(data)) 
     {
-      Log::Summary << "Transport restarted - resubscribing\n";
+      log.summary << "Transport restarted - resubscribing\n";
       resubscribe();
       continue;
     }
@@ -144,13 +144,13 @@ bool Client::request(Message& req)
   FaultMessage errm(response);
   if (!errm)
   {
-    Log::Error << "Weird response received:\n";
-    Log::Error << response << endl;
+    log.error << "Weird response received:\n";
+    log.error << response << endl;
   }
   else
   {
-    Log::Error << "Request error:\n";
-    Log::Error << errm << endl;
+    log.error << "Request error:\n";
+    log.error << errm << endl;
   }
   return false;
 }

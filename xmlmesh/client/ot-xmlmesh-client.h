@@ -13,6 +13,7 @@
 #include <string>
 #include <queue>
 #include "ot-net.h"
+#include "ot-log.h"
 #if !defined(_SINGLE)
 #include "ot-mt.h"
 #endif
@@ -57,7 +58,7 @@ private:
   queue<Message> secondary_q;  // Queue for unwanted messages received
                                // in request()
   list<string> subscribed_subjects;
-
+  Log::Streams log;            // Private (threadsafe) log streams
   void resubscribe();
 
 public:
@@ -235,11 +236,11 @@ public:
 
   //------------------------------------------------------------------------
   // Dispatch a message (background thread)
-  void dispatch(Message &msg);
+  void dispatch(Message &msg, Log::Streams& log);
 
   //------------------------------------------------------------------------
   // Resubscribe for all subjects we should be subscribed to (background)
-  void resubscribe();
+  void resubscribe(Log::Streams& log);
 
   //------------------------------------------------------------------------
   // Destructor

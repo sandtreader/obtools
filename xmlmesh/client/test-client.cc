@@ -34,17 +34,18 @@ int main(int argc, char **argv)
   Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
   Log::LevelFilter     level_out(Log::LEVEL_DUMP, tsfilter);
   Log::logger.connect(level_out);
+  Log::Streams log;
 
   // Resolve name
   Net::IPAddress addr(host);
   if (!addr)
   {
-    Log::Error << "Can't resolve host: " << host << endl;
+    log.error << "Can't resolve host: " << host << endl;
     return 1;
   }
 
-  Log::Summary << "Host: " << addr << 
-    " (" << addr.get_hostname() << ")" << endl;
+  log.summary << "Host: " << addr 
+	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
   Net::EndPoint server(addr, port);
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 #else
     if (client.poll(msg)) 
 #endif
-      Log::Detail << msg.get_text() << endl;
+      log.detail << msg.get_text() << endl;
   }
 
   return 0;  
