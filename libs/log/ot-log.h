@@ -11,7 +11,10 @@
 #ifndef __OBTOOLS_LOG_H
 #define __OBTOOLS_LOG_H
 
+#if !defined(_SINGLE)
 #include "ot-mt.h"
+#endif
+
 #include <time.h>
 #include <list>
 #include <string>
@@ -62,7 +65,9 @@ public:
 class Channel
 {
 public:
+#if !defined(_SINGLE)
   MT::Mutex mutex;  // Assume multi-threaded use
+#endif
 
   //--------------------------------------------------------------------------
   // Constructor

@@ -35,7 +35,10 @@ void PatternFilter::log(Message& msg)
 
 void TimestampFilter::log(Message& msg)
 {
-  MT::Lock lock(mutex);  // localtime is dubiously thread-safe
+#if !defined(_SINGLE)
+  MT::Lock lock(mutex);    // localtime is dubiously thread-safe
+#endif
+
   char stm[81];
   
   strftime(stm, 80, format.c_str(), localtime(&msg.timestamp));

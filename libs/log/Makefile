@@ -5,38 +5,22 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-OBJS = distributor.o filter.o logstream.o channel.o logger.o
+NAME   	= ot-log
+HEADERS = ot-log.h
+OBJS  	= distributor.o filter.o logstream.o channel.o logger.o
+DEPENDS = text
+TESTS 	= test-log
+TESTCMD	= ./test-log
+MULTI    = 1
+VARIANT-SINGLE = 1
 
-ifdef DEBUG
-CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
-LDFLAGS += -g
+#Suppress MT in SINGLE build
+ifndef SINGLE
+DEPENDS += mt
 endif
 
-CPPFLAGS += -I../mt -I../text
-
-all: test-log 
-
-clean: 
-	-@rm -f *.o *.a *~ test-log
-
-test:	test-log 
-	./test-log
-
-release: ot-log.a
-	cp ot-log.a $(RELEASEDIR) 
-	cp ot-log.h $(RELEASEDIR) 
-
-#Test harness:
-test-log: test-log.o ot-log.a ../text/ot-text.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
-
-#Core library
-ot-log.a: $(OBJS)
-	$(AR) r $@ $^
-
-#Objects
-$(OBJS): ot-log.h Makefile
-test-log.o: ot-log.h Makefile
+ROOT    = ../..
+include $(ROOT)/build/lib.mk
 
 
 

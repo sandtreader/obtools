@@ -16,7 +16,10 @@ namespace ObTools { namespace Log {
 // Connect a channel
 void Distributor::connect(Channel& chan)
 {
+#if !defined(_SINGLE)
   MT::Lock lock(mutex);
+#endif
+
   channels.push_back(&chan);
 }
 
@@ -24,7 +27,9 @@ void Distributor::connect(Channel& chan)
 // Disconnect the given channel
 void Distributor::disconnect(Channel& chan)
 {
+#if !defined(_SINGLE)
   MT::Lock lock(mutex);
+#endif
 
   channels.remove(&chan);
 }
@@ -33,7 +38,9 @@ void Distributor::disconnect(Channel& chan)
 // Log a message
 void Distributor::log(Message& msg)
 {
+#if !defined(_SINGLE)
   MT::Lock lock(mutex);
+#endif
 
   // Send to all channels 
   list<Channel *>::iterator p;

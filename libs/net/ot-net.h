@@ -19,7 +19,9 @@
 #include <iostream>
 #include <string>
 
+#if !defined(_SINGLE)
 #include "ot-mt.h"
+#endif
 
 namespace ObTools { namespace Net { 
 
@@ -492,6 +494,7 @@ public:
   bool operator!() const { return !connected; }
 };
 
+#if !defined(_SINGLE)  // No chance of this working single threaded
 //==========================================================================
 // TCP server (multi-threaded, multiple clients at once)
 // This is an abstract class which should be subclassed to implement
@@ -550,6 +553,7 @@ class TCPServerThread: public MT::Thread
 public:
   TCPServerThread(TCPServer &s): server(s) { start(); }
 };
+#endif //!_SINGLE
 
 //==========================================================================
 }} //namespaces

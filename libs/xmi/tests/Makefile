@@ -8,15 +8,13 @@
 test:	test-poseidon test-argo
 
 test-poseidon:	test-model.xmi
-	LeakCheck ../test-xmi < test-model.xmi
-	leak-analyze ../test-xmi
+	../build.debug/test-xmi < test-model.xmi
 
 test-argo:	test-argo_.xmi
-	LeakCheck ../test-xmi < test-argo_.xmi
-	leak-analyze ../test-xmi
+	../build.debug/test-xmi < test-argo_.xmi
 
 clean: 
-	-@rm -f *~ *.bak leak.out test-model.xmi test-argo_.xmi
+	-@rm -f *~ *.bak test-model.xmi test-argo_.xmi
 
 #Extract tests from model (requires unzip to be installed)
 test-model.xmi: test-model.zargo

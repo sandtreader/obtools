@@ -9,7 +9,8 @@ all:
 	-@rm *.tgz *~
 	tar cvfz obtools-libs.tgz --exclude=CVS --exclude=Makefile *
 
-
+clean:
+	-@rm -f *.a *.h *.tgz *~
 
 
 

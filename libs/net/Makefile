@@ -5,43 +5,23 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-OBJS = socket.o address.o client.o server.o stream.o
+NAME   	= ot-net
+HEADERS = ot-net.h
+OBJS  	= socket.o address.o client.o stream.o
+TESTS 	= test-client 
+TESTCMD	= ./test-client localhost
+MULTI    = 1
+VARIANT-SINGLE = 1
 
-ifdef DEBUG
-CPPFLAGS += -g
-LDFLAGS += -g
+#Catch ourselves recursing in SINGLE mode and suppress server and use of MT
+ifndef SINGLE
+OBJS 	+= server.o
+TESTS  	+= test-server
+DEPENDS += mt
 endif
 
-CPPFLAGS += -I../mt
-
-all: test-client test-server
-
-clean: 
-	-@rm -f *.o *.a *~ test-client test-server
-
-test:	test-client test-server
-	./test-client localhost
-
-release: ot-net.a
-	cp ot-net.a $(RELEASEDIR) 
-	cp ot-net.h $(RELEASEDIR) 
-
-#Test harnesses:
-test-client: test-client.o ot-net.a 
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
-
-test-server: test-server.o ot-net.a ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-#Core library
-ot-net.a: $(OBJS)
-	$(AR) r $@ $^
-
-#Objects
-$(OBJS): ot-net.h Makefile
-test-client.o: ot-net.h Makefile
-test-server.o: ot-net.h Makefile
-
+ROOT    = ../..
+include $(ROOT)/build/lib.mk
 
 
 

@@ -5,39 +5,16 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-ifdef DEBUG
-CPPFLAGS += -g
-LDFLAGS += -g
-endif
+NAME   	= ot-cache
+# No OBJS
+HEADERS = ot-cache.h
+DEPENDS = mt
+TESTS 	= test-timeout-use test-timeout-age test-pointer
+TESTCMD	= ./test-pointer
+MULTI    = 1
 
-CPPFLAGS += -I../mt
-
-all: test-timeout-use test-timeout-age test-pointer
-
-clean: 
-	-@rm -f *.o *.a *~ test-timeout-use test-timeout-age test-pointer
-
-test:	test-timeout-use test-timeout-age test-pointer
-	./test-pointer
-
-release: 
-	cp ot-cache.h $(RELEASEDIR) 
-
-#Test harnesses:
-test-timeout-use: test-timeout-use.o ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-test-timeout-age: test-timeout-age.o ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-test-pointer: test-pointer.o ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-#Objects
-test-timeout-use.o: ot-cache.h Makefile
-test-timeout-age.o: ot-cache.h Makefile
-test-pointer.o: ot-cache.h Makefile
-
+ROOT    = ../..
+include $(ROOT)/build/lib.mk
 
 
 

@@ -5,42 +5,14 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-OBJS = md5.o proplist.o
+NAME   	= ot-misc
+HEADERS = ot-misc.h
+OBJS  	= md5.o proplist.o
+TESTS 	= test-md5 test-prop
+TESTCMD	= ./test-md5 && ./test-prop
+MULTI    = 1
+VARIANT-SINGLE = 1
 
-ifdef DEBUG
-CPPFLAGS += -g
-LDFLAGS += -g
-endif
-
-all: test-md5 test-prop
-
-clean: 
-	-@rm -f *.o *.a *~ test-md5 test-prop
-
-test:	test-md5 test-prop
-	./test-md5
-	./test-prop
-
-release: ot-misc.a
-	cp ot-misc.a $(RELEASEDIR) 
-	cp ot-misc.h $(RELEASEDIR) 
-
-#Test harnesses:
-test-md5: test-md5.o ot-misc.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
-
-test-prop: test-prop.o ot-misc.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
-
-#Core library
-ot-misc.a: $(OBJS)
-	$(AR) r $@ $^
-
-#Objects
-$(OBJS): ot-misc.h Makefile
-test-md5.o: ot-misc.h Makefile
-test-prop.o: ot-misc.h Makefile
-
-
-
+ROOT    = ../..
+include $(ROOT)/build/lib.mk
 
