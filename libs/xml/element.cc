@@ -508,7 +508,7 @@ void Element::set_attr_int(const string& attname, int value)
 // (_bool qualifier not strictly necessary here, but matches get_attr_bool)
 void Element::set_attr_bool(const string& attname, bool value)
 {
-  attrs[attname] = value?"yes":"no";
+  attrs[attname] = value?"true":"false";
 }
 
 //--------------------------------------------------------------------------
