@@ -327,7 +327,7 @@ public:
 istream& operator>>(istream& s, Parser& p) throw (ParseFailed);
 
 //------------------------------------------------------------------------
-// >> operator to write Element to ostream
+// << operator to write Element to ostream
 //
 // e.g. cout << parser.get_root();
 //
@@ -420,7 +420,7 @@ public:
   bool get_value_bool(const string& path, bool def=false);
 
   //--------------------------------------------------------------------------
-  // Integer value fetch
+  // XPath Integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_int(const string& path, int def=0);
