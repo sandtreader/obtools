@@ -56,7 +56,13 @@ void Thread::detach()
 // Cancel - ask it to stop
 void Thread::cancel()
 {
-  if (thread) pthread_cancel(thread);
+  if (thread)
+  {
+    pthread_cancel(thread);
+    // Join to make sure it has cleanly finished before we exit
+    if (thread) pthread_join(thread, NULL);
+    thread = 0;
+  }
 }
 
 //--------------------------------------------------------------------------

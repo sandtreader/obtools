@@ -4,17 +4,17 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = thread.o
+OBJS = thread.o pool.o
 
 ifdef DEBUG
 CPPFLAGS += -g
 LDFLAGS += -g
 endif
 
-all: test-thread test-queue
+all: test-thread test-queue test-pool
 
 clean: 
-	-@rm -f *.o *.a *~ test-thread test-queue
+	-@rm -f *.o *.a *~ test-thread test-queue test-pool
 
 test:	test-thread test-queue
 	./test-thread 10
@@ -27,6 +27,9 @@ test-thread: test-thread.o ot-mt.a
 test-queue: test-queue.o ot-mt.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
+test-pool: test-pool.o ot-mt.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
+
 #Core library
 ot-mt.a: $(OBJS)
 	$(AR) r $@ $^
@@ -35,6 +38,7 @@ ot-mt.a: $(OBJS)
 $(OBJS): ot-mt.h Makefile
 test-thread.o: ot-mt.h Makefile
 test-queue.o: ot-mt.h Makefile
+test-pool.o: ot-mt.h Makefile
 
 
 

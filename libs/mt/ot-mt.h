@@ -12,6 +12,7 @@
 
 #include <pthread.h>
 #include <queue>
+#include <list>
 
 namespace ObTools { namespace MT { 
 
@@ -240,6 +241,134 @@ public:
     }
   }
 }; 
+
+//==========================================================================
+// Poolable thread class - use in Thread Pool below
+// (you still have to subclass this to implement run(), though)
+
+template<class T> class ThreadPool;  //forward
+class PoolThread;                    //forward
+
+// Interface allowing replacement into the pool without knowing how the
+// pool template is instantiated (see below)
+class IPoolReplacer
+{
+public:
+  virtual void replace(PoolThread *t)=0;
+};
+
+class PoolThread: public Thread
+{
+public:
+  IPoolReplacer& replacer;
+  Condition in_use;
+
+  //--------------------------------------------------------------------------
+  // Constructor - automatically starts thread in !in_use state
+  PoolThread(IPoolReplacer& _replacer);
+
+  //--------------------------------------------------------------------------
+  // Kick thread after being given parameters (members of subclasses)
+  void kick();
+};
+
+//==========================================================================
+// Template for pool replacers
+// This piece of evil allows a 'PoolThread' to replace itself in the pool
+// knowing only that it is a subclass of PoolThread, not what the 
+// pool template is instantiated to (the actual subclass)
+template<class T> class PoolReplacer: public IPoolReplacer
+{
+private:
+  ThreadPool<T>& pool;
+
+public:
+  PoolReplacer(ThreadPool<T>& _pool): pool(_pool) {}
+  virtual void replace(PoolThread *t) { pool.replace(dynamic_cast<T *>(t)); }
+};
+
+//==========================================================================
+// Thread Pool template
+template<class T> class ThreadPool
+{
+private:
+  Mutex mutex;
+  int min_spares;
+  int max_threads;
+  list<T *> threads;  // All of them
+  list<T *> spares;   // Just the spare ones
+  PoolReplacer<T> replacer;
+  
+  // Add another spare thread to the pool
+  void add_spare()
+  {
+    T *t = new T(replacer);
+    threads.push_back(t);
+    spares.push_back(t);
+  }
+
+  // Fill pool to provide 'min' spares, but not more than 'max' in all
+  void fill() 
+  { 
+    while (spares.size() < min_spares && threads.size() < max_threads) 
+      add_spare(); 
+  }
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  // min-max is range of number of threads the pool will keep alive
+  // min must be at least 1
+  ThreadPool(int min=1, int max=10): 
+    min_spares(min), max_threads(max), replacer(*this)
+  { fill(); }
+
+  //--------------------------------------------------------------------------
+  // Remove a thread from the pool
+  // 0 if none available
+  T *remove()
+  {
+    Lock lock(mutex);
+    fill();  // Try and make spares
+    if (!spares.size()) return 0; 
+
+    T *t = spares.front();
+    spares.pop_front();
+    return t;
+  }
+
+  //--------------------------------------------------------------------------
+  // Replace a thread in the pool
+  void replace(T *t)
+  {
+    Lock lock(mutex);
+    spares.push_back(t);
+
+    // Empty spares above minimum amount
+    while (spares.size() > min_spares)
+    {
+      T *t = spares.back();  // Kill last one entered
+      spares.pop_back();
+
+      // Remove from arbitrary position in threads list
+      typename list<T *>::iterator p = find(threads.begin(), threads.end(), t);
+      if (p!=threads.end()) threads.erase(p);
+      
+      delete t;
+    }
+  }
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  // Kill all threads 
+  ~ThreadPool()
+  {
+    Lock lock(mutex);
+    for(typename list<T *>::iterator p=threads.begin(); p!=threads.end(); p++)
+      delete *p;
+  }
+};
+
 
 //==========================================================================
 }} //namespaces
