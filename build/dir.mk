@@ -15,15 +15,24 @@ clean:  $(patsubst %,%-clean,$(SUBS))
 
 test: 	$(patsubst %,%-test,$(SUBS))
 
+#Overridable for deeper structures
+ifdef RELEASEDIR
+NORELEASE = 1         # It belongs to the level above
+else
+RELEASEDIR = release
+endif
+
 release: $(patsubst %,%-release,$(SUBS))
-	$(MAKE) -C release
+ifndef NORELEASE
+	$(MAKE) -C $(RELEASEDIR)
+endif
 
 # Submake template to run on every lib
 define sub_template
 $(1)-all: 	; $$(MAKE) -C $(1)
 $(1)-clean: 	; $$(MAKE) -C $(1) clean
 $(1)-test: 	; $$(MAKE) -C $(1) test
-$(1)-release: 	; $$(MAKE) -C $(1) RELEASEDIR=../release release
+$(1)-release: 	; $$(MAKE) -C $(1) RELEASEDIR=../$(RELEASEDIR) release
 endef
 
 $(foreach sub,$(SUBS),$(eval $(call sub_template,$(sub))))

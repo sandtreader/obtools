@@ -145,13 +145,10 @@ clean:
 test:	$(patsubst %,test-%,$(VARIANTS))
 
 # Release target - get all variants to release (optionally)
-# and copy headers 
+# and copy configs - assumed to be invariant
 release: $(patsubst %,release-%,$(VARIANTS))
 ifdef CONFIGS
 	cp $(CONFIGS) $(RELEASEDIR) 
-endif
-ifeq ($(TYPE), lib)
-	cp $(HEADERS) $(RELEASEDIR) 
 endif
 
 # Build targets
@@ -189,6 +186,9 @@ ifdef RELEASE
 ifdef RELEASEDIR
 ifdef RELEASABLE
 	cp $(RELEASABLE) ../$(RELEASEDIR)/$(RELEASE-NAME) 
+ifeq ($(TYPE), lib)
+	cp $(patsubst %,../%,$(HEADERS)) ../$(RELEASEDIR) 
+endif
 endif
 endif
 endif
