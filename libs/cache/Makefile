@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-cache
 # No OBJS
 HEADERS = ot-cache.h
@@ -14,7 +15,7 @@ TESTCMD	= ./test-pointer
 MULTI    = 1
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 
