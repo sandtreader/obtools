@@ -224,19 +224,20 @@ void Generator::generate_use(XML::Element& use_e,
 			     const string& streamname)
 {
   // Create script expansion for each parameter
-  int i=0;
+  map <string, bool> params_used;
+
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(pe, use_e, "xt:param")
+    string pn = pe["name"];
+
     // Generate param stream name
-    ostringstream psn_s;
-    psn_s << "_param_s_" << i;
-    string psn = psn_s.str();
+    string psn = string("_param_s_")+pn;
  
     // Generate code to build dirname
     sout << "  ostringstream " << psn << ";\n";
     int temp=0; // No stripping
     process_script(*pe, tags, psn, temp);
-    sout << "  string _param_" << i << " = " << psn << ".str();\n";
-    i++;
+    sout << "  string _param_" << pn << " = " << psn << ".str();\n";
+    params_used[pn] = true;
   OBTOOLS_XML_ENDFOR
 
   // Generate call to template function
@@ -244,12 +245,15 @@ void Generator::generate_use(XML::Element& use_e,
   sout << "  template_" << define_e["name"] << "(" << streamname << ", "
        << childname << ", " << indexname << ", _path";
 
-  // Include previously generated string for each parameter
-  i=0;
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(pe, use_e, "xt:param")
-    pe.valid();  // Keep compiler quiet about not using it
-    sout << ",\n    _param_" << i;
-  i++;
+  // Check each argument in the definition to see if we've provided it, 
+  // and generate it, use default if not
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, define_e, "xt:arg")
+    sout << ",\n    ";
+    string an = ae["name"];
+    if (params_used[an])
+      sout << "_param_" << an;
+    else
+      sout << "\"" << ae["default"] << "\"";
   OBTOOLS_XML_ENDFOR
 
   sout << ");\n";
@@ -455,7 +459,6 @@ void Generator::generate_defines()
     // Create argument strings
     OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, te, "xt:arg")
       sout << ",\n     string " << ae["name"];
-      if (ae.has_attr("default")) sout << " = \"" << ae["default"] << "\"";
     OBTOOLS_XML_ENDFOR
     sout << ")\n{\n";
 
