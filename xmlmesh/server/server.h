@@ -169,11 +169,11 @@ protected:
   bool respond(RoutingMessage& request);
 
   //------------------------------------------------------------------------
-  // Return an error to an existing request
+  // Return a fault to an existing request
   // Returns whether successul
   bool respond(RoutingMessage& request,
-	       ErrorMessage::Severity severity,
-	       const string& text);
+	       SOAP::Fault::Code code,
+	       const string& reason);
 
 public:
   //------------------------------------------------------------------------

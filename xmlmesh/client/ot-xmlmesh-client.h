@@ -83,8 +83,8 @@ public:
   //------------------------------------------------------------------------
   // Return an error to request given
   // Returns whether successul
-  bool respond(ErrorMessage::Severity severity,
-	       const string& text,
+  bool respond(SOAP::Fault::Code code,
+	       const string& reason,
 	       Message& request);
 
   //------------------------------------------------------------------------
@@ -204,8 +204,8 @@ public:
   //------------------------------------------------------------------------
   // Return an error to request given
   // Returns whether successul
-  bool respond(ErrorMessage::Severity severity,
-	       const string& text,
+  bool respond(SOAP::Fault::Code code,
+	       const string& reason,
 	       Message& request);
 
   //------------------------------------------------------------------------

@@ -84,11 +84,11 @@ bool Client::respond(Message& request)
 //------------------------------------------------------------------------
 // Return an error to request given
 // Returns whether successul
-bool Client::respond(ErrorMessage::Severity severity,
-		     const string& text,
+bool Client::respond(SOAP::Fault::Code code,
+		     const string& reason,
 		     Message& request)
 {
-  ErrorMessage errm(request.get_id(), severity, text);
+  FaultMessage errm(request.get_id(), code, reason);
   return send(errm);
 }
 
@@ -141,7 +141,7 @@ bool Client::request(Message& req)
   if (subject == "xmlmesh.ok") return true;
 
   // Handle error
-  ErrorMessage errm(response);
+  FaultMessage errm(response);
   if (!errm)
   {
     Log::Error << "Weird response received:\n";

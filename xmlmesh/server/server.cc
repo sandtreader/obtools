@@ -11,8 +11,6 @@
 #include "ot-log.h"
 #include <time.h>
 
-#define CORRELATOR_TICK_DELAY 30
-
 namespace ObTools { namespace XMLMesh { 
 
 //------------------------------------------------------------------------

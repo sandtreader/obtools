@@ -18,17 +18,14 @@ namespace ObTools { namespace XMLMesh {
 // Request-response correlation
 struct Correlation
 {
+  string id;                     // Request message ID
   Client client;                 // Client we're acting for
   string source_path;            // Original path for the request 
-  string source_id;              // Client's original message ID
-  string dest_id;                // Our replacement ID sent onwards
 
-  Correlation(Client& _client,
-	      const string& _source_path,
-	      const string& _source_id,
-	      const string& _dest_id):
-    client(_client), source_path(_source_path), source_id(_source_id), 
-    dest_id(_dest_id) {}
+  Correlation(const string& _id,
+	      Client& _client,
+	      const string& _source_path):
+    id(_id), client(_client), source_path(_source_path) {}
 };
 
 ostream& operator<<(ostream&s, const Correlation& c);
@@ -94,9 +91,6 @@ bool Correlator::handle(RoutingMessage& msg)
     {
       Log::Detail << "Correlator: Found correlation:\n  " << *cr << endl;
       
-      // Substitute original ID for ref
-      msg.message.set_ref(cr->source_id);
-
       // Substitute original path and make it a response so it goes into
       // reverse routing
       msg.path = MessagePath(cr->source_path);
@@ -121,22 +115,13 @@ bool Correlator::handle(RoutingMessage& msg)
     // Check for rsvp
     if (msg.message.get_rsvp())
     {
-      // Grab old ID
-      string old_id = msg.message.get_id();
-
-      // Create a new ID
-      ostringstream ids;
-      ids << "CREQ-" << ++id_serial;
-      string new_id = ids.str();
+      // Grab ID
+      string id = msg.message.get_id();
 
       // Create correlated request and enter in the cache
-      Correlation *cr = new Correlation(msg.client, msg.path.to_string(), 
-					old_id, new_id);
-      request_cache.add(new_id, cr);
+      Correlation *cr = new Correlation(id, msg.client, msg.path.to_string());
+      request_cache.add(id, cr);
       
-      // Substitute our id in the message
-      msg.message.set_id(new_id);
-
       // Log it
       Log::Detail << "Correlator: Opened correlation:\n  " << *cr << endl;
     }
@@ -187,8 +172,8 @@ void Correlator::tick()
 // Correlation stream operator
 ostream& operator<<(ostream&s, const Correlation& c)
 {
-  s << "[" << c.source_id << "(" << c.source_path << ") -> " 
-    << c.dest_id << " for " << c.client.client << " ]";
+  s << "[" << c.id << "(" << c.source_path << ")  for " 
+    << c.client.client << " ]";
   return s;
 }
 

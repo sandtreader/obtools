@@ -137,7 +137,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
   if (!smsg)
   {
     Log::Error << "Subscription: Bogus message from " << path << " dropped\n";
-    respond(msg, ErrorMessage::FATAL, "Illegal XML");
+    respond(msg, SOAP::Fault::CODE_SENDER, "Illegal subscription message");
     return false;
   }
 
@@ -161,7 +161,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
       return false;
 
     default:
-      respond(msg, ErrorMessage::FATAL, "Illegal operation");
+      respond(msg, SOAP::Fault::CODE_SENDER, "Illegal subscription operation");
       return false;
   }
 

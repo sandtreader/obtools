@@ -17,26 +17,14 @@ namespace ObTools { namespace XMLMesh {
 // Constructor for requests
 SubscriptionMessage::SubscriptionMessage(Operation _operation, 
 					 const string& _subject):
-  Message(), operation(_operation), subject(_subject)
+  Message((_operation==JOIN)?"xmlmesh.subscription.join"
+	                    :"xmlmesh.subscription.leave",
+	  new XML::Element((_operation==JOIN)?"x:join":"x:leave"),
+	  true),
+  operation(_operation), 
+  subject(_subject)
 {
-  string op;
-
-  switch (operation)
-  {
-    case JOIN:  op = "join";  break;
-    case LEAVE: op = "leave"; break;
-  }
-
-  ostringstream mss;
-  mss << "  <xmlmesh:" << op << " subject=\"" << subject << "\"/>";
-  string content = mss.str();
- 
-  // Create subject
-  string subject = "xmlmesh.subscription.";
-  subject += op;
-
-  // Create message from this
-  create(subject, content, true);
+  soap_message->get_body().set_attr("subject", _subject);
 }
 
 //--------------------------------------------------------------------------
@@ -44,15 +32,12 @@ SubscriptionMessage::SubscriptionMessage(Operation _operation,
 SubscriptionMessage::SubscriptionMessage(Message& msg): 
   Message(msg.get_text())  // Copy text
 {
-  // Get the XML
-  const XML::Element& xml = get_xml();
+  // Get the body
+  const XML::Element& body = get_body();
 
-  // Get xmlmesh.join/leave elements
-  const XML::Element& xsub = xml.get_child();
-
-  if (xsub.name == "xmlmesh:join")
+  if (body.name == "x:join")
     operation = JOIN;
-  else if (xsub.name == "xmlmesh:leave")
+  else if (body.name == "x:leave")
     operation = LEAVE;
   else
   {
@@ -63,7 +48,7 @@ SubscriptionMessage::SubscriptionMessage(Message& msg):
   }
 
   // Get subject
-  subject = xsub.get_attr("subject", "*"); 
+  subject = body.get_attr("subject", "*"); 
 }
 
 //------------------------------------------------------------------------

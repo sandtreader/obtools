@@ -16,7 +16,7 @@
 #include "ot-mt.h"
 #endif
 
-#include "ot-xml.h"
+#include "ot-soap.h"
 
 namespace ObTools { namespace XMLMesh {
 
@@ -27,31 +27,26 @@ using namespace std;
 // XMLMesh message
 class Message
 {
-private:
+protected:
   // Two forms of message - either XML, or text, or both.  get_xml and
   // get_text will convert if necessary, but holding both saves work
   // when just passing things through
-  XML::Element *xml_message;   // XML <message> element
-  string textual_message;      // Textual message (<message ...>)
+  SOAP::Message *soap_message;  // SOAP message
+  string textual_message;       // Textual message (<message ...>)
 
-  string allocate_id();
-
-protected:
-  // Create from text content
-  void create(const string& subject, const string& content,
-	      bool rsvp=false, const string& ref="");
+  const XML::Element& get_routing_header();
 
 public:
   //--------------------------------------------------------------------------
   // Default constructor - assumes we will set the message text later
-  Message(): xml_message(0) {}
+  Message(): soap_message(0) {}
 
   //--------------------------------------------------------------------------
-  // Basic constructor from text for outgoing messages
-  // ID is manufactured here
-  Message(const string& subject, const string& text_content,
-	  bool rsvp = false, const string& ref=""): xml_message(0)
-  { create(subject, text_content, rsvp, ref); }
+  // Constructor from existing SOAP::Message for outgoing messages
+  // ID is manufactured here, and routing header added
+  // 'soap' is taken and will be disposed with message
+  Message(const string& subject, SOAP::Message *soap,
+	  bool rsvp, const string& ref);
 
   //--------------------------------------------------------------------------
   // Constructor from XML for outgoing messages
@@ -59,6 +54,13 @@ public:
   // Takes ownership of the XML::Element - make sure it's detached from the
   // parser!
   Message(const string& subject, XML::Element *xml_content,
+	  bool rsvp = false, const string& ref="");
+
+  //--------------------------------------------------------------------------
+  // Constructor from partial XML text for outgoing messages
+  // ID is manufactured here
+  // body_text is the body text to be sent
+  Message(const string& subject, const string& body_text,
 	  bool rsvp = false, const string& ref="");
 
   //--------------------------------------------------------------------------
@@ -70,16 +72,16 @@ public:
   // Note, uses to_text to ensure there is a textual form, since we aren't
   // taking the XML
   Message(const Message& m):
-    xml_message(0), textual_message(m.to_text()) {}
+    soap_message(0), textual_message(m.to_text()) {}
 
   //--------------------------------------------------------------------------
   // Assignment operator, likewise
   Message& operator=(const Message &m)
   {
     // Check for old XML
-    if (xml_message) delete xml_message;
+    if (soap_message) delete soap_message;
 
-    xml_message = 0;
+    soap_message = 0;
     textual_message = m.to_text();
   }
 
@@ -92,18 +94,24 @@ public:
   string Message::get_text();
 
   //--------------------------------------------------------------------------
-  //Get XML content, still owned by Message, will be destroyed with it
-  const XML::Element& get_xml();
+  //Get SOAP Message, still owned by Message, will be destroyed with it
+  //Check for validity with !
+  const SOAP::Message& Message::get_soap();
 
   //--------------------------------------------------------------------------
-  //Get XML content for modification - clears textual copy if any.
-  //XML is still owned by Message, will be destroyed with it
-  XML::Element& get_modifiable_xml();
+  //Get SOAP message for modification - clears textual copy if any
+  //SOAP is still owned by Message, will be destroyed with it
+  SOAP::Message& get_modifiable_soap();
 
   //--------------------------------------------------------------------------
-  //Get XML content to keep after Message is destroyed
-  //Can return 0 if XML parse failed
-  XML::Element *detach_xml();
+  //Get XML Body content, still owned by Message, will be destroyed with it
+  //Check for validity with !
+  const XML::Element& get_body();
+
+  //--------------------------------------------------------------------------
+  //Ditto, but specifying a particular element name
+  //Check for validity with !
+  const XML::Element& get_body(const string& name);
 
   //--------------------------------------------------------------------------
   //Get subject of a message
@@ -122,22 +130,6 @@ public:
   string get_ref();
 
   //--------------------------------------------------------------------------
-  //Set id of a message
-  void set_subject(const string& new_subject);
-
-  //--------------------------------------------------------------------------
-  //Set id of a message
-  void set_id(const string& new_id);
-
-  //--------------------------------------------------------------------------
-  //Set rsvp of a message
-  void set_rsvp(bool new_rsvp);
-
-  //--------------------------------------------------------------------------
-  //Set ref of a message
-  void set_ref(const string& new_ref);
-
-  //--------------------------------------------------------------------------
   //Destructor - kills xml data if not detached
   ~Message();
 };
@@ -154,7 +146,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor given string ref, for responses
   OKMessage(const string& _ref):
-    Message("xmlmesh.ok", "<xmlmesh.ok/>", false, _ref) {}
+    Message("xmlmesh.ok", new XML::Element("x:ok"), false, _ref) {}
 
   //--------------------------------------------------------------------------
   // Down-cast constructor from general message on receipt
@@ -163,42 +155,35 @@ public:
 };
 
 //==========================================================================
-// Standard messages - xmlmesh.error
-
-class ErrorMessage: public Message
+// Fault message
+class FaultMessage: public Message
 {
 public:
-  // Severity of error
-  enum Severity
-  {
-    WARNING,
-    ERROR,
-    SERIOUS,
-    FATAL,
-    BOGUS          // Used if error can't be parsed
-  };
-
-  Severity severity;
-  string text;
+  SOAP::Fault::Code code;
+  string reason;
 
   //--------------------------------------------------------------------------
   // Constructor for responses
-  ErrorMessage(const string& _ref, Severity _severity, 
-	       const string& _text);
+  FaultMessage(const string& ref, SOAP::Fault::Code _code,
+	       const string& _reason);
 
   //--------------------------------------------------------------------------
   // Down-cast constructor from general message on receipt
   // Note: not const Message& because we may modify it by getting text
-  ErrorMessage(Message& msg);
+  FaultMessage(Message& msg);
+
+  //--------------------------------------------------------------------------
+  // Get raw SOAP Fault message for further unpacking
+  SOAP::Fault& get_fault() const;
 
   //--------------------------------------------------------------------------
   //Test for badness
-  bool operator!() { return severity == BOGUS; }
+  bool operator!() { return code == SOAP::Fault::CODE_UNKNOWN; }
 };
 
 //------------------------------------------------------------------------
-// << operator to write ErrorMessage to ostream
-ostream& operator<<(ostream& s, const ErrorMessage& m);
+// << operator to write FaultMessage to ostream
+ostream& operator<<(ostream& s, const FaultMessage& m);
 
 //==========================================================================
 // Standard messages - xmlmesh.subscription

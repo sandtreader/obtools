@@ -8,8 +8,8 @@
 TYPE	= lib
 NAME   	= ot-xmlmesh-core
 HEADERS = ot-xmlmesh.h
-OBJS    = message.o m-error.o m-subscription.o
-DEPENDS = xml net log
+OBJS    = message.o m-fault.o m-subscription.o
+DEPENDS = soap xml net log
 MT-VARIANTS = 1
 
 # Suppress MT library if single 

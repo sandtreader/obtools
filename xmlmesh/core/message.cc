@@ -15,7 +15,7 @@ namespace ObTools { namespace XMLMesh {
 
 //--------------------------------------------------------------------------
 //Standard namespace
-static const char *xml_namespace = "obtools.com/xmlmesh";
+static const char *xmlmesh_namespace = "http://obtools.com/ns/xmlmesh";
 
 //--------------------------------------------------------------------------
 //Static globals for ID allocation - threadsafe
@@ -28,7 +28,7 @@ static int id_serial;
 
 //--------------------------------------------------------------------------
 //Allocate an ID
-string Message::allocate_id()
+static string _allocate_id()
 {
 #if !defined(_SINGLE)
   MT::Lock lock(id_mutex);
@@ -40,24 +40,37 @@ string Message::allocate_id()
 }
 
 //--------------------------------------------------------------------------
-// Create outgoing messages
-void Message::create(const string& subject, const string& text_content,
-		     bool rsvp, const string& ref)
+// Add routing header to the given SOAP message
+static void _add_routing_header(SOAP::Message *soap,
+				const string& subject,
+				bool rsvp,
+				const string& ref)
 {
-  string id = allocate_id();
+  // Add routing header - role 'Next', must_understand, relay
+  XML::Element& rh = soap->add_header("x:routing", 
+				      SOAP::Header::ROLE_NEXT, 
+				      true, true);
+    
+  // Add our routing parameters
+  rh.set_attr("x:id", _allocate_id());
+  rh.set_attr("x:subject", subject);
+  if (rsvp) rh.set_attr_bool("x:rsvp", true);
+  if (ref.size()) rh.set_attr("x:ref", ref);
+}
 
-  // Hold in a textual form to save parsing the text
-  ostringstream mss;
-  mss << "<xmlmesh:message xmlns:xmlmesh=\"" << xml_namespace 
-      << "\" id=\"" << id << "\" subject=\"" << subject << "\"";
-  if (rsvp) mss << " rsvp=\"yes\"";
-  if (ref.size()) mss << " ref=\"" << ref << "\"";
-  mss << ">\n";
-  mss << text_content << endl;
-  mss << "</xmlmesh:message>\n";
+//--------------------------------------------------------------------------
+// Constructor from existing SOAP::Message for outgoing messages
+// ID is manufactured here, and routing header added
+// 'soap' is taken and will be disposed with message
+Message::Message(const string& subject, SOAP::Message *soap,
+		 bool rsvp, const string& ref)
+{
+  // Create a SOAP message with XMLMesh namespace
+  soap_message = soap;
+  soap->add_namespace("xmlns:x", xmlmesh_namespace);
 
-  textual_message = mss.str();
-  xml_message = 0;  // Don't parse unless required
+  // Add routing header
+  _add_routing_header(soap, subject, rsvp, ref);
 }
 
 //--------------------------------------------------------------------------
@@ -68,17 +81,44 @@ void Message::create(const string& subject, const string& text_content,
 Message::Message(const string& subject, XML::Element *xml_content,
 		 bool rsvp, const string& ref)
 {
-  string id = allocate_id();
+  // Create a SOAP message with XMLMesh namespace
+  soap_message = new SOAP::Message();
+  soap_message->add_namespace("xmlns:x", xmlmesh_namespace);
 
-  // Manufacture an XML <xmlmesh:message> element containing the attributes and
-  // the given content
-  xml_message = new XML::Element("xmlmesh:message");
-  xml_message->attrs["xmlns:xmlmesh"] = xml_namespace;
-  xml_message->attrs["id"] = id;
-  xml_message->attrs["subject"] = subject;
-  if (rsvp) xml_message->attrs["rsvp"] = "yes";
-  if (ref.size()) xml_message->attrs["ref"] = ref;
-  xml_message->children.push_back(xml_content);
+  // Add routing header
+  _add_routing_header(soap_message, subject, rsvp, ref);
+
+  // Add content body
+  soap_message->add_body(xml_content);
+}
+
+//--------------------------------------------------------------------------
+// Constructor from partial XML text for outgoing messages
+// ID is manufactured here
+// body_text is the body text to be sent
+Message::Message(const string& subject, const string& body_text,
+		 bool rsvp, const string& ref)
+{
+  // Create a SOAP message with XMLMesh namespace
+  soap_message = new SOAP::Message();
+  soap_message->add_namespace("xmlns:x", xmlmesh_namespace);
+
+  // Add routing header
+  _add_routing_header(soap_message, subject, rsvp, ref);
+
+  // Parse content body
+  XML::Parser parser(Log::Error);
+  try
+  {
+    parser.read_from(body_text);
+    soap_message->add_body(parser.detach_root());
+  }
+  catch (XML::ParseFailed)
+  {
+    Log::Error << "XMLMesh Message creation: "
+	       << "can't parse supplied body text:\n" 
+	       << body_text << endl;
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -86,7 +126,7 @@ Message::Message(const string& subject, XML::Element *xml_content,
 Message::Message(const string& message_text)
 {
   textual_message = message_text;
-  xml_message = 0;  // For now - will be created in get_xml if required
+  soap_message = 0;  // For now - will be created in get_xml if required
 }
 
 //--------------------------------------------------------------------------
@@ -96,12 +136,7 @@ string Message::to_text() const
   if (textual_message.size()) return textual_message;
 
   // If XML exists, get the textual form
-  if (xml_message)
-  {
-    ostringstream mss;
-    mss << *xml_message;
-    return mss.str();
-  }
+  if (soap_message) return soap_message->to_string();
   
   return "";
 }
@@ -116,149 +151,111 @@ string Message::get_text()
 }
 
 //--------------------------------------------------------------------------
-//Get XML content, still owned by Message, will be destroyed with it
-const XML::Element& Message::get_xml()
+//Get SOAP Message, still owned by Message, will be destroyed with it
+//Check for validity with !
+const SOAP::Message& Message::get_soap()
 {
   // If we've already got it, return immediately
-  if (xml_message) return *xml_message;
+  if (soap_message) return *soap_message;
 
-  // Parse XML
-  XML::Parser parser(Log::Error);
+  // Create parser with fixed namespace in case someone's being clever
+  // and using another prefix
+  SOAP::Parser parser(Log::Error);
+  parser.fix_namespace(xmlmesh_namespace, "x");
 
-  // Fix our namespace incase they're being clever
-  parser.fix_namespace(xml_namespace, "xmlmesh");
-
-  try
+  // Read SOAP message from parser
+  soap_message = new SOAP::Message(textual_message, parser);
+  if (!*soap_message)
   {
-    parser.read_from(textual_message);
-    XML::Element& root = parser.get_root();
-    if (root.name == "xmlmesh:message")
-    {
-      // Detach it to keep
-      xml_message = parser.detach_root();
-    }
-    else
-    {
-      Log::Error << "XMLMesh:: Received bogus XML root: " << root.name << endl;
-    }
-  }
-  catch (XML::ParseFailed)
-  {
-    Log::Error << "XMLMesh:: Can't parse incoming message\n";
+    Log::Error << "XMLMesh:: Can't parse incoming SOAP message\n";
+    // Leave the dead XML here, otherwise we'll keep parsing it again
   }
 
-  // See if we've got one now - if not, return Element::none for safety
-  if (xml_message)
-    return *xml_message;
-  else
-    return XML::Element::none;
+  return *soap_message;
 }
 
 //--------------------------------------------------------------------------
-//Get XML content for modification - clears textual copy if any
-//XML is still owned by Message, will be destroyed with it
-XML::Element& Message::get_modifiable_xml()
+//Get SOAP message for modification - clears textual copy if any
+//SOAP is still owned by Message, will be destroyed with it
+SOAP::Message& Message::get_modifiable_soap()
 {
   // Make sure we have XML form available
-  get_xml();
+  get_soap();
 
   // Delete the textual form
   textual_message = "";
 
-  // Return XML
-  if (xml_message)
-    return *xml_message;
-  else
-    return XML::Element::none;
+  // Return message
+  return *soap_message;
 }
 
 //--------------------------------------------------------------------------
-//Get XML content to keep after Message is destroyed
-//Can return 0 if XML parse failed
-XML::Element *Message::detach_xml()
+//Get XML Body content, still owned by Message, will be destroyed with it
+//Check for validity with !
+const XML::Element& Message::get_body()
 {
-  // Try to ensure we have some XML
-  get_xml();
+  get_soap();  // Ensure soap_message exists
+  return soap_message->get_body();
+}
 
-  // If we have it, detach and return it
-  if (xml_message)
-  {
-    XML::Element *m = xml_message;
-    xml_message = 0;
-    return m;
-  }
-  else return 0;
+//--------------------------------------------------------------------------
+//Ditto, but specifying a particular element name
+//Check for validity with !
+const XML::Element& Message::get_body(const string& name)
+{
+  get_soap();  // Ensure soap_message exists
+  return soap_message->get_body(name);
+}
+
+//--------------------------------------------------------------------------
+//Get routing header of the message
+const XML::Element& Message::get_routing_header()
+{
+  const SOAP::Message& soap = get_soap();
+  SOAP::Header h;
+  if (soap.get_header("x:routing", h))
+    return *h.content;
+  else
+    return XML::Element::none;
 }
 
 //--------------------------------------------------------------------------
 //Get subject of a message
 string Message::get_subject()
 {
-  const XML::Element& xml = get_xml();
-  return xml.get_attr("subject");
+  const XML::Element& routing = get_routing_header();
+  return routing["x:subject"];
 }
 
 //--------------------------------------------------------------------------
 //Get id of a message
 string Message::get_id()
 {
-  const XML::Element& xml = get_xml();
-  return xml.get_attr("id");
+  const XML::Element& routing = get_routing_header();
+  return routing["x:id"];
 }
 
 //--------------------------------------------------------------------------
 //Get whether the message requires a response
 bool Message::get_rsvp()
 {
-  const XML::Element& xml = get_xml();
-  return xml.get_attr_bool("rsvp");
+  const XML::Element& routing = get_routing_header();
+  return routing.get_attr_bool("x:rsvp");
 }
 
 //--------------------------------------------------------------------------
 //Get reference of a message
 string Message::get_ref()
 {
-  const XML::Element& xml = get_xml();
-  return xml.get_attr("ref");
-}
-
-//--------------------------------------------------------------------------
-//Set id of a message
-void Message::set_subject(const string& new_subject)
-{
-  XML::Element& xml = get_modifiable_xml();
-  xml.set_attr("subject", new_subject);
-}
-
-//--------------------------------------------------------------------------
-//Set id of a message
-void Message::set_id(const string& new_id)
-{
-  XML::Element& xml = get_modifiable_xml();
-  xml.set_attr("id", new_id);
-}
-
-//--------------------------------------------------------------------------
-//Set rsvp of a message
-void Message::set_rsvp(bool new_rsvp)
-{
-  XML::Element& xml = get_modifiable_xml();
-  xml.set_attr_bool("rsvp", new_rsvp);
-}
-
-//--------------------------------------------------------------------------
-//Set ref of a message
-void Message::set_ref(const string& new_ref)
-{
-  XML::Element& xml = get_modifiable_xml();
-  xml.set_attr("ref", new_ref);
+  const XML::Element& routing = get_routing_header();
+  return routing["x:ref"];
 }
 
 //--------------------------------------------------------------------------
 //Destructor - kills xml data if not detached
 Message::~Message()
 {
-  if (xml_message) delete xml_message;
+  if (soap_message) delete soap_message;
 }
 
 //------------------------------------------------------------------------

@@ -141,13 +141,13 @@ bool Service::respond(RoutingMessage& request)
 }
 
 //------------------------------------------------------------------------
-// Return an error to an existing request
+// Return a fault to an existing request
 // Returns whether successul
 bool Service::respond(RoutingMessage& request,
-		      ErrorMessage::Severity severity,
-		      const string& text)
+		      SOAP::Fault::Code code,
+		      const string& reason)
 {
-  ErrorMessage response(request.message.get_id(), severity, text);
+  FaultMessage response(request.message.get_id(), code, reason);
   return respond(response, request);
 }
 
