@@ -29,9 +29,6 @@ private:
   bool ok;                    // Whether started OK
 
   CPPT::Tags read_tags(XML::Element& root, CPPT::Tags& defaults);
-  void process_script(const string& script, CPPT::Tags& tags, int& max_ci);
-  void template_funcs(XML::Element& root, CPPT::Tags& tags,
-		      int& max_ci, const string& suffix="");
   void generate_legal();
   void generate_config_vars();
 
@@ -50,9 +47,19 @@ protected:
   virtual string get_parameter_type(XML::Element &te) = 0;
 
   //--------------------------------------------------------------------------
+  // Process a script to cout, using given tags
+  // Limit common indent removal to max_ci.  If not yet set (<0), sets it to
+  // common indent of this script
+  void process_script(const string& script, CPPT::Tags& tags, 
+		      const string& streamname, int& max_ci);
+  
+  //--------------------------------------------------------------------------
   // Generate code to call a template for all elements of given name
   virtual void generate_call(XML::Element& te, XML::Element& parent,
-			     const string& suffix,
+			     CPPT::Tags& tags,
+			     int& max_ci,
+			     const string& streamname,
+			     string& script,
 			     bool is_root = false) = 0;
 
   //--------------------------------------------------------------------------
@@ -63,7 +70,8 @@ protected:
   // Accumulates script in script, dumps it on hitting a sub-template
   virtual void generate_template(XML::Element& te, XML::Element& parent,
 				 CPPT::Tags& tags, 
-				 int& max_ci, const string& suffix,
+				 int& max_ci, 
+				 const string& streamname,
 				 string& script);
 
   //--------------------------------------------------------------------------

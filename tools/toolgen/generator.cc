@@ -117,6 +117,7 @@ void Generator::generate_legal()
 void Generator::generate_includes()
 {
   sout << "\n#include \"ot-xml.h\"\n";
+  sout << "\n#include \"ot-text.h\"\n";
 
   sout << "#include <fstream>\n";
   sout << "#include <sstream>\n";
@@ -189,7 +190,7 @@ CPPT::Tags Generator::read_tags(XML::Element& root, CPPT::Tags& defaults)
 // Limit common indent removal to max_ci.  If not yet set (<0), sets it to
 // common indent of this script
 void Generator::process_script(const string& script, CPPT::Tags& tags, 
-			       int& max_ci)
+			       const string& streamname, int& max_ci)
 {
   // Tidy up script first - remove leading and trailing blank lines
   string myscript = Text::strip_blank_lines(script);
@@ -207,7 +208,7 @@ void Generator::process_script(const string& script, CPPT::Tags& tags,
 
     // Run it through CPPT
     istringstream sscr(myscript);
-    CPPT::Processor processor(sscr, sout, tags, "_sout");
+    CPPT::Processor processor(sscr, sout, tags, streamname);
     processor.process();
   }
 }
@@ -220,14 +221,82 @@ void Generator::process_script(const string& script, CPPT::Tags& tags,
 // Accumulates script in script, dumps it on hitting a sub-template
 void Generator::generate_template(XML::Element& e, XML::Element& te,
 				  CPPT::Tags& tags, 
-				  int& max_ci, const string& suffix,
+				  int& max_ci, 
+				  const string& streamname,
 				  string& script)
 {
   // Check for optimised content
   if (e.content.size()) script += e.content;
 
+  // Give us a block context to avoid redeclarations
+  sout << " {\n";
+
+  // Now my code - depends whether we need to open a new file or not
+  XML::XPathProcessor xpath(e);
+  string fn_script = xpath["xt:file"];
+  string dir_script = xpath["xt:dir"];
+
+  // Check for tag override in this element
+  CPPT::Tags mytags = read_tags(e, tags); 
+
+  // Get element parameter name and type
+  string var = get_parameter_name(e);
+  string vartype = get_parameter_type(e);
+  string param = vartype + " " + var;
+
+  string mystream = streamname;
+  int old_max_ci = max_ci;
+
+  if (dir_script.size())
+  {
+    // Generate code to build dirname
+    sout << "  ostringstream _dirname_s;\n";
+    int temp=0; // No stripping
+    process_script(dir_script, tags, "_dirname_s", temp);
+    sout << "  string _dirname = _dirname_s.str();\n";
+
+    // Generate path addition code
+    sout <<"  string _oldpath = _path;\n";
+    sout <<"  _path += _dirname + \"/\";\n\n";
+
+    sout <<"  // Make directory\n";
+    sout <<"  string _cmd = string(\"mkdir -p \\\"\")+_path+\"\\\"\";\n";
+    sout <<"  if (system(_cmd.c_str()))\n";
+    sout <<"  {\n";
+    sout <<"    cerr << \"Could not \" << _cmd << endl;\n";
+    sout <<"    exit(2);\n";
+    sout <<"  }\n\n";
+  }
+
+  if (fn_script.size())
+  {
+    // Generate code to build filename
+    sout << "  ostringstream _filename_s;\n";
+    int temp=0; // No stripping
+    process_script(fn_script, tags, "_filename_s", temp);
+    sout << "  string _filename = _path + _filename_s.str();\n";
+
+    // Output Regen stream if wanted for this file
+    if (xpath.get_value_bool("xt:file/@regen"))
+      sout << "  ObTools::ReGen::rofstream";
+    else
+      sout << "  ofstream";
+
+    sout << " _sout(_filename.c_str());\n";
+    sout << "  if (!_sout)\n";
+    sout << "  {\n";
+    sout << "    cerr << \"Can't create file: \" << _filename <<endl;\n";
+    sout << "    exit(4);\n";
+    sout << "  }\n\n";
+
+    // Reset max common indent for new file
+    max_ci = -1;
+
+    // Move to new stream for subsequent output
+    mystream = "_sout";
+  }
+
   // Iterate all child elements
-  int i=0;
   OBTOOLS_XML_FOREACH_CHILD(ce, e)
     if (ce.name.empty())
     {
@@ -236,19 +305,16 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
     }
     else 
     {
-      // Get my suffix appended to parent's
-      ostringstream ssuf;
-      ssuf << suffix << '_' << i+1;
-      string mysuffix = ssuf.str();
-
       if (ce.name == "xt:template")
       {
 	// Process and clear script before calling sub-template
-	process_script(script, tags, max_ci);
+	process_script(script, tags, mystream, max_ci);
 	script.clear();
 
 	// Call to subtemplate, iterating over children
-	generate_call(ce, te, mysuffix);
+	generate_call(ce, te, mytags, max_ci, mystream, script);
+	process_script(script, mytags, mystream, max_ci);
+	script.clear();
       }
 
       // Recurse to sub-elements, except ignoring xt:xxx 
@@ -258,144 +324,27 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 	script += ce.start_to_string();
 
 	// Recurse to generate content, keeping 'te' set the same
-	generate_template(ce, te, tags, max_ci, mysuffix, script);
+	generate_template(ce, te, tags, max_ci, mystream, script);
 
 	// Process end tag as a script
 	script += ce.end_to_string();
       }
     }
-    i++;
   OBTOOLS_XML_ENDFOR
-}
 
-//--------------------------------------------------------------------------
-// Produce template functions from all templates at given level
-void Generator::template_funcs(XML::Element& root, CPPT::Tags& tags,
-			       int& max_ci, const string& suffix)
-{
-  int i=0;
-  OBTOOLS_XML_FOREACH_CHILD(e, root)
-    if (e.name.size())  // Ignore raw content
-    {
-      // Get my suffix appended to any existing
-      ostringstream ssuf;
-      ssuf << suffix << '_' << i+1;
-      string mysuffix = ssuf.str();
+  // Process any tail-end script
+  process_script(script, mytags, mystream, max_ci);
+  script.clear();
 
-      // Check for template
-      if (e.name == "xt:template")
-      {
-	// Now my code - depends whether we need to open a new file or not
-	XML::XPathProcessor xpath(e);
-	string fn_script = xpath["xt:file"];
-	string dir_script = xpath["xt:dir"];
+  // Output code to restore path
+  if (dir_script.size())
+    sout <<"  _path = _oldpath;\n";
 
-	string streamname = "_sout";
+  // Close block context
+  sout << " }\n";
 
-	// Check for tag override in this element
-	CPPT::Tags mytags = read_tags(e, tags); 
-
-	// Get element parameter name and type
-	string var = get_parameter_name(e);
-	string vartype = get_parameter_type(e);
-	string param = vartype + " " + var;
-
-	int old_max_ci = max_ci;
-	if (fn_script.size())
-	{
-	  // Generate function to build filename
-	  sout<<"//----------------------------------------------------------------\n";
-	  sout << "// Filename builder for " << e.get_attr("name") << endl;
-	  sout << "string fn_template" << mysuffix << "(" << param << ")\n";
-	  sout << "{\n";
-	  sout << "  ostringstream _sout;\n";
-	  int temp=0; // No stripping
-	  process_script(fn_script, tags, temp);
-	  sout << "  return _sout.str();\n";
-	  sout << "}\n\n";
-
-	  // Rename template function stream parameter so we can replace it
-	  streamname = "_sout2";
-
-	  // Reset max common indent for new file
-	  max_ci = -1;
-	}
-
-	if (dir_script.size())
-	{
-	  // Generate function to build dirname
-	  sout<<"//----------------------------------------------------------------\n";
-	  sout << "// Directory name builder for " 
-	       << e.get_attr("name") << endl;
-	  sout << "string dn_template" << mysuffix << "(" << param << ")\n";
-	  sout << "{\n";
-	  sout << "  ostringstream _sout;\n";
-	  int temp=0; // No stripping
-	  process_script(dir_script, tags, temp);
-	  sout << "  return _sout.str();\n";
-	  sout << "}\n\n";
-	}
-
-	// Recurse to children 
-	template_funcs(e, mytags, max_ci, mysuffix);
-
-	sout<<"//----------------------------------------------------------------\n";
-	sout <<"// " << e.get_attr("name") << endl;
-	sout << "void template" << mysuffix << "(ostream& " << streamname 
-	     << ", " << param 
-	     << ", int _index, string _path)\n";
-	sout << "{\n";
-	sout << "  int _i;\n";
-
-	if (dir_script.size())
-	{
-	  // Generate path addition code
-	  sout <<"  _path += dn_template" << mysuffix 
-	       <<"(" << var << ") + \"/\";\n\n";
-
-	  sout <<"  // Make directory\n";
-	  sout <<"  string _cmd = string(\"mkdir -p \\\"\")+_path+\"\\\"\";\n";
-	  sout <<"  if (system(_cmd.c_str()))\n";
-	  sout <<"  {\n";
-	  sout <<"    cerr << \"Could not \" << _cmd << endl;\n";
-	  sout <<"    exit(2);\n";
-	  sout <<"  }\n\n";
-	}
-
-	if (fn_script.size())
-	{
-	  // Generate file open code for sout 
-	  sout << "  string _fn = _path+fn_template" << mysuffix 
-	       << "(" << var << ");\n";
-	  // Output Regen stream if wanted for this file
-	  if (xpath.get_value_bool("xt:file/@regen"))
-	    sout << "  ObTools::ReGen::rofstream _sout(_fn.c_str());\n";
-	  else
-	    sout << "  ofstream _sout(_fn.c_str());\n";
-	  sout << "  if (!_sout)\n";
-	  sout << "  {\n";
-	  sout << "    cerr << \"Can't create file: \" << _fn << endl;\n";
-	  sout << "    exit(4);\n";
-	  sout << "  }\n\n";
-	}
-
-	string script;
-	generate_template(e, e, mytags, max_ci, mysuffix, script);
-	process_script(script, mytags, max_ci);
-
-	sout << "}\n\n";
-
-	// Return common indent for outer file
-	if (fn_script.size()) max_ci = old_max_ci;
-      }
-      else
-      {
-	// Just recurse
-	template_funcs(e, tags, max_ci, mysuffix);
-      }
-    }
-    i++;
-  OBTOOLS_XML_ENDFOR
+  // Return common indent for outer file
+  if (fn_script.size()) max_ci = old_max_ci;
 }
 
 //--------------------------------------------------------------------------
@@ -409,12 +358,10 @@ void Generator::generate_roots()
     if (ce.name == "xt:template")
     {
       // Get my suffix 
-      ostringstream ssuf;
-      ssuf << '_' << i+1;
-      string suffix = ssuf.str();
-
+      string script;
+      int max_ci = -1;
       // Call to template, iterating over children
-      generate_call(ce, root, suffix, true);
+      generate_call(ce, root, tags, max_ci, "cout", script, true);
     }
     i++;
   OBTOOLS_XML_ENDFOR
@@ -443,13 +390,6 @@ void Generator::generate()
     code = Text::remove_indent(code, Text::get_common_indent(code));
     sout << code << endl;
   }
-
-  // Template functions
-  sout<<"//================================================================\n";
-  sout<<"// Template scripts from "<< config_file 
-      <<" <xt:template> sections\n\n";
-  int max_ci = -1;
-  template_funcs(config.get_root(), tags, max_ci);
 
   // Main function
   generate_main();
