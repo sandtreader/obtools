@@ -13,7 +13,11 @@
 
 int main()
 {
-  ObTools::XML::Configuration config("tests/config.xml");
+  list<string> filenames;
+  filenames.push_back("not-there.xml");
+  filenames.push_back("tests/config.xml");
+  filenames.push_back("tests/simple.xml");
+  ObTools::XML::Configuration config(filenames);
 
   if (!config.read("config")) return 2;
 
