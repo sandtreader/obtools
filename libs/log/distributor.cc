@@ -12,44 +12,20 @@
 namespace ObTools { namespace Log {
 
 //--------------------------------------------------------------------------
-// Connect a channel under the given name
-// Takes ownership and will dispose of it unless disconnected again
-void Distributor::connect(const string& name, Channel *chan)
+// Connect a channel
+void Distributor::connect(Channel& chan)
 {
   MT::Lock lock(mutex);
-  channels[name] = chan;
+  channels.push_back(&chan);
 }
 
 //--------------------------------------------------------------------------
-// Disconnect the named channel but don't dispose of it
-// Returns the channel if found, 0 if not
-Channel *Distributor::disconnect(const string& name)
+// Disconnect the given channel
+void Distributor::disconnect(Channel& chan)
 {
   MT::Lock lock(mutex);
 
-  map<string, Channel *>::iterator p = channels.find(name);
-  if (p != channels.end())
-  {
-    Channel *c = p->second;
-    channels.erase(p);
-    return c;
-  }
-  else return 0;
-}
-
-//--------------------------------------------------------------------------
-// Disconnect and dispose of the named channel
-// Whether it was found
-bool Distributor::dispose(const string& name)
-{
-  MT::Lock lock(mutex);
-  Channel *c = disconnect(name);
-  if (c)
-  {
-    delete c;
-    return true;
-  }
-  else return false;
+  channels.remove(&chan);
 }
 
 //--------------------------------------------------------------------------
@@ -58,32 +34,11 @@ void Distributor::log(Message& msg)
 {
   MT::Lock lock(mutex);
 
-  // Send to all channels with max level higher or equal to this, with
-  // matching pattern (or none)
-  map<string, Channel *>::iterator p;
+  // Send to all channels 
+  list<Channel *>::iterator p;
   for(p=channels.begin(); p!=channels.end(); p++)
-  {
-    Channel *c = p->second;
-    if (c->level >= msg.level
-     && (!c->pattern.size() || Text::pattern_match(c->pattern, msg.text))) 
-      c->log(msg);
-  }
+    (*p)->log(msg);
 }
-
-//--------------------------------------------------------------------------
-// Destructor - disposes of all registered channels
-Distributor::~Distributor()
-{
-  MT::Lock lock(mutex);
-
-  map<string, Channel *>::iterator p;
-  for(p=channels.begin(); p!=channels.end(); p++)
-  {
-    Channel *c = p->second;
-    delete c;
-  }
-}
-
 
 }} // namespaces
 

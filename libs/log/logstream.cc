@@ -21,13 +21,6 @@ LogStreamBuf::LogStreamBuf(Channel& _channel, Level _level):
 }
 
 //------------------------------------------------------------------------
-// LogStreamBuf Destructor - force close
-LogStreamBuf::~LogStreamBuf() 
-{ 
-  close(); 
-}
-
-//------------------------------------------------------------------------
 // LogStreamBuf close() function
 // Does all the real work here!
 void LogStreamBuf::close()
@@ -47,16 +40,14 @@ int LogStreamBuf::overflow(int c)
 {
   if (c==EOF)
     close();
-  else
-    buffer += (char)c;
-
-  // Pass buffer on at EOL
-  if (c=='\n')
+  else if (c=='\n')
   {
+    // Pass buffer on at EOL, without EOL in it
     Message msg(level, buffer);
     channel.log(msg);
     buffer.erase();
   }
+  else buffer += (char)c;
 
   return 0;
 }

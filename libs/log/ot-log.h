@@ -12,7 +12,7 @@
 
 #include "ot-mt.h"
 #include <time.h>
-#include <map>
+#include <list>
 #include <string>
 #include <iostream>
 
@@ -47,7 +47,7 @@ class Message
 public:
   Level level;
   time_t timestamp;
-  string text;
+  string text;          // Line of text without EOL
 
   //--------------------------------------------------------------------------
   // Constructor
@@ -61,15 +61,11 @@ public:
 class Channel
 {
 public:
-  Level level;
-  string pattern;
   MT::Mutex mutex;  // Assume multi-threaded use
 
   //--------------------------------------------------------------------------
-  // Constructors
-  // p (pattern) is a glob pattern for lines (c.f. Text::pattern_match)
-  Channel(Level l=LEVEL_SUMMARY, const string& p=""): 
-    level(l), pattern(p) {}
+  // Constructor
+  Channel() {}
 
   //--------------------------------------------------------------------------
   // Abstract virtual logging function
@@ -81,36 +77,66 @@ public:
 };
 
 //==========================================================================
-// Line-based Log channel 
-// Abstract virtual definition of a logging channel which splits into 
-// timestamped lines
-class LineChannel: public Channel
+// Abtract Filter channel
+// Does something to the message and passes it on, or drops it
+class Filter: public Channel
 {
 protected:
-  string time_format;
-  string buffer;
+  Channel& next;
 
 public:
-  //--------------------------------------------------------------------------
-  // Constructor - for time format, see strftime(3)
-  LineChannel(Level l=LEVEL_SUMMARY, 
-	      const string& p = "",
-	      const string& _time_format = "%H:%M:%S %a %d %b %Y: "): 
-    Channel(l, p), time_format(_time_format) {}
-
-  //--------------------------------------------------------------------------
-  // Message logging function
-  void log(Message& msg);
-
-  //--------------------------------------------------------------------------
-  // Abstract virtual line logging function
-  virtual void log_line(const string& line) = 0;
+  Filter(Channel& _next): next(_next) {}
 };
 
+//==========================================================================
+// LevelFilter channel
+// Filters messages by maximum log level
+class LevelFilter: public Filter
+{
+private:
+  Level level;
+
+public:
+  LevelFilter(Level _l, Channel& _next): level(_l), Filter(_next) {}
+
+  void log(Message& msg);
+};
+
+//==========================================================================
+// PatternFilter channel
+// Filters messages by a pattern applies to the text
+class PatternFilter: public Filter
+{
+private:
+  string pattern;
+
+public:
+  // Constructor takes Text::pattern_match (glob) format
+  PatternFilter(const string& _p, Channel& _next): 
+    pattern(_p), Filter(_next) {}
+
+  void log(Message& msg);
+};
+
+//==========================================================================
+// TimestampFilter channel
+// Adds timestamps to the front of each message
+class TimestampFilter: public Filter
+{
+private:
+  string format;
+
+public:
+  // Constructor takes strftime format
+  TimestampFilter(const string& _format, Channel& _next): 
+    format(_format), Filter(_next) {}
+
+  void log(Message& msg);
+};
 
 //==========================================================================
 // Channel to standard iostream
-class StreamChannel: public LineChannel
+class StreamChannel: public Channel
 {
 private:
   ostream& stream;
@@ -118,53 +144,37 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  StreamChannel(ostream& s, Level l=LEVEL_SUMMARY,
-		const string& p = "",
-		const string& t = "%H:%M:%S %a %d %b %Y: "): 
-    LineChannel(l, p, t), stream(s) {}
+  StreamChannel(ostream& s): stream(s) {}
 
   //--------------------------------------------------------------------------
   // Logging function
-  void log_line(const string& line);
+  void log(Message& msg);
 };
 
 //==========================================================================
 // Log distribution point
 // Also a channel, so they can be chained
-// Own level applies as well as channels'
 class Distributor: public Channel
 {
 private:
-  map<string, Channel *> channels;
+  list<Channel *> channels;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  // Set own level to maximum
-  Distributor(): Channel(LEVEL_DUMP) {}
+  Distributor() {}
   
   //--------------------------------------------------------------------------
-  // Connect a channel under the given name
-  // Takes ownership and will dispose of it unless disconnected again
-  void connect(const string& name, Channel *chan);
+  // Connect a channel 
+  void connect(Channel& chan);
 
   //--------------------------------------------------------------------------
-  // Disconnect the named channel but don't dispose of it
-  // Returns the channel if found, 0 if not
-  Channel *disconnect(const string& name);
-
-  //--------------------------------------------------------------------------
-  // Disconnect and dispose of the named channel
-  // Whether it was found
-  bool dispose(const string& name);
+  // Disconnect the given channel
+  void disconnect(Channel& chan);
 
   //--------------------------------------------------------------------------
   // Log a message
   void log(Message& msg);
-
-  //--------------------------------------------------------------------------
-  // Destructor - disposes of all registered channels
-  ~Distributor();
 };
 
 //==========================================================================
@@ -184,9 +194,8 @@ protected:
   int overflow(int); 
    
 public:
-  // Constructor/destructor
+  // Constructor
   LogStreamBuf(Channel& _channel, Level level);
-  ~LogStreamBuf();
 
   // Close stream
   void close();
@@ -201,7 +210,7 @@ public:
     ostream(new LogStreamBuf(channel, level)) {}
 
   // Destructor
-  ~LogStream() { close(); delete rdbuf(); }
+  ~LogStream() { delete rdbuf(); }
 
   // Close - pass on to LogStreamBuf to do
   void close() { static_cast<LogStreamBuf *>(rdbuf())->close(); }

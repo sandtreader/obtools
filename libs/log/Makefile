@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = distributor.o logstream.o channel.o logger.o
+OBJS = distributor.o filter.o logstream.o channel.o logger.o
 
 ifdef DEBUG
 CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
