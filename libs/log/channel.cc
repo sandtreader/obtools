@@ -19,6 +19,10 @@ namespace ObTools { namespace Log {
 // Logging function
 void StreamChannel::log(Message& msg)
 {
+#if !defined(_SINGLE)
+  MT::Lock lock(mutex);    // ostreams are NOT thread-safe
+#endif
+
   stream << msg.text << endl;
 }
 

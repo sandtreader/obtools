@@ -21,11 +21,15 @@ Distributor logger;
 
 //==========================================================================
 // Simple global log streams
-LogStream Error  (logger, LEVEL_ERROR);
-LogStream Summary(logger, LEVEL_SUMMARY);
-LogStream Detail (logger, LEVEL_DETAIL);
-LogStream Debug  (logger, LEVEL_DEBUG);
-LogStream Dump   (logger, LEVEL_DUMP);
+// Do not remove this restriction to single-threaded code without reading
+// *** notes in ot-log.h!
+#if defined(_SINGLE)
+Stream Error  (logger, LEVEL_ERROR);
+Stream Summary(logger, LEVEL_SUMMARY);
+Stream Detail (logger, LEVEL_DETAIL);
+Stream Debug  (logger, LEVEL_DEBUG);
+Stream Dump   (logger, LEVEL_DUMP);
+#endif
 
 }} // namespaces
 

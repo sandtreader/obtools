@@ -12,8 +12,8 @@
 namespace ObTools { namespace Log {
 
 //------------------------------------------------------------------------
-// LogStreamBuf Constructor 
-LogStreamBuf::LogStreamBuf(Channel& _channel, Level _level): 
+// StreamBuf Constructor 
+StreamBuf::StreamBuf(Channel& _channel, Level _level): 
   closed(false), channel(_channel), level(_level)
 {
   // use unbuffered IO, since we're going to buffer it anyway
@@ -22,9 +22,9 @@ LogStreamBuf::LogStreamBuf(Channel& _channel, Level _level):
 }
 
 //------------------------------------------------------------------------
-// LogStreamBuf close() function
+// StreamBuf close() function
 // Does all the real work here!
-void LogStreamBuf::close()
+void StreamBuf::close()
 {
   // Avoid doing this more than once
   if (closed) return;
@@ -35,9 +35,9 @@ void LogStreamBuf::close()
 }
 
 //------------------------------------------------------------------------
-// LogStreamBuf overflow() function
+// StreamBuf overflow() functitcon
 // Handles characters one at a time, since streambuf is unbuffered
-int LogStreamBuf::overflow(int c)
+int StreamBuf::overflow(int c)
 {
   if (c==EOF)
     close();

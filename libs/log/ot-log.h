@@ -62,6 +62,7 @@ public:
 //==========================================================================
 // Log channel 
 // Abstract virtual definition of a logging channel
+// Note: Safe to share channels between threads because mutexed
 class Channel
 {
 public:
@@ -187,7 +188,7 @@ public:
 // Log stream for use with sugared objects below
 
 //Logging streambuf
-class LogStreamBuf: public streambuf
+class StreamBuf: public streambuf
 {
 private:
   string buffer;
@@ -201,41 +202,77 @@ protected:
    
 public:
   // Constructor
-  LogStreamBuf(Channel& _channel, Level level);
+  StreamBuf(Channel& _channel, Level level);
 
   // Close stream
   void close();
 };
 
 //Log stream
-class LogStream: public ostream
+//  *** Note:  Not shareable between threads - see *** below
+class Stream: public ostream
 {
 public:
   // Constructor - like ofstream
-  LogStream(Channel &channel, Level level): 
-    ostream(new LogStreamBuf(channel, level)) {}
+  Stream(Channel &channel, Level level): 
+    ostream(new StreamBuf(channel, level)) {}
 
   // Destructor
-  ~LogStream() { delete rdbuf(); }
+  ~Stream() { delete rdbuf(); }
 
-  // Close - pass on to LogStreamBuf to do
-  void close() { static_cast<LogStreamBuf *>(rdbuf())->close(); }
+  // Close - pass on to StreamBuf to do
+  void close() { static_cast<StreamBuf *>(rdbuf())->close(); }
 };
 
 //==========================================================================
 // Singleton Distributor for simple Logs
+// Note: Safe to share between threads
 extern Distributor logger;
 
 //==========================================================================
 // Simple log streams
 // e.g.
 //   ObTools::Log::Error << "The end of the world is nigh!" << endl;
+//
+// *** NOTE *** 
+// *** Since ostreams are not thread-sharable, and I have made no attempt
+// *** to make Log::StreamBuf be so, these global streams must NOT be used
+// *** in multithreaded code by more than one thread, otherwise you WILL
+// *** get weird unpredictable crashes when two threads log at the same time
+// *** This is potentially such a Bad Thing that I have disabled these 
+// *** globals for all multi-threaded code - subvert at your peril!
+// *** Use a thread-local Log::Streams structure (see below) instead
+#if defined(_SINGLE)
+extern Stream Error;
+extern Stream Summary;
+extern Stream Detail;
+extern Stream Debug;
+extern Stream Dump;
+#endif
 
-extern LogStream Error;
-extern LogStream Summary;
-extern LogStream Detail;
-extern LogStream Debug;
-extern LogStream Dump;
+//==========================================================================
+// Log streams structure - use in multi-threaded code to get yoursel a
+// thread-local stream group
+// e.g.
+//   ObTools::Log::Streams log;  // On stack or thread-local object
+//
+//   log.error << "Oops\n";
+
+struct Streams
+{
+  Stream error;
+  Stream summary;
+  Stream detail;
+  Stream debug;
+  Stream dump;
+
+  Streams():
+    error  (logger, LEVEL_ERROR),
+    summary(logger, LEVEL_SUMMARY),
+    detail (logger, LEVEL_DETAIL),
+    debug  (logger, LEVEL_DEBUG),
+    dump   (logger, LEVEL_DUMP) {}
+};
 
 //==========================================================================
 // Useful constants for optimising out high log levels
