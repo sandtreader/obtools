@@ -69,6 +69,7 @@ ostream& operator<<(ostream& s, const IPAddress& ip)
   struct in_addr in;
   in.s_addr = ip.nbo();
   s << inet_ntoa(in);
+  return s;
 }
 
 
@@ -87,6 +88,7 @@ void EndPoint::output(ostream& s) const
 ostream& operator<<(ostream& s, const EndPoint& ep)
 {
   ep.output(s);
+  return s;
 }
 
 //==========================================================================
@@ -98,6 +100,7 @@ ostream& operator<<(ostream& s, const EndPoint& ep)
 ostream& operator<<(ostream& s, const Protocol& p)
 {
   s << ((p==TCP)?"TCP":"UDP");
+  return s;
 }
 
 //==========================================================================
@@ -115,6 +118,7 @@ void Port::output(ostream& s) const
 ostream& operator<<(ostream& s, const Port& p)
 {
   p.output(s);
+  return s;
 }
 
 }} // namespaces

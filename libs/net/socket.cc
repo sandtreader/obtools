@@ -78,6 +78,8 @@ ostream& operator<<(ostream& s, const SocketError& e)
     s << "Socket Error (" << e.error << "): " << strerror(e.error); 
   else
     s << "Socket EOF";
+
+  return s;
 }
 
 //==========================================================================
@@ -218,6 +220,7 @@ void TCPSocket::write(const char *p) throw(SocketError)
 TCPSocket& operator<<(TCPSocket& s, const string& t)
 {
   s.write(t);
+  return s;
 }
 
 //--------------------------------------------------------------------------

@@ -26,6 +26,7 @@ public:
 ostream& operator<<(ostream& s, const Wombat& w)
 {
   s << "Wombat '" << w.name << "'(" << w.n << ")";
+  return s;
 }
 
 int main()
