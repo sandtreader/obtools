@@ -87,7 +87,7 @@ string tolower(const string& text);
 string toupper(const string& text);
 
 //==========================================================================
-// Crypto functions (crypto.cc)
+// MD5 hash function (md5.cc)
 
 //--------------------------------------------------------------------------
 // MD5 sum a string (returns hex string)
