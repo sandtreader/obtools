@@ -541,6 +541,19 @@ uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
 }
 
 //--------------------------------------------------------------------------
+// Get the real value of an attribute of the given name
+// Returns attribute value
+// Defaults to default value given (or 0.0) if not present
+// Returns 0.0 if present but bogus
+double Element::get_attr_real(const string& attname, double def) const
+{
+  map<string,string>::const_iterator p=attrs.find(attname);
+  if (p!=attrs.end()) return atof(p->second.c_str());
+
+  return def;
+}
+
+//--------------------------------------------------------------------------
 // Tests whether the element has an attribute of the given name
 // Quicker than !get_attr("foo").empty()
 bool Element::has_attr(const string& attname) const
@@ -570,11 +583,31 @@ void Element::set_attr_int(const string& attname, int value)
 }
 
 //--------------------------------------------------------------------------
+// Set an attribute (64-bit integer)
+// (_int64 qualifier not strictly necessary here, but matches get_attr_int64)
+void Element::set_attr_int64(const string& attname, uint64_t value)
+{
+  ostringstream oss;
+  oss << value;
+  attrs[attname] = oss.str();
+}
+
+//--------------------------------------------------------------------------
 // Set an attribute (bool)
 // (_bool qualifier not strictly necessary here, but matches get_attr_bool)
 void Element::set_attr_bool(const string& attname, bool value)
 {
   attrs[attname] = value?"true":"false";
+}
+
+//--------------------------------------------------------------------------
+// Set an attribute (real)
+// (_real qualifier not strictly necessary here, but matches get_attr_real)
+void Element::set_attr_real(const string& attname, double value)
+{
+  ostringstream oss;
+  oss << value;
+  attrs[attname] = oss.str();
 }
 
 //--------------------------------------------------------------------------
