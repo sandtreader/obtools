@@ -27,6 +27,11 @@ private:
 
 public:
   //------------------------------------------------------------------------
+  //Clear the row
+  void clear() 
+  { fields.clear(); }
+
+  //------------------------------------------------------------------------
   //Add name/value pair(Drivers only)
   void add(const string& fieldname, const string& value)
   { fields[fieldname] = value; }
@@ -66,7 +71,7 @@ public:
 
   //------------------------------------------------------------------------
   //Get next row from result set
-  //Whether another was found - if so, writes into row
+  //Whether another was found - if so, clears and writes into row
   virtual bool fetch(Row& row)=0;
 
   //------------------------------------------------------------------------
@@ -134,7 +139,7 @@ public:
 
   //------------------------------------------------------------------------
   //Get next row from result set
-  //Whether another was found - if so, writes into row
+  //Whether another was found - if so, clears writes into row
   bool fetch(Row& row) { return rset?rset->fetch(row):false; }
 
   //------------------------------------------------------------------------
@@ -189,7 +194,7 @@ public:
 
   //------------------------------------------------------------------------
   //Execute a query and get first (only) row
-  //Returns whether successful - row is filled in if so
+  //Returns whether successful - row is cleared and filled in if so
   bool query(const string& sql, Row& row);
 
   //------------------------------------------------------------------------

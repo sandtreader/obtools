@@ -13,7 +13,7 @@ namespace ObTools { namespace DB {
 
 //------------------------------------------------------------------------
 //Execute a query and get first (only) row
-//Returns whether successful - row is filled in if so
+//Returns whether successful - row is cleared and filled in if so
 bool Connection::query(const string& sql, Row& row)
 {
   Result result = query(sql);

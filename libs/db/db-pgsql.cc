@@ -25,7 +25,7 @@ int ResultSet::count()
 
 //------------------------------------------------------------------------
 //Get next row from result set
-//Whether another was found - if so, writes into row
+//Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
 {
   PGresult *res = (PGresult *)pgres;
@@ -34,6 +34,7 @@ bool ResultSet::fetch(Row& row)
   {
     // Load all the fields by name into the row
     int nf = PQnfields(res);
+    row.clear();
     for(int i=0; i<nf; i++)
       row.add(PQfname(res, i), PQgetvalue(res, row_cursor, i));
 
