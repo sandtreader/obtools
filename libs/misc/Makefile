@@ -8,9 +8,9 @@
 TYPE	= lib
 NAME   	= ot-misc
 HEADERS = ot-misc.h
-OBJS  	= md5.o proplist.o
-TESTS 	= test-md5 test-prop
-TESTCMD	= ./test-md5 && ./test-prop
+OBJS  	= md5.o proplist.o random.o
+TESTS 	= test-md5 test-prop test-random
+TESTCMD	= ./test-md5 && ./test-prop && ./test-random
 MT-VARIANTS = 1
 
 ROOT    = ../..

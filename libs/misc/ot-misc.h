@@ -99,8 +99,23 @@ public:
 };
 
 //------------------------------------------------------------------------
-// << operator to write Cloud to ostream
+// << operator to write PropertyList to ostream
 ostream& operator<<(ostream& s, const PropertyList& pl);
+
+//==========================================================================
+//Random string generator
+//Uses best available random number source (e.g. /dev/urandom)
+class Random
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Random() {}
+
+  //------------------------------------------------------------------------
+  // Get a random hex string up to N bytes (N*2 hex digits) long
+  string generate_hex(int n);
+};
  
 //==========================================================================
 }} //namespaces
