@@ -22,6 +22,7 @@ H2
   font-weight         : bold;
   color               : #003080;
   border-top: solid 1px #003080;
+  margin-top: 2em;
 }
 
 H3
@@ -46,6 +47,7 @@ H4
 P
 {
   font-size           : x-small;
+  line-height: 140%;
   margin-bottom: 1em;
 }
 
@@ -82,6 +84,27 @@ HR
   height              : 2px;
 }
 
+TABLE
+{ 
+  margin-left: 3em;
+  background-color: #e0f0ff;
+  font-size: x-small;
+  border-right: solid 1px black;
+  border-bottom: solid 1px black;
+}
+
+TH, TD
+{ 
+  padding: 2px;
+  border-left: solid 1px black;
+  border-top: solid 1px black;
+}
+
+TH
+{ 
+  text-align: left;
+  font-weight: bold;
+}
 
 DIV.member
 { 
@@ -95,12 +118,42 @@ DIV.member
 
 DIV.function
 { 
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+DIV.function-header
+{ 
   border:  solid 1px #c0c0c0;
-  margin-left: 2.0em; 
-  margin-right: 2.0em;
+  margin-left: 0em; 
+  margin-right: 1.0em;
   margin-bottom: 1.0em;
   background-color: #e0ffe0;
-  padding: 4px;
+  padding: 8px;
 }
+
+H3.function
+{ 
+  font-family: Courier, monospace;
+  margin-bottom: 0;
+  padding-bottom: 1em;
+}
+
+DIV.function P.function-title
+{ 
+  color               : #003080;
+  font-weight: bold;
+  background-color: #e0ffe0;
+  padding-left:0;
+  margin-bottom: 0;
+}
+
+DIV.function P
+{ 
+  margin-top: 0;
+  padding-left: 1em;
+}
+
+
 
 

@@ -34,6 +34,8 @@
 <desc><p>Can be 0 at end of list</p></desc>
 </member>
 
+<function-group name="Methods">
+
 <function name="Foo">
 <title>Foo default constructor</title>
 </function>
@@ -55,6 +57,7 @@
 <desc><p>Something describing some wrinkle of the result</p></desc>
 </result>
 </function>
+</function-group>
 
 </class>
 

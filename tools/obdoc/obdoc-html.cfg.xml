@@ -60,10 +60,32 @@
   </xt:code>
 
   <!-- =============== Handy macro templates =================  -->
+  <!-- Macro define for table -->
+  <xt:define name="Table" element="table">
+    <TABLE>
+      <!-- Column header row, if provided -->
+      <xt:template element="column">
+        <xt:start>&lt;TR></xt:start>
+	<TH>$= column["name"] =$</TH>
+	<xt:end>&lt;/TR></xt:end>
+      </xt:template>
+
+      <!-- Data rows -->
+      <xt:template element="row">
+      <TR>
+        $( if (row.has_attr("name")) 
+	     sout << "&lt;TH>" << row["name"] << "&lt;/TH>"; )$
+        <xt:template element="item"><TD>$= *item =$</TD></xt:template>
+      </TR>
+      </xt:template>
+    </TABLE>
+  </xt:define>
+
   <!-- Macro define for description text at all levels -->
   <xt:define name="Desc" element="desc">
     <DIV CLASS="desc">
       <xt:template element="p"><P>$= *p =$</P></xt:template>
+      <xt:use template="Table"/>
     </DIV>
   </xt:define>
 
@@ -87,15 +109,32 @@
 
   <!-- =============== Function/Method template ===============  -->
   <xt:define name="Function" element="function">
-    <xt:param name="type" default="Method"/>
-    <xt:start><H2>$= type =$s</H2></xt:start>
     <DIV CLASS="function">
-    <H3><xt:template element="result">$= show_type(result) =$</xt:template>
+    <DIV CLASS="function-header">
+    <H3 CLASS="function">
+      <xt:template element="result">$= show_type(result) =$</xt:template>
       $= function["name"] =$(
       <xt:template element="arg">$= (arg_index?",":"") =$
-	$= show_type(arg) =$ $= arg["name"] =$</xt:template> ):
-    <xt:template element="title">$= *title =$</xt:template></H3>
+	$= show_type(arg) =$ $= arg["name"] =$$( 
+          if (arg.has_attr("default")) 
+	    sout << " = " << arg["default"]; 
+        )$</xt:template> )</H3>
+    <P CLASS="function-title"><xt:template element="title">$= *title =$
+      </xt:template></P></DIV>
     <xt:use template="Desc"/>
+    </DIV>
+  </xt:define>
+
+  <!-- =============== Function Group template ===============  -->
+  <xt:define name="FunctionGroup" element="function-group" var="group">
+    <DIV CLASS="function-group">
+    <H2 CLASS="function-group">$= group["name"] =$</H2>
+
+    <!-- Function group description -->
+    <xt:use template="Desc"/>
+
+    <!-- Functions -->
+    <xt:use template="Function"/>
     </DIV>
   </xt:define>
 
@@ -127,8 +166,8 @@
       </DIV>
     </xt:template>
 
-    <!-- Functions -->
-    <xt:use template="Function"/>
+    <!-- Function Groups -->
+    <xt:use template="FunctionGroup"/>
 
     </BODY></HTML>
   </xt:define>
@@ -165,10 +204,8 @@
       <xt:end>&lt;/UL></xt:end>
     </xt:template>
 
-    <!-- Static functions -->
-    <xt:use template="Function">
-      <xt:arg name="type">Static Function</xt:arg>
-    </xt:use>
+    <!-- Function groups -->
+    <xt:use template="FunctionGroup"/>
 
     </BODY></HTML>
   </xt:define>
