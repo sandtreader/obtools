@@ -22,6 +22,9 @@ all: xmlmesh-server
 clean: 
 	-@rm -f *.o *.a *~ xmlmesh-server
 
+release: xmlmesh-server
+	cp xmlmesh-server $(RELEASEDIR) 
+
 #Test harnesses:
 xmlmesh-server:	$(OBJS)    					        \
 		../client/ot-xmlmesh-client.a				\
