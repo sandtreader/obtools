@@ -79,7 +79,7 @@ ostream& operator<<(ostream& s, const IPAddress& ip)
 // Output to given stream
 void EndPoint::output(ostream& s) const
 {
-  s << address << ":" << port;
+  s << host << ":" << port;
 }
 
 //--------------------------------------------------------------------------
@@ -87,6 +87,34 @@ void EndPoint::output(ostream& s) const
 ostream& operator<<(ostream& s, const EndPoint& ep)
 {
   ep.output(s);
+}
+
+//==========================================================================
+// Protocol
+
+//------------------------------------------------------------------------
+// << operator to write Protocol to ostream
+// e.g. cout << proto;
+ostream& operator<<(ostream& s, const Protocol& p)
+{
+  s << ((p==TCP)?"TCP":"UDP");
+}
+
+//==========================================================================
+// Ports
+
+//--------------------------------------------------------------------------
+// Output to given stream
+void Port::output(ostream& s) const
+{
+  s << proto << ":" << host << ":" << port;
+}
+
+//--------------------------------------------------------------------------
+// Dotted quad output operator
+ostream& operator<<(ostream& s, const Port& p)
+{
+  p.output(s);
 }
 
 }} // namespaces

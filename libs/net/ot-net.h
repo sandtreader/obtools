@@ -79,30 +79,42 @@ public:
 ostream& operator<<(ostream& s, const IPAddress& ip);
 
 //==========================================================================
-// Protocol endpoint (address.cc) - IP Address and port identifying client
+// IP Protocol 
+enum Protocol
+{
+  TCP,
+  UDP
+};
+
+//------------------------------------------------------------------------
+// << operator to write Protocol to ostream (address.cc)
+// e.g. cout << proto; 
+ostream& operator<<(ostream& s, const Protocol& p);
+
+//==========================================================================
+// Network endpoint (address.cc) - IP Address and port identifying client
 class EndPoint
 {
-private:
-  IPAddress address;
+public: 
+  IPAddress host;
   int port;              // Host Byte Order
 
-public: 
   //--------------------------------------------------------------------------
   // Constructors
-  EndPoint(): address(), port(0) {}
-  EndPoint(IPAddress _address, int _port): address(_address), port(_port) {}
-  EndPoint(uint32_t in, int _port): address(in), port(_port) {}
+  EndPoint(): host(), port(0) {}
+  EndPoint(IPAddress _host, int _port): host(_host), port(_port) {}
+  EndPoint(uint32_t in, int _port): host(in), port(_port) {}
 
   // Constructor from a sockaddr_in - note ntohl/ntohs here!
   EndPoint(const struct sockaddr_in& saddr):
-    address(ntohl(saddr.sin_addr.s_addr)), port(ntohs(saddr.sin_port)) {}
+    host(ntohl(saddr.sin_addr.s_addr)), port(ntohs(saddr.sin_port)) {}
 
   //--------------------------------------------------------------------------
   // Export to sockaddr_in - note htonl/htons here!
   void set(struct sockaddr_in& saddr)
   {
     saddr.sin_family = AF_INET;
-    saddr.sin_addr.s_addr = address.nbo();
+    saddr.sin_addr.s_addr = host.nbo();
     saddr.sin_port = htons(port);
   }
 
@@ -112,23 +124,65 @@ public:
 
   //--------------------------------------------------------------------------
   // Test for badness
-  bool operator!() const { return !address; }
+  bool operator!() const { return !host; }
 
   //--------------------------------------------------------------------------
   // == operator 
   bool operator==(const EndPoint& o) const 
-  { return address == o.address && port == o.port; }
+  { return host == o.host && port == o.port; }
 
   //--------------------------------------------------------------------------
   // < operator to help with maps 
   bool operator<(const EndPoint& o) const 
-  { return address < o.address || (address == o.address && port < o.port); }
+  { return host < o.host || (host == o.host && port < o.port); }
 };
 
 //------------------------------------------------------------------------
 // << operator to write EndPoint to ostream
 // e.g. cout << ep;
 ostream& operator<<(ostream& s, const EndPoint& ep);
+
+//==========================================================================
+// Protocol endpoint (address.cc) - IP Address and port identifying client
+// plus protocol
+class Port
+{
+public: 
+  IPAddress host;
+  Protocol proto;
+  int port;              // Host Byte Order
+
+  //--------------------------------------------------------------------------
+  // Constructors
+  Port(): host(), port(0), proto(TCP) {}
+  Port(IPAddress _host, Protocol _proto, int _port): 
+    host(_host), proto(_proto), port(_port) {}
+
+  //--------------------------------------------------------------------------
+  // Output to given stream
+  void output(ostream& s) const;
+
+  //--------------------------------------------------------------------------
+  // Test for badness
+  bool operator!() const { return !host; }
+
+  //--------------------------------------------------------------------------
+  // == operator 
+  bool operator==(const Port& o) const 
+  { return host == o.host && proto == o.proto && port == o.port; }
+
+  //--------------------------------------------------------------------------
+  // < operator to help with maps 
+  bool operator<(const Port& o) const 
+  { return host < o.host 
+      || (host == o.host && proto < o.proto) 
+      || (host == o.host && proto == o.proto && port < o.port); }
+};
+
+//------------------------------------------------------------------------
+// << operator to write Port to ostream
+// e.g. cout << ep;
+ostream& operator<<(ostream& s, const Port& p);
 
 //==========================================================================
 // Abstract Socket (socket.cc)
