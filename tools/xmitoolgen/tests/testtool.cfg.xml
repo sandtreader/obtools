@@ -81,6 +81,27 @@
       s+=")";
       return s;
     }
+
+    //Routine to return pointer/list members for association ends
+    string xmicc_assoc_end(ObTools::UML::AssociationEnd&amp; a)
+    {
+      if (!a.is_navigable) return "";
+
+      ObTools::UML::AssociationEnd *other = a.get_other_end();
+      ObTools::UML::Association *assoc = a.get_association();
+
+      string type = other->participant->name;
+      // Get name - best of: role, association name, referent type
+      string name = other->name;  
+      if (other->name.empty()) name = assoc->name;  
+      if (other->name.empty()) name = type;
+      name[0] = tolower(name[0]);  // Ensure lc variable
+
+      if (other->multiplicity.upper == 1)
+        return type + " *" + name;
+      else
+	return "list&lt;" + type + " *> " + name +"s"; 
+    }
   </code>
 
   <!-- Config items for tool -->
@@ -125,13 +146,18 @@
 
       class $= c.name =$
       <template name = "Inheritance" scope="generalization">
-	$= (index?",":":") =$$= g.parent->name =$
+	$= (index?",":":") =$$= g.gparent->name =$
       </template>
       {
       private:
       <template name = "Private attribute declaration" scope="attribute" 
 		visibility="private">
         $= a.type->name =$ $= a.name =$;
+      </template>
+
+      <template name = "Private associations" scope="association_end" 
+		visibility="private">
+        $= xmicc_assoc_end(a) =$;
       </template>
 
         //~^ ----- Manually added private methods ------
@@ -141,7 +167,7 @@
 
       public:
       <template name = "Public method declaration" scope="operation" 
-		visibility="public">
+                visibility="public">
         $= xmicc_op_sig(o) =$;
       </template>
       };
