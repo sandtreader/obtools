@@ -20,6 +20,7 @@ namespace ObTools { namespace XMLMesh {
 using namespace std;
 
 class Transport;  // Forward
+class Server;     
 
 //==========================================================================
 // Message queue data for incoming messages, and typedef for queue
@@ -90,6 +91,42 @@ public:
 };
 
 //==========================================================================
+// Request-response correlator
+struct CorrelatedRequest
+{
+  Transport *transport;     // Which transport the request came from
+  Net::EndPoint client;     // Which client on that transport
+  string client_id;         // Client's original message ID
+
+  CorrelatedRequest(Transport *_transport, Net::EndPoint& _client,
+		    const string& _id):
+    transport(_transport), client(_client), client_id(_id) {}
+};
+
+class Correlator
+{
+private:
+  Server& server;
+  unsigned long id_serial; 
+  map<string, CorrelatedRequest> requests;  // Map of my ID back to client
+
+public:
+  //------------------------------------------------------------------------
+  // Default Constructor 
+  Correlator(Server& _server): server(_server), id_serial(0) {}
+
+  //------------------------------------------------------------------------
+  // Handle a request message - remembers it in correlation map, alters
+  // ID to own so we can find responses
+  void handle_request(IncomingMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Handle a response message - looks up correlation and sends it back to
+  // the given client, modifying ID back to the original
+  void handle_response(IncomingMessage& msg);
+};
+
+//==========================================================================
 // Server Transport (abstract interface)
 // Low-level transport of raw data
 class Transport
@@ -123,8 +160,6 @@ public:
   // Returns 0 if failed
   virtual Transport *create(XML::Element& xml) = 0;
 };
-
-class Server;  //forward
 
 //==========================================================================
 // Service (abstract interface)
@@ -180,6 +215,7 @@ private:
 
   // Internal state
   Distributor distributor;                  // Message distributor
+  Correlator correlator;                    // Response correlator
   IncomingMessageQueue incoming_q;          // Queue of incoming messages
 
   bool create_transport(XML::Element& xml);

@@ -20,16 +20,9 @@ using namespace ObTools::XMLMesh;
 
 int main(int argc, char **argv)
 {
+  // Read config
   char *cfg = "xmlmesh.cfg.xml";
   if (argc > 1) cfg = argv[1];
-
-  // Set up logging
-  Log::StreamChannel   chan_out(cout);
-  Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
-  Log::LevelFilter     level_out(Log::LEVEL_DUMP, tsfilter);
-  Log::logger.connect(level_out);
-
-  // Read config
   XML::Configuration config(cfg);
   if (!config.read("xmlmesh"))
   {
@@ -37,6 +30,14 @@ int main(int argc, char **argv)
     return 2;
   }
 
+  // Set up logging
+  Log::StreamChannel   chan_out(cout);
+  Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
+  int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
+  Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
+  Log::logger.connect(level_out);
+  Log::Summary << "xmlmesh-server starting\n";
+  
   // Create server 
   Server server;
 

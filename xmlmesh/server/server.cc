@@ -13,7 +13,7 @@ namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
 // Constructor
-Server::Server()
+Server::Server(): correlator(*this)
 {
 
 }
@@ -138,6 +138,20 @@ void Server::run()
 		  << ":" << msg.client << ", subject " 
 		  << msg.message.get_subject() << ":\n";
       Log::Detail << msg.message.to_text() << endl;
+
+      // Handle request-response pairs
+      string ref = msg.message.get_ref();
+      if (ref.size())
+      {
+	Log::Detail << "Response to message ID " << ref << endl;
+	correlator.handle_response(msg);
+      }
+      else if (msg.message.get_rsvp())
+      {
+	Log::Detail << "Response requested, ID is " 
+		    << msg.message.get_id() << endl;
+	correlator.handle_request(msg);
+      }
 
       // Deal with it
       distributor.distribute(msg);
