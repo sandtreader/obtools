@@ -176,21 +176,6 @@ protected:
   // to the end of the line.  Do not add endl.
   virtual void print_header(ostream &sout);
 
-  // Template function for sugar filters - builds list of only subelements
-  // matching given type
-  template<class T> list<T *> filter_subelements()
-  {
-    list<T *> l;
-    for(list<Element *>::iterator p=subelements.begin();
-	p!=subelements.end();
-	p++)
-    {
-      T *t = dynamic_cast<T *>(*p);
-      if (t) l.push_back(t);
-    }
-    return l;
-  }
-
 public:
   // XMI support
   XMI::Reader& reader;       //Reader that is helping me
@@ -216,6 +201,21 @@ public:
   // prints sub-elements at indent+2
   // Only override if you want to replace entire printing
   virtual void print(ostream& sout, int indent=0);
+
+  // Template function for sugar filters - builds list of only subelements
+  // matching given type
+  template<class T> list<T *> filter_subelements()
+  {
+    list<T *> l;
+    for(list<Element *>::iterator p=subelements.begin();
+	p!=subelements.end();
+	p++)
+    {
+      T *t = dynamic_cast<T *>(*p);
+      if (t) l.push_back(t);
+    }
+    return l;
+  }
 
   //Virtual destructor - defaults to deleting subelements
   virtual ~Element();
