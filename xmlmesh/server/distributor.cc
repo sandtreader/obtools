@@ -26,7 +26,7 @@ void Distributor::attach_handler(const string& subject, MessageHandler& h)
 void Distributor::distribute(IncomingMessage& msg)
 {
   // Get subject
-  XML::Element& xml = msg.message.get_xml();
+  const XML::Element& xml = msg.message.get_xml();
   string subject = xml.get_attr("subject");
 
   // Loop over all handlers to see if they want it
