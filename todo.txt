@@ -1,0 +1,24 @@
+ObTools ToDo:
+
+Basic tool:
+- Handle associations
+
+<RELEASE 1>
+
+O/R mapping tool:
+- GPL'ed
+- Need database connection library - do MySQL, Postgres first
+- Initially manual load/save - associations give refs, have to load manually
+
+<RELEASE 2>
+
+ObCache 1:
+- Auto load from SQL on demand
+- Smart pointers/dirty bits for load/save
+
+<RELEASE 3>
+
+ObCache 2:
+- Distributed
+- Generalise transport mechanism
+
