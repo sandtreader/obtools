@@ -154,13 +154,13 @@ bool MIMEHeaderGenerator::generate()
 	value.erase(0, split+1);
 
 	// Output first fragment, with continuation
-	cout << frag << "\r\n ";
+	out << frag << "\r\n ";
       }
       else break; // Give up - they'll have to have it long
     }
 
     // Output remainder and CRLF
-    cout << value << "\r\n";
+    out << value << "\r\n";
   OBTOOLS_XML_ENDFOR
 
   // Output final blank line
