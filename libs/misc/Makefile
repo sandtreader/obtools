@@ -10,8 +10,7 @@ HEADERS = ot-misc.h
 OBJS  	= md5.o proplist.o
 TESTS 	= test-md5 test-prop
 TESTCMD	= ./test-md5 && ./test-prop
-MULTI    = 1
-VARIANT-SINGLE = 1
+MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/lib.mk

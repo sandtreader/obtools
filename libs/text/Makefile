@@ -10,8 +10,7 @@ HEADERS = ot-text.h
 OBJS  	= ws.o pattern.o case.o 
 TESTS 	= test-ws test-pattern test-case
 TESTCMD	= ./test-ws && ./test-pattern && ./test-case
-MULTI    = 1
-VARIANT-SINGLE = 1
+MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/lib.mk

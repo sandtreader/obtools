@@ -12,8 +12,7 @@ TESTS 	= test-xml test-xpath test-config
 TESTCMD	= ./test-xml < ../tests/simple.xml && \
           ./test-xpath < ../tests/simple.xml && \
 	  ./test-config
-MULTI    = 1
-VARIANT-SINGLE = 1
+MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/lib.mk

@@ -16,17 +16,40 @@
 # EXTLIBS:   List of external libraries 
 # TESTCMD:   Test command
 # CONFIGS:   Configs and other files copied to release
-# MULTI:     Set if multithreading is required
+# VARIANTS:  List of build variants
+# VARIANT-xx: Flags for each variant
 
-# This recurses on itself with target 'exe' and then also defines:
+# This recurses on itself with target 'exe'
 
+# Standard variant flags:
+# RELEASE:   Build release version
 # DEBUG:     Build debug version
+# MULTI:     Build multi-threaded version
+# SINGLE:    Build single-threaded version
+
+# If VARIANTS is undefined, defaults to standard release/debug set, plus
+# single/multi versions if MT-VARIANTS is set, multi being the default
 
 #==========================================================================
 # Verify eval works
 $(eval EVALWORKS=1)
 ifndef EVALWORKS
 $(error eval is broken - you need GNU make 3.80 or greater)
+endif
+
+# Default VARIANTS and flags if not set
+ifndef VARIANTS
+ifdef MT-VARIANTS
+VARIANTS = release debug single-release single-debug
+VARIANT-release 	= RELEASE MULTI
+VARIANT-debug 		= DEBUG MULTI
+VARIANT-single-release 	= RELEASE SINGLE
+VARIANT-single-debug 	= DEBUG SINGLE
+else
+VARIANTS = debug release
+VARIANT-debug = DEBUG
+VARIANT-release = RELEASE
+endif
 endif
 
 # Get locations
@@ -41,12 +64,17 @@ CPPFLAGS += -D_REENTRANT
 EXTRALIBS += -lpthread
 endif
 
+ifdef SINGLE
+CPPFLAGS += -D_SINGLE
+LIB-VARIANT = -single
+endif
+
 ifdef DEBUG
 CPPFLAGS += -g
 LDFLAGS += -g
-LIB-VARIANT = -debug
+LIB-VARIANT += -debug
 else
-LIB-VARIANT = -release
+LIB-VARIANT += -release
 endif
 
 #Sort out dependencies
@@ -70,38 +98,57 @@ EXTRALIBS += $(EXTLIBS)
 # Account for moving down into build directories
 vpath % ..
 
-# Main target: recurse to self to build variants
-all:	build-release build-debug 
+# Main target: build all variants
+all:	$(patsubst %,build-%,$(VARIANTS))
 
 # Top-level clean target
 clean: 
-	-@rm -rf build.*
+	-@rm -rf build-*
 
-# Top-level test target - uses debug version
-test:	build-debug
-	$(MAKE) -C build.debug -f ../Makefile ROOT=../$(ROOT) runtests
+# Top-level test target - run tests on all variants
+test:	$(patsubst %,test-%,$(VARIANTS))
 
-# Release target - uses release version
-release: build-release
-	cp build.release/$(NAME) $(RELEASEDIR) 
+# Release target - get all variants to release (optionally)
+# and copy headers 
+release: $(patsubst %,release-%,$(VARIANTS))
 ifdef CONFIGS
 	cp $(CONFIGS) $(RELEASEDIR) 
 endif
 
 # Build targets
-build-release:
-	-@mkdir -p build.release
-	$(MAKE) -C build.release -f ../Makefile ROOT=../$(ROOT) exe
+define build_template
+#Expand VARIANT-xxx for each build directory, and recurse to self to build,
+#test and release
+build-$(1):
+	-@mkdir -p build-$(1)
+	$$(MAKE) -C build-$(1) -f ../Makefile \
+                 $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) exe
 
-build-debug:
-	-@mkdir -p build.debug
-	$(MAKE) -C build.debug -f ../Makefile DEBUG=1 ROOT=../$(ROOT) exe
+test-$(1): build-$(1)
+	$$(MAKE) -C build-$(1) -f ../Makefile \
+                 $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) runtests
+
+release-$(1): build-$(1)
+	$$(MAKE) -C build-$(1) -f ../Makefile \
+                 $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) dorelease
+endef
+
+$(foreach variant,$(VARIANTS),$(eval $(call build_template,$(variant))))
 
 # Per-build target - sub-make comes in here
 exe: $(NAME)
 
 runtests:
+ifdef DEBUG
 	$(TESTCMD)
+endif
+
+dorelease:
+ifdef RELEASE
+ifdef RELEASEDIR
+	cp $(NAME) ../$(RELEASEDIR) 
+endif
+endif
 
 #Executable
 $(NAME): $(OBJS) $(LIBS)

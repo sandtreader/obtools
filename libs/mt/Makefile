@@ -10,7 +10,8 @@ HEADERS = ot-mt.h
 OBJS  	= thread.o pool.o
 TESTS 	= test-thread test-pool test-queue test-mutex test-rmutex
 TESTCMD	= ./test-thread 10 && ./test-queue
-MULTI    = 1
+#Both standard variants are multithreaded, of course
+MULTI 	= 1
 
 ROOT    = ../..
 include $(ROOT)/build/lib.mk

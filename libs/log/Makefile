@@ -11,8 +11,7 @@ OBJS  	= distributor.o filter.o logstream.o channel.o logger.o
 DEPENDS = text
 TESTS 	= test-log
 TESTCMD	= ./test-log
-MULTI    = 1
-VARIANT-SINGLE = 1
+MT-VARIANTS = 1
 
 #Suppress MT in SINGLE build
 ifndef SINGLE

@@ -10,8 +10,7 @@ HEADERS = ot-net.h
 OBJS  	= socket.o address.o client.o stream.o
 TESTS 	= test-client 
 TESTCMD	= ./test-client localhost
-MULTI    = 1
-VARIANT-SINGLE = 1
+MT-VARIANTS = 1
 
 #Catch ourselves recursing in SINGLE mode and suppress server and use of MT
 ifndef SINGLE

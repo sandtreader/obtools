@@ -5,23 +5,29 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-# !!! Handle other variants?
-NAME   	= ot-db-pgsql
-HEADERS = ot-db.h ot-db-pgsql.h
-OBJS  	= connection.o row.o db-pgsql.o
+HEADERS = ot-db.h
+OBJS  	= connection.o row.o
 DEPENDS = log text
-TESTS 	= test-pgsql
-TESTCMD	= ./test-pgsql
-MULTI   = 1
-VARIANT-SINGLE = 1
+VARIANTS = release-pgsql debug-pgsql single-release-pgsql single-debug-pgsql
+VARIANT-release-pgsql 		= RELEASE MULTI POSTGRES
+VARIANT-debug-pgsql 		= DEBUG MULTI POSTGRES
+VARIANT-single-release-pgsql 	= RELEASE SINGLE POSTGRES
+VARIANT-single-debug-pgsql 	= DEBUG SINGLE POSTGRES
 
 #Don't use MT in SINGLE
 ifndef SINGLE
 DEPENDS += mt
 endif
 
+ifdef POSTGRES
+NAME	= ot-db-pgsql
+HEADERS += ot-db-pgsql.h
+OBJS 	+= db-pgsql.o
 EXTINCS = /usr/include/postgresql/
 EXTLIBS = /usr/lib/libpq.so
+TESTS 	= test-pgsql
+TESTCMD	= ./test-pgsql
+endif
 
 ROOT    = ../..
 include $(ROOT)/build/lib.mk
