@@ -559,6 +559,10 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructors
+  // No files - add later
+  Configuration(int parse_flags=PARSER_OPTIMISE_CONTENT)
+    :parser(parse_flags) {  }
+
   // Single filename
   Configuration(const string& fn, int parse_flags=PARSER_OPTIMISE_CONTENT)
     :parser(parse_flags) { filenames.push_back(fn); }
@@ -566,6 +570,10 @@ public:
   // List of filenames - front() is tried first
   Configuration(list<string>& fns, int parse_flags=PARSER_OPTIMISE_CONTENT)
     :filenames(fns), parser(parse_flags) {}
+
+  //------------------------------------------------------------------------
+  // Add a filename to the config list, post creation
+  void add_file(const string& fn) { filenames.push_back(fn); }
 
   //------------------------------------------------------------------------
   // Add namespace to prefix mapping (see Parser::fix_namespace)
