@@ -7,6 +7,8 @@
 //==========================================================================
 
 #include "ot-text.h"
+#include <iostream>
+
 using namespace std;
 using namespace ObTools;
 
@@ -21,6 +23,12 @@ int main()
   cout << "Canonicalised: [" << temp << "]\n";
   cout << "First word is '" << Text::remove_word(temp) << "' leaving ["
        << temp << "]\n\n";
+
+  cout << "Split words:\n";
+  vector<string> l = Text::split_words(text);
+  for(vector<string>::iterator p = l.begin(); p!=l.end(); ++p)
+    cout << "  " << *p << endl;
+  cout << endl;
 
   text = Text::strip_blank_lines(text);
   int ci = Text::get_common_indent(text);

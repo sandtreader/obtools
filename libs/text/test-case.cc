@@ -7,6 +7,8 @@
 //==========================================================================
 
 #include "ot-text.h"
+#include <iostream>
+
 using namespace std;
 using namespace ObTools;
 

@@ -11,10 +11,7 @@
 #define __OBTOOLS_TEXT_H
 
 #include <string>
-#include <deque>
-#include <list>
-#include <map>
-#include <iostream>
+#include <vector>
 
 namespace ObTools { namespace Text { 
 
@@ -50,6 +47,11 @@ string canonicalise_space(const string& text);
 // Text must be canonical (see above)
 // Returns first word, removes it and space from text
 string remove_word(string& text);
+
+//--------------------------------------------------------------------------
+// Get list of words from text
+// Text is canonicalised before splitting
+vector<string> split_words(const string& text);
 
 //==========================================================================
 // Pattern matching functions (pattern.cc)

@@ -202,4 +202,21 @@ string remove_word(string& text)
   }
 }
 
+//--------------------------------------------------------------------------
+// Get list of words from text
+// Text is canonicalised before splitting
+vector<string> split_words(const string& text)
+{
+  vector<string> l;
+
+  // Canonicalise it
+  string temp = canonicalise_space(text);
+
+  // Loop reading words
+  while (temp.size())
+    l.push_back(remove_word(temp));
+
+  return l;
+}
+
 }} // namespaces
