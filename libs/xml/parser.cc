@@ -7,6 +7,7 @@
 //==========================================================================
 
 #include "ot-xml.h"
+#include <sstream>
 using namespace ObTools::XML;
 
 //--------------------------------------------------------------------------
@@ -530,6 +531,21 @@ Element& Parser::get_root()
 }
 
 //------------------------------------------------------------------------
+// Get root element detached from parser, so you can keep it after the
+// parser has died
+// Returns 0 if not valid
+Element *Parser::detach_root()
+{
+  if (root)
+  {
+    Element *r = root;
+    root = 0;
+    return r;
+  }
+  else return 0;
+}
+
+//------------------------------------------------------------------------
 // Do initial processing on an element (after attributes read)
 // Handles namespace map building - actual processing of namespace is
 // done in final_processing
@@ -687,6 +703,14 @@ Parser::~Parser()
 void Parser::read_from(istream &s) throw (ParseFailed)
 {
   parse_stream(s);
+}
+
+//--------------------------------------------------------------------------
+// Parse from given string
+void Parser::read_from(const string &s) throw (ParseFailed)
+{
+  istringstream iss(s);
+  parse_stream(iss);
 }
 
 //------------------------------------------------------------------------

@@ -309,9 +309,20 @@ public:
   void read_from(istream& s) throw (ParseFailed); 
 
   //------------------------------------------------------------------------
+  // Parse from given string
+  // Throws ParseFailed if parse fails for any fatal reason
+  void read_from(const string& s) throw (ParseFailed); 
+
+  //------------------------------------------------------------------------
   // Get root element
   // Returns Element::none if not valid
   Element& get_root(); 
+
+  //------------------------------------------------------------------------
+  // Get root element detached from parser, so you can keep it after the
+  // parser has died
+  // Returns 0 if not valid
+  Element *detach_root(); 
 };
 
 
