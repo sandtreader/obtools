@@ -274,6 +274,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 {
   // Read until non-escaped '<'
   string content;
+  bool first = true;
 
   for(;;)
   {
@@ -287,9 +288,11 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
     {
       c = skip_ws(s, c);
       if (c!='<') content+=' ';  //Compress to single space, suppress at end
+      first = false;
     }
 
-    if (c=='<')
+    // First (passed in) character '<' is allowed if lenient
+    if (c=='<' && !first)
     {
       //New tag - push this back and stop
       s.unget();
@@ -310,6 +313,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
     // Read another for next time
     c=0;
     s.get(c);
+    first = false;
   }
 
   //Create sub-element with content, and add it to currently open element
