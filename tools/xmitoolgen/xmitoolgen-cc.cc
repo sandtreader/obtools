@@ -226,37 +226,41 @@ string scope_var(Scope scope)
 }
 
 //--------------------------------------------------------------------------
-// Strip leading and trailing blank lines from a string
+// Strip single leading and trailing blank lines from a string
+// (XML artefacts)
 string strip_blank_lines(const string& script)
 {
   // Find first non-space character
   string::size_type start = script.find_first_not_of(" \t\n");
   if (start == string::npos) return "";  // Completely empty
 
-  // Find previous eol from here
-  start = script.find_last_of("\n", start);
-  if (start == string::npos) 
-    start = 0;  // First line not blank
+  // Find first newline
+  string::size_type nl = script.find_first_of("\n");
+  if (nl == string::npos) return script; // No newlines at all
+
+  // If newline first, first line is blank - move forward
+  if (nl<start)
+    start = nl+1;  // Move to next line
   else
-    start++;    // At start of first non-blank line
+    start = 0;  // First line not blank
 
   // Find last non-space character
   string::size_type end = script.find_last_not_of(" \t\n");
   if (end == string::npos || end<start) return "";  // (shouldn't happen)
 
-  // Find next eol from here
-  end = script.find_first_of("\n", end);
-  // Now at end of last line, or end (npos)
+  // Find last newline
+  nl = script.find_last_of("\n");
 
-  if (end == string::npos)
-    return script.substr(start);
+  // If newline last, last line is blank - chop it
+  if (nl>end)
+    return script.substr(start, nl-start+1);
   else
-    return script.substr(start, end-start+1);
+    return script.substr(start); // Not blank, leave it
 }
 
 //--------------------------------------------------------------------------
 // Find minimum leading whitespace (common indent) of a string
-// Tabs are treated just like a single space
+// Tabs are treated as 8 spaces
 // Won't return more than 80
 int common_indent(const string& script)
 {
@@ -270,8 +274,11 @@ int common_indent(const string& script)
     switch (*p)
     {
       case ' ':
-      case '\t':
 	if (!seen_text) indent++;
+      break;
+
+      case '\t':
+	if (!seen_text) indent+=8;
       break;
 
       case '\n':
@@ -305,9 +312,14 @@ string remove_indent(const string& script, int indent)
     switch (c)
     {
       case ' ':
-      case '\t':
 	// Only add spaces if used up indent
 	if (pos++ >= indent) result+=c;
+      break;
+
+      case '\t':
+	// Only add tab if used up indent
+	if (pos >= indent) result+=c;
+	pos += 8;
       break;
 
       case '\n':
@@ -531,9 +543,10 @@ void template_funcs(XML::Element& root, CPPT::Tags& tags,
     {
       // Generate file open code for sout - this is a bit evil, because of
       // the need to always preserve 'sout' as the output stream
+      // Uses the ReGen rofstream to merge this with user changes
       cout << "  string _fn = path+fn_template" << mysuffix << "("
 	   << scope_var(scope) << ");\n";
-      cout << "  ofstream sout(_fn.c_str());\n";
+      cout << "  ObTools::ReGen::rofstream sout(_fn.c_str());\n";
       cout << "  if (!sout)\n";
       cout << "  {\n";
       cout << "    cerr << \"Can't create file: \" << _fn << endl;\n";
@@ -624,18 +637,27 @@ int main(int argc, char **argv)
   legal(config_file, config);
 
   // Some header stuff
-  cout << "\n#include \"ot-xmi.h\"\n\n";
+  cout << "\n#include \"ot-xmi.h\"\n";
+  cout << "#include \"ot-regen.h\"\n\n";
+
   cout << "#include <fstream>\n";
   cout << "#include <sstream>\n";
-  cout << "#include <cstdlib>\n";
+  cout << "#include <cstdlib>\n\n";
 
   // Their config items
   config_vars(config);
 
   // Their custom code
-  cout<<"//================================================================\n";
-  cout << "// Custom code from " << config_file << " <code> section\n";
-  cout << config["code"] << endl;
+  string code = strip_blank_lines(config["code"]);
+  if (code.size())
+  {
+    cout<<"//================================================================\n";
+    cout << "// Custom code from " << config_file << " <code> section\n\n";
+ cerr << common_indent(code);
+
+    code = remove_indent(code, common_indent(code));
+    cout << code << endl;
+  }
 
   // Template functions
   cout<<"//================================================================\n";
