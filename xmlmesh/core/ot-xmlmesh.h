@@ -12,7 +12,10 @@
 
 #include <string>
 #include "ot-net.h"
+#if !defined(_SINGLE)
 #include "ot-mt.h"
+#endif
+
 #include "ot-xml.h"
 
 namespace ObTools { namespace XMLMesh {

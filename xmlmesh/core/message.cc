@@ -8,7 +8,6 @@
 //==========================================================================
 
 #include "ot-xmlmesh.h"
-#include "ot-mt.h"
 #include "ot-log.h"
 #include <sstream>
 
@@ -21,14 +20,20 @@ static const char *xml_namespace = "obtools.com/xmlmesh";
 //--------------------------------------------------------------------------
 //Static globals for ID allocation - threadsafe
 
+#if !defined(_SINGLE)
 static MT::Mutex id_mutex;
+#endif
+
 static int id_serial;
 
 //--------------------------------------------------------------------------
 //Allocate an ID
 string Message::allocate_id()
 {
+#if !defined(_SINGLE)
   MT::Lock lock(id_mutex);
+#endif
+
   ostringstream ids;
   ids << "OTM-" << ++id_serial;
   return ids.str();

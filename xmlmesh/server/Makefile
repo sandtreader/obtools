@@ -5,38 +5,15 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-OBJS = 	main.o server.o distributor.o correlator.o			\
-	transport-otmp-server.o						\
-	service-publish.o
+NAME   	= xmlmesh-server
+HEADERS = server.h
+OBJS 	= main.o server.o distributor.o correlator.o			\
+	  transport-otmp-server.o service-publish.o
+DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp net log mt xml text cache
+CONFIGS = xmlmesh.cfg.xml
+MULTI   = 1
 
-ifdef DEBUG
-CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
-LDFLAGS += -g
-endif
+ROOT    = ../..
+include $(ROOT)/build/exe.mk
 
-CPPFLAGS += -I../../libs/mt/ -I../../libs/net/ -I../../libs/log 
-CPPFLAGS += -I../../libs/xml -I../../libs/text/ -I../../libs/cache/
-CPPFLAGS += -I../core -I../otmp -I../client
-
-all: xmlmesh-server
-
-clean: 
-	-@rm -f *.o *.a *~ xmlmesh-server
-
-release: xmlmesh-server
-	cp xmlmesh-server $(RELEASEDIR) 
-	cp xmlmesh.cfg.xml $(RELEASEDIR) 
-
-#Test harnesses:
-xmlmesh-server:	$(OBJS)    					        \
-		../client/ot-xmlmesh-client.a				\
-		../otmp/ot-xmlmesh-otmp.a				\
-		../core/ot-xmlmesh-core.a				\
-	     	../../libs/net/ot-net.a ../../libs/mt/ot-mt.a 		\
-		../../libs/log/ot-log.a ../../libs/text/ot-text.a	\
-		../../libs/xml/ot-xml.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-#Objects
-$(OBJS): server.h Makefile
 

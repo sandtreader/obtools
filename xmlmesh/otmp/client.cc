@@ -22,6 +22,7 @@ namespace ObTools { namespace XMLMesh { namespace OTMP {
 //==========================================================================
 // Background traffic handler threads
 
+#if !defined(_SINGLE)
 //--------------------------------------------------------------------------
 // Receive handler thread class
 // Just repeatedly calls back into receive_messages
@@ -205,6 +206,7 @@ bool Client::send_messages()
   return true;
 }
 
+#endif // !_SINGLE
 
 //==========================================================================
 // Foreground stuff
@@ -215,9 +217,11 @@ Client::Client(Net::EndPoint _server): server(_server)
 {
   socket = 0;
 
+#if !defined(_SINGLE)
   //Start send and receive threads - receive thread will 'restart' socket
   receive_thread = new ReceiveThread(*this);
   send_thread    = new SendThread(*this);
+#endif
 }
 
 
@@ -226,7 +230,11 @@ Client::Client(Net::EndPoint _server): server(_server)
 // Whether message queued
 bool Client::send(Message& msg)
 {
+#if defined(_SINGLE)
+#warning Implement Client::send for single-tasking!
+#else
   send_q.send(msg);  // Never fails, will eat all memory first
+#endif
   return true;  
 }
 
@@ -234,7 +242,11 @@ bool Client::send(Message& msg)
 // Check whether a message is available before blocking in wait()
 bool Client::poll()
 {
+#if defined(_SINGLE)
+#warning Implement Client::poll for single-tasking!
+#else
   return receive_q.poll();
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -242,7 +254,11 @@ bool Client::poll()
 // Returns false if the connection was restarted 
 bool Client::wait(Message& msg)
 {
+#if defined(_SINGLE)
+#warning Implement Client::wait for single-tasking!
+#else
   msg = receive_q.wait();    // Never fails
+#endif
   return msg.data.size()!=0; // Empty message on restart
 }
 
@@ -250,8 +266,10 @@ bool Client::wait(Message& msg)
 // Destructor
 Client::~Client()
 {
+#if !defined(_SINGLE)
   delete receive_thread;
   delete send_thread;
+#endif
   if (socket) delete socket;
 }
 

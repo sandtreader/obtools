@@ -13,7 +13,9 @@
 #include <string>
 #include <map>
 #include "ot-net.h"
+#if !defined(_SINGLE)
 #include "ot-mt.h"
+#endif
 
 namespace ObTools { namespace XMLMesh { namespace OTMP { 
 
@@ -87,6 +89,7 @@ private:
   Net::EndPoint server;
   Net::TCPClient *socket;
 
+#if !defined(_SINGLE)
   // Thread and queue stuff
   MT::Mutex mutex;             // Global client mutex used for socket
                                // creation and restart
@@ -95,6 +98,7 @@ private:
 
   MT::Thread *receive_thread;
   MT::Queue<Message> receive_q;
+#endif
 
   bool restart_socket();
 
@@ -127,6 +131,7 @@ public:
   virtual ~Client();
 };
 
+#if !defined(_SINGLE)  // None of the server stuff works singlethreaded
 //==========================================================================
 // Handy typedef of a session map - maps endpoints to sessions
 typedef map<Net::EndPoint, struct ClientSession *> SessionMap;
@@ -226,6 +231,7 @@ public:
   bool send(ClientMessage& msg);
 };
 
+#endif // !_SINGLE
 
 //==========================================================================
 }}} //namespaces

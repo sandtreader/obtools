@@ -5,29 +5,18 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-OBJS = message.o m-error.o m-subscription.o
+NAME   	= ot-xmlmesh-core
+HEADERS = ot-xmlmesh.h
+OBJS    = message.o m-error.o m-subscription.o
+DEPENDS = xml net log
+MULTI   = 1
+VARIANT-SINGLE = 1
 
-ifdef DEBUG
-CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
-LDFLAGS += -g
+# Suppress MT library if single 
+ifndef SINGLE
+DEPENDS += mt
 endif
 
-CPPFLAGS += -I../../libs/mt/ -I../../libs/xml 
-CPPFLAGS += -I../../libs/net/ -I../../libs/log 
-
-all: ot-xmlmesh-core.a
-
-clean: 
-	-@rm -f *.o *.a *~ test-client 
-
-release: ot-xmlmesh-core.a
-	cp ot-xmlmesh-core.a $(RELEASEDIR) 
-	cp ot-xmlmesh.h $(RELEASEDIR) 
-
-#Core library
-ot-xmlmesh-core.a: $(OBJS)
-	$(AR) r $@ $^
-
-#Objects
-$(OBJS): ot-xmlmesh.h Makefile
+ROOT    = ../..
+include $(ROOT)/build/lib.mk
 

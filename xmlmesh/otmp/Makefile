@@ -5,44 +5,25 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-OBJS = client.o server.o
+NAME   	= ot-xmlmesh-otmp
+HEADERS = ot-xmlmesh-otmp.h
+OBJS    = client.o
+DEPENDS = net log text
+MULTI   = 1
+VARIANT-SINGLE = 1
 
-ifdef DEBUG
-CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
-LDFLAGS += -g
+TESTS 	= test-client
+TESTCMD = ./test-client localhost
+
+# Suppress MT library and server if single 
+ifndef SINGLE
+DEPENDS += mt
+OBJS 	+= server.o
+TESTS 	+= test-server
 endif
 
-CPPFLAGS += -I../../libs/mt/ -I../../libs/net/ -I../../libs/log -I../shared
+ROOT    = ../..
+include $(ROOT)/build/lib.mk
 
-all: test-client test-server
 
-clean: 
-	-@rm -f *.o *.a *~ test-client test-server
-
-test:	test-client test-server
-	./test-client localhost
-
-release: ot-xmlmesh-otmp.a
-	cp ot-xmlmesh-otmp.a $(RELEASEDIR) 
-	cp ot-xmlmesh-otmp.h $(RELEASEDIR) 
-
-#Test harnesses:
-test-client:	test-client.o ot-xmlmesh-otmp.a	  	                \
-	     	../../libs/net/ot-net.a ../../libs/mt/ot-mt.a 		\
-		../../libs/log/ot-log.a ../../libs/text/ot-text.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-test-server:	test-server.o ot-xmlmesh-otmp.a	  	                \
-	     	../../libs/net/ot-net.a ../../libs/mt/ot-mt.a 		\
-		../../libs/log/ot-log.a ../../libs/text/ot-text.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
-
-#Client library
-ot-xmlmesh-otmp.a: $(OBJS)
-	$(AR) r $@ $^
-
-#Objects
-$(OBJS): ot-xmlmesh-otmp.h Makefile
-test-client.o: ot-xmlmesh-otmp.h Makefile
-test-server.o: ot-xmlmesh-otmp.h Makefile
 
