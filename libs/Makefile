@@ -10,6 +10,7 @@ all:
 	$(MAKE) -C cppt
 
 clean: 
+	-@rm -f *~
 	$(MAKE) -C xml clean
 	$(MAKE) -C xmi clean
 	$(MAKE) -C cppt clean

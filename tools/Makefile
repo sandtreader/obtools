@@ -8,6 +8,7 @@ all:
 	$(MAKE) -C xmltools
 
 clean: 
+	-@rm -f *~
 	$(MAKE) -C xmltools clean
 
 test: 

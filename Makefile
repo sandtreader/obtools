@@ -9,6 +9,7 @@ all:
 	$(MAKE) -C tools
 
 clean: 
+	-@rm -f *~
 	$(MAKE) -C libs clean
 	$(MAKE) -C tools clean
 
