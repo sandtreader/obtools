@@ -51,6 +51,7 @@ class OTMPServer: public Service
 {
 private:
   int port;
+
   OTMP::Server otmp;
   OTMPServerThread  server_thread;
   OTMPMessageThread message_thread;
@@ -80,6 +81,23 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   server_thread(otmp), 
   message_thread(*this)
 {
+  bool filtered = false;
+  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(filter, cfg, "filter")
+    string addr = filter["address"];
+    Net::MaskedAddress ma(addr);
+
+    Log::Summary << "  Connections allowed from " << ma << endl;
+    otmp.allow(ma);
+    filtered = true;
+  OBTOOLS_XML_ENDFOR
+
+  // Add localhost-only filter if none specified
+  if (!filtered)
+  {
+    otmp.allow(Net::MaskedAddress("localhost"));
+    Log::Summary << "  Default filtering:  localhost only\n";
+  }
+
   server_thread.start();
   message_thread.start();
 
