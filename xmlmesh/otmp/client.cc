@@ -48,6 +48,34 @@ public:
 };
 
 //------------------------------------------------------------------------
+// Restart a dead or non-existent socket
+// Note:  Ensure this is called only in one thread (the receive thread)
+bool Client::restart_socket()
+{
+  // Lock the mutex while we try to restart
+  MT::Lock lock(mutex);
+
+  // Delete old socket, if any
+  if (socket) delete socket;
+
+  // Try and get a new one
+  socket = new Net::TCPClient(server);
+
+  if (!*socket)
+  {
+    // Leave it valid but unhappy to avoid crashing send thread
+
+    Log::Error << "OTMP: Can't open socket to " << server << endl;
+    return false;
+  }
+  else
+  {
+    Log::Summary << "OTMP: Opened socket to " << server << endl;
+    return true;
+  }
+}
+
+//------------------------------------------------------------------------
 // Receive some messages, if any
 // Blocks waiting for incoming messages, returns whether everything OK
 bool Client::receive_messages()
@@ -112,17 +140,7 @@ class SendThread: public MT::Thread
 
   void run() 
   { 
-    for(;;)
-    {
-      // Loop while socket is happy
-      while (client.send_messages());
-
-      // Log fault and sleep before retrying
-      Log::Error << "OTMP(send): Socket failed, can't restart\n";
-      Log::Error << "OTMP(send): Sleeping for " 
-		 << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
-      sleep(DEAD_SOCKET_SLEEP_TIME);
-    }
+    for(;;) client.send_messages();
   }
 
 public:
@@ -134,12 +152,17 @@ public:
 // Blocks waiting for outgoing messages, returns whether everything OK
 bool Client::send_messages()
 {
-  // Check socket exists and is connected - if not, try to reconnect it
-  if ((!socket || !*socket) && !restart_socket()) return false;
-
   // Wait for message to go out, and send it
   Message msg = send_q.wait();
  
+  // Check that socket is OK - if not, sleep hoping the receive thread
+  // can reanimate it
+  while (!socket || !*socket)
+  {
+    Log::Summary << "OTMP(send): Socket is dead - waiting for improvement\n";
+    sleep(DEAD_SOCKET_SLEEP_TIME);
+  }
+
   // Deal with it
   if (Log::debug_ok)
     Log::Debug << "OTMP(send): Sending message length " << msg.data.size() 
@@ -148,6 +171,10 @@ bool Client::send_messages()
 
   try // Handle SocketErrors
   {
+    // Lock the mutex while we use the socket - the receive thread's restart
+    // might jump in here and kill it under us, otherwise
+    MT::Lock lock(mutex);
+
     // Write chunk header
     socket->write_nbo_int(TAG_MESSAGE);
     socket->write_nbo_int(msg.data.size());
@@ -166,39 +193,6 @@ bool Client::send_messages()
   return true;
 }
 
-//------------------------------------------------------------------------
-// Restart a dead or non-existent socket
-bool Client::restart_socket()
-{
-  // Lock client global mutex while we mess with this
-  MT::Lock lock(mutex);
-
-  // If we have a socket, kill it
-  if (socket) 
-  {
-    delete socket;
-    socket = 0;
-    Log::Summary << "OTMP: Restarting socket\n";
-  }
-
-  // Try and get a new one
-  socket = new Net::TCPClient(server);
-
-  if (!*socket)
-  {
-    delete socket;
-    socket = 0;
-    Log::Error << "OTMP: Can't open socket to " << server << endl;
-    return false;
-  }
-  else
-  {
-    Log::Summary << "OTMP: Opened socket to " << server << endl;
-
-    return true;
-  }
-}
-
 
 //==========================================================================
 // Foreground stuff
@@ -209,10 +203,7 @@ Client::Client(Net::EndPoint _server): server(_server)
 {
   socket = 0;
 
-  //Try to start socket
-  restart_socket();
-
-  //Start send and receive threads
+  //Start send and receive threads - receive thread will 'restart' socket
   receive_thread = new ReceiveThread(*this);
   send_thread    = new SendThread(*this);
 }
