@@ -6,7 +6,7 @@
 #==========================================================================
 
 all: 
-	-@rm *.tgz *~
+	-@rm -f *.tgz *~
 	tar cvfz obtools-xmlmesh.tgz --exclude=CVS --exclude=Makefile *
 
 clean:
