@@ -37,8 +37,6 @@ class Correlator: public Service
 private:
   static const int DEFAULT_TIMEOUT = 60;
 
-  unsigned long id_serial; 
-
   // Cache: map of our ID to correlation
   typedef Cache::UseTimeoutPointerCache<string, Correlation> CacheType;
   CacheType request_cache;
@@ -65,7 +63,6 @@ public:
 // Default Constructor 
 Correlator::Correlator(XML::Element& cfg): 
     Service(cfg), 
-    id_serial(0), 
     request_cache(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT)) 
 {
   Log::Summary << "Correlator Service '" << id << "' started\n"; 
