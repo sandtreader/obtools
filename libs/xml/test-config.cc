@@ -1,0 +1,43 @@
+//==========================================================================
+// ObTools::XML: test-config.cc
+//
+// Test harness for ObTools XML Configuration file support
+//
+// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+//==========================================================================
+
+#include "ot-xml.h"
+
+//--------------------------------------------------------------------------
+// Main
+
+int main()
+{
+  ObTools::XML::Configuration config("tests/config.xml");
+
+  if (!config.read("config")) return 2;
+
+  cout << "/@version: "  << config.get_value("/@version") << endl;
+  cout << "directory: "  << config.get_value("directory") << endl;
+  cout << "output/mode: "  << config.get_value_int("output/mode", 444) << endl;
+  cout << "output/atomic: " 
+       << config.get_value_bool("output/atomic", false) << endl;
+
+  //Files
+  list<string> files = config.get_values("input/file");
+  for(list<string>::iterator p = files.begin();
+      p!=files.end();
+      p++)
+    cout << "input/file: " << *p << endl;
+
+  //Map
+  map<string, string> m = config.get_map("types/map");
+  for(map<string, string>::iterator p = m.begin(); p!=m.end(); p++)
+    cout << "Map '" << p->first << "'->'" << p->second << "'\n";
+
+  return 0;  
+}
+
+
+
+

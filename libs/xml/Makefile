@@ -4,23 +4,40 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = element.o parser.o
+OBJS = element.o parser.o xpath.o config.o
 ifdef DEBUG
 CPPFLAGS += -g
 LDFLAGS += -g
 endif
- 
-all: test-xml
+
+all: test-xml test-xpath test-config
 
 clean: 
-	-@rm -f *.o *.a *~ *.~* *.obj *.exe *.lib *.dll *.tds test-xml leak.out
+	-@rm -f *.o *.a *~ *.~* *.obj *.exe *.lib *.dll *.tds test-xml \
+        test-xpath test-config leak.out 
 
-test:	test-xml
+test:	xml-test xpath-test config-test
+
+xml-test: test-xml
 	LeakCheck ./test-xml < tests/simple.xml
 	leak-analyze ./test-xml
- 
-#Test harness:
+
+xpath-test: test-xpath
+	LeakCheck ./test-xpath < tests/simple.xml
+	leak-analyze ./test-xpath
+
+config-test: test-config
+	LeakCheck ./test-config 
+	leak-analyze ./test-config
+
+#Test harnesses:
 test-xml: test-xml.o ot-xml.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+
+test-xpath: test-xpath.o ot-xml.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+
+test-config: test-config.o ot-xml.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #XML library
@@ -30,6 +47,8 @@ ot-xml.a: $(OBJS)
 #Objects
 $(OBJS): ot-xml.h Makefile
 test-xml.o: ot-xml.h Makefile
+test-xpath.o: ot-xml.h Makefile
+test-config.o: ot-xml.h Makefile
 
 
 

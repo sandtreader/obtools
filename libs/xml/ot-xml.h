@@ -310,8 +310,8 @@ public:
 
   //------------------------------------------------------------------------
   // Get root element
-  // Throws ParseFailed if not valid
-  Element& get_root() throw (ParseFailed); 
+  // Returns Element::none if not valid
+  Element& get_root(); 
 };
 
 
@@ -333,6 +333,110 @@ istream& operator>>(istream& s, Parser& p) throw (ParseFailed);
 //
 // Note - read into Parser, write from Element
 ostream& operator<<(ostream& s, const Element& e);
+
+//==========================================================================
+// XPath processor
+// Only handles child and attribute axis steps in abbreviated form, no 
+// predicates
+// e.g. /config/foo/@width
+// Paths can be absolute or relative - always rooted at 'root'
+
+class XPathProcessor
+{
+private:
+  Element& root;           // Document root we're working on
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  XPathProcessor(): root(Element::none) {}
+  XPathProcessor(Element& _root): root(_root) {}
+  
+  //------------------------------------------------------------------------
+  // Element list fetch - all elements matching final child step.
+  // Only first element of intermediate steps is used - list is not merged!
+  list<Element *> get_elements(const string& path);
+
+  //------------------------------------------------------------------------
+  // Single element fetch - first of list, if any, or 0
+  Element *get_element(const string& path);
+
+  //------------------------------------------------------------------------
+  // Value fetch - either attribute or content of single (first) element
+  // Returns def if anything not found
+  string get_value(const string& path, const char *def="");
+
+  //--------------------------------------------------------------------------
+  // Boolean value fetch
+  // Defaults to default value given (or false) if not present
+  // Recognises words beginning [TtYy] as true, everything else is false
+  bool get_value_bool(const string& path, bool def=false);
+
+  //--------------------------------------------------------------------------
+  // Integer value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_value_int(const string& path, int def=0);
+};
+
+//==========================================================================
+// Configuration
+// Support for XML configuration files
+class Configuration
+{
+private:
+  list<string> filenames;
+  Parser parser;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  // Single filename
+  Configuration(const string& fn) { filenames.push_back(fn); }
+  // List of filenames - front() is tried first
+  Configuration(list<string>& fns): filenames(fns) {}
+
+  //------------------------------------------------------------------------
+  // Read configuration file
+  // Returns whether successful
+  // ename is the expected root element name - fails if wrong
+  bool read(const string& ename);
+
+  //------------------------------------------------------------------------
+  // Get root element
+  // Returns Element::none if not valid
+  Element& get_root() { return parser.get_root(); }
+
+  //------------------------------------------------------------------------
+  // XPath value fetch - either attribute or content of single (first) element
+  // Returns def if anything not found
+  // Note all get_value methods still work, and return def, if file read fails
+  string get_value(const string& path, const char *def="");
+
+  //--------------------------------------------------------------------------
+  // XPath Boolean value fetch
+  // Defaults to default value given (or false) if not present
+  // Recognises words beginning [TtYy] as true, everything else is false
+  bool get_value_bool(const string& path, bool def=false);
+
+  //--------------------------------------------------------------------------
+  // Integer value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_value_int(const string& path, int def=0);
+
+  //------------------------------------------------------------------------
+  // XPath list-of-values fetch
+  // Returns contents of all elements matching XPath
+  list<string> get_values(const string& path);
+
+  //------------------------------------------------------------------------
+  // XPath map fetch
+  // Returns string->string map of all element matching given XPath,
+  // using given attribute name as key, content as value
+  map<string, string> get_map(const string& path,
+			      const char *name_attr = "name");
+};
 
 //==========================================================================
 }} //namespaces
