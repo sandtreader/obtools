@@ -29,28 +29,46 @@
     }
   </xt:code>
 
+  <!-- Macro define for description text at all levels -->
+  <xt:define name="Desc" element="desc">
+    <DIV CLASS="desc">
+      <xt:template element="p"><P>$= *p =$</P></xt:template>
+    </DIV>
+  </xt:define>
+
+  <!-- Macro define for file HEAD title -->
+  <xt:define name="Title_HEAD" element="title">
+    <xt:arg name="prefix" default=""/>
+    <xt:arg name="dir" default=""/>
+    <HEAD>
+    <LINK REL="STYLESHEET" HREF="$= dir =$../../obdoc.css" 
+          TITLE="ObDoc Stylesheet"/> 
+    <TITLE>$( if (prefix.size()) sout << prefix << ": "; )$
+           $= *title =$</TITLE>
+    </HEAD>
+  </xt:define>
+ 
+  <!-- Macro define for file BODY title -->
+  <xt:define name="Title_BODY" element="title">
+    <xt:arg name="prefix" default=""/>
+    <H1>$( if (prefix.size()) sout << prefix << ": "; )$
+           $= *title =$</H1>
+  </xt:define>
+
   <!-- Top-level project template -->
   <xt:template name="Project" element="project">
     <xt:dir>$= project["name"] =$</xt:dir>
     <xt:file>index.html</xt:file>
 
-    <HTML><HEAD>
-    <LINK REL="STYLESHEET" HREF="../../obdoc.css" TITLE="ObDoc Stylesheet"/> 
-    <TITLE>
-    <!-- Project title for HEAD -->
-    <xt:template element="title">$= *title =$</xt:template>
-    </TITLE></HEAD>
+    <HTML>
+    <xt:use template="Title_HEAD"/>     
 
     <BODY>
     <!-- Project title H1 -->
-    <xt:template element="title"><H1>$= *title =$</H1></xt:template>
+    <xt:use template="Title_BODY"/>     
 
     <!-- Project description -->
-    <xt:template element="desc">
-      <DIV CLASS="desc">
-        <xt:template element="p"><P>$= *p =$</P></xt:template>
-      </DIV>
-    </xt:template>
+    <xt:use template="Desc"/>
 
     <!-- Library links -->
     <H2>Libraries</H2>
@@ -68,24 +86,17 @@
       <xt:dir>$= lib["dir"] =$</xt:dir>
       <xt:file>index.html</xt:file>
 
-      <HTML><HEAD>
-      <LINK REL="STYLESHEET" HREF="../../../obdoc.css" 
-            TITLE="ObDoc Stylesheet"/> 
-      <TITLE>
-      <!-- Library title for HEAD -->
-      <xt:template element="title">$= *title =$</xt:template>
-      </TITLE></HEAD>
+      <HTML>
+      <xt:use template="Title_HEAD">
+        <xt:param name="dir">../</xt:param>
+      </xt:use>
 
       <BODY>
       <!-- Library title H1 -->
-      <xt:template element="title"><H1>$= *title =$</H1></xt:template>
+      <xt:use template="Title_BODY"/>     
 
       <!-- Library description -->
-      <xt:template element="desc">
-        <DIV CLASS="desc">
-          <xt:template element="p"><P>$= *p =$</P></xt:template>
-        </DIV>
-      </xt:template>
+      <xt:use template="Desc"/>
 
       <!-- Class links -->
       <H2>Classes</H2>
@@ -99,31 +110,24 @@
       </UL>
       </BODY></HTML>
 
-      <!-- Class directory -->
+      <!-- Class file -->
       <xt:template name="Class" element="class" var="cls">
 	<xt:file>$= cls["name"] =$.html</xt:file>
 
-	<HTML><HEAD>
-	<LINK REL="STYLESHEET" HREF="../../../obdoc.css" 
-	      TITLE="ObDoc Stylesheet"/> 
-	<TITLE>
-	<!-- Class title for HEAD -->
-	$= cls["name"] =$: 
-	<xt:template element="title">$= *title =$</xt:template>
-	</TITLE></HEAD>
+	<HTML>
+        <xt:use template="Title_HEAD">
+	  <xt:param name="prefix">$= cls["name"] =$</xt:param>
+          <xt:param name="dir">../</xt:param>
+        </xt:use>
 
 	<BODY>
 	<!-- Class title H1 -->
-        <H1>$= cls["name"] =$: 
-	<xt:template element="title">$= *title =$</xt:template>
-	</H1>
+        <xt:use template="Title_BODY">
+	  <xt:param name="prefix">$= cls["name"] =$</xt:param>
+	</xt:use>
 
 	<!-- Class description -->
-	<xt:template element="desc">
-	  <DIV CLASS="desc">
-	    <xt:template element="p"><P>$= *p =$</P></xt:template>
-	  </DIV>
-	</xt:template>
+        <xt:use template="Desc"/>
 
 	<!-- Members -->
 	<H2>Class members</H2>
@@ -131,11 +135,7 @@
 	  <DIV CLASS="member">
 	  <H3>$= member["type"] =$ $= member["name"] =$:
             <xt:template element="title">$= *title =$</xt:template></H3>
-          <xt:template element="desc">
-  	    <DIV CLASS="desc">
-	      <xt:template element="p"><P>$= *p =$</P></xt:template>
-	    </DIV>
-          </xt:template>
+	    <xt:use template="Desc"/>
           </DIV>
 	</xt:template>
  	
@@ -150,11 +150,7 @@
               $= htmlise(arg["type"]) =$ 
               $= arg["name"] =$</xt:template>):
           <xt:template element="title">$= *title =$</xt:template></H3>
-          <xt:template element="desc">
-  	    <DIV CLASS="desc">
-	      <xt:template element="p"><P>$= *p =$</P></xt:template>
-	    </DIV>
-          </xt:template>
+          <xt:use template="Desc"/>
           </DIV>
 	</xt:template>
 
@@ -163,3 +159,4 @@
     </xt:template>
   </xt:template>
 </xt:tool>  
+
