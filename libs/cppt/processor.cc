@@ -263,7 +263,7 @@ void Processor::process()
 
 	    case TOKEN_INVALID:
 	      // Pass mistaken token through verbatim, retry unused
-	      sout << tr_code.get_token();
+	      sout << tr_expr.get_token();
 	      if (!used_char) goto retry;
 	      break;
 	  }
