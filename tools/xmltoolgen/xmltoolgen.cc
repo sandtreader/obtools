@@ -15,7 +15,7 @@ using namespace ObTools::ToolGen;
 using namespace std;
 
 //==========================================================================
-// XML tool generator, language independent
+// XML tool generator
 class XMLGenerator: public Generator
 {
 protected:
