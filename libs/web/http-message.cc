@@ -143,6 +143,14 @@ bool HTTPMessageGenerator::generate()
   XML::Element& headers = root.get_child("headers");
   XML::Element& body = root.get_child("body");
 
+  // Check for a content-length header, and if not present, add one
+  if (!headers.get_child("content-length"))
+  {
+    ostringstream oss;
+    oss << body.content.size();
+    headers.add("content-length", oss.str());
+  }
+
   // Output headers
   MIMEHeaderGenerator mhg(headers, out);
   if (!mhg.generate()) return false;
