@@ -5,7 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = xml xmi cppt regen misc text mt net log cache db cli init soap
+SUBS = xml xmi cppt regen misc text mt net log cache db cli init soap chan web
 ROOT = ..
 include ../build/dir.mk
 
