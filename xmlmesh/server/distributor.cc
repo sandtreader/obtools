@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::XMLBus:Server distributor.cc
+// ObTools::XMLMesh:Server distributor.cc
 //
-// Implementation of XMLBus message distributor
+// Implementation of XMLMesh message distributor
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -10,7 +10,7 @@
 #include "ot-log.h"
 #include "ot-text.h"
 
-namespace ObTools { namespace XMLBus { 
+namespace ObTools { namespace XMLMesh { 
 
 //------------------------------------------------------------------------
 // Attach a new message handler on the given subject pattern

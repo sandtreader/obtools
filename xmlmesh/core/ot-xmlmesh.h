@@ -1,26 +1,26 @@
 //==========================================================================
-// ObTools::XMLBus:Core ot-xmlbus.h
+// ObTools::XMLMesh:Core ot-xmlmesh.h
 //
-// Core definitions for XMLBus 
+// Core definitions for XMLMesh 
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_H
-#define __OBTOOLS_XMLBUS_H
+#ifndef __OBTOOLS_XMLMESH_H
+#define __OBTOOLS_XMLMESH_H
 
 #include <string>
 #include "ot-net.h"
 #include "ot-mt.h"
 #include "ot-xml.h"
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
-// XMLBus message
+// XMLMesh message
 class Message
 {
 private:
@@ -87,7 +87,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLBUS_H
+#endif // !__OBTOOLS_XMLMESH_H
 
 
 

@@ -1,20 +1,20 @@
 //==========================================================================
-// ObTools::XMLBus:Client: ot-xmlbus-client.h
+// ObTools::XMLMesh:Client: ot-xmlmesh-client.h
 //
-// Public definitions for XMLBus client library
+// Public definitions for XMLMesh client library
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_CLIENT_H
-#define __OBTOOLS_XMLBUS_CLIENT_H
+#ifndef __OBTOOLS_XMLMESH_CLIENT_H
+#define __OBTOOLS_XMLMESH_CLIENT_H
 
 #include <string>
 #include "ot-net.h"
 #include "ot-mt.h"
-#include "ot-xmlbus.h"
+#include "ot-xmlmesh.h"
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -65,7 +65,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLBUS_CLIENT_H
+#endif // !__OBTOOLS_XMLMESH_CLIENT_H
 
 
 

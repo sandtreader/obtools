@@ -1,19 +1,19 @@
 //==========================================================================
-// ObTools::XMLBus: client.cc
+// ObTools::XMLMesh: client.cc
 //
-// Implementation of XMLBus client library
+// Implementation of XMLMesh client library
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-client.h"
+#include "ot-xmlmesh-client.h"
 #include "ot-log.h"
 
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sstream>
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full

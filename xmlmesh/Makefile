@@ -1,5 +1,5 @@
 #==========================================================================
-# Makefile for all XMLBus components
+# Makefile for all XMLMesh components
 #
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================

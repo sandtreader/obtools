@@ -1,12 +1,12 @@
 //==========================================================================
-// ObTools::XMLBus: test-server.cc
+// ObTools::XMLMesh: test-server.cc
 //
 // Test harness for raw OTMP server
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-otmp.h"
+#include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
 
 using namespace std;
@@ -17,15 +17,15 @@ using namespace ObTools;
 // Pulls messages off the given queue and sends them to the given socket
 class ReflectorThread: public MT::Thread
 {
-  XMLBus::OTMP::Server& server;
-  MT::Queue<XMLBus::OTMP::ClientMessage>& receive_q;
+  XMLMesh::OTMP::Server& server;
+  MT::Queue<XMLMesh::OTMP::ClientMessage>& receive_q;
 
   void run() 
   { 
     for(;;)
     {
       // Block for a message
-      XMLBus::OTMP::ClientMessage msg = receive_q.wait();
+      XMLMesh::OTMP::ClientMessage msg = receive_q.wait();
 
       // Send it back
       server.send(msg);
@@ -33,8 +33,8 @@ class ReflectorThread: public MT::Thread
   }
 
 public:
-  ReflectorThread(XMLBus::OTMP::Server &s, 
-		  MT::Queue<XMLBus::OTMP::ClientMessage>& q): 
+  ReflectorThread(XMLMesh::OTMP::Server &s, 
+		  MT::Queue<XMLMesh::OTMP::ClientMessage>& q): 
     server(s), receive_q(q) { start(); }
 };
 
@@ -50,10 +50,10 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
 
   // Create unified receive queue
-  MT::Queue<XMLBus::OTMP::ClientMessage> q;
+  MT::Queue<XMLMesh::OTMP::ClientMessage> q;
 
   // Create server 
-  XMLBus::OTMP::Server server(q);
+  XMLMesh::OTMP::Server server(q);
 
   // Start reflector thread
   ReflectorThread reflector(server, q);

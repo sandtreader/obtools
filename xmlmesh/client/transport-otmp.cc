@@ -1,19 +1,19 @@
 //==========================================================================
-// ObTools::XMLBus:Client: transport-otmp.cc
+// ObTools::XMLMesh:Client: transport-otmp.cc
 //
-// Implementation of OTMP client transport for XMLBus
+// Implementation of OTMP client transport for XMLMesh
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-client-otmp.h"
+#include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
 
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sstream>
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full

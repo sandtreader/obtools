@@ -1,5 +1,5 @@
 #==========================================================================
-# Makefile for ObTools XMLBus core library
+# Makefile for ObTools XMLMesh core library
 #
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
@@ -14,15 +14,15 @@ endif
 CPPFLAGS += -I../../libs/mt/ -I../../libs/xml 
 CPPFLAGS += -I../../libs/net/ -I../../libs/log 
 
-all: ot-xmlbus-core.a
+all: ot-xmlmesh-core.a
 
 clean: 
 	-@rm -f *.o *.a *~ test-client 
 
 #Core library
-ot-xmlbus-core.a: $(OBJS)
+ot-xmlmesh-core.a: $(OBJS)
 	$(AR) r $@ $^
 
 #Objects
-$(OBJS): ot-xmlbus.h Makefile
+$(OBJS): ot-xmlmesh.h Makefile
 

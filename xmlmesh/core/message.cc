@@ -1,17 +1,17 @@
 //==========================================================================
-// ObTools::XMLBus:Core: message.cc
+// ObTools::XMLMesh:Core: message.cc
 //
-// Implementation of XMLBus message
+// Implementation of XMLMesh message
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus.h"
+#include "ot-xmlmesh.h"
 #include "ot-mt.h"
 #include "ot-log.h"
 #include <sstream>
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //--------------------------------------------------------------------------
 //Static globals for ID allocation - threadsafe
@@ -113,12 +113,12 @@ XML::Element& Message::get_xml()
     }
     else
     {
-      Log::Error << "XMLBus:: Received bogus XML root: " << root.name << endl;
+      Log::Error << "XMLMesh:: Received bogus XML root: " << root.name << endl;
     }
   }
   catch (XML::ParseFailed)
   {
-    Log::Error << "XMLBus:: Can't parse incoming message\n";
+    Log::Error << "XMLMesh:: Can't parse incoming message\n";
   }
 
   // See if we've got one now - if not, return Element::none for safety

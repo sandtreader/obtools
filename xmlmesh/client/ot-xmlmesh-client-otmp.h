@@ -1,18 +1,18 @@
 //==========================================================================
-// ObTools::XMLBus: ot-xmlbus-client-otmp.h
+// ObTools::XMLMesh: ot-xmlmesh-client-otmp.h
 //
-// Definition of OTMP-based XMLBus client 
+// Definition of OTMP-based XMLMesh client 
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_OTMP_CLIENT_H
-#define __OBTOOLS_XMLBUS_OTMP_CLIENT_H
+#ifndef __OBTOOLS_XMLMESH_OTMP_CLIENT_H
+#define __OBTOOLS_XMLMESH_OTMP_CLIENT_H
 
-#include "ot-xmlbus-client.h"
-#include "ot-xmlbus-otmp.h"
+#include "ot-xmlmesh-client.h"
+#include "ot-xmlmesh-otmp.h"
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -29,14 +29,14 @@ public:
   // Constructor - take server address
   OTMPClientTransport(Net::EndPoint server): otmp(server) {}
 
-  // Implementations of ClientTransport virtuals (q.v. ot-xmlbus.h)
+  // Implementations of ClientTransport virtuals (q.v. ot-xmlmesh.h)
   bool send(const string& data);
   bool poll();
   bool wait(string& data);
 };
 
 //==========================================================================
-// OTMP-based XMLBus Client
+// OTMP-based XMLMesh Client
 class OTMPClient: public Client
 {
 private:
@@ -51,7 +51,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLBUS_OTMP_H
+#endif // !__OBTOOLS_XMLMESH_OTMP_H
 
 
 

@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::XMLBus:Server server.cc
+// ObTools::XMLMesh:Server server.cc
 //
-// Implementation of XMLBus server object
+// Implementation of XMLMesh server object
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -9,7 +9,7 @@
 #include "server.h"
 #include "ot-log.h"
 
-namespace ObTools { namespace XMLBus { 
+namespace ObTools { namespace XMLMesh { 
 
 //------------------------------------------------------------------------
 // Constructor

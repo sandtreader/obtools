@@ -1,17 +1,17 @@
 //==========================================================================
-// ObTools::XMLBus:Server: transport-otmp.h
+// ObTools::XMLMesh:Server: transport-otmp.h
 //
 // Definition of OTMP ServerTransport
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_SERVER_TRANS_OTMP_H
-#define __OBTOOLS_XMLBUS_SERVER_TRANS_OTMP_H
+#ifndef __OBTOOLS_XMLMESH_SERVER_TRANS_OTMP_H
+#define __OBTOOLS_XMLMESH_SERVER_TRANS_OTMP_H
 
 #include "server.h"
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -30,7 +30,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLBUS_SERVER_TRANS_OTMP_H
+#endif // !__OBTOOLS_XMLMESH_SERVER_TRANS_OTMP_H
 
 
 

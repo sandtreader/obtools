@@ -1,12 +1,12 @@
 //==========================================================================
-// ObTools::XMLBus:OTMP: client.cc
+// ObTools::XMLMesh:OTMP: client.cc
 //
 // Implementation of raw OTMP client 
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-otmp.h"
+#include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
 
 #include <unistd.h>
@@ -16,7 +16,7 @@
 // Time to sleep for if socket dies and won't come back
 #define DEAD_SOCKET_SLEEP_TIME 10
 
-namespace ObTools { namespace XMLBus { namespace OTMP {
+namespace ObTools { namespace XMLMesh { namespace OTMP {
 
 //==========================================================================
 // Background traffic handler threads

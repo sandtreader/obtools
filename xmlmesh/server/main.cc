@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::XMLBus:Server: main.cc
+// ObTools::XMLMesh:Server: main.cc
 //
-// Main entry point for XMLBus Server
+// Main entry point for XMLMesh Server
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
@@ -12,14 +12,14 @@
 
 using namespace std;
 using namespace ObTools;
-using namespace ObTools::XMLBus;
+using namespace ObTools::XMLMesh;
 
 //--------------------------------------------------------------------------
 // Main
 
 int main(int argc, char **argv)
 {
-  char *cfg = "xmlbus.cfg.xml";
+  char *cfg = "xmlmesh.cfg.xml";
   if (argc > 1) cfg = argv[1];
 
   // Set up logging
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
   // Read config
   XML::Configuration config(cfg);
-  if (!config.read("xmlbus"))
+  if (!config.read("xmlmesh"))
   {
     Log::Error << "Can't read configuration file\n";
     return 2;

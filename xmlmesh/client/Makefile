@@ -1,5 +1,5 @@
 #==========================================================================
-# Makefile for ObTools XMLBus client library
+# Makefile for ObTools XMLMesh client library
 #
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
@@ -23,19 +23,19 @@ test:	test-client
 	./test-client localhost
 
 #Test harnesses:
-test-client:	test-client.o ot-xmlbus-client.a	                \
-		../otmp/ot-xmlbus-otmp.a				\
-		../core/ot-xmlbus-core.a				\
+test-client:	test-client.o ot-xmlmesh-client.a	                \
+		../otmp/ot-xmlmesh-otmp.a				\
+		../core/ot-xmlmesh-core.a				\
 	     	../../libs/net/ot-net.a ../../libs/mt/ot-mt.a 		\
 		../../libs/log/ot-log.a ../../libs/text/ot-text.a	\
 		../../libs/xml/ot-xml.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
 #Client library
-ot-xmlbus-client.a: $(OBJS)
+ot-xmlmesh-client.a: $(OBJS)
 	$(AR) r $@ $^
 
 #Objects
-$(OBJS): ot-xmlbus-client.h ../otmp/ot-xmlbus-otmp.h Makefile
-test-client.o: ot-xmlbus-client.h Makefile
+$(OBJS): ot-xmlmesh-client.h ../otmp/ot-xmlmesh-otmp.h Makefile
+test-client.o: ot-xmlmesh-client.h Makefile
 

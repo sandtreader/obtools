@@ -1,20 +1,20 @@
 //==========================================================================
-// ObTools::XMLBus:Server: server.h
+// ObTools::XMLMesh:Server: server.h
 //
-// Internal definitions for XMLBus Server
+// Internal definitions for XMLMesh Server
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_SERVER_H
-#define __OBTOOLS_XMLBUS_SERVER_H
+#ifndef __OBTOOLS_XMLMESH_SERVER_H
+#define __OBTOOLS_XMLMESH_SERVER_H
 
 #include <string>
 #include "ot-net.h"
 #include "ot-mt.h"
-#include "ot-xmlbus.h"
+#include "ot-xmlmesh.h"
 
-namespace ObTools { namespace XMLBus {
+namespace ObTools { namespace XMLMesh {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -191,7 +191,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLBUS_SERVER_H
+#endif // !__OBTOOLS_XMLMESH_SERVER_H
 
 
 

@@ -1,20 +1,20 @@
 //==========================================================================
-// ObTools::XMLBus: ot-xmlbus-otmp.h
+// ObTools::XMLMesh: ot-xmlmesh-otmp.h
 //
 // Internal definitions for OTMP protocol, client and server
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_OTMP_H
-#define __OBTOOLS_XMLBUS_OTMP_H
+#ifndef __OBTOOLS_XMLMESH_OTMP_H
+#define __OBTOOLS_XMLMESH_OTMP_H
 
 #include <string>
 #include <map>
 #include "ot-net.h"
 #include "ot-mt.h"
 
-namespace ObTools { namespace XMLBus { namespace OTMP { 
+namespace ObTools { namespace XMLMesh { namespace OTMP { 
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -215,7 +215,7 @@ public:
 
 //==========================================================================
 }}} //namespaces
-#endif // !__OBTOOLS_XMLBUS_OTMP_H
+#endif // !__OBTOOLS_XMLMESH_OTMP_H
 
 
 

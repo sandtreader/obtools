@@ -1,12 +1,12 @@
 //==========================================================================
-// ObTools::XMLBus: test-client.cc
+// ObTools::XMLMesh: test-client.cc
 //
-// Test harness for XMLBus client
+// Test harness for XMLMesh client
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-client-otmp.h"
+#include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
 #include <unistd.h>
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   }
 
   char *host = argv[1];
-  int port = XMLBus::OTMP::DEFAULT_PORT;
+  int port = XMLMesh::OTMP::DEFAULT_PORT;
   if (argc > 2) port = atoi(argv[2]);
 
   // Set up logging
@@ -47,13 +47,13 @@ int main(int argc, char **argv)
 
   // Start client
   Net::EndPoint server(addr, port);
-  XMLBus::OTMPClient client(server);
+  XMLMesh::OTMPClient client(server);
 
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)
   {
     sleep(1);
-    XMLBus::Message msg("Test", "This is a test message");
+    XMLMesh::Message msg("Test", "This is a test message");
 
     client.send(msg);
 

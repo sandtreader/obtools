@@ -1,5 +1,5 @@
 #==========================================================================
-# Makefile for ObTools XMLBus server
+# Makefile for ObTools XMLMesh server
 #
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
@@ -15,16 +15,16 @@ CPPFLAGS += -I../../libs/mt/ -I../../libs/net/ -I../../libs/log
 CPPFLAGS += -I../../libs/xml -I../../libs/text/
 CPPFLAGS += -I../core -I../otmp -I../client
 
-all: xmlbus-server
+all: xmlmesh-server
 
 clean: 
-	-@rm -f *.o *.a *~ xmlbus-server
+	-@rm -f *.o *.a *~ xmlmesh-server
 
 #Test harnesses:
-xmlbus-server:	$(OBJS)    					        \
-		../client/ot-xmlbus-client.a				\
-		../otmp/ot-xmlbus-otmp.a				\
-		../core/ot-xmlbus-core.a				\
+xmlmesh-server:	$(OBJS)    					        \
+		../client/ot-xmlmesh-client.a				\
+		../otmp/ot-xmlmesh-otmp.a				\
+		../core/ot-xmlmesh-core.a				\
 	     	../../libs/net/ot-net.a ../../libs/mt/ot-mt.a 		\
 		../../libs/log/ot-log.a ../../libs/text/ot-text.a	\
 		../../libs/xml/ot-xml.a

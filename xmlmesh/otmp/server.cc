@@ -1,19 +1,19 @@
 //==========================================================================
-// ObTools::XMLBus:OTMP: server.cc
+// ObTools::XMLMesh:OTMP: server.cc
 //
 // Implementation of raw OTMP server 
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-otmp.h"
+#include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
 
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sstream>
 
-namespace ObTools { namespace XMLBus { namespace OTMP {
+namespace ObTools { namespace XMLMesh { namespace OTMP {
 
 //--------------------------------------------------------------------------
 // Send handler thread class
