@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMLMesh:Server: transport-otmp.cc
+// ObTools::XMLMesh:Server: transport-otmp-server.cc
 //
 // Implementation of OTMP server transport for XMLMesh
 //
