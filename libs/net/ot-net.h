@@ -98,6 +98,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructors
+  Protocol(): proto(PROTO_UNKNOWN) {}
   Protocol(Proto _proto): proto(_proto) {}
   Protocol(const Protocol& p): proto(p.proto) {}
   Protocol(const string& ps);
