@@ -119,6 +119,10 @@ public:
   string to_string() const;
 
   //--------------------------------------------------------------------------
+  // Convert to a string as a fragment (no <?xml PI)
+  string Element::to_string_frag() const;
+
+  //--------------------------------------------------------------------------
   // Write start-tag only to a given stream
   // NB, always outputs unclosed start tag, even if empty
   void write_start_to(ostream &s) const;
@@ -403,7 +407,7 @@ private:
   //--------------------------------------------------------------------------
   // Other private functions
   void parse_stream(istream &s) throw (ParseFailed);
-  void read_tag(xmlchar c, istream &s) throw(ParseFailed);
+  bool read_tag(xmlchar c, istream &s) throw(ParseFailed);
   void read_end_tag(xmlchar c, istream &s) throw(ParseFailed);
   void read_content(xmlchar c, istream &s) throw(ParseFailed);
   void read_ref(string& text, istream &s) throw (ParseFailed);

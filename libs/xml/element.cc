@@ -168,6 +168,15 @@ string Element::to_string() const
 }
 
 //--------------------------------------------------------------------------
+// Convert to a string as a fragment (no <?xml PI)
+string Element::to_string_frag() const
+{
+  ostringstream oss;
+  write_indented(0, oss);
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
 // Write start-tag only to a given stream
 // NB, always outputs unclosed start tag, even if empty
 void Element::write_start_to(ostream &s) const

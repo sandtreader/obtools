@@ -99,7 +99,10 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
        
 	default:  // Something else - could be tag
 	  if (is_name_start(c))
-	    read_tag(c, s);
+	  {
+	    // Check for empty tag & empty stack - done
+	    if (read_tag(c, s) && elements.empty()) done=true;
+	  }
 	  else
 	  {
 	    // Check for leniency here - if so, keep it as character
@@ -129,7 +132,8 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
 //--------------------------------------------------------------------------
 // Read a tag and attributes
 // c is first character already read
-void Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
+// Returns whether element read is empty
+bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
 {
   string name = read_rest_of_name(c, s);
 
@@ -220,6 +224,7 @@ void Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
   //If we don't have a root before, we do now
   if (!root) root = e;
 
+  return empty;
 }
 
 //--------------------------------------------------------------------------
