@@ -18,6 +18,7 @@
 # DEPENDS:   List of ObTools libraries we depend on
 # EXTINCS:   List of external include directories
 # EXTLIBS:   List of external libraries 
+# TESTS:     List of test executables to build
 # TESTCMD:   Test command
 # CONFIGS:   Configs and other files copied to release
 # VARIANTS:  List of build variants
@@ -200,7 +201,7 @@ endif
 define test_template
 $(1): $(1).o $$(LIB) $$(LIBS)
 	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
-TEST_OBJS += $(1).o
+TESTOBJS += $(1).o
 endef
 
 $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
