@@ -87,7 +87,9 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 	<< " = _parser.get_root();\n";
 
     // Generate directly on the root element
+    generate_start(te, tags, "0", streamname);
     generate_template(te, te, tags, max_ci, streamname, script);
+    generate_end(te, tags, "1", streamname);
   }
   else
   {
@@ -105,12 +107,14 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
       sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
 	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
 
+    generate_start(te, tags, index_var, streamname);
     generate_template(te, te, tags, max_ci, streamname, script);
     process_script(script, tags, streamname, max_ci);
     script.clear();
 
     sout << " " << index_var << "++;\n";
     sout << "  OBTOOLS_XML_ENDFOR\n";
+    generate_end(te, tags, index_var, streamname);
   }
 }
 
@@ -132,7 +136,9 @@ void XMLGenerator::expand_use(XML::Element& use_e,
 	<< " = _parser.get_root();\n";
 
     // Generate directly on the root element
+    generate_start(define_e, tags, "0", streamname);
     generate_use(use_e, define_e, tags, child_var, "0", streamname);
+    generate_end(define_e, tags, "1", streamname);
   }
   else
   {
@@ -155,11 +161,13 @@ void XMLGenerator::expand_use(XML::Element& use_e,
     else
       sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
 	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
-    
+     
+    generate_start(define_e, tags, index_var, streamname);
     generate_use(use_e, define_e, tags, child_var, index_var, streamname);
 
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_XML_ENDFOR\n";
+    generate_end(define_e, tags, index_var, streamname);
   }
 }
 
