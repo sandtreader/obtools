@@ -15,6 +15,7 @@
 #include <list>
 #include <map>
 #include <iostream>
+#include <stdint.h>
 
 namespace ObTools { namespace XML {
 
@@ -151,6 +152,13 @@ public:
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_attr_int(const string& attname, int def=0) const;
+
+  //--------------------------------------------------------------------------
+  // Get the 64-bit integer value of an attribute of the given name
+  // Returns attribute value
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  uint64_t get_attr_int64(const string& attname, uint64_t def=0) const;
 
   //--------------------------------------------------------------------------
   // Tests whether the element has an attribute of the given name

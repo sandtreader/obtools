@@ -451,6 +451,21 @@ int Element::get_attr_int(const string& attname, int def) const
 }
 
 //--------------------------------------------------------------------------
+// Get the 64-bit integer value of an attribute of the given name
+// Returns attribute value
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
+{
+  map<string,string>::const_iterator p=attrs.find(attname);
+
+  // Warning: non-portable outside glibc/ISO-C-99 
+  if (p!=attrs.end()) return atoll(p->second.c_str());
+
+  return def;
+}
+
+//--------------------------------------------------------------------------
 // Tests whether the element has an attribute of the given name
 // Quicker than !get_attr("foo").empty()
 bool Element::has_attr(const string& attname) const
