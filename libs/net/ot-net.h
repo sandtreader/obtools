@@ -53,12 +53,12 @@ public:
   uint32_t nbo() const { return ::htonl(address); }
 
   //--------------------------------------------------------------------------
-  // Get hostname (reverse lookup), or dotted quad
-  string get_hostname() const;
+  // Get dotted quad
+  string get_dotted_quad() const;
 
   //--------------------------------------------------------------------------
-  // Output dotted quad to given stream
-  void output_dotted_quad(ostream& s) const;
+  // Get hostname (reverse lookup), or dotted quad
+  string get_hostname() const;
 
   //--------------------------------------------------------------------------
   // Test for badness

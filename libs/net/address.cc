@@ -40,32 +40,35 @@ IPAddress::IPAddress(const string& hostname_s)
 }
 
 //--------------------------------------------------------------------------
+// Get dotted quad
+string IPAddress::get_dotted_quad() const
+{
+  struct in_addr in;
+  in.s_addr = nbo();
+  return string(inet_ntoa(in));
+}
+
+//--------------------------------------------------------------------------
 // Get hostname (reverse lookup), or dotted quad
 string IPAddress::get_hostname() const
 {
   struct hostent *host;
-  uint32_t nbo_addr = htonl(address);
+  uint32_t nbo_addr = nbo();
   host = gethostbyaddr((char *)&nbo_addr, 4, AF_INET);
 
   if (host)
     return host->h_name;
   else
-    return inet_ntoa(*(struct in_addr *)&nbo_addr);
-}
-
-//--------------------------------------------------------------------------
-// Output dotted quad to given stream
-void IPAddress::output_dotted_quad(ostream& s) const
-{
-  uint32_t nbo_addr = htonl(address);
-  s << inet_ntoa(*(struct in_addr *)&nbo_addr);
+    return get_dotted_quad();
 }
 
 //--------------------------------------------------------------------------
 // Dotted quad output operator
 ostream& operator<<(ostream& s, const IPAddress& ip)
 {
-  ip.output_dotted_quad(s);
+  struct in_addr in;
+  in.s_addr = ip.nbo();
+  s << inet_ntoa(in);
 }
 
 
