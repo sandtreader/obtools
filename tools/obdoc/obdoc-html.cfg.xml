@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<!--
-  XMLToolGen configuration file for ObDoc documentor
-  Copyright (c) 2004 xMill Consulting Limited
--->
+<!-- ================================================================ -->
+<!-- XMLToolGen configuration file for ObDoc documentor               -->
+<!-- Copyright (c) 2004 xMill Consulting Limited                      -->
+<!-- ================================================================ -->
 
 <xt:tool xmlns:xt="obtools.com/ns/tools">
 
@@ -90,11 +90,10 @@
     <xt:param name="type" default="Method"/>
     <xt:start><H2>$= type =$s</H2></xt:start>
     <DIV CLASS="function">
-    <H3><xt:template element="result">
-      $= show_type(result) =$</xt:template>
+    <H3><xt:template element="result">$= show_type(result) =$</xt:template>
       $= function["name"] =$(
       <xt:template element="arg">$= (arg_index?",":"") =$
-	$= show_type(arg) =$ $= arg["name"] =$</xt:template>):
+	$= show_type(arg) =$ $= arg["name"] =$</xt:template> ):
     <xt:template element="title">$= *title =$</xt:template></H3>
     <xt:use template="Desc"/>
     </DIV>
@@ -107,7 +106,6 @@
     <HTML>
     <xt:use template="Title_HEAD">
       <xt:arg name="prefix">$= cls["name"] =$</xt:arg>
-      <xt:arg name="dir">../</xt:arg>
     </xt:use>
 
     <BODY>
@@ -218,9 +216,13 @@
     </BODY></HTML>
   </xt:define>
 
-  <!-- Pre-pass to get class references (no code generated) -->
-  <xt:template name="Project" element="project">
+  <!-- =========== Recursive pre-pass template===================  -->
+  <!-- Scans for class definitions and enters them in class_files map -->
+  <xt:define name="Project_Scan" element="project">
     <xt:dir>$= project["name"] =$</xt:dir>
+
+    <!-- Run recursively for sub-projects -->
+    <xt:use template="Project_Scan"/>
 
     <!-- Library directory -->
     <xt:template name="Library" element="library" var="lib">
@@ -231,9 +233,15 @@
         $( define_class(cls["name"], _path+cls["name"]+".html"); )$
       </xt:template>
     </xt:template>
-  </xt:template>
+  </xt:define>
+
+  <!-- ================== Top-level calls ====================  -->
+  <!-- Pre-pass to get class references (no code generated) -->
+  <xt:use template="Project_Scan"/>
 
   <!-- Second pass - run main Project template over top-level project -->
   <xt:use template="Project"/>
+
+<!-- === end ===  -->
 </xt:tool>  
 
