@@ -285,7 +285,7 @@ public:
 // (Read as 'for each child <v> of parent <p>')
 #define OBTOOLS_XML_FOREACH_CHILD(_childvar, _parent)                     \
   {                                                                       \
-    list<ObTools::XML::Element *>& _elems=(_parent).children;             \
+    const list<ObTools::XML::Element *>& _elems=(_parent).children;       \
     for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
         _p!=_elems.end();                                                 \
         _p++)                                                             \
@@ -296,7 +296,7 @@ public:
 // (Read as 'for each child <v> of parent <p> with tag <tag>')
 #define OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(_childvar, _parent, _tag)      \
   {                                                                       \
-    list<ObTools::XML::Element *> _elems=(_parent).get_children(_tag);    \
+    const list<ObTools::XML::Element *> _elems=(_parent).get_children(_tag); \
     for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
         _p!=_elems.end();                                                 \
         _p++)                                                             \
@@ -307,7 +307,8 @@ public:
 // (Read as 'for each descendant <v> of parent <p> with tag <tag>')
 #define OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
   {                                                                       \
-    list<ObTools::XML::Element *> _elems=(_parent).get_descendants(_tag); \
+    const list<ObTools::XML::Element *> _elems=                           \
+       (_parent).get_descendants(_tag);\
     for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
         _p!=_elems.end();                                                 \
         _p++)                                                             \
@@ -320,7 +321,7 @@ public:
 #define OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
                                                         _tag, _prune)     \
   {                                                                       \
-    list<ObTools::XML::Element *> _elems=                                 \
+    const list<ObTools::XML::Element *> _elems=                           \
        (_parent).get_descendants(_tag, _prune);                           \
     for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
         _p!=_elems.end();                                                 \
