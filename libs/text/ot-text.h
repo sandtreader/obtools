@@ -87,8 +87,29 @@ string tolower(const string& text);
 string toupper(const string& text);
 
 //==========================================================================
+// Crypto functions (crypto.cc)
+
+//--------------------------------------------------------------------------
+// MD5 sum a string (returns hex string)
+string md5(const string& text);
+
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
