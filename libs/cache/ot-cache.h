@@ -344,9 +344,13 @@ public:
   iterator end() { return iterator(cachemap.end()); }
 
   //--------------------------------------------------------------------------
+  // Clear all content
+  virtual void clear() { cachemap.clear(); }
+
+  //--------------------------------------------------------------------------
   // Virtual destructor 
   // (does nothing here, but PointerCache uses it to free pointers)
-  virtual ~Cache() {}
+  ~Cache() {}
 };
 
 //==========================================================================
@@ -507,14 +511,18 @@ public:
   iterator end() { return iterator(cachemap.end()); }
 
   //--------------------------------------------------------------------------
-  // Destructor to clear all entries
-  // Has to be here to ensure the right clear() gets called
-  ~PointerCache() 
+  // Clear all content
+  virtual void clear() 
   {
     for(MapIterator p = cachemap.begin(); p!=cachemap.end(); ++p)
       clear(p->second); 
+    cachemap.clear(); 
   }
 
+  //--------------------------------------------------------------------------
+  // Destructor to clear all entries
+  // Has to be here to ensure the right clear() gets called
+  ~PointerCache() { clear(); }
 };
 
 ////////////////////////////////////////////////////////////////////////////
