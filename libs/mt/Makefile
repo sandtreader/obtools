@@ -11,12 +11,12 @@ CPPFLAGS += -g
 LDFLAGS += -g
 endif
 
-all: test-thread test-queue test-pool
+all: test-thread test-queue test-pool test-mutex test-rmutex
 
 clean: 
-	-@rm -f *.o *.a *~ test-thread test-queue test-pool
+	-@rm -f *.o *.a *~ test-thread test-queue test-pool test-mutex test-rmutex
 
-test:	test-thread test-queue
+test:	test-thread test-queue test-pool test-mutex test-rmutex
 	./test-thread 10
 	./test-queue
 
@@ -34,6 +34,12 @@ test-queue: test-queue.o ot-mt.a
 test-pool: test-pool.o ot-mt.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
+test-mutex: test-mutex.o ot-mt.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
+
+test-rmutex: test-rmutex.o ot-mt.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
+
 #Core library
 ot-mt.a: $(OBJS)
 	$(AR) r $@ $^
@@ -43,6 +49,8 @@ $(OBJS): ot-mt.h Makefile
 test-thread.o: ot-mt.h Makefile
 test-queue.o: ot-mt.h Makefile
 test-pool.o: ot-mt.h Makefile
+test-mutex.o: ot-mt.h Makefile
+test-rmutex.o: ot-mt.h Makefile
 
 
 

@@ -69,6 +69,9 @@ public:
 
 //==========================================================================
 // Mutex class
+// Note:  These mutexes are NOT recursive - PTHREAD_MUTEX_RECURSIVE is not
+// portable.  Use RecursiveMutex if you need to lock it multiple times within 
+// the same thread 
 class Mutex
 {
 private:
@@ -77,7 +80,7 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Default Constructor - initialises mutex
+  // Default Constructor - initialises mutex 
   Mutex() { pthread_mutex_init(&mutex, NULL); }
   
   //--------------------------------------------------------------------------
@@ -203,6 +206,74 @@ public:
   // to implement 'rising-edge-only' synchronisation.  If you want both edges
   // synchronised, manually wait/signal/broadcast for 'false' too
   void clear() { flag = false; }
+};
+
+//==========================================================================
+// Recursive Mutex class
+// You can use these recursively - i.e. hold them locked in one function 
+// while you call another one which locks it again
+class RMutex
+{
+private:
+  Mutex mutex;
+  Condition available;
+  int count;
+  pthread_t owner;
+
+public:
+  //--------------------------------------------------------------------------
+  // Default Constructor - initialises mutex 
+  RMutex(): available(true), count(0), owner(0), mutex() {}
+  
+  //--------------------------------------------------------------------------
+  // Lock the mutex, block if locked
+  void lock() 
+  {
+    pthread_t self = pthread_self();
+    for(;;) // May loop if we lose the race after wait()
+    {
+      // Wait for it to be available
+      if (owner!=self) available.wait();
+
+      // Take it
+      Lock lock(mutex);
+
+      if (!count || owner==self)  // Make sure we're still OK
+      {
+	++count;
+	owner=self;
+	available.clear();
+	return;
+      }
+    }
+  }
+
+  //--------------------------------------------------------------------------
+  // Unlock the mutex
+  void unlock()
+  { 
+    Lock lock(mutex);
+
+    if (!--count) 
+    {
+      owner = 0;
+      available.signal();    // Wake up waiters
+    }
+  }
+};
+
+//==========================================================================
+// Recursive Lock class - as Lock, but usable recursively (see Lock for detail)
+class RLock
+{
+private:
+  RMutex& mutex;
+  RLock(const RLock& x): mutex(x.mutex) { }
+  void operator=(const RLock& x) { }
+
+public:
+  RLock(RMutex &m): mutex(m) { mutex.lock(); }
+  ~RLock() { mutex.unlock(); }
 };
 
 //==========================================================================
