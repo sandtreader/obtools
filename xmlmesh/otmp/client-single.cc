@@ -23,12 +23,12 @@ Client::Client(Net::EndPoint _server): server(_server)
 {
   // Try and get a client
   socket = 0;
-  restart_socket();
+  restart_socket(log);
 }
 
 //------------------------------------------------------------------------
 // Restart a dead or non-existent socket
-bool Client::restart_socket()
+bool Client::restart_socket(Log::Streams& log)
 {
   // Delete old socket, if any
   if (socket) delete socket;
@@ -38,14 +38,14 @@ bool Client::restart_socket()
 
   if (!*socket)
   {
-    Log::Error << "OTMP: Can't open socket to " << server << endl;
+    log.error << "OTMP: Can't open socket to " << server << endl;
     delete socket;
     socket = 0;
     return false;
   }
   else
   {
-    Log::Detail << "OTMP: Opened socket to " << server << endl;
+    log.detail << "OTMP: Opened socket to " << server << endl;
     return true;
   }
 }
@@ -55,16 +55,15 @@ bool Client::restart_socket()
 // Whether successful 
 bool Client::send(Message& msg)
 {
-  if (!socket && !restart_socket())
+  if (!socket && !restart_socket(log))
   {
-    Log::Error << "XMLMesh can't send - no socket\n";
+    log.error << "XMLMesh can't send - no socket\n";
     return false;
   }
 
-  if (Log::debug_ok)
-    Log::Debug << "OTMP(send): Sending message length " << msg.data.size() 
-	       << " (flags " << msg.flags << ")\n";
-  if (Log::dump_ok) Log::Dump << msg.data << endl;
+  OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(send): Sending message length " 
+		       << msg.data.size() << " (flags " << msg.flags << ")\n";)
+  OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
 
   // Write chunk header
   socket->write_nbo_int(TAG_MESSAGE);
@@ -82,9 +81,9 @@ bool Client::send(Message& msg)
 // Returns false if the socket is restarted
 bool Client::wait(Message& msg)
 {
-  if (!socket && !restart_socket())
+  if (!socket && !restart_socket(log))
   {
-    Log::Error << "XMLMesh can't receive - no socket\n";
+    log.error << "XMLMesh can't receive - no socket\n";
     return false;
   }
 
@@ -99,20 +98,19 @@ bool Client::wait(Message& msg)
       uint32_t len   = socket->read_nbo_int();
       uint32_t flags = socket->read_nbo_int();
 
-      if (Log::debug_ok)
-	Log::Debug << "OTMP(recv): Message length " << len 
-		   << " (flags " << flags << ")\n";
+      OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(recv): Message length " << len 
+			   << " (flags " << flags << ")\n";)
 
       // Read the data
       string content;
       if (!socket->read(content, len))
       {
-	Log::Error << "OTMP(recv): Short message read - socket died\n";
-	restart_socket();
+	log.error << "OTMP(recv): Short message read - socket died\n";
+	restart_socket(log);
 	return false;
       }
-      
-      if (Log::dump_ok) Log::Dump << content << endl;
+ 
+      OBTOOLS_LOG_IF_DUMP(log.dump << content << endl;)
       
       // Post up a message
       msg = Message(content, flags);
@@ -121,17 +119,17 @@ bool Client::wait(Message& msg)
     else
     {
       // Unrecognised tag
-      Log::Error << "OTMP(recv): Unrecognised tag - out-of-sync?\n";
+      log.error << "OTMP(recv): Unrecognised tag - out-of-sync?\n";
       //Try to restart socket
-      restart_socket();
+      restart_socket(log);
       return false;
     }
   }
   catch (Net::SocketError se)
   {
-    Log::Error << "OTMP(recv): " << se << endl;
+    log.error << "OTMP(recv): " << se << endl;
     //Try to restart socket
-    restart_socket();
+    restart_socket(log);
     return false;
   }
 }

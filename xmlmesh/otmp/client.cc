@@ -28,18 +28,19 @@ namespace ObTools { namespace XMLMesh { namespace OTMP {
 class ClientReceiveThread: public MT::Thread
 {
   Client& client;
+  Log::Streams log;  // Private to this thread
 
   void run() 
   { 
     for(;;)
     {
       // Loop while socket is happy
-      while (client.receive_messages());
+      while (client.receive_messages(log));
 
       // Log fault and sleep before retrying
-      Log::Error << "OTMP(recv): Socket failed, can't restart\n";
-      Log::Error << "OTMP(recv): Sleeping for " 
-		 << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
+      log.error << "OTMP(recv): Socket failed, can't restart\n";
+      log.error << "OTMP(recv): Sleeping for " 
+		<< DEAD_SOCKET_SLEEP_TIME << " seconds\n";
       sleep(DEAD_SOCKET_SLEEP_TIME);
     }
   }
@@ -51,7 +52,7 @@ public:
 //------------------------------------------------------------------------
 // Restart a dead or non-existent socket
 // Note:  Ensure this is called only in one thread (the receive thread)
-bool Client::restart_socket()
+bool Client::restart_socket(Log::Streams& log)
 {
   // Lock the mutex while we try to restart
   MT::Lock lock(mutex);
@@ -69,12 +70,12 @@ bool Client::restart_socket()
   {
     // Leave it valid but unhappy to avoid crashing send thread
 
-    Log::Error << "OTMP: Can't open socket to " << server << endl;
+    log.error << "OTMP: Can't open socket to " << server << endl;
     return false;
   }
   else
   {
-    Log::Detail << "OTMP: Opened socket to " << server << endl;
+    log.detail << "OTMP: Opened socket to " << server << endl;
 
     if (!starting)
     {
@@ -90,10 +91,10 @@ bool Client::restart_socket()
 //------------------------------------------------------------------------
 // Receive some messages, if any
 // Blocks waiting for incoming messages, returns whether everything OK
-bool Client::receive_messages()
+bool Client::receive_messages(Log::Streams& log)
 {
   // Check socket exists and is connected - if not, try to reconnect it
-  if ((!socket || !*socket) && !restart_socket()) return false;
+  if ((!socket || !*socket) && !restart_socket(log)) return false;
 
   // Wait for message to come in and post it up
   try // Handle SocketErrors
@@ -107,19 +108,18 @@ bool Client::receive_messages()
       uint32_t len   = socket->read_nbo_int();
       uint32_t flags = socket->read_nbo_int();
 
-      if (Log::debug_ok)
-	Log::Debug << "OTMP(recv): Message length " << len 
-		   << " (flags " << flags << ")\n";
+      OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(recv): Message length " << len 
+			   << " (flags " << flags << ")\n";)
 
       // Read the data
       string content;
       if (!socket->read(content, len))
       {
-	Log::Error << "OTMP(recv): Short message read - socket died\n";
-	return restart_socket();
+	log.error << "OTMP(recv): Short message read - socket died\n";
+	return restart_socket(log);
       }
 
-      if (Log::dump_ok) Log::Dump << content << endl;
+      OBTOOLS_LOG_IF_DUMP(log.dump << content << endl;)
 
       // Post up a message
       Message msg(content, flags);
@@ -128,16 +128,16 @@ bool Client::receive_messages()
     else
     {
       // Unrecognised tag
-      Log::Error << "OTMP(recv): Unrecognised tag - out-of-sync?\n";
+      log.error << "OTMP(recv): Unrecognised tag - out-of-sync?\n";
       //Try to restart socket
-      return restart_socket();
+      return restart_socket(log);
     }
   }
   catch (Net::SocketError se)
   {
-    Log::Error << "OTMP(recv): " << se << endl;
+    log.error << "OTMP(recv): " << se << endl;
     //Try to restart socket
-    return restart_socket();
+    return restart_socket(log);
   }
 
   return true;
@@ -149,10 +149,11 @@ bool Client::receive_messages()
 class ClientSendThread: public MT::Thread
 {
   Client& client;
+  Log::Streams log;  // Private to this thread
 
   void run() 
   { 
-    for(;;) client.send_messages();
+    for(;;) client.send_messages(log);
   }
 
 public:
@@ -162,7 +163,7 @@ public:
 //------------------------------------------------------------------------
 // Send out some messages, if any
 // Blocks waiting for outgoing messages, returns whether everything OK
-bool Client::send_messages()
+bool Client::send_messages(Log::Streams& log)
 {
   // Wait for message to go out, and send it
   Message msg = send_q.wait();
@@ -171,15 +172,14 @@ bool Client::send_messages()
   // can reanimate it
   while (!socket || !*socket)
   {
-    Log::Detail << "OTMP(send): Socket is dead - waiting for improvement\n";
+    log.detail << "OTMP(send): Socket is dead - waiting for improvement\n";
     sleep(DEAD_SOCKET_SLEEP_TIME);
   }
 
   // Deal with it
-  if (Log::debug_ok)
-    Log::Debug << "OTMP(send): Sending message length " << msg.data.size() 
-	       << " (flags " << msg.flags << ")\n";
-  if (Log::dump_ok) Log::Dump << msg.data << endl;
+  OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(send): Sending message length " 
+		       << msg.data.size() << " (flags " << msg.flags << ")\n";)
+  OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
 
   try // Handle SocketErrors
   {
@@ -197,9 +197,9 @@ bool Client::send_messages()
   }
   catch (Net::SocketError se)
   {
-    Log::Error << "OTMP(send): " << se << endl;
+    log.error << "OTMP(send): " << se << endl;
     //Try to restart socket
-    return restart_socket();
+    return restart_socket(log);
   }
 
   return true;

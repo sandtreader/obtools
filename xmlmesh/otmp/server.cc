@@ -22,6 +22,7 @@ namespace ObTools { namespace XMLMesh { namespace OTMP {
 class ServerSendThread: public MT::Thread
 {
   ClientSession& session;
+  Log::Streams log;  // Private to this thread
 
   void run() 
   { 
@@ -31,11 +32,10 @@ class ServerSendThread: public MT::Thread
       Message msg = session.send_q.wait();
 
       // Deal with it
-      if (Log::debug_ok)
-	Log::Debug << "OTMP(ssend): Sending message length " 
-		   << msg.data.size() 
-		   << " (flags " << msg.flags << ")\n";
-      if (Log::dump_ok) Log::Dump << msg.data << endl;
+      OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(ssend): Sending message length " 
+			   << msg.data.size() 
+			   << " (flags " << msg.flags << ")\n";)
+      OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
 
       try // Handle SocketErrors
       {
@@ -49,7 +49,7 @@ class ServerSendThread: public MT::Thread
       }
       catch (Net::SocketError se)
       {
-	Log::Error << "OTMP(ssend): " << se << endl;
+	log.error << "OTMP(ssend): " << se << endl;
 	cancel();
       }
     }
@@ -69,7 +69,8 @@ bool Server::verify(Net::EndPoint ep)
       p++)
     if (*p == ep.host) return true;
 
-  Log::Error << "OTMP(serv): Rejected connection from " << ep << endl;
+  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  error_log << "OTMP(serv): Rejected connection from " << ep << endl;
   return false;
 }
 
@@ -78,9 +79,11 @@ bool Server::verify(Net::EndPoint ep)
 void Server::process(Net::TCPSocket& socket, 
 		     Net::EndPoint client)
 {
+  Log::Streams log;  // Our private log
+
   const char *obit = "ended";
 
-  Log::Summary << "OTMP(serv): Got connection from " << client << endl;
+  log.summary << "OTMP(serv): Got connection from " << client << endl;
 
   // Create client session and map it (autoremoved on destruction)
   ClientSession session(socket, client, client_sessions);
@@ -108,20 +111,19 @@ void Server::process(Net::TCPSocket& socket,
 	uint32_t len   = socket.read_nbo_int();
 	uint32_t flags = socket.read_nbo_int();
 
-	if (Log::debug_ok)
-	  Log::Debug << "OTMP(srecv): Message length " << len 
-		     << " (flags " << flags << ")\n";
+	OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(srecv): Message length " 
+			     << len << " (flags " << flags << ")\n";)
 
 	// Read the data
 	string content;
 	if (!socket.read(content, len))
 	{
-	  Log::Error << "OTMP(srecv): Short message read - socket died\n";
+	  log.error << "OTMP(srecv): Short message read - socket died\n";
 	  obit = "died";
 	  break;
 	}
 
-	if (Log::dump_ok) Log::Dump << content << endl;
+	OBTOOLS_LOG_IF_DUMP(log.dump << content << endl;)
 
 	// Post up a message
 	ClientMessage msg(client, content, flags);
@@ -130,15 +132,15 @@ void Server::process(Net::TCPSocket& socket,
       else
       {
 	// Unrecognised tag
-	Log::Error << "OTMP(recv): Unrecognised tag " 
-		   << hex << tag << dec << " - out-of-sync?\n";
+	log.error << "OTMP(recv): Unrecognised tag " 
+		  << hex << tag << dec << " - out-of-sync?\n";
 	obit = "unsynced";
 	break;
       }
     }
     catch (Net::SocketError se)
     {
-      Log::Error << "OTMP(recv): " << se << endl;
+      log.error << "OTMP(recv): " << se << endl;
       obit = "failed";
       break;
     }
@@ -153,8 +155,8 @@ void Server::process(Net::TCPSocket& socket,
   else
     obit = "failed (send)";
 
-  Log::Summary << "OTMP(serv): Connection from " << client
-	       << " " << obit << endl;
+  log.summary << "OTMP(serv): Connection from " << client
+	      << " " << obit << endl;
 } 
 
 

@@ -13,6 +13,7 @@
 #include <string>
 #include <map>
 #include "ot-net.h"
+#include "ot-log.h"
 #if !defined(_SINGLE)
 #include "ot-mt.h"
 #endif
@@ -89,7 +90,9 @@ private:
   Net::EndPoint server;
   Net::TCPClient *socket;
 
-#if !defined(_SINGLE)
+#if defined(_SINGLE)
+  Log::Streams log;            // Our log streams (in MT, threads provide)
+#else
   // Thread and queue stuff
   MT::Mutex mutex;             // Global client mutex used for socket
                                // creation and restart
@@ -100,7 +103,8 @@ private:
   MT::Queue<Message> receive_q;
 #endif
 
-  bool restart_socket();
+  // Internal functions
+  bool restart_socket(Log::Streams& log);
 
 public:
   //------------------------------------------------------------------------
@@ -110,8 +114,8 @@ public:
 #if !defined(_SINGLE)
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
-  bool receive_messages();
-  bool send_messages();
+  bool receive_messages(Log::Streams& log);
+  bool send_messages(Log::Streams& log);
 #endif
 
   //------------------------------------------------------------------------
