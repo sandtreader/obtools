@@ -455,7 +455,7 @@ void Generator::generate_defines()
     // Create argument strings
     OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, te, "xt:arg")
       sout << ",\n     string " << ae["name"];
-      if (ae["default"].size()) sout << " = \"" << ae["default"] << "\"";
+      if (ae.has_attr("default")) sout << " = \"" << ae["default"] << "\"";
     OBTOOLS_XML_ENDFOR
     sout << ")\n{\n";
 
