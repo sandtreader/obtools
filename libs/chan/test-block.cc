@@ -38,10 +38,8 @@ int main()
   cout << hex << br.read_nbo_32() << endl;
   cout << hex << br.read_nbo_64() << endl;
   string s;
-  if (!br.read(s, 3))
-    cerr << "Can't read 'end' string\n";
-  else
-    cout << s << endl;
+  br.read(s, 3);
+  cout << s << endl;
    
   uint32_t n;
   if (br.read_nbo_32(n))

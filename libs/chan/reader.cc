@@ -21,10 +21,10 @@
 namespace ObTools { namespace Channel {
 
 //--------------------------------------------------------------------------
-// Read exact amount of data from the channel into a binary buffer
-// Returns whether successful (channel not closed)
-// Throws Error on failure
-bool Reader::read(void *buf, size_t count) throw (Error)
+// Try to read an exact amount of data from the channel into a binary buffer
+// Returns false if channel goes EOF before anything is read
+// Throws Error on failure, or EOF after a read
+bool Reader::try_read(void *buf, size_t count) throw (Error)
 {
   char *p = (char *)buf;
   size_t done = 0;
@@ -32,22 +32,44 @@ bool Reader::read(void *buf, size_t count) throw (Error)
   while (done < count)
   {
     size_t size = basic_read(p, count-done);
-    if (size)
+    if (size == count-done)
     {
       p += size;
       done += size;
     }
-    else return false;
+    else if (size || done)
+      throw Error(0, "EOF");
+    else
+      return false;
   }
-  
+
   return true;
 }
 
 //--------------------------------------------------------------------------
-// Read exact amount of data from the channel into a string
-// Whether successful - all data was read before channel closed
+// Read exact amount of data from the channel into a binary buffer
 // Throws Error on failure
-bool Reader::read(string& s, size_t count) throw (Error)
+void Reader::read(void *buf, size_t count) throw (Error)
+{
+  char *p = (char *)buf;
+  size_t done = 0;
+
+  while (done < count)
+  {
+    size_t size = basic_read(p, count-done);
+    if (size == count-done)
+    {
+      p += size;
+      done += size;
+    }
+    else throw Error(0, "EOF");
+  }
+}
+
+//--------------------------------------------------------------------------
+// Read exact amount of data from the channel into a string
+// Throws Error on failure
+void Reader::read(string& s, size_t count) throw (Error)
 {
   char buf[CHANNEL_BUFFER_SIZE+1];
   size_t done = 0;
@@ -59,15 +81,13 @@ bool Reader::read(string& s, size_t count) throw (Error)
     if (count-done < n) n = count-done;
 
     size_t size = basic_read(buf, n);
-    if (size)
+    if (size == n)
     {
       s.append(buf, size);
       done += size;
     }
-    else return false;
+    else throw Error(0, "EOF in string");
   }
-  
-  return true;
 }
 
 //--------------------------------------------------------------------------
@@ -76,7 +96,7 @@ bool Reader::read(string& s, size_t count) throw (Error)
 unsigned char Reader::read_byte() throw (Error)
 {
   unsigned char n;
-  if (!read(&n, 1)) throw Error(0, "EOF");
+  read(&n, 1);
   return n;
 }
 
@@ -86,7 +106,7 @@ unsigned char Reader::read_byte() throw (Error)
 uint16_t Reader::read_nbo_16() throw (Error)
 {
   uint16_t n;
-  if (!read(&n, 2)) throw Error(0, "EOF");
+  read(&n, 2);
   return ntohs(n);
 }
 
@@ -96,7 +116,7 @@ uint16_t Reader::read_nbo_16() throw (Error)
 uint32_t Reader::read_nbo_24() throw (Error)
 {
   unsigned char buf[3];
-  if (!read(buf, 3)) throw Error(0, "EOF");
+  read(buf, 3);
   return ((uint32_t)buf[0] << 16) + ((uint32_t)buf[1] << 8) + buf[2];
 }
 
@@ -106,7 +126,7 @@ uint32_t Reader::read_nbo_24() throw (Error)
 uint32_t Reader::read_nbo_32() throw (Error)
 {
   uint32_t n;
-  if (!read(&n, 4)) throw Error(0, "EOF");
+  read(&n, 4);
   return ntohl(n);
 }
 
@@ -115,7 +135,7 @@ uint32_t Reader::read_nbo_32() throw (Error)
 // Throws Error on non-EOF failure
 bool Reader::read_nbo_32(uint32_t& n) throw (Error)
 {
-  if (!read(&n, 4)) return false;
+  if (!try_read(&n, 4)) return false;
   n=ntohl(n);
   return true;
 }

@@ -54,16 +54,20 @@ public:
   virtual size_t basic_read(void *buf, size_t count) throw (Error) = 0;
 
   //--------------------------------------------------------------------------
+  // Try to read an exact amount of data from the channel into a binary buffer
+  // Returns false if channel goes EOF before anything is read
+  // Throws Error on failure, or EOF after a read
+  bool try_read(void *buf, size_t count) throw (Error);
+
+  //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a binary buffer
-  // Returns whether successful (channel not closed)
   // Throws Error on failure
-  bool read(void *buf, size_t count) throw (Error);
+  void read(void *buf, size_t count) throw (Error);
 
   //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a string
-  // Whether successful - all data was read before channel closed
   // Throws Error on failure
-  bool read(string& s, size_t count) throw (Error);
+  void read(string& s, size_t count) throw (Error);
 
   //--------------------------------------------------------------------------
   // Read a single byte from the channel
