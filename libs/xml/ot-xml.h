@@ -31,6 +31,7 @@ typedef char xmlchar;
 class Element
 {
 private:
+  void write_attrs(ostream &s) const;
   void write_indented(int indent, ostream &s) const;
   string escape(const string &v, bool escquote) const;
   void append_descendants(const string& name, const string& prune, 
@@ -113,6 +114,23 @@ public:
   //--------------------------------------------------------------------------
   // Convert to a string
   string to_string() const;
+
+  //--------------------------------------------------------------------------
+  // Write start-tag only to a given stream
+  // NB, always outputs unclosed start tag, even if empty
+  void write_start_to(ostream &s) const;
+
+  //--------------------------------------------------------------------------
+  // Convert start-tag to a string
+  string start_to_string() const;
+
+  //--------------------------------------------------------------------------
+  // Write end-tag only to a given stream
+  void write_end_to(ostream &s) const;
+
+  //--------------------------------------------------------------------------
+  // Convert end-tag to a string
+  string end_to_string() const;
 
   //------------------------------------------------------------------------
   // 'Optimise' single text sub-elements back to 'content' string here
@@ -225,6 +243,10 @@ public:
   string get_content() const;
 
   //--------------------------------------------------------------------------
+  // Handy * operator to get content
+  string operator*() const { return get_content(); }
+
+  //--------------------------------------------------------------------------
   // Get all text content from the entire tree accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements, and recursing into subchildren
@@ -326,7 +348,20 @@ enum
 
   // Do namespace translation
   // Automatically turned on if you call fix_namespace
-  PARSER_FIX_NAMESPACES=4
+  PARSER_FIX_NAMESPACES=4,
+
+  // Be lenient about & and < in contexts in which they couldn't be XML
+  // syntax - i.e., not followed by a name character, '#' (for &), 
+  // '!', '?' or '/' (for <) - and consider them just normal character data.
+  // This makes it more pleasant to include code, particularly C++ code, 
+  // in XML
+
+  // This mimics the behaviour of SGML (hooray!) (ISO 8879:B.7.3), but
+  // strictly violates XML (XML1.0:2.4), unless you consider it a form
+  // of error handling...  But seriously, folks, using this feature may
+  // mean your XML files are rejected by parsers who are less lenient
+  // (or by this parser without this flag set)
+  PARSER_BE_LENIENT=8
 };
 
 //==========================================================================
@@ -504,6 +539,11 @@ public:
   // List of filenames - front() is tried first
   Configuration(list<string>& fns, int parse_flags=PARSER_OPTIMISE_CONTENT)
     :filenames(fns), parser(parse_flags) {}
+
+  //------------------------------------------------------------------------
+  // Add namespace to prefix mapping (see Parser::fix_namespace)
+  void fix_namespace(const char *name, const char *prefix)
+  { parser.fix_namespace(name, prefix); }
 
   //------------------------------------------------------------------------
   // Read configuration file

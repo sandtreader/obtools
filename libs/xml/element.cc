@@ -18,6 +18,45 @@ using namespace ObTools::XML;
 Element Element::none("!NONE!");
 
 //--------------------------------------------------------------------------
+// Write attributes to given stream
+void Element::write_attrs(ostream &s) const
+{
+  //Output attributes
+  for(map<string,string>::const_iterator p=attrs.begin();
+      p!=attrs.end();
+      p++)
+  {
+    xmlchar delim;
+    const string &v = p->second;
+    bool escquote=false;
+
+    // Decide whether value contains ' or " or both
+    if (v.find('"') != string::npos)
+    {
+      //It has a " in it - see if it also contains a '
+      if (v.find('\'') != string::npos)
+      {
+	//Oops - it has both.  Better escape the quote, then
+	escquote=true;
+      }
+      else
+      {
+	//We'll be OK by swapping to using ' as delimiter
+	delim = '\'';
+      }
+    }
+    else
+    {
+      //That's fine, we can use " as delimiter
+      delim = '"';
+    }
+
+    //But we must escape &, < and > as well
+    s << ' ' << p->first << "=" << delim << escape(v, escquote) << delim;
+  } 
+}
+
+//--------------------------------------------------------------------------
 // Write to a given stream with given indent
 void Element::write_indented(int indent, ostream &s) const
 {
@@ -26,41 +65,9 @@ void Element::write_indented(int indent, ostream &s) const
   //Name indicates true element
   if (name.size())
   {
+    // Output start tag and attributes
     s << '<' << name;
-
-    //Output attributes
-    for(map<string,string>::const_iterator p=attrs.begin();
-	p!=attrs.end();
-	p++)
-    {
-      xmlchar delim;
-      const string &v = p->second;
-      bool escquote=false;
-
-      // Decide whether value contains ' or " or both
-      if (v.find('"') != string::npos)
-      {
-	//It has a " in it - see if it also contains a '
-	if (v.find('\'') != string::npos)
-	{
-	  //Oops - it has both.  Better escape the quote, then
-	  escquote=true;
-	}
-	else
-	{
-	  //We'll be OK by swapping to using ' as delimiter
-	  delim = '\'';
-	}
-      }
-      else
-      {
-	//That's fine, we can use " as delimiter
-	delim = '"';
-      }
-
-      //But we must escape &, < and > as well
-      s << ' ' << p->first << "=" << delim << escape(v, escquote) << delim;
-    } 
+    write_attrs(s);
 
     //Output sub-elements if any
     if (children.empty())
@@ -153,6 +160,41 @@ string Element::to_string() const
 {
   ostringstream oss;
   write_to(oss);
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
+// Write start-tag only to a given stream
+// NB, always outputs unclosed start tag, even if empty
+void Element::write_start_to(ostream &s) const
+{
+  s << "<" << name;
+  write_attrs(s);
+  s << ">";
+}
+
+//--------------------------------------------------------------------------
+// Convert start-tag to a string
+string Element::start_to_string() const
+{
+  ostringstream oss;
+  write_start_to(oss);
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
+// Write end-tag only to a given stream
+void Element::write_end_to(ostream &s) const
+{
+  s << "</" << name << ">";
+}
+
+//--------------------------------------------------------------------------
+// Convert end-tag to a string
+string Element::end_to_string() const
+{
+  ostringstream oss;
+  write_end_to(oss);
   return oss.str();
 }
 

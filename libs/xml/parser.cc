@@ -118,7 +118,16 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
 	  if (is_name_start(c))
 	    read_tag(c, s);
 	  else
-	    fatal("Illegal tag");
+	  {
+	    // Check for leniency here - if so, keep it as character
+	    // data, like SGML would
+	    if (flags & PARSER_BE_LENIENT)
+	    {
+	      s.unget();              // Push back second char
+	      read_content('<', s);   // Keep '<' as text
+	    }
+	    else fatal("Illegal tag");
+	  }
       }
     }
     else if (root)
@@ -277,7 +286,8 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 {
   // Read until non-escaped '<'
   string content;
-  content+=c;  //We know c is not '<' initially or we wouldn't be here
+  content+=c;  // We know c is not '<' initially or we wouldn't be here
+               // (unless being lenient, but then we want to keep it anyway)
 
   for(;;)
   {
@@ -342,7 +352,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 //--------------------------------------------------------------------------
 // Read a reference (CharRef or EntityRef)
 // Assumes & has been read.  Allows &#nn; &#xXX; and &ent;
-// s is string to add to (note can be multiple chars if UTF8)
+// text is string to add to (note can be multiple chars if UTF8)
 void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
 {
   xmlchar c=0;
@@ -420,7 +430,17 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
     else
       fatal("Unrecognised entity name");
   }
-  else fatal("Weird reference - unescaped '&'?");
+  else 
+  {
+    // Check for leniency here - if so, keep it as character
+    // data, like SGML would
+    if (flags & PARSER_BE_LENIENT)
+    {
+      text += '&';  // Push the original '&' into the text
+      s.unget();    // Hand the next char back to content reader
+    }
+    else fatal("Weird reference - unescaped '&'?");
+  }
 }
 
 //--------------------------------------------------------------------------
