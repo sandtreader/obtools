@@ -183,11 +183,7 @@ int Connection::inserted_id()
 Connection::~Connection() 
 {
   PGconn *conn = (PGconn *)pgconn;
-  if (valid && conn)
-  {
-    PQfinish(conn);
-    Log::Detail << "PostgresQL disconnected\n";
-  }
+  if (valid && conn) PQfinish(conn);
 }
 
 }}} // namespaces
