@@ -282,9 +282,8 @@ string MD5::sum(const string& text)
 
   // Turn it back into a hex string
   ostringstream oss;
-  oss << hex << setfill('0') << setw(2);
   for(int i=0; i<16; i++)
-    oss << (unsigned)digest[i];
+    oss << hex << setfill('0') << setw(2) << (unsigned)digest[i];
   return oss.str();
 }
 

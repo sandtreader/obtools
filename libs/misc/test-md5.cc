@@ -15,13 +15,16 @@ using namespace ObTools;
 //--------------------------------------------------------------------------
 // Main
 
-int main()
+int main(int argc, char **argv)
 {
   string text = "Top secret message";
+  if (argc > 1) text = argv[1];
+
   Misc::MD5 md5er;
   string md5 = md5er.sum(text);
 
-  cout << "MD5 of '" << text << "' is " << md5 << endl;
+  cout << "MD5 of '" << text << "' is " << md5 
+       << " (" << md5.size() << " characters)\n";
 
   return 0;  
 }
