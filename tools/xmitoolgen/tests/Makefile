@@ -16,6 +16,9 @@ VARIANT-debug = DEBUG
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
 
+#Turn off -Wall to avoid reams of unused parameter warning
+CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
+
 #Template code
 _testtool.cc: ../testtool.cfg.xml ../../build-debug/xmitoolgen-cc Makefile
 	../../build-debug/xmitoolgen-cc ../testtool.cfg.xml > _testtool.cc
