@@ -32,10 +32,16 @@ class DispatchThread: public MT::Thread
     for(;;)
     {
       string data;
-      transport.wait(data);
-
-      Message msg(data);  // Construct message from XML <message> data
-      client.dispatch(msg);
+      if (transport.wait(data))
+      {
+	Message msg(data);  // Construct message from XML <message> data
+	client.dispatch(msg);
+      }
+      else
+      {
+	Log::Summary << "Transport restarted - resubscribing\n";
+	client.resubscribe();
+      }
     }
   }
 
@@ -49,7 +55,7 @@ public:
 void MultiClient::dispatch(Message &msg)
 {
   string ref = msg.get_ref();
-  MT::Lock l(lock);
+  MT::RLock l(mutex);
 
   if (ref.size())
   {
@@ -88,6 +94,60 @@ void MultiClient::dispatch(Message &msg)
     if (!handled)
       Log::Error << "Unhandled message received with subject " 
 		 << subject << endl;
+  }
+}
+
+//------------------------------------------------------------------------
+// Resubscribe for all subjects we should be subscribed to
+void MultiClient::resubscribe()
+{
+  // We take the mutex to lock everything out until this is sorted
+  MT::RLock l(mutex);
+
+retry:
+  for(list<Subscriber *>::iterator p = subscribers.begin();
+      p!=subscribers.end();
+      p++)
+  {
+    Subscriber *sub = *p;
+    SubscriptionMessage req(SubscriptionMessage::JOIN, sub->subject);
+    string id = req.get_id();
+
+    // Send the message
+    send(req);
+
+    // We have to implement our own (sub-)dispatch loop because we are the
+    // dispatch thread, and we need a response to the subscribe
+
+    // Loop dispatching message until we get a response to this
+    for(;;)
+    {
+      string data;
+      if (transport.wait(data))
+      {
+	Message msg(data);  // Construct message from XML <message> data
+
+	// Check ref (if any) to see if it's ours
+	string ref = msg.get_ref();
+	if (ref == id)
+	{
+	  // Check it for OK
+	  if (msg.get_subject() == "xmlmesh.ok") break;
+
+	  Log::Error << "Error response to resubscribe:\n" << data << endl;
+	}
+	else
+	{
+	  // Dispatch to others and continue
+	  dispatch(msg);
+	}
+      }
+      else
+      {
+	Log::Summary << "Transport failed during resubscribe - retrying\n";
+	goto retry;  // Try it all again
+      }
+    }
   }
 }
 
@@ -143,29 +203,31 @@ bool MultiClient::respond(ErrorMessage::Severity severity,
 // Returns whether successful, fills in response if so
 bool MultiClient::request(Message& req, Message& response)
 {
-  // Send message
-  if (!send(req))
-  {
-    Log::Error << "Sending request failed\n";
-    return false;
-  }
-
   // Create a client request
   MultiClientRequest mcr(&response);
 
   // Register it
   string id = req.get_id();
   {
-    MT::Lock l(lock);
+    MT::RLock l(mutex);
     requests[id] = &mcr;
   }
 
-  // Block on its flag
+  // Send message
+  if (!send(req))
+  {
+    Log::Error << "Sending request failed\n";
+    MT::RLock l(mutex);
+    requests.erase(id);
+    return false;
+  }
+
+  // Block on response flag
   mcr.done.wait();
 
   // Remove it from map 
   {
-    MT::Lock l(lock);
+    MT::RLock l(mutex);
     requests.erase(id);
   }
 
@@ -204,7 +266,7 @@ bool MultiClient::request(Message& req)
 void MultiClient::register_subscriber(Subscriber *sub)
 {
   {
-    MT::Lock l(lock);
+    MT::RLock l(mutex);
     subscribers.push_back(sub);
   }
 
@@ -224,7 +286,7 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
     Log::Error << "Unable to unsubscribe for " << sub->subject << endl;
 
   {
-    MT::Lock l(lock);
+    MT::RLock l(mutex);
     subscribers.remove(sub);
   }
 }

@@ -107,7 +107,7 @@ void PublishService::signal_client(Transport *transport, Net::EndPoint& client,
     case Service::CLIENT_FINISHED:
       // Force unsubscription on everything
       Log::Summary << "Forcibly unsubscribing client " << transport->name 
-		   << ": " << client << "\n";
+		   << ":" << client << "\n";
       unsubscribe(transport, client, "*");
       break;
   }
@@ -158,13 +158,13 @@ bool PublishService::handle_subscription(IncomingMessage& msg)
     if (!smsg)
     {
       Log::Error << "Subscription: Bogus message from " << msg.transport->name 
-		 << ": " << msg.client << " dropped\n";
+		 << ":" << msg.client << " dropped\n";
       server.respond(ErrorMessage::FATAL, "Illegal XML", msg);
       return false;
     }
 
     Log::Summary << "Subscription request from " << msg.transport->name 
-		 << ": " << msg.client << ":\n";
+		 << ":" << msg.client << ":\n";
     Log::Summary << smsg << endl;
 
     // Handle it
@@ -205,11 +205,15 @@ bool PublishService::subscribe(Transport *transport,
   // Check pattern is one we can accept subscription for
   if (Text::pattern_match(subject_pattern, subject))
   {
+    // Unsubscribe from this first
+    unsubscribe(transport, client, subject);
+
+    // (Re)subscribe
     Subscription sub(transport, client, subject);
     subscriptions.push_back(sub);
 
     Log::Detail << "Client " << transport->name 
-		<< ": " << client << " subscribed to "
+		<< ":" << client << " subscribed to "
 		<< subject << "\n";
 
     return true;
@@ -235,7 +239,7 @@ restart:
 	&& Text::pattern_match(subject, sub.subject))
     {
       Log::Detail << "Client " << transport->name 
-		  << ": " << client << " unsubscribed from "
+		  << ":" << client << " unsubscribed from "
 		  << sub.subject << "\n";
 
       subscriptions.erase(p);

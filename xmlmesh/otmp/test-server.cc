@@ -28,7 +28,8 @@ class ReflectorThread: public MT::Thread
       XMLMesh::OTMP::ClientMessage msg = receive_q.wait();
 
       // Send it back
-      server.send(msg);
+      if (msg.action == XMLMesh::OTMP::ClientMessage::MESSAGE)
+	server.send(msg);
     }
   }
 

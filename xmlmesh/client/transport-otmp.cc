@@ -33,7 +33,8 @@ bool OTMPClientTransport::poll()
 
 //------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
-// Returns whether one was read - will only return false if something fails
+// Returns false if the transport was restarted and subscriptions
+// (and messages) may have been lost
 bool OTMPClientTransport::wait(string &data)
 {
   OTMP::Message otmp_msg;

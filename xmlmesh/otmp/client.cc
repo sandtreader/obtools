@@ -55,6 +55,9 @@ bool Client::restart_socket()
   // Lock the mutex while we try to restart
   MT::Lock lock(mutex);
 
+  // Remember if we had a socket before (not just starting)
+  bool starting = (socket==0);
+
   // Delete old socket, if any
   if (socket) delete socket;
 
@@ -71,6 +74,14 @@ bool Client::restart_socket()
   else
   {
     Log::Summary << "OTMP: Opened socket to " << server << endl;
+
+    if (!starting)
+    {
+      // Send empty message to flag restart
+      Message msg;
+      receive_q.send(msg);
+    }
+
     return true;
   }
 }
@@ -227,11 +238,11 @@ bool Client::poll()
 
 //------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
-// Returns whether one was read - will only return false if something fails
+// Returns false if the connection was restarted 
 bool Client::wait(Message& msg)
 {
-  msg = receive_q.wait();  // Never fails
-  return true;
+  msg = receive_q.wait();    // Never fails
+  return msg.data.size()!=0; // Empty message on restart
 }
 
 //------------------------------------------------------------------------

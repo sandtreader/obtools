@@ -118,7 +118,7 @@ public:
 
   //------------------------------------------------------------------------
   // Receive a message - blocks waiting for one to arrive
-  // Returns whether one was read - will only return false if something fails
+  // Returns false if the connection was restarted 
   bool wait(Message& msg);
 
   //------------------------------------------------------------------------

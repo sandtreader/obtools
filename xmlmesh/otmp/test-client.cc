@@ -59,8 +59,10 @@ int main(int argc, char **argv)
 
     if (client.poll())
     {
-      client.wait(msg);
-      cout << msg.data << endl;
+      if (client.wait(msg))
+	cout << msg.data << endl;
+      else
+	cout << "RESTART\n";
     }
   }
 

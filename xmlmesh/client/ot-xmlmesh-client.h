@@ -32,7 +32,8 @@ public:
   virtual bool poll() = 0;
 
   // Wait for a message - blocking.
-  // Returns whether one read - only returns false if something fails
+  // Returns false if the transport was restarted and subscriptions
+  // (and messages) may have been lost
   virtual bool wait(string& data) = 0;
 };
 
@@ -44,6 +45,9 @@ private:
   ClientTransport& transport;
   MT::Queue<Message> secondary_q;  // Queue for unwanted messages received
                                    // in request()
+  list<string> subscribed_subjects;
+
+  void resubscribe();
 
 public:
   //------------------------------------------------------------------------
@@ -61,7 +65,10 @@ public:
 
   //------------------------------------------------------------------------
   // Receive a message - blocks waiting for one to arrive
-  // Returns whether one was read - will only return false if something fails
+  // Returns whether one was read - will only return false if the transport
+  // was restarted, and messages might have been missed
+  // Note however subscriptions will be renewed on restart, and you can
+  // continue to wait for new messages.
   bool wait(Message& msg);
 
   //------------------------------------------------------------------------
@@ -167,7 +174,7 @@ private:
   list<Subscriber *> subscribers;              // Active subscribers
   map<string, MultiClientRequest *> requests;  // Active requests, by id
   MT::Thread *dispatch_thread;                 // Message dispatch thread
-  MT::Mutex lock;                              // Global state lock
+  MT::RMutex mutex;                            // Global state lock
 
 public:
   //------------------------------------------------------------------------
@@ -217,6 +224,10 @@ public:
   //------------------------------------------------------------------------
   // Dispatch a message (background thread)
   void dispatch(Message &msg);
+
+  //------------------------------------------------------------------------
+  // Resubscribe for all subjects we should be subscribed to (background)
+  void resubscribe();
 
   //------------------------------------------------------------------------
   // Destructor

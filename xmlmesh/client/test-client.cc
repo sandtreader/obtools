@@ -50,7 +50,7 @@ int main(int argc, char **argv)
   XMLMesh::OTMPClient client(server);
 
   // Subscribe to some stuff
-  client.subscribe("info.*");
+  XMLMesh::Subscription sub(client, "info.*");
   
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)
@@ -64,8 +64,6 @@ int main(int argc, char **argv)
       Log::Detail << msg.get_text() << endl;
   }
 
-  // And unsubscribe again
-  client.unsubscribe("*");
   return 0;  
 }
 

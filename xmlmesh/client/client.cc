@@ -44,7 +44,10 @@ bool Client::poll(Message& msg)
 
 //------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
-// Returns whether one was read - will only return false if something fails
+// Returns whether one was read - will only return false if the transport
+// was restarted, and messages might have been missed
+// Note however subscriptions will be renewed on restart, and you can
+// continue to wait for new messages.
 bool Client::wait(Message& msg)
 {
   // Check if there's anything on the secondary queue first
@@ -55,7 +58,12 @@ bool Client::wait(Message& msg)
   }
 
   string data;
-  if (!transport.wait(data)) return false;
+  if (!transport.wait(data))
+  {
+    Log::Summary << "Transport restarted - resubscribing\n";
+    resubscribe();
+    return false;
+  }
 
   msg = Message(data);  // Construct message from XML <message> data
   return true;
@@ -100,8 +108,9 @@ bool Client::request(Message& req, Message& response)
     string data;
     if (!transport.wait(data)) 
     {
-      Log::Error << "Awaiting response failed\n";
-      return false;
+      Log::Summary << "Transport restarted - resubscribing\n";
+      resubscribe();
+      continue;
     }
 
     response = Message(data);
@@ -143,6 +152,18 @@ bool Client::request(Message& req)
   return false;
 }
 
+//------------------------------------------------------------------------
+// Resubscribe for all subjects we should be subscribed to
+void Client::resubscribe()
+{
+  for(list<string>::iterator p = subscribed_subjects.begin();
+      p != subscribed_subjects.end();
+      ++p)
+  {
+    SubscriptionMessage msg(SubscriptionMessage::JOIN, *p);
+    request(msg);
+  }
+}
 
 //------------------------------------------------------------------------
 // Subscribe for messages of a given subject - expressed as a pattern match
@@ -151,6 +172,7 @@ bool Client::request(Message& req)
 bool Client::subscribe(const string& subject)
 {
   SubscriptionMessage msg(SubscriptionMessage::JOIN, subject);
+  subscribed_subjects.push_back(subject);
   return request(msg);
 }
 
@@ -163,6 +185,7 @@ bool Client::subscribe(const string& subject)
 bool Client::unsubscribe(const string& subject)
 {
   SubscriptionMessage msg(SubscriptionMessage::LEAVE, subject);
+  subscribed_subjects.remove(subject);
   return request(msg);
 }
 
