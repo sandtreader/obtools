@@ -22,6 +22,7 @@ int main()
   Log::TimestampFilter tsfilter("%H:%M:%S: ", chan_out);
   Log::LevelFilter level_out(Log::LEVEL_DEBUG, tsfilter);
   Log::logger.connect(level_out);
+  Log::Streams log;
 
   // Connect database
   DB::PG::Connection conn("host=localhost dbname=test user=postgres");
@@ -36,7 +37,7 @@ int main()
 
   DB::Row row;
   while (res.fetch(row))
-    Log::Detail << row["id"] << ":" << row["name"] << endl;
+    log.detail << row["id"] << ":" << row["name"] << endl;
 
   return 0;  
 }

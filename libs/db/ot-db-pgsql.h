@@ -11,6 +11,7 @@
 #define __OBTOOLS_DB_PGSQL_H
 
 #include "ot-db.h"
+#include "ot-log.h"
 
 namespace ObTools { namespace DB { namespace PG {  
 
@@ -58,6 +59,8 @@ class Connection: public DB::Connection
 private:
   void *pgconn;   // PGconn structure
   int last_oid;   // Last OID to be inserted
+  Log::Streams log; // Private (therefore per-thread, assuming connections
+                    // are not shared) log streams
 
 public:
   //------------------------------------------------------------------------

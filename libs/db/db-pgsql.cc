@@ -79,19 +79,19 @@ Connection::Connection(const string& conninfo):
   PGconn *conn = PQconnectdb(conninfo.c_str());
   if (!conn || PQstatus(conn) == CONNECTION_BAD)
   {
-    Log::Error << "DB: Cannot connect to PostgresQL at:\n";
-    Log::Error << "[" << conninfo << "]\n";
+    log.error << "DB: Cannot connect to PostgresQL at:\n";
+    log.error << "[" << conninfo << "]\n";
     if (conn)
     {
-      Log::Error << PQerrorMessage(conn) << endl;
+      log.error << PQerrorMessage(conn) << endl;
       PQfinish(conn);
     }
-    else Log::Error << "Can't allocate connection\n";
+    else log.error << "Can't allocate connection\n";
     return;
   }
 
   // OK, we have a connection
-  Log::Detail << "PostgresQL connected\n";
+  log.detail << "PostgresQL connected\n";
   pgconn = conn;
   valid = true;
 }
@@ -103,20 +103,20 @@ bool Connection::exec(const string& sql)
 {
   PGconn *conn = (PGconn *)pgconn;
 
-  if (Log::debug_ok) Log::Debug << "DBexec: " << sql << endl;
+  OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec: " << sql << endl;)
 
   PGresult *res = PQexec(conn, sql.c_str());
 
   if (!res)
   {
-    Log::Error << "Postgres exec failed - NULL result\n";
+    log.error << "Postgres exec failed - NULL result\n";
     return false;
   }
 
   ExecStatusType status = PQresultStatus(res);
   if (status == PGRES_COMMAND_OK)
   {
-    if (Log::debug_ok) Log::Debug << "DBexec OK" << endl;
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec OK" << endl;)
 
     // Grab OID in case they want to see it
     Oid oid = PQoidValue(res);
@@ -130,9 +130,9 @@ bool Connection::exec(const string& sql)
   }
   else
   {
-    Log::Error << "Postgres exec failed (" << PQresStatus(status) << "):\n";
-    Log::Error << "  " << sql << endl;
-    Log::Error << "  " << PQerrorMessage(conn);
+    log.error << "Postgres exec failed (" << PQresStatus(status) << "):\n";
+    log.error << "  " << sql << endl;
+    log.error << "  " << PQerrorMessage(conn);
     PQclear(res);
     return false;
   }
@@ -145,28 +145,28 @@ Result Connection::query(const string& sql)
 {
   PGconn *conn = (PGconn *)pgconn;
 
-  if (Log::debug_ok) Log::Debug << "DBquery: " << sql << endl;
+  OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery: " << sql << endl;)
 
   PGresult *res = PQexec(conn, sql.c_str());
 
   if (!res)
   {
-    Log::Error << "Postgres query failed - NULL result\n";
+    log.error << "Postgres query failed - NULL result\n";
     return Result();
   }
 
   ExecStatusType status = PQresultStatus(res);
   if (status == PGRES_TUPLES_OK)
   {
-    if (Log::debug_ok) 
-      Log::Debug << "DBquery OK: " << PQntuples(res) << " rows\n";
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery OK: " 
+			 << PQntuples(res) << " rows\n";)
     return Result(new ResultSet(res));
   }
   else
   {
-    Log::Error << "Postgres query failed (" << PQresStatus(status) << "):\n";
-    Log::Error << "  " << sql << endl;
-    Log::Error << "  " << PQerrorMessage(conn);
+    log.error << "Postgres query failed (" << PQresStatus(status) << "):\n";
+    log.error << "  " << sql << endl;
+    log.error << "  " << PQerrorMessage(conn);
     PQclear(res);
     return Result();
   }
