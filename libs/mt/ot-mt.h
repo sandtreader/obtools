@@ -224,7 +224,7 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises mutex 
-  RMutex(): available(true), count(0), owner(0), mutex() {}
+  RMutex(): mutex(), available(true), count(0), owner(0) {}
   
   //--------------------------------------------------------------------------
   // Lock the mutex, block if locked
@@ -381,8 +381,8 @@ template<class T> class ThreadPool
 {
 private:
   Mutex mutex;
-  int min_spares;
-  int max_threads;
+  unsigned int min_spares;
+  unsigned int max_threads;
   list<T *> threads;  // All of them
   list<T *> spares;   // Just the spare ones
   PoolReplacer<T> replacer;
@@ -407,7 +407,7 @@ public:
   // Constructor
   // min-max is range of number of threads the pool will keep alive
   // min must be at least 1
-  ThreadPool(int min=1, int max=10): 
+  ThreadPool(unsigned int min=1, unsigned int max=10): 
     min_spares(min), max_threads(max), replacer(*this)
   { fill(); }
 

@@ -62,7 +62,7 @@ void TransmitThread::run()
 //--------------------------------------------------------------------------
 // Main
 
-int main(int argc, char **argv)
+int main()
 {
   // Start receivers
   ReceiveThread r1(1);

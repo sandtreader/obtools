@@ -40,7 +40,7 @@ void TestThread::run()
 //--------------------------------------------------------------------------
 // Main
 
-int main(int argc, char **argv)
+int main()
 {
   ObTools::MT::ThreadPool<TestThread> pool(1,10);
 

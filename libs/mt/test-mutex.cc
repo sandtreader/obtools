@@ -43,7 +43,7 @@ void TestThread::run()
 
 //--------------------------------------------------------------------------
 // Main
-int main(int argc, char **argv)
+int main()
 {
   n=0;
   TestThread t;
