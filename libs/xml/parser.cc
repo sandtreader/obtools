@@ -11,23 +11,6 @@
 #include <sstream>
 using namespace ObTools::XML;
 
-//--------------------------------------------------------------------------
-//Inline character classification functions 
-//I18N: Somewhat dangerously, we use standard isalnum - which uses the
-//standard locale.  Behaviour of this outside ASCII is not known!
-namespace ObTools { namespace XML {
-
-bool is_name_start(xmlchar c)
-{
-  return (isalnum(c) || c==':' || c=='_'); 
-}
-
-bool is_name_char(xmlchar c)
-{
-  return (isalnum(c) || c==':' || c=='-' || c=='_' || c=='.');
-}
-
-}} //namespaces
 
 //--------------------------------------------------------------------------
 // Parse a stream
@@ -59,7 +42,7 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
     if (root && (flags & PARSER_PRESERVE_WHITESPACE))
       s.get(c);
     else
-      s >> c;  //WS stripped!
+      c = skip_ws(s);
 
     //Now's a good time for a sanity check
     if (!c)
@@ -162,7 +145,8 @@ void Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       fatal("Illegal start tag");
 
     //If it's whitespace (not / or >), skip it
-    if (c!='/' && c!='>') s>>c;
+    if (c!='/' && c!='>') c = skip_ws(s, c);
+
 
     //Empty close />
     if (c=='/')
@@ -187,12 +171,11 @@ void Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       fatal("Duplicate attribute name");
 
     //Skip optional WS, then ensure =
-    if (isspace(c)) s>>c;
+    if (isspace(c)) c = skip_ws(s, c);
     if (c!='=') fatal("No = given for attribute");
 
     //Skip optional WS again and get start of value 
-    c=0;
-    s>>c;
+    c = skip_ws(s);
 
     //Must be some kind of quote (this is XML, not SGML!)
     if (c!='"' && c!='\'') fatal("Attribute value not quoted");
@@ -246,8 +229,8 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
 {
   string name = read_rest_of_name(c, s);
 
-  //Skip optional whitespace (note >> handles all after the first)
-  if (isspace(c)) s>>c;
+  //Skip optional whitespace
+  if (isspace(c)) c=skip_ws(s, c);
 
   //This must now be a '>' or its an error
   if (c!='>') throw ParseFailed();
@@ -268,7 +251,12 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
     else
     {
       //Complain, but ignore it
-      error("Mis-nested tags");
+      string err = "Mis-nested tags - expected </";
+      err+=e->name;
+      err+="> but got </";
+      err+=name;
+      err+=">";
+      error(err);
     }
   }
   else
@@ -286,13 +274,10 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 {
   // Read until non-escaped '<'
   string content;
-  content+=c;  // We know c is not '<' initially or we wouldn't be here
-               // (unless being lenient, but then we want to keep it anyway)
 
   for(;;)
   {
-    c=0;
-    s.get(c);
+    // Use passed-in character the first time round
 
     //Magic whitespace handling - if this is whitespace, keep a single
     //space unless we are about to end, then strip to read the rest
@@ -300,8 +285,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
     // any other character)
     if (!(flags & PARSER_PRESERVE_WHITESPACE) && isspace(c))
     {
-      c=0;
-      s>>c;  //Stripping all remaining whitespace
+      c = skip_ws(s, c);
       if (c!='<') content+=' ';  //Compress to single space, suppress at end
     }
 
@@ -317,8 +301,15 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
       read_ref(content, s);
     else if (!c)
       fatal("Unexpected end of stream");
-    else
+    else 
+    {
+      if (c=='\n') line++;   // Count unmashed lines if preserving
       content+=c;
+    }
+    
+    // Read another for next time
+    c=0;
+    s.get(c);
   }
 
   //Create sub-element with content, and add it to currently open element
@@ -475,7 +466,8 @@ void Parser::skip_to_gt(istream &s) throw (ParseFailed)
     xmlchar c=0;
     s.get(c);
     if (c == '>') break;
-    if (!c) fatal("Unexpected end-of-file");
+    else if (c == '\n') line++;
+    else if (!c) fatal("Unexpected end-of-file");
   }
 }
 
@@ -496,10 +488,12 @@ void Parser::skip_comment(istream &s) throw (ParseFailed)
 	c=0;
 	s.get(c);
 	if (c=='>') break;
+	else if (c == '\n') line++;
       }
+      else if (c == '\n') line++;
     }
-
-    if (!c) fatal("Unexpected end-of-file in comment");
+    else if (c == '\n') line++;
+    else if (!c) fatal("Unexpected end-of-file in comment");
   }
 }
 
@@ -515,6 +509,7 @@ void Parser::skip_pi(istream &s) throw (ParseFailed)
     {
       c=0;
       s.get(c);
+      if (c == '\n') line++;
       if (c=='>') break;
     }
 
@@ -524,19 +519,19 @@ void Parser::skip_pi(istream &s) throw (ParseFailed)
 
 //--------------------------------------------------------------------------
 // Log an error, but continue
-void Parser::error(const char *s)
+void Parser::error(const string& s)
 {
   errors++;
-  serr << "XML Error: " << s << endl;
+  serr << "XML Error: " << s << " at line " << line << endl;
 }
 
 
 //--------------------------------------------------------------------------
 // Log a fatal error and throw exception
-void Parser::fatal(const char *s) throw (ParseFailed)
+void Parser::fatal(const string& s) throw (ParseFailed)
 {
   errors++;
-  serr << "XML Fatal Error: " << s << endl;
+  serr << "XML Fatal Error: " << s << " at line " << line << endl;
   throw ParseFailed();
 }
 

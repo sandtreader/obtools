@@ -378,6 +378,26 @@ private:
   Element *root;       //0 if not valid
   deque<map<string, string> > ns_maps; //Stack of maps of prefix->full name
 
+  //--------------------------------------------------------------------------
+  //Inline character classification functions 
+  //I18N: Somewhat dangerously, we use standard isalnum - which uses the
+  //standard locale.  Behaviour of this outside ASCII is not known!
+  bool is_name_start(xmlchar c)
+  { return (isalnum(c) || c==':' || c=='_'); }
+  bool is_name_char(xmlchar c)
+  { return (isalnum(c) || c==':' || c=='-' || c=='_' || c=='.'); }
+
+  //--------------------------------------------------------------------------
+  // Read a character, skipping initial whitespace, and counting lines
+  // Equivalent to s >> c, but with line counting
+  // Existing character can be passed in for counting, too
+  xmlchar skip_ws(istream &s, xmlchar c=0)
+  { if (c=='\n') line++;
+    for(;;) { c=0; s.get(c); 
+              if (!isspace(c)) return c; if (c=='\n') line++; } }
+
+  //--------------------------------------------------------------------------
+  // Other private functions
   void parse_stream(istream &s) throw (ParseFailed);
   void read_tag(xmlchar c, istream &s) throw(ParseFailed);
   void read_end_tag(xmlchar c, istream &s) throw(ParseFailed);
@@ -387,8 +407,8 @@ private:
   void skip_comment(istream &s) throw (ParseFailed);
   void skip_to_gt(istream &s) throw (ParseFailed);
   void skip_pi(istream &s) throw (ParseFailed);
-  void error(const char *s);
-  void fatal(const char *s) throw (ParseFailed);
+  void error(const string& s);
+  void fatal(const string& s) throw (ParseFailed);
   void initial_processing(Element *e);
   void final_processing(Element *e);
   void substitute_name(string& name, bool usedef=false);
@@ -399,7 +419,8 @@ protected:
 
 public:
   int errors;
-  
+  int line;
+
   //------------------------------------------------------------------------
   // Constructors & Destructor
   // s is output stream for parsing errors
@@ -407,7 +428,8 @@ public:
     root(0),
     serr(s), 
     flags(f), 
-    errors(0)
+    errors(0),
+    line(1)
   {}
 
   // Default - use cerr
@@ -415,7 +437,8 @@ public:
     root(0),
     serr(cerr), 
     flags(f),
-    errors(0)
+    errors(0),
+    line(1)
   {}
 
   ~Parser();
