@@ -63,6 +63,21 @@ public:
   bool read(string& s, size_t count) throw (Error);
 
   //--------------------------------------------------------------------------
+  // Read a single byte from the channel
+  // Throws SocketError on failure or EOF
+  unsigned char read_byte() throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Read a network byte order (MSB-first) 2-byte integer from the channel
+  // Throws SocketError on failure or EOF
+  uint16_t read_nbo_16() throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Read a network byte order (MSB-first) 3-byte integer from the channel
+  // Throws SocketError on failure or EOF
+  uint32_t read_nbo_24() throw (Error);
+
+  //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the channel
   // Throws SocketError on failure or EOF
   uint32_t read_nbo_32() throw (Error);
@@ -102,6 +117,21 @@ public:
   // Write the given C string to the channel
   // Throws Error on failure
   void write(const char *p) throw(Error);
+
+  //--------------------------------------------------------------------------
+  // Write a single byte to the channel
+  // Throws Error on failure
+  void write_byte(unsigned char b) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Write a network byte order (MSB-first) 2-byte integer to the channel
+  // Throws Error on failure
+  void write_nbo_16(uint16_t i) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Write a network byte order (MSB-first) 3-byte integer to the channel
+  // Throws Error on failure
+  void write_nbo_24(uint32_t i) throw (Error);
 
   //--------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 4-byte integer to the channel

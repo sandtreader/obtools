@@ -35,6 +35,35 @@ void Writer::write(const char *p) throw(Error)
 }
 
 //--------------------------------------------------------------------------
+// Write a single byte to the channel
+// Throws Error on failure
+void Writer::write_byte(unsigned char b) throw (Error)
+{
+  basic_write(&b, 1);
+}
+
+//--------------------------------------------------------------------------
+// Write a network byte order (MSB-first) 2-byte integer to the channel
+// Throws Error on failure
+void Writer::write_nbo_16(uint16_t i) throw (Error)
+{
+  uint16_t n = htons(i);
+  basic_write(&n, 2);
+}
+
+//--------------------------------------------------------------------------
+// Write a network byte order (MSB-first) 3-byte integer to the channel
+// Throws Error on failure
+void Writer::write_nbo_24(uint32_t i) throw (Error)
+{
+  unsigned char buf[3];
+  buf[0] = (unsigned char)(i>>16);
+  buf[1] = (unsigned char)(i>>8);
+  buf[2] = (unsigned char)(i);
+  basic_write(buf, 3);
+}
+
+//--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 4-byte integer to the channel
 // Throws Error on failure
 void Writer::write_nbo_32(uint32_t i) throw (Error)

@@ -18,6 +18,9 @@ int main()
   char buf[40];
   ObTools::Channel::BlockWriter bw(buf, 40);
 
+  bw.write_byte(0x2A);
+  bw.write_nbo_16(0x55AA);
+  bw.write_nbo_24(0xF1F2F3);
   bw.write_nbo_32(0x5041554C);
   bw.write_nbo_64(0x0102030405060708LL);
   bw.write("end");
@@ -25,6 +28,9 @@ int main()
   cout << "Bytes remaining: " << bw.remaining() << endl;
 
   ObTools::Channel::BlockReader br(buf, 40-bw.remaining());
+  cout << hex << br.read_byte() << endl;
+  cout << hex << br.read_nbo_16() << endl;
+  cout << hex << br.read_nbo_24() << endl;
   cout << hex << br.read_nbo_32() << endl;
   cout << hex << br.read_nbo_64() << endl;
   string s;

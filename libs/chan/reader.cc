@@ -71,6 +71,36 @@ bool Reader::read(string& s, size_t count) throw (Error)
 }
 
 //--------------------------------------------------------------------------
+// Read a single byte from the channel
+// Throws SocketError on failure or EOF
+unsigned char Reader::read_byte() throw (Error)
+{
+  unsigned char n;
+  if (!read(&n, 1)) throw Error(0, "EOF");
+  return n;
+}
+
+//--------------------------------------------------------------------------
+// Read a network byte order (MSB-first) 2-byte integer from the channel
+// Throws SocketError on failure or EOF
+uint16_t Reader::read_nbo_16() throw (Error)
+{
+  uint16_t n;
+  if (!read(&n, 2)) throw Error(0, "EOF");
+  return ntohs(n);
+}
+
+//--------------------------------------------------------------------------
+// Read a network byte order (MSB-first) 3-byte integer from the channel
+// Throws SocketError on failure or EOF
+uint32_t Reader::read_nbo_24() throw (Error)
+{
+  unsigned char buf[3];
+  if (!read(buf, 3)) throw Error(0, "EOF");
+  return ((uint32_t)buf[0] << 16) + ((uint32_t)buf[1] << 8) + buf[2];
+}
+
+//--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 4-byte integer from the socket
 // Throws SocketError on failure or EOF
 uint32_t Reader::read_nbo_32() throw (Error)
