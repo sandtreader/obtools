@@ -278,6 +278,60 @@ public:
 };
 
 //==========================================================================
+// Claimable class
+// A claimable object can be Claimed - see below
+// Use as a mixin
+class Claimable
+{
+private:
+  Mutex mutex;
+  int claims;
+
+public:
+  //--------------------------------------------------------------------------
+  // Default Constructor 
+  Claimable(): mutex(), claims(0) {}
+
+  //--------------------------------------------------------------------------
+  // Stake a claim
+  void claim() { Lock lock(mutex); claims++; }
+
+  //--------------------------------------------------------------------------
+  // Release a claim
+  void release() { Lock lock(mutex); claims--; }
+
+  //--------------------------------------------------------------------------
+  // Check whether claimed
+  // Note:  Locking here ensures we can't get in while another thread is
+  // inside a claim or release method
+  bool is_claimed() { Lock lock(mutex); return claims!=0; }
+};
+
+//==========================================================================
+// Claim class
+// Temporary claim on a Claimable object
+// Note that a 'claim' is not a 'lock' - it is not exclusive.  The idea
+// here is to state that you are interested in the claimed object, and 
+// would prefer it didn't get deleted under you.  Use this where multiple
+// threads need to use an object which might get deleted - each user stakes
+// a claim while it needs the object, and the reaper avoids deleting any
+// which are claimed.
+class Claim
+{
+private:
+  Claimable &target;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor - claim the target
+  Claim(Claimable& _target): target(_target) { target.claim(); }
+
+  //--------------------------------------------------------------------------
+  // Destructor - release the target
+  ~Claim() { target.release(); }
+};
+
+//==========================================================================
 // Queue template - send any message between threads safety
 template<class T> class Queue
 {
