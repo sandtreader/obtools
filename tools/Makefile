@@ -5,17 +5,17 @@
 #==========================================================================
 
 all: 
-	$(MAKE) -C xmltools
-	$(MAKE) -C xmitools
+#	$(MAKE) -C xmltools
+	$(MAKE) -C xmitoolgen
 
 clean: 
 	-@rm -f *~
-	$(MAKE) -C xmltools clean
-	$(MAKE) -C xmitools clean
+#	$(MAKE) -C xmltools clean
+	$(MAKE) -C xmitoolgen clean
 
 test: 
-	$(MAKE) -C xmltools test
-	$(MAKE) -C xmitools test
+#	$(MAKE) -C xmltools test
+	$(MAKE) -C xmitoolgen test
 
 
 
