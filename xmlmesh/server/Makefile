@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = main.o server.o distributor.o transport-otmp.o
+OBJS = main.o server.o distributor.o transport-otmp-server.o
 
 ifdef DEBUG
 CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP

@@ -6,7 +6,7 @@
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "transport-otmp.h"
+#include "transport-otmp-server.h"
 #include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
 
@@ -46,7 +46,7 @@ public:
 
 //==========================================================================
 // OTMP Server Transport 
-class OTMPServerTransport: public ServerTransport
+class OTMPServerTransport: public Transport
 {
 private:
   OTMP::Server otmp;
@@ -65,7 +65,7 @@ public:
   void dispatch();
 
   //------------------------------------------------------------------------
-  // Implementation of ServerTransport virtual interface - q.v. server.h
+  // Implementation of Transport virtual interface - q.v. server.h
   bool send(const Net::EndPoint& client, const string& data);
 };
 
@@ -120,7 +120,7 @@ OTMPServerTransportFactory OTMPServerTransportFactory::instance;
 
 //------------------------------------------------------------------------
 //Create method
-ServerTransport *OTMPServerTransportFactory::create(XML::Element& xml)
+Transport *OTMPServerTransportFactory::create(XML::Element& xml)
 {
   int port = xml.get_attr_int("port", OTMP::DEFAULT_PORT);
   return new OTMPServerTransport(port);

@@ -78,7 +78,7 @@ public:
 //==========================================================================
 // Server Transport (abstract interface)
 // Low-level transport of raw data
-class ServerTransport
+class Transport
 {
 protected:
   IncomingMessageQueue *incoming_q;  
@@ -86,7 +86,7 @@ protected:
 public:
   //------------------------------------------------------------------------
   // Default constructor
-  ServerTransport(): incoming_q(0) {}
+  Transport(): incoming_q(0) {}
 
   //------------------------------------------------------------------------
   // Attach to given incoming queue
@@ -99,13 +99,13 @@ public:
 
 //==========================================================================
 // Server Transport Factory (abstract interface)
-class ServerTransportFactory
+class TransportFactory
 {
 public:
   //------------------------------------------------------------------------
   // Create a server transport from the given XML element
   // Returns 0 if failed
-  virtual ServerTransport *create(XML::Element& xml) = 0;
+  virtual Transport *create(XML::Element& xml) = 0;
 };
 
 class Server;  //forward
@@ -145,12 +145,12 @@ class Server
 {
 private:
   // Factories for use during configuration
-  map<string, ServerTransportFactory *> transport_factories;
+  map<string, TransportFactory *> transport_factories;
   map<string, ServiceFactory *>         service_factories;
 
   // List of active modules
-  list<ServerTransport *> transports;       // List of active transports
-  map<string, ServerTransport *> transport_ids;  // Map of transports ids
+  list<Transport *> transports;            // List of active transports
+  map<string, Transport *> transport_ids;  // Map of transports ids
 
   list<Service *> services;                 // List of active services
 
@@ -168,7 +168,7 @@ public:
 
   //------------------------------------------------------------------------
   // Register a transport type
-  void register_transport(const string& name, ServerTransportFactory *factory);
+  void register_transport(const string& name, TransportFactory *factory);
 
   //------------------------------------------------------------------------
   // Register a service type

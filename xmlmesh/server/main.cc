@@ -7,7 +7,7 @@
 //==========================================================================
 
 #include "server.h"
-#include "transport-otmp.h"
+#include "transport-otmp-server.h"
 #include "ot-log.h"
 
 using namespace std;

@@ -1,13 +1,13 @@
 //==========================================================================
 // ObTools::XMLMesh:Server: transport-otmp.h
 //
-// Definition of OTMP ServerTransport
+// Definition of OTMP Server Transport
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLMESH_SERVER_TRANS_OTMP_H
-#define __OBTOOLS_XMLMESH_SERVER_TRANS_OTMP_H
+#ifndef __OBTOOLS_XMLMESH_TRANS_OTMP_SERVER_H
+#define __OBTOOLS_XMLMESH_TRANS_OTMP_SERVER_H
 
 #include "server.h"
 
@@ -18,9 +18,9 @@ using namespace std;
 
 //==========================================================================
 // OTMP Server Transport Factory
-class OTMPServerTransportFactory: public ServerTransportFactory
+class OTMPServerTransportFactory: public TransportFactory
 {
-  ServerTransport *create(XML::Element& xml);
+  Transport *create(XML::Element& xml);
   static OTMPServerTransportFactory instance;  // singleton
 
 public:
@@ -30,7 +30,7 @@ public:
 
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLMESH_SERVER_TRANS_OTMP_H
+#endif // !__OBTOOLS_XMLMESH_TRANS_OTMP_SERVER_H
 
 
 

@@ -21,7 +21,7 @@ Server::Server()
 //------------------------------------------------------------------------
 // Register a transport type
 void Server::register_transport(const string& name, 
-				ServerTransportFactory *factory)
+				TransportFactory *factory)
 {
   transport_factories[name] = factory;
 }
@@ -64,13 +64,13 @@ void Server::configure(XML::Configuration& config)
 bool Server::create_transport(XML::Element& xml)
 {
   // Find tag name in registry
-  map<string, ServerTransportFactory *>::iterator p;
+  map<string, TransportFactory *>::iterator p;
   p = transport_factories.find(xml.name);
   if (p==transport_factories.end()) return false;
 
   // Call factory to create transport
-  ServerTransportFactory *factory = p->second;
-  ServerTransport *t = factory->create(xml);
+  TransportFactory *factory = p->second;
+  Transport *t = factory->create(xml);
   
   // Connect to our incoming queue and store it
   t->attach_incoming(incoming_q);
@@ -129,7 +129,7 @@ Server::~Server()
     delete *p;
 
   // Delete all attached transports
-  for(list<ServerTransport *>::iterator p=transports.begin();
+  for(list<Transport *>::iterator p=transports.begin();
       p!=transports.end();
       p++)
     delete *p;
