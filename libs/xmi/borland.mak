@@ -10,6 +10,8 @@ INCDEPS = ..\xml
 LIBDEPS = ..\xml\ot-xml.lib ..\fix\ot-fix.lib 
 
 TESTS = test-xmi.exe 
+TESTCMD = test-xmi.exe < tests/test-model.xmi
+TESTCMD2 = test-xmi.exe < tests/test-argo_.xmi
 
 !include "..\..\build\borland.lib.mak"
 
