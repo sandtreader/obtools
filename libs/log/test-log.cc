@@ -8,33 +8,33 @@
 
 #include "ot-log.h"
 using namespace std;
-using namespace ObTools::Log;
+using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Main
 
 int main(int argc, char **argv)
 {
-  StreamChannel chan_out(cout);
-  StreamChannel chan_err(cerr);
+  Log::StreamChannel chan_out(cout);
+  Log::StreamChannel chan_err(cerr);
 
-  PatternFilter hfilter("H*", chan_out);
-  LevelFilter   level_out(LEVEL_SUMMARY, hfilter);
+  Log::PatternFilter hfilter("H*", chan_out);
+  Log::LevelFilter   level_out(Log::LEVEL_SUMMARY, hfilter);
 
-  TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_err);
-  LevelFilter     level_err(LEVEL_ERROR, tsfilter);
+  Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_err);
+  Log::LevelFilter     level_err(Log::LEVEL_ERROR, tsfilter);
 
-  logger.connect(hfilter);
-  logger.connect(level_err);
+  Log::logger.connect(hfilter);
+  Log::logger.connect(level_err);
 
-  Summary << "Hello, world\nThis is a test\n\n";
-  Summary << "You shouldn't see this\n";
+  Log::Summary << "Hello, world\nThis is a test\n\n";
+  Log::Summary << "You shouldn't see this\n";
 
-  if (dump_ok)
-    Dump << "This is more than you ever wanted to know\n";
+  if (Log::dump_ok)
+    Log::Dump << "This is more than you ever wanted to know\n";
 
-  Error << "Hey, both cout and cerr should see this\n";
-  Error << "But only cerr will see this\nand this\n";
+  Log::Error << "Hey, both cout and cerr should see this\n";
+  Log::Error << "But only cerr will see this\nand this\n";
 
   return 0;  
 }
