@@ -16,7 +16,7 @@ using namespace ObTools::Cache;
 
 int main()
 {
-  TimeoutUseCache<string, string> cache(5);
+  UseTimeoutCache<string, string> cache(5);
 
   cache.add("foo", "FOO");
   cache.dump(cout); 

@@ -30,7 +30,7 @@ ostream& operator<<(ostream& s, const Wombat& w)
 
 int main()
 {
-  ManualPointerCache<string, Wombat> cache(5);
+  LRUEvictionPointerCache<string, Wombat> cache(5);
 
   cache.add("foo", new Wombat("Foo", 1));
   cache.add("bar", new Wombat("Bar", 2));

@@ -21,7 +21,6 @@ namespace ObTools { namespace Cache {
 //Make our lives easier without polluting anyone else
 using namespace std;
 
-
 //==========================================================================
 // General per-item data useful to policies
 struct PolicyData
@@ -42,11 +41,24 @@ struct PolicyData
 };
 
 //==========================================================================
-// Evictor policy class (abstract interface)
-class Policy
+// Structure for map values - includes user's content, plus useful
+// data for eviction policies
+template<class CONTENT> struct MapContent
+{
+  CONTENT content;                       
+  PolicyData policy_data;
+
+  MapContent() {}  // Required for map => CONTENT default constructor
+  MapContent(const CONTENT& _content): content(_content) {}
+};
+
+//==========================================================================
+// Background tidy policy template (abstract interface)
+// Called in background to cull 'dead' items
+template<class ID, class CONTENT> class TidyPolicy
 {
 public:
-  Policy() {}
+  TidyPolicy() {}
 
   //--------------------------------------------------------------------------
   // Background check whether to keep an entry
@@ -55,7 +67,16 @@ public:
   // Also passed the current time for efficiency and consistency
   //  - non-time-based checks are free to ignore it!
   virtual bool keep_entry(const PolicyData& pd, time_t now) = 0;
-  
+};
+
+//==========================================================================
+// Evictor policy template (abstract interface)
+// Called to kill off least-wanted entries in cache when full
+template<class ID, class CONTENT> class EvictorPolicy
+{
+public:
+  EvictorPolicy() {}
+
   //--------------------------------------------------------------------------
   // Eviction policy - find the worst entry
   // Called for every unlocked cache entry with current policy data 
@@ -73,9 +94,11 @@ public:
 // Cache template
 
 // Template arguments:
-//   ID:      Key of cache map (e.g. string, int) - must be hashable
-//   CONTENT: What we want the cache to hold
-//   POLICY:  Eviction Policy class (inherits from Policy)
+//   ID:              Key of cache map (e.g. string, int) - must be hashable
+//   CONTENT:         What we want the cache to hold
+//   TIDY_POLICY:     Tidy Policy class (inherits from TidyPolicy<ID, CONTENT>)
+//   EVICTOR_POLICY:  Eviction Policy class 
+//                      (inherits from EvictorPolicy<ID, CONTENT>)
 
 // At this level, we assume CONTENT is fairly primitive (e.g, string,
 // pointer or small struct) and we don't worry too much about copying
@@ -83,24 +106,14 @@ public:
 
 // See PointerCache if you want to store something bigger.
 
-template<class ID, class CONTENT, class POLICY> class Cache
+template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY> 
+  class Cache
 {
 protected:
   //--------------------------------------------------------------------------
-  // Structure for map values - includes user's content, plus useful
-  // data for eviction policies
-  struct MapContent
-  {
-    CONTENT content;                       
-    PolicyData policy_data;
-
-    MapContent() {}  // Required for map => CONTENT default constructor
-    MapContent(const CONTENT& _content): content(_content) {}
-  };
-
-  //--------------------------------------------------------------------------
   // Useful internal typedefs
-  typedef map<ID, MapContent> MapType;
+  typedef MapContent<CONTENT> MCType;
+  typedef map<ID, MCType> MapType;
   typedef typename MapType::iterator MapIterator;
 
   //--------------------------------------------------------------------------
@@ -115,8 +128,9 @@ protected:
   // Core map
   MapType cachemap;
 
-  // Policy instance
-  POLICY policy;
+  // Policies
+  TIDY_POLICY tidy_policy;
+  EVICTOR_POLICY evictor_policy;
 
   //--------------------------------------------------------------------------
   // evict() version (q.v.) to call with mutex locked
@@ -135,8 +149,8 @@ protected:
 	  p!=cachemap.end();
 	  p++)
       {
-	MapContent &mc = p->second;
-	if (policy.check_worst(mc.policy_data, worst_data))
+	MapContent<CONTENT> &mc = p->second;
+	if (evictor_policy.check_worst(mc.policy_data, worst_data))
 	{
 	  // Keep this as the worst
 	  worst = p;
@@ -160,13 +174,15 @@ protected:
   //--------------------------------------------------------------------------
   // Clear the given content - does nothing here, but implemented in
   // PointerCache to free pointers
-  virtual void clear(const MapContent& mc) {}
+  virtual void clear(const MCType& mc) {}
 
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  Cache(const POLICY& _policy, int _limit=0): 
-    policy(_policy), limit(_limit) {}
+  Cache(const TIDY_POLICY& _tpol, 
+	const EVICTOR_POLICY& _epol,
+	int _limit=0): 
+    tidy_policy(_tpol), evictor_policy(_epol), limit(_limit) {}
 
   //--------------------------------------------------------------------------
   // Add an item of content to the cache
@@ -177,7 +193,7 @@ public:
   { 
     MT::Lock lock(mutex);
     if (limit && cachemap.size() > limit && !evict_locked()) return false;
-    cachemap[id] = MapContent(content); 
+    cachemap[id] = MCType(content); 
     return true; 
   }
 
@@ -232,8 +248,8 @@ public:
     for(MapIterator p = cachemap.begin();
 	p!=cachemap.end();)
     {
-      MapContent &mc = p->second;
-      if (!policy.keep_entry(mc.policy_data, now))
+      MCType &mc = p->second;
+      if (!tidy_policy.keep_entry(mc.policy_data, now))
       {
 	MapIterator q=p;
 	p++;  // Protect from deletion
@@ -266,7 +282,7 @@ public:
 	p!=cachemap.end();
 	p++)
     {
-      MapContent &mc = p->second;
+      MCType &mc = p->second;
       PolicyData &pd = mc.policy_data;
 
       s << p->first << " -> " << mc.content << endl;
@@ -312,26 +328,30 @@ ostream& operator<<(ostream&s, const PointerContent<CONTENT>& pc)
 }
 
 // Main PointerCache template
-template<class ID, class CONTENT, class POLICY> class PointerCache:
-  public Cache<ID, PointerContent<CONTENT>, POLICY>  
+template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY> 
+  class PointerCache: 
+  public Cache<ID, PointerContent<CONTENT>, TIDY_POLICY, EVICTOR_POLICY>  
 {
 protected:
-  // Evil typedefs to allow us to access parent structs/typedefs
-  typedef typename 
-    Cache<ID, PointerContent<CONTENT>, POLICY>::MapIterator PMapIterator;
-  typedef typename 
-    Cache<ID, PointerContent<CONTENT>, POLICY>::MapContent PMapContent;
+  //--------------------------------------------------------------------------
+  // Useful internal typedefs
+  typedef MapContent<PointerContent<CONTENT> > MCType;
+  typedef map<ID, MCType> MapType;
+  typedef typename MapType::iterator MapIterator;
 
   //--------------------------------------------------------------------------
   // Clear the given content - frees pointer
-  virtual void clear(const PMapContent& mc)
+  virtual void clear(const MCType& mc)
   { delete mc.content.ptr; }
 
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  PointerCache(const POLICY& _policy, int _limit=0): 
-    Cache<ID, PointerContent<CONTENT>, POLICY>::Cache(_policy, _limit) {}
+  PointerCache(const TIDY_POLICY& _tpol,
+	       const EVICTOR_POLICY& _epol,
+	       int _limit=0): 
+    Cache<ID, PointerContent<CONTENT>, 
+          TIDY_POLICY, EVICTOR_POLICY>::Cache(_tpol, _epol, _limit) {}
 
   //--------------------------------------------------------------------------
   // Add an item of content to the cache by pointer
@@ -344,7 +364,7 @@ public:
     remove(id);
 
     // Add PointerContent
-    return Cache<ID, PointerContent<CONTENT>, POLICY>::
+    return Cache<ID, PointerContent<CONTENT>, TIDY_POLICY, EVICTOR_POLICY>::
       add(id, PointerContent<CONTENT>(content));
   }
 
@@ -355,7 +375,7 @@ public:
   CONTENT *lookup(const ID& id)
   {
     MT::Lock lock(mutex);
-    PMapIterator p = cachemap.find(id);
+    MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) 
       return p->second.content.ptr;
     else
@@ -369,7 +389,7 @@ public:
   CONTENT *detach(const ID& id)
   {
     MT::Lock lock(mutex);
-    PMapIterator p = cachemap.find(id);
+    MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) 
     {
       CONTENT *r = p->second.content.ptr;
@@ -380,20 +400,33 @@ public:
   }
 };
 
+////////////////////////////////////////////////////////////////////////////
+// Policies
+////////////////////////////////////////////////////////////////////////////
+
 //==========================================================================
-// Manual policy
-// Does no eviction automatically
-class ManualPolicy: public Policy
+// No tidy policy - does nothing
+template<class ID, class CONTENT> class NoTidyPolicy: 
+  public TidyPolicy<ID, CONTENT>
 {
 public:
-  ManualPolicy() {}
+  NoTidyPolicy() {}
 
   //------------------------------------------------------------------------
   // Background check whether to keep an entry
   // Always says OK
   bool keep_entry(const PolicyData& pd, time_t now)
   { return true; }
-  
+};
+
+//==========================================================================
+// No eviction policy - does nothing
+template<class ID, class CONTENT> class NoEvictorPolicy: 
+  public EvictorPolicy<ID, CONTENT>
+{
+public:
+  NoEvictorPolicy() {}
+
   //------------------------------------------------------------------------
   // Eviction policy - find the oldest entry
   // Never says this is the 'worst' - hence nothing is ever evicted
@@ -402,81 +435,35 @@ public:
 };
 
 //==========================================================================
-// Cache template using Manual policy
-template<class ID, class CONTENT> class ManualCache: 
-  public Cache<ID, CONTENT, ManualPolicy>
-{
-public:
-  ManualCache(int _limit=0): 
-    Cache<ID, CONTENT, ManualPolicy>::Cache(ManualPolicy(), _limit) {}
-};
-
-//==========================================================================
-// PointerCache template using Manual policy
-template<class ID, class CONTENT> class ManualPointerCache: 
-  public PointerCache<ID, CONTENT, ManualPolicy>
-{
-public:
-  ManualPointerCache(int _limit=0): 
-    PointerCache<ID, CONTENT, ManualPolicy>::PointerCache(ManualPolicy(), 
-							  _limit) {}
-};
-
-//==========================================================================
-// Timeout-since-last-use policy
+// Timeout-since-last-use tidy policy
 // Simply removes entries a given time after last use
-class TimeoutUsePolicy: public Policy
+template<class ID, class CONTENT> class UseTimeoutTidyPolicy: 
+  public TidyPolicy<ID, CONTENT>
 {
 private:
   int timeout;  // In seconds
 
 public:
-  TimeoutUsePolicy(int _timeout): timeout(_timeout) {}
+  UseTimeoutTidyPolicy(int _timeout): timeout(_timeout) {}
 
   //------------------------------------------------------------------------
   // Background check whether to keep an entry
   // Checks time since last use isn't greater than timeout
   bool keep_entry(const PolicyData& pd, time_t now)
   { return now-pd.use_time < timeout; }
-  
-  //------------------------------------------------------------------------
-  // Eviction policy - find the oldest entry
-  bool check_worst(const PolicyData& current, const PolicyData& worst)
-  { return current.use_time < worst.use_time; }
 };
 
 //==========================================================================
-// Cache template using TimeoutUse policy
-template<class ID, class CONTENT> class TimeoutUseCache: 
-  public Cache<ID, CONTENT, TimeoutUsePolicy>
-{
-public:
-  TimeoutUseCache(int _timeout, int _limit=0): 
-    Cache<ID, CONTENT, TimeoutUsePolicy>::Cache
-    (TimeoutUsePolicy(_timeout), _limit) {}
-};
-
-//==========================================================================
-// PointerCache template using TimeoutUse policy
-template<class ID, class CONTENT> class TimeoutUsePointerCache: 
-  public PointerCache<ID, CONTENT, TimeoutUsePolicy>
-{
-public:
-  TimeoutUsePointerCache(int _timeout, int _limit=0): 
-    PointerCache<ID, CONTENT, TimeoutUsePolicy>::PointerCache
-    (TimeoutUsePolicy(_timeout), _limit) {}
-};
-
-//==========================================================================
-// Timeout total age policy
+// Timeout total age tidy policy
 // Simply removes entries a given time after creation
-class TimeoutAgePolicy: public Policy
+template<class ID, class CONTENT> class AgeTimeoutTidyPolicy: 
+  public TidyPolicy<ID, CONTENT>
 {
 private:
   int timeout;  // In seconds
 
 public:
-  TimeoutAgePolicy(int _timeout): timeout(_timeout) {}
+  AgeTimeoutTidyPolicy(int _timeout): timeout(_timeout) {}
 
   //------------------------------------------------------------------------
   // Background check whether to keep an entry
@@ -484,32 +471,148 @@ public:
   bool keep_entry(const PolicyData& pd, time_t now)
   { return now-pd.add_time < timeout; }
   
+};
+
+//==========================================================================
+// LRU eviction policy
+// Removes least recently used
+template<class ID, class CONTENT> class LRUEvictorPolicy: 
+  public EvictorPolicy<ID, CONTENT>
+{
+public:
+  LRUEvictorPolicy() {}
+
   //------------------------------------------------------------------------
-  // Eviction policy - find the oldest entry
+  // Eviction policy - find the least recently used entry
   bool check_worst(const PolicyData& current, const PolicyData& worst)
   { return current.use_time < worst.use_time; }
 };
 
 //==========================================================================
-// Cache template using TimeoutAge policy
-template<class ID, class CONTENT> class TimeoutAgeCache: 
-  public Cache<ID, CONTENT, TimeoutAgePolicy>
+// Oldest eviction policy
+// Removes oldest entry
+template<class ID, class CONTENT> class AgeEvictorPolicy: 
+  public EvictorPolicy<ID, CONTENT>
 {
 public:
-  TimeoutAgeCache(int _timeout, int _limit=0): 
-    Cache<ID, CONTENT, TimeoutAgePolicy>::Cache
-    (TimeoutAgePolicy(_timeout), _limit) {}
+  AgeEvictorPolicy() {}
+
+  //------------------------------------------------------------------------
+  // Eviction policy - find the oldest entry
+  bool check_worst(const PolicyData& current, const PolicyData& worst)
+  { return current.add_time < worst.add_time; }
+};
+
+////////////////////////////////////////////////////////////////////////////
+// Standard combinations
+////////////////////////////////////////////////////////////////////////////
+
+//==========================================================================
+// Use Timeout cache, no eviction
+template<class ID, class CONTENT> class UseTimeoutCache:
+  public Cache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
+               NoEvictorPolicy<ID, CONTENT> >
+{
+public:
+  UseTimeoutCache(int _timeout): 
+    Cache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
+          NoEvictorPolicy<ID,CONTENT> >::Cache
+    (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+     NoEvictorPolicy<ID, CONTENT>()) {}
 };
 
 //==========================================================================
-// PointerCache template using TimeoutAge policy
-template<class ID, class CONTENT> class TimeoutAgePointerCache: 
-  public PointerCache<ID, CONTENT, TimeoutAgePolicy>
+// Use Timeout pointer cache, no eviction
+template<class ID, class CONTENT> class UseTimeoutPointerCache:
+  public PointerCache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
+               NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  TimeoutAgePointerCache(int _timeout, int _limit=0): 
-    PointerCache<ID, CONTENT, TimeoutAgePolicy>::PointerCache
-    (TimeoutAgePolicy(_timeout), _limit) {}
+  UseTimeoutPointerCache(int _timeout): 
+    PointerCache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
+                 NoEvictorPolicy<ID,CONTENT> >::PointerCache
+    (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+     NoEvictorPolicy<ID, CONTENT>()) {}
+};
+
+//==========================================================================
+// Age Timeout cache, no eviction
+template<class ID, class CONTENT> class AgeTimeoutCache:
+  public Cache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
+               NoEvictorPolicy<ID, CONTENT> >
+{
+public:
+  AgeTimeoutCache(int _timeout): 
+    Cache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
+          NoEvictorPolicy<ID,CONTENT> >::Cache
+    (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+     NoEvictorPolicy<ID, CONTENT>()) {}
+};
+
+//==========================================================================
+// Age Timeout pointer cache, no eviction
+template<class ID, class CONTENT> class AgeTimeoutPointerCache:
+  public PointerCache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
+               NoEvictorPolicy<ID, CONTENT> >
+{
+public:
+  AgeTimeoutPointerCache(int _timeout): 
+    PointerCache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
+                 NoEvictorPolicy<ID,CONTENT> >::PointerCache
+    (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+     NoEvictorPolicy<ID, CONTENT>()) {}
+};
+
+//==========================================================================
+// LRU eviction cache, no tidying
+template<class ID, class CONTENT> class LRUEvictionCache:
+  public Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+               LRUEvictorPolicy<ID, CONTENT> >
+{
+public:
+  LRUEvictionCache(int _timeout): 
+    Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+          LRUEvictorPolicy<ID,CONTENT> >::Cache
+    (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>()) {}
+};
+
+//==========================================================================
+// LRU eviction pointer cache, no tidying
+template<class ID, class CONTENT> class LRUEvictionPointerCache:
+  public PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+                      LRUEvictorPolicy<ID, CONTENT> >
+{
+public:
+  LRUEvictionPointerCache(int _timeout): 
+    PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+                 LRUEvictorPolicy<ID,CONTENT> >::PointerCache
+    (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>()) {}
+};
+
+//==========================================================================
+// Age eviction cache, no tidying
+template<class ID, class CONTENT> class AgeEvictionCache:
+  public Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+               AgeEvictorPolicy<ID, CONTENT> >
+{
+public:
+  AgeEvictionCache(int _timeout): 
+    Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+          AgeEvictorPolicy<ID,CONTENT> >::Cache
+    (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>()) {}
+};
+
+//==========================================================================
+// Age eviction pointer cache, no tidying
+template<class ID, class CONTENT> class AgeEvictionPointerCache:
+  public PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+                      AgeEvictorPolicy<ID, CONTENT> >
+{
+public:
+  AgeEvictionPointerCache(int _timeout): 
+    PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+                 AgeEvictorPolicy<ID,CONTENT> >::PointerCache
+    (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>()) {}
 };
 
 //==========================================================================

@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::Cache: test-timeout-use.cc
+// ObTools::Cache: test-timeout-age.cc
 //
 // Test harness for cache library - Time-since-last-used eviction
 //
@@ -16,7 +16,7 @@ using namespace ObTools::Cache;
 
 int main()
 {
-  TimeoutAgeCache<string, string> cache(5);
+  AgeTimeoutCache<string, string> cache(5);
 
   cache.add("foo", "FOO");
   cache.dump(cout); 
