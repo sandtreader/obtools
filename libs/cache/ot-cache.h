@@ -170,9 +170,6 @@ protected:
   // Limit on entries, 0 if unlimited
   int limit;
 
-  // Overall mutex
-  MT::Mutex mutex;
-
   // Core map
   MapType cachemap;
 
@@ -181,9 +178,104 @@ protected:
   EVICTOR_POLICY evictor_policy;
 
   //--------------------------------------------------------------------------
-  // evict() version (q.v.) to call with mutex locked
-  bool evict_locked() 
+  // Clear the given content - does nothing here, but implemented in
+  // PointerCache to free pointers
+  virtual void clear(const MCType& mc) { }
+
+public:
+  // Overall recursive mutex
+  MT::RMutex mutex;
+
+  //--------------------------------------------------------------------------
+  // Constructor
+  Cache(const TIDY_POLICY& _tpol, 
+	const EVICTOR_POLICY& _epol,
+	int _limit=0): 
+    tidy_policy(_tpol), evictor_policy(_epol), limit(_limit), mutex() {}
+
+  //--------------------------------------------------------------------------
+  // Add an item of content to the cache
+  // item is COPIED
+  // Any existing content under this ID is deleted
+  // Whether successful - can fail if limit reached and no eviction possible
+  bool add(const ID& id, const CONTENT& content)
   { 
+    MT::RLock lock(mutex);
+    if (limit && cachemap.size() > limit && !evict()) return false;
+    cachemap[id] = MCType(content); 
+    return true; 
+  }
+
+  //--------------------------------------------------------------------------
+  // Check (without copying) whether a given ID exists in the cache
+  bool contains(const ID& id)
+  { 
+    MT::RLock lock(mutex);
+    return (cachemap.find(id) != cachemap.end()); 
+  }
+
+  //--------------------------------------------------------------------------
+  // Returns copy of content of a given ID in the map
+  // Whether found - if not, result is not changed
+  bool lookup(const ID& id, CONTENT& result)
+  {
+    MT::RLock lock(mutex);
+    MapIterator p = cachemap.find(id);
+    if (p != cachemap.end()) result = p->second.content;
+  }
+
+  //--------------------------------------------------------------------------
+  // Touches an entry, renewing its use-time and incrementing use-count
+  // Ignored if ID doesn't exist
+  void touch(const ID& id)
+  {
+    MT::RLock lock(mutex);
+    MapIterator p = cachemap.find(id);
+    if (p != cachemap.end()) p->second.policy_data.touch();
+  }
+
+  //--------------------------------------------------------------------------
+  // Remove content of given ID
+  void remove(const ID& id) 
+  { 
+    MT::RLock lock(mutex);
+    MapIterator p = cachemap.find(id);
+    if (p != cachemap.end())
+    {
+      clear(p->second);
+      cachemap.erase(p);
+    }
+  }
+
+  //--------------------------------------------------------------------------
+  // Run background evictor policy
+  void tidy() 
+  { 
+    MT::RLock lock(mutex);
+    time_t now = time(0);
+
+    for(MapIterator p = cachemap.begin();
+	p!=cachemap.end();)
+    {
+      MCType &mc = p->second;
+      if (!tidy_policy.keep_entry(mc.policy_data, now))
+      {
+	MapIterator q=p;
+	++p;  // Protect from deletion
+	clear(q->second);
+	cachemap.erase(q);
+      }
+      else ++p;
+    }
+  }
+
+  //--------------------------------------------------------------------------
+  // Run emergency evictor policy
+  // Evicts until map size is less than limit (room to add one)
+  // Returns whether there is now room
+  bool evict()
+  {
+    MT::RLock lock(mutex);
     int needed = cachemap.size() - limit + 1;  // Number we need to evict
     if (needed <= 0) return true;
 
@@ -220,109 +312,10 @@ protected:
   }
 
   //--------------------------------------------------------------------------
-  // Clear the given content - does nothing here, but implemented in
-  // PointerCache to free pointers
-  virtual void clear(const MCType& mc) { }
-
-public:
-  //--------------------------------------------------------------------------
-  // Constructor
-  Cache(const TIDY_POLICY& _tpol, 
-	const EVICTOR_POLICY& _epol,
-	int _limit=0): 
-    tidy_policy(_tpol), evictor_policy(_epol), limit(_limit) {}
-
-  //--------------------------------------------------------------------------
-  // Add an item of content to the cache
-  // item is COPIED
-  // Any existing content under this ID is deleted
-  // Whether successful - can fail if limit reached and no eviction possible
-  bool add(const ID& id, const CONTENT& content)
-  { 
-    MT::Lock lock(mutex);
-    if (limit && cachemap.size() > limit && !evict_locked()) return false;
-    cachemap[id] = MCType(content); 
-    return true; 
-  }
-
-  //--------------------------------------------------------------------------
-  // Check (without copying) whether a given ID exists in the cache
-  bool contains(const ID& id)
-  { 
-    MT::Lock lock(mutex);
-    return (cachemap.find(id) != cachemap.end()); 
-  }
-
-  //--------------------------------------------------------------------------
-  // Returns copy of content of a given ID in the map
-  // Whether found - if not, result is not changed
-  bool lookup(const ID& id, CONTENT& result)
-  {
-    MT::Lock lock(mutex);
-    MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) result = p->second.content;
-  }
-
-  //--------------------------------------------------------------------------
-  // Touches an entry, renewing its use-time and incrementing use-count
-  // Ignored if ID doesn't exist
-  void touch(const ID& id)
-  {
-    MT::Lock lock(mutex);
-    MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) p->second.policy_data.touch();
-  }
-
-  //--------------------------------------------------------------------------
-  // Remove content of given ID
-  void remove(const ID& id) 
-  { 
-    MT::Lock lock(mutex);
-    MapIterator p = cachemap.find(id);
-    if (p != cachemap.end())
-    {
-      clear(p->second);
-      cachemap.erase(p);
-    }
-  }
-
-  //--------------------------------------------------------------------------
-  // Run background evictor policy
-  void tidy() 
-  { 
-    MT::Lock lock(mutex);
-    time_t now = time(0);
-
-    for(MapIterator p = cachemap.begin();
-	p!=cachemap.end();)
-    {
-      MCType &mc = p->second;
-      if (!tidy_policy.keep_entry(mc.policy_data, now))
-      {
-	MapIterator q=p;
-	++p;  // Protect from deletion
-	clear(q->second);
-	cachemap.erase(q);
-      }
-      else ++p;
-    }
-  }
-
-  //--------------------------------------------------------------------------
-  // Run emergency evictor policy
-  // Evicts until map size is less than limit (room to add one)
-  // Returns whether there is now room
-  bool evict()
-  {
-    MT::Lock lock(mutex);
-    return evict_locked();
-  }
-
-  //--------------------------------------------------------------------------
   // Dump contents to given stream
-  void dump(ostream& s)
+  void dump(ostream& s, bool show_content=false)
   { 
-    MT::Lock lock(mutex);
+    MT::RLock lock(mutex);
     time_t now = time(0);
 
     s << "Cache size " << cachemap.size() << ", limit " << limit << ":\n";
@@ -333,8 +326,9 @@ public:
       MCType &mc = p->second;
       PolicyData &pd = mc.policy_data;
 
-      s << p->first << " -> " << mc.content << endl;
-      s << "  (at=" << pd.add_time-now << 
+      s << p->first;
+      if (show_content) s << " -> " << mc.content << endl;
+      s << " (at=" << pd.add_time-now << 
 	", ut=" << pd.use_time-now <<
 	", use=" << pd.use_count << ")\n";
     }
@@ -342,6 +336,9 @@ public:
 
   //--------------------------------------------------------------------------
   // Iterators
+  // NB! If you use these in a MT environment you must manually lock the mutex 
+  // This is also the reason there is no const_iterator - it is never safe
+  // to use a const cache, since you won't be able to lock it
   typedef CacheIterator<ID, CONTENT> iterator;
   iterator begin() { return iterator(cachemap.begin()); }
   iterator end() { return iterator(cachemap.end()); }
@@ -478,7 +475,7 @@ public:
   // Pointer returned is owned by cache and will be deleted by it
   CONTENT *lookup(const ID& id)
   {
-    MT::Lock lock(mutex);
+    MT::RLock lock(mutex);
     MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) 
       return p->second.content.ptr;
@@ -492,7 +489,7 @@ public:
   // Pointer returned is detached from cache and should be disposed by caller
   CONTENT *detach(const ID& id)
   {
-    MT::Lock lock(mutex);
+    MT::RLock lock(mutex);
     MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) 
     {

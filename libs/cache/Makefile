@@ -24,13 +24,13 @@ release:
 
 #Test harnesses:
 test-timeout-use: test-timeout-use.o ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
 test-timeout-age: test-timeout-age.o ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
 test-pointer: test-pointer.o ../mt/ot-mt.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
 #Objects
 test-timeout-use.o: ot-cache.h Makefile

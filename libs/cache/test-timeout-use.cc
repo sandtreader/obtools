@@ -19,17 +19,17 @@ int main()
   UseTimeoutCache<string, string> cache(5);
 
   cache.add("foo", "FOO");
-  cache.dump(cout); 
+  cache.dump(cout, true); 
   sleep(2);
 
   cache.add("bar", "BAR");
-  cache.dump(cout);
+  cache.dump(cout, true);
 
   for(int i=0; i<10; i++)
   {
     cache.tidy();
     cache.touch("foo");
-    cache.dump(cout);
+    cache.dump(cout, true);
     sleep(1);
   }
 
