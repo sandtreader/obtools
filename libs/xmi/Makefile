@@ -4,7 +4,9 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = reader.o uml.o
+OBJS = reader.o element.o package.o class.o association.o assocend.o \
+	attribute.o operation.o parameter.o
+
 CPPFLAGS += -g -I../xml
 LDFLAGS += -g 
 

@@ -11,72 +11,6 @@
 using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
-// Package destructor
-Package::~Package()
-{
-  //Delete classes
-  for(list<Class *>::iterator p=classes.begin();
-      p!=classes.end();
-      p++)
-    delete *p;
-
-  //Delete associations
-  for(list<Association *>::iterator p=associations.begin();
-      p!=associations.end();
-      p++)
-    delete *p;
-
-  //Delete sub-packages
-  for(list<Package *>::iterator p=packages.begin();
-      p!=packages.end();
-      p++)
-    delete *p;
-}
-
-//--------------------------------------------------------------------------
-// Package printer
-void Package::print(ostream& sout, int indent)
-{
-  sout << string(indent, ' ');
-  sout << "Package '" << name << "':" << endl;
-
-  //Print sub-packages
-  for(list<Package *>::iterator p=packages.begin();
-      p!=packages.end();
-      p++)
-    (*p)->print(sout, indent+2);
-
-  //Print classes
-  for(list<Class *>::iterator p=classes.begin();
-      p!=classes.end();
-      p++)
-    (*p)->print(sout, indent+2);
-
-  //Print associations
-  for(list<Association *>::iterator p=associations.begin();
-      p!=associations.end();
-      p++)
-    (*p)->print(sout, indent+2);
-}
-
-//--------------------------------------------------------------------------
-// Class destructor
-Class::~Class()
-{
-  //Delete attributes
-  for(list<Attribute *>::iterator p=attributes.begin();
-      p!=attributes.end();
-      p++)
-    delete *p;
-
-  //Delete operations
-  for(list<Operation *>::iterator p=operations.begin();
-      p!=operations.end();
-      p++)
-    delete *p;
-}
-
-//--------------------------------------------------------------------------
 // Class printer
 void Class::print(ostream& sout, int indent)
 {
@@ -101,18 +35,7 @@ void Class::print(ostream& sout, int indent)
     sout << " <" << stereotype << ">";
 
   sout << ":" << endl;
-
-  //Print attributes
-  for(list<Attribute *>::iterator p=attributes.begin();
-      p!=attributes.end();
-      p++)
-    (*p)->print(sout, indent+2);
-
-  //Print operations
-  for(list<Operation *>::iterator p=operations.begin();
-      p!=operations.end();
-      p++)
-    (*p)->print(sout, indent+2);
+  print_subelements(sout, indent+2);
 }
 
 //--------------------------------------------------------------------------
@@ -124,17 +47,6 @@ void Association::print(ostream& sout, int indent)
   if (!name.empty())
     sout << "'" << name << "'";
   sout << endl;
-}
-
-//--------------------------------------------------------------------------
-// Operation destructor
-Operation::~Operation()
-{
-  //Delete parameters
-  for(list<Parameter *>::iterator p=parameters.begin();
-      p!=parameters.end();
-      p++)
-    delete *p;
 }
 
 //--------------------------------------------------------------------------

@@ -13,8 +13,14 @@
 #include <list>
 #include <iostream>
 #include "ot-xml.h"
+
+//Mutual recursion problems - define only what ot-uml.h needs 
+//before including it
+namespace ObTools { namespace XMI { class Reader; }};
 #include "ot-uml.h"
 
+//==========================================================================
+// Namespace
 namespace ObTools { namespace XMI {
 
 //Make our lives easier without polluting anyone else
@@ -31,35 +37,32 @@ class Reader
 {
 private:
   ostream& serr;                       //error output stream
-  map<string, UML::Class *> classmap;  //map of ids to classes/datatypes
+  map<string, UML::Element *> idmap;   //map of ids to elements
 
-  void warning(const char *warn, const string& detail);
-  void error(const char *err, const string& detail="") throw (ParseFailed);
-  UML::Class *lookup_class(const string& id);
-  UML::Class *get_type(XML::Element& te);
-  UML::Attribute *read_attribute(XML::Element& ae);
-  void scan_class(XML::Element& ce, UML::ClassKind kind=UML::CLASS_CONCRETE);
-  UML::Class *read_class(XML::Element& ce);
-  UML::Association *read_association(XML::Element& ae); 
-  UML::Package *read_package(XML::Element& pe);
+  //We keep the following to ensure validity of the XML document for our
+  //(and our model's) lifetime
+  XML::Parser xml_parser;              
 
 public:
   UML::Package *model;        
 
-  //------------------------------------------------------------------------
-  // Constructors & Destructor
+  //Log a warning
+  void warning(const char *warn, const string& detail="");
+
+  //Log an error and bomb out
+  void error(const char *err, const string& detail="") throw (ParseFailed);
+
+  //Record an ID to element mappimg
+  void record_element(const string& id, UML::Element *e);
+
+  //Get element from ID - return 0 if not found
+  UML::Element *lookup_element(const string& id);
+
+  // Constructor
   // s is output stream for parsing errors
-  Reader(ostream &s):
-    serr(s),
-    model(0)
-  {}
+  Reader(ostream &s=cerr);
 
-  // Default - use cerr
-  Reader():
-    serr(cerr),
-    model(0)
-  {}
-
+  // Destructor
   ~Reader();
 
   //------------------------------------------------------------------------
