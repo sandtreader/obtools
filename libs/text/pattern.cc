@@ -37,8 +37,8 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
     
     if (!cased)
     {
-      c = tolower(c);
-      d = tolower(d);
+      c = ::tolower(c);
+      d = ::tolower(d);
     }
     
     switch (c)
@@ -48,7 +48,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
 
       case '\\': 		/* Literal - must match next character */
         c = *p++;
-        if (!cased) c = tolower(c);
+        if (!cased) c = ::tolower(c);
         if (c!=d) return false;
         break;
 
@@ -61,12 +61,12 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
         c = *p;
         if (c != '\\' && c != '?' && c != '*' && c != '[')
         {
-          if (!cased) c = tolower(c);
+          if (!cased) c = ::tolower(c);
           while (d != c)
           {
             if (!d) return false;  /* Ran out of text */
             d = *q++;
-            if (!cased) d = tolower(d);
+            if (!cased) d = ::tolower(d);
           }
         }
         
@@ -106,7 +106,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
         do
         {
           if (c == '\\') c = *p++;
-          if (!cased) c = tolower(c);
+          if (!cased) c = ::tolower(c);
 
           if (*p == '-' && p[1] != ']')
           { 
@@ -114,7 +114,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
             if (*++p == '\\') p++;
               
             e=*p;
-            if (!cased) e = tolower(e);
+            if (!cased) e = ::tolower(e);
             if (d >= c && d <= e) found = true;
 
             p++;

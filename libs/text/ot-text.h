@@ -39,6 +39,18 @@ int get_common_indent(const string& text);
 // Remove indent from text, up to 'indent' spaces
 string remove_indent(const string& text, int indent);
 
+//--------------------------------------------------------------------------
+// Canonicalise a multiword string:
+//  Remove leading and trailing whitespace
+//  Translate intervening whitespace strings into single space
+string canonicalise_space(const string& text);
+
+//--------------------------------------------------------------------------
+// Split a string into first word and remaining
+// Text must be canonical (see above)
+// Returns first word, removes it and space from text
+string remove_word(string& text);
+
 //==========================================================================
 // Pattern matching functions (pattern.cc)
 // NB - Unix 'glob' style patterns, not full regexp
@@ -60,6 +72,17 @@ bool pattern_match(const char *pattern, const char *text,
 // More C++ friendly version
 bool pattern_match(const string& pattern, const string& text, 
 		   bool cased=true);
+
+//==========================================================================
+// Case functions (case.cc)
+
+//--------------------------------------------------------------------------
+// Lower-case a string
+string tolower(const string& text);
+
+//--------------------------------------------------------------------------
+// Upper-case a string
+string toupper(const string& text);
 
 //==========================================================================
 }} //namespaces

@@ -123,4 +123,83 @@ string remove_indent(const string& text, int indent)
   return result;
 }
 
+//--------------------------------------------------------------------------
+// Canonicalise a multiword string:
+//  Remove leading and trailing whitespace
+//  Translate intervening whitespace strings into single space
+string canonicalise_space(const string& text)
+{
+  int state = 0;  // 0=start, 1=word, 2=ws
+  string fixed;
+
+  for(string::const_iterator p = text.begin(); p!=text.end(); p++)
+  {
+    char c = *p;
+    switch (c)
+    {
+      case ' ':
+      case '\t':
+      case '\r':
+      case '\n':
+	switch (state)
+	{
+	  case 0: // At start, ignore it
+	    break;
+
+	  case 1: // After word, go to WS state
+	    state = 2;
+	    break;
+
+	  case 2: // More WS - ignore it
+	    break;
+	}
+	break;
+
+      default:
+	switch (state)
+	{
+	  case 0: // At start - keep it and go to word
+	    fixed+=c;
+	    state = 1;
+	    break;
+
+	  case 1: // More word - keep it
+	    fixed+=c;
+	    break;
+
+	  case 2: // First after WS - add single space, keep this and go to 1
+	    fixed+=' ';
+	    fixed+=c;
+	    state = 1;
+	    break;
+	}
+    }
+  }
+
+  return fixed;
+}
+
+//--------------------------------------------------------------------------
+// Split a string into first word and remaining
+// Text must be canonical (see above)
+// Returns first word, removes it and space from text
+string remove_word(string& text)
+{
+  // Find first word of text
+  string::size_type sp = text.find(' ');
+  if (sp == string::npos || !sp)
+  {
+    // Take all of it
+    string word=text;
+    text="";
+    return word;
+  }
+  else
+  {
+    string word = text.substr(0, sp);
+    text = text.substr(sp+1);
+    return word;
+  }
+}
+
 }} // namespaces
