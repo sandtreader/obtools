@@ -172,7 +172,7 @@ void Correlator::tick()
 // Correlation stream operator
 ostream& operator<<(ostream&s, const Correlation& c)
 {
-  s << "[" << c.id << "(" << c.source_path << ")  for " 
+  s << "[" << c.id << " -> " << c.source_path << " for " 
     << c.client.client << " ]";
   return s;
 }

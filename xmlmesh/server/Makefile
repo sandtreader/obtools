@@ -11,7 +11,7 @@ HEADERS = server.h
 OBJS 	= main.o server.o service.o mpath.o otmp-server.o correlator.o  \
           publisher.o
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
-          net log mt xml soap text cache init
+          net log mt xml soap text cache init misc
 CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1
 

@@ -9,7 +9,7 @@ TYPE	= lib
 NAME   	= ot-xmlmesh-core
 HEADERS = ot-xmlmesh.h
 OBJS    = message.o m-fault.o m-subscription.o
-DEPENDS = soap xml net log
+DEPENDS = soap xml net log misc
 MT-VARIANTS = 1
 
 # Suppress MT library if single 

@@ -9,34 +9,25 @@
 
 #include "ot-xmlmesh.h"
 #include "ot-log.h"
+#include "ot-misc.h"
 #include <sstream>
 
 namespace ObTools { namespace XMLMesh {
+
+#define XMLMESH_ID_SIZE 16
 
 //--------------------------------------------------------------------------
 //Standard namespace
 static const char *xmlmesh_namespace = "http://obtools.com/ns/xmlmesh";
 
 //--------------------------------------------------------------------------
-//Static globals for ID allocation - threadsafe
-
-#if !defined(_SINGLE)
-static MT::Mutex id_mutex;
-#endif
-
-static int id_serial;
-
-//--------------------------------------------------------------------------
 //Allocate an ID
+//Actually, we just generate a very long random one - this should make it
+//globally unique for correlation
 static string _allocate_id()
 {
-#if !defined(_SINGLE)
-  MT::Lock lock(id_mutex);
-#endif
-
-  ostringstream ids;
-  ids << "OTM-" << ++id_serial;
-  return ids.str();
+  Misc::Random r;
+  return r.generate_hex(XMLMESH_ID_SIZE);
 }
 
 //--------------------------------------------------------------------------
