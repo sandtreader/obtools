@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMLBus:OTMP: client_transport.cc
+// ObTools::XMLBus:Client: transport-otmp.cc
 //
 // Implementation of OTMP client transport for XMLBus
 //

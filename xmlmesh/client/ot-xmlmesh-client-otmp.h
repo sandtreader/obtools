@@ -27,9 +27,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - take server address
-  // port=0 means use default port for protocol
-  OTMPClientTransport(Net::IPAddress address, int port=0):
-    otmp(address, port) {}
+  OTMPClientTransport(Net::EndPoint server): otmp(server) {}
 
   // Implementations of ClientTransport virtuals (q.v. ot-xmlbus.h)
   bool send(const string& data);
@@ -48,9 +46,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor - take server address
   // port=0 means use default port for protocol
-  OTMPClient(Net::IPAddress address, int port=0):
-    transport(address, port),
-    Client(transport) {}
+  OTMPClient(Net::EndPoint server): transport(server), Client(transport) {}
 };
 
 //==========================================================================
