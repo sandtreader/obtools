@@ -21,6 +21,7 @@ public:
   int n;
 
   Wombat(const string& _name, int _n): name(_name), n(_n) {}
+  ~Wombat() { cout << "Deleted wombat '" << name << "'(" << n << ")\n"; }
 };
 
 ostream& operator<<(ostream& s, const Wombat& w)

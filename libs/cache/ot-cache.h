@@ -222,7 +222,7 @@ protected:
   //--------------------------------------------------------------------------
   // Clear the given content - does nothing here, but implemented in
   // PointerCache to free pointers
-  virtual void clear(const MCType& mc) {}
+  virtual void clear(const MCType& mc) { }
 
 public:
   //--------------------------------------------------------------------------
@@ -347,13 +347,9 @@ public:
   iterator end() { return iterator(cachemap.end()); }
 
   //--------------------------------------------------------------------------
-  // Virtual destructor - clears all entries
+  // Virtual destructor 
   // (does nothing here, but PointerCache uses it to free pointers)
-  virtual ~Cache() 
-  {
-    for(MapIterator p = cachemap.begin(); p!=cachemap.end(); ++p)
-      clear(p->second); 
-  }
+  virtual ~Cache() {}
 };
 
 //==========================================================================
@@ -445,7 +441,11 @@ protected:
 
   //--------------------------------------------------------------------------
   // Clear the given content - frees pointer
-  virtual void clear(const MCType& mc)
+  // N.B. Types here - it must match the prototype of the parent clear()
+  // method, and the compiler isn't clever enough to work out that our MCType
+  // is actually the same as theirs.
+  virtual void clear(const typename Cache<ID, PointerContent<CONTENT>, 
+		     TIDY_POLICY, EVICTOR_POLICY>::MCType& mc)
   { delete mc.content.ptr; }
 
 public:
@@ -508,6 +508,16 @@ public:
   typedef PointerCacheIterator<ID, CONTENT> iterator;
   iterator begin() { return iterator(cachemap.begin()); }
   iterator end() { return iterator(cachemap.end()); }
+
+  //--------------------------------------------------------------------------
+  // Destructor to clear all entries
+  // Has to be here to ensure the right clear() gets called
+  ~PointerCache() 
+  {
+    for(MapIterator p = cachemap.begin(); p!=cachemap.end(); ++p)
+      clear(p->second); 
+  }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////
