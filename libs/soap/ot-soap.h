@@ -59,8 +59,9 @@ struct Header
   };
 
   XML::Element *content;  // The XML element
-  bool must_understand;
   Role role;
+  bool must_understand;
+  bool relay;
 };
 
 //==========================================================================
@@ -84,28 +85,50 @@ public:
   Message(istream& in_s, ostream& err_s);
 
   //------------------------------------------------------------------------
+  // Add a namespace attribute to the envelope
+  void add_namespace(const string& attr, const string& value);
+
+  //------------------------------------------------------------------------
   // Add a header element (fully formed)
   // header is taken and will be deleted with message
-  void add_header(XML::Element *header);
+  // Returns reference to 'header'
+  XML::Element& add_header(XML::Element *header);
+
+  //------------------------------------------------------------------------
+  // Add a header element by name
+  // Returns reference to created header element
+  XML::Element& add_header(const string& name)
+  { return add_header(new XML::Element(name)); }
 
   //------------------------------------------------------------------------
   // Add a header element with given role string
   // header is taken and will be deleted with message
-  // Element is modified with role and mustUnderstand attributes
-  void add_header(XML::Element *header, const string& role,
-		  bool must_understand = true);
+  // Element is modified with role, mustUnderstand and relay attributes
+  // Returns reference to created header element
+  XML::Element& add_header(const string& name, const string& role,
+			   bool must_understand = true,
+			   bool relay = false);
 
   //------------------------------------------------------------------------
   // Add a header element with given standard role
   // header is taken and will be deleted with message
-  // Element is modified with role and mustUnderstand attributes
-  void add_header(XML::Element *header, Header::Role role,
-		  bool must_understand = true);
+  // Element is modified with role, relay and mustUnderstand attributes
+  // Returns reference to created header element
+  XML::Element& add_header(const string& name, Header::Role role,
+			   bool must_understand = true,
+			   bool relay = false);
 
   //------------------------------------------------------------------------
   // Add a body element
   // body is taken and will be deleted with message
-  void add_body(XML::Element *body);
+  // Returns reference to new body element
+  XML::Element& add_body(XML::Element *body);
+
+  //------------------------------------------------------------------------
+  // Add a body element by name
+  // Returns reference to created body element
+  XML::Element& add_body(const string& name)
+  { return add_body(new XML::Element(name)); }
 
   //------------------------------------------------------------------------
   // Dump XML text to given output stream
@@ -131,7 +154,6 @@ public:
   //------------------------------------------------------------------------
   // Destructor
   ~Message() { if (doc) delete doc; }
-
 };
 
 //------------------------------------------------------------------------
@@ -139,8 +161,92 @@ public:
 ostream& operator<<(ostream& s, const Message& m);
 
 //==========================================================================
+// SOAP Fault Message
+class Fault: public Message
+{
+public:
+  //------------------------------------------------------------------------
+  // Fault codes
+  enum Code
+  {
+    CODE_VERSION_MISMATCH,
+    CODE_MUST_UNDERSTAND,
+    CODE_DATA_ENCODING_UNKNOWN,
+    CODE_SENDER,
+    CODE_RECEIVER
+  };
+  
+  //------------------------------------------------------------------------
+  // Constructor for outgoing faults 
+  // Reason is the English (xml:lang="en") version - use add_reason for more
+  Fault(Code code, const string& reason);
+
+  //------------------------------------------------------------------------
+  // Set a subcode 
+  // According to SOAP 1.2: 5.4.1.3, the value should be a qualified name
+  // We only allow one level here!
+  void set_subcode(const string& value);
+
+  //------------------------------------------------------------------------
+  // Add a reason
+  // Use this for non-English reasons - pass the English reason in the
+  // constructor, above
+  void add_reason(const string& text, const string& lang);
+
+  //------------------------------------------------------------------------
+  // Set the Node value
+  // According to SOAP 1.2: 5.4.3, this should be a URI identifying the node
+  // There should only be one (but this routine doesn't check this)
+  void set_node(const string& uri);
+
+  //------------------------------------------------------------------------
+  // Set the Role value
+  // According to SOAP 1.2: 5.4.4, this should be a URI identifying the role
+  // the node was operating in when the fault occurred
+  // There should only be one (but this routine doesn't check this)
+  void set_role(const string& uri);
+
+  //------------------------------------------------------------------------
+  // Add a detail entry
+  // Detail entries can be more or less anything
+  void add_detail(XML::Element *detail);
+};
+
+//==========================================================================
+// SOAP VersionMismatch Fault Message
+// Adds recommended headers (SOAP1.2: 5.4.7), indicating support for
+// ONLY SOAP1.2
+class VersionMismatchFault: public Fault
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor for outgoing faults
+  VersionMismatchFault();
+};
+
+//==========================================================================
+// SOAP MustUnderstand Fault Message
+// Adds recommended headers (SOAP1.2: 5.4.8), indicating non-understood
+// elements
+class MustUnderstandFault: public Fault
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor for outgoing faults
+  MustUnderstandFault();
+
+  //------------------------------------------------------------------------
+  // Add a NotUnderstood block
+  // attr/value indicate a namespace
+  void add_not_understood(const string& qname, const string& attr,
+			  const string& value);
+
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_SOAP_H
+
 
 
 

@@ -62,80 +62,77 @@ Message::Message(istream& in_s, ostream& err_s)
 }
 
 //------------------------------------------------------------------------
+// Add a namespace attribute to the envelope
+void Message::add_namespace(const string& attr, const string& value)
+{
+  if (doc) doc->set_attr(attr, value);
+}
+
+//------------------------------------------------------------------------
 // Add a header element
 // header is taken and will be deleted with message
-void Message::add_header(XML::Element *header)
+// Returns reference to 'header'
+XML::Element& Message::add_header(XML::Element *header)
 {
-  if (doc)
-  {
-    // Make sure there is an env:Header container
-    if (!doc->get_child("env:Header")) doc->add("env:Header");
-    XML::Element& eh = doc->get_child("env:Header");
-    if (!!eh) eh.add(header);
-  }
-  else
-  {
-    // Safest to clean up here
-    delete header;
-  }
+  if (doc) doc->make_child("env:Header").add(header);
+  return *header;
 }
 
 //------------------------------------------------------------------------
 // Add a header element with given role string
 // header is taken and will be deleted with message
-// Element is modified with role and mustUnderstand attributes
-void Message::add_header(XML::Element *header, const string& role,
-			 bool must_understand)
+// Element is modified with role, mustUnderstand and relay attributes
+// Returns reference to created header element
+XML::Element& Message::add_header(const string &name, const string& role,
+				  bool must_understand,
+				  bool relay)
 {
-  header->set_attr("env:role", role);
+  XML::Element *header = new XML::Element(name);
+
+  // Only add role if non-empty
+  if (!role.empty()) header->set_attr("env:role", role);
 
   // Only add mustUnderstand if true (SOAP 1.2: 5.2.3)
   if (must_understand) header->set_attr_bool("env:mustUnderstand", true);
-  add_header(header);
+
+  // Only add relay if true (SOAP 1.2: 5.2.4)
+  if (relay) header->set_attr_bool("env:relay", true);
+
+  return add_header(header);
 }
 
 //------------------------------------------------------------------------
 // Add a header element with given standard role
 // header is taken and will be deleted with message
-// Element is modified with role and mustUnderstand attributes
-void Message::add_header(XML::Element *header, Header::Role role,
-			 bool must_understand)
+// Element is modified with role, mustUnderstand and relay attributes
+// Returns reference to created header element
+XML::Element& Message::add_header(const string& name, Header::Role role,
+				  bool must_understand,
+				  bool relay)
 {
   switch (role)
   {
     case Header::ROLE_NONE:
-      add_header(header, RN_NONE, must_understand);
-      break;
+      return add_header(name, RN_NONE, must_understand, relay);
 
     case Header::ROLE_NEXT:
-      add_header(header, RN_NEXT, must_understand);
-      break;
+      return add_header(name, RN_NEXT, must_understand, relay);
 
     case Header::ROLE_ULTIMATE_RECEIVER:
       // UR is the default;  don't add it - SOAP 1.2: 5.2.2
-      if (must_understand) header->set_attr_bool("env:mustUnderstand", true);
-      add_header(header);
-      break;
+      return add_header(name, "", must_understand, relay);
   }
+
+  return XML::Element::none;
 }
 
 //------------------------------------------------------------------------
 // Add a body element
 // body is taken and will be deleted with message
-void Message::add_body(XML::Element *body)
+XML::Element& Message::add_body(XML::Element *body)
 {
-  if (doc)
-  {
-    // Make sure there is an env:Body container
-    if (!doc->get_child("env:Body")) doc->add("env:Body");
-    XML::Element& eb = doc->get_child("env:Body");
-    if (!!eb) eb.add(body);
-  }
-  else
-  {
-    // Safest to clean up here
-    delete body;
-  }
+  if (doc) doc->make_child("env:Body").add(body);
+  return *body;
 }
 
 //------------------------------------------------------------------------
@@ -209,6 +206,8 @@ list<Header> Message::get_headers()
       Header h;
       h.content = &he;
       h.must_understand = he.get_attr_bool("env:mustUnderstand");
+      h.relay           = he.get_attr_bool("env:relay");
+
       string rs = he["env:role"];
 
       if (rs == RN_NONE)

@@ -8,7 +8,7 @@
 TYPE	= lib
 NAME   	= ot-soap
 HEADERS = ot-soap.h
-OBJS  	= message.o 
+OBJS  	= message.o fault.o
 DEPENDS = xml
 TESTS 	= test-soap
 TESTCMD	= ./test-soap < ../tests/soap1-2.xml

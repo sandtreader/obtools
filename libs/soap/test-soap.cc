@@ -19,9 +19,11 @@ using namespace ObTools;
 int main(int argc, char **argv)
 {
   SOAP::Message msg;
-  msg.add_header(new XML::Element("xm:header1"), SOAP::Header::ROLE_NEXT);
-  msg.add_header(new XML::Element("xm:header2"), "xm:role", false);
-  msg.add_body(new XML::Element("xm:body"));
+  msg.add_namespace("xmlns:xm", "http://www.obtools.com/foo");
+  msg.add_header("xm:header1", SOAP::Header::ROLE_NEXT);
+  msg.add_header("xm:header2", "xm:role", false, true);
+  msg.add_header("xm:header3", SOAP::Header::ROLE_ULTIMATE_RECEIVER, true);
+  msg.add_body("xm:body");
   cout << "Constructed message:\n" << msg;
 
   SOAP::Message msg2(cin, cerr);
@@ -45,6 +47,24 @@ int main(int argc, char **argv)
       p!= bodies.end();
       p++)
     cout << "- " << (*p)->name << endl;
+
+  cout << "\nConstructed Fault:\n";
+  SOAP::Fault fault(SOAP::Fault::CODE_RECEIVER, "It went wrong");
+  fault.add_reason("Ca marche pas", "fr");
+  fault.set_subcode("xm:whoops");
+  fault.set_node("http://foo");
+  fault.set_role(SOAP::RN_NEXT);
+  cout << fault;
+
+  cout << "\nConstructed VersionMismatch Fault:\n";
+  SOAP::VersionMismatchFault vm_fault;
+  cout << vm_fault;
+
+  cout << "\nConstructed MustUnderstand Fault:\n";
+  SOAP::MustUnderstandFault mu_fault;
+  mu_fault.add_not_understood("xm:foo", "xmlns:xm", 
+			      "http://www.obtools.com/foo");
+  cout << mu_fault;
 
   return 0;  
 }
