@@ -33,7 +33,7 @@ using namespace std;
 //     <chunk>
 //     <chunk>
 //
-// A chunk is a tag indicating the chunk type (only two are currently defined),
+// A chunk is a tag indicating the chunk type (only one is currently defined),
 // the length of the message, some flags, and the data of the message.  
 //
 // Because there aren't many tags defined out of the 32-bit range, the tag 
@@ -61,8 +61,7 @@ const int OTMP_DEFAULT_PORT = 29167;
 // Standard OTMP tags
 enum OTMPTag
 {
-  OTMP_TAG_PING    = 0x50494e47,   // PING - Reflected NOOP, message is seq.
-  OTMP_TAG_MESSAGE = 0x4f544d53,   // OTMS - Message carrying
+  OTMP_TAG_MESSAGE = 0x4f544d53   // OTMS - Message carrying
 };
 
 // Internal struct for carrying messages 

@@ -61,43 +61,36 @@ bool OTMPClient::receive_messages()
     // Read a 4-byte tag
     uint32_t tag = socket->read_nbo_int();
 
-    switch (tag)
+    if (tag == OTMP_TAG_MESSAGE)
     {
-      case OTMP_TAG_PING:
-      case OTMP_TAG_MESSAGE:
-	// Handle a TLV block
-	break;
+      // Handle a TLV block
+      uint32_t len   = socket->read_nbo_int();
+      uint32_t flags = socket->read_nbo_int();
 
-      default:
-	// Unrecognised tag
-	Log::Error << "OTMP(recv): Unrecognised tag - out-of-sync?\n";
-	//Try to restart socket
+      if (Log::debug_ok)
+	Log::Debug << "OTMP(recv): Message length " << len 
+		   << " (flags " << flags << ")\n";
+
+      // Read the data
+      string content;
+      if (!socket->read(content, len))
+      {
+	Log::Error << "OTMP(recv): Short message read - socket died\n";
 	return restart_socket();
+      }
+
+      if (Log::dump_ok) Log::Dump << content << endl;
+
+      // Post up a message
+      OTMPMessage msg(content, flags);
+      receive_q.send(msg);
     }
-
-    uint32_t len   = socket->read_nbo_int();
-    uint32_t flags = socket->read_nbo_int();
-
-    switch (tag)
+    else
     {
-      case OTMP_TAG_PING:
-	// !!! handle it
-	break;
-
-      case OTMP_TAG_MESSAGE:
-	if (Log::debug_ok)
-	  Log::Debug << "OTMP(recv): Message length " << len 
-		     << " (flags " << flags << ")\n";
-	// Read the data
-	string content;
-	if (!socket->read(content, len))
-	{
-	  Log::Error << "OTMP(recv): Short message read - socket died\n";
-	  return restart_socket();
-	}
-
-	if (Log::dump_ok) Log::Dump << content << endl;
-	break;
+      // Unrecognised tag
+      Log::Error << "OTMP(recv): Unrecognised tag - out-of-sync?\n";
+      //Try to restart socket
+      return restart_socket();
     }
   }
   catch (Net::SocketError se)
