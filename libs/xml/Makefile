@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-xml
 HEADERS = ot-xml.h
 OBJS  	= element.o parser.o xpath.o config.o
@@ -15,6 +16,6 @@ TESTCMD	= ./test-xml < ../tests/simple.xml && \
 MT-VARIANTS = 1
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 

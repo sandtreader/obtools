@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-mt
 HEADERS = ot-mt.h
 OBJS  	= thread.o pool.o
@@ -14,7 +15,7 @@ TESTCMD	= ./test-thread 10 && ./test-queue
 MULTI 	= 1
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 

@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-xmi
 HEADERS = ot-xmi.h ot-uml.h
 OBJS	= assocend.o association.o attribute.o class.o classifier.o      \
@@ -15,7 +16,7 @@ TESTS 	= test-xmi
 TESTCMD	= $(MAKE) -C ../tests test
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 

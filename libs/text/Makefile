@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-text
 HEADERS = ot-text.h 
 OBJS  	= ws.o pattern.o case.o 
@@ -13,6 +14,6 @@ TESTCMD	= ./test-ws && ./test-pattern && ./test-case
 MT-VARIANTS = 1
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 

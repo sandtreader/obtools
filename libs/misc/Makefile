@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-misc
 HEADERS = ot-misc.h
 OBJS  	= md5.o proplist.o
@@ -13,5 +14,5 @@ TESTCMD	= ./test-md5 && ./test-prop
 MT-VARIANTS = 1
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 

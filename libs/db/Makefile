@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 HEADERS = ot-db.h
 OBJS  	= connection.o row.o
 DEPENDS = log text
@@ -30,7 +31,7 @@ TESTCMD	= ./test-pgsql
 endif
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 

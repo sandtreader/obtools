@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-regen
 HEADERS = ot-regen.h
 OBJS  	= mfile.o master.o regenbuf.o
@@ -13,7 +14,7 @@ TESTCMD	= ./regen foo.gen ../tests/example.h  && \
 	  ./regen foo.gen ../tests/example.h
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 

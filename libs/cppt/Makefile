@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-cppt
 HEADERS = ot-cppt.h
 OBJS  	= processor.o tokenr.o
@@ -15,7 +16,7 @@ TESTCMD	= ./test-cppt < ../tests/simple.cppt > _temp.cc && \
 	  ./_temp
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 

@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-log
 HEADERS = ot-log.h
 OBJS  	= distributor.o filter.o logstream.o channel.o logger.o
@@ -19,7 +20,7 @@ DEPENDS += mt
 endif
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 

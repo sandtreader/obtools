@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-net
 HEADERS = ot-net.h
 OBJS  	= socket.o address.o client.o stream.o
@@ -20,7 +21,7 @@ DEPENDS += mt
 endif
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 
 
