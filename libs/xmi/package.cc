@@ -29,7 +29,7 @@ Package::Package(XMI::Reader& rdr, XML::Element& xe)
   read_subelements("UML:Association",    create_element<Association>, true, p);
   read_subelements("UML:Generalization", create_element<Generalization>, true, 
 		                                                           p);
-  read_subelements("UML:Package",        create_element<Package>, p);
+  read_subelements("UML:Package",        create_element<Package>, false, p);
 }
 
 //--------------------------------------------------------------------------
