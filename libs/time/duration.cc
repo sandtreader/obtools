@@ -134,7 +134,7 @@ Duration::Duration(const string& text)
 //------------------------------------------------------------------------
 // Convert to HH:MM:SS string - never goes into days or higher
 // Can output fractional seconds - rounds to nearest millisecond
-string Duration::hms()
+string Duration::hms() const
 {
   ostringstream oss;
   // Round seconds to milliseconds, to avoid unfortunate combinations

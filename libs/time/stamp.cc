@@ -230,7 +230,7 @@ Stamp::Stamp(const string& text)
 //------------------------------------------------------------------------
 // Convert to ISO timestamp string
 // Generates YYYY:MM:DD HH:MM:SS.sssZ form 
-string Stamp::iso()
+string Stamp::iso() const
 {
   ostringstream oss;
   Split sp = split(t);  

@@ -108,16 +108,16 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to floating point seconds (e.g. for NTP timestamp in text)
-  double seconds() { return t; }
+  double seconds() const { return t; }
 
   //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
-  ntp_stamp_t ntp() { return (uint64_t)(t * (1ULL<<NTP_SHIFT)); }
+  ntp_stamp_t ntp() const { return (uint64_t)(t * (1ULL<<NTP_SHIFT)); }
 
   //------------------------------------------------------------------------
   // Convert to HH:MM:SS string - never goes into days or higher
   // Can output fractional seconds - rounds to nearest millisecond
-  string hms();
+  string hms() const;
 
 
 };
@@ -157,16 +157,16 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to time_t
-  time_t time() { return (time_t)(t>>NTP_SHIFT)-EPOCH_1970; }
+  time_t time() const { return (time_t)(t>>NTP_SHIFT)-EPOCH_1970; }
 
   //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
-  ntp_stamp_t ntp() { return t; }
+  ntp_stamp_t ntp() const { return t; } 
 
   //------------------------------------------------------------------------
   // Convert to ISO timestamp string
   // Generates YYYY:MM:DD HH:MM:SS.sssZ form 
-  string iso();
+  string iso() const;
 
   //------------------------------------------------------------------------
   // Static constructor-like function from NTP timestamp
@@ -176,6 +176,16 @@ public:
   //------------------------------------------------------------------------
   // Static constructor-like function for time now
   static Stamp now();
+
+  //------------------------------------------------------------------------
+  // Subtract two stamps to get duration between
+  Duration operator-(const Stamp& o) const
+  { return Duration::from_ntp(o.t-t); }
+
+  //------------------------------------------------------------------------
+  // Add a Duration to a stamp
+  Stamp operator+(const Duration& d) const
+  { return Stamp::from_ntp(t+d.ntp()); }
 };
 
 
