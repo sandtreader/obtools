@@ -38,7 +38,10 @@ protected:
   //--------------------------------------------------------------------------
   // Generate code to call a template for all elements of given name
   virtual void generate_call(XML::Element& te, XML::Element& parent,
-			     const string& suffix,
+			     CPPT::Tags& tags,
+			     int& max_ci,
+			     const string& streamname,
+			     string& script,
 			     bool is_root = false);
 
   //--------------------------------------------------------------------------
@@ -58,29 +61,47 @@ public:
 //--------------------------------------------------------------------------
 // Generate code to call a template for all elements of given name
 void XMLGenerator::generate_call(XML::Element& te, XML::Element& parent,
-				 const string& suffix,
+				 CPPT::Tags& tags,
+				 int& max_ci,
+				 const string& streamname,
+				 string& script,
 				 bool is_root)
 {
-  string ename = te.get_attr("element");
-
-  sout << "\n  //Call " << (ename.empty()?"all":ename) << " templates\n";
+  string child_var = get_parameter_name(te);
 
   if (is_root)
   {
-    // Operate on root itself, to cout
-    sout << "  template" << suffix << "(cout, root, 0, \"\");\n";
+    sout << "\n  //Expand root template\n";
+    sout<<"  ObTools::XML::Element& " << child_var 
+	<< " = _parser.get_root();\n";
+
+    // Generate directly on the root element
+    generate_template(te, te, tags, max_ci, streamname, script);
   }
-  else 
+  else
   {
+    string ename = te.get_attr("element");
+    sout << "\n  //Expand " << (ename.empty()?"all":ename) << " templates\n";
+
     string parent_var = get_parameter_name(parent);
-    sout << "  _i=0;\n";
+    string index_var = child_var + "_index";
+
+    sout << " int " << index_var << "=0;\n";
     if (ename.empty()) // All children
-      sout << "  OBTOOLS_XML_FOREACH_CHILD(_child_e, " << parent_var << ")\n";
+      sout << "  OBTOOLS_XML_FOREACH_CHILD(" 
+	   << child_var << ", " << parent_var << ")\n";
     else
-      sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(_child_e, " 
-	   << parent_var << ", \"" << ename << "\")\n";
-    sout << "    template" << suffix << "(_sout, _child_e, _i++, _path);\n";
+      sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
+	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
+
+    generate_template(te, te, tags, max_ci, streamname, script);
+    process_script(script, tags, streamname, max_ci);
+    script.clear();
+
+    sout << " " << index_var << "++;\n";
     sout << "  OBTOOLS_XML_ENDFOR\n";
+    
+    sout << "\n  //End of " << (ename.empty()?"all":ename) << " templates\n";
   }
 }
 
@@ -95,11 +116,11 @@ void XMLGenerator::generate_main()
   sout<<"{\n";
 
   sout<<"  // Load up XML from input\n";
-  sout<<"  ObTools::XML::Parser parser;\n\n";
+  sout<<"  ObTools::XML::Parser _parser;\n\n";
 
   sout<<"  try\n";
   sout<<"  {\n";
-  sout<<"    cin >> parser;\n";
+  sout<<"    cin >> _parser;\n";
   sout<<"  }\n";
   sout<<"  catch (ObTools::XML::ParseFailed)\n";
   sout<<"  {\n";
@@ -107,9 +128,7 @@ void XMLGenerator::generate_main()
   sout<<"    return 2;\n";
   sout<<"  }\n\n";
 
-  sout<<"  ObTools::XML::Element& root = parser.get_root();\n\n";
-
-  sout<<"  // Call all the template functions with cout\n";
+  sout<<"  string _path;\n\n";
 
   generate_roots();
 

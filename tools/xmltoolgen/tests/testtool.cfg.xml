@@ -28,7 +28,7 @@
     <!-- Chapter links -->
     <UL>
     <xt:template name = "Chapter links" element="chapter" var="ch">
-      <LI><A HREF='$= ch["id"] =$/index.html'>Chapter $= _index+1 =$</A></LI>
+      <LI><A HREF='$= ch["id"] =$/index.html'>Chapter $= ch_index+1 =$</A></LI>
     </xt:template>
     </UL>
 
@@ -49,7 +49,7 @@
       <!-- Section links -->
       <UL>
       <xt:template name = "Section links" element="section">
-	<LI><A HREF='sec.$= section["id"] =$.html'>Section $= _index+1 =$</A>
+	<LI><A HREF='sec.$= section["id"] =$.html'>Section $= section_index+1 =$</A>
         </LI>
       </xt:template>
       </UL>
