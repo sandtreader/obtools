@@ -12,9 +12,10 @@
 #include <string>
 #include <list>
 
-using namespace std;
-
 namespace ObTools { namespace UML {
+
+//Make our lives easier without polluting anyone else
+using namespace std;
 
 //==========================================================================
 // UML general element (parent of all model elements)

@@ -10,9 +10,11 @@
 #define __OBTOOLS_CPPT_H
 
 #include <iostream>
-using namespace std;
 
 namespace ObTools { namespace CPPT {
+
+//Make our lives easier without polluting anyone else
+using namespace std;
 
 //==========================================================================
 // Internal processor state

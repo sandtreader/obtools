@@ -14,9 +14,11 @@
 #include <list>
 #include <map>
 #include <iostream>
-using namespace std;
 
 namespace ObTools { namespace XML {
+
+//Make our lives easier without polluting anyone else
+using namespace std;
 
 //Type to use for characters
 typedef char xmlchar;
