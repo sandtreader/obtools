@@ -6,7 +6,7 @@
 #==========================================================================
 
 all: 
-	-@rm *.tgz *~
+	-@rm -f *.tgz *~
 	tar cvfz obtools-libs.tgz --exclude=CVS --exclude=Makefile *
 
 clean:
