@@ -41,6 +41,7 @@
 <function name="Foo">
 <title>Foo copy constructor</title>
 <arg name="src" type="const Foo&amp;" ref="Foo"/>
+<arg name="n" type="int" default="0"/>
 <result type="Foo&amp;" ref="Foo"/>
 </function>
 

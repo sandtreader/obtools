@@ -8,7 +8,7 @@
 TYPE	= exe
 NAME   	= obdoc
 OBJS 	= _obdoc.o
-DEPENDS = xml regen
+DEPENDS = xml regen text
 TESTCMD = ./obdoc < ../test.obdoc.xml
 VARIANTS = debug
 VARIANT-debug = DEBUG

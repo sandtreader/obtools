@@ -17,6 +17,19 @@
     </xt:tags>
   </xt:script>
 
+  <!-- Helper code -->
+  <xt:code>
+    // Make a string safe for HTML
+    string htmlise(string s)
+    {
+      // Remember that the XML parser has a go at this first
+      s = ObTools::Text::subst(s, "&amp;", "&amp;amp;");
+      s = ObTools::Text::subst(s, "&lt;", "&amp;lt;");
+      return s;
+    }
+  </xt:code>
+
+  <!-- Top-level project template -->
   <xt:template name="Project" element="project">
     <xt:dir>$= project["name"] =$</xt:dir>
     <xt:file>index.html</xt:file>
@@ -111,7 +124,41 @@
 	    <xt:template element="p"><P>$= *p =$</P></xt:template>
 	  </DIV>
 	</xt:template>
-	</BODY></HTML>
+
+	<!-- Members -->
+	<H2>Class members</H2>
+	<xt:template element="member">
+	  <DIV CLASS="member">
+	  <H3>$= member["type"] =$ $= member["name"] =$:
+            <xt:template element="title">$= *title =$</xt:template></H3>
+          <xt:template element="desc">
+  	    <DIV CLASS="desc">
+	      <xt:template element="p"><P>$= *p =$</P></xt:template>
+	    </DIV>
+          </xt:template>
+          </DIV>
+	</xt:template>
+ 	
+	<!-- Function -->
+	<H2>Functions</H2>
+	<xt:template element="function">
+	  <DIV CLASS="function">
+	  <H3><xt:template element="result">$= htmlise(result["type"]) 
+                 =$</xt:template>
+            $= function["name"] =$(
+            <xt:template element="arg">$= (arg_index?",":"") =$ 
+              $= htmlise(arg["type"]) =$ 
+              $= arg["name"] =$</xt:template>):
+          <xt:template element="title">$= *title =$</xt:template></H3>
+          <xt:template element="desc">
+  	    <DIV CLASS="desc">
+	      <xt:template element="p"><P>$= *p =$</P></xt:template>
+	    </DIV>
+          </xt:template>
+          </DIV>
+	</xt:template>
+
+        </BODY></HTML>
       </xt:template>
     </xt:template>
   </xt:template>
