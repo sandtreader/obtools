@@ -1,0 +1,203 @@
+<HTML>
+<HEAD>
+<LINK REL="STYLESHEET" HREF="../../doc/obtools.css">
+<TITLE>XMLMesh: Concepts</TITLE>
+</HEAD>
+<BODY>
+
+<H1>XMLMesh: The Concepts</H1>
+
+<P>XMLMesh is a system for connecting elements of a distributed
+solution together with XML messaging, using a client-server model with a Publish-Subscribe metaphor.</P>
+<P>This document gives a conceptual overview of the XMLMesh design, without going into too much programming detail.</P>
+<H3>Contents</H3>
+<UL class=contents>
+<LI><A HREF="#cs">The client-server model</A>
+<LI><A HREF="#msg">Structure of a message</A>
+<LI><A HREF="#pubsub">Publish and Subscribe</A>
+<LI><A HREF="#real">A real-world example</A>
+</UL>
+
+<H2><A NAME="cs">The client-server model</A></H2>
+
+<P>The <A HREF="server.html">XMLMesh server</A> acts as a point of
+connection for multiple <A HREF="clients.html">XMLMesh clients</A>,
+using a simple TCP protocol called 'Object Toolsmiths Message
+Protocol', or <strong>OTMP</strong>.</P>
+
+<P>Clients can send messages, either as a 'one way' broadcast, or a 'request-response' pair.  Clients can also <em>subscribe</em> to receive messages of a particular type, and if required, return responses to them.</P>
+
+<DIV CLASS=diag><IMG CLASS=diag SRC="client-server.png"></DIV>
+
+<P>One key advantage of this model is that you can add a new client
+without having to change either the server or any existing client.
+The sender of an informational message doesn't have to know who, if
+anyone, will receive it.  Also, the server and clients can be on the
+same machine or different machines, at your choice.  This makes a
+system built on top of XMLMesh very flexible and future-proof.</P>
+
+<P>[Future versions will allow 'daisy chaining' of servers to provide
+an even more distributed structure.]</P>
+
+<H2><A NAME="msg">Structure of a message</A></H2> 
+
+<P>The core of an XMLMesh message consists simply of any valid XML
+(including plain text), tagged with a <em>subject</em>.  XMLMesh does
+not specify the content of the XML at all, except for some simple core
+messages to make life easier (even these are optional).</P>
+
+<H3>The message subject</H3>
+<P>The subject is used to route the message to clients according to
+their subscriptions, and is conventionally a list of words separated
+by dots, in a hierarchy.  Some typical subjects might be:</P>
+
+<UL>
+<LI><SPAN class=code>log.info</SPAN></LI>
+<LI><SPAN class=code>log.critical</SPAN></LI>
+<LI><SPAN class=code>status.sensor.V23</SPAN></LI>
+<LI><SPAN class=code>purchase.confirm</SPAN></LI>
+</UL>
+
+<P>As we will see later, a client can use the hierarchical nature of
+the subject to subscribe to multiple subjects at once.</P>
+
+<P>Choice of subjects is a matter of style, but we find it helps to think about how to use XMLMesh 'properly' if you use subjects according to the following conventions:</P>
+<UL>
+<LI>For 'one way' messages and responses to requests, use <em>declarative</em> language, such as 'status' and 'confirmed'</LI>
+<LI>For request messages, use <em>active</em> language, such as 'confirm' and 'create'</LI>
+</UL>
+
+<P>The reason for this distinction is that it is very common (and one
+of the main intentions of the XMLMesh design) for 'one way' messages
+to be received by multiple clients <em>who may not be known to the
+sender</em>.  By making declarative statements rather than asking
+someone to do something, you are stating facts which may be of use to
+anyone, rather than assuming how they will be used.  Another corollary
+of this idea is that you should use 'one way' messages wherever
+possible, since a 'request' message can only be answered by a single
+receiver.</P>
+
+<P>Also, it is a good idea not to overload the subjects with too much
+information - just include the information you think would be useful
+for routing.  For example, we've included the sensor name in '<SPAN
+class=code>status.sensor.V23</SPAN>' because in our imaginary scenario
+we might want to watch certain sensors and not others.</P>
+
+<H3>Request-Response</H3>
+<P>An XMLMesh message also has an <em>ID</em>, which allows
+correlation of responses with requests, and an optional <em>RVSP</em> flag to indicate whether a response is expected.  Response messages have a
+<em>reference</em>, which refers to the ID of the message they are
+responding to.</P>
+
+<H3>Examples</H3>
+<P>Here are some basic XMLMesh messages:</P>
+<PRE class=xml>
+&lt;xmlmesh:message subject="log.info">
+  08:35 Logging started
+&lt;/xmlmesh:message>
+
+&lt;xmlmesh:message subject="status.sensor.V23">
+  &lt;status sensor="V23" status="active" value="193.4"/>
+&lt;/xmlmesh:message>
+
+&lt;xmlmesh:message subject="purchase.confirm" id="OTM-42" rsvp="yes">
+  &lt;purchase order="1264487" account="600329" price="129.99"/>
+&lt;/xmlmesh:message>
+
+&lt;xmlmesh:message subject="purchase.confirmed" 
+                 id="OTM-309" ref="OTM-42">
+  &lt;confirmation ticket="4345GB90003"/>
+&lt;/xmlmesh:message>
+</PRE>
+
+<P>The last pair of messages are a request-response, asking a billing system for confirmation of a purchase.  The billing system responds with a 'ticket' number confirming the purchase.</P>
+
+<H3>Namespaces</H3> 
+It is good practice to use XML Namespaces to define your XML messages, to 
+ensure people can mix them with their own without conflict.  XMLMesh uses its own namespace for the &lt;xmlmesh:message> 'wrapper', and we suggest you define your own for the contents.</P>
+<P>Hence a full XMLMesh message might be:</P>
+<PRE class=xml>
+&lt;xmlmesh:message xmlns:xmlmesh="obtools.com/xmlmesh"
+                 subject="ecommerce.order.create" id="OTM-42">
+  &lt;ec:create-order xmlns:ec="somedomain.com/ecommerce/2.1" account="932145">
+    &lt;ec:order-item item="AG9934-B" quantity="4"/>
+    &lt;ec:order-item item="ZF2148-X" quantity="1" backorder="yes"/>
+  &lt;/ec:create-order>
+&lt;/xmlmesh:message>
+</PRE> 
+
+<H2><A NAME="pubsub">Publish and Subscribe</A></H2>
+
+<P>The XMLMesh server doesn't do anything itself; it just routes
+messages between clients.  Some of the XMLMesh clients may be
+'clients' in the conventional sense - making requests and receiving
+responses; while others will be 'servers' in the conventional sense -
+receiving requests and returning responses.  The XMLMesh structure
+doesn't define which is which, and 'servers' are commonly 'clients'
+for other 'servers' in order to get their work done.</P>
+
+<P>To receive messages of a certain type (<em>subject</em>), an
+XMLMesh client subscribes to that subject at the XMLMesh server.
+There is a wildcard scheme (as in filenames) which allows a client to
+subscribe for multiple subjects at once:</P>
+
+<TABLE class=def CELLPADDING=0 CELLSPACING=0>
+<TR><TH>Subject</TH><TH>Meaning</TH></TR>
+<TR><TD><SPAN class=code>log.info</SPAN></TD><TD>Just 'log.info' messages</TD></TH>
+<TR><TD><SPAN class=code>log.*</SPAN></TD><TD>Any messages with subjects beginning with 'log.'</TD></TR>
+<TR><TD><SPAN class=code>status.sensor.[PVX]*</SPAN></TD><TD>Any messages with subjects beginning with 'status.sensor.' followed by 'P', 'V' or 'X'</TD></TR>
+<TR><TD><SPAN class=code>*</SPAN></TD><TD>All messages</TD></TR>
+</TABLE>
+
+<H2><A NAME="real">A real-world example</A></H2>
+
+<P>The following diagram shows the message flows in a typical
+real-world example, of an online 'e-commerce' ordering system:</P>
+
+<DIV CLASS=diag><IMG CLASS=diag SRC="ecommerce.png"></DIV>
+
+<P>The usual order of play here would be:</P>
+<OL>
+<LI><SPAN class=code>order.create</span> - user wants to order something
+<LI><SPAN class=code>order.created</span> - catalogue system confirms this
+<LI><SPAN class=code>purchase.confirm</span> - user wants to pay
+<LI><SPAN class=code>purchase.confirmed</span> - billing system confirms payment
+<LI><SPAN class=code>order.shipped</span> - shipping has sent the order
+</OL>
+
+<P>There would of course be many more messages in a real system, but the concepts remain the same.</P>
+
+<P>A few things to note:</P>
+
+<UL>
+<LI>Each component just deals with the messages it understands.</LI>
+
+<LI>The auditor sucks up all the messages for its audit trail, without
+any of the other components needing to know it is there.
+
+<LI>The shipping component just publishes what it knows - an order has
+shipped - without worrying about who is going to want to know.  In fact, it is received by both the catalogue system and the billing
+interface (and the omnipresent auditor!).
+</UL>
+
+<H3>Sharing information</H3>
+
+<P>One final note: You <em>can</em> be 'purist' and have every
+communication between components in the system expressed as XMLMesh
+messages.  However, it's quite acceptable to share information in
+other ways - for example, with shared access to a database.</P>
+
+<P>In the diagram above, for example, we hint that the Web interface
+and catalogue system share a product database without going through XMLMesh.
+This makes sense when there is a lot of complex data to share.
+However, it is a good principle to ensure that
+<em>changes</em> to the database are always triggered by an XMLMesh
+message - that way, there are fewer problems with locking, and the
+changes can always be picked up by an auditor component, as here.</P>
+
+<DIV class=footer>
+<P>XMLMesh is part of the <A HREF="http://www.obtools.com">Object Toolsmiths</A> project.</P>
+<P>Copyright &copy; xMill Consulting Ltd. 2003.  All rights reserved.</P>
+</DIV>
+</BODY>
+</HTML>
