@@ -65,6 +65,18 @@ public:
   bool wait(Message& msg);
 
   //------------------------------------------------------------------------
+  // Return OK to request given
+  // Returns whether successul
+  bool respond(Message& request);
+
+  //------------------------------------------------------------------------
+  // Return an error to request given
+  // Returns whether successul
+  bool respond(ErrorMessage::Severity severity,
+	       const string& text,
+	       Message& request);
+
+  //------------------------------------------------------------------------
   // Send a message and get a response (blocking)
   // Returns whether successful, fills in response if so
   bool request(Message& req, Message& response);
@@ -116,15 +128,15 @@ class MultiClient;  // forward
 // See mclient.cc
 class Subscriber
 {
-private:
-  MultiClient& mclient;
+protected:
+  MultiClient& client;
 
 public:
   string subject;
 
   //------------------------------------------------------------------------
   // Constructor/destructor register/unregister into multiclient
-  Subscriber(MultiClient& _mclient, const string& _subject);
+  Subscriber(MultiClient& _client, const string& _subject);
   virtual ~Subscriber();
 
   //------------------------------------------------------------------------
@@ -171,6 +183,18 @@ public:
   // Send a message - never blocks, but can fail if the queue is full
   // Whether message queued
   bool send(Message& msg);
+
+  //------------------------------------------------------------------------
+  // Return OK to request given
+  // Returns whether successul
+  bool respond(Message& request);
+
+  //------------------------------------------------------------------------
+  // Return an error to request given
+  // Returns whether successul
+  bool respond(ErrorMessage::Severity severity,
+	       const string& text,
+	       Message& request);
 
   //------------------------------------------------------------------------
   // Send a message and get a response (blocking)

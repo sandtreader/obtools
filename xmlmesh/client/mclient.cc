@@ -119,6 +119,26 @@ bool MultiClient::send(Message& msg)
 }
 
 //------------------------------------------------------------------------
+// Return OK to request given
+// Returns whether successul
+bool MultiClient::respond(Message& request)
+{
+  OKMessage okm(request.get_id());
+  return send(okm);
+}
+
+//------------------------------------------------------------------------
+// Return an error to request given
+// Returns whether successul
+bool MultiClient::respond(ErrorMessage::Severity severity,
+			  const string& text,
+			  Message& request)
+{
+  ErrorMessage errm(request.get_id(), severity, text);
+  return send(errm);
+}
+
+//------------------------------------------------------------------------
 // Send a message and get a response (blocking)
 // Returns whether successful, fills in response if so
 bool MultiClient::request(Message& req, Message& response)
@@ -221,17 +241,17 @@ MultiClient::~MultiClient()
 
 //------------------------------------------------------------------------
 // Constructor - register into client
-Subscriber::Subscriber(MultiClient& _mclient, const string& _subject):
-  mclient(_mclient), subject(_subject)
+Subscriber::Subscriber(MultiClient& _client, const string& _subject):
+  client(_client), subject(_subject)
 {
-  mclient.register_subscriber(this);
+  client.register_subscriber(this);
 }
 
 //------------------------------------------------------------------------
 // Destructor - deregister from client
 Subscriber::~Subscriber()
 {
-  mclient.deregister_subscriber(this);
+  client.deregister_subscriber(this);
 }
 
 }} // namespaces

@@ -62,6 +62,26 @@ bool Client::wait(Message& msg)
 }
 
 //------------------------------------------------------------------------
+// Return OK to request given
+// Returns whether successul
+bool Client::respond(Message& request)
+{
+  OKMessage okm(request.get_id());
+  return send(okm);
+}
+
+//------------------------------------------------------------------------
+// Return an error to request given
+// Returns whether successul
+bool Client::respond(ErrorMessage::Severity severity,
+		     const string& text,
+		     Message& request)
+{
+  ErrorMessage errm(request.get_id(), severity, text);
+  return send(errm);
+}
+
+//------------------------------------------------------------------------
 // Send a message and get a response (blocking)
 // Returns whether successful, fills in response if so
 bool Client::request(Message& req, Message& response)
