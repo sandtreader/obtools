@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!-- You know what, this isn't really all that simple - 
+     pretty evil, actually -->
+<foo attr1='"val1"' attr2='&apos;val2&apos;' val3='&apos;val3"'>
+  Foo &lt;content&gt; &amp; stuff
+  More &#42;content&#x2a;
+  <bar attr3="&quot;val3&quot;"/>
+  <wombat>Wombats are<!-- an inconvenient comment -->go!</wombat>
+  <cellar><wombat>A buried wombat</wombat></cellar>
+  copy as ref: &#xa9; copy as UTF8: ©
+<XX1:bing xmlns:XX1="namespace1" XX1:fred="1">
+  <XX1:bong xmlns="namespace2" jim="2">
+    <wombat>I'm a namespace2 wombat - you shouldn't see me</wombat>
+    <wombat xmlns="" random:stuff="3">I'm an ordinary wombat - hello
+    </wombat>
+    <random:element/>
+  </XX1:bong>
+</XX1:bing> 
+</foo>
