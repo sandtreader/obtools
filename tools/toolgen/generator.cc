@@ -22,6 +22,7 @@ namespace ObTools { namespace ToolGen {
 Generator::Generator(const string& _config_file, 
 		     ostream& _sout, ostream &_serr):
   config_file(_config_file),
+  ok(false),
   config(_config_file, 
 	 XML::PARSER_OPTIMISE_CONTENT | XML::PARSER_PRESERVE_WHITESPACE),
   sout(_sout), serr(_serr)
@@ -29,12 +30,18 @@ Generator::Generator(const string& _config_file,
   config.fix_namespace("xt", "obtools.com/ns/tools");
 
   if (!config.read("xt:tool"))
+  {
     serr << "Can't read tool configuration file " 
 	 << config_file << " (no xt:tool)\n";
+    return;
+  }
 
   // Check for correct language
   if (config["xt:script/@language"] != "C++")
+  {
     serr << "Wrong script language - I do C++ only\n";
+    return;
+  }
 
   XML::Element& root = config.get_root();
   CPPT::Tags deftags = { "$(", ")$", "$=", "=$", "", "" };
