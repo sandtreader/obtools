@@ -5,6 +5,6 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = xmltoolgen xmitoolgen
+SUBS = toolgen xmltoolgen xmitoolgen
 include ../build/dir.mk
 
