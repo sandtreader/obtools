@@ -440,10 +440,9 @@ public:
 template<class ID, class CONTENT> class UseTimeoutTidyPolicy: 
   public TidyPolicy<ID, CONTENT>
 {
-private:
+public:
   int timeout;  // In seconds
 
-public:
   UseTimeoutTidyPolicy(int _timeout): timeout(_timeout) {}
 
   //------------------------------------------------------------------------
@@ -459,10 +458,9 @@ public:
 template<class ID, class CONTENT> class AgeTimeoutTidyPolicy: 
   public TidyPolicy<ID, CONTENT>
 {
-private:
+public:
   int timeout;  // In seconds
 
-public:
   AgeTimeoutTidyPolicy(int _timeout): timeout(_timeout) {}
 
   //------------------------------------------------------------------------
@@ -519,6 +517,7 @@ public:
           NoEvictorPolicy<ID,CONTENT> >::Cache
     (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>()) {}
+  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -533,6 +532,7 @@ public:
                  NoEvictorPolicy<ID,CONTENT> >::PointerCache
     (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>()) {}
+  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -547,6 +547,7 @@ public:
           NoEvictorPolicy<ID,CONTENT> >::Cache
     (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>()) {}
+  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -561,6 +562,7 @@ public:
                  NoEvictorPolicy<ID,CONTENT> >::PointerCache
     (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>()) {}
+  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
