@@ -5,8 +5,10 @@
 #==========================================================================
 
 OBJS = element.o parser.o
+ifdef DEBUG
 CPPFLAGS += -g
 LDFLAGS += -g
+endif
  
 all: test-xml
 

@@ -5,9 +5,12 @@
 #==========================================================================
 
 OBJS = processor.o
+
+ifdef DEBUG
 CPPFLAGS += -g
 LDFLAGS += -g
- 
+endif
+
 all: test-cppt
 
 clean: 

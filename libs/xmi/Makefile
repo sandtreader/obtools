@@ -8,8 +8,12 @@ OBJS =  assocend.o association.o attribute.o class.o classifier.o      \
 	element.o enum.o feature.o genelem.o general.o modelelem.o     \
 	operation.o package.o parameter.o reader.o types.o
 
-CPPFLAGS += -g -I../xml
-LDFLAGS += -g 
+ifdef DEBUG
+CPPFLAGS += -g
+LDFLAGS += -g
+endif
+
+CPPFLAGS += -I../xml
 
 all: test-xmi
 
