@@ -50,7 +50,6 @@ test:
 	$(MAKE) -C misc test
 
 release: 
-	mkdir -p release/
 	$(MAKE) -C xml   RELEASEDIR=../release/ release
 	$(MAKE) -C xmi   RELEASEDIR=../release/ release
 	$(MAKE) -C cppt  RELEASEDIR=../release/ release
@@ -63,6 +62,9 @@ release:
 	$(MAKE) -C db    RELEASEDIR=../release/ release
 	$(MAKE) -C cli   RELEASEDIR=../release/ release
 	$(MAKE) -C misc  RELEASEDIR=../release/ release
+	$(MAKE) -C release
+
+
 
 
 
