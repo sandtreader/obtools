@@ -141,7 +141,7 @@ all:	$(patsubst %,build-%,$(VARIANTS))
 
 # Top-level clean target
 clean: 
-	-@rm -rf build-* $(DIRTY)
+	-@rm -rf build-* *~ $(DIRTY)
 	$(CLEANCMD)
 
 # Top-level test target - run tests on all variants
