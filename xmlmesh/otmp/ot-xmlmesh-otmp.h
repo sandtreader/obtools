@@ -3,7 +3,7 @@
 //
 // Internal definitions for OTMP protocol, client and server
 //
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #ifndef __OBTOOLS_XMLMESH_OTMP_H

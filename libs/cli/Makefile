@@ -1,7 +1,7 @@
 #==========================================================================
 # Makefile for ObTools::CLI
 #
-# Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 #==========================================================================
 
 OBJS = command.o group.o registry.o cli.o telnet.o

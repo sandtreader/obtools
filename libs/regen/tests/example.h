@@ -3,7 +3,7 @@
 //
 // Example template for class
 //
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 // These lines are perverse and should be ignored

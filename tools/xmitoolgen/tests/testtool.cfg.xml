@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-  Copyright (c) 2003 Object Toolsmiths Limited
+  Copyright (c) 2003 xMill Consulting Limited
 
 * NOTE:  This file is unusually provided under an 'MIT'-style licence    * 
 * (see <legal> below) to allow use of GENERATED CODE ONLY in proprietary *
@@ -14,7 +14,7 @@
   apply its own copyright and license for portions generated solely by it -->
   <legal>
 // Sample XMITool configuration
-// Copyright (c) 2003 Object Toolsmiths Limited
+// Copyright (c) 2003 xMill Consulting Limited
  
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the

@@ -4,7 +4,7 @@
 // Micro XPath processor
 // Only handles very basic x/y/z/@foo syntax (for now!)
 //
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #include "ot-xml.h"

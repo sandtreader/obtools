@@ -4,7 +4,7 @@
 // Tool to read <xmltool> specification and generate C++ source for an XML
 // tool that implements it
 //
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #include "ot-xml.h"
@@ -43,7 +43,7 @@ void legal(const char *config_file, XML::Configuration& config)
   cout<<"// under the GNU General Public License (GPL), this entire program\n";
   cout<<"// is covered under the terms of the GPL.\n\n";
 
-  cout<<"// For the avoidance of doubt, Object Toolsmiths Limited does NOT\n";
+  cout<<"// For the avoidance of doubt, xMill Consulting Limited does NOT\n";
   cout<<"// consider the OUTPUT of this program to be a derived work of the\n";
   cout<<"// xmltoolgen framework and libraries (source 1).\n\n";
   cout<<"// HOWEVER, we DO consider the output of this program to be a\n";
@@ -58,7 +58,7 @@ void legal(const char *config_file, XML::Configuration& config)
 
   cout<<"//================================================================\n";
   cout<<"// Source 1: Tool framework\n";
-  cout<<"// Copyright (c) Object Toolsmiths Limited 2003\n\n";
+  cout<<"// Copyright (c) xMill Consulting Limited 2003\n\n";
 
   cout<<"// This program is free software; you can redistribute it and/or\n";
   cout<<"// modify it under the terms of the GNU General Public License\n";

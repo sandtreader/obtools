@@ -5,7 +5,7 @@
 // MD5 message-digest code taken from Colin Plumb's 1993 public domain
 // version, heavily modified into C++.
 //
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #include "ot-misc.h"

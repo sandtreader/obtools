@@ -4,7 +4,7 @@
 // Public definitions for ObTools::Net
 // C++ wrapping of BSD sockets etc.
 // 
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #ifndef __OBTOOLS_NET_H

@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools XML parser
 // 
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #ifndef __OBTOOLS_XML_H

@@ -4,7 +4,7 @@
 // Public definitions for ObTools::DB Library
 // General C++ database wrapper
 // 
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #ifndef __OBTOOLS_DB_H

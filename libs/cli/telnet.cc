@@ -3,7 +3,7 @@
 //
 // Implementation of Telnet (TCP) CLI
 //
-// Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
+// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 //==========================================================================
 
 #include "ot-cli-telnet.h"
