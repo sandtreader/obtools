@@ -14,10 +14,11 @@ endif
 all: regen
 
 clean: 
-	-@rm -f *.o *.a *~ regen
+	-@rm -f *.o *.a *~ regen *.gen
 
-test:	regen tests/template.cc tests/user.cc
-	./regen tests/user.cc tests/template.cc 
+test:	regen tests/example.h
+	./regen foo.gen tests/example.h
+	./regen foo.gen tests/example.h 
  
 #CLI app
 regen: regen.o ot-regen.a
