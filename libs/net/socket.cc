@@ -333,7 +333,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
   if (size >= 0)
   {
     if (address_p) *address_p = IPAddress(ntohl(saddr.sin_addr.s_addr));
-    if (*port_p)   *port_p    = ntohs(saddr.sin_port);
+    if (port_p)    *port_p    = ntohs(saddr.sin_port);
   }
   
   return size;
