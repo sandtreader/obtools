@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = reader.o
+OBJS = reader.o elems.o
 CPPFLAGS += -g -I../xml
 LDFLAGS += -g 
 
@@ -14,7 +14,7 @@ clean:
 	-@rm -f *.o *.a *~ test-xmi leak.out
 
 test:	test-xmi
-	LeakCheck ./test-xmi < tests/simple.xmi
+	LeakCheck ./test-xmi < tests/test1-2.xmi
 	leak-analyze ./test-xmi
 
 #Test harness:

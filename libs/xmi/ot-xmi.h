@@ -14,6 +14,7 @@
 #include <deque>
 #include <map>
 #include <iostream>
+#include "xml.h"
 using namespace std;
 
 namespace ObTools { namespace XMI {
@@ -40,12 +41,13 @@ public:
     visibility(v)
   {}
 
-  Element(string& n, ElementVisibility v=ELEMENT_PUBLIC):
+  Element(const string& n, ElementVisibility v=ELEMENT_PUBLIC):
     name(n),
     visibility(v) 
   {}
 
-  Element(string& i, string& n, ElementVisibility v=ELEMENT_PUBLIC):
+  Element(const string& i, const string& n, 
+	  ElementVisibility v=ELEMENT_PUBLIC):
     id(i),
     name(n),
     visibility(v) 
@@ -71,7 +73,7 @@ class Class;
 
 //==========================================================================
 // UML Attribute class
-class Attribute: Element
+class Attribute: public Element
 {
 public:
   Class *type;
@@ -79,7 +81,7 @@ public:
 
   //------------------------------------------------------------------------
   //Constructor
-  Attribute(string& n, Class *t, 
+  Attribute(const string& n, Class *t, 
 	    ElementVisibility v=ELEMENT_PRIVATE,
 	    Multiplicity m=Multiplicity()):
     Element(n,v),
@@ -98,7 +100,7 @@ enum ParameterKind
   PARAMETER_RETURN
 };
 
-class Parameter: Element
+class Parameter: public Element
 {
 public:
   ParameterKind kind;
@@ -107,7 +109,7 @@ public:
 
   //------------------------------------------------------------------------
   //Constructor
-  Parameter(string& n, Class *t, ParameterKind k=PARAMETER_IN,
+  Parameter(const string& n, Class *t, ParameterKind k=PARAMETER_IN,
 	    Multiplicity m=Multiplicity()):
     Element(n),
     type(t),
@@ -119,14 +121,14 @@ public:
 
 //==========================================================================
 // UML Operation class
-class Operation: Element
+class Operation: public Element
 {
 public:
-  list<Parameter> parameters;  //Including return
+  list<Parameter *> parameters;  //Including return
 
   //------------------------------------------------------------------------
   //Constructor
-  Operation(string& n, 
+  Operation(const string& n, 
 	    ElementVisibility v=ELEMENT_PUBLIC):
     Element(n,v)
   {}
@@ -142,35 +144,24 @@ enum ClassKind
   CLASS_PRIMITIVE  // System-defined datatype
 };
 
-class Class: Element
+class Class: public Element
 {
 public:
   ClassKind kind;
   string stereotype;        
   list <Class *> parents;  // Generalisations
   list <Class *> children; // Specialisations
-  list <Attribute> attributes;
-  list <Operation> operations;
+  list <Attribute *> attributes;
+  list <Operation *> operations;
 
   //------------------------------------------------------------------------
   //Constructors
-  Class(string& i, string& n,
+  Class(const string& i, const string& n,
 	ClassKind k=CLASS_CONCRETE,
 	ElementVisibility v=ELEMENT_PUBLIC):
     Element(i,n,v),
     kind(k)
   {}
-
-  //With stereotype
-  Class(string& i, string& n, 
-	string& st,
-	ClassKind k=CLASS_CONCRETE,
-	ElementVisibility v=ELEMENT_PUBLIC):
-    Element(i,n,v),
-    kind(k),
-    stereotype(st)
-  {}
-
 };
 
 //==========================================================================
@@ -182,7 +173,7 @@ enum AggregationKind
   AGGREGATION_COMPOSITE
 };
 
-class AssociationEnd: Element
+class AssociationEnd: public Element
 {
 public:
   Class *connection;
@@ -207,7 +198,7 @@ public:
   {}
 
   //With name
-  AssociationEnd(string& n,
+  AssociationEnd(const string& n,
 		 Class *c,
 		 Multiplicity m=Multiplicity(),
 		 AggregationKind agg=AGGREGATION_NONE,
@@ -230,7 +221,7 @@ public:
 
 //==========================================================================
 // UML Association class
-class Association: Element
+class Association: public Element
 {
 public:
   Class *type;               // For association classes, usually 0
@@ -244,48 +235,27 @@ public:
   {}
 
   //With name
-  Association(string&n, Class *t=0):
+  Association(const string& n, Class *t=0):
     Element(n),
     type(t)
   {}
 };
 
 //==========================================================================
-// UML Package class
-class Package: Element
+// UML Package class - also used for top-level model
+class Package: public Element
 {
 public:
-  list<Package> packages;  //Sub-packages
-  list<Class> classes;     
-  list<Association> associations;
+  list<Package *> packages;  //Sub-packages
+  list<Class *> classes;     
+  list<Association *> associations;
 
-  //Constructors (only here so we can use them in Model)
-  Package(string& n): Element(n) {}
-  Package(): Element() {}
+  //Constructor
+  Package(const string& n): Element(n) {}
+
+  //Destructor
+  ~Package();
 };
-
-//==========================================================================
-// UML Model class
-// Essentially the root package, but versioned
-class Model: Package
-{
-public:
-  int version;  //XMI version * 100 (e.g. 120)
-
-  //------------------------------------------------------------------------
-  //Constructors
-  Model(string& n, int v):
-    Package(n),
-    version(v)
-  {}
-
-  //Default constructor for initialisation of Reader - note zero version
-  Model(): 
-    Package(),
-    version(0) 
-  {}
-};
-
 
 //==========================================================================
 // XMI exceptions
@@ -298,8 +268,14 @@ class Reader
 private:
   ostream& serr;       //error output stream
 
+  void warning(const char *warn, const string& detail);
+  void error(const char *err, const string& detail="") throw (ParseFailed);
+  Class *read_class(ObTools::XML::Element& ce);
+  Association *read_association(ObTools::XML::Element& ae); 
+  Package *read_package(ObTools::XML::Element& pe);
+
 public:
-  Model model;        
+  Package *model;        
 
   //------------------------------------------------------------------------
   // Constructors & Destructor
