@@ -16,8 +16,37 @@ namespace ObTools { namespace CLI {
 //Add a command
 void CommandGroup::add(Command *command)
 {
-  string w = Text::tolower(command->word);  // Lower case for comparison
-  commands[w] = command;
+  string t = Text::tolower(command->word);  // Lower case for comparison
+  t = Text::canonicalise_space(t);          // Sort out spaces, if any
+
+  // Look for first word, and remainder - if there is a remainder, it's
+  // a multi-part thing, and we need to create a command-group for it
+  string word = Text::remove_word(t);
+
+  if (t.size())
+  {
+    CommandGroup *group = 0;
+
+    // Look for existing group
+    map<string, Command *>::iterator p = commands.find(word);
+    if (p!=commands.end())
+    {
+      CommandGroup *cg = dynamic_cast<CommandGroup *>(p->second);
+      if (cg) group=cg;
+    }
+
+    // Create group if not already there
+    if (!group)
+    {
+      group = new CommandGroup(word);
+      commands[word] = group;
+    }
+
+    // Remove prefix and add to group
+    command->word = t;
+    group->add(command);
+  }
+  else commands[word] = command;
 }
 
 //------------------------------------------------------------------------

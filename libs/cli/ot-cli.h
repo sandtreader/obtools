@@ -104,7 +104,8 @@ public:
 
   //------------------------------------------------------------------------
   //Constructor
-  CommandGroup(const string& _word): Command(_word, 0) {}
+  CommandGroup(const string& _word, const string& _help=""): 
+    Command(_word, 0, _help) {}
 
   //------------------------------------------------------------------------
   //Add a command
@@ -129,6 +130,11 @@ class Registry: public CommandGroup
 {
 public:
   Registry(): CommandGroup("") {}
+
+  //------------------------------------------------------------------------
+  //Add a command-group
+  void add(const string& prefix, const string& help="")
+  { CommandGroup::add(new CommandGroup(prefix, help)); }
 
   //------------------------------------------------------------------------
   //Add a command
