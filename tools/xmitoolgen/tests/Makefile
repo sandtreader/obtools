@@ -5,11 +5,9 @@
 #==========================================================================
 
 ifdef DEBUG
-CPPFLAGS += -g
+CXXFLAGS += -g
 LDFLAGS += -g
 endif
-
-CPPFLAGS += -I../../../libs/xml/ -I../../../libs/xmi/
 
 all: testtool
 
@@ -22,12 +20,12 @@ test:	testtool test.xmi
 #	cat out-Foo.html
 
 #Test tool
-testtool: testtool.o ../../../libs/xmi/ot-xmi.a ../../../libs/xml/ot-xml.a 
+testtool: testtool.o ../../../libs/xmi/ot-xmi.a ../../../libs/xml/ot-xml.a ../../../libs/regen/ot-regen.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #Objects
 testtool.o: _testtool.cc Makefile
-	$(CXX) -c -I.. -I../../../libs/xml/ -I../../../libs/xmi/ -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -I.. -I../../../libs/xml/ -I../../../libs/xmi/ -I../../../libs/regen/ -o $@ $<
 
 #Template code
 _testtool.cc: testtool.cfg.xml ../xmitoolgen-cc Makefile

@@ -50,16 +50,20 @@
   <!-- Support code to be added to tool -->
   <code>
     //Routine to return method signature of operation
-    string xmicc_op_sig(ObTools::UML::Operation&amp; op)
+    //full - for code;  not full - for regen marker
+    string xmicc_op_sig(ObTools::UML::Operation&amp; op, bool full=false)
     {
       string s;
-      ObTools::UML::Parameter *ret = op.get_return();
-      if (ret)
-        s = ret->type->name;
-      else
-        s= "void";
-
-      s += " ";
+      if (full)
+      {
+        ObTools::UML::Parameter *ret = op.get_return();
+        if (ret)
+          s = ret->type->name;
+        else
+          s= "void";
+       
+        s += " ";
+      }
       s += op.name;
       s += "(";
 
@@ -67,8 +71,11 @@
       OBTOOLS_UML_FOREACH_PARAMETER(p, op)
         if (i++) s+=", ";
         s+=p.type->name;
-	s+=" ";
-	s+=p.name;
+	if (full)
+        {
+          s+=" ";
+	  s+=p.name;
+        }
       OBTOOLS_UML_ENDFOR
 
       s+=")";
@@ -92,13 +99,18 @@
       // Automatically generated code by xmi2cc
       // $=c.name=$.cc
 
+      #include "$=c.name=$.h"
       <template name= "Method implementation" scope="operation">
-      // Method $= o.name =$
-      $= xmicc_op_sig(o) =$
+
+      //---------------------------------------------------------
+      //~[ Method $= xmicc_op_sig(o) =$
+      $= xmicc_op_sig(o, true) =$
       {
+        //~^ ----- Manual implementation -----
 
-
+        //v~ ---------------------------------
       }
+      //~]
       </template>
     </template>
 
@@ -108,6 +120,9 @@
       // Automatically generated code by xmi2cc
       // $= c.name =$.h
 
+      //---------------------------------------------------------
+      //~[ class $= c.name =$
+
       class $= c.name =$
       <template name = "Inheritance" scope="generalization">
 	$= (index?",":":") =$$= g.parent->name =$
@@ -116,15 +131,21 @@
       private:
       <template name = "Private attribute declaration" scope="attribute" 
 		visibility="private">
-	$= a.type->name =$ $= a.name =$;
+        $= a.type->name =$ $= a.name =$;
       </template>
+
+        //~^ ----- Manually added private methods ------
+
+
+        //~v -------------------------------------------
 
       public:
       <template name = "Public method declaration" scope="operation" 
 		visibility="public">
-	$= xmicc_op_sig(o) =$;
+        $= xmicc_op_sig(o) =$;
       </template>
-      }
+      };
+      //~]
     </template>
   </template>
 </xmitool>  
