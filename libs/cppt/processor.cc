@@ -14,26 +14,38 @@ using namespace ObTools::CPPT;
 // in C++ output
 void Processor::text_char(char c)
 {
-  if (started_text)
+  // If not in a stream already, start one
+  if (!started_text)
   {
-    if (c=='\n')
-    {
-      sout << "\\n\";" << endl;
-      started_text = false;
-    }
-    else sout << c;
-  }
-  else
-  {
+    // If newline, just output endl and leave stream closed
     if (c=='\n')
       sout << "  " << sname << " << endl;\n";
     else
     {
-      sout << "  " << sname << " << \"" << c;
+      // Open stream
+      sout << "  " << sname << " << \"";
       started_text = true;
     }
   }
 
+  // Check again that above started stream (not a newline)
+  if (started_text)
+  {
+    switch (c)
+    {
+      case '\n':
+	sout << "\\n\";" << endl;
+	started_text = false;
+	break;
+
+      case '"':  // Back-slashify quotes
+	sout << "\\\"";
+	break;
+
+      default:
+	sout << c;
+    }
+  }
 }
 
 //--------------------------------------------------------------------------
