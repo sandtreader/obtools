@@ -13,7 +13,7 @@ using namespace std;
 //--------------------------------------------------------------------------
 // Main
 
-int main(int argc, char **argv)
+int main()
 {
   char buf[40];
   ObTools::Channel::BlockWriter bw(buf, 40);
@@ -25,8 +25,8 @@ int main(int argc, char **argv)
   cout << "Bytes remaining: " << bw.remaining() << endl;
 
   ObTools::Channel::BlockReader br(buf, 40-bw.remaining());
-  cout << br.read_nbo_32() << endl;
-  cout << br.read_nbo_64() << endl;
+  cout << hex << br.read_nbo_32() << endl;
+  cout << hex << br.read_nbo_64() << endl;
   string s;
   if (!br.read(s, 3))
     cerr << "Can't read 'end' string\n";
