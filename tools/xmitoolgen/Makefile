@@ -9,7 +9,7 @@ CPPFLAGS += -g
 LDFLAGS += -g
 endif
 
-CPPFLAGS += -I../../libs/cppt/ -I../../libs/xml
+CPPFLAGS += -I../../libs/cppt/ -I../../libs/xml -I../../libs/text
 
 .PHONY: test all clean 
 
@@ -25,11 +25,12 @@ clean:
 
 #Tool generator
 xmitoolgen-cc: xmitoolgen-cc.o ../../libs/cppt/ot-cppt.a \
-               ../../libs/xml/ot-xml.a
+               ../../libs/xml/ot-xml.a ../../libs/text/ot-text.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #Objects
-xmitoolgen-cc.o: ../../libs/cppt/ot-cppt.h ../../libs/xml/ot-xml.h Makefile
+xmitoolgen-cc.o: ../../libs/cppt/ot-cppt.h ../../libs/xml/ot-xml.h \
+	         ../../libs/text/ot-text.h Makefile
 
 
 

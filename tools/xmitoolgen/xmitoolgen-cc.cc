@@ -9,6 +9,7 @@
 
 #include "ot-xml.h"
 #include "ot-cppt.h"
+#include "ot-text.h"
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
@@ -226,117 +227,6 @@ string scope_var(Scope scope)
   }
 }
 
-//--------------------------------------------------------------------------
-// Strip single leading and trailing blank lines from a string
-// (XML artefacts)
-string strip_blank_lines(const string& script)
-{
-  // Find first non-space character
-  string::size_type start = script.find_first_not_of(" \t\n");
-  if (start == string::npos) return "";  // Completely empty
-
-  // Find first newline
-  string::size_type nl = script.find_first_of("\n");
-  if (nl == string::npos) return script; // No newlines at all
-
-  // If newline first, first line is blank - move forward
-  if (nl<start)
-    start = nl+1;  // Move to next line
-  else
-    start = 0;  // First line not blank
-
-  // Find last non-space character
-  string::size_type end = script.find_last_not_of(" \t\n");
-  if (end == string::npos || end<start) return "";  // (shouldn't happen)
-
-  // Find last newline
-  nl = script.find_last_of("\n");
-
-  // If newline last, last line is blank - chop it
-  if (nl>end)
-    return script.substr(start, nl-start+1);
-  else
-    return script.substr(start); // Not blank, leave it
-}
-
-//--------------------------------------------------------------------------
-// Find minimum leading whitespace (common indent) of a string
-// Tabs are treated as 8 spaces
-// Won't return more than 80
-int common_indent(const string& script)
-{
-  int min = 80;
-  int indent = 0;
-  bool seen_text = false;
-  
-  // Run a simple state machine counting leading whitespace on lines
-  for(string::const_iterator p = script.begin(); p!=script.end(); p++)
-  {
-    switch (*p)
-    {
-      case ' ':
-	if (!seen_text) indent++;
-      break;
-
-      case '\t':
-	if (!seen_text) indent+=8;
-      break;
-
-      case '\n':
-	seen_text = false;
-	indent = 0;
-      break;
-
-      default:  // Any non-whitespace
-	if (!seen_text)
-	{
-	  if (indent < min) min = indent;
-	  seen_text = true;
-	}
-      break;
-    }
-  }
-
-  return min;
-}
-
-//--------------------------------------------------------------------------
-// Remove indent from script, up to 'indent' spaces
-string remove_indent(const string& script, int indent)
-{
-  string result;
-  int pos=0;
-
-  for(string::const_iterator p = script.begin(); p!=script.end(); p++)
-  {
-    char c=*p;
-    switch (c)
-    {
-      case ' ':
-	// Only add spaces if used up indent
-	if (pos++ >= indent) result+=c;
-      break;
-
-      case '\t':
-	// Only add tab if used up indent
-	if (pos >= indent) result+=c;
-	pos += 8;
-      break;
-
-      case '\n':
-	pos = 0;
-	result+=c;
-      break;
-
-      default:  // Any non-whitespace
-	pos++;
-	result+=c;
-      break;
-    }
-  }
-
-  return result;
-}
 
 //--------------------------------------------------------------------------
 // Process a script to cout, using given tags
@@ -345,15 +235,15 @@ string remove_indent(const string& script, int indent)
 void process_script(const string& script, CPPT::Tags& tags, int& max_ci)
 {
   // Tidy up script first - remove leading and trailing blank lines
-  string myscript = strip_blank_lines(script);
+  string myscript = Text::strip_blank_lines(script);
 
   if (myscript.size())
   {
     // Remove common indent, up to max_ci
-    int ci = common_indent(myscript);
+    int ci = Text::get_common_indent(myscript);
     if (max_ci < 0) max_ci = ci;   // Capture first text as max strip
     if (ci > max_ci) ci=max_ci;    // Limit to max strip anyway
-    myscript = remove_indent(myscript, ci);
+    myscript = Text::remove_indent(myscript, ci);
 
     cout << endl;  // Separate code (not output!)
 
@@ -655,14 +545,13 @@ int main(int argc, char **argv)
   config_vars(config);
 
   // Their custom code
-  string code = strip_blank_lines(config["code"]);
+  string code = Text::strip_blank_lines(config["code"]);
   if (code.size())
   {
     cout<<"//================================================================\n";
     cout << "// Custom code from " << config_file << " <code> section\n\n";
- cerr << common_indent(code);
 
-    code = remove_indent(code, common_indent(code));
+    code = Text::remove_indent(code, Text::get_common_indent(code));
     cout << code << endl;
   }
 
