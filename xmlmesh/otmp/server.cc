@@ -73,6 +73,10 @@ void Server::process(Net::TCPSocket& socket,
   // Start send thread
   SendThread send_thread(session);
 
+  // Tell the queue the client has arrived
+  ClientMessage bmsg(client, ClientMessage::STARTED);
+  receive_q.send(bmsg);
+
   // Loop receiving messages and posting to receive_q
   // Stop if send thread unhappy, too
   while (!!socket && !!send_thread)
@@ -124,6 +128,10 @@ void Server::process(Net::TCPSocket& socket,
       break;
     }
   }
+
+  // Tell the queue the client has gone
+  ClientMessage emsg(client, ClientMessage::FINISHED);
+  receive_q.send(emsg);
 
   if (!!send_thread) 
     send_thread.cancel();

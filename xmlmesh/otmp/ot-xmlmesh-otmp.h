@@ -164,9 +164,22 @@ struct ClientMessage
   Net::EndPoint client;
   Message msg;
 
-  // Constructor
+  enum Action
+  {
+    STARTED,
+    MESSAGE,
+    FINISHED
+  };
+
+  Action action;
+
+  // Constructor for message
   ClientMessage(Net::EndPoint _client, const string& _data="", int _flags=0):
-    client(_client), msg(_data,_flags) {}
+    client(_client), msg(_data,_flags), action(MESSAGE) {}
+
+  // Constructor for other action
+  ClientMessage(Net::EndPoint _client, Action _action):
+    client(_client), msg(), action(_action) {}
 };
 
 //==========================================================================
