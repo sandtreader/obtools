@@ -50,6 +50,7 @@ public:
   OTMPClient(Net::EndPoint server): transport(server), Client(transport) {}
 };
 
+#if !defined(_SINGLE)
 //==========================================================================
 // OTMP-based XMLMesh MultiClient
 class OTMPMultiClient: public MultiClient
@@ -66,6 +67,7 @@ public:
   OTMPMultiClient(Net::EndPoint server): 
     transport(server), MultiClient(transport) { start(); }
 };
+#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces

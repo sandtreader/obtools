@@ -17,7 +17,7 @@ extern "C" {
 
 //--------------------------------------------------------------------------
 // Globals
-// Note:  This isn't remotely thread-safe - use CC if you want that
+// Note:  This isn't remotely thread-safe - use C++ version if you want that
 static XMLMesh::OTMPClient *client = 0;
 
 //--------------------------------------------------------------------------
@@ -37,7 +37,7 @@ int ot_xmlmesh_init(const char *host, int port)
   Net::IPAddress addr(host);
   if (!addr)
   {
-    Log::Error << "Can't resolve host: " << host << endl;
+    cerr << "Can't resolve host: " << host << endl;
     return 0;
   }
 

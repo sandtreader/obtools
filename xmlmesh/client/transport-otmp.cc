@@ -29,7 +29,12 @@ bool OTMPClientTransport::send(const string& data)
 // Check for message available
 bool OTMPClientTransport::poll()
 {
+#if defined(_SINGLE)
+  Log::Error << "Poll called on single-threaded OTMP transport\n";
+  return false;
+#else
   return otmp.poll();
+#endif
 }
 
 //------------------------------------------------------------------------

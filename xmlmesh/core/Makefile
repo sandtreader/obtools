@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-xmlmesh-core
 HEADERS = ot-xmlmesh.h
 OBJS    = message.o m-error.o m-subscription.o
@@ -17,5 +18,6 @@ DEPENDS += mt
 endif
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
+
 

@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= exe
 NAME   	= xmlmesh-server
 HEADERS = server.h
 OBJS 	= main.o server.o distributor.o correlator.o			\
@@ -14,6 +15,6 @@ CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1
 
 ROOT    = ../..
-include $(ROOT)/build/exe.mk
+include $(ROOT)/build/std.mk
 
 

@@ -107,19 +107,23 @@ public:
   // Constructors - takes server endpoint (address+port)
   Client(Net::EndPoint _server);
 
+#if !defined(_SINGLE)
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
   bool receive_messages();
   bool send_messages();
+#endif
 
   //------------------------------------------------------------------------
   // Send a message - never blocks, but can fail if the queue is full
   // Whether message queued
   bool send(Message& msg);
 
+#if !defined(_SINGLE)
   //------------------------------------------------------------------------
   // Check whether a message is available before blocking in wait()
   bool poll();
+#endif
 
   //------------------------------------------------------------------------
   // Receive a message - blocks waiting for one to arrive

@@ -11,8 +11,11 @@
 #define __OBTOOLS_XMLMESH_CLIENT_H
 
 #include <string>
+#include <queue>
 #include "ot-net.h"
+#if !defined(_SINGLE)
 #include "ot-mt.h"
+#endif
 #include "ot-xmlmesh.h"
 
 namespace ObTools { namespace XMLMesh {
@@ -44,8 +47,8 @@ class Client
 {
 private:
   ClientTransport& transport;
-  MT::Queue<Message> secondary_q;  // Queue for unwanted messages received
-                                   // in request()
+  queue<Message> secondary_q;  // Queue for unwanted messages received
+                               // in request()
   list<string> subscribed_subjects;
 
   void resubscribe();
@@ -128,6 +131,7 @@ public:
   ~Subscription() { client.unsubscribe(subject); }
 };
 
+#if !defined(_SINGLE)
 class MultiClient;  // forward
 //==========================================================================
 // Subscriber objects - abstract functors to handle callback from MultiClient
@@ -234,6 +238,8 @@ public:
   // Destructor
   ~MultiClient();
 };
+
+#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces

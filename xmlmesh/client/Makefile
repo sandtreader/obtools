@@ -5,14 +5,12 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+TYPE	= lib
 NAME   	= ot-xmlmesh-client
 HEADERS = ot-xmlmesh-client.h ot-xmlmesh-client-otmp.h
 OBJS    = client.o transport-otmp.o
 DEPENDS = xmlmesh-core xmlmesh-otmp net log xml text 
-
-#Can't build single yet - need MT::Queue to be available even without threading
-#MT-VARIANTS = 1
-MULTI   = 1
+MT-VARIANTS = 1
 
 TESTS 	= test-client
 TESTCMD = ./test-client localhost
@@ -25,6 +23,6 @@ TESTS 	+= test-mclient
 endif
 
 ROOT    = ../..
-include $(ROOT)/build/lib.mk
+include $(ROOT)/build/std.mk
 
 

@@ -30,9 +30,10 @@ bool Client::send(Message& msg)
 bool Client::poll(Message& msg)
 {
   // Check if there's anything on the secondary queue first
-  if (secondary_q.poll())
+  if (!secondary_q.empty())
   {
-    msg = secondary_q.wait();
+    msg = secondary_q.front();
+    secondary_q.pop();
     return true;
   }
 
@@ -52,9 +53,10 @@ bool Client::poll(Message& msg)
 bool Client::wait(Message& msg)
 {
   // Check if there's anything on the secondary queue first
-  if (secondary_q.poll())
+  if (!secondary_q.empty())
   {
-    msg = secondary_q.wait();
+    msg = secondary_q.front();
+    secondary_q.pop();
     return true;
   }
 
@@ -122,7 +124,7 @@ bool Client::request(Message& req, Message& response)
     if (req.get_id() == response.get_ref()) return true;
 
     // Requeue on the secondary queue so wait() gets it later
-    secondary_q.send(response);
+    secondary_q.push(response);
   }
 }
 

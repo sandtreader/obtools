@@ -58,7 +58,9 @@ int main(int argc, char **argv)
 
     client.send(msg);
 
+#if !defined(_SINGLE)
     if (client.poll())
+#endif
     {
       if (client.wait(msg))
 	cout << msg.data << endl;

@@ -61,7 +61,11 @@ int main(int argc, char **argv)
 
     client.send(msg);
 
+#if defined(_SINGLE)
+    if (client.wait(msg))
+#else
     if (client.poll(msg)) 
+#endif
       Log::Detail << msg.get_text() << endl;
   }
 
