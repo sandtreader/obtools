@@ -228,6 +228,7 @@ public:
   // Export to sockaddr_in - note htonl/htons here!
   void set(struct sockaddr_in& saddr)
   {
+    memset(&saddr, 0, sizeof(struct sockaddr_in)); // Stop valgrind whinging
     saddr.sin_family = AF_INET;
     saddr.sin_addr.s_addr = host.nbo();
     saddr.sin_port = htons(port);
