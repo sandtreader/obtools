@@ -8,10 +8,16 @@
 TYPE	= lib
 NAME   	= ot-chan
 HEADERS = ot-chan.h
-DEPENDS = mt net
+DEPENDS = net
 OBJS  	= reader.o writer.o tcp-chan.o block-chan.o
 TESTS 	= test-block
+TESTCMD = ./test-block
 MT-VARIANTS = 1
+
+#Catch ourselves recursing in SINGLE mode and suppress use of MT
+ifndef SINGLE
+DEPENDS += mt
+endif
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
