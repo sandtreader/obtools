@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!DOCTYPE XMI SYSTEM 'UML_1.4_XMI_1.1.dtd'>
+<XMI xmi.version='1.2' xmlns:UML='omg.org/UML/1.4'>
+<XMI.header>
+<XMI.metamodel xmi.name='UML' xmi.version='1.4'/>
+</XMI.header>
+<XMI.content>
+<UML:Model xmi.id='S.1' name='Employment Model' visibility='public'
+isSpecification='false' isRoot='false' isLeaf='false' isAbstract='false'>
+<UML:Namespace.ownedElement>
+<UML:Class xmi.id='S.2' name='Person' visibility='public' isSpecification='false'
+namespace='S.1' isRoot='true' isLeaf='true' isAbstract='false' isActive='false'/>
+<UML:Class xmi.id='S.3' name='Business' visibility='public' isSpecification='false'
+namespace='S.1' isRoot='true' isLeaf='true' isAbstract='false' isActive='false'/>
+<UML:Association xmi.id='G.1' name='Employment' visibility='public'
+isSpecification='false' isRoot='false' isLeaf='false' isAbstract='false'>
+<UML:Association.connection>
+<UML:AssociationEnd name='employer' visibility='public' isSpecification='false'
+isNavigable='true' ordering='unordered' aggregation='none' targetScope='instance'
+changeability='changeable' participant='S.3' association='G.1'>
+<UML:AssociationEnd.multiplicity>
+<UML:Multiplicity>
+<UML:Multiplicity.range>
+<UML:MultiplicityRange lower='0' upper='-1'/>
+</UML:Multiplicity.range>
+</UML:Multiplicity>
+</UML:AssociationEnd.multiplicity>
+</UML:AssociationEnd>
+<UML:AssociationEnd name='employee' visibility='public' isSpecification='false'
+isNavigable='true' ordering='unordered' aggregation='none' targetScope='instance'
+changeability='changeable' participant='S.2' association='G.1'>
+<UML:AssociationEnd.multiplicity>
+<UML:Multiplicity>
+<UML:Multiplicity.range>
+<UML:MultiplicityRange lower='0' upper='-1'/>
+</UML:Multiplicity.range>
+</UML:Multiplicity>
+</UML:AssociationEnd.multiplicity>
+</UML:AssociationEnd>
+</UML:Association.connection>
+</UML:Association>
+</UML:Namespace.ownedElement>
+</UML:Model>
+</XMI.content>
+</XMI>

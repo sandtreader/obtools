@@ -1,0 +1,170 @@
+<?xml version = '1.0' encoding = 'ISO-8859-1' ?>
+<!-- <!DOCTYPE XMI SYSTEM 'UMLX13.dtd' > -->
+<XMI xmi.version = '1.0' timestamp = 'Tue Nov 07 22:49:17 2000' >
+ <XMI.header>
+  <XMI.documentation>
+   <XMI.exporter>Unisys.JCR.2</XMI.exporter>
+   <XMI.exporterVersion>1.3</XMI.exporterVersion>
+  </XMI.documentation>
+  <XMI.metamodel xmi.name = 'UML' xmi.version = '1.3'/>
+ </XMI.header>
+<XMI.content>
+<!-- ==================== BeispielModell    [Model] ==================== -->
+<Model_Management.Model xmi.id = 'G.0' >
+  <Foundation.Core.ModelElement.name>BeispielModell</Foundation.Core.ModelElement.name>
+  <Foundation.Core.ModelElement.visibility xmi.value = "public"/>
+  <Foundation.Core.ModelElement.isSpecification xmi.value = "false"/>
+  <Foundation.Core.GeneralizableElement.isRoot xmi.value = "false"/>
+  <Foundation.Core.GeneralizableElement.isLeaf xmi.value = "false"/>
+  <Foundation.Core.GeneralizableElement.isAbstract xmi.value = "false"/>
+  <Foundation.Core.Namespace.ownedElement>
+    <!-- ==================== BeispielModell::BeispielModell    [Package] ==================== -->
+    <Model_Management.Package xmi.id = 'S.1' >
+      <Foundation.Core.ModelElement.name>BeispielModell</Foundation.Core.ModelElement.name>
+      <Foundation.Core.ModelElement.visibility xmi.value = "public"/>
+      <Foundation.Core.ModelElement.isSpecification xmi.value = "false"/>
+      <Foundation.Core.GeneralizableElement.isRoot xmi.value = "false"/>
+      <Foundation.Core.GeneralizableElement.isLeaf xmi.value = "false"/>
+      <Foundation.Core.GeneralizableElement.isAbstract xmi.value = "false"/>
+      <Foundation.Core.ModelElement.namespace>
+        <Foundation.Core.Namespace xmi.idref = 'G.0'/>  <!-- BeispielModell -->
+      </Foundation.Core.ModelElement.namespace>
+      <Foundation.Core.Namespace.ownedElement>
+        <!-- ==================== BeispielModell::BeispielModell::KlasseA    [Class] ==================== -->
+        <Foundation.Core.Class xmi.id = 'S.2' >
+          <Foundation.Core.ModelElement.name>KlasseA</Foundation.Core.ModelElement.name>
+          <Foundation.Core.ModelElement.visibility xmi.value = "public"/>
+          <Foundation.Core.ModelElement.isSpecification xmi.value = "false"/>
+          <Foundation.Core.GeneralizableElement.isRoot xmi.value = "true"/>
+          <Foundation.Core.GeneralizableElement.isLeaf xmi.value = "true"/>
+          <Foundation.Core.GeneralizableElement.isAbstract xmi.value = "false"/>
+          <Foundation.Core.Class.isActive xmi.value = "false"/>
+          <Foundation.Core.ModelElement.namespace>
+            <Foundation.Core.Namespace xmi.idref = 'S.1'/>  <!-- BeispielModell::BeispielModell -->
+          </Foundation.Core.ModelElement.namespace>
+          <Foundation.Core.Classifier.feature>
+            <!-- ==================== BeispielModell::BeispielModell::KlasseA.Attrib1    [Attribute] ==================== -->
+            <Foundation.Core.Attribute xmi.id = 'S.3' >
+              <Foundation.Core.ModelElement.name>Attrib1</Foundation.Core.ModelElement.name>
+              <Foundation.Core.ModelElement.visibility xmi.value = "private"/>
+              <Foundation.Core.ModelElement.isSpecification xmi.value = "false"/>
+              <Foundation.Core.Feature.ownerScope xmi.value = "instance"/>
+              <Foundation.Core.StructuralFeature.multiplicity>
+                <Foundation.Data_Types.Multiplicity >
+                  <Foundation.Data_Types.Multiplicity.range>
+                    <Foundation.Data_Types.MultiplicityRange >
+                      <Foundation.Data_Types.MultiplicityRange.lower>1</Foundation.Data_Types.MultiplicityRange.lower>
+                      <Foundation.Data_Types.MultiplicityRange.upper>1</Foundation.Data_Types.MultiplicityRange.upper>
+                    </Foundation.Data_Types.MultiplicityRange>
+                  </Foundation.Data_Types.Multiplicity.range>
+                </Foundation.Data_Types.Multiplicity>
+              </Foundation.Core.StructuralFeature.multiplicity>
+              <Foundation.Core.StructuralFeature.changeability xmi.value = "changeable"/>
+              <Foundation.Core.StructuralFeature.targetScope xmi.value = "instance"/>
+              <Foundation.Core.Attribute.initialValue>
+                <Foundation.Data_Types.Expression >
+                  <Foundation.Data_Types.Expression.language></Foundation.Data_Types.Expression.language>
+                  <Foundation.Data_Types.Expression.body>42</Foundation.Data_Types.Expression.body>
+                </Foundation.Data_Types.Expression>
+              </Foundation.Core.Attribute.initialValue>
+              <Foundation.Core.StructuralFeature.type>
+                <Foundation.Core.Classifier xmi.idref = 'G.1'/>  <!-- Integer -->
+              </Foundation.Core.StructuralFeature.type>
+            </Foundation.Core.Attribute>
+            <!-- ==================== BeispielModell::BeispielModell::KlasseA.Attrib2    [Attribute] ==================== -->
+            <Foundation.Core.Attribute xmi.id = 'S.4' >
+              <Foundation.Core.ModelElement.name>Attrib2</Foundation.Core.ModelElement.name>
+              <Foundation.Core.ModelElement.visibility xmi.value = "private"/>
+              <Foundation.Core.ModelElement.isSpecification xmi.value = "false"/>
+              <Foundation.Core.Feature.ownerScope xmi.value = "instance"/>
+              <Foundation.Core.StructuralFeature.multiplicity>
+                <Foundation.Data_Types.Multiplicity >
+                  <Foundation.Data_Types.Multiplicity.range>
+                    <Foundation.Data_Types.MultiplicityRange >
+                      <Foundation.Data_Types.MultiplicityRange.lower>0</Foundation.Data_Types.MultiplicityRange.lower>
+                      <Foundation.Data_Types.MultiplicityRange.upper>-1</Foundation.Data_Types.MultiplicityRange.upper>
+                    </Foundation.Data_Types.MultiplicityRange>
+                  </Foundation.Data_Types.Multiplicity.range>
+                </Foundation.Data_Types.Multiplicity>
+              </Foundation.Core.StructuralFeature.multiplicity>
+              <Foundation.Core.StructuralFeature.changeability xmi.value = "changeable"/>
+              <Foundation.Core.StructuralFeature.targetScope xmi.value = "instance"/>
+              <Foundation.Core.Attribute.initialValue>
+                <Foundation.Data_Types.Expression >
+                  <Foundation.Data_Types.Expression.language></Foundation.Data_Types.Expression.language>
+                  <Foundation.Data_Types.Expression.body></Foundation.Data_Types.Expression.body>
+                </Foundation.Data_Types.Expression>
+              </Foundation.Core.Attribute.initialValue>
+              <Foundation.Core.StructuralFeature.type>
+                <Foundation.Core.Classifier xmi.idref = 'S.2'/>  <!-- BeispielModell::BeispielModell::KlasseA -->
+              </Foundation.Core.StructuralFeature.type>
+            </Foundation.Core.Attribute>
+          </Foundation.Core.Classifier.feature>
+        </Foundation.Core.Class>
+      </Foundation.Core.Namespace.ownedElement>
+    </Model_Management.Package>
+    <!-- ==================== Integer    [DataType] ==================== -->
+    <Foundation.Core.DataType xmi.id = 'G.1' >
+      <Foundation.Core.ModelElement.name>Integer</Foundation.Core.ModelElement.name>
+      <Foundation.Core.ModelElement.visibility xmi.value = "public"/>
+      <Foundation.Core.ModelElement.isSpecification xmi.value = "false"/>
+      <Foundation.Core.GeneralizableElement.isRoot xmi.value = "false"/>
+      <Foundation.Core.GeneralizableElement.isLeaf xmi.value = "false"/>
+      <Foundation.Core.GeneralizableElement.isAbstract xmi.value = "false"/>
+    </Foundation.Core.DataType>
+  </Foundation.Core.Namespace.ownedElement>
+</Model_Management.Model>
+<Foundation.Extension_Mechanisms.TaggedValue xmi.id = 'XX.2' >
+  <Foundation.Extension_Mechanisms.TaggedValue.tag>persistence</Foundation.Extension_Mechanisms.TaggedValue.tag>
+  <Foundation.Extension_Mechanisms.TaggedValue.value>transient</Foundation.Extension_Mechanisms.TaggedValue.value>
+  <Foundation.Extension_Mechanisms.TaggedValue.modelElement>
+    <Foundation.Core.ModelElement xmi.idref = 'S.2'/>  <!-- BeispielModell::BeispielModell::KlasseA -->
+  </Foundation.Extension_Mechanisms.TaggedValue.modelElement>
+</Foundation.Extension_Mechanisms.TaggedValue>
+<Diagramming.Diagram xmi.id = 'S.7' >
+  <Diagramming.Diagram.name>Main</Diagramming.Diagram.name>
+  <Diagramming.Diagram.toolName>Rational Rose 98</Diagramming.Diagram.toolName>
+  <Diagramming.Diagram.diagramType>ClassDiagram</Diagramming.Diagram.diagramType>
+  <Diagramming.Diagram.style></Diagramming.Diagram.style>
+  <Diagramming.Diagram.owner>
+    <Foundation.Core.ModelElement xmi.idref = 'S.1'/>  <!-- BeispielModell::BeispielModell -->
+  </Diagramming.Diagram.owner>
+  <Diagramming.Diagram.element>
+    <Diagramming.DiagramElement xmi.id = 'XX.3' >
+      <Diagramming.DiagramElement.geometry> 736, 336, 418, 186,</Diagramming.DiagramElement.geometry>
+      <Diagramming.DiagramElement.style>Font.Blue= 0,Font.Green= 0,Font.Red= 0,Font.FaceName=Arial,Font.Size= 10,Font.Bold=0,Font.Italic=0,Font.Strikethrough=0,Font.Underline=0,LineColor.Blue= 0,LineColor.Green= 0,LineColor.Red= 64,FillColor.Blue= 204,FillColor.Green= 255,FillColor.Red= 255,FillColor.Transparent=0,AutomaticResize=1,ShowAllAttributes=1,ShowAllOperations=0,ShowOperationSignature=0,SuppressAttributes=0,SuppressOperations=1,</Diagramming.DiagramElement.style>
+      <Foundation.Core.PresentationElement.subject>
+        <Foundation.Core.ModelElement xmi.idref = 'S.2'/>  <!-- BeispielModell::BeispielModell::KlasseA -->
+      </Foundation.Core.PresentationElement.subject>
+    </Diagramming.DiagramElement>
+  </Diagramming.Diagram.element>
+</Diagramming.Diagram>
+<Diagramming.Diagram xmi.id = 'S.8' >
+  <Diagramming.Diagram.name>Main</Diagramming.Diagram.name>
+  <Diagramming.Diagram.toolName>Rational Rose 98</Diagramming.Diagram.toolName>
+  <Diagramming.Diagram.diagramType>ClassDiagram</Diagramming.Diagram.diagramType>
+  <Diagramming.Diagram.style></Diagramming.Diagram.style>
+  <Diagramming.Diagram.owner>
+    <Foundation.Core.ModelElement xmi.idref = 'G.0'/>  <!-- BeispielModell -->
+  </Diagramming.Diagram.owner>
+  <Diagramming.Diagram.element>
+    <Diagramming.DiagramElement xmi.id = 'XX.4' >
+      <Diagramming.DiagramElement.geometry> 944, 768, 300, 180,</Diagramming.DiagramElement.geometry>
+      <Diagramming.DiagramElement.style>Category</Diagramming.DiagramElement.style>
+      <Foundation.Core.PresentationElement.subject>
+        <Foundation.Core.ModelElement xmi.idref = 'S.1'/>  <!-- BeispielModell::BeispielModell -->
+      </Foundation.Core.PresentationElement.subject>
+    </Diagramming.DiagramElement>
+  </Diagramming.Diagram.element>
+</Diagramming.Diagram>
+<Diagramming.Diagram xmi.id = 'S.9' >
+  <Diagramming.Diagram.name>Main</Diagramming.Diagram.name>
+  <Diagramming.Diagram.toolName>Rational Rose 98</Diagramming.Diagram.toolName>
+  <Diagramming.Diagram.diagramType>ModuleDiagram</Diagramming.Diagram.diagramType>
+  <Diagramming.Diagram.style></Diagramming.Diagram.style>
+  <Diagramming.Diagram.owner>
+    <Foundation.Core.ModelElement xmi.idref = 'G.0'/>  <!-- BeispielModell -->
+  </Diagramming.Diagram.owner>
+</Diagramming.Diagram>
+</XMI.content>
+</XMI>
