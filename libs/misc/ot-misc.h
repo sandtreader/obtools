@@ -91,7 +91,9 @@ public:
   //--------------------------------------------------------------------------
   // Add a boolean value
   void add(const string& name, bool value)
-  { add(name, value?"true":"false"); }
+  { // Avoid evil recursion due to bool->string implicit cast
+    insert(make_pair(name, string(value?"true":"false"))); 
+  }
 
   //--------------------------------------------------------------------------
   // Get a value, with default
