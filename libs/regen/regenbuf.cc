@@ -24,7 +24,7 @@ using namespace ObTools::ReGen;
 //------------------------------------------------------------------------
 // regenbuf Constructor 
 regenbuf::regenbuf(string _fn, const char *_marker, int _flags): 
-  streambuf(), fn(_fn), marker(_marker), flags(_flags), closed(false) 
+  streambuf(), fn(_fn), closed(false), marker(_marker), flags(_flags)
 { 
   // use unbuffered IO, since we're going to buffer it anyway
   setp(0,0); 
