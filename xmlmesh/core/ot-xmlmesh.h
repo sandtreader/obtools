@@ -57,6 +57,13 @@ public:
 	  bool rsvp = false, const string& ref="");
 
   //--------------------------------------------------------------------------
+  // Constructor from partial XML for outgoing messages
+  // ID is manufactured here
+  // Copies text of xml element and reparses it into body
+  Message(const string& subject, const XML::Element& xml_content,
+	  bool rsvp = false, const string& ref="");
+
+  //--------------------------------------------------------------------------
   // Constructor from partial XML text for outgoing messages
   // ID is manufactured here
   // body_text is the body text to be sent

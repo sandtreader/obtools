@@ -84,6 +84,34 @@ Message::Message(const string& subject, XML::Element *xml_content,
 }
 
 //--------------------------------------------------------------------------
+// Constructor from partial XML for outgoing messages
+// ID is manufactured here
+// Copies text of xml element and reparses it into body
+Message::Message(const string& subject, const XML::Element& xml_content,
+		 bool rsvp, const string& ref)
+{
+  // Create a SOAP message with XMLMesh namespace
+  soap_message = new SOAP::Message();
+  soap_message->add_namespace("xmlns:x", xmlmesh_namespace);
+
+  // Add routing header
+  _add_routing_header(soap_message, subject, rsvp, ref);
+
+  // Parse content body
+  XML::Parser parser(Log::Error);
+  try
+  {
+    parser.read_from(xml_content.to_string_frag());
+    soap_message->add_body(parser.detach_root());
+  }
+  catch (XML::ParseFailed)
+  {
+    Log::Error << "XMLMesh Message creation: "
+	       << "can't reparse supplied element " << xml_content << endl;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Constructor from partial XML text for outgoing messages
 // ID is manufactured here
 // body_text is the body text to be sent
