@@ -1,0 +1,13 @@
+<xmlmesh>
+  <log level="4"/>
+  <services>
+    <otmp-server port="9990" id="server"/>
+    <correlator id="correlator"/>
+    <publisher id="publisher"/>
+  </services>
+
+  <routes>
+    <route from="server" to="correlator"/>
+    <route from="correlator" to="publisher"/>
+  </routes>
+</xmlmesh>

@@ -2,10 +2,11 @@
   <log level="4"/>
   <services>
     <otmp-server port="29167" id="server"/>
-    <otmp-client server="localhost" port="9990" id="log-sink"/>  
-    <otmp-client server="localhost" port="9991" id="info-source">
+    <otmp-client server="localhost" port="9990" id="info-sink"/>  
+<!--    <otmp-client server="localhost" port="9991" id="info-source">
       <subscription subject="info.*"/>
     </otmp-client>
+-->
 
     <correlator id="correlator"/>
     <publisher id="publisher"/>
@@ -14,7 +15,7 @@
   <routes>
     <route from="server" to="correlator"/>
     <route from="correlator" to="publisher"/>
-    <route from="server" to="log-sink" subject="log.*"/>
-    <route from="info-source" to="publisher" subject="info.*"/>
+    <route from="server" to="info-sink" subject="info.*"/>
+<!--    <route from="info-source" to="publisher" subject="info.*"/> -->
   </routes>
 </xmlmesh>
