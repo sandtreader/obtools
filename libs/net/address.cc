@@ -21,7 +21,7 @@ IP_Address::IP_Address(const char *hostname)
 {
   if (isdigit(*hostname))
   {
-    address = inet_addr(hostname);
+    address = ntohl(inet_addr(hostname));
   }
   else
   {
