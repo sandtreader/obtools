@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<!--
+  XMLToolGen configuration file for ObDoc documentor
+  Copyright (c) 2004 xMill Consulting Limited
+-->
+
+<xt:tool xmlns:xt="obtools.com/ns/tools">
+
+  <!-- Setup of script processing for rest of file -->
+  <xt:script language="C++">
+    <!-- Tags to support C++ in XML - $ isn't significant to either -->
+    <xt:tags>
+      <xt:start-code>$(</xt:start-code>
+      <xt:end-code>)$</xt:end-code>
+      <xt:start-expr>$=</xt:start-expr>
+      <xt:end-expr>=$</xt:end-expr>
+    </xt:tags>
+  </xt:script>
+
+  <xt:template name="Project" element="project">
+    <xt:dir>$= project["name"] =$</xt:dir>
+    <xt:file>index.html</xt:file>
+
+    <HTML><HEAD>
+    <LINK REL="STYLESHEET" HREF="../../obdoc.css" TITLE="ObDoc Stylesheet"/> 
+    <TITLE>
+    <!-- Project title for HEAD -->
+    <xt:template element="title">$= *title =$</xt:template>
+    </TITLE></HEAD>
+
+    <BODY>
+    <!-- Project title H1 -->
+    <xt:template element="title"><H1>$= *title =$</H1></xt:template>
+
+    <!-- Project description -->
+    <xt:template element="desc">
+      <DIV CLASS="desc">
+        <xt:template element="p"><P>$= *p =$</P></xt:template>
+      </DIV>
+    </xt:template>
+
+    <!-- Library links -->
+    <H2>Libraries</H2>
+    <UL>
+    <xt:template element="library" var="lib">
+      <LI><A HREF='$= lib["dir"] =$/index.html'>
+        <xt:template element="title">$= *title =$</xt:template>
+      </A></LI>
+    </xt:template>
+    </UL>
+    </BODY></HTML>
+
+    <!-- Library directory -->
+    <xt:template name="Library" element="library" var="lib">
+      <xt:dir>$= lib["dir"] =$</xt:dir>
+      <xt:file>index.html</xt:file>
+
+      <HTML><HEAD>
+      <LINK REL="STYLESHEET" HREF="../../../obdoc.css" 
+            TITLE="ObDoc Stylesheet"/> 
+      <TITLE>
+      <!-- Library title for HEAD -->
+      <xt:template element="title">$= *title =$</xt:template>
+      </TITLE></HEAD>
+
+      <BODY>
+      <!-- Library title H1 -->
+      <xt:template element="title"><H1>$= *title =$</H1></xt:template>
+
+      <!-- Library description -->
+      <xt:template element="desc">
+        <DIV CLASS="desc">
+          <xt:template element="p"><P>$= *p =$</P></xt:template>
+        </DIV>
+      </xt:template>
+
+      <!-- Class links -->
+      <H2>Classes</H2>
+      <UL>
+      <xt:template element="class" var="cls">
+	<LI><A HREF='$= cls["name"] =$.html'>
+	  $= cls["name"] =$: 
+	  <xt:template element="title">$= *title =$</xt:template>
+	</A></LI>
+      </xt:template>
+      </UL>
+      </BODY></HTML>
+
+      <!-- Class directory -->
+      <xt:template name="Class" element="class" var="cls">
+	<xt:file>$= cls["name"] =$.html</xt:file>
+
+	<HTML><HEAD>
+	<LINK REL="STYLESHEET" HREF="../../../obdoc.css" 
+	      TITLE="ObDoc Stylesheet"/> 
+	<TITLE>
+	<!-- Class title for HEAD -->
+	$= cls["name"] =$: 
+	<xt:template element="title">$= *title =$</xt:template>
+	</TITLE></HEAD>
+
+	<BODY>
+	<!-- Class title H1 -->
+        <H1>$= cls["name"] =$: 
+	<xt:template element="title">$= *title =$</xt:template>
+	</H1>
+
+	<!-- Class description -->
+	<xt:template element="desc">
+	  <DIV CLASS="desc">
+	    <xt:template element="p"><P>$= *p =$</P></xt:template>
+	  </DIV>
+	</xt:template>
+	</BODY></HTML>
+      </xt:template>
+    </xt:template>
+  </xt:template>
+</xt:tool>  

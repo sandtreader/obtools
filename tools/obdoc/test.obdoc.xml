@@ -1,0 +1,61 @@
+<project name="TestProject">
+<title>Test project for ObDoc</title>
+<desc>
+<p>This is a test project to test ObDoc</p>
+<p>These are paragraphs of the description</p>
+</desc>
+
+<library name="TestLib1" dir="lib1">
+<title>Test Library 1</title>
+<desc>
+<p>This is a test library for ObDoc</p>
+</desc>
+
+<file name="test.h">
+<title>Test Library 1 Header</title>
+</file>
+
+<file name="foo.cc">
+<title>Implementation of 'foo's</title>
+</file>
+
+<class name="Foo" location="foo.cc">
+<title>Wibble generator</title>
+<desc>
+<p>This describes what a Foo is.  I hope someone can tell me, because I've been wondering for years.</p>
+</desc>
+
+<member name="a1" type="int">
+<title>An integer a1</title>
+</member>
+
+<member name="next" type="Foo *" ref="Foo">
+<title>Chain to next Foo in the list</title>
+<desc><p>Can be 0 at end of list</p></desc>
+</member>
+
+<function name="Foo">
+<title>Foo default constructor</title>
+</function>
+
+<function name="Foo">
+<title>Foo copy constructor</title>
+<arg name="src" type="const Foo&amp;" ref="Foo"/>
+<result type="Foo&amp;" ref="Foo"/>
+</function>
+
+<function name="bar">
+<title>Do something useful like creating an array</title>
+<arg name="n" type="int">
+<title>Number of foos required</title>
+</arg>
+<result type="array<Foo>">
+<title>Array of Foos</title>
+<desc><p>Something describing some wrinkle of the result</p></desc>
+</result>
+</function>
+
+</class>
+
+</library>
+</project>

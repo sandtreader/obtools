@@ -1,0 +1,85 @@
+
+/* General stuff */
+BODY 
+{
+  background-color    : #ffffff;
+  font-family         : Arial,Helvetica,san-serif;
+  font-size           : small;
+  padding             : 1em;
+}
+
+H1
+{
+  font-size           : large;
+  font-weight         : bold;
+  text-decoration     : underline;
+  color               : #003080;
+}
+
+H2 
+{
+  font-size           : small;
+  font-weight         : bold;
+  color               : #003080;
+  border-top: solid 1px #003080;
+}
+
+H3
+{
+  font-size           : x-small;
+  font-weight         : bold;
+  color               : #003080;
+}
+
+H4
+{
+  font-size           : 1.0em;
+  width               : 50%;
+  border-top-width    : 2px;
+  border-top-style    : solid;
+  border-top-color    : #000000;
+  padding-top         : 1.0em;
+}
+
+
+P
+{
+  font-size           : x-small;
+  margin-bottom: 1em;
+}
+
+A
+{ 
+  text-decoration     : none;
+}
+
+A:hover 
+{
+  background-color    : #c0ffc0;
+}
+
+UL
+{
+  width               : 80%;
+  margin-left         : 2.0em;
+  background-color    : #ffffe0;
+  border: solid 1px #808080;
+}
+
+LI
+{
+  font-weight         : bold;
+  list-style-position : inside;
+  list-style-type     : disc;
+  line-height         : 160%;
+}  
+
+HR
+{
+  color               : #000000;
+  background_colour   : #000000;
+  height              : 2px;
+}
+
+
+
