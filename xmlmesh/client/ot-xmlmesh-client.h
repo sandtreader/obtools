@@ -37,11 +37,13 @@ public:
 };
 
 //==========================================================================
-// General XML Bus client using any transport
+// Simple 'single-user' XMLMesh client using any transport
 class Client
 {
 private:
   ClientTransport& transport;
+  MT::Queue<Message> secondary_q;  // Queue for unwanted messages received
+                                   // in request()
 
 public:
   //------------------------------------------------------------------------
@@ -85,6 +87,116 @@ public:
   // e.g. client.unsubscribe("*");
   // Returns whether successful
   bool unsubscribe(const string& subject);
+};
+
+//==========================================================================
+// Subscription class - subscribes for given subject on given single-user
+// client
+class Subscription
+{
+private:
+  Client& client;
+  string subject;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor/destructor simply subscribe/unsubscribe
+  Subscription(Client& _client, const string& _subject):
+    client(_client), subject(_subject)
+  { client.subscribe(subject); }
+    
+  ~Subscription() { client.unsubscribe(subject); }
+};
+
+class MultiClient;  // forward
+//==========================================================================
+// Subscriber objects - abstract functors to handle callback from MultiClient
+// for subscribed messages (see below), also with the subscribe/unsubscribe
+// functionality of Subscription above
+// See mclient.cc
+class Subscriber
+{
+private:
+  MultiClient& mclient;
+
+public:
+  string subject;
+
+  //------------------------------------------------------------------------
+  // Constructor/destructor register/unregister into multiclient
+  Subscriber(MultiClient& _mclient, const string& _subject);
+  virtual ~Subscriber();
+
+  //------------------------------------------------------------------------
+  // Message handler function - implemented by child classes
+  virtual void handle(Message& msg) = 0;
+};
+
+//==========================================================================
+// Request-response request record
+struct MultiClientRequest
+{
+  Message *response;    // Where to put response message
+  MT::Condition done;   // Whether done
+
+  MultiClientRequest(Message *_response): response(_response) {}
+};
+
+//==========================================================================
+// Complex 'multi-user' XMLMesh client using any transport
+// Operates with background worker threads 
+// Request-response is handled with the same interface as Client, but
+// multiple may be outstanding in different threads at once
+// Subscribed messages are delivered into Subscriber objects (q.v.)
+class MultiClient
+{
+private:
+  ClientTransport& transport;
+  list<Subscriber *> subscribers;              // Active subscribers
+  map<string, MultiClientRequest *> requests;  // Active requests, by id
+  MT::Thread *dispatch_thread;                 // Message dispatch thread
+  MT::Mutex lock;                              // Global state lock
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor - attach transport
+  MultiClient(ClientTransport& _transport);
+
+  //------------------------------------------------------------------------
+  // Start - allows transport-specific child class to ensure transport
+  // is initialised before doing anything with it
+  void start();
+
+  //------------------------------------------------------------------------
+  // Send a message - never blocks, but can fail if the queue is full
+  // Whether message queued
+  bool send(Message& msg);
+
+  //------------------------------------------------------------------------
+  // Send a message and get a response (blocking)
+  // Returns whether successful, fills in response if so
+  bool request(Message& req, Message& response);
+
+  //------------------------------------------------------------------------
+  // Send a message and confirm receipt or error
+  // Returns whether successful.  Handles errors itself
+  bool request(Message& req);
+
+  //------------------------------------------------------------------------
+  // Register a subscriber functor
+  void register_subscriber(Subscriber *sub);
+
+  //------------------------------------------------------------------------
+  // Deregister a subscriber functor
+  void deregister_subscriber(Subscriber *sub);
+
+  //------------------------------------------------------------------------
+  // Dispatch a message (background thread)
+  void dispatch(Message &msg);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~MultiClient();
 };
 
 //==========================================================================

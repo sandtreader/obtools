@@ -28,6 +28,13 @@ bool Client::send(Message& msg)
 // Receive a message - never blocks, returns whether one was received
 bool Client::poll(Message& msg)
 {
+  // Check if there's anything on the secondary queue first
+  if (secondary_q.poll())
+  {
+    msg = secondary_q.wait();
+    return true;
+  }
+
   // Check if there's anything there
   if (!transport.poll()) return false;
 
@@ -40,6 +47,13 @@ bool Client::poll(Message& msg)
 // Returns whether one was read - will only return false if something fails
 bool Client::wait(Message& msg)
 {
+  // Check if there's anything on the secondary queue first
+  if (secondary_q.poll())
+  {
+    msg = secondary_q.wait();
+    return true;
+  }
+
   string data;
   if (!transport.wait(data)) return false;
 
@@ -61,22 +75,24 @@ bool Client::request(Message& req, Message& response)
 
   for(;;)
   {
-    // Block waiting for a message
-    if (!wait(response)) 
+    // Block waiting for a message (note, don't use wait(), otherwise
+    // we end up going in circles!)
+    string data;
+    if (!transport.wait(data)) 
     {
       Log::Error << "Awaiting response failed\n";
       return false;
     }
+
+    response = Message(data);
 
     // Make sure the ref's match
     // Note:  This is the simplest synchronous send/receive;  assumes
     // no interleaving of responses
     if (req.get_id() == response.get_ref()) return true;
 
-    // Complain and repeat
-    Log::Error << "Mismatched response ignored:\n";
-    Log::Error << "Request id:   " << req.get_id() << endl;
-    Log::Error << "Response ref: " << response.get_ref() << endl;
+    // Requeue on the secondary queue so wait() gets it later
+    secondary_q.send(response);
   }
 }
 

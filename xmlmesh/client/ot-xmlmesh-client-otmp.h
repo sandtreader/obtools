@@ -50,6 +50,23 @@ public:
 };
 
 //==========================================================================
+// OTMP-based XMLMesh MultiClient
+class OTMPMultiClient: public MultiClient
+{
+private:
+  OTMPClientTransport transport;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor - take server address
+  // port=0 means use default port for protocol
+  // NB: MultiClient is constructed before transport whatever we say
+  // - therefore leave starting it to constructor body
+  OTMPMultiClient(Net::EndPoint server): 
+    transport(server), MultiClient(transport) { start(); }
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_XMLMESH_OTMP_H
 
