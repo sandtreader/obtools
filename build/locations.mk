@@ -10,49 +10,53 @@
 
 # Pass in ROOT as relative path to obtools/ root
 
-# ObTools full libraries
-OT-LIBS = cli cppt db log misc mt net regen text xmi xml
-
-# ObTools include-only (template) libraries
-OT-INCS = cache
-
-# XMLMesh libraries
-XMLMESH-LIBS = core otmp client
+# List of libraries and associated directories
+# Each word split by ':' into
+# 1: Library name, including variant (as put into DEPENDS)
+# 2: Directory of source, relative to ROOT
+# 3: Optional variant suffix of build directory, OR 'NOLIB' for templates
+OT-LIBS = cli:libs/cli     			\
+          cppt:libs/cppt   			\
+          db-pgsql:libs/db:-pgsql 		\
+	  cache:libs/cache:NOLIB  		\
+	  log:libs/log     			\
+	  misc:libs/misc   			\
+          mt:libs/mt       			\
+          net:libs/net     			\
+          regen:libs/regen 			\
+          text:libs/text   			\
+          xmi:libs/xmi     			\
+          xml:libs/xml     			\
+          xmlmesh-core:xmlmesh/core  		\
+          xmlmesh-otmp:xmlmesh/otmp  		\
+          xmlmesh-client:xmlmesh/client 	\
+          xmlmesh-c:xmlmesh/bindings/c  
 
 #==========================================================================
-# Template for standard ObTools library
+# Template for standard Obtools library
+# $(1): Package name, including variant
+# $(2): Directory, relative to root
+# $(3): (optional) variant suffix for build directories
+#     or NOLIB if no library required
 define lib_template
-DIR-$(1) = $$(ROOT)/libs/$(1)
-INCS-$(1) = $$(DIR-$(1))/ot-$(1).h
-LIBS-$(1)-release = $$(DIR-$(1))/build-release/ot-$(1).a
-LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug/ot-$(1).a
-LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release/ot-$(1).a
-LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug/ot-$(1).a
+DIR-$(1) = $$(ROOT)/$(2)
+ifneq ($(3), NOLIB)
+LIBS-$(1)-release = $$(DIR-$(1))/build-release$(3)/ot-$(1).a
+LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$(3)/ot-$(1).a
+LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release$(3)/ot-$(1).a
+LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug$(3)/ot-$(1).a
+endif
 endef
 
-# Run template for each library
-$(foreach lib,$(OT-LIBS),$(eval $(call lib_template,$(lib))))
-
-# Template for standard ObTools include
-define inc_template
-DIR-$(1) = $$(ROOT)/libs/$(1)
-INCS-$(1) = $$(DIR-$(1))/ot-$(1).h
+# Split at spaces and pass on to lib_template as words
+define split_template
+$(call lib_template,$(word 1,$(1)),$(word 2,$(1)),$(word 3,$(1)))
 endef
 
-# Run template for each include
-$(foreach inc,$(OT-INCS),$(eval $(call inc_template,$(inc))))
+# Run template for each library, splitting on : to match template args (q.v.)
+$(foreach lib,$(OT-LIBS),$(eval $(call split_template,$(subst :, ,$(lib)))))
 
-# Template for XMLMesh library
-define xmlmesh_template
-DIR-xmlmesh-$(1) = $$(ROOT)/xmlmesh/$(1)
-LIBS-xmlmesh-$(1)-release = $$(DIR-xmlmesh-$(1))/build-release/ot-xmlmesh-$(1).a
-LIBS-xmlmesh-$(1)-debug   = $$(DIR-xmlmesh-$(1))/build-debug/ot-xmlmesh-$(1).a
-LIBS-xmlmesh-$(1)-single-release = $$(DIR-xmlmesh-$(1))/build-single-release/ot-xmlmesh-$(1).a
-LIBS-xmlmesh-$(1)-single-debug = $$(DIR-xmlmesh-$(1))/build-single-debug/ot-xmlmesh-$(1).a
-endef
 
-# Run template for each XMLMesh part
-$(foreach lib,$(XMLMESH-LIBS),$(eval $(call xmlmesh_template,$(lib))))
 
 
 
