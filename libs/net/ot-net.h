@@ -522,6 +522,11 @@ public:
   int csendto(const void *msg, size_t len, int flags, EndPoint endpoint);
 
   //--------------------------------------------------------------------------
+  // Raw datagram sendmsg wrapper
+  int csendmsg(struct iovec *gathers, int ngathers, int flags,
+	       EndPoint endpoint);
+
+  //--------------------------------------------------------------------------
   // Safe datagram recv wrapper
   // Throws SocketError on failure
   ssize_t recv(void *buf, size_t len, int flags=0) 
@@ -545,6 +550,14 @@ public:
   // Throws SocketError on failure
   ssize_t sendto(const void *buf, size_t len, int flags, EndPoint endpoint)
     throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Safe datagram sendmsg wrapper
+  // Throws SocketError on failure
+  ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags,
+		  EndPoint endpoint)
+    throw (SocketError);
+
 };
 
 //==========================================================================

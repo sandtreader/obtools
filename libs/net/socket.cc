@@ -418,6 +418,37 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
 };
 
 //--------------------------------------------------------------------------
+// Raw datagram sendmsg wrapper
+int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
+			EndPoint endpoint)
+{
+  struct sockaddr_in saddr;
+  endpoint.set(saddr);
+  int res;
+
+#ifdef __WIN32__
+#error No idea if this works in Windows
+#else
+  struct msghdr mh;
+  mh.msg_name = &saddr;
+  mh.msg_namelen = sizeof(saddr);
+  mh.msg_iov = gathers;
+  mh.msg_iovlen = ngathers;
+  mh.msg_control = 0;
+  mh.msg_controllen = 0;
+  mh.msg_flags = 0;
+
+  do
+  {
+    res = ::sendmsg(fd, &mh, flags); 
+  }
+  while (res<0 && errno == EINTR);
+#endif
+
+  return res;
+};
+
+//--------------------------------------------------------------------------
 // Safe datagram recv wrapper
 // Throws SocketError on failure
 ssize_t UDPSocket::recv(void *buf, size_t len, int flags) throw (SocketError)
@@ -459,6 +490,18 @@ ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
                              throw (SocketError)
 {
   int res = csendto(buf, len, flags, endpoint);
+  if (res < 0) throw SocketError(errno);
+  return res;
+}
+
+//--------------------------------------------------------------------------
+// Safe datagram sendmsg wrapper
+// Throws SocketError on failure
+ssize_t UDPSocket::sendmsg(struct iovec *gathers, int ngathers, int flags,
+			  EndPoint endpoint)
+                             throw (SocketError)
+{
+  int res = csendmsg(gathers, ngathers, flags, endpoint);
   if (res < 0) throw SocketError(errno);
   return res;
 }
