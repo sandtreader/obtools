@@ -5,6 +5,8 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+.PHONY: all clean test release
+
 all: 
 	$(MAKE) -C libs
 	$(MAKE) -C tools
@@ -21,4 +23,6 @@ test:
 	$(MAKE) -C tools test
 	$(MAKE) -C xmlmesh test
 
-
+release:
+	$(MAKE) -C libs release
+	$(MAKE) -C xmlmesh release
