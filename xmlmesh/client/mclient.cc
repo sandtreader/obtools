@@ -87,8 +87,21 @@ void MultiClient::dispatch(Message &msg, Log::Streams& log)
       Subscriber *sub = *p;
       if (Text::pattern_match(sub->subject, subject))
       {
-	sub->handle(msg);
-	handled = true;
+	// Pass it to a worker thread - this allows the subscriber to
+	// initiate an outgoing request and get the result - otherwise
+	// we end up in deadlock
+	MultiClientWorker *t = workers.remove();
+	if (t)
+	{
+	  t->sub = sub;
+	  t->msg = new Message(msg);  // Copy for safety
+	  t->kick();  // This will handle back in run() in the worker thread
+	  handled = true;
+	}
+	else
+	{
+	  log.error << "Mesh client has no spare workers - message lost\n";
+	}
       }
     }
 
@@ -154,11 +167,24 @@ retry:
 }
 
 //==========================================================================
+// MultiClientWorker worker thread
+
+//------------------------------------------------------------------------
+// Run function - pass msg to subscriber
+void MultiClientWorker::run() 
+{ 
+  sub->handle(*msg); 
+  delete msg;
+}
+
+//==========================================================================
 // Foreground stuff
 
 //------------------------------------------------------------------------
 // Constructor - attach transport
-MultiClient::MultiClient(ClientTransport& _transport): transport(_transport)
+MultiClient::MultiClient(ClientTransport& _transport,
+			 int _min_spare_workers, int _max_workers): 
+  transport(_transport), workers(_min_spare_workers, _max_workers)
 {
   dispatch_thread = new DispatchThread(*this, transport);
 }

@@ -175,6 +175,22 @@ struct MultiClientRequest
 };
 
 //==========================================================================
+// Worker thread for multi-threaded subscribers
+class MultiClientWorker: public MT::PoolThread
+{
+public:
+  Subscriber *sub;
+  Message *msg;
+
+  MultiClientWorker(ObTools::MT::PoolReplacer<MultiClientWorker>& _rep):
+    PoolThread(_rep) {}
+
+  //------------------------------------------------------------------------
+  // Run function - pass msg to subscriber
+  void run();
+};
+
+//==========================================================================
 // Complex 'multi-user' XMLMesh client using any transport
 // Operates with background worker threads 
 // Request-response is handled with the same interface as Client, but
@@ -187,12 +203,15 @@ private:
   list<Subscriber *> subscribers;              // Active subscribers
   map<string, MultiClientRequest *> requests;  // Active requests, by id
   MT::Thread *dispatch_thread;                 // Message dispatch thread
+  MT::ThreadPool<MultiClientWorker> workers;   // Worker thread pool 
   MT::RMutex mutex;                            // Global state lock
 
 public:
   //------------------------------------------------------------------------
   // Constructor - attach transport
-  MultiClient(ClientTransport& _transport);
+  MultiClient(ClientTransport& _transport,
+	      int _min_spare_workers=1,
+	      int _max_workers=10);
 
   //------------------------------------------------------------------------
   // Start - allows transport-specific child class to ensure transport
