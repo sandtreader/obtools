@@ -145,7 +145,7 @@ enum ClassKind
 {
   CLASS_CONCRETE,  // Normal user-defined class
   CLASS_ABSTRACT,  // Abstract user-defined class
-  CLASS_PRIMITIVE  // System-defined datatype
+  CLASS_DATATYPE   // System-defined datatype
 };
 
 class Class: public Element

@@ -11,11 +11,11 @@ LDFLAGS += -g
 all: test-xmi
 
 clean: 
-	-@rm -f *.o *.a *~ test-xmi leak.out
+	-@rm -f *.o *.a *~ test-xmi 
+	$(MAKE) -C tests clean
 
 test:	test-xmi
-	LeakCheck ./test-xmi < tests/test1-2.xmi
-	leak-analyze ./test-xmi
+	$(MAKE) -C tests test
 
 #Test harness:
 test-xmi: test-xmi.o ot-xmi.a ../xml/ot-xml.a 
@@ -28,6 +28,7 @@ ot-xmi.a: $(OBJS)
 #Objects
 $(OBJS): ot-xmi.h ot-uml.h ../xml/ot-xml.h Makefile
 test-xmi.o: ot-xmi.h ot-uml.h Makefile
+
 
 
 

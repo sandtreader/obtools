@@ -17,6 +17,7 @@
 
 namespace ObTools { namespace XMI {
 
+//Make our lives easier without polluting anyone else
 using namespace std;
 using namespace ObTools;
 
@@ -29,17 +30,18 @@ class ParseFailed {};
 class Reader
 {
 private:
-  ostream& serr;                  //error output stream
-  map<string, UML::Class *> classmap;  //map of ids to classes
+  ostream& serr;                       //error output stream
+  map<string, UML::Class *> classmap;  //map of ids to classes/datatypes
 
   void warning(const char *warn, const string& detail);
   void error(const char *err, const string& detail="") throw (ParseFailed);
   UML::Class *lookup_class(const string& id);
-  UML::Attribute *read_attribute(ObTools::XML::Element& ae);
-  void scan_class(ObTools::XML::Element& ce);
-  UML::Class *read_class(ObTools::XML::Element& ce);
-  UML::Association *read_association(ObTools::XML::Element& ae); 
-  UML::Package *read_package(ObTools::XML::Element& pe);
+  UML::Class *get_type(XML::Element& te);
+  UML::Attribute *read_attribute(XML::Element& ae);
+  void scan_class(XML::Element& ce, UML::ClassKind kind=UML::CLASS_CONCRETE);
+  UML::Class *read_class(XML::Element& ce);
+  UML::Association *read_association(XML::Element& ae); 
+  UML::Package *read_package(XML::Element& pe);
 
 public:
   UML::Package *model;        

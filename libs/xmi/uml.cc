@@ -92,8 +92,8 @@ void Class::print(ostream& sout, int indent)
       sout << " abstract";
       break;
 
-    case CLASS_PRIMITIVE:
-      sout << " primitive";
+    case CLASS_DATATYPE:
+      sout << " datatype";
       break;
   }
 
@@ -150,7 +150,7 @@ void Operation::print(ostream& sout, int indent)
 void Attribute::print(ostream& sout, int indent)
 {
   sout << string(indent, ' ');
-  sout << "Attribute '" << name << "'" << endl;
+  sout << "Attribute '" << name << ":" << type->name << "'" << endl;
 }
 
 
