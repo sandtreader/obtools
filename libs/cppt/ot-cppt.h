@@ -43,8 +43,8 @@ public:
   TokenRecogniser(): index(0), longest_valid(0) {}
 
   //------------------------------------------------------------------------
-  //Add a token
-  void add_token(const char *tok) { tokens.push_back(tok); }
+  //Add a token - empty strings are silently ignored
+  void add_token(const string& tok) { if (tok.size()) tokens.push_back(tok); }
 
   //------------------------------------------------------------------------
   //Process a character
@@ -71,12 +71,12 @@ enum ProcessorState
 // Tags list
 struct Tags
 {
-  const char *start_code;
-  const char *end_code;
-  const char *start_expr;
-  const char *end_expr;
-  const char *start_comment;
-  const char *end_comment;
+  string start_code;
+  string end_code;
+  string start_expr;
+  string end_expr;
+  string start_comment;
+  string end_comment;
 };
 
 //==========================================================================
