@@ -6,7 +6,7 @@
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus.h"
+#include "ot-xmlbus-client-otmp.h"
 #include "ot-log.h"
 #include <unistd.h>
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
-  XMLBus::Client client(addr, port);
+  XMLBus::OTMPClient client(addr, port);
 
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)
@@ -56,10 +56,7 @@ int main(int argc, char **argv)
 
     client.send(msg);
 
-    if (client.poll(msg))
-    {
-      cout << msg.subject << ": " << msg.content << endl;
-    }
+    if (client.poll(msg)) cout << msg.get_text() << endl;
   }
 
   return 0;  

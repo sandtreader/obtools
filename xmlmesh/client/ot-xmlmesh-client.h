@@ -1,18 +1,18 @@
 //==========================================================================
-// ObTools::XMLBus: ot-xmlbus.h
+// ObTools::XMLBus:Client: ot-xmlbus-client.h
 //
 // Public definitions for XMLBus client library
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#ifndef __OBTOOLS_XMLBUS_H
-#define __OBTOOLS_XMLBUS_H
+#ifndef __OBTOOLS_XMLBUS_CLIENT_H
+#define __OBTOOLS_XMLBUS_CLIENT_H
 
 #include <string>
 #include "ot-net.h"
 #include "ot-mt.h"
-#include "ot-xmlbus-otmp.h"
+#include "ot-xmlbus.h"
 
 namespace ObTools { namespace XMLBus {
 
@@ -20,29 +20,33 @@ namespace ObTools { namespace XMLBus {
 using namespace std;
 
 //==========================================================================
-// XMLBus message
-class Message
+// Client Transport (abstract interface)
+// Low-level transport of raw data
+class ClientTransport
 {
 public:
-  string id;           // Unique ID 
-  string subject;      // Subject (used for subscription etc.)
-  string content;      // Message content
+  // Send a message - returns whether successful
+  virtual bool send(const string& data) = 0;
 
-  //------------------------------------------------------------------------
-  // Constructor
-  // ID is manufactured here
-  Message(const string& _subject, const string& _content);
+  // Check whether a message is available before blocking in wait()
+  virtual bool poll() = 0;
+
+  // Wait for a message - blocking.
+  // Returns whether one read - only returns false if something fails
+  virtual bool wait(string& data) = 0;
 };
 
 //==========================================================================
-// XML Bus client
-class Client: private OTMPClient
+// General XML Bus client using any transport
+class Client
 {
+private:
+  ClientTransport& transport;
+
 public:
   //------------------------------------------------------------------------
-  // Constructors - take server address
-  // port=0 means use default port for protocol
-  Client(Net::IPAddress address, int port=0);
+  // Constructor - attach transport
+  Client(ClientTransport& _transport): transport(_transport) {}
 
   //------------------------------------------------------------------------
   // Send a message - never blocks, but can fail if the queue is full
@@ -59,10 +63,9 @@ public:
   bool wait(Message& msg);
 };
 
-
 //==========================================================================
 }} //namespaces
-#endif // !__OBTOOLS_XMLBUS_H
+#endif // !__OBTOOLS_XMLBUS_CLIENT_H
 
 
 

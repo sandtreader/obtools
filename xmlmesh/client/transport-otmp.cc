@@ -1,12 +1,12 @@
 //==========================================================================
-// ObTools::XMLBus: client.cc
+// ObTools::XMLBus:OTMP: client_transport.cc
 //
-// Implementation of XMLBus client library
+// Implementation of OTMP client transport for XMLBus
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "ot-xmlbus-client.h"
+#include "ot-xmlbus-client-otmp.h"
 #include "ot-log.h"
 
 #include <unistd.h>
@@ -18,32 +18,27 @@ namespace ObTools { namespace XMLBus {
 //------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full
 // Whether message queued
-bool Client::send(Message& msg)
+bool OTMPClientTransport::send(const string& data)
 {
-  string data = msg.get_text();  // Convert to <message> string
-  return transport.send(data);
+  OTMP::Message otmp_msg(data);
+  return otmp.send(otmp_msg);
 }
 
 //------------------------------------------------------------------------
-// Receive a message - never blocks, returns whether one was received
-bool Client::poll(Message& msg)
+// Check for message available
+bool OTMPClientTransport::poll()
 {
-  // Check if there's anything there
-  if (!transport.poll()) return false;
-
-  // Get it
-  return wait(msg);
+  return otmp.poll();
 }
 
 //------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
 // Returns whether one was read - will only return false if something fails
-bool Client::wait(Message& msg)
+bool OTMPClientTransport::wait(string &data)
 {
-  string data;
-  if (!transport.wait(data)) return false;
-
-  msg = Message(data);  // Construct message from XML <message> data
+  OTMP::Message otmp_msg;
+  if (!otmp.wait(otmp_msg)) return false;
+  data = otmp_msg.data;
   return true;
 }
 
