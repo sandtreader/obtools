@@ -104,8 +104,8 @@ public:
 class SocketError 
 {
 public:
-  int error;  // errno value
-  SocketError(int e): error(e) {}
+  int error;  // errno value, or 0
+  SocketError(int e=0): error(e) {}
 };
 
 //------------------------------------------------------------------------
@@ -175,8 +175,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the socket
-  // Throws SocketError on failure
+  // Throws SocketError on failure or EOF
   uint32_t read_nbo_int() throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Ditto, but allowing the possibility of failure at EOF
+  // Throws SocketError on non-EOF failure
+  bool read_nbo_int(uint32_t& n) throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 4-byte integer to the socket

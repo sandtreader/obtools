@@ -60,7 +60,10 @@ void Socket::go_blocking()
 // e.g. cout << e;
 ostream& operator<<(ostream& s, const SocketError& e)
 { 
-  s << "Socket Error (" << e.error << "): " << strerror(e.error); 
+  if (e.error)
+    s << "Socket Error (" << e.error << "): " << strerror(e.error); 
+  else
+    s << "Socket EOF";
 }
 
 //==========================================================================
@@ -217,12 +220,22 @@ bool operator>>(TCPSocket& s, string& t)
 
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 4-byte integer from the socket
-// Throws SocketError on failure
+// Throws SocketError on failure or EOF
 uint32_t TCPSocket::read_nbo_int() throw (SocketError)
 {
   uint32_t n;
-  read(&n, 4);
+  if (!read(&n, 4)) throw SocketError();
   return ntohl(n);
+}
+
+//--------------------------------------------------------------------------
+// Ditto, but allowing the possibility of failure at EOF
+// Throws SocketError on non-EOF failure
+bool TCPSocket::read_nbo_int(uint32_t& n) throw (SocketError)
+{
+  if (!read(&n, 4)) return false;
+  n=ntohl(n);
+  return true;
 }
 
 //--------------------------------------------------------------------------
