@@ -42,8 +42,9 @@ SubscriptionMessage::SubscriptionMessage(Message& msg):
   else
   {
     // Probably bogus XML
-    Log::Error << "Unknown XML in subscription message:\n";
-    Log::Error << get_text() << "\n";
+    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    error_log << "Unknown XML in subscription message:\n";
+    error_log << get_text() << "\n";
     operation = BOGUS;  
   }
 

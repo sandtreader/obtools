@@ -30,7 +30,8 @@ FaultMessage::FaultMessage(Message& msg):
 {
   string text = msg.get_text();
 
-  SOAP::Parser parser(Log::Error);
+  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  SOAP::Parser parser(error_log);
   SOAP::Fault *fault = new SOAP::Fault(text, parser);
   soap_message = fault;
 

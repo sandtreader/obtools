@@ -97,8 +97,12 @@ Message::Message(const string& subject, const XML::Element& xml_content,
   // Add routing header
   _add_routing_header(soap_message, subject, rsvp, ref);
 
+  // Manufacturer our own error stream since we're used multithreaded and
+  // there's nothing long-lived here to provide a full Streams structure
+  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+
   // Parse content body
-  XML::Parser parser(Log::Error);
+  XML::Parser parser(error_log);
   try
   {
     parser.read_from(xml_content.to_string_frag());
@@ -106,8 +110,8 @@ Message::Message(const string& subject, const XML::Element& xml_content,
   }
   catch (XML::ParseFailed)
   {
-    Log::Error << "XMLMesh Message creation: "
-	       << "can't reparse supplied element " << xml_content << endl;
+    error_log << "XMLMesh Message creation: "
+	      << "can't reparse supplied element " << xml_content << endl;
   }
 }
 
@@ -126,7 +130,8 @@ Message::Message(const string& subject, const string& body_text,
   _add_routing_header(soap_message, subject, rsvp, ref);
 
   // Parse content body
-  XML::Parser parser(Log::Error);
+  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  XML::Parser parser(error_log);
   try
   {
     parser.read_from(body_text);
@@ -134,9 +139,9 @@ Message::Message(const string& subject, const string& body_text,
   }
   catch (XML::ParseFailed)
   {
-    Log::Error << "XMLMesh Message creation: "
-	       << "can't parse supplied body text:\n" 
-	       << body_text << endl;
+    error_log << "XMLMesh Message creation: "
+	      << "can't parse supplied body text:\n" 
+	      << body_text << endl;
   }
 }
 
@@ -179,14 +184,15 @@ const SOAP::Message& Message::get_soap()
 
   // Create parser with fixed namespace in case someone's being clever
   // and using another prefix
-  SOAP::Parser parser(Log::Error);
+  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  SOAP::Parser parser(error_log);
   parser.fix_namespace(xmlmesh_namespace, "x");
 
   // Read SOAP message from parser
   soap_message = new SOAP::Message(textual_message, parser);
   if (!*soap_message)
   {
-    Log::Error << "XMLMesh:: Can't parse incoming SOAP message\n";
+    error_log << "XMLMesh:: Can't parse incoming SOAP message\n";
     // Leave the dead XML here, otherwise we'll keep parsing it again
   }
 
