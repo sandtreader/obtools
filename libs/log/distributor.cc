@@ -7,6 +7,7 @@
 //==========================================================================
 
 #include "ot-log.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace Log {
 
@@ -16,6 +17,7 @@ namespace ObTools { namespace Log {
 void Distributor::connect(const string& name, Channel *chan)
 {
   MT::Lock lock(mutex);
+  channels[name] = chan;
 }
 
 //--------------------------------------------------------------------------
@@ -24,6 +26,15 @@ void Distributor::connect(const string& name, Channel *chan)
 Channel *Distributor::disconnect(const string& name)
 {
   MT::Lock lock(mutex);
+
+  map<string, Channel *>::iterator p = channels.find(name);
+  if (p != channels.end())
+  {
+    Channel *c = p->second;
+    channels.erase(p);
+    return c;
+  }
+  else return 0;
 }
 
 //--------------------------------------------------------------------------
@@ -32,6 +43,13 @@ Channel *Distributor::disconnect(const string& name)
 bool Distributor::dispose(const string& name)
 {
   MT::Lock lock(mutex);
+  Channel *c = disconnect(name);
+  if (c)
+  {
+    delete c;
+    return true;
+  }
+  else return false;
 }
 
 //--------------------------------------------------------------------------
@@ -39,6 +57,17 @@ bool Distributor::dispose(const string& name)
 void Distributor::log(Message& msg)
 {
   MT::Lock lock(mutex);
+
+  // Send to all channels with max level higher or equal to this, with
+  // matching pattern (or none)
+  map<string, Channel *>::iterator p;
+  for(p=channels.begin(); p!=channels.end(); p++)
+  {
+    Channel *c = p->second;
+    if (c->level >= msg.level
+     && (!c->pattern.size() || Text::pattern_match(c->pattern, msg.text))) 
+      c->log(msg);
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -46,6 +75,13 @@ void Distributor::log(Message& msg)
 Distributor::~Distributor()
 {
   MT::Lock lock(mutex);
+
+  map<string, Channel *>::iterator p;
+  for(p=channels.begin(); p!=channels.end(); p++)
+  {
+    Channel *c = p->second;
+    delete c;
+  }
 }
 
 

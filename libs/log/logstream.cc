@@ -50,6 +50,14 @@ int LogStreamBuf::overflow(int c)
   else
     buffer += (char)c;
 
+  // Pass buffer on at EOL
+  if (c=='\n')
+  {
+    Message msg(level, buffer);
+    channel.log(msg);
+    buffer.erase();
+  }
+
   return 0;
 }
 

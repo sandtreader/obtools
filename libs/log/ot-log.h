@@ -62,11 +62,14 @@ class Channel
 {
 public:
   Level level;
+  string pattern;
   MT::Mutex mutex;  // Assume multi-threaded use
 
   //--------------------------------------------------------------------------
-  // Constructor
-  Channel(Level l=LEVEL_SUMMARY): level(l) {}
+  // Constructors
+  // p (pattern) is a glob pattern for lines (c.f. Text::pattern_match)
+  Channel(Level l=LEVEL_SUMMARY, const string& p=""): 
+    level(l), pattern(p) {}
 
   //--------------------------------------------------------------------------
   // Abstract virtual logging function
@@ -78,8 +81,36 @@ public:
 };
 
 //==========================================================================
+// Line-based Log channel 
+// Abstract virtual definition of a logging channel which splits into 
+// timestamped lines
+class LineChannel: public Channel
+{
+protected:
+  string time_format;
+  string buffer;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor - for time format, see strftime(3)
+  LineChannel(Level l=LEVEL_SUMMARY, 
+	      const string& p = "",
+	      const string& _time_format = "%H:%M:%S %a %d %b %Y: "): 
+    Channel(l, p), time_format(_time_format) {}
+
+  //--------------------------------------------------------------------------
+  // Message logging function
+  void log(Message& msg);
+
+  //--------------------------------------------------------------------------
+  // Abstract virtual line logging function
+  virtual void log_line(const string& line) = 0;
+};
+
+
+//==========================================================================
 // Channel to standard iostream
-class StreamChannel: public Channel
+class StreamChannel: public LineChannel
 {
 private:
   ostream& stream;
@@ -87,11 +118,14 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  StreamChannel(ostream& s, Level l=LEVEL_SUMMARY): Channel(l), stream(s) {}
+  StreamChannel(ostream& s, Level l=LEVEL_SUMMARY,
+		const string& p = "",
+		const string& t = "%H:%M:%S %a %d %b %Y: "): 
+    LineChannel(l, p, t), stream(s) {}
 
   //--------------------------------------------------------------------------
   // Logging function
-  void log(Message& msg);
+  void log_line(const string& line);
 };
 
 //==========================================================================

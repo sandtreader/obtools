@@ -7,11 +7,11 @@
 OBJS = distributor.o logstream.o channel.o logger.o
 
 ifdef DEBUG
-CPPFLAGS += -g
+CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
 LDFLAGS += -g
 endif
 
-CPPFLAGS += -I../mt 
+CPPFLAGS += -I../mt -I../text
 
 all: test-log 
 
@@ -19,10 +19,10 @@ clean:
 	-@rm -f *.o *.a *~ test-log
 
 test:	test-log 
-	./test-log localhost
+	./test-log
 
 #Test harness:
-test-log: test-log.o ot-log.a 
+test-log: test-log.o ot-log.a ../text/ot-text.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #Core library
