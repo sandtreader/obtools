@@ -5,31 +5,19 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-ifdef DEBUG
-CXXFLAGS += -g
-LDFLAGS += -g
-endif
+TYPE	= exe
+NAME   	= testtool
+OBJS 	= _testtool.o
+DEPENDS = xmi xml regen
+TESTCMD = ./testtool < ../test.xmi
+VARIANTS = debug
+VARIANT-debug = DEBUG
 
-all: testtool
-
-clean: 
-	-@rm -rf *.o *.a *~ testtool _*.cc TEST
-
-#Test generation
-test:	testtool test.xmi
-	./testtool < test.xmi 
-#	cat out-Foo.html
-
-#Test tool
-testtool: testtool.o ../../../libs/xmi/ot-xmi.a ../../../libs/xml/ot-xml.a ../../../libs/regen/ot-regen.a
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
-
-#Objects
-testtool.o: _testtool.cc Makefile
-	$(CXX) $(CXXFLAGS) -c -I.. -I../../../libs/xml/ -I../../../libs/xmi/ -I../../../libs/regen/ -o $@ $<
+ROOT    = ../../..
+include $(ROOT)/build/std.mk
 
 #Template code
-_testtool.cc: testtool.cfg.xml ../xmitoolgen-cc Makefile
-	../xmitoolgen-cc testtool.cfg.xml > _testtool.cc
+_testtool.cc: ../testtool.cfg.xml ../../build-debug/xmitoolgen-cc Makefile
+	../../build-debug/xmitoolgen-cc ../testtool.cfg.xml > _testtool.cc
 
 
