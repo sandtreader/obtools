@@ -95,6 +95,20 @@ public:
   string get_attr(const string& name, const char *def="");
 
   //--------------------------------------------------------------------------
+  // Get all direct child text content accumulated into one string
+  // Returns optimised content if available, otherwise iterates children
+  // collecting text from data elements
+  // Strings from separate elements are separately with '\n'
+  string get_content();
+
+  //--------------------------------------------------------------------------
+  // Get all text content from the entire tree accumulated into one string
+  // Returns optimised content if available, otherwise iterates children
+  // collecting text from data elements, and recursing into subchildren
+  // Strings from separate elements are separately with '\n'
+  string get_deep_content();
+
+  //--------------------------------------------------------------------------
   // Validity check
   // Easy way of checking if you've got Element::none
   // Don't use (e!=Element::none) - that compares values!

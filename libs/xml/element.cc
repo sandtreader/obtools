@@ -214,6 +214,66 @@ void Element::append_descendants(const string& name, list<Element *>& l)
 }
 
 //--------------------------------------------------------------------------
+// Get all direct child text content accumulated into one string
+// Returns optimised content if available, otherwise iterates children
+// collecting text from data elements
+// Strings from separate elements are separately with '\n'
+string Element::get_content()
+{
+  // Return content directly if available
+  if (content != "") return content;
+
+  // Otherwise iterate all elements
+  string s;
+  for(list<Element *>::iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    Element &e=**p;
+
+    // Look for absence of tag rather than presence of content - this
+    // might be optimised and we don't want to collect second-level stuff
+    if (e.name.empty() && !e.content.empty()) 
+    {
+      s+=(*p)->content;
+      s+='\n';
+    }
+  }
+
+  return s;
+}
+
+//--------------------------------------------------------------------------
+// Get all text content from the entire tree accumulated into one string
+// Returns optimised content if available, otherwise iterates children
+// collecting text from data elements, and recursing into subchildren
+// Strings from separate elements are separately with '\n'
+string Element::get_deep_content()
+{
+  // Return content directly if available
+  if (content != "") return content;
+
+  // Otherwise iterate all elements
+  string s;
+  for(list<Element *>::iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    Element &e=**p;
+
+    // Extract content from this, recursively
+    string ss=e.get_deep_content();
+    if (!ss.empty())
+    {
+      s+=ss;
+      s+='\n';  // Separate pieces with \n
+    }
+  }
+
+  return s;
+}
+
+//--------------------------------------------------------------------------
 // Get an attribute of the given name
 // Returns attribute value
 // Defaults to default value given (or "") if not present
