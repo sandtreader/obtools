@@ -1,14 +1,14 @@
 //==========================================================================
-// ObTools::XMI: elems.cc
+// ObTools::XMI: uml.cc
 //
-// XMI element classes
+// UML model classes
 // Not much interesting in here - just destructors and debug streaming
 //
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "xmi.h"
-using namespace ObTools::XMI;
+#include "ot-uml.h"
+using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
 // Package destructor

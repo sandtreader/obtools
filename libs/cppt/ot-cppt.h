@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::CPPT: cppt.h
+// ObTools::CPPT: ot-cppt.h
 //
 // Public definitions for C++ template processor
 // 

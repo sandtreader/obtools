@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = reader.o elems.o
+OBJS = reader.o uml.o
 CPPFLAGS += -g -I../xml
 LDFLAGS += -g 
 
@@ -18,16 +18,16 @@ test:	test-xmi
 	leak-analyze ./test-xmi
 
 #Test harness:
-test-xmi: test-xmi.o xmi.a ../xml/xml.a 
+test-xmi: test-xmi.o ot-xmi.a ../xml/ot-xml.a 
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #XMI library
-xmi.a: $(OBJS)
+ot-xmi.a: $(OBJS)
 	$(AR) r $@ $^
 
 #Objects
-$(OBJS): xmi.h ../xml/xml.h Makefile
-test-xmi.o: xmi.h Makefile
+$(OBJS): ot-xmi.h ot-uml.h ../xml/ot-xml.h Makefile
+test-xmi.o: ot-xmi.h ot-uml.h Makefile
 
 
 

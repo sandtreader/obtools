@@ -18,16 +18,16 @@ test:	test-xml
 	leak-analyze ./test-xml
  
 #Test harness:
-test-xml: test-xml.o xml.a
+test-xml: test-xml.o ot-xml.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #XML library
-xml.a: $(OBJS)
+ot-xml.a: $(OBJS)
 	$(AR) r $@ $^
 
 #Objects
-$(OBJS): xml.h Makefile
-test-xml.o: xml.h Makefile
+$(OBJS): ot-xml.h Makefile
+test-xml.o: ot-xml.h Makefile
 
 
 

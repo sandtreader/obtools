@@ -6,9 +6,9 @@
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "xmi.h"
-#include "xml.h"
+#include "ot-xmi.h"
 using namespace ObTools::XMI;
+using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
 // Destructor

@@ -20,16 +20,16 @@ test:	test-cppt tests/simple.cppt
 	./_temp
  
 #Test harness:
-test-cppt: test-cppt.o cppt.a
+test-cppt: test-cppt.o ot-cppt.a
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
 
 #CPPT library
-cppt.a: $(OBJS)
+ot-cppt.a: $(OBJS)
 	$(AR) r $@ $^
 
 #Objects
-$(OBJS): cppt.h Makefile
-test-cppt.o: cppt.h Makefile
+$(OBJS): ot-cppt.h Makefile
+test-cppt.o: ot-cppt.h Makefile
 
 
 

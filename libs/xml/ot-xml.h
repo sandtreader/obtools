@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XML: xml.h
+// ObTools::XML: ot-xml.h
 //
 // Public definitions for ObTools XML parser
 // 

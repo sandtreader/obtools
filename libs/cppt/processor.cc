@@ -6,7 +6,7 @@
 // Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 //==========================================================================
 
-#include "cppt.h"
+#include "ot-cppt.h"
 using namespace ObTools::CPPT;
 
 //--------------------------------------------------------------------------
