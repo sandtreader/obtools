@@ -35,5 +35,5 @@ doc:	all
 	$(MAKE) -C libs DOCFILE=doc.out/combined.obdoc.xml docfile
 	-@cat tail.obdoc.xml >> doc.out/combined.obdoc.xml
 	-@cp tools/obdoc/obdoc.css doc.out/
-	( cd doc.out; ../tools/obdoc/build-debug/obdoc < combined.obdoc.xml )
+	( cd doc.out; ../tools/obdoc/build-release/obdoc-html < combined.obdoc.xml )
 
