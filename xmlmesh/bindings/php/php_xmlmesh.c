@@ -12,6 +12,8 @@
 #include "ext/standard/info.h"
 #include "ot-xmlmesh-c.h"
 
+#define IGNORE(x) x=x;
+
 /* ======================================================================= */
 /* Module globals and INI items                                            */
 
@@ -96,7 +98,8 @@ static void php_xmlmesh_init_globals(zend_xmlmesh_globals *xmlmesh_globals)
 /* ----------------------------------------------------------------------- */
 /* Module init function                                                    */
 ZEND_MINIT_FUNCTION(xmlmesh)
-{
+{ IGNORE(type)
+
   ZEND_INIT_MODULE_GLOBALS(xmlmesh, php_xmlmesh_init_globals, NULL);
   REGISTER_INI_ENTRIES();
   XMLMESH_G(conn) = NULL;
@@ -108,7 +111,8 @@ ZEND_MINIT_FUNCTION(xmlmesh)
 /* ----------------------------------------------------------------------- */
 /* Module shutdown function                                                */
 ZEND_MSHUTDOWN_FUNCTION(xmlmesh)
-{
+{ IGNORE(type)
+
   UNREGISTER_INI_ENTRIES();
   if (XMLMESH_G(conn))
   {
@@ -122,7 +126,8 @@ ZEND_MSHUTDOWN_FUNCTION(xmlmesh)
 /* ----------------------------------------------------------------------- */
 /* Request init function                                                   */
 ZEND_RINIT_FUNCTION(xmlmesh)
-{
+{ IGNORE(type) IGNORE(module_number)
+
   // Create connection if not already made
   // This should happen in the post-fork instance
   if (!XMLMESH_G(conn))
@@ -135,7 +140,8 @@ ZEND_RINIT_FUNCTION(xmlmesh)
 /* ----------------------------------------------------------------------- */
 /* Request shutdown function                                               */
 ZEND_RSHUTDOWN_FUNCTION(xmlmesh)
-{
+{ IGNORE(type) IGNORE(module_number)
+
   return SUCCESS;
 }
 
@@ -157,7 +163,8 @@ ZEND_MINFO_FUNCTION(xmlmesh)
 /* Send a one-way XML message with no response                             */
 /* bool xmlmesh_send(string subject, string xml);                          */
 ZEND_FUNCTION(xmlmesh_send)
-{
+{ IGNORE(this_ptr) IGNORE(return_value_used)
+
   char *subject;
   int subject_len;
   char *xml;
@@ -188,7 +195,8 @@ ZEND_FUNCTION(xmlmesh_send)
 /* string xmlmesh_request(string subject, string xml);                     */
 /* Returns empty string if request failed                                  */
 ZEND_FUNCTION(xmlmesh_request)
-{
+{ IGNORE(this_ptr) IGNORE(return_value_used)
+
   char *subject;
   int subject_len;
   char *xml;
@@ -222,7 +230,8 @@ ZEND_FUNCTION(xmlmesh_request)
 /* Send an XML Request and check for OK or error                           */
 /* bool xmlmesh_simple_request(string subject, string xml);                */
 ZEND_FUNCTION(xmlmesh_simple_request)
-{
+{ IGNORE(this_ptr) IGNORE(return_value_used)
+
   char *subject;
   int subject_len;
   char *xml;

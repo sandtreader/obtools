@@ -124,6 +124,8 @@ bool Publisher::handle(RoutingMessage& msg)
       originate(submsg);
     }
   }
+
+  return true;  // Not likely to have forward routing, but possible
 }
 
 //------------------------------------------------------------------------

@@ -180,16 +180,17 @@ public:
   // Constructors
   Service(const string& _id, 
 	  int _min_threads=1, int _max_threads=1): 
-    id(_id), multithreaded(_max_threads>1), 
-    threads(_min_threads, _max_threads) 
+    multithreaded(_max_threads>1), 
+    threads(_min_threads, _max_threads),
+    id(_id)
   {}
 
   // From XML config
   Service(XML::Element& cfg):
-    id(cfg["id"]),
     multithreaded(cfg.get_attr_int("minthreads", 1) > 1),
     threads(cfg.get_attr_int("minthreads", 1),
-	    cfg.get_attr_int("maxthreads", 1))
+	    cfg.get_attr_int("maxthreads", 1)),
+    id(cfg["id"])
   {}
 
   //------------------------------------------------------------------------
@@ -212,11 +213,15 @@ public:
     CLIENT_FINISHED
   };
 
-  virtual void signal(Signal sig, Client& client) {}
+  virtual void signal(Signal, Client&) {}
 
   //------------------------------------------------------------------------
   // Tick function - does nothing by default, can be overridden
   virtual void tick() {}
+
+  //------------------------------------------------------------------------
+  // Virtual destructor - does nothing here
+  virtual ~Service() {}
 };
 
 //==========================================================================
