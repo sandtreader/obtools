@@ -10,17 +10,6 @@
 -->
 
 <xmitool xmlns="obtools.com/ns/xmitool">
-  <!-- Setup of script processing for rest of file -->
-  <script language="C++">
-    <!-- Tags to support C++ in XML - $ isn't significant to either -->
-    <tags>
-      <start-code>$(</start-code>
-      <end-code>$)</end-code>
-      <start-expr>$=</start-expr>
-      <end-expr>=$</end-expr>
-    </tags>
-  </script>
-
   <!-- Legal info transferred into header - note xmitoolgen will also
   apply its own copyright and license for portions generated solely by it -->
   <legal>
@@ -47,13 +36,44 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   </legal>
 
+  <!-- Setup of script processing for rest of file -->
+  <script language="C++">
+    <!-- Tags to support C++ in XML - $ isn't significant to either -->
+    <tags>
+      <start-code>$(</start-code>
+      <end-code>)$</end-code>
+      <start-expr>$=</start-expr>
+      <end-expr>=$</end-expr>
+    </tags>
+  </script>
+
   <!-- Support code to be added to tool -->
   <code>
-//Routine to get method signature of operation
-string xmicc_op_sig(ObTools::UML::Operation&amp; op)
-{
-  return "foo";
-}
+    //Routine to return method signature of operation
+    string xmicc_op_sig(ObTools::UML::Operation&amp; op)
+    {
+      string s;
+      ObTools::UML::Parameter *ret = op.get_return();
+      if (ret)
+        s = ret->type->name;
+      else
+        s= "void";
+
+      s += " ";
+      s += op.name;
+      s += "(";
+
+      int i=0;
+      OBTOOLS_UML_FOREACH_PARAMETER(p, op)
+        if (i++) s+=", ";
+        s+=p.type->name;
+	s+=" ";
+	s+=p.name;
+      OBTOOLS_UML_ENDFOR
+
+      s+=")";
+      return s;
+    }
   </code>
 
   <!-- Config items for tool -->
@@ -63,43 +83,50 @@ string xmicc_op_sig(ObTools::UML::Operation&amp; op)
     <var name="overwrite" path="overwrite" type="bool"/>
   </config>
 
-  <outputs>
+  <template name="Package directories" scope="rpackage">
+    <directory>$=p.name=$</directory>
+
     <!-- C++ implementation output -->
-    <output name = "C++ implementation" scope="class">
-      <files>class_$=class.name=$.cc</files>
-      <template scope="class">
-// Automatically generated code by xmi2cc
-// $=class.name=$.cc
+    <template name = "C++ implementation" scope="class">
+      <filename>$=c.name=$.cc</filename>
+      // Automatically generated code by xmi2cc
+      // $=c.name=$.cc
 
-	<template scope="operation">
-// Method $= operation.name =$
-$= xmicc_op_sig(operation) =$
-{
+      <template name= "Method implementation" scope="operation">
+      // Method $= o.name =$
+      $= xmicc_op_sig(o) =$
+      {
 
 
-}
-	</template>
+      }
       </template>
-    </output>
+    </template>
 
     <!-- C++ header output -->
-    <output name = "C++ header" scope="class">
-      <files>class_$= class.name =$.h</files>
-      <template scope="class">
-// Automatically generated code by xmi2cc
-// $= class.name =$.h
+    <template name = "C++ header" scope="class">
+      <filename>$= c.name =$.h</filename>
+      // Automatically generated code by xmi2cc
+      // $= c.name =$.h
 
-class $= class.name =$
-{
-public:
-	<template scope="operation" visibility="public">
-  $= xmicc_op_sig(operation) =$;
-	</template>
-}
-
+      class $= c.name =$
+      <template name = "Inheritance" scope="generalization">
+	$= (index?",":":") =$$= g.parent->name =$
       </template>
-    </output>
-  </outputs>
+      {
+      private:
+      <template name = "Private attribute declaration" scope="attribute" 
+		visibility="private">
+	$= a.type->name =$ $= a.name =$;
+      </template>
+
+      public:
+      <template name = "Public method declaration" scope="operation" 
+		visibility="public">
+	$= xmicc_op_sig(o) =$;
+      </template>
+      }
+    </template>
+  </template>
 </xmitool>  
 
 

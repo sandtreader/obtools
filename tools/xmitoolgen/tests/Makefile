@@ -14,7 +14,7 @@ CPPFLAGS += -I../../../libs/xml/ -I../../../libs/xmi/
 all: testtool
 
 clean: 
-	-@rm -rf *.o *.a *~ testtool _*.cc out-*
+	-@rm -rf *.o *.a *~ testtool _*.cc TEST
 
 #Test generation
 test:	testtool test.xmi
