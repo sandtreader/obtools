@@ -120,7 +120,8 @@ bool Publisher::handle(RoutingMessage& msg)
       // as originator, and with the same path, but set as response
       // Note however that the message isn't modified - no ref set
       ServiceClient client(this, msg.client.client);
-      RoutingMessage submsg(client, msg.message, msg.path);
+      MessagePath path(sub.path);
+      RoutingMessage submsg(client, msg.message, path);
       originate(submsg);
     }
   }
