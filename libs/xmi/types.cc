@@ -85,7 +85,7 @@ Expression Expression::read_from(XML::Element &pare)
       exp.language = expe.get_attr("language");
     else
     {
-      XML::Element lange = expe.get_child("UML:Expression.language");
+      XML::Element& lange = expe.get_child("UML:Expression.language");
       if (lange.valid()) 
 	exp.language = lange.content;
     }
@@ -95,7 +95,7 @@ Expression Expression::read_from(XML::Element &pare)
       exp.body = expe.get_attr("body");
     else
     {
-      XML::Element bodye = expe.get_child("UML:Expression.body");
+      XML::Element& bodye = expe.get_child("UML:Expression.body");
       if (bodye.valid()) 
 	exp.body = bodye.content;
     }
