@@ -276,7 +276,7 @@ UDPSocket::UDPSocket()
 UDPSocket::UDPSocket(int port)
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
-  Socket::bind(port);
+  if (!Socket::bind(port)) close();
 }
 
 //--------------------------------------------------------------------------
