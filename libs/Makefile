@@ -5,7 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = xml xmi cppt regen misc text mt net log cache db cli 
+SUBS = xml xmi cppt regen misc text mt net log cache db cli init
 include ../build/dir.mk
 
 
