@@ -520,13 +520,16 @@ void Parser::fatal(const char *s) throw (ParseFailed)
 
 //------------------------------------------------------------------------
 // Get root element
-// Throws ParseFailed if not valid
-Element& Parser::get_root() throw (ParseFailed)
+// Returns Element::none if not valid
+Element& Parser::get_root() 
 {
-  if (!root) throw ParseFailed();
-  return *root;
+  if (root) 
+    return *root;
+  else
+    return Element::none;
 }
 
+//------------------------------------------------------------------------
 // Do initial processing on an element (after attributes read)
 // Handles namespace map building - actual processing of namespace is
 // done in final_processing
