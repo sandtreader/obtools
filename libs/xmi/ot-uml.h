@@ -77,6 +77,9 @@ protected:
 		      const string& subelement_name);
   bool get_bool_property(const string& attr_name,
 			 const string& subelement_name);
+  bool get_int_property(const string& attr_name,
+			const string& subelement_name,
+			int def=0);
   string get_idref_property(const string& attr_name,
 			    const string& subelement_name,
 			    const string& subsubelement_name="");

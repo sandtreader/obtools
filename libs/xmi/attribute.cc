@@ -24,7 +24,7 @@ void Attribute::build_refs()
 {
   //Get type
   if (!get_type(type))
-    reader.error("No type specified for attribute ", name);
+    reader.error("No type specified for attribute id ", id);
 }
 
 //--------------------------------------------------------------------------
@@ -38,6 +38,9 @@ void Attribute::print(ostream& sout, int indent=0)
     sout << "class " << type.c->name;
   else if (type.dt)
     sout << "type " << type.dt->name;
+
+  if (type.multi.lower!=1 || type.multi.upper!=1)
+    sout << '[' << type.multi.lower << ".." << type.multi.upper << ']';
 
   sout << endl;
 }

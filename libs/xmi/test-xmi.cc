@@ -25,9 +25,12 @@ int main()
     return 2;
   }
 
-  //Now we should have a model
-  if (reader.model)
-    reader.model->print(cout);
+  //Show versions
+  cout << "XMI version: " << reader.xmi_version << endl;
+  cout << "UML version: " << reader.uml_version << endl;
+
+  //List model
+  if (reader.model) reader.model->print(cout);
 
   return 0;  
 }
