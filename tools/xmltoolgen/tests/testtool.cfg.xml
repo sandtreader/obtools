@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+  Copyright (c) 2003 Object Toolsmiths Limited
+-->
+
+<xmltool xmlns="obtools.com/ns/xmltool">
+
+  <!-- Setup of script processing for rest of file -->
+  <script language="C++">
+    <!-- Tags to support C++ in XML - $ isn't significant to either -->
+    <tags>
+      <start-code>$(</start-code>
+      <end-code>)$</end-code>
+      <start-expr>$=</start-expr>
+      <end-expr>=$</end-expr>
+    </tags>
+  </script>
+
+  <template name="Book" element="book">
+    <directory>$= e.get_attr("name") =$</directory>
+    <filename>index.html</filename>
+
+    <!-- Book  title -->
+    <template name = "Book title" element="title">
+      &lt;H1>$= e.get_deep_content() =$&lt;/H1>
+    </template>
+
+    <!-- Chapter links -->
+    &lt;UL>
+    <template name = "Chapter links" element="chapter">
+      &lt;LI>&lt;A HREF='$= e.get_attr("id") =$/index.html'>Chapter $= index+1 =$&lt;/A>&lt;/LI>
+    </template>
+    &lt;/UL>
+
+
+    <template name="Chapter" element="chapter">
+      <directory>$= e.get_attr("id") =$</directory>
+      <filename>index.html</filename>
+
+      <!-- Chapter title -->
+      <template name = "Chapter title" element="title">
+	&lt;H1>$= e.get_deep_content() =$&lt;/H1>
+      </template>
+
+      <!-- Chapter paragraphs -->
+      <template name = "Chapter introductory paras" element="para">
+	&lt;P>$= e.get_deep_content() =$&lt;/P>
+      </template>
+
+      <!-- Section links -->
+      &lt;UL>
+      <template name = "Section links" element="section">
+	&lt;LI>&lt;A HREF='sec.$= e.get_attr("id") =$.html'>Section $= index+1 =$&lt;/A>&lt;/LI>
+      </template>
+      &lt;/UL>
+
+      <!-- Sections -->
+      <template name = "Sections" element="section">
+	<filename>sec.$= e.get_attr("id") =$.html</filename>
+
+	<!-- Section title -->
+	<template name = "Section title" element="title">
+	  &lt;H1>$= e.get_deep_content() =$&lt;/H1>
+	</template>
+
+	<!-- Section paragraphs -->
+	<template name = "Section paras" element="para">
+	  &lt;P>$= e.get_deep_content() =$&lt;/P>
+	</template>
+      </template>
+    </template>
+  </template>
+</xmltool>  
+
+
+
+
+
+
+
