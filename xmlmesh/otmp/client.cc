@@ -74,7 +74,7 @@ bool Client::restart_socket()
   }
   else
   {
-    Log::Summary << "OTMP: Opened socket to " << server << endl;
+    Log::Detail << "OTMP: Opened socket to " << server << endl;
 
     if (!starting)
     {
@@ -171,7 +171,7 @@ bool Client::send_messages()
   // can reanimate it
   while (!socket || !*socket)
   {
-    Log::Summary << "OTMP(send): Socket is dead - waiting for improvement\n";
+    Log::Detail << "OTMP(send): Socket is dead - waiting for improvement\n";
     sleep(DEAD_SOCKET_SLEEP_TIME);
   }
 
