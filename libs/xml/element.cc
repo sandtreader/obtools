@@ -11,6 +11,10 @@
 #include <ctype.h>
 #include <sstream>
 
+#ifdef __BORLANDC__
+#include "ot-fix.h"
+#endif
+
 using namespace ObTools::XML;
 
 //--------------------------------------------------------------------------
