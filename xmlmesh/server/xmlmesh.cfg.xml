@@ -1,0 +1,14 @@
+<xmlbus>
+  <transports>
+    <otmp-server port="29167" id="server"/>
+    <otmp-client server="localhost" port="9990" id="log"/>
+    <otmp-client server="localhost" port="9991" id="info"/>
+  </transports>
+
+  <services>
+    <publish subject="info.*" transport="server"/>
+    <accept subject="log.*" transport="server"/> 
+    <forward subject="log.*"  transport="log"/>
+    <subscribe subject="info.*" transport="info"/>
+  </services>
+</xmlbus>

@@ -10,7 +10,6 @@
 #define __OBTOOLS_XMLBUS_SERVER_TRANS_OTMP_H
 
 #include "server.h"
-#include "ot-xmlbus-otmp.h"
 
 namespace ObTools { namespace XMLBus {
 
@@ -18,21 +17,14 @@ namespace ObTools { namespace XMLBus {
 using namespace std;
 
 //==========================================================================
-// OTMP Server Transport 
-class OTMPServerTransport: public ServerTransport
+// OTMP Server Transport Factory
+class OTMPServerTransportFactory: public ServerTransportFactory
 {
-private:
-  OTMP::Server otmp;
-  MT::Queue<OTMP::ClientMessage> receive_q;
+  ServerTransport *create(XML::Element& xml);
+  static OTMPServerTransportFactory instance;  // singleton
 
 public:
-  //------------------------------------------------------------------------
-  // Constructor - default to standard OTMP port
-  OTMPServerTransport(int port=0);
-
-  //------------------------------------------------------------------------
-  // Implementation of ServerTransport virtual interface - q.v. server.h
-  bool send(const Net::EndPoint& client, const string& data);
+  static void register_into(Server& server);
 };
 
 

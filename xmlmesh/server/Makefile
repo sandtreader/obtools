@@ -4,7 +4,7 @@
 # Copyright (c) 2003 Object Toolsmiths Limited.  All rights reserved
 #==========================================================================
 
-OBJS = main.o server.o transport-otmp.o
+OBJS = main.o server.o distributor.o transport-otmp.o
 
 ifdef DEBUG
 CPPFLAGS += -g -D OBTOOLS_LOG_MAX_LEVEL=LEVEL_DUMP
@@ -12,7 +12,8 @@ LDFLAGS += -g
 endif
 
 CPPFLAGS += -I../../libs/mt/ -I../../libs/net/ -I../../libs/log 
-CPPFLAGS += -I../../libs/xml -I../core -I../otmp -I../client
+CPPFLAGS += -I../../libs/xml -I../../libs/text/
+CPPFLAGS += -I../core -I../otmp -I../client
 
 all: xmlbus-server
 

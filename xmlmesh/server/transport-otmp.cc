@@ -7,6 +7,7 @@
 //==========================================================================
 
 #include "transport-otmp.h"
+#include "ot-xmlbus-otmp.h"
 #include "ot-log.h"
 
 #include <unistd.h>
@@ -15,40 +16,82 @@
 
 namespace ObTools { namespace XMLBus {
 
-//--------------------------------------------------------------------------
-// Send handler thread class
-// Pulls messages off the given queue and sends them to the given socket
-class ReflectorThread: public MT::Thread
+//==========================================================================
+// OTMP Server thread class
+class OTMPServerThread: public MT::Thread
 {
   OTMP::Server& server;
-  MT::Queue<OTMP::ClientMessage>& receive_q;
-
-  void run() 
-  { 
-    for(;;)
-    {
-      // Block for a message
-      OTMP::ClientMessage msg = receive_q.wait();
-
-      // Send it back
-      server.send(msg);
-    }
+  void run()
+  {
+    server.run();
   }
 
 public:
-  ReflectorThread(OTMP::Server &s, 
-		  MT::Queue<OTMP::ClientMessage>& q): 
-    server(s), receive_q(q) { start(); }
+  OTMPServerThread(OTMP::Server &s): server(s) { }
 };
 
+class OTMPServerTransport;  //forward
+
+//==========================================================================
+// OTMP Message thread class
+class OTMPMessageThread: public MT::Thread
+{
+  OTMPServerTransport& transport;
+  void run();
+
+public:
+  OTMPMessageThread(OTMPServerTransport& _transport):
+    transport(_transport) {}
+};
+
+//==========================================================================
+// OTMP Server Transport 
+class OTMPServerTransport: public ServerTransport
+{
+private:
+  OTMP::Server otmp;
+  OTMPServerThread  server_thread;
+  OTMPMessageThread message_thread;
+  OTMP::ClientMessageQueue receive_q;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor - default to standard OTMP port
+  OTMPServerTransport(int port=0);
+
+  //--------------------------------------------------------------------------
+  // OTMP Message dispatcher
+  // Fetch OTMP messages and send them up as internal messages
+  void dispatch();
+
+  //------------------------------------------------------------------------
+  // Implementation of ServerTransport virtual interface - q.v. server.h
+  bool send(const Net::EndPoint& client, const string& data);
+};
 
 //------------------------------------------------------------------------
 // Constructor
 OTMPServerTransport::OTMPServerTransport(int port):
-  otmp(receive_q, port)
+  otmp(receive_q, port), server_thread(otmp), 
+  message_thread(*this)
 {
+  server_thread.start();
+  message_thread.start();
+}
 
+//--------------------------------------------------------------------------
+// OTMP Message dispatcher
+// Fetch OTMP messages and send them up as internal messages
+void OTMPServerTransport::dispatch() 
+{ 
+  if (incoming_q)
+  {
+    OTMP::ClientMessage otmp_msg = receive_q.wait();
 
+    // Convert to generic message
+    IncomingMessage imsg(otmp_msg.client, Message(otmp_msg.msg.data));
+    incoming_q->send(imsg);
+  }
 }
 
 //------------------------------------------------------------------------
@@ -61,6 +104,34 @@ bool OTMPServerTransport::send(const Net::EndPoint& client,
   return otmp.send(otmp_msg);
 }
 
+//==========================================================================
+//Message thread run
+void OTMPMessageThread::run()
+{
+  for(;;) transport.dispatch();
+}
+
+//==========================================================================
+// OTMP Server Transport Factory
+
+//------------------------------------------------------------------------
+//Singleton instance
+OTMPServerTransportFactory OTMPServerTransportFactory::instance;
+
+//------------------------------------------------------------------------
+//Create method
+ServerTransport *OTMPServerTransportFactory::create(XML::Element& xml)
+{
+  int port = xml.get_attr_int("port", OTMP::DEFAULT_PORT);
+  return new OTMPServerTransport(port);
+}
+
+//------------------------------------------------------------------------
+//Registration method
+void OTMPServerTransportFactory::register_into(Server& server)
+{
+  server.register_transport("otmp-server", &instance);
+}
 
 }} // namespaces
 

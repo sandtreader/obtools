@@ -7,61 +7,47 @@
 //==========================================================================
 
 #include "server.h"
+#include "transport-otmp.h"
 #include "ot-log.h"
-#include "ot-xmlbus-otmp.h"
 
 using namespace std;
 using namespace ObTools;
 using namespace ObTools::XMLBus;
 
 //--------------------------------------------------------------------------
-// Send handler thread class
-// Pulls messages off the given queue and sends them to the given socket
-class ReflectorThread: public MT::Thread
-{
-  OTMP::Server& server;
-  MT::Queue<OTMP::ClientMessage>& receive_q;
-
-  void run() 
-  { 
-    for(;;)
-    {
-      // Block for a message
-      OTMP::ClientMessage msg = receive_q.wait();
-
-      // Send it back
-      server.send(msg);
-    }
-  }
-
-public:
-  ReflectorThread(OTMP::Server &s, 
-		  MT::Queue<OTMP::ClientMessage>& q): 
-    server(s), receive_q(q) { start(); }
-};
-
-//--------------------------------------------------------------------------
 // Main
 
 int main(int argc, char **argv)
 {
+  char *cfg = "xmlbus.cfg.xml";
+  if (argc > 1) cfg = argv[1];
+
   // Set up logging
   Log::StreamChannel   chan_out(cout);
   Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
   Log::LevelFilter     level_out(Log::LEVEL_DUMP, tsfilter);
   Log::logger.connect(level_out);
 
-  // Create unified receive queue
-  MT::Queue<OTMP::ClientMessage> q;
+  // Read config
+  XML::Configuration config(cfg);
+  if (!config.read("xmlbus"))
+  {
+    Log::Error << "Can't read configuration file\n";
+    return 2;
+  }
 
   // Create server 
-  OTMP::Server server(q);
+  Server server;
 
-  // Start reflector thread
-  ReflectorThread reflector(server, q);
+  // Register transport modules
+  OTMPServerTransportFactory::register_into(server);
 
-  // Run the server
+  // Configure server 
+  server.configure(config);
+
+  // Run server (never returns)
   server.run();
+
   return 0;  
 }
 

@@ -25,16 +25,62 @@ struct IncomingMessage
 {
   Net::EndPoint client;
   Message message;
+
+  IncomingMessage(Net::EndPoint _client, Message _message):
+    client(_client), message(_message) {}
 };
 
 typedef MT::Queue<IncomingMessage> IncomingMessageQueue;
+
+//==========================================================================
+// Message Handler (abstract interface)
+class MessageHandler
+{
+public:
+  //------------------------------------------------------------------------
+  // Handle a message
+  // Returns whether message should continue to be distributed
+  virtual bool handle(IncomingMessage& msg) = 0;
+};
+
+//==========================================================================
+// Handler registration
+struct HandlerRegistration
+{
+  string subject_pattern;
+  MessageHandler& handler;
+
+  HandlerRegistration(const string& _pattern, MessageHandler& _handler):
+    subject_pattern(_pattern), handler(_handler) {}
+};
+
+//==========================================================================
+// Message Distributor
+class Distributor
+{
+private:
+  list<HandlerRegistration> handlers;       // List of active handlers
+
+public:
+  //------------------------------------------------------------------------
+  // Default Constructor 
+  Distributor() {}
+
+  //------------------------------------------------------------------------
+  // Attach a new message handler on the given subject pattern
+  void attach_handler(const string& subject, MessageHandler& h);
+
+  //------------------------------------------------------------------------
+  // Distribute a message
+  void distribute(IncomingMessage& msg);
+};
 
 //==========================================================================
 // Server Transport (abstract interface)
 // Low-level transport of raw data
 class ServerTransport
 {
-private:
+protected:
   IncomingMessageQueue *incoming_q;  
 
 public:
@@ -52,12 +98,68 @@ public:
 };
 
 //==========================================================================
+// Server Transport Factory (abstract interface)
+class ServerTransportFactory
+{
+public:
+  //------------------------------------------------------------------------
+  // Create a server transport from the given XML element
+  // Returns 0 if failed
+  virtual ServerTransport *create(XML::Element& xml) = 0;
+};
+
+class Server;  //forward
+
+//==========================================================================
+// Service (abstract interface)
+// Enabling module providing various kinds of message service
+class Service
+{
+protected:
+  Server& server;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Service(Server& _server): server(_server) {}
+
+  //------------------------------------------------------------------------
+  // Initialise service - returns whether successful
+  virtual bool initialise() = 0;
+};
+
+//==========================================================================
+// Service Factory (abstract interface)
+class ServiceFactory
+{
+public:
+  //------------------------------------------------------------------------
+  // Create a service from the given XML element
+  // Returns 0 if failed
+  virtual Service *create(XML::Element& xml) = 0;
+};
+
+//==========================================================================
 // General XML Bus server using any number of transports
 class Server
 {
 private:
-  IncomingMessageQueue incoming_q;          // Queue of incoming messages
+  // Factories for use during configuration
+  map<string, ServerTransportFactory *> transport_factories;
+  map<string, ServiceFactory *>         service_factories;
+
+  // List of active modules
   list<ServerTransport *> transports;       // List of active transports
+  map<string, ServerTransport *> transport_ids;  // Map of transports ids
+
+  list<Service *> services;                 // List of active services
+
+  // Internal state
+  Distributor distributor;                  // Message distributor
+  IncomingMessageQueue incoming_q;          // Queue of incoming messages
+
+  bool create_transport(XML::Element& xml);
+  bool create_service(XML::Element& xml); 
 
 public:
   //------------------------------------------------------------------------
@@ -65,9 +167,20 @@ public:
   Server();
 
   //------------------------------------------------------------------------
-  // Attach a new transport
-  // Transport will be deleted on destruction
-  void attach_transport(ServerTransport *t);
+  // Register a transport type
+  void register_transport(const string& name, ServerTransportFactory *factory);
+
+  //------------------------------------------------------------------------
+  // Register a service type
+  void register_service(const string& name, ServiceFactory *factory);
+
+  //------------------------------------------------------------------------
+  // Load modules etc. from XML config
+  void configure(XML::Configuration& config);
+
+  //------------------------------------------------------------------------
+  // Run method - never returns
+  void run(); 
 
   //------------------------------------------------------------------------
   // Destructor
