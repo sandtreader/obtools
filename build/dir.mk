@@ -9,10 +9,6 @@
 
 all:	$(patsubst %,%-all,$(SUBS))
 
-clean:  $(patsubst %,%-clean,$(SUBS))
-	-@rm -f *~ 
-	$(MAKE) -C release clean
-
 test: 	$(patsubst %,%-test,$(SUBS))
 
 #Overridable for deeper structures
@@ -25,6 +21,12 @@ endif
 release: $(patsubst %,%-release,$(SUBS))
 ifndef NORELEASE
 	$(MAKE) -C $(RELEASEDIR)
+endif
+
+clean:  $(patsubst %,%-clean,$(SUBS))
+	-@rm -f *~ 
+ifndef NORELEASE
+	$(MAKE) -C release clean
 endif
 
 # Submake template to run on every lib
