@@ -61,6 +61,30 @@ public:
   // Receive a message - blocks waiting for one to arrive
   // Returns whether one was read - will only return false if something fails
   bool wait(Message& msg);
+
+  //------------------------------------------------------------------------
+  // Send a message and get a response (blocking)
+  // Returns whether successful, fills in response if so
+  bool request(Message& req, Message& response);
+
+  //------------------------------------------------------------------------
+  // Send a message and confirm receipt or error
+  // Returns whether successful.  Handles errors itself
+  bool request(Message& req);
+
+  //------------------------------------------------------------------------
+  // Subscribe for messages of a given subject - expressed as a pattern match
+  // e.g. client.subscribe("info.*");
+  // Returns whether successful
+  bool subscribe(const string& subject);
+
+  //------------------------------------------------------------------------
+  // Unsubscribe for messages of a given subject 
+  // Subject is a pattern - can use more general pattern to unsubscribe
+  // more specific ones
+  // e.g. client.unsubscribe("*");
+  // Returns whether successful
+  bool unsubscribe(const string& subject);
 };
 
 //==========================================================================

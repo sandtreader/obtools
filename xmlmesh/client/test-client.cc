@@ -49,17 +49,23 @@ int main(int argc, char **argv)
   Net::EndPoint server(addr, port);
   XMLMesh::OTMPClient client(server);
 
+  // Subscribe to some stuff
+  client.subscribe("info.*");
+  
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)
   {
     sleep(1);
-    XMLMesh::Message msg("Test", "This is a test message");
+    XMLMesh::Message msg("info.foo", "<info>Boo!</info>");
 
     client.send(msg);
 
-    if (client.poll(msg)) cout << msg.get_text() << endl;
+    if (client.poll(msg)) 
+      Log::Detail << msg.get_text() << endl;
   }
 
+  // And unsubscribe again
+  client.unsubscribe("*");
   return 0;  
 }
 

@@ -47,6 +47,88 @@ bool Client::wait(Message& msg)
   return true;
 }
 
+//------------------------------------------------------------------------
+// Send a message and get a response (blocking)
+// Returns whether successful, fills in response if so
+bool Client::request(Message& req, Message& response)
+{
+  // Send message
+  if (!send(req))
+  {
+    Log::Error << "Sending request failed\n";
+    return false;
+  }
+
+  for(;;)
+  {
+    // Block waiting for a message
+    if (!wait(response)) 
+    {
+      Log::Error << "Awaiting response failed\n";
+      return false;
+    }
+
+    // Make sure the ref's match
+    // Note:  This is the simplest synchronous send/receive;  assumes
+    // no interleaving of responses
+    if (req.get_id() == response.get_ref()) return true;
+
+    // Complain and repeat
+    Log::Error << "Mismatched response ignored:\n";
+    Log::Error << "Request id:   " << req.get_id() << endl;
+    Log::Error << "Response ref: " << response.get_ref() << endl;
+  }
+}
+
+//------------------------------------------------------------------------
+// Send a message and confirm receipt or error
+// Returns whether successful.  Handles errors itself
+bool Client::request(Message& req)
+{
+  Message response;
+  if (!request(req, response)) return false;
+
+  // Check type of message
+  string subject = response.get_subject();
+  if (subject == "xmlmesh.ok") return true;
+
+  // Handle error
+  ErrorMessage errm(response);
+  if (!errm)
+  {
+    Log::Error << "Weird response received:\n";
+    Log::Error << response << endl;
+  }
+  else
+  {
+    Log::Error << "Request error:\n";
+    Log::Error << errm << endl;
+  }
+  return false;
+}
+
+
+//------------------------------------------------------------------------
+// Subscribe for messages of a given subject - expressed as a pattern match
+// e.g. client.subscribe("info.*");
+// Returns whether successful
+bool Client::subscribe(const string& subject)
+{
+  SubscriptionMessage msg(SubscriptionMessage::JOIN, subject);
+  return request(msg);
+}
+
+//------------------------------------------------------------------------
+// Unsubscribe for messages of a given subject 
+// Subject is a pattern - can use more general pattern to unsubscribe
+// more specific ones
+// e.g. client.unsubscribe("*");
+// Returns whether successful
+bool Client::unsubscribe(const string& subject)
+{
+  SubscriptionMessage msg(SubscriptionMessage::LEAVE, subject);
+  return request(msg);
+}
 
 }} // namespaces
 
