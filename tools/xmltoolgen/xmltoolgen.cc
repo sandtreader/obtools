@@ -36,13 +36,22 @@ protected:
   { return "ObTools::XML::Element&"; }
 
   //--------------------------------------------------------------------------
-  // Generate code to call a template for all elements of given name
-  virtual void generate_call(XML::Element& te, XML::Element& parent,
+  // Iterate over child elements, expanding template inline
+  // Accumulates expanded script in 'script'
+  virtual void expand_inline(XML::Element& te, XML::Element& parent,
 			     CPPT::Tags& tags,
 			     int& max_ci,
 			     const string& streamname,
 			     string& script,
 			     bool is_root = false);
+
+  //--------------------------------------------------------------------------
+  // Iterate over child elements, calling predefined template
+  virtual void expand_use(XML::Element& use_e, 
+			  XML::Element& define_e,
+			  XML::Element& parent,
+			  CPPT::Tags& tags,
+			  const string& streamname);
 
   //--------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
@@ -59,8 +68,9 @@ public:
 };
 
 //--------------------------------------------------------------------------
-// Generate code to call a template for all elements of given name
-void XMLGenerator::generate_call(XML::Element& te, XML::Element& parent,
+// Iterate over child elements, expanding template inline
+// Accumulates expanded script in 'script'
+void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 				 CPPT::Tags& tags,
 				 int& max_ci,
 				 const string& streamname,
@@ -71,7 +81,7 @@ void XMLGenerator::generate_call(XML::Element& te, XML::Element& parent,
 
   if (is_root)
   {
-    sout << "\n  //Expand root template\n";
+    sout << "  //Expand root template\n";
     sout<<"  ObTools::XML::Element& " << child_var 
 	<< " = _parser.get_root();\n";
 
@@ -81,7 +91,7 @@ void XMLGenerator::generate_call(XML::Element& te, XML::Element& parent,
   else
   {
     string ename = te.get_attr("element");
-    sout << "\n  //Expand " << (ename.empty()?"all":ename) << " templates\n";
+    sout << "  //Expand " << (ename.empty()?"all":ename) << " templates\n";
 
     string parent_var = get_parameter_name(parent);
     string index_var = child_var + "_index";
@@ -100,9 +110,43 @@ void XMLGenerator::generate_call(XML::Element& te, XML::Element& parent,
 
     sout << " " << index_var << "++;\n";
     sout << "  OBTOOLS_XML_ENDFOR\n";
-    
-    sout << "\n  //End of " << (ename.empty()?"all":ename) << " templates\n";
   }
+}
+
+//--------------------------------------------------------------------------
+// Iterate over child elements, calling predefined template
+void XMLGenerator::expand_use(XML::Element& use_e, 
+			      XML::Element& define_e,
+			      XML::Element& parent,
+			      CPPT::Tags& tags,
+			      const string& streamname)
+{
+  sout << "  //Call " << define_e["name"] << " templates\n";
+
+  string ename = define_e.get_attr("element");
+
+  string child_var = get_parameter_name(define_e);
+  string parent_var = get_parameter_name(parent);
+
+  // Beware:  If we are called recursively, child_var and parent_var
+  // could be the same - spot this and modify for it
+  if (child_var == parent_var)
+    child_var = string("child_") + child_var;
+
+  string index_var = child_var + "_index";
+
+  sout << "  int " << index_var << "=0;\n";
+  if (ename.empty()) // All children
+    sout << "  OBTOOLS_XML_FOREACH_CHILD(" 
+	 << child_var << ", " << parent_var << ")\n";
+  else
+    sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
+	 << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
+
+  generate_use(use_e, define_e, tags, child_var, index_var, streamname);
+
+  sout << "  " << index_var << "++;\n";
+  sout << "  OBTOOLS_XML_ENDFOR\n";
 }
 
 //--------------------------------------------------------------------------

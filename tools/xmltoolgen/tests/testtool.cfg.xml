@@ -16,14 +16,44 @@
     </xt:tags>
   </xt:script>
 
+  <!-- Predefined template for titles -->
+  <xt:define name="Title" element="title">
+    <xt:arg name="prefix" default="?"/>
+    <H1>$= prefix =$: $= *title =$</H1>
+  </xt:define>
+
+  <!-- Predefined template for paragraphs -->
+  <xt:define name="Para" element="para">
+    <P>$= para_index+1 =$: $= *para =$</P>
+  </xt:define>
+
+  <!-- Unbound recursive template for listing structure -->
+  <xt:define name="List" var="e">
+    <LI>$= e.name =$
+    $(
+      if (e["id"].size())
+        sout << " (" << e["id"] << ")";
+      if (e.children.size()) 
+      { 
+    )$
+      <UL>
+      <xt:use template="List"/>
+      </UL>
+    $( 
+      } 
+    )$
+    </LI>
+  </xt:define>
+
+  <!-- Main template -->
   <xt:template name="Book" element="book">
     <xt:dir>$= book["name"] =$</xt:dir>
     <xt:file>index.html</xt:file>
 
-    <!-- Book  title -->
-    <xt:template name = "Book title" element="title">
-      <H1>$= *title =$</H1>
-    </xt:template>
+    <!-- Book title -->
+    <xt:use template="Title">
+      <xt:param name="prefix">Book</xt:param>
+    </xt:use>
 
     <!-- Chapter links -->
     <UL>
@@ -37,14 +67,12 @@
       <xt:file>index.html</xt:file>
 
       <!-- Chapter title -->
-      <xt:template name = "Chapter title" element="title">
-	<H1>$= *title =$</H1>
-      </xt:template>
+      <xt:use template="Title">
+        <xt:param name="prefix">Chapter $=title_index+1=$</xt:param>
+      </xt:use>
 
       <!-- Chapter paragraphs -->
-      <xt:template name = "Chapter introductory paras" element="para">
-	<P>$= *para =$</P>
-      </xt:template>
+      <xt:use template="Para"/>
 
       <!-- Section links -->
       <UL>
@@ -59,16 +87,25 @@
 	<xt:file>sec.$= section["id"] =$.html</xt:file>
 
 	<!-- Section title -->
-	<xt:template name = "Section title" element="title">
-	  <H1>$= *title =$</H1>
-	</xt:template>
+        <xt:use template="Title"/>
 
 	<!-- Section paragraphs -->
-	<xt:template name = "Section paras" element="para">
-	  <P>$= *para =$</P>
-	</xt:template>
+	<xt:use template="Para"/>
       </xt:template>
     </xt:template>
+
+    <!-- Structure listing - example of an unbound recursive template -->
+    <HR/>
+    <H2>Structure listing</H2>
+    <UL><xt:use template="List"/></UL>
+
+    <!-- XML Listing - unparsed output of entire element -->
+    <HR/>
+    <H2>Raw XML</H2>
+    <PRE>
+    $= book =$
+    </PRE>
+
   </xt:template>
 </xt:tool>  
 
