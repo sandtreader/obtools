@@ -37,7 +37,7 @@ Message::Message(const string& subject, const string& text_content,
 {
   string id = allocate_id();
 
-  // Hold in a textual form
+  // Hold in a textual form to save parsing the text
   ostringstream mss;
   mss << "<message id=\"" << id << "\" subject=\"" << subject << "\"";
   if (rsvp) mss << " rsvp=\"yes\"";
@@ -60,7 +60,7 @@ Message::Message(const string& subject, XML::Element *xml_content,
 {
   string id = allocate_id();
 
-  // Manufacturer an XML <message> element containing the attributes and
+  // Manufacture an XML <message> element containing the attributes and
   // the given content
   xml_message = new XML::Element("message");
   xml_message->attrs["id"] = id;
