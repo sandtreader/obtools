@@ -22,6 +22,8 @@
 # CONFIGS:   Configs and other files copied to release
 # VARIANTS:  List of build variants
 # VARIANT-xx: Flags for each variant
+# DIRTY:     Extra things to delete on 'make clean' (as well as build- dirs)
+# CLEANCMD:  Extra clean command on 'make clean'
 
 # This recurses on itself with target 'exe'
 
@@ -139,7 +141,8 @@ all:	$(patsubst %,build-%,$(VARIANTS))
 
 # Top-level clean target
 clean: 
-	-@rm -rf build-*
+	-@rm -rf build-* $(DIRTY)
+	$(CLEANCMD)
 
 # Top-level test target - run tests on all variants
 test:	$(patsubst %,test-%,$(VARIANTS))
