@@ -11,10 +11,9 @@
 namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
-// Constructor.  Starts listening immediately and doesn't return unless
-// it all falls apart.
-TCPServer::TCPServer(int _port, int _backlog):
-  port(_port), backlog(_backlog)
+// Run server
+// doesn't return unless it all falls apart.
+void TCPServer::run()
 {
   if (fd < 0) return;
 
@@ -44,12 +43,35 @@ TCPServer::TCPServer(int _port, int _backlog):
       IPAddress client_address(htonl(saddr.sin_addr.s_addr));
       int client_port = ntohs(saddr.sin_port);
 
-      //!!! Hand it to thread pool
+      // Get a thread
+      TCPServerThread *thread = threadpool.remove();
+      if (thread)
+      {
+	// Fill in parameters
+	thread->server         = this;
+	thread->client_socket  = client_socket;
+	thread->client_address = client_address;
+	thread->client_port    = client_port;
+
+	// Start it off
+	thread->kick();
+      }
+      else
+      {
+	// Dump it
+	client_socket.close();
+      }
     }
   }
 }
 
-
+//--------------------------------------------------------------------------
+// Server thread 'run' function
+void TCPServerThread::run()
+{
+  // Just pass them to the server's process function
+  server->process(client_socket, client_address, client_port);
+}
 
 }} // namespaces
 

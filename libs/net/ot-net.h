@@ -18,6 +18,8 @@
 #include <iostream>
 #include <string>
 
+#include "ot-mt.h"
+
 namespace ObTools { namespace Net { 
 
 //Make our lives easier without polluting anyone else
@@ -76,13 +78,17 @@ protected:
   // Default constructor - set bad initially
   Socket(): fd(-1) {}
  
-  // Virtual destructor - usually we just close  
+  // Virtual destructor
   virtual ~Socket();
 
 public:
   //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return fd<0; }
+
+  //--------------------------------------------------------------------------
+  // Close
+  void close();
 
   //--------------------------------------------------------------------------
   // Go non-blocking
@@ -253,29 +259,56 @@ public:
   //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !connected; }
+
+  //--------------------------------------------------------------------------
+  // Destructor (closes socket)
+  TCPClient::~TCPClient();
 };
 
 //==========================================================================
 // TCP server (multi-threaded, multiple clients at once)
 // This is an abstract class which should be subclassed to implement
 // process()
+class TCPServer;  //forward
+
+class TCPServerThread: public MT::PoolThread
+{
+public:
+  TCPServer *server;
+  TCPSocket client_socket;
+  IPAddress client_address;
+  int client_port;
+
+  TCPServerThread(MT::PoolReplacer<TCPServerThread>& _rep):
+    MT::PoolThread(_rep) {}
+  virtual void run();
+};
+
 class TCPServer: public TCPSocket
 {
 private:
   int port;
   int backlog;
+  MT::ThreadPool<TCPServerThread> threadpool;
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor.  Starts listening immediately and doesn't return unless
-  // it all falls apart.
-  TCPServer(int _port, int _backlog=5);
+  // Constructor.  
+  TCPServer::TCPServer(int _port, int _backlog=5, 
+		       int min_spare=1, int max_threads=10):
+    port(_port), backlog(_backlog), threadpool(min_spare, max_threads) {}
+
+  //--------------------------------------------------------------------------
+  // Run server
+  // Doesn't return unless it all falls apart.
+  void run();
 
   //--------------------------------------------------------------------------
   // Virtual function to process a single connection on the given socket.  
   // Called in its own thread, this use blocking IO to read and write the
   // socket, and should just return when the socket ends or when bored
-  virtual void process(TCPSocket &s) = 0;
+  virtual void process(TCPSocket &s, IPAddress client_address,
+		       int client_port)=0;
 };
 
 

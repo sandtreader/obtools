@@ -18,10 +18,21 @@ namespace ObTools { namespace Net {
 // Abstract Socket 
 
 //--------------------------------------------------------------------------
-// Default destructor - just close
+// Default destructor - do nothing
+// NOTE:  Does NOT close the fd - that causes nightmares in assignment ops 
 Socket::~Socket()
 {
-  close(fd);
+}
+
+//--------------------------------------------------------------------------
+// Close
+void Socket::close()
+{
+  if (fd>=0)
+  {
+    ::close(fd);
+    fd = -1;
+  }
 }
 
 //--------------------------------------------------------------------------

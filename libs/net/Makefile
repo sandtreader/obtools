@@ -11,17 +11,22 @@ CPPFLAGS += -g
 LDFLAGS += -g
 endif
 
-all: test-client
+CPPFLAGS += -I../mt
+
+all: test-client test-server
 
 clean: 
 	-@rm -f *.o *.a *~ test-client
 
-test:	test-client
+test:	test-client test-server
 	./test-client localhost
 
 #Test harnesses:
-test-client: test-client.o ot-net.a
+test-client: test-client.o ot-net.a 
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++
+
+test-server: test-server.o ot-net.a ../mt/ot-mt.a
+	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ -lpthread
 
 #Core library
 ot-net.a: $(OBJS)
@@ -30,6 +35,7 @@ ot-net.a: $(OBJS)
 #Objects
 $(OBJS): ot-net.h Makefile
 test-client.o: ot-net.h Makefile
+test-server.o: ot-net.h Makefile
 
 
 
