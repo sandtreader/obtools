@@ -17,7 +17,7 @@ namespace ObTools { namespace XMLMesh {
 // Constructor for responses
 FaultMessage::FaultMessage(const string& ref, SOAP::Fault::Code _code,
 			   const string& _reason):
-  Message("xmlmesh.fault", new SOAP::Fault(code, reason), false, ref),
+  Message("xmlmesh.fault", new SOAP::Fault(_code, _reason), false, ref),
   code(_code),
   reason(_reason)
 {
