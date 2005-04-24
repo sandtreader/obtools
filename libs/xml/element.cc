@@ -79,8 +79,8 @@ void Element::write_indented(int indent, ostream &s) const
       //Could have an 'optimised' content string, though
       if (content.size())
       {
-	//String it all on one line
-	s << '>' << content << "</" << name << '>' << endl;
+	//String it all on one line - escaped for &, < and >
+	s << '>' << escape(content, false) << "</" << name << '>' << endl;
       }
       else
       {
