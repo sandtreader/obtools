@@ -1,0 +1,9 @@
+*.tgz
+*.h
+*.a
+*.so
+*.so.*
+*.cfg.xml
+xmlmesh-server
+*.deb
+*.v

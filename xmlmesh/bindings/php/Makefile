@@ -8,8 +8,9 @@
 TYPE	= dlmod
 NAME   	= php_xmlmesh
 OBJS 	= php_xmlmesh.o
-DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
-	  net log xml soap text cache misc
+#DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
+#	  net log xml soap text cache misc
+DEPENDS	= xmlmesh-c ot-xmlmesh ot-general
 PHP	= /usr/include/php4
 EXTINCS = $(PHP) $(PHP)/TSRM $(PHP)/main $(PHP)/Zend
 
