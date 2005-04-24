@@ -47,6 +47,18 @@ bool Thread::start()
 }
 
 //--------------------------------------------------------------------------
+// Set priority - higher numbers have higher priority
+// realtime sets SCHED_RR if set
+// Whether successful (may fail if realtime requested when not root)
+bool Thread::set_priority(int priority, bool realtime)
+{
+  struct sched_param param;
+  param.sched_priority = priority;
+  return pthread_setschedparam(thread, realtime?SCHED_RR:SCHED_OTHER, 
+			       &param) == 0;
+}
+
+//--------------------------------------------------------------------------
 // Cancel - ask it to stop
 void Thread::cancel()
 {

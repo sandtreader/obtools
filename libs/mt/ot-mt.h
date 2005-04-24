@@ -44,6 +44,12 @@ public:
   bool start();
 
   //--------------------------------------------------------------------------
+  // Set priority - higher numbers have higher priority
+  // realtime sets SCHED_RR if set
+  // Whether successful (may fail if realtime requested when not root)
+  bool set_priority(int priority, bool realtime=false);
+
+  //--------------------------------------------------------------------------
   // Join - caller waits for this thread to end
   void join() { if (thread) pthread_join(thread, NULL); }
 
