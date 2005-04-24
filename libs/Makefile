@@ -6,7 +6,7 @@
 #==========================================================================
 
 SUBS = xml xmi cppt regen misc text mt net log cache db cli init soap \
-       chan web time
+       chan web time superlibs
 ROOT = ..
 include ../build/dir.mk
 
