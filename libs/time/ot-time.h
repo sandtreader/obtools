@@ -118,6 +118,22 @@ public:
   // Convert to HH:MM:SS string - never goes into days or higher
   // Can output fractional seconds - rounds to nearest millisecond
   string hms() const;
+
+  //------------------------------------------------------------------------
+  // Arithmetic operators, so far as it makes sense
+  Duration operator-(const Duration& o) const { return Duration(t-o.t); }
+  Duration operator+(const Duration& o) const { return Duration(t+o.t); }
+  Duration operator*(double n) const { return Duration(t*n); }
+  Duration operator/(double n) const { return Duration(t/n); }
+
+  //------------------------------------------------------------------------
+  // Comparison operators
+  bool operator==(const Duration& o) const { return t==o.t; }
+  bool operator!=(const Duration& o) const { return t!=o.t; }
+  bool operator<(const Duration& o) const { return t<o.t; }
+  bool operator>(const Duration& o) const { return t>o.t; }
+  bool operator<=(const Duration& o) const { return t<=o.t; }
+  bool operator>=(const Duration& o) const { return t>=o.t; }
 };
 
 //==========================================================================
