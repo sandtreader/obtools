@@ -16,29 +16,38 @@
 # 2: Directory of source, relative to ROOT
 # 3: Optional variant suffix of build directory, OR 'NOLIB' for templates
 OT-LIBS = cli:libs/cli     			\
-          cppt:libs/cppt   			\
-          db-pgsql:libs/db:-pgsql 		\
+	  cppt:libs/cppt   			\
+	  db-pgsql:libs/db:-pgsql 		\
 	  cache:libs/cache:NOLIB  		\
 	  chan:libs/chan			\
 	  init:libs/init			\
 	  log:libs/log     			\
 	  misc:libs/misc   			\
-          mt:libs/mt       			\
-          net:libs/net     			\
-          regen:libs/regen 			\
+	  mt:libs/mt       			\
+	  net:libs/net     			\
+	  regen:libs/regen 			\
 	  soap:libs/soap			\
-          text:libs/text   			\
+	  text:libs/text   			\
 	  time:libs/time			\
 	  web:libs/web				\
-          xmi:libs/xmi     			\
-          xml:libs/xml     			\
-          xmlmesh-core:xmlmesh/core  		\
-          xmlmesh-otmp:xmlmesh/otmp  		\
-          xmlmesh-client:xmlmesh/client 	\
-          xmlmesh-c:xmlmesh/bindings/c  	\
-	  toolgen:tools/toolgen     		\
+	  xmi:libs/xmi     			\
+	  xml:libs/xml     			\
+	  xmlmesh-core:xmlmesh/core  		\
+	  xmlmesh-otmp:xmlmesh/otmp  		\
+	  xmlmesh-client:xmlmesh/client 	\
+	  xmlmesh-c:xmlmesh/bindings/c  	\
+	  toolgen:tools/toolgen			\
 	  xmitoolgen:tools/xmitoolgen		\
 	  xmltoolgen:tools/xmltoolgen
+
+# List of shared libraries and associated directories
+# Each word split by ':' into
+# 1: Library name, including variant (as put into DEPENDS)
+# 2: Directory of source, relative to ROOT
+OT-SHLIBS = ot-general:libs/superlibs/general	\
+	    ot-db-pgsql:libs/superlibs/db	\
+	    ot-codegen:libs/superlibs/codegen	\
+	    ot-xmlmesh:xmlmesh/superlibs/xmlmesh
 
 #==========================================================================
 # Template for standard Obtools library
@@ -49,6 +58,7 @@ OT-LIBS = cli:libs/cli     			\
 define lib_template
 DIR-$(1) = $$(ROOT)/$(2)
 ifneq ($(3), NOLIB)
+VARIANTS-$(1) = $(3)
 LIBS-$(1)-release = $$(DIR-$(1))/build-release$(3)/ot-$(1).a
 LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$(3)/ot-$(1).a
 LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release$(3)/ot-$(1).a
@@ -64,7 +74,18 @@ endef
 # Run template for each library, splitting on : to match template args (q.v.)
 $(foreach lib,$(OT-LIBS),$(eval $(call split_template,$(subst :, ,$(lib)))))
 
+define shlib_template
+DIR-$(1) = $$(ROOT)/$(2)
+LIBS-$(1)-release = $$(DIR-$(1))/build-release/lib$(1).so
+LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug/lib$(1).so
+LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release/lib$(1).so
+LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug/lib$(1).so
+endef
 
+# Split at spaces and pass on to lib_template as words
+define shsplit_template
+$(call shlib_template,$(word 1,$(1)),$(word 2,$(1)))
+endef
 
-
-
+# Run template for each library, splitting on : to match template args (q.v.)
+$(foreach shlib,$(OT-SHLIBS),$(eval $(call shsplit_template,$(subst :, ,$(shlib)))))

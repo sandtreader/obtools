@@ -13,6 +13,7 @@
 #              lib    Library
 #              dlmod  Dynamically loaded module (with static libraries inside)
 # NAME:      Name of the executable/library/module
+# VERSION:   Version number of the shared superlibrary
 # OBJS:      List of local objects to build in the exe/lib/dlmod
 # HEADERS:   Internal header dependencies / released headers for libs
 # DEPENDS:   List of ObTools libraries we depend on
@@ -49,16 +50,24 @@ endif
 ifndef VARIANTS
 ifdef MT-VARIANTS
 VARIANTS = release debug single-release single-debug
-VARIANT-release 	= RELEASE MULTI
-VARIANT-debug 		= DEBUG MULTI
-VARIANT-single-release 	= RELEASE SINGLE
-VARIANT-single-debug 	= DEBUG SINGLE
+VARIANT-release			= RELEASE MULTI
+VARIANT-debug			= DEBUG MULTI
+VARIANT-single-release		= RELEASE SINGLE
+VARIANT-single-debug		= DEBUG SINGLE
 else
 VARIANTS = debug release
-VARIANT-debug 	= DEBUG
-VARIANT-release = RELEASE
+VARIANT-debug		= DEBUG
+VARIANT-release		= RELEASE
 endif
 endif
+
+# Suffix rules for shared objects
+SUFFIXES += .lo
+%.lo : %.c
+	$(COMPILE.c) -fpic $(OUTPUT_OPTION) $<
+
+%.lo : %.cc
+	$(COMPILE.cc) -fpic $(OUTPUT_OPTION) $<
 
 # Get locations
 include $(ROOT)/build/locations.mk
@@ -67,11 +76,13 @@ include $(ROOT)/build/locations.mk
 ifeq ($(TYPE), lib)
 ifdef OBJS   # If no objects, no library is built
 LIB 	= $(NAME).a
+SALIB	= $(NAME).sa
+LOBJS	= $(patsubst %.o,%.lo,$(OBJS))
 RELEASABLE   = $(LIB)
 RELEASE-NAME = $(LIB)
 endif
 
-TARGETS = $(LIB)
+TARGETS = $(LIB) $(SALIB) .copied
 ifdef DEBUG         # Only build tests in DEBUG version
 TARGETS += $(TESTS)
 endif
@@ -92,6 +103,20 @@ RELEASE-NAME = $(NAME).so
 CPPFLAGS += -fpic
 endif
 
+#Targets for superlib
+ifeq ($(TYPE), superlib)
+VERSIONM = $(word 1,$(subst ., ,$(VERSION)))
+SOLINK = lib$(NAME).so
+SOLIB = $(SOLINK).$(VERSION)
+SONAME = $(SOLINK).$(VERSIONM)
+SALIBS = $(patsubst %.a,%.sa,$(LIBS))
+TARGETS = $(SOLIB)
+RELEASABLE = $(SOLIB)
+RELEASE-NAME = $(SOLIB)
+RELEASE-LINK = $(SONAME)
+CPPFLAGS += -fpic
+endif
+
 #Set standard flags
 CPPFLAGS += -W -Wall
 
@@ -107,6 +132,10 @@ LIB-SINGLEP = -single
 ifeq ($(TYPE), lib)
 RELEASE-NAME = $(NAME)-single.a
 endif
+ifeq ($(TYPE), superlib)
+RELEASE-NAME = lib$(NAME)-single.so.$(VERSION)
+RELEASE-LINK = lib$(NAME)-single.so.$(VERSIONM)
+endif
 endif
 
 ifdef DEBUG
@@ -120,13 +149,23 @@ endif
 #Sort out dependencies
 define dep_template
 #Expand DIR-xxx for each dependency
-CPPFLAGS += -I$(DIR-$(1))
+CPPFLAGS += -I$(DIR-$(1))/build$(LIB-SINGLEP)$(LIB-DEBUGP)
 
 #Add library dependency for tests/exe/dlmod
 LIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
 endef
 
 $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
+
+# Sort out header propagation for superlibs
+define header_template
+SOHEADERS += $(DIR-$(1))/build$(LIB-SINGLEP)$(LIB-DEBUGP)$(VARIANTS-$(1))/*.h
+endef
+
+# ifeq...endif commented out due to 'eval' bug in make...
+#ifeq ($(TYPE), superlib)
+$(foreach dep,$(DEPENDS),$(eval $(call header_template,$(dep))))
+#endif
 
 #Add external libraries and includes
 CPPFLAGS += $(patsubst %,-I%,$(EXTINCS))
@@ -142,7 +181,7 @@ vpath % ..
 all:	$(patsubst %,build-%,$(VARIANTS))
 
 # Top-level clean target
-clean: 
+clean:
 	-@rm -rf build-* *~ $(DIRTY)
 	$(CLEANCMD)
 
@@ -153,7 +192,7 @@ test:	$(patsubst %,test-%,$(VARIANTS))
 # and copy configs - assumed to be invariant
 release: $(patsubst %,release-%,$(VARIANTS))
 ifdef CONFIGS
-	cp $(CONFIGS) $(RELEASEDIR) 
+	cp $(CONFIGS) $(RELEASEDIR)
 endif
 
 # Documentation target - simply append the local obdoc.xml file (if it exists)
@@ -195,10 +234,17 @@ dorelease:
 ifdef RELEASE
 ifdef RELEASEDIR
 ifdef RELEASABLE
-	cp $(RELEASABLE) ../$(RELEASEDIR)/$(RELEASE-NAME) 
+	cp $(RELEASABLE) ../$(RELEASEDIR)/$(RELEASE-NAME)
 endif
 ifeq ($(TYPE), lib)
-	cp $(patsubst %,../%,$(HEADERS)) ../$(RELEASEDIR) 
+	cp $(patsubst %,../%,$(HEADERS)) ../$(RELEASEDIR)
+endif
+ifeq ($(TYPE), superlib)
+	cd ../$(RELEASEDIR); ln -fs $(RELEASE-NAME) $(RELEASE-LINK)
+	echo $(VERSION) > ../$(RELEASEDIR)/$(NAME).v
+endif
+ifeq ($(TYPE), exe)
+	echo $(VERSION) > ../$(RELEASEDIR)/$(NAME).v
 endif
 endif
 endif
@@ -218,20 +264,41 @@ $(NAME): $(OBJS) $(LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ $(EXTRALIBS)
 endif
 
+#Library
 ifeq ($(TYPE), lib)
+.copied: $(patsubst %,../%,$(HEADERS))
+	cp $(patsubst %,../%,$(HEADERS)) .
+	touch .copied
+
 $(LIB): $(OBJS)
-	$(AR) r $@ $^
+	$(AR) r $@ $(OBJS)
+
+$(SALIB): $(LOBJS)
+	$(AR) r $@ $(LOBJS)
 endif
 
+#DL Mod
 ifeq ($(TYPE), dlmod)
 $(NAME).so: $(OBJS) $(LIBS)
 	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ $^ -lstdc++ $(EXTRALIBS)
 endif
 
+#Superlib
+ifeq ($(TYPE), superlib)
+$(SOLIB): $(SALIBS)
+	cp $(SOHEADERS) .
+	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
+        $(SALIBS) -Wl,-no-whole-archive -lstdc++
+	ln -fs $@ $(SOLINK)
+endif
+
 #Dependencies
-$(OBJS): $(HEADERS) Makefile
+$(OBJS): $(patsubst %,../%,$(HEADERS)) Makefile
+ifeq ($(TYPE), lib)
+$(LOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
+endif
 ifdef TESTOBJS
-$(TESTOBJS): $(HEADERS) Makefile
+$(TESTOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
 endif
 
 
