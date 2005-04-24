@@ -2,9 +2,13 @@
 #==========================================================================
 # Makedeb file for ObTools General libraries.
 #
-# Copyright (c) 2004 xMill Consulting Limited.  All rights reserved
+# Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
+
+#This file originally by Will Colwyn <willc@westerntelecom.co.uk>
+#Copyright assigned by Western Telecom Limited under 
+#Software Licensing Agreement dated 13th January 2005
 
 set -e
 
@@ -37,7 +41,7 @@ Section: libs
 Priority: optional
 Architecture: $ARCH
 Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3), libot-general (>= 1.0.0), libot-xmlmesh (>= 1.0.0)
-Maintainer: Will Colwyn <willc@westerntelecom.co.uk>
+Maintainer: xMill Consulting <info@xmill.com>
 Description: ObTools XMLMesh server - $DESC.
 EOF
 
