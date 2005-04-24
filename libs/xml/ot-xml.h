@@ -566,6 +566,12 @@ public:
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_int(const string& path, int def=0);
+
+  //--------------------------------------------------------------------------
+  // Real value fetch
+  // Defaults to default value given (or 0.0) if not present
+  // Returns 0.0 if present but bogus
+  double get_value_real(const string& path, double def=0.0);
 };
 
 //==========================================================================
@@ -643,6 +649,12 @@ public:
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_int(const string& path, int def=0);
+
+  //--------------------------------------------------------------------------
+  // XPath Real value fetch
+  // Defaults to default value given (or 0.0) if not present
+  // Returns 0.0 if present but bogus
+  double get_value_real(const string& path, double def=0.0);
 
   //------------------------------------------------------------------------
   // XPath list-of-values fetch

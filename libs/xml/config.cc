@@ -100,6 +100,16 @@ int Configuration::get_value_int(const string& path, int def)
   return xpath.get_value_int(path, def); 
 }
 
+//--------------------------------------------------------------------------
+// Real value fetch
+// Defaults to default value given (or 0.0) if not present
+// Returns 0.0 if present but bogus
+double Configuration::get_value_real(const string& path, double def)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.get_value_real(path, def); 
+}
+
 //------------------------------------------------------------------------
 // XPath list-of-values fetch
 // Returns contents of all elements matching XPath

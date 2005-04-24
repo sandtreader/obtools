@@ -138,4 +138,14 @@ int XPathProcessor::get_value_int(const string& path, int def)
   return def;
 }
 
+//--------------------------------------------------------------------------
+// Real value fetch
+// Defaults to default value given (or 0.0) if not present
+// Returns 0.0 if present but bogus
+double XPathProcessor::get_value_real(const string& path, double def)
+{
+  string v = get_value(path);
+  if (!v.empty()) return atof(v.c_str());
+  return def;
+}
 
