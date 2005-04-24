@@ -5,6 +5,8 @@ Libs
 
 XML:
  - Implement CDATA marked section
+ - Keep line number in element for semantic errors & nesting errors
+ - Don't output <?xml ?> by default - provide separate function
 
 DB:
  - Transactions
@@ -56,12 +58,20 @@ Future:
 
 XMITools
 --------
-Basic tool:
+Toolgen library:
  - Make regen optional
- - Test tool - use some config items
+ - Auto read config items with xpath - option to override on CLI
+ - xt:init code goes into main()
 
 xmltoolgen:
- - Fix %lt; issue? - accept and ignore subelements - use namespace?
+ - Test tool - use some config items
+
+xmitoolgen:
+
+obdoc:
+ - Provide mechanism for file header/footer
+ - Provide summary TOC
+ - Allow global variables 
 
 <RELEASE 1>
 
