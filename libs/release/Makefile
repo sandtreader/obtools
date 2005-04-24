@@ -6,11 +6,12 @@
 #==========================================================================
 
 all: 
+	./makedeb-general.sh
+	./makedeb-db-pgsql.sh
+	./makedeb-codegen.sh
 	-@rm -f *.tgz *~
-	tar cvfz obtools-libs.tgz --exclude=CVS --exclude=Makefile *
+	tar cvfz obtools-libs.tgz --exclude=CVS --exclude=Makefile \
+        --exclude=makedeb*.sh --exclude=*.deb --exclude=*.v *
 
 clean:
-	-@rm -f *.a *.h *.tgz *~
-
-
-
+	-@rm -f *.so *.so.* *.a *.h *.tgz *~ *.v *.deb
