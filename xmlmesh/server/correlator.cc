@@ -14,21 +14,43 @@
 
 namespace ObTools { namespace XMLMesh { 
 
+class Correlator;   // Forward
+
 //==========================================================================
 // Request-response correlation
-struct Correlation
+// Implements MessageTracker interface
+struct Correlation: public MessageTracker
 {
+  Correlator& correlator;        // Ref back to owning correlator
   string id;                     // Request message ID
   ServiceClient client;          // Client we're acting for
   string source_path;            // Original path for the request 
+  list<RoutingMessage *> copies; // List of copies of message
+  bool forwarded;                // Whether forwarded 
+  bool replied;                  // Whether replied
 
-  Correlation(const string& _id,
+  //------------------------------------------------------------------------
+  // Constructor
+  Correlation(Correlator& _corr, const string& _id,
 	      ServiceClient& _client,
 	      const string& _source_path):
-    id(_id), client(_client), source_path(_source_path) {}
-};
+    correlator(_corr), id(_id), client(_client), source_path(_source_path),
+    forwarded(false), replied(false) {}
 
-ostream& operator<<(ostream&s, const Correlation& c);
+  //------------------------------------------------------------------------
+  // MessageTracker interface implementations
+  void notify_forwarded(RoutingMessage *) { forwarded = true; }
+  void attach(RoutingMessage *msg) { copies.push_back(msg); }
+  void detach(RoutingMessage *msg);
+
+  //------------------------------------------------------------------------
+  // Internal notification
+  void notify_replied() { replied = true; }
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Correlation();
+};
 
 //==========================================================================
 // Correlator service
@@ -57,7 +79,63 @@ public:
   //------------------------------------------------------------------------
   // Tick function - times out correlations
   void tick();
+
+  //------------------------------------------------------------------------
+  // Handle orphan messages (messages that cannot now be replied to)
+  void handle_orphan(const string& id, ServiceClient& client, 
+		     Correlation *cr);
 };
+
+
+//==========================================================================
+// Correlation implementation
+
+//------------------------------------------------------------------------
+// Correlation stream operator
+ostream& operator<<(ostream&s, const Correlation& c)
+{
+  s << "[" << c.id << " -> " << c.source_path << " for " 
+    << c.client.client << " ]";
+  return s;
+}
+
+//------------------------------------------------------------------------
+// Detach a copy of a message (before it dies)
+void Correlation::detach(RoutingMessage *msg)
+{
+  // Remove this message from the list
+  copies.remove(msg);
+
+  // If now empty, and not forwarded or replied, there will be no response,
+  // so get correlator to fail it
+  if (copies.empty() && !forwarded && !replied) 
+  {
+    correlator.handle_orphan(id, client, this);
+
+    // Set replied so we don't do it again when the correlation times out
+    replied = true;
+  }
+}
+
+//------------------------------------------------------------------------
+// Destructor
+Correlation::~Correlation()
+{
+  // Make sure we are cut loose from any messages which are still
+  // being tracked by us
+  while (!copies.empty())
+  {
+    RoutingMessage *msg = copies.front();
+    copies.pop_front();
+    msg->tracker = 0;
+  }
+
+  // If not replied, we must send back an orphan error
+  if (!replied) correlator.handle_orphan(id, client, this);
+}
+
+//==========================================================================
+// Correlator implementation
 
 //------------------------------------------------------------------------
 // Default Constructor 
@@ -95,8 +173,10 @@ bool Correlator::handle(RoutingMessage& msg)
       MessagePath path(cr->source_path);
       RoutingMessage newmsg(client, msg.message, path);
       originate(newmsg);
-       
-      // Remove it from cache
+
+      // Notify reply and remove it from cache
+      // (will detach itself from messages)
+      cr->notify_replied();
       request_cache.remove(our_ref);
 
       // Don't continue with this message in normal routing
@@ -122,9 +202,14 @@ bool Correlator::handle(RoutingMessage& msg)
       string id = msg.message.get_id();
 
       // Create correlated request and enter in the cache
-      Correlation *cr = new Correlation(id, msg.client, msg.path.to_string());
+      Correlation *cr = new Correlation(*this, id, msg.client, 
+					msg.path.to_string());
       request_cache.add(id, cr);
-      
+
+      // Put the correlation in as a message tracker so we can trace what
+      // happens to this message
+      msg.track(cr);
+
       // Log it
       tlog.detail << "Correlator: Opened correlation:\n  " << *cr << endl;
     }
@@ -174,13 +259,20 @@ void Correlator::tick()
 }
 
 //------------------------------------------------------------------------
-// Correlation stream operator
-ostream& operator<<(ostream&s, const Correlation& c)
+// Handle orphan messages (messages that cannot now be replied to)
+void Correlator::handle_orphan(const string& id, ServiceClient& client, 
+			       Correlation *cr)
 {
-  s << "[" << c.id << " -> " << c.source_path << " for " 
-    << c.client.client << " ]";
-  return s;
+  log.error << "Correlation " << *cr << " orphaned with no response\n";
+
+  FaultMessage response(id, SOAP::Fault::CODE_RECEIVER, 
+			"Nothing to handle this request");
+  ServiceClient newclient(this, client.client);
+  MessagePath path(cr->source_path);
+  RoutingMessage newmsg(newclient, response, path);
+  originate(newmsg);
 }
+
 
 //==========================================================================
 // Auto-register

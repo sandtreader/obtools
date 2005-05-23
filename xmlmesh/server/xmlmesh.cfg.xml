@@ -7,8 +7,7 @@
       <filter address="10.0.0.0/255.255.255.128"/>
     </otmp-server>
 
-
-    <correlator id="correlator"/>
+    <correlator id="correlator" timeout="5"/>
     <publisher id="publisher"/>
   </services>
 

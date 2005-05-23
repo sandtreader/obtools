@@ -107,10 +107,16 @@ void OTMPClientService::dispatch()
 // Implementation of Service virtual interface - q.v. server.h
 bool OTMPClientService::handle(RoutingMessage& msg)
 {
-  if (!client.send(msg.message))
+  if (client.send(msg.message))
+  {
+    // Tell tracker the message has been forwarded, so it can call off
+    // the dogs locally
+    msg.notify_forwarded();
+  }
+  else
   {
     Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
-    error_log << "OTMP Client can't send message\n";  // Tell tracker!!!
+    error_log << "OTMP Client can't send message\n"; 
   }
 
   return false;  // Nowhere else to go

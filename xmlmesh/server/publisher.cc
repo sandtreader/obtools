@@ -124,6 +124,10 @@ bool Publisher::handle(RoutingMessage& msg)
       ServiceClient client(this, msg.client.client);
       MessagePath path(sub.path);
       RoutingMessage submsg(client, msg.message, path);
+
+      // If old message was being tracked, attach new one as well
+      if (msg.tracker) submsg.track(msg.tracker);
+
       originate(submsg);
     }
   }

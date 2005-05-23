@@ -78,6 +78,31 @@ class MessagePath
 };
 
 //==========================================================================
+// Abstract interface for message tracking
+
+class RoutingMessage;  // forward
+
+class MessageTracker
+{
+public:
+  //------------------------------------------------------------------------
+  // Attach a (new) copy of a message to the tracker
+  virtual void attach(RoutingMessage *msg) = 0;
+
+  //------------------------------------------------------------------------
+  // Detach a copy of a message (before it dies)
+  virtual void detach(RoutingMessage *msg) = 0;
+
+  //------------------------------------------------------------------------
+  // Notify tracker of forwarding of a message
+  virtual void notify_forwarded(RoutingMessage *msg) = 0;
+
+  //------------------------------------------------------------------------
+  // Virtual destructor (does nothing here)
+  virtual ~MessageTracker() {}
+};
+
+//==========================================================================
 // Message to be routed through the system
 struct RoutingMessage
 {
@@ -88,18 +113,67 @@ struct RoutingMessage
   MessagePath path;            // Path through the internal services
                                // - built up for requests, stripped back for
                                //   responses
- 
+  MessageTracker *tracker;     // Tracker following this message, or 0
+
   //------------------------------------------------------------------------
   // Constructor for inbound messages with empty path
   RoutingMessage(ServiceClient& _client, Message _message):
-    client(_client), message(_message), reversing(false)
+    client(_client), message(_message), reversing(false), tracker(0)
   {}
 
   //------------------------------------------------------------------------
   // Constructor for returned messages, with reverse path
   RoutingMessage(ServiceClient& _client, Message _message, MessagePath& _path):
-    client(_client), message(_message), reversing(true), path(_path)
+    client(_client), message(_message), reversing(true), path(_path),
+    tracker(0)
   {}
+
+  //------------------------------------------------------------------------
+  // Copy constructor
+  // Piecewise copy, except tells tracker that it was copied, too
+  RoutingMessage(const RoutingMessage& orig):
+    client(orig.client), message(orig.message), reversing(orig.reversing),
+    path(orig.path), tracker(orig.tracker)
+  {
+    // Attach new copy to tracker, if any
+    if (tracker) tracker->attach(this);
+  }
+
+  //------------------------------------------------------------------------
+  // Attach tracker 
+  void track(MessageTracker *_tracker)
+  {
+    // Detach any old tracker
+    untrack();
+    tracker = _tracker;
+    tracker->attach(this);
+  }
+
+  //------------------------------------------------------------------------
+  // Detach tracker
+  void untrack()
+  {
+    if (tracker)
+    {
+      tracker->detach(this);
+      tracker = 0;
+    }
+  }
+
+  //------------------------------------------------------------------------
+  // Notify of forwarding
+  void notify_forwarded()
+  {
+    // Tell tracker, if any
+    if (tracker) tracker->notify_forwarded(this);
+  }
+
+  //------------------------------------------------------------------------
+  // Destructor - tell tracker of our demise
+  ~RoutingMessage()
+  {
+    if (tracker) tracker->detach(this);
+  }
 };
 
 //==========================================================================

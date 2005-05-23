@@ -114,7 +114,7 @@ void Server::run()
 { 
   for(;;)
   {
-    sleep(10); // configurable!!!
+    sleep(1); 
 
     // Tick all services 
     for(list<Service *>::iterator p=services.begin();

@@ -185,8 +185,12 @@ bool OTMPServer::handle(RoutingMessage& msg)
 		       << client << endl;)
 
   OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
-  if (!otmp.send(otmp_msg))
-    tlog.error << "OTMP Server can't send message\n";  // Tell tracker!!!
+  if (otmp.send(otmp_msg))
+  {
+    // Tell tracker it was forwarded
+    msg.notify_forwarded();
+  }
+  else tlog.error << "OTMP Server can't send message\n";  
 
   return false;  // Nowhere else to go
 }
