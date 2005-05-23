@@ -22,9 +22,6 @@ XMLMesh
 ------
 
 Current:
-  tracking of requests;  ensure a response is received if not externally
-    routed
-
   authentication/filtering of incoming msgs:
     MD5 challenge (id, key)
     Symmetric challenge for client to prove server authentic?
