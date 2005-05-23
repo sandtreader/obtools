@@ -377,6 +377,7 @@ template<class CONTENT>
 ostream& operator<<(ostream&s, const PointerContent<CONTENT>& pc)
 {
   if (pc.ptr) s << *(pc.ptr);
+  return s;
 }
 
 //==========================================================================
