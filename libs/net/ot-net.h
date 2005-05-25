@@ -347,6 +347,18 @@ public:
   // Bind to a local port (TCP or UDP servers)
   // Whether successful
   bool bind(int port);
+
+  //--------------------------------------------------------------------------
+  // Get local address
+  // Only works if socket is bound or connected.  
+  // Because of multihoming, IP address may only be available if connected 
+  // to a specific remote host
+  EndPoint local();
+
+  //--------------------------------------------------------------------------
+  // Get remote address
+  // Only works if socket is connected.  
+  EndPoint remote();
 };
 
 //==========================================================================
@@ -501,8 +513,13 @@ public:
   UDPSocket();
 
   //--------------------------------------------------------------------------
-  // Constructor - allocatebs socket and binds to local port (UDP server)
+  // Constructor - allocates socket and binds to local port (UDP server)
   UDPSocket(int port);
+
+  //--------------------------------------------------------------------------
+  // Constructor - allocates socket and connects to remote port (UDP client)
+  // Use this to obtain local addressing for packets sent to this endpoint
+  UDPSocket(EndPoint remote);
 
   //--------------------------------------------------------------------------
   // Raw datagram recv wrapper

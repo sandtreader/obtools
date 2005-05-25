@@ -81,6 +81,37 @@ bool Socket::bind(int port)
   return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
 }
 
+//--------------------------------------------------------------------------
+// Get local address
+// Only works if socket is bound or connected.  
+// Because of multihoming, IP address may only be available if connected 
+// to a specific remote host
+EndPoint Socket::local()
+{
+  struct sockaddr_in name;
+  socklen_t namelen = sizeof(name);
+
+  if (!getsockname(fd, (struct sockaddr *)&name, &namelen))
+    return EndPoint(name);
+  else
+    return EndPoint();
+}
+
+//--------------------------------------------------------------------------
+// Get remote address
+// Only works if socket is connected.  
+EndPoint Socket::remote()
+{
+  struct sockaddr_in name;
+  socklen_t namelen = sizeof(name);
+
+  if (!getpeername(fd, (struct sockaddr *)&name, &namelen))
+    return EndPoint(name);
+  else
+    return EndPoint();
+}
+
+
 //==========================================================================
 // Socket exceptions
 
@@ -318,6 +349,21 @@ UDPSocket::UDPSocket(int port)
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
   CHECKFD(fd)
   if (!Socket::bind(port)) close();
+}
+
+//--------------------------------------------------------------------------
+// Constructor - allocates socket and connects to remote port (UDP client)
+// Use this to obtain local addressing for packets sent to this endpoint
+UDPSocket::UDPSocket(EndPoint remote)
+{
+  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  CHECKFD(fd)
+
+  struct sockaddr_in saddr;
+  remote.set(saddr);
+
+  if (fd>=0 && connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+    close();
 }
 
 //--------------------------------------------------------------------------
