@@ -200,6 +200,20 @@ public:
   // Add a Duration to a stamp
   Stamp operator+(const Duration& d) const
   { return Stamp::from_ntp(t+d.ntp()); }
+
+  //------------------------------------------------------------------------
+  // Comparison operators
+  // Think very hard before you use exact inequality/equality - two
+  // different timestamps are very unlikely to be the same...  Provided
+  // really only for piecewise comparison of structures that contain them
+  bool operator==(const Stamp& o) const { return t==o.t; }
+  bool operator!=(const Stamp& o) const { return t!=o.t; }
+
+  // These are much safer...
+  bool operator<(const Stamp& o) const { return t<o.t; }
+  bool operator>(const Stamp& o) const { return t>o.t; }
+  bool operator<=(const Stamp& o) const { return t<=o.t; }
+  bool operator>=(const Stamp& o) const { return t>=o.t; }
 };
 
 
