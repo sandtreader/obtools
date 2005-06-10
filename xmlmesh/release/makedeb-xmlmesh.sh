@@ -106,7 +106,7 @@ install -m 0644 $SRC_DIR/ot-xmlmesh-client.h $DEB_DEV/usr/include/obtools/
 install -m 0644 $SRC_DIR/ot-xmlmesh-client-otmp.h $DEB_DEV/usr/include/obtools/
 install -m 0644 $SRC_DIR/../../libs/release/ot-soap.a $DEB_DEV/usr/lib/obtools/
 install -m 0644 $SRC_DIR/../../libs/release/ot-soap-single.a $DEB_DEV/usr/lib/obtools/
-install -m 0644 $SRC_DIR/../../libs/release/ot-soap.h $DEB_DEV/usr/lib/obtools/
+install -m 0644 $SRC_DIR/../../libs/release/ot-soap.h $DEB_DEV/usr/include/obtools/
 
 # create links
 pushd $DEB_RUN/usr/lib/obtools
