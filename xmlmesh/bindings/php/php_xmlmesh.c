@@ -70,14 +70,14 @@ ZEND_MINFO_FUNCTION(xmlmesh);
 zend_module_entry xmlmesh_module_entry = 
 {
   STANDARD_MODULE_HEADER,
-  "XMLMesh Client",
+  "xmlmesh",
   xmlmesh_functions,
   ZEND_MINIT(xmlmesh),
   ZEND_MSHUTDOWN(xmlmesh),
   ZEND_RINIT(xmlmesh),
   ZEND_RSHUTDOWN(xmlmesh),
   ZEND_MINFO(xmlmesh),
-  "0.1",
+  "0.2",
   STANDARD_MODULE_PROPERTIES
 };
 
