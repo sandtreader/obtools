@@ -74,7 +74,7 @@ ResultSet::~ResultSet()
 //Constructor - takes Postgres connection string
 //e.g. "host=localhost dbname=foo user=prc password=secret"
 Connection::Connection(const string& conninfo): 
-  DB::Connection(), pgconn(0), last_oid(-1)
+  DB::Connection(), pgconn(0)
 {
   PGconn *conn = PQconnectdb(conninfo.c_str());
   if (!conn || PQstatus(conn) == CONNECTION_BAD)
@@ -117,14 +117,6 @@ bool Connection::exec(const string& sql)
   if (status == PGRES_COMMAND_OK)
   {
     OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec OK" << endl;)
-
-    // Grab OID in case they want to see it
-    Oid oid = PQoidValue(res);
-    if (oid != InvalidOid)
-      last_oid = (int)oid;
-    else
-      last_oid = -1;
-
     PQclear(res);
     return true;
   }
@@ -170,13 +162,6 @@ Result Connection::query(const string& sql)
     PQclear(res);
     return Result();
   }
-}
-
-//------------------------------------------------------------------------
-//Get integer ID of last INSERT, or -1 if none
-int Connection::inserted_id()
-{
-  return last_oid;
 }
 
 //------------------------------------------------------------------------

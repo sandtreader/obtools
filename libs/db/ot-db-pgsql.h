@@ -58,7 +58,6 @@ class Connection: public DB::Connection
 {
 private:
   void *pgconn;   // PGconn structure
-  int last_oid;   // Last OID to be inserted
   Log::Streams log; // Private (therefore per-thread, assuming connections
                     // are not shared) log streams
 
@@ -77,10 +76,6 @@ public:
   //Execute a query and get result (e.g. SELECT)
   //Returns result - check this for validity
   Result query(const string& sql);
-
-  //------------------------------------------------------------------------
-  //Get integer ID of last INSERT
-  int inserted_id();
 
   //------------------------------------------------------------------------
   //Destructor

@@ -188,10 +188,6 @@ public:
   virtual Result query(const string& sql)=0;
 
   //------------------------------------------------------------------------
-  //Get integer ID of last INSERT
-  virtual int inserted_id()=0;
-
-  //------------------------------------------------------------------------
   //Virtual destructor
   virtual ~Connection() {}
 
@@ -222,6 +218,17 @@ public:
   //Execute a query and get single (only) integer value from first (only) row
   //Returns value or default if not found
   bool query_bool(const string& sql, bool def=false);
+
+  //------------------------------------------------------------------------
+  //Do an INSERT and retrieve the last inserted (max) automatic ID
+  //Returns ID, or 0 if failed
+  //Note:  You can do an ordinary exec() for INSERT if you don't care about
+  //the auto-generated ID used - it's probably faster
+  //Set in_transaction only if you're already doing a transaction; by
+  //default this function may create its own
+  int insert(const string& sql, 
+	     const string& table, const string& id_field="id",
+	     bool in_transaction=false);
 };
 
 //==========================================================================

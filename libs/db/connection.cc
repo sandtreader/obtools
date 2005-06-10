@@ -80,5 +80,28 @@ bool Connection::query_bool(const string& sql, bool def)
   else return def;
 }
 
+//------------------------------------------------------------------------
+//Do an INSERT and retrieve the last inserted serial ID
+//Returns ID, or 0 if failed
+int Connection::insert(const string& sql, 
+		       const string& table, const string& id_field,
+		       bool in_transaction)
+{
+  if (!in_transaction && !exec("BEGIN TRANSACTION")) return 0;
+  if (!exec(sql)) return 0;
+
+  // Assume autoincrementing IDs always increase, so max is the largest
+  string sql2("SELECT max(");
+  sql2 += id_field;
+  sql2 += ") from ";
+  sql2 += table;
+  int id=query_int(sql2);
+
+  if (!in_transaction) exec("COMMIT TRANSACTION");
+
+  return id;
+}			 
+
+
 
 }} // namespaces
