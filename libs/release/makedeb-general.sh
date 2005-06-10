@@ -17,7 +17,7 @@ DESC='general libraries'
 PACKAGE=lib$NAME
 SRC_DIR=`dirname $0`
 VERSION=`cat $NAME.v`
-RELEASE=1
+RELEASE=2
 ARCH=i386
 
 # split version
@@ -124,8 +124,8 @@ install -m 0644 $SRC_DIR/ot-misc.h $DEB_DEV/usr/include/obtools/
 install -m 0644 $SRC_DIR/ot-mt.h $DEB_DEV/usr/include/obtools/
 install -m 0644 $SRC_DIR/ot-net.h $DEB_DEV/usr/include/obtools/
 install -m 0644 $SRC_DIR/ot-text.h $DEB_DEV/usr/include/obtools/
-install -m 0644 $SRC_DIR/ot-time.h $DEB_DEV/usr/lib/obtools/
-install -m 0644 $SRC_DIR/ot-web.h $DEB_DEV/usr/lib/obtools/
+install -m 0644 $SRC_DIR/ot-time.h $DEB_DEV/usr/include/obtools/
+install -m 0644 $SRC_DIR/ot-web.h $DEB_DEV/usr/include/obtools/
 install -m 0644 $SRC_DIR/ot-xml.h $DEB_DEV/usr/include/obtools/
 
 # create links

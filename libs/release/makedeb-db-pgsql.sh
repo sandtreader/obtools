@@ -17,7 +17,7 @@ DESC='Postgres DB library'
 PACKAGE=lib$NAME
 SRC_DIR=`dirname $0`
 VERSION=`cat $NAME.v`
-RELEASE=1
+RELEASE=2
 ARCH=i386
 
 # split version
