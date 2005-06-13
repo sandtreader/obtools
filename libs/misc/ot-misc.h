@@ -176,7 +176,28 @@ public:
   // Get a random number in the range 0 and (n-1)
   unsigned int generate_up_to(unsigned int n);
 };
- 
+
+//==========================================================================
+//Hex data dumper
+class Dumper
+{
+  ostream& sout;
+  int width;
+  int split;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  // width gives number of bytes per line
+  // split is interval of spaces between bytes: 0 is no spaces
+  Dumper(ostream& _sout, int _width=16, int _split=4): 
+    sout(_sout), width(_width), split(_split) {}
+
+  //------------------------------------------------------------------------
+  // Dump a block
+  void dump(void *block, int length);
+};
+
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_MISC_H
