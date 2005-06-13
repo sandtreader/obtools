@@ -23,6 +23,7 @@ namespace ObTools { namespace Channel {
 //--------------------------------------------------------------------------
 // Try to read an exact amount of data from the channel into a binary buffer
 // Returns false if channel goes EOF before anything is read
+// Buf may be 0 to skip data
 // Throws Error on failure, or EOF after a read
 bool Reader::try_read(void *buf, size_t count) throw (Error)
 {
@@ -34,7 +35,7 @@ bool Reader::try_read(void *buf, size_t count) throw (Error)
     size_t size = basic_read(p, count-done);
     if (size == count-done)
     {
-      p += size;
+      if (p) p += size;
       done += size;
     }
     else if (size || done)
@@ -48,6 +49,7 @@ bool Reader::try_read(void *buf, size_t count) throw (Error)
 
 //--------------------------------------------------------------------------
 // Read exact amount of data from the channel into a binary buffer
+// Buf may be 0 to skip data
 // Throws Error on failure
 void Reader::read(void *buf, size_t count) throw (Error)
 {
@@ -59,7 +61,7 @@ void Reader::read(void *buf, size_t count) throw (Error)
     size_t size = basic_read(p, count-done);
     if (size == count-done)
     {
-      p += size;
+      if (p) p += size;
       done += size;
     }
     else throw Error(0, "EOF");
@@ -150,12 +152,17 @@ uint64_t Reader::read_nbo_64() throw (Error)
 }
 
 //--------------------------------------------------------------------------
+// Skip N bytes
+void Reader::skip(int n)
+{
+  read(0, n);
+}
+
+//--------------------------------------------------------------------------
 // Skip to given alignment (bytes) from current offset
 void Reader::align(int n)
 { 
-  int i = n*((offset+n-1)/n) - offset;  // Bytes to skip
-  char c;
-  while (i--) basic_read(&c, 1); 
+  skip(n*((offset+n-1)/n) - offset);  // Bytes to skip
 }
 
 }} // namespaces

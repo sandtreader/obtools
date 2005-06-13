@@ -22,7 +22,7 @@ size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
 
   if (count)
   {
-    memcpy(buf, data, count);
+    if (buf) memcpy(buf, data, count);
     data += count;
     offset += count;
   }

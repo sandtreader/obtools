@@ -10,6 +10,8 @@
 #include "ot-chan.h"
 #include "ot-net.h"
 
+#define SKIP_BUF_SIZE 4096
+
 namespace ObTools { namespace Channel {
 
 //==========================================================================
@@ -20,7 +22,17 @@ size_t TCPSocketReader::basic_read(void *buf, size_t count) throw (Error)
 {
   try
   {
-    size_t n = s.read(buf, count);
+    size_t n;
+    if (buf)
+    {
+      n = s.read(buf, count);
+    }
+    else
+    {
+      char temp[SKIP_BUF_SIZE];  // Skip up to this many bytes
+      n = s.read(temp, count);
+    }
+
     offset += n;
     return n;
   }

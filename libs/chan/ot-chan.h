@@ -50,17 +50,20 @@ public:
   //--------------------------------------------------------------------------
   // Read as much data as is available, up to 'count' bytes
   // Returns amount read, also adjusts offset
+  // If 'buf' is 0, just skip as much data as possible
   // Throws Error on failure (not EOF)
   virtual size_t basic_read(void *buf, size_t count) throw (Error) = 0;
 
   //--------------------------------------------------------------------------
   // Try to read an exact amount of data from the channel into a binary buffer
   // Returns false if channel goes EOF before anything is read
+  // Buf may be 0 to skip data
   // Throws Error on failure, or EOF after a read
   bool try_read(void *buf, size_t count) throw (Error);
 
   //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a binary buffer
+  // Buf may be 0 to skip data
   // Throws Error on failure
   void read(void *buf, size_t count) throw (Error);
 
@@ -102,6 +105,10 @@ public:
   //--------------------------------------------------------------------------
   // Get current offset
   size_t get_offset() { return offset; }
+
+  //--------------------------------------------------------------------------
+  // Skip N bytes
+  void skip(int n);
 
   //--------------------------------------------------------------------------
   // Skip to given alignment (bytes) from current offset
