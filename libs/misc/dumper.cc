@@ -34,6 +34,9 @@ void Dumper::dump(void *block, int length)
 
     offset+=w;
   }
+
+  // Restore channel to 'normal'
+  sout << dec << setw(0) << setfill(' ');
 }
 
 
