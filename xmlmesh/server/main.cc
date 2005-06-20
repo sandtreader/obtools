@@ -9,6 +9,10 @@
 
 #include "server.h"
 #include "ot-log.h"
+#include <fstream>
+
+#define DEFAULT_LOGFILE "/var/log/obtools/xmlmesh.log"
+#define PID_FILE        "/var/run/ot-xmlmesh.pid"
 
 using namespace std;
 using namespace ObTools;
@@ -25,10 +29,17 @@ int main(int argc, char **argv)
   // Run initialisation sequence (auto-registration of modules etc.)
   Init::Sequence::run();
 
-  // Read config
-  char *cfg = "xmlmesh.cfg.xml";
-  if (argc > 1) cfg = argv[1];
-  XML::Configuration config(cfg);
+  // Grab config filename if specified
+  XML::Configuration config;
+  if (argc > 1)
+    config.add_file(argv[argc-1]);  // Last arg, leaves room for options
+  else
+  {
+    // Option of local or /etc
+    config.add_file("xmlmesh.cfg.xml");
+    config.add_file("/etc/obtools/xmlmesh.cfg.xml");
+  }
+
   if (!config.read("xmlmesh"))
   {
     cerr << "Can't read configuration file\n";
@@ -36,12 +47,33 @@ int main(int argc, char **argv)
   }
 
   // Set up logging
-  Log::StreamChannel   chan_out(cout);
+#if defined(DAEMON)
+  string logfile = config.get_value("log/@file", DEFAULT_LOGFILE);
+  ofstream logstream(logfile.c_str(),ios::app);
+  if (!logstream)
+  {
+    cerr << "central-authd: Unable to open logfile " << logfile << endl;
+    return 2;
+  }
+  Log::StreamChannel chan_out(logstream);
+#else
+  Log::StreamChannel chan_out(cout);
+#endif
   Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
+
+#if defined(DAEMON)
+  if (daemon(1, 1))
+    log.error << "Can't become daemon: " << strerror(errno) << endl;
+
+  // Create pid file
+  ofstream pidfile(PID_FILE);
+  pidfile << getpid() << endl;
+  pidfile.close();
+#endif
 
   log.summary << "xmlmesh-server starting\n";
   

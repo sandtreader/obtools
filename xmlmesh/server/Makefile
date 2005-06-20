@@ -19,6 +19,10 @@ else
 DEPENDS = ot-general ot-xmlmesh
 endif
 
+ifdef RELEASE
+CPPFLAGS += -DDAEMON
+endif
+
 CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1
 
