@@ -1,0 +1,11 @@
+Package: libot-general
+Priority: optional
+Section: libs
+Architecture: i386
+Maintainer: Paul Clark <paul@xmill.com>
+Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
+Description: ObTools general-purpose libraries 
+ The ObTools libraries provide a range of useful interfaces and objects for
+ multithreaded & network applications in C++
+ .
+ This package provides the standard multithreaded shared runtime libraries

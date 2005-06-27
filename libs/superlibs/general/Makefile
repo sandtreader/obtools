@@ -11,6 +11,14 @@ VERSION	= 1.0.0
 DEPENDS = xml misc text net log init chan time web
 MT-VARIANTS = 1
 
+DEBIAN-NAME    = libot-general
+DEBIAN-VERSION = $(VERSION)
+DEBIAN-REVISION = 2
+
+ifdef SINGLE
+DEBIAN-VARIANT = single
+endif
+
 # Supress MT, CLI & CACHE libraries if single
 ifndef SINGLE
 DEPENDS += mt cache cli

@@ -1,0 +1,106 @@
+#!/bin/sh
+#==========================================================================
+# Build Debian package for ObTools general super library
+#
+# Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+#==========================================================================
+
+set -e
+
+NAME=$1
+VERSION=$2
+REV=$3
+VARIANT=$4
+DEB_VERSION=$VERSION.$3
+SRC_DIR=`dirname $0`
+RELEASE_DIR=$SRC_DIR/../../release
+
+PACKAGE_RUN=${NAME}${VARIANT}_$VERSION-${REV}_i386.deb
+DEB_RUN_DIR=/tmp/$PACKAGE_RUN.$$
+
+PACKAGE_DEV=${NAME}${VARIANT}-dev_$VERSION-${REV}_i386.deb
+DEB_DEV_DIR=/tmp/$PACKAGE_DEV.$$
+
+# Split down Debian version 
+OLDIFS=$IFS
+IFS='\.'
+read VERSION_MAJOR VERSION_MINOR VERSION_PATCH <<EOF
+$VERSION
+EOF
+IFS=$OLDIFS
+
+#Create runtime package structure
+mkdir -p $DEB_RUN_DIR/DEBIAN
+mkdir -p $DEB_RUN_DIR/usr/lib/obtools
+
+install -m 0644 $SRC_DIR/DEBIAN.RUN/control$VARIANT $DEB_RUN_DIR/DEBIAN/control
+install -m 0755 $SRC_DIR/DEBIAN.RUN/postinst $DEB_RUN_DIR/DEBIAN/postinst
+install -m 0755 $SRC_DIR/DEBIAN.RUN/postrm $DEB_RUN_DIR/DEBIAN/postrm
+
+echo "Version: $DEB_VERSION" >> $DEB_RUN_DIR/DEBIAN/control
+
+install -s -m 0644 $NAME.so.$VERSION $DEB_RUN_DIR/usr/lib/obtools/$NAME$VARIANT.so.$VERSION
+
+#Make ld.so links
+pushd $DEB_RUN_DIR/usr/lib/obtools
+ln -s $NAME$VARIANT.so.$VERSION $NAME$VARIANT.so.$VERSION_MAJOR
+popd
+
+#Create dev package structure
+mkdir -p $DEB_DEV_DIR/DEBIAN
+mkdir -p $DEB_DEV_DIR/usr/lib/obtools
+mkdir -p $DEB_DEV_DIR/usr/include/obtools
+
+install -m 0644 $SRC_DIR/DEBIAN.DEV/control$VARIANT $DEB_DEV_DIR/DEBIAN/control
+
+echo "Depends: libot-general (>= $DEB_VERSION)" >> $DEB_DEV_DIR/DEBIAN/control
+echo "Version: $DEB_VERSION" >> $DEB_DEV_DIR/DEBIAN/control
+
+install -m 0644 $RELEASE_DIR/ot-chan$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-init$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-log$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-misc$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-net$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-text$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-time$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-web$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-xml$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+
+if [ -z $VARIANT ]; then
+#Only install multi-dependent libraries in base
+install -m 0644 $RELEASE_DIR/ot-mt.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-cli.a $DEB_DEV_DIR/usr/lib/obtools/
+
+#Only install common header files in base - Depends on variants reflects this
+install -m 0644 $RELEASE_DIR/ot-cache.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-chan.h $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-cli-telnet.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-cli.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-init.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-log.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-misc.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-mt.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-net.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-text.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-time.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-web.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-xml.h $DEB_DEV_DIR/usr/include/obtools/
+
+fi
+
+#Make library build links
+pushd $DEB_DEV_DIR/usr/lib/obtools
+ln -s $NAME$VARIANT.so.$VERSION_MAJOR $NAME$VARIANT.so
+popd
+
+#Build debs
+fakeroot -- dpkg -b $DEB_RUN_DIR $PACKAGE_RUN
+cp $PACKAGE_RUN $RELEASE_DIR
+
+fakeroot -- dpkg -b $DEB_DEV_DIR $PACKAGE_DEV
+cp $PACKAGE_DEV $RELEASE_DIR
+
+# clean up
+rm -rf $DEB_RUN_DIR $DEB_DEV_DIR
+
