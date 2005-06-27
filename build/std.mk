@@ -113,7 +113,15 @@ endif
 #Targets for superlib
 ifeq ($(TYPE), superlib)
 VERSIONM = $(word 1,$(subst ., ,$(VERSION)))
+
+#Make sure library name is changed to reflect singleness, because directory
+#location is lost in dependencies
+ifdef SINGLE
+SOLINK = lib$(NAME)-single.so
+else
 SOLINK = lib$(NAME).so
+endif
+
 SOLIB = $(SOLINK).$(VERSION)
 SONAME = $(SOLINK).$(VERSIONM)
 SALIBS = $(patsubst %.a,%.sa,$(LIBS))

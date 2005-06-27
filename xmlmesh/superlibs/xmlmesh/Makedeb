@@ -41,7 +41,7 @@ install -m 0755 $SRC_DIR/DEBIAN.RUN/postrm $DEB_RUN_DIR/DEBIAN/postrm
 
 echo "Version: $DEB_VERSION" >> $DEB_RUN_DIR/DEBIAN/control
 
-install -s -m 0644 $NAME.so.$VERSION $DEB_RUN_DIR/usr/lib/obtools/$NAME$VARIANT.so.$VERSION
+install -s -m 0644 $NAME$VARIANT.so.$VERSION $DEB_RUN_DIR/usr/lib/obtools/$NAME$VARIANT.so.$VERSION
 
 #Make ld.so links
 pushd $DEB_RUN_DIR/usr/lib/obtools

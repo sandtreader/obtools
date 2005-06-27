@@ -44,10 +44,10 @@ OT-LIBS = cli:libs/cli     			\
 # Each word split by ':' into
 # 1: Library name, including variant (as put into DEPENDS)
 # 2: Directory of source, relative to ROOT
-OT-SHLIBS = ot-general:libs/superlibs/general	\
-	    ot-db-pgsql:libs/superlibs/db	\
-	    ot-codegen:libs/superlibs/codegen	\
-	    ot-xmlmesh:xmlmesh/superlibs/xmlmesh
+OT-SHLIBS = ot-general:libs/superlibs/general			\
+	    ot-db-pgsql:libs/superlibs/db			\
+	    ot-codegen:libs/superlibs/codegen			\
+	    ot-xmlmesh:xmlmesh/superlibs/xmlmesh		
 
 #==========================================================================
 # Template for standard Obtools library
@@ -78,8 +78,8 @@ define shlib_template
 DIR-$(1) = $$(ROOT)/$(2)
 LIBS-$(1)-release = $$(DIR-$(1))/build-release/lib$(1).so
 LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug/lib$(1).so
-LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release/lib$(1).so
-LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug/lib$(1).so
+LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release/lib$(1)-single.so
+LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug/lib$(1)-single.so
 endef
 
 # Split at spaces and pass on to lib_template as words
