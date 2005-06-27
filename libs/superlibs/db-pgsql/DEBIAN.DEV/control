@@ -1,0 +1,13 @@
+Package: libot-db-pgsql-dev
+Priority: optional
+Section: libs
+Architecture: i386
+Maintainer: Paul Clark <paul@xmill.com>
+Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
+Depends: postgresql-dev (>= 7.4.1), libot-general-dev (>= 1.0.0)
+Description: ObTools Postgres database libraries (development files)
+ The ObTools database library provides a generic database interface in C++.
+ This is the Postgres interface version
+ .
+ This package provides development files for building applications which
+ use the library

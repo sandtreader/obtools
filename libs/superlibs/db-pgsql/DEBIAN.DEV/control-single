@@ -1,0 +1,14 @@
+Package: libot-db-pgsql-single-dev
+Priority: optional
+Section: libs
+Architecture: i386
+Maintainer: Paul Clark <paul@xmill.com>
+Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
+Depends: postgresql-dev (>= 7.4.1), libot-general-single-dev (>= 1.0.0)
+Depends: libot-db-pgsql-dev (>= 1.0.0)
+Description: ObTools Postgres database libraries (single-threaded dev. files)
+ The ObTools database library provides a generic database interface in C++.
+ This is the Postgres interface version
+ .
+ This package is in addition to libot-db-pgsql-dev and provides development 
+ files for building *single threaded* applications which use the library
