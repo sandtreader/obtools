@@ -6,10 +6,6 @@
 #==========================================================================
 
 all:
-	./makedeb-xmlmesh.sh
-	-@rm -f *.tgz *~
-	tar cvfz obtools-xmlmesh.tgz --exclude=CVS --exclude=Makefile \
-        --exclude=makedeb*.sh --exclude=*.deb --exclude=*.v *
 
 clean:
 	-@rm -f *.so *.so.* *.a *.h *.tgz *.cfg.xml \

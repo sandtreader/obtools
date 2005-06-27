@@ -6,11 +6,15 @@
 #==========================================================================
 
 TYPE	= exe
-NAME   	= xmlmesh-server
-VERSION = 1.0.0
+NAME    = xmlmesh-server
 HEADERS = server.h
 OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 	  correlator.o publisher.o
+
+DEBIAN-NAME    = ot-xmlmesh
+DEBIAN-VERSION = 1.0.0
+DEBIAN-REVISION = 2
+
 #Build from static local libraries in DEBUG, installed .so's in release
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \

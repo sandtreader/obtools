@@ -1,0 +1,12 @@
+Package: libot-xmlmesh
+Priority: optional
+Section: libs
+Architecture: i386
+Maintainer: Paul Clark <paul@xmill.com>
+Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
+Depends: libot-general (>= 1.0.0)
+Description: ObTools XMLMesh message bus shared libraries 
+ XMLMesh is a SOAP-based XML message bus for integration of distributed
+ components using simple XML messages.  
+ .
+ This package provides shared libraries for clients to attach to the server

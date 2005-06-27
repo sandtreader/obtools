@@ -1,7 +1,7 @@
 #==========================================================================
-# Makefile for all ObTools super-libraries
+# Makefile for all ObTools XMLMesh super-libraries
 #
-# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
