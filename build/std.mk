@@ -39,6 +39,13 @@
 # If VARIANTS is undefined, defaults to standard release/debug set, plus
 # single/multi versions if MT-VARIANTS is set, multi being the default
 
+# If DEBIAN-NAME is defined, builds a Debian .deb package only in release
+# target, according to its type, using the following defines:
+#   DEBIAN-NAME Name of package and associated scripts
+#   DEBIAN-VER  Package version
+#   DEBIAN-REV  Package revision
+# Provide local Makedeb script and DEBIAN files directory in source dir
+
 #==========================================================================
 # Verify eval works
 $(eval EVALWORKS=1)
@@ -146,6 +153,10 @@ else
 LIB-DEBUGP = -release
 endif
 
+ifdef DEBIAN-VARIANT
+DEBIAN-VARIANT := -$(DEBIAN-VARIANT)
+endif
+
 #Sort out dependencies
 define dep_template
 #Expand DIR-xxx for each dependency
@@ -241,10 +252,9 @@ ifeq ($(TYPE), lib)
 endif
 ifeq ($(TYPE), superlib)
 	cd ../$(RELEASEDIR); ln -fs $(RELEASE-NAME) $(RELEASE-LINK)
-	echo $(VERSION) > ../$(RELEASEDIR)/$(NAME).v
 endif
-ifeq ($(TYPE), exe)
-	echo $(VERSION) > ../$(RELEASEDIR)/$(NAME).v
+ifdef DEBIAN-NAME
+	../Makedeb $(DEBIAN-NAME) $(DEBIAN-VERSION) $(DEBIAN-REVISION) $(DEBIAN-VARIANT)
 endif
 endif
 endif
