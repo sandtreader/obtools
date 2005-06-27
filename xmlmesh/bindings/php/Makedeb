@@ -1,0 +1,31 @@
+#!/bin/sh
+#==========================================================================
+# Build Debian package for ObTools XMLMesh PHP extension
+#
+# Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
+# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+#==========================================================================
+
+set -e
+
+DEB_VERSION=$2.$3
+PACKAGE=$1_$2-$3_i386.deb
+SRC_DIR=`dirname $0`
+DEB_DIR=/tmp/${PACKAGE}.$$
+
+mkdir -p $DEB_DIR/DEBIAN
+mkdir -p $DEB_DIR/usr/lib/php4/20020429/
+
+install -m 0644 $SRC_DIR/DEBIAN/control $DEB_DIR/DEBIAN/control
+install -m 0755 $SRC_DIR/DEBIAN/postinst $DEB_DIR/DEBIAN/postinst
+install -m 0755 $SRC_DIR/DEBIAN/prerm $DEB_DIR/DEBIAN/prerm
+
+echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
+
+install -s -m 0755 php_xmlmesh.so $DEB_DIR/usr/lib/php4/20020429/
+
+fakeroot -- dpkg -b $DEB_DIR $PACKAGE
+cp $PACKAGE $SRC_DIR/../../release/
+
+# clean up
+rm -rf $DEB_DIR

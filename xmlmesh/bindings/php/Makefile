@@ -9,6 +9,10 @@ TYPE	= dlmod
 NAME   	= php_xmlmesh
 OBJS 	= php_xmlmesh.o
 
+DEBIAN-NAME    = ot-xmlmesh-php
+DEBIAN-VERSION = 1.0.0
+DEBIAN-REVISION = 1
+
 ifdef DEBUG
 DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
 	  net log xml soap text cache misc
