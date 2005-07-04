@@ -216,6 +216,13 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Get current size of map
+  unsigned int size()
+  { 
+    return cachemap.size();
+  }
+
+  //--------------------------------------------------------------------------
   // Returns copy of content of a given ID in the map
   // Whether found - if not, result is not changed
   bool lookup(const ID& id, CONTENT& result)
@@ -640,11 +647,11 @@ template<class ID, class CONTENT> class UseTimeoutCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  UseTimeoutCache(int _timeout): 
+  UseTimeoutCache(int _timeout, unsigned int _limit = 0): 
     Cache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
           NoEvictorPolicy<ID,CONTENT> >::Cache
     (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
-     NoEvictorPolicy<ID, CONTENT>()) {}
+     NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
@@ -655,11 +662,11 @@ template<class ID, class CONTENT> class UseTimeoutPointerCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  UseTimeoutPointerCache(int _timeout): 
+  UseTimeoutPointerCache(int _timeout, unsigned int _limit = 0): 
     PointerCache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
                  NoEvictorPolicy<ID,CONTENT> >::PointerCache
     (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
-     NoEvictorPolicy<ID, CONTENT>()) {}
+     NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
@@ -670,11 +677,11 @@ template<class ID, class CONTENT> class AgeTimeoutCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeTimeoutCache(int _timeout): 
+  AgeTimeoutCache(int _timeout, unsigned int _limit = 0): 
     Cache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
           NoEvictorPolicy<ID,CONTENT> >::Cache
     (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
-     NoEvictorPolicy<ID, CONTENT>()) {}
+     NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
@@ -685,11 +692,11 @@ template<class ID, class CONTENT> class AgeTimeoutPointerCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeTimeoutPointerCache(int _timeout): 
+  AgeTimeoutPointerCache(int _timeout, unsigned int _limit = 0): 
     PointerCache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
                  NoEvictorPolicy<ID,CONTENT> >::PointerCache
     (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
-     NoEvictorPolicy<ID, CONTENT>()) {}
+     NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
 };
 
@@ -700,10 +707,10 @@ template<class ID, class CONTENT> class LRUEvictionCache:
                LRUEvictorPolicy<ID, CONTENT> >
 {
 public:
-  LRUEvictionCache(int _timeout): 
+  LRUEvictionCache(int _timeout, unsigned int _limit = 0): 
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           LRUEvictorPolicy<ID,CONTENT> >::Cache
-    (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>()) {}
+    (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>(), _limit) {}
 };
 
 //==========================================================================
@@ -713,10 +720,10 @@ template<class ID, class CONTENT> class LRUEvictionPointerCache:
                       LRUEvictorPolicy<ID, CONTENT> >
 {
 public:
-  LRUEvictionPointerCache(int _timeout): 
+  LRUEvictionPointerCache(int _timeout, unsigned int _limit = 0): 
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  LRUEvictorPolicy<ID,CONTENT> >::PointerCache
-    (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>()) {}
+    (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>(), _limit) {}
 };
 
 //==========================================================================
@@ -726,10 +733,10 @@ template<class ID, class CONTENT> class AgeEvictionCache:
                AgeEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeEvictionCache(int _timeout): 
+  AgeEvictionCache(int _timeout, unsigned int _limit = 0): 
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           AgeEvictorPolicy<ID,CONTENT> >::Cache
-    (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>()) {}
+    (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>(), _limit) {}
 };
 
 //==========================================================================
@@ -739,10 +746,10 @@ template<class ID, class CONTENT> class AgeEvictionPointerCache:
                       AgeEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeEvictionPointerCache(int _timeout): 
+  AgeEvictionPointerCache(int _timeout, unsigned int _limit = 0): 
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  AgeEvictorPolicy<ID,CONTENT> >::PointerCache
-    (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>()) {}
+    (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>(), _limit) {}
 };
 
 //==========================================================================
