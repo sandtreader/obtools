@@ -179,6 +179,36 @@ public:
 };
 
 //==========================================================================
+// Stream Reader
+class StreamReader: public Reader
+{
+private:
+  istream& sin;
+
+public:
+  // Constructor
+  StreamReader(istream& _s): sin(_s) {}
+
+  // Read implementations
+  virtual size_t basic_read(void *buf, size_t count) throw (Error);
+};
+
+//==========================================================================
+// Stream Writer
+class StreamWriter: public Writer
+{
+private:
+  ostream& sout;
+
+public:
+  // Constructor
+  StreamWriter(ostream& _s): sout(_s) {}
+
+  // Write implementation
+  virtual void basic_write(const void *buf, size_t count) throw (Error);
+};
+
+//==========================================================================
 // TCP Socket Reader
 class TCPSocketReader: public Reader
 {

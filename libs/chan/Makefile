@@ -9,9 +9,9 @@ TYPE	= lib
 NAME   	= ot-chan
 HEADERS = ot-chan.h
 DEPENDS = net
-OBJS  	= reader.o writer.o tcp-chan.o block-chan.o
-TESTS 	= test-block
-TESTCMD = ./test-block
+OBJS  	= reader.o writer.o tcp-chan.o block-chan.o stream-chan.o
+TESTS 	= test-block test-stream
+TESTCMD = ./test-block && ./test-stream
 MT-VARIANTS = 1
 
 #Catch ourselves recursing in SINGLE mode and suppress use of MT
