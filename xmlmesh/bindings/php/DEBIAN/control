@@ -9,7 +9,3 @@ Description: ObTools XMLMesh message bus PHP interface
  .
  This package provides a simple PHP extension for sending XMLMesh messages
  and requests
-
-
-
-
