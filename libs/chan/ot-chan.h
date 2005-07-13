@@ -244,12 +244,12 @@ public:
 class BlockReader: public Reader
 {
 private:
-  const char *data;
+  const unsigned char *data;
   size_t length;
 
 public:
   // Constructor
-  BlockReader(const char *_data, size_t _length): 
+  BlockReader(const unsigned char *_data, size_t _length): 
     data(_data), length(_length) {}
 
   // Read implementations
@@ -261,12 +261,12 @@ public:
 class BlockWriter: public Writer
 {
 private:
-  char *data;
+  unsigned char *data;
   size_t length;
 
 public:
   // Constructor.  _length is max length - fails after this
-  BlockWriter(char *_data, size_t _length): 
+  BlockWriter(unsigned char *_data, size_t _length): 
     data(_data), length(_length) {}
 
   // Write implementation

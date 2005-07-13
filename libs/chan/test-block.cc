@@ -15,7 +15,7 @@ using namespace std;
 
 int main()
 {
-  char buf[40];
+  unsigned char buf[40];
   ObTools::Channel::BlockWriter bw(buf, 40);
 
   bw.write_byte(0x2A);
