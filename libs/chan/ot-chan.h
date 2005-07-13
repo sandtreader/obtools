@@ -12,6 +12,7 @@
 #define __OBTOOLS_CHAN_H
 
 #include "ot-net.h"
+#include <iostream>
 
 namespace ObTools { namespace Channel { 
 
