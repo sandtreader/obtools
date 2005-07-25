@@ -7,13 +7,13 @@
 
 TYPE	= superlib
 NAME	= ot-general
-VERSION	= 1.0.0
+VERSION	= 1.0.3
 DEPENDS = xml misc text net log init chan time web
 MT-VARIANTS = 1
 
 DEBIAN-NAME    = libot-general
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 2
+DEBIAN-REVISION = 1
 
 ifdef SINGLE
 DEBIAN-VARIANT = single
