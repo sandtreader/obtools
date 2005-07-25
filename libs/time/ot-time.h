@@ -55,6 +55,7 @@ struct Split
 
 //==========================================================================
 //Duration - a length of time, not fixed at any one moment
+//Beware: Falls apart if durations are negative!
 class Duration
 {
 private:
@@ -193,6 +194,8 @@ public:
 
   //------------------------------------------------------------------------
   // Subtract two stamps to get duration between
+  // Beware if they could be misordered - duration returned will be very
+  // large, not negative!
   Duration operator-(const Stamp& o) const
   { return Duration::from_ntp(t-o.t); }
 
