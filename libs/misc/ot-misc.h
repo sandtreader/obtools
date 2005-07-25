@@ -137,7 +137,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Get an real value, with default
-  int get_real(const string& name, double def=0.0) const
+  double get_real(const string& name, double def=0.0) const
   {
     string v = get(name);
     if (!v.empty()) return atof(v.c_str());
