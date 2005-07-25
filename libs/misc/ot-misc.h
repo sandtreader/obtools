@@ -136,6 +136,15 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Get an real value, with default
+  int get_real(const string& name, double def=0.0) const
+  {
+    string v = get(name);
+    if (!v.empty()) return atof(v.c_str());
+    return def;
+  }
+
+  //--------------------------------------------------------------------------
   // Overridden read-only [] operator
   // Unlike standard [], doesn't create a blank value if it doesn't exist
   string operator[](const string& name) const { return get(name); }
