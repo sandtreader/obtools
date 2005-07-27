@@ -4,11 +4,11 @@
 test -f /usr/sbin/ot-xmlmesh || exit 0
 
 case "$1" in
-start)	echo -n "Starting ObTools XMLMesh server"
+start)	echo -n "Starting ObTools XMLMesh server: ot-xmlmesh"
         start-stop-daemon --start --quiet --pidfile /var/run/ot-xmlmesh.pid --name ot-xmlmesh --startas /usr/sbin/ot-xmlmesh
         echo "." 
 	;;
-stop)	echo -n "Stopping ObTools XMLMesh server"
+stop)	echo -n "Stopping ObTools XMLMesh server: ot-xmlmesh"
         start-stop-daemon --stop --quiet --pidfile /var/run/ot-xmlmesh.pid --name ot-xmlmesh 
         echo "."
         ;;
