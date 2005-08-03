@@ -16,7 +16,7 @@ using namespace ObTools::XML;
 // Read configuration file
 // Returns whether successful
 // ename is the expected root element name - fails if wrong
-bool Configuration::read(const string& ename)
+bool Configuration::read(const string& ename, ostream& err)
 {
   // Run through list of filenames to find one that will open
   for(list<string>::iterator p = filenames.begin();
@@ -32,15 +32,15 @@ bool Configuration::read(const string& ename)
       }
       catch (ParseFailed)
       {
-	cerr << "Bad XML in config file\n";
+	err << "Bad XML in config file\n";
 	return false;
       }
 
       Element& root = parser.get_root();
       if (root.name != ename)
       {
-	cerr << "Bad root in config file - expected <" << ename 
-	     << ">, got <" << root.name << ">\n";
+	err << "Bad root in config file - expected <" << ename 
+	    << ">, got <" << root.name << ">\n";
 	return false;
       }
 
@@ -49,7 +49,7 @@ bool Configuration::read(const string& ename)
   }
 
   // Nothing will open
-  cerr << "Can't find config file\n";
+  err << "Can't find config file\n";
   return false;
 }
 
