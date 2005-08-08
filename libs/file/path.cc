@@ -16,6 +16,28 @@
 namespace ObTools { namespace File {
 
 //--------------------------------------------------------------------------
+// Constructor from directory and leaf
+// If directory is empty or ends with slash already, doesn't add a slash
+Path::Path(const string& dir, const string& leaf)
+{
+  if (dir.empty() || dir[dir.size()-1] == SEPCHAR)
+    path = dir + leaf;
+  else
+    path = dir + SEPCHAR + leaf;
+}
+
+//--------------------------------------------------------------------------
+// Constructor from existing path and leaf (combines as above)
+Path::Path(const Path& _path, const string& leaf) 
+{
+  string dir = _path.str();
+  if (dir.empty() || dir[dir.size()-1] == SEPCHAR)
+    path = dir + leaf;
+  else
+    path = dir + SEPCHAR + leaf;
+}
+
+//--------------------------------------------------------------------------
 // Get directory: everything before last slash, if any, not including
 // trailing slash.  If no slashes, returns empty path
 string Path::dirname() const

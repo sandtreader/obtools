@@ -45,9 +45,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructor from directory and leaf
-  // If directory is empty, doesn't add a slash
-  Path(const string& dir, const string& leaf):
-    path(dir.empty()?leaf:(dir+SEPCHAR+leaf)) {}
+  // If directory is empty or ends with slash already, doesn't add a slash
+  Path(const string& dir, const string& leaf);
+
+  //--------------------------------------------------------------------------
+  // Constructor from existing path and leaf (combines as above)
+  Path(const Path& _path, const string& leaf);
 
   // Accessors ---------------------------------------------------------------
   //--------------------------------------------------------------------------
