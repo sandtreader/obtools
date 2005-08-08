@@ -1,14 +1,14 @@
 #==========================================================================
 # Makefile for ObTools General super library
 #
-# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 TYPE	= superlib
 NAME	= ot-general
-VERSION	= 1.0.3
-DEPENDS = xml misc text net log init chan time web
+VERSION	= 1.1.0
+DEPENDS = xml misc text net log init chan time web file
 MT-VARIANTS = 1
 
 DEBIAN-NAME    = libot-general
