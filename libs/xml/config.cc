@@ -48,8 +48,8 @@ bool Configuration::read(const string& ename, ostream& err)
     }
   }
 
-  // Nothing will open
-  err << "Can't find config file\n";
+  // Nothing will open - but don't complain, they might be expecting
+  // this
   return false;
 }
 
