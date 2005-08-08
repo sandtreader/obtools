@@ -20,6 +20,7 @@ OT-LIBS = cli:libs/cli     			\
 	  db-pgsql:libs/db:-pgsql 		\
 	  cache:libs/cache:NOLIB  		\
 	  chan:libs/chan			\
+	  file:libs/file                        \
 	  init:libs/init			\
 	  log:libs/log     			\
 	  misc:libs/misc   			\
