@@ -146,7 +146,10 @@ uint64_t Path::length() const
 // Returns whether successful
 bool Path::erase() const
 {
-  return !unlink(c_str());
+  if (is_dir())
+    return !system((string("rm -rf ")+path).c_str());
+  else
+    return !unlink(c_str());
 }
 
 //--------------------------------------------------------------------------
