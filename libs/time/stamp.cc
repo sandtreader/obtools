@@ -229,9 +229,11 @@ Stamp::Stamp(const string& text)
 
 //------------------------------------------------------------------------
 // Convert to ISO timestamp string
-// Generates YYYY:MM:DD HH:MM:SS.sssZ form 
+// Generates YYYY:MM:DD HH:MM:SS.sssZ form or empty if invalid
 string Stamp::iso() const
 {
+  if (!t) return "";  // Empty if invalid
+
   ostringstream oss;
   Split sp = split(t);  
 

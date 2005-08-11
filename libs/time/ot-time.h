@@ -171,6 +171,11 @@ public:
   Stamp(const string& text);
 
   //------------------------------------------------------------------------
+  // Validity checks - NTP 0 is not valid
+  bool valid() { return t!=0; }
+  bool operator!() { return !t; }
+
+  //------------------------------------------------------------------------
   // Convert to time_t
   time_t time() const { return (time_t)(t>>NTP_SHIFT)-EPOCH_1970; }
 
@@ -180,7 +185,7 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to ISO timestamp string
-  // Generates YYYY:MM:DD HH:MM:SS.sssZ form 
+  // Generates YYYY:MM:DD HH:MM:SS.sssZ form or empty if invalid
   string iso() const;
 
   //------------------------------------------------------------------------
