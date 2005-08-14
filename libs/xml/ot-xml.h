@@ -350,8 +350,47 @@ public:
     {                                                                     \
       ObTools::XML::Element& _childvar=**_p;
 
- 
-// End block for any kind of FOREACH
+// --- Now things get truly ugly: const versions of the same
+#define OBTOOLS_XML_FOREACH_CONST_CHILD(_childvar, _parent)               \
+  {                                                                       \
+    const list<const ObTools::XML::Element *>& _elems=(_parent).children; \
+    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      const ObTools::XML::Element& _childvar=**_p;
+
+#define OBTOOLS_XML_FOREACH_CONST_CHILD_WITH_TAG(_childvar, _parent, _tag) \
+  {                                                                       \
+    const list<const ObTools::XML::Element *> _elems=(_parent).get_children(_tag); \
+    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      const ObTools::XML::Element& _childvar=**_p;
+
+#define OBTOOLS_XML_FOREACH_CONST_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
+  {                                                                       \
+    const list<const ObTools::XML::Element *> _elems=                     \
+       (_parent).get_descendants(_tag);\
+    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      const ObTools::XML::Element& _childvar=**_p;
+
+#define OBTOOLS_XML_FOREACH_CONST_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
+                                                        _tag, _prune)     \
+  {                                                                       \
+    const list<const ObTools::XML::Element *> _elems=                     \
+       (_parent).get_descendants(_tag, _prune);                           \
+    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
+        _p!=_elems.end();                                                 \
+        _p++)                                                             \
+    {                                                                     \
+      const ObTools::XML::Element& _childvar=**_p;
+
+// --- End block for any kind of FOREACH
 #define OBTOOLS_XML_ENDFOR }}
 
 //==========================================================================
