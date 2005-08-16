@@ -29,6 +29,7 @@ using namespace std;
 // Standard log levels
 enum Level
 {
+  LEVEL_NONE    = 0,   // Nothing at all (nothing should log at this level)
   LEVEL_ERROR   = 1,   // Errors the operator should know about
   LEVEL_SUMMARY = 2,   // Summary of things happening
   LEVEL_DETAIL  = 3,   // Detail of things happening
