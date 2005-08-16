@@ -149,7 +149,6 @@ bool Client::request(Message& req)
   }
   else
   {
-    log.error << "Request error:\n";
     log.error << errm << endl;
   }
   return false;

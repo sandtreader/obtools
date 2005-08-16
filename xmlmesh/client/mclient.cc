@@ -285,7 +285,6 @@ bool MultiClient::request(Message& req)
   }
   else
   {
-    error_log << "Request error:\n";
     error_log << errm << endl;
   }
   return false;
