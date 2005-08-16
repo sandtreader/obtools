@@ -48,7 +48,7 @@ void TCPServer::run()
       // there was a way to pass an allowed-list to the kernel...
       if (!verify(client))
       {
-	::close(fd);
+	::close(new_fd);
 	continue;
       }
 
