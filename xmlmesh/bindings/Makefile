@@ -5,7 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = c php
+SUBS = c php cli
 RELEASEDIR = ../release
 include ../../build/dir.mk
 
