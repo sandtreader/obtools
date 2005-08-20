@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools XML parser
 // 
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2003-2005 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
@@ -24,6 +24,89 @@ using namespace std;
 
 //Type to use for characters
 typedef char xmlchar;
+
+class Element; // Forward
+
+//==========================================================================
+// Element list iterators
+// Actually contains a list of elements;  sequential forward access only
+// Usage is different from STL iterator:
+//    for(Element::iterator p(parent.children()); !!p; ++p)
+//       XML::Element& child = *p;
+struct ElementIterator
+{
+  list<Element *> elements;
+  list<Element *>::const_iterator it;
+
+  //------------------------------------------------------------------------
+  // Constructors
+  ElementIterator(const list<Element *>& l): 
+    elements(l), it(elements.begin()) {}
+  ElementIterator(const ElementIterator& o):
+    elements(o.elements), it(elements.begin()) {}
+
+  //------------------------------------------------------------------------
+  // Validity checks
+  bool valid() { return it != elements.end(); }
+  bool operator!() { return !valid(); }
+
+  //------------------------------------------------------------------------
+  // Incrementors
+  // Postincrement (p++) is not provided because it would be very inefficient
+  ElementIterator& operator++() { it++; return *this; }
+
+  //------------------------------------------------------------------------
+  // Derefs
+  Element& operator*() const { return **it; }
+  Element *operator->() const { return *it; }
+};
+
+// Const equivalent
+struct ConstElementIterator
+{
+  list<const Element *> elements;
+  list<const Element *>::const_iterator it;
+  ConstElementIterator(const list<const Element *>& l): 
+    elements(l), it(elements.begin()) {}
+  ConstElementIterator(const ConstElementIterator& o):
+    elements(o.elements), it(elements.begin()) {}
+  bool valid() { return it != elements.end(); }
+  bool operator!() { return !valid(); }
+  ConstElementIterator& operator++() { it++; return *this; }
+  const Element& operator*() const { return **it; }
+  const Element *operator->() const { return *it; }
+};
+
+//==========================================================================
+// XML Parser flags
+enum 
+{
+  // Snap single text content elements back to parent-element.content
+  // Makes simple grammars a lot easier to access
+  PARSER_OPTIMISE_CONTENT=1,
+
+  // Preserve whitespace as it (prepare for a flood of indentation strings!)
+  // BEWARE: If you use this, the << >> process isn't round-trip clean for
+  // whitespace, because the output adds its own indentation
+  PARSER_PRESERVE_WHITESPACE=2,
+
+  // Do namespace translation
+  // Automatically turned on if you call fix_namespace
+  PARSER_FIX_NAMESPACES=4,
+
+  // Be lenient about & and < in contexts in which they couldn't be XML
+  // syntax - i.e., not followed by a name character, '#' (for &), 
+  // '!', '?' or '/' (for <) - and consider them just normal character data.
+  // This makes it more pleasant to include code, particularly C++ code, 
+  // in XML
+
+  // This mimics the behaviour of SGML (hooray!) (ISO 8879:B.7.3), but
+  // strictly violates XML (XML1.0:2.4), unless you consider it a form
+  // of error handling...  But seriously, folks, using this feature may
+  // mean your XML files are rejected by parsers who are less lenient
+  // (or by this parser without this flag set)
+  PARSER_BE_LENIENT=8
+};
 
 //==========================================================================
 // XML Element class
@@ -64,6 +147,11 @@ public:
   //--------------------------------------------------------------------------
   // Non-element marker
   static Element none;
+
+  //--------------------------------------------------------------------------
+  // Iterator defs
+  typedef ElementIterator iterator;
+  typedef ConstElementIterator const_iterator;
 
   //--------------------------------------------------------------------------
   // Validity checks
@@ -109,6 +197,13 @@ public:
   Element& add(const string& n, const string& a, 
 	       const string& v, const string& c) 
   { return add(new Element(n, a, v, c)); }
+
+  //------------------------------------------------------------------------
+  // Add child elements from XML text - reparses text and adds resulting
+  // root as a child element.  Parser ostream & flags as Parser() below
+  // Returns added child, or 'none' if parse failed
+  Element& add_xml(const string& xml, ostream& serr = cerr,
+		   int parse_flags = PARSER_OPTIMISE_CONTENT);
 
   //------------------------------------------------------------------------
   // Dump to given output stream
@@ -294,139 +389,52 @@ public:
 };
 
 //==========================================================================
-// XML syntactic support macros (inline template functions won't do this, 
-// sorry Bjarne ;-)
+// XML syntactic support macros 
+
+// DEPRECATED:  Use ElementIterators directly in new code, and convert old!
+// NOTE: Const versions of these are not provided - use const_iterators
 //
 // e.g.
-//    OBTOOLS_XML_FOREACH_CHILD_TAG(s, root, "section")
+//    OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(s, root, "section")
 //      cout << s.get_attr("name");
 //    OBTOOLS_XML_ENDFOR
 
 // Do block for every direct child of a parent
 // (Read as 'for each child <v> of parent <p>')
 #define OBTOOLS_XML_FOREACH_CHILD(_childvar, _parent)                     \
-  {                                                                       \
-    const list<ObTools::XML::Element *>& _elems=(_parent).children;       \
-    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      ObTools::XML::Element& _childvar=**_p;
+  for(ObTools::XML::ElementIterator _p((_parent).children); !!_p; ++_p)   \
+  { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every direct child with a given tag
 // (Read as 'for each child <v> of parent <p> with tag <tag>')
 #define OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(_childvar, _parent, _tag)      \
-  {                                                                       \
-    const list<ObTools::XML::Element *> _elems=(_parent).get_children(_tag); \
-    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      ObTools::XML::Element& _childvar=**_p;
+  for(ObTools::XML::ElementIterator _p((_parent).get_children(_tag));     \
+      !!_p; ++_p)                                                         \
+  { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every descendant with a given tag
 // (Read as 'for each descendant <v> of parent <p> with tag <tag>')
 #define OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
-  {                                                                       \
-    const list<ObTools::XML::Element *> _elems=                           \
-       (_parent).get_descendants(_tag);\
-    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      ObTools::XML::Element& _childvar=**_p;
+  for(ObTools::XML::ElementIterator _p((_parent).get_descendants(_tag));  \
+      !!_p; ++_p)                                                         \
+  { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every descendant with a given tag, but pruned at given tag
 // (Read as 'for each descendant <v> of parent <p> with tag <tag>, 
 //  pruned at <prune>s')
 #define OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
                                                         _tag, _prune)     \
-  {                                                                       \
-    const list<ObTools::XML::Element *> _elems=                           \
-       (_parent).get_descendants(_tag, _prune);                           \
-    for(list<ObTools::XML::Element *>::const_iterator _p=_elems.begin();  \
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      ObTools::XML::Element& _childvar=**_p;
-
-// --- Now things get truly ugly: const versions of the same
-#define OBTOOLS_XML_FOREACH_CONST_CHILD(_childvar, _parent)               \
-  {                                                                       \
-    const list<const ObTools::XML::Element *>& _elems=(_parent).children; \
-    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      const ObTools::XML::Element& _childvar=**_p;
-
-#define OBTOOLS_XML_FOREACH_CONST_CHILD_WITH_TAG(_childvar, _parent, _tag) \
-  {                                                                       \
-    const list<const ObTools::XML::Element *> _elems=(_parent).get_children(_tag); \
-    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      const ObTools::XML::Element& _childvar=**_p;
-
-#define OBTOOLS_XML_FOREACH_CONST_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
-  {                                                                       \
-    const list<const ObTools::XML::Element *> _elems=                     \
-       (_parent).get_descendants(_tag);\
-    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      const ObTools::XML::Element& _childvar=**_p;
-
-#define OBTOOLS_XML_FOREACH_CONST_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
-                                                        _tag, _prune)     \
-  {                                                                       \
-    const list<const ObTools::XML::Element *> _elems=                     \
-       (_parent).get_descendants(_tag, _prune);                           \
-    for(list<const ObTools::XML::Element *>::const_iterator _p=_elems.begin();\
-        _p!=_elems.end();                                                 \
-        _p++)                                                             \
-    {                                                                     \
-      const ObTools::XML::Element& _childvar=**_p;
+  for(ObTools::XML::ElementIterator                                       \
+        _p((_parent).get_descendants(_tag, _prune));                      \
+      !!_p; ++_p)                                                         \
+  { ObTools::XML::Element& _childvar=*_p;
 
 // --- End block for any kind of FOREACH
-#define OBTOOLS_XML_ENDFOR }}
+#define OBTOOLS_XML_ENDFOR }
 
 //==========================================================================
 // XML exceptions
 class ParseFailed {};
-
-//==========================================================================
-// XML Parser flags
-enum 
-{
-  // Snap single text content elements back to parent-element.content
-  // Makes simple grammars a lot easier to access
-  PARSER_OPTIMISE_CONTENT=1,
-
-  // Preserve whitespace as it (prepare for a flood of indentation strings!)
-  // BEWARE: If you use this, the << >> process isn't round-trip clean for
-  // whitespace, because the output adds its own indentation
-  PARSER_PRESERVE_WHITESPACE=2,
-
-  // Do namespace translation
-  // Automatically turned on if you call fix_namespace
-  PARSER_FIX_NAMESPACES=4,
-
-  // Be lenient about & and < in contexts in which they couldn't be XML
-  // syntax - i.e., not followed by a name character, '#' (for &), 
-  // '!', '?' or '/' (for <) - and consider them just normal character data.
-  // This makes it more pleasant to include code, particularly C++ code, 
-  // in XML
-
-  // This mimics the behaviour of SGML (hooray!) (ISO 8879:B.7.3), but
-  // strictly violates XML (XML1.0:2.4), unless you consider it a form
-  // of error handling...  But seriously, folks, using this feature may
-  // mean your XML files are rejected by parsers who are less lenient
-  // (or by this parser without this flag set)
-  PARSER_BE_LENIENT=8
-};
 
 //==========================================================================
 // XML Parser class

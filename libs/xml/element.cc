@@ -224,6 +224,30 @@ void Element::optimise()
   }
 }
 
+//------------------------------------------------------------------------
+// Add child elements from XML text - reparses text and adds resulting
+// root as a child element.  Parser ostream & flags as Parser() below
+// Returns added child, or 'none' if parse failed
+Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
+{
+  ObTools::XML::Parser parser(serr, parse_flags);
+  try
+  {
+    parser.read_from(xml);
+    Element *root = parser.detach_root();
+    if (root)
+    {
+      children.push_back(root);
+      return *root;
+    }
+    else return none;
+  }
+  catch (ParseFailed) 
+  {
+    return none;
+  }
+}
+
 //--------------------------------------------------------------------------
 // Find first (or only) child element of any type
 // Returns Element::none if none
