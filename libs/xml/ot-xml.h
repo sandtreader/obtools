@@ -31,7 +31,7 @@ class Element; // Forward
 // Element list iterators
 // Actually contains a list of elements;  sequential forward access only
 // Usage is different from STL iterator:
-//    for(Element::iterator p(parent.children()); !!p; ++p)
+//    for(Element::iterator p(parent.children()); p; ++p)
 //       XML::Element& child = *p;
 struct ElementIterator
 {
@@ -48,6 +48,7 @@ struct ElementIterator
   //------------------------------------------------------------------------
   // Validity checks
   bool valid() { return it != elements.end(); }
+  operator bool() { return valid(); }
   bool operator!() { return !valid(); }
 
   //------------------------------------------------------------------------
@@ -71,6 +72,7 @@ struct ConstElementIterator
   ConstElementIterator(const ConstElementIterator& o):
     elements(o.elements), it(elements.begin()) {}
   bool valid() { return it != elements.end(); }
+  operator bool() { return valid(); }
   bool operator!() { return !valid(); }
   ConstElementIterator& operator++() { it++; return *this; }
   const Element& operator*() const { return **it; }
@@ -157,6 +159,8 @@ public:
   // Validity checks
   // Easy way of checking if you've got Element::none
   // Don't use (e!=Element::none) - that compares values!
+  // Note we don't provide an operator bool due to problems with ambiguity
+  // of [] operator
   bool valid() const { return this!=&none; }
   bool operator!() const { return !valid(); }
 
@@ -402,21 +406,21 @@ public:
 // Do block for every direct child of a parent
 // (Read as 'for each child <v> of parent <p>')
 #define OBTOOLS_XML_FOREACH_CHILD(_childvar, _parent)                     \
-  for(ObTools::XML::ElementIterator _p((_parent).children); !!_p; ++_p)   \
+  for(ObTools::XML::ElementIterator _p((_parent).children); _p; ++_p)   \
   { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every direct child with a given tag
 // (Read as 'for each child <v> of parent <p> with tag <tag>')
 #define OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(_childvar, _parent, _tag)      \
   for(ObTools::XML::ElementIterator _p((_parent).get_children(_tag));     \
-      !!_p; ++_p)                                                         \
+      _p; ++_p)                                                         \
   { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every descendant with a given tag
 // (Read as 'for each descendant <v> of parent <p> with tag <tag>')
 #define OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(_childvar, _parent, _tag) \
   for(ObTools::XML::ElementIterator _p((_parent).get_descendants(_tag));  \
-      !!_p; ++_p)                                                         \
+      _p; ++_p)                                                         \
   { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every descendant with a given tag, but pruned at given tag
@@ -425,8 +429,7 @@ public:
 #define OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
                                                         _tag, _prune)     \
   for(ObTools::XML::ElementIterator                                       \
-        _p((_parent).get_descendants(_tag, _prune));                      \
-      !!_p; ++_p)                                                         \
+        _p((_parent).get_descendants(_tag, _prune)); _p; ++_p)            \
   { ObTools::XML::Element& _childvar=*_p;
 
 // --- End block for any kind of FOREACH
