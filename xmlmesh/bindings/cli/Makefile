@@ -10,7 +10,7 @@ NAME   	= xmlmesh-send
 OBJS 	= xmlmesh-send.o
 
 DEBIAN-NAME    = ot-xmlmesh-cli
-DEBIAN-VERSION = 1.0.0
+DEBIAN-VERSION = 1.1.0
 DEBIAN-REVISION = 1
 
 ifdef DEBUG

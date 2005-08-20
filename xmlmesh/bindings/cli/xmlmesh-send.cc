@@ -12,6 +12,7 @@
 
 #include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
+#include <fstream>
 
 #if !defined(_SINGLE)
 #error Do NOT build multithreaded - no guarantee that send() will complete!
@@ -26,13 +27,14 @@ void usage(char *pname)
 {
   cout << "ObTools XMLMesh command line message interface\n\n";
   cout << "Usage:\n";
-  cout << "  " << pname << " [options] <subject>\n\n";
-  cout << "Reads message from stdin and sends it with the given subject\n";
+  cout << "  " << pname << " [options] <subject> [<file>]\n\n";
+  cout << "Reads message from <file> or stdin, and sends it with the given subject\n";
   cout << "May output response to stdout if requested\n";
   cout << "Result code 0 for success, 1 for message failure, 2 for fatal error\n\n";
   cout << "Options:\n";
   cout << "  -c --check      Request response and check for OK, or output error to stderr\n";
-  cout << "  -r --response   Request response and output it to stdout\n";
+  cout << "  -r --response   Request response and output body to stdout\n";
+  cout << "  -s --soap       Show full SOAP response (only if -r)\n";
   cout << "  -v --verbose    More logging\n";
   cout << "  -q --quiet      No logging, even on error\n";
   cout << "  -h --host       Set XMLMesh host (default 'localhost')\n";
@@ -45,51 +47,65 @@ void usage(char *pname)
 // Main
 int main(int argc, char **argv)
 {
-  bool check = false;
-  bool show_response = false;
-
-  string host("localhost");
-  int port = XMLMesh::OTMP::DEFAULT_PORT;
-  Log::Level log_level = Log::LEVEL_ERROR;
-
   if (argc < 2)
   {
     usage(argv[0]);
     return 0;
   }
 
-  // Last argument is always subject
-  string subject(argv[argc-1]);
+  string subject;
+  string file;
+  bool check = false;
+  bool show_response = false;
+  bool soap_response = false;
+  string host("localhost");
+  int port = XMLMesh::OTMP::DEFAULT_PORT;
+  Log::Level log_level = Log::LEVEL_ERROR;
 
   // Parse options
-  for(int i=1; i<argc-1; i++)
+  for(int i=1; i<argc; i++)
   {
     string opt(argv[i]);
-    if (opt == "-c" || opt == "--check")
-      check = true;
-    else if (opt == "-r" || opt == "--response")
-      show_response = true;
-    else if (opt == "-v" || opt == "--verbose")
+
+    if (opt[0] == '-')
     {
-      log_level = Log::LEVEL_DETAIL;
-      OBTOOLS_LOG_IF_DEBUG(log_level = Log::LEVEL_DEBUG;)
+      if (opt == "-c" || opt == "--check")
+	check = true;
+      else if (opt == "-r" || opt == "--response")
+	show_response = true;
+      else if (opt == "-s" || opt == "--soap")
+	soap_response = true;
+      else if (opt == "-v" || opt == "--verbose")
+      {
+	log_level = Log::LEVEL_DETAIL;
+	OBTOOLS_LOG_IF_DEBUG(log_level = Log::LEVEL_DEBUG;)
+      }
+      else if (opt == "-q" || opt == "--quiet")
+	log_level = Log::LEVEL_NONE;
+      else if ((opt == "-h" || opt == "--host") && i<argc-2)
+	host = argv[++i];
+      else if ((opt == "-p" || opt == "--port") && i<argc-2)
+	port = atoi(argv[++i]);
+      else if (opt == "-?" || opt == "--help")
+      {
+	usage(argv[0]);
+	return 0;
+      }
+      else
+      {
+	cerr << "Unknown option: " << opt << endl;
+	usage(argv[0]);
+	return 2;
+      }
     }
-    else if (opt == "-q" || opt == "--quiet")
-      log_level = Log::LEVEL_NONE;
-    else if ((opt == "-h" || opt == "--host") && i<argc-2)
-      host = argv[++i];
-    else if ((opt == "-p" || opt == "--port") && i<argc-2)
-      port = atoi(argv[++i]);
-    else if (opt == "-?" || opt == "--help")
-    {
-      usage(argv[0]);
-      return 0;
-    }
+    else if (subject.empty())
+      subject = opt;
+    else if (file.empty())
+      file = opt;
     else
     {
-      cerr << "Unknown option: " << opt << endl;
-      usage(argv[0]);
-      return 2;
+      cerr << "Extra arguments ignored\n";
+      break;
     }
   }
 
@@ -114,9 +130,32 @@ int main(int argc, char **argv)
   Net::EndPoint server(addr, port);
   XMLMesh::OTMPClient client(server);
 
-  // Read message from stdin
+  // Read message from file or stdin
   string xml;
-  while (cin) cin >> xml;
+  if (file.empty())
+  {
+    while (cin)
+    {
+      char c;
+      cin.get(c);
+      xml+=c;
+    }
+  }
+  else
+  {
+    ifstream fin(file.c_str());
+    if (!fin) 
+    {
+      cerr << "Can't read file " << file << endl;
+      return 2;
+    }
+    while (fin) 
+    {
+      char c;
+      fin.get(c);
+      xml+=c;
+    }
+  }
 
   log.detail << "Subject: " << subject << endl;
   log.detail << "Message:\n" << xml << endl;
@@ -132,7 +171,12 @@ int main(int argc, char **argv)
     {
       XMLMesh::Message response;
       if (client.request(request, response))
-	cout << response.get_text();
+      {
+	if (soap_response)
+	  cout << response.get_text();
+	else
+	  cout << response.get_body();
+      }
       else
 	return 1;
     }
