@@ -135,7 +135,11 @@ Message::Message(const string& subject, const string& body_text,
   try
   {
     parser.read_from(body_text);
-    soap_message->add_body(parser.detach_root());
+    XML::Element *root = parser.detach_root();
+    if (root)
+      soap_message->add_body(root);
+    else
+      error_log << "XMLMesh Message creation: No body XML found\n";
   }
   catch (XML::ParseFailed)
   {
