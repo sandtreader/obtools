@@ -142,6 +142,14 @@ uint64_t Path::length() const
 }
 
 //--------------------------------------------------------------------------
+// Get the file's last-modified time (mtime)
+time_t Path::last_modified() const
+{
+  struct stat64 sb;
+  return stat64(c_str(), &sb)?0:sb.st_mtime;
+}
+
+//--------------------------------------------------------------------------
 // Delete the file/directory (directories are always deleted recursively)
 // Returns whether successful
 bool Path::erase() const

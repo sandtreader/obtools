@@ -17,6 +17,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <time.h>
 
 namespace ObTools { namespace File { 
 
@@ -110,6 +111,10 @@ public:
   //--------------------------------------------------------------------------
   // Get the file's length
   uint64_t length() const;
+
+  //--------------------------------------------------------------------------
+  // Get the file's last-modified time (mtime)
+  time_t last_modified() const;
 
   // Methods to manipulate whole files ---------------------------------------
   //--------------------------------------------------------------------------
