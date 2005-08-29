@@ -162,12 +162,10 @@ bool Path::erase() const
 
 //--------------------------------------------------------------------------
 // Rename file to new path
-// New path will be resolved against old one before rename
 // Note: You probably can't rename between filing systems
 bool Path::rename(const Path& new_path) const
 {
-  Path dest = resolve(new_path);
-  return !::rename(c_str(), dest.c_str());  
+  return !::rename(c_str(), new_path.c_str());  
 }
 
 //------------------------------------------------------------------------

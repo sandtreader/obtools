@@ -124,7 +124,6 @@ public:
 
   //--------------------------------------------------------------------------
   // Rename file to new path
-  // New path will be resolved against old one before rename
   // Note: You probably can't rename between filing systems
   bool rename(const Path& new_path) const;
 };
