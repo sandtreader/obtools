@@ -1,12 +1,16 @@
 ObTools ToDo:
 
+Build
+-----
+
+ - Fix Will's hack copying .h's to build-* for .so builds
+
 Libs
 ----
 
 XML:
  - Implement CDATA marked section
  - Keep line number in element for semantic errors & nesting errors
- - Don't output <?xml ?> by default - provide separate function
 
 DB:
  - Transactions
