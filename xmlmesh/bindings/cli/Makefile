@@ -5,12 +5,11 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-TYPE	= exe
-NAME   	= xmlmesh-send
-OBJS 	= xmlmesh-send.o
+TYPE	= exes
+NAME   	= xmlmesh-send xmlmesh-receive
 
 DEBIAN-NAME    = ot-xmlmesh-cli
-DEBIAN-VERSION = 1.1.0
+DEBIAN-VERSION = 1.2.0
 DEBIAN-REVISION = 1
 
 ifdef DEBUG
