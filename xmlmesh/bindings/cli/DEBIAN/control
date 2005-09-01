@@ -8,4 +8,5 @@ Description: ObTools XMLMesh message bus command line interface
  components using simple XML messages
  .
  This package provides a simple command-line utility for sending messages
- and receiving responses in scripts, ot-xmlmesh-send
+ and receiving responses in scripts, ot-xmlmesh-send, and a daemon for
+ receiving messages and passing them to scripts, ot-xmlmesh-receive
