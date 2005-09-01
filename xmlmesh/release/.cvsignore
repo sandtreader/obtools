@@ -6,5 +6,6 @@
 *.cfg.xml
 xmlmesh-server
 xmlmesh-send
+xmlmesh-receive
 *.deb
 *.v
