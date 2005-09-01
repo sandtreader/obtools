@@ -211,15 +211,13 @@ public:
 
   //------------------------------------------------------------------------
   // Dump to given output stream
-  void write_to(ostream& s) const; 
+  // with_pi controls whether to including the standard-compliant <?xml .. ?>
+  void write_to(ostream& s, bool with_pi=false) const; 
 
   //--------------------------------------------------------------------------
   // Convert to a string
-  string to_string() const;
-
-  //--------------------------------------------------------------------------
-  // Convert to a string as a fragment (no <?xml PI)
-  string Element::to_string_frag() const;
+  // with_pi controls whether to including the standard-compliant <?xml .. ?>
+  string to_string(bool with_pi=false) const;
 
   //--------------------------------------------------------------------------
   // Write start-tag only to a given stream

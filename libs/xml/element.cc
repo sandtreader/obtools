@@ -152,27 +152,20 @@ string Element::escape(const string &v, bool escquote) const
 
 //--------------------------------------------------------------------------
 // Write to a given stream
-void Element::write_to(ostream &s) const
+// with_pi controls whether to including the standard-compliant <?xml .. ?>
+void Element::write_to(ostream &s, bool with_pi) const
 {
-  s << "<?xml version=\"1.0\"?>" << endl;
+  if (with_pi) s << "<?xml version=\"1.0\"?>" << endl;
   write_indented(0, s);
 }
 
 //--------------------------------------------------------------------------
 // Convert to a string
-string Element::to_string() const
+// with_pi controls whether to including the standard-compliant <?xml .. ?>
+string Element::to_string(bool with_pi) const
 {
   ostringstream oss;
-  write_to(oss);
-  return oss.str();
-}
-
-//--------------------------------------------------------------------------
-// Convert to a string as a fragment (no <?xml PI)
-string Element::to_string_frag() const
-{
-  ostringstream oss;
-  write_indented(0, oss);
+  write_to(oss, with_pi);
   return oss.str();
 }
 
