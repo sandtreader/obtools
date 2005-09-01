@@ -53,7 +53,7 @@ ostream& operator<<(ostream& s, const FaultMessage& m)
   SOAP::Fault& fault = m.get_fault();
 
   s << "SOAP Fault: " << fault.get_reason() 
-    << " (" << fault.get_code_string() << ")\n";
+    << " (" << fault.get_code_string() << ")";
 
   return s;
 }
