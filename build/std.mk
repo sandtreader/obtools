@@ -9,10 +9,11 @@
 
 # ROOT:      Relative path to obtools/ root from including Makefile
 # TYPE:      Type of thing we want to build:
-#              exe    Final executable
+#              exe    Final single executable
+#              exes   Final multiple executable, each with equivalent .o
 #              lib    Library
 #              dlmod  Dynamically loaded module (with static libraries inside)
-# NAME:      Name of the executable/library/module
+# NAME:      Name of the executable(s)/library/module
 # VERSION:   Version number of the shared superlibrary
 # OBJS:      List of local objects to build in the exe/lib/dlmod
 # HEADERS:   Internal header dependencies / released headers for libs
@@ -28,7 +29,7 @@
 # CLEANCMD:  Extra clean command on 'make clean'
 # DOCFILE:   File (relative to ROOT) to append documentation to
 
-# This recurses on itself with target 'exe'
+# This recurses on itself with target 'targets'
 
 # Standard variant flags:
 # RELEASE:   Build release version
@@ -100,6 +101,14 @@ ifeq ($(TYPE), exe)
 TARGETS = $(NAME)
 RELEASABLE = $(NAME)
 RELEASE-NAME = $(NAME)
+endif
+
+#Targets for multiple executables
+ifeq ($(TYPE), exes)
+TARGETS = $(NAME)
+RELEASABLE = $(NAME)
+#Blank allows copy to work below
+RELEASE-NAME = 
 endif
 
 #Targets for dlmod
@@ -282,6 +291,20 @@ $(NAME): $(OBJS) $(LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ $(EXTRALIBS)
 endif
 
+#Multiple executables
+define exe_template
+#This weird order with ifeq inside the template gets round an apparent
+#limitation of make - you can't call templates inside an ifeq, or it
+#complains (wrongly) of missing endifs
+ifeq ($(TYPE), exes)
+$(1): $(1).o $$(LIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
+EXEOBJS += $(1).o
+endif
+endef
+
+$(foreach exe,$(NAME),$(eval $(call exe_template,$(exe))))
+
 #Library
 ifeq ($(TYPE), lib)
 .copied: $(patsubst %,../%,$(HEADERS))
@@ -317,6 +340,9 @@ $(LOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
 endif
 ifdef TESTOBJS
 $(TESTOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
+endif
+ifdef EXEOBJS
+$(EXEOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
 endif
 
 
