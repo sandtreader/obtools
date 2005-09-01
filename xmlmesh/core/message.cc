@@ -105,7 +105,7 @@ Message::Message(const string& subject, const XML::Element& xml_content,
   XML::Parser parser(error_log);
   try
   {
-    parser.read_from(xml_content.to_string_frag());
+    parser.read_from(xml_content.to_string());
     soap_message->add_body(parser.detach_root());
   }
   catch (XML::ParseFailed)
