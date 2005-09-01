@@ -16,6 +16,7 @@ DEB_DIR=/tmp/${PACKAGE}.$$
 mkdir -p $DEB_DIR/DEBIAN
 mkdir -p $DEB_DIR/usr/sbin
 mkdir -p $DEB_DIR/etc/init.d
+mkdir -p $DEB_DIR/etc/logrotate.d
 mkdir -p $DEB_DIR/etc/obtools
 mkdir -p $DEB_DIR/var/log/obtools
 
@@ -29,6 +30,7 @@ echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
 install -s -m 0755 xmlmesh-server $DEB_DIR/usr/sbin/ot-xmlmesh
 install -m 0644 $SRC_DIR/xmlmesh.cfg.xml $DEB_DIR/etc/obtools/xmlmesh.cfg.xml
 install -m 0755 $SRC_DIR/ot-xmlmesh.init.d $DEB_DIR/etc/init.d/ot-xmlmesh
+install -m 0644 $SRC_DIR/ot-xmlmesh.logrotate.d $DEB_DIR/etc/logrotate.d/ot-xmlmesh
 
 fakeroot -- dpkg -b $DEB_DIR $PACKAGE
 cp $PACKAGE $SRC_DIR/../release/
