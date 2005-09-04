@@ -116,6 +116,12 @@ public:
   // Get the file's last-modified time (mtime)
   time_t last_modified() const;
 
+  //--------------------------------------------------------------------------
+  // Set the file's last-modified time (mtime)
+  // Also sets access time to now
+  // Returns whether successful
+  bool set_last_modified(time_t t) const;
+
   // Methods to manipulate whole files ---------------------------------------
   //--------------------------------------------------------------------------
   // Delete the file/directory (directories are always deleted recursively)

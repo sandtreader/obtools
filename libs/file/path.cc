@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <utime.h>
 
 namespace ObTools { namespace File {
 
@@ -147,6 +148,18 @@ time_t Path::last_modified() const
 {
   struct stat64 sb;
   return stat64(c_str(), &sb)?0:sb.st_mtime;
+}
+
+//--------------------------------------------------------------------------
+// Set the file's last-modified time (mtime)
+// Also sets access time to now
+// Returns whether successful
+bool Path::set_last_modified(time_t t) const
+{
+  struct utimbuf utb;
+  utb.actime = time(NULL);  // Now
+  utb.modtime = t;
+  return !utime(c_str(), &utb); 
 }
 
 //--------------------------------------------------------------------------
