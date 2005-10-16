@@ -13,7 +13,7 @@ VERSION=$2
 REV=$3
 #Not expected, but left in place just in case...
 VARIANT=$4
-DEB_VERSION=$VERSION.$3
+DEB_VERSION=$VERSION-$3
 SRC_DIR=`dirname $0`
 RELEASE_DIR=$SRC_DIR/../../release
 
