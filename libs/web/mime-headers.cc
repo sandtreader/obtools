@@ -156,6 +156,9 @@ Misc::PropertyList MIMEHeaders::split_parameters(string& value)
 // body (if any)
 bool MIMEHeaders::read(istream& in)
 {
+  // Clear existing
+  xml.clear_children();
+
   // Read lines
   while (!in.fail())
   {

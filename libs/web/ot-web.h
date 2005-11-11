@@ -55,6 +55,14 @@ public:
   URL(XML::Element& xml);
 
   //--------------------------------------------------------------------------
+  // Get the text of the URL
+  string get_text() { return text; }
+
+  //--------------------------------------------------------------------------
+  // Clear the URL
+  void clear() { text.clear(); }
+
+  //--------------------------------------------------------------------------
   // Split text into XML
   // Pass in an empty named element, and this will fill it up as above
   // Returns whether successful (valid URL)

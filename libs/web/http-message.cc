@@ -40,6 +40,10 @@ bool HTTPMessage::read(istream &in)
 
     // Rest is reason 
     reason = string(line, sp2+1);
+
+    // Method, URL are empty
+    method.clear();
+    url.clear();
   }
   else
   {
@@ -53,6 +57,10 @@ bool HTTPMessage::read(istream &in)
 
     // Version is the rest
     version = string(line, sp2+1);
+
+    // Code, reason are empty
+    code = 0;
+    reason.clear();
   }
 
   // Now read headers
@@ -70,6 +78,7 @@ bool HTTPMessage::read(istream &in)
 
   // Note: Code to handle read-to-end-of-stream meaning of length=0
   // is still in here
+  body.clear();
   if (length)
   {
     // Try to read this much or up to end of stream
