@@ -672,14 +672,23 @@ bool Element::translate(map<string, string>& trans_map)
 }
 
 //--------------------------------------------------------------------------
-// Destructor
+// Clear children
 // Recursively destroys children
-Element::~Element()
+void Element::clear_children()
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
     delete *p;
+  children.clear();
+}
+
+//--------------------------------------------------------------------------
+// Destructor
+// Recursively destroys children
+Element::~Element()
+{
+  clear_children();
 }
 
 //------------------------------------------------------------------------

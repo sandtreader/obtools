@@ -385,6 +385,11 @@ public:
   // the document.  
   bool translate(map<string, string>& trans_map);
 
+  //--------------------------------------------------------------------------
+  // Clear children
+  // Recursively destroys children
+  void clear_children();
+
   //------------------------------------------------------------------------
   // Destructor
   ~Element();
