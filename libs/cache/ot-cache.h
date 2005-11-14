@@ -178,11 +178,6 @@ protected:
   TIDY_POLICY tidy_policy;
   EVICTOR_POLICY evictor_policy;
 
-  //--------------------------------------------------------------------------
-  // Clear the given content - does nothing here, but implemented in
-  // PointerCache to free pointers
-  virtual void clear(const MCType&) { }
-
 public:
   // Overall recursive mutex
   MT::RMutex mutex;
@@ -201,8 +196,9 @@ public:
   // Whether successful - can fail if limit reached and no eviction possible
   bool add(const ID& id, const CONTENT& content)
   { 
-    MT::RLock lock(mutex);
     if (limit && cachemap.size() > limit && !evict()) return false;
+
+    MT::RLock lock(mutex);  // NB Don't lock around evict
     cachemap[id] = MCType(content); 
     return true; 
   }
@@ -244,36 +240,27 @@ public:
 
   //--------------------------------------------------------------------------
   // Remove content of given ID
-  void remove(const ID& id) 
+  virtual void remove(const ID& id) 
   { 
     MT::RLock lock(mutex);
     MapIterator p = cachemap.find(id);
-    if (p != cachemap.end())
-    {
-      clear(p->second);
-      cachemap.erase(p);
-    }
+    if (p != cachemap.end()) cachemap.erase(p);
   }
 
   //--------------------------------------------------------------------------
   // Run background evictor policy
-  void tidy() 
+  virtual void tidy() 
   { 
-    MT::RLock lock(mutex);
     time_t now = time(0);
+    MT::RLock lock(mutex);
 
     for(MapIterator p = cachemap.begin();
 	p!=cachemap.end();)
     {
-      MCType &mc = p->second;
+      MapIterator q=p++;
+      MCType &mc = q->second;
       if (!tidy_policy.keep_entry(mc.policy_data, now))
-      {
-	MapIterator q=p;
-	++p;  // Protect from deletion
-	clear(q->second);
 	cachemap.erase(q);
-      }
-      else ++p;
     }
   }
 
@@ -281,9 +268,10 @@ public:
   // Run emergency evictor policy
   // Evicts until map size is less than limit (room to add one)
   // Returns whether there is now room
-  bool evict()
+  virtual bool evict()
   {
     MT::RLock lock(mutex);
+
     // Number we need to evict
     unsigned int needed = cachemap.size() - limit + 1;  
     if (needed <= 0) return true;
@@ -298,7 +286,7 @@ public:
 	  p!=cachemap.end();
 	  ++p)
       {
-	MapContent<CONTENT> &mc = p->second;
+	MCType &mc = p->second;
 	if (evictor_policy.check_worst(mc.policy_data, worst_data))
 	{
 	  // Keep this as the worst
@@ -310,7 +298,6 @@ public:
       // Did we find one?
       if (worst!=cachemap.end())
       {
-	clear(worst->second);
 	cachemap.erase(worst);
 	needed--;
       }
@@ -450,15 +437,6 @@ protected:
   typedef map<ID, MCType> MapType;
   typedef typename MapType::iterator MapIterator;
 
-  //--------------------------------------------------------------------------
-  // Clear the given content - frees pointer
-  // N.B. Types here - it must match the prototype of the parent clear()
-  // method, and the compiler isn't clever enough to work out that our MCType
-  // is actually the same as theirs.
-  virtual void clear(const typename Cache<ID, PointerContent<CONTENT>, 
-		     TIDY_POLICY, EVICTOR_POLICY>::MCType& mc)
-  { delete mc.content.ptr; }
-
 public:
   //--------------------------------------------------------------------------
   // Constructor
@@ -515,6 +493,108 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Remove content of given ID
+  virtual void remove(const ID& id) 
+  { 
+    CONTENT *to_delete = 0;
+
+    // Avoid locking around delete to prevent deadlocks if destruction
+    // attempts locks itself
+    {
+      MT::RLock lock(mutex);
+      MapIterator p = cachemap.find(id);
+      if (p != cachemap.end())
+      {
+	to_delete = p->second.content.ptr;
+	cachemap.erase(p);
+      }
+    }
+	
+    if (to_delete) delete(to_delete);
+  }
+
+  //--------------------------------------------------------------------------
+  // Run background evictor policy
+  virtual void tidy() 
+  { 
+    list<CONTENT *> to_delete;
+    time_t now = time(0);
+
+    // Avoid locking around delete
+    {
+      MT::RLock lock(mutex);
+
+      for(MapIterator p = cachemap.begin();
+	  p!=cachemap.end();)
+      {
+	MapIterator q=p++;
+	MCType &mc = q->second;
+	if (!tidy_policy.keep_entry(mc.policy_data, now))
+	{
+	  to_delete.push_back(q->second.content.ptr);
+	  cachemap.erase(q);
+	}
+      }
+    }
+
+    // Now do the delete outside the lock
+    for(typename list<CONTENT *>::iterator p = to_delete.begin();
+	p!=to_delete.end(); ++p)
+      delete(*p);
+  }
+
+  //--------------------------------------------------------------------------
+  // Run emergency evictor policy
+  // Evicts until map size is less than limit (room to add one)
+  // Returns whether there is now room
+  virtual bool evict()
+  {
+    // Number we need to evict
+    unsigned int needed = cachemap.size() - limit + 1;  
+    if (needed <= 0) return true;
+
+    while (needed)
+    {
+      CONTENT *to_delete = 0;
+      PolicyData worst_data;
+
+      {
+	MT::RLock lock(mutex);
+	MapIterator worst = cachemap.end();  
+
+	// Show the policy all the entries, let them choose the worst
+	for(MapIterator p = cachemap.begin();
+	    p!=cachemap.end();
+	    ++p)
+	{
+	  MCType &mc = p->second;
+	  if (evictor_policy.check_worst(mc.policy_data, worst_data))
+	  {
+	    // Keep this as the worst
+	    worst = p;
+	    worst_data = mc.policy_data;
+	  }
+	}
+
+	// Did we find one?
+	if (worst!=cachemap.end())
+	{
+	  to_delete = worst->second.content.ptr;
+	  cachemap.erase(worst);
+	  needed--;
+	}
+	else return false;  // Can't do it
+      }
+      
+      // Do delete outside lock
+      if (to_delete) delete(to_delete);
+    }
+
+    return true; // Got enough 
+  }
+
+
+  //--------------------------------------------------------------------------
   // Iterators
   typedef PointerCacheIterator<ID, CONTENT> iterator;
   iterator begin() { return iterator(cachemap.begin()); }
@@ -525,7 +605,7 @@ public:
   virtual void clear() 
   {
     for(MapIterator p = cachemap.begin(); p!=cachemap.end(); ++p)
-      clear(p->second); 
+      delete(p->second.content.ptr); 
     cachemap.clear(); 
   }
 
