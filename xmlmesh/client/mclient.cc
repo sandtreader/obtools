@@ -37,7 +37,7 @@ class DispatchThread: public MT::Thread
       if (transport.wait(data))
       {
 	Message msg(data);  // Construct message from XML <message> data
-	client.dispatch(msg, log);
+	client.handle(msg, log);
       }
       else
       {
@@ -53,8 +53,8 @@ public:
 };
 
 //------------------------------------------------------------------------
-// Dispatch a message (background thread)
-void MultiClient::dispatch(Message &msg, Log::Streams& log)
+// Handle a message (background thread)
+void MultiClient::handle(Message &msg, Log::Streams& log)
 {
   string ref = msg.get_ref();
   MT::RLock l(mutex);
@@ -76,8 +76,34 @@ void MultiClient::dispatch(Message &msg, Log::Streams& log)
   }
   else
   {
-    string subject = msg.get_subject();
-    bool handled = false;
+    // Pass it to a worker thread - this allows the subscriber to
+    // initiate an outgoing request and get the result - otherwise
+    // we end up in deadlock
+    MultiClientWorker *t = workers.remove();
+    if (t)
+    {
+      t->client = this;
+      t->msg = new Message(msg);  // Copy for safety
+      t->kick();  // This will handle back in run() in the worker thread
+    }
+    else
+    {
+      log.error << "Mesh client has no spare workers - '" 
+		<< msg.get_subject() << "' message lost\n";
+    }
+  }
+}
+
+//------------------------------------------------------------------------
+// Dispatch a message (worker thread)
+void MultiClient::dispatch(Message *msg)
+{
+  string subject = msg->get_subject();
+  list<Subscriber *> handlers;
+
+  {
+    // Lock while reading subscriber list
+    MT::RLock l(mutex);
 
     // Try all the subscribers
     for(list<Subscriber *>::iterator p = subscribers.begin();
@@ -87,29 +113,38 @@ void MultiClient::dispatch(Message &msg, Log::Streams& log)
       Subscriber *sub = *p;
       if (Text::pattern_match(sub->subject, subject))
       {
-	// Pass it to a worker thread - this allows the subscriber to
-	// initiate an outgoing request and get the result - otherwise
-	// we end up in deadlock
-	MultiClientWorker *t = workers.remove();
-	if (t)
-	{
-	  t->sub = sub;
-	  t->msg = new Message(msg);  // Copy for safety
-	  t->kick();  // This will handle back in run() in the worker thread
-	  handled = true;
-	}
+	// Lock subscriber to prevent delete 
+	sub->mutex.lock();
+	if (sub->active)    // Check it hasn't gone inactive 
+	  handlers.push_back(sub);
 	else
-	{
-	  log.error << "Mesh client has no spare workers - message lost\n";
-	}
+	  sub->mutex.unlock();  // Let it die
       }
     }
-
-    // Complain if no-one wanted it
-    if (!handled)
-      log.error << "Unhandled message received with subject " 
-		<< subject << endl;
   }
+
+  // Complain if no-one wanted it
+  if (handlers.empty())
+  {
+    Log::Streams log;
+    log.error << "Unhandled message received with subject " 
+	      << subject << endl;
+  }
+
+  // Now have own safe list of locked subscribers - no-one can interfere
+  // with this, even if they try unsubscribing now
+  for(list<Subscriber *>::iterator p = handlers.begin();
+      p!=handlers.end();
+      p++)
+  {
+    Subscriber *sub = *p;
+    sub->handle(*msg); 
+
+    // Now it's safe to delete
+    sub->mutex.unlock();
+  }
+
+  delete msg;
 }
 
 //------------------------------------------------------------------------
@@ -154,7 +189,7 @@ retry:
 	else
 	{
 	  // Dispatch to others and continue
-	  dispatch(msg, log);
+	  handle(msg, log);
 	}
       }
       else
@@ -173,8 +208,7 @@ retry:
 // Run function - pass msg to subscriber
 void MultiClientWorker::run() 
 { 
-  sub->handle(*msg); 
-  delete msg;
+  client->dispatch(msg);
 }
 
 //==========================================================================
@@ -339,16 +373,34 @@ MultiClient::~MultiClient()
 //------------------------------------------------------------------------
 // Constructor - register into client
 Subscriber::Subscriber(MultiClient& _client, const string& _subject):
-  client(_client), subject(_subject)
+  client(_client), subject(_subject), mutex(), active(true)
 {
   client.register_subscriber(this);
+}
+
+//------------------------------------------------------------------------
+// Manual unsubscription.  Use this if there is any chance messages may
+// still be arriving in another thread when you call the destructor
+// May block waiting for existing messages to complete
+void Subscriber::disconnect()
+{
+  if (active)
+  {
+    // Unregister first
+    client.deregister_subscriber(this);
+
+    // Now temporarily lock the mutex and go inactive to ensure no 
+    // more messages are handled
+    MT::Lock lock(mutex);
+    active = false;
+  }
 }
 
 //------------------------------------------------------------------------
 // Destructor - deregister from client
 Subscriber::~Subscriber()
 {
-  client.deregister_subscriber(this);
+  disconnect();
 }
 
 }} // namespaces

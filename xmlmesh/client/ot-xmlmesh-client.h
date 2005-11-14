@@ -146,6 +146,26 @@ class MultiClient;  // forward
 // for subscribed messages (see below), also with the subscribe/unsubscribe
 // functionality of Subscription above
 // See mclient.cc
+
+// NOTE!  You must not delete this while handling a message through it
+// - evidently, in terms of C++ object safety, but also there is a
+// mutex set while handling a message to prevent deletion by another
+// thread.  Also, if there is any chance that a message could arrive, or
+// already be active, through another thread while deleting it (which
+// is usually the case with dynamic subscriptions) call disconnect()
+// first!
+
+// [Technical rationale:  This object is both the subscription and the 
+//  message handler.  The destructor can only unsubscribe once the 
+//  Subscriber superclass destructor is called, by which time the object has
+//  'become' just a Subscriber, with no implementation of handle(), so you
+//  will get 'pure virtual method called' aborts() if a message is already
+//  in progress.  In any case, your child class state is no longer valid at
+//  that point.  disconnect() safely deregisters and makes the subscriber
+//  inactive, to guarantee that when the destructor is called there cannot
+//  be any outstanding or new messages handled through it.  Note it may have
+//  to block waiting for existing messages to be handled to ensure this -
+//  beware of deadlocks!]
 class Subscriber
 {
 protected:
@@ -153,11 +173,19 @@ protected:
 
 public:
   string subject;
+  MT::Mutex mutex; 
+  bool active;
 
   //------------------------------------------------------------------------
   // Constructor/destructor register/unregister into multiclient
   Subscriber(MultiClient& _client, const string& _subject);
   virtual ~Subscriber();
+
+  //------------------------------------------------------------------------
+  // Manual unsubscription.  Use this if there is any chance messages may
+  // still be arriving in another thread when you call the destructor
+  // May block waiting for existing messages to complete
+  void disconnect();
 
   //------------------------------------------------------------------------
   // Message handler function - implemented by child classes
@@ -179,7 +207,7 @@ struct MultiClientRequest
 class MultiClientWorker: public MT::PoolThread
 {
 public:
-  Subscriber *sub;
+  MultiClient *client;
   Message *msg;
 
   MultiClientWorker(ObTools::MT::PoolReplacer<MultiClientWorker>& _rep):
@@ -254,8 +282,12 @@ public:
   void deregister_subscriber(Subscriber *sub);
 
   //------------------------------------------------------------------------
-  // Dispatch a message (background thread)
-  void dispatch(Message &msg, Log::Streams& log);
+  // Handle a message (background thread)
+  void handle(Message &msg, Log::Streams& log);
+
+  //------------------------------------------------------------------------
+  // Dispatch a message (worker thread)
+  void dispatch(Message *msg);
 
   //------------------------------------------------------------------------
   // Resubscribe for all subjects we should be subscribed to (background)
