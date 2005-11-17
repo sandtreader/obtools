@@ -132,6 +132,12 @@ public:
   // Rename file to new path
   // Note: You probably can't rename between filing systems
   bool rename(const Path& new_path) const;
+
+  //--------------------------------------------------------------------------
+  // Ensure a directory path exists
+  // With parents set, acts like 'mkdir -p' and creates full path if required
+  // Returns whether successful
+  bool ensure(bool parents=false, int mode=0777) const;
 };
 
 //------------------------------------------------------------------------

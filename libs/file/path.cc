@@ -181,6 +181,28 @@ bool Path::rename(const Path& new_path) const
   return !::rename(c_str(), new_path.c_str());  
 }
 
+//--------------------------------------------------------------------------
+// Ensure a directory path exists
+// With parents set, acts like 'mkdir -p' and creates full path if required
+// Returns whether successful
+bool Path::ensure(bool parents, int mode) const
+{
+  // Bottom out empty paths
+  if (path.empty()) return true;
+
+  // Bottom out existing paths
+  if (exists()) return true;
+
+  if (parents)
+  {
+    // Split directory into leaf and parent dir and recurse to parent
+    Path ppath(dirname());
+    if (!ppath.ensure()) return false;
+  }
+
+  return !::mkdir(c_str(), mode);
+}
+
 //------------------------------------------------------------------------
 // << operator to write Path to ostream
 ostream& operator<<(ostream& s, const Path& p) 
