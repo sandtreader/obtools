@@ -490,20 +490,21 @@ public:
   void replace(T *t)
   {
     Lock lock(mutex);
-    spares.push_back(t);
 
-    // Empty spares above minimum amount
-    while (spares.size() > min_spares)
+    // Empty spares above minimum amount, allowing for the one we're about
+    // to replace
+    while (spares.size() > min_spares-1)
     {
-      T *t = spares.back();  // Kill last one entered
+      T *ts = spares.back();  // Kill last one entered
       spares.pop_back();
-
-      // Remove from arbitrary position in threads list
-      typename list<T *>::iterator p = find(threads.begin(), threads.end(), t);
-      if (p!=threads.end()) threads.erase(p);
-      
-      delete t;
+      threads.remove(ts);
+      delete ts;
     }
+
+    // Add this back to spares after deletion - can't delete the one we're
+    // running in!  (Note that this means that there will always be one
+    // spare even if min_spares=0)
+    spares.push_back(t);
   }
 
   //--------------------------------------------------------------------------
