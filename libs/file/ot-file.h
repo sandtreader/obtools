@@ -18,6 +18,7 @@
 #include <string>
 #include <stdint.h>
 #include <time.h>
+#include <sys/types.h>
 
 namespace ObTools { namespace File { 
 
@@ -111,7 +112,7 @@ public:
   //--------------------------------------------------------------------------
   // Get the file's length
   uint64_t length() const;
-
+ 
   //--------------------------------------------------------------------------
   // Get the file's last-modified time (mtime)
   time_t last_modified() const;
@@ -122,7 +123,33 @@ public:
   // Returns whether successful
   bool set_last_modified(time_t t) const;
 
-  // Methods to manipulate whole files ---------------------------------------
+  //--------------------------------------------------------------------------
+  // Get the file's mode
+  mode_t mode() const;
+
+  //--------------------------------------------------------------------------
+  // Set file permissions mode (chmod)
+  bool set_mode(mode_t mode) const;
+
+  // String version
+  bool set_mode(const string& mode) const { return set_mode(otoi(mode)); }
+
+  //--------------------------------------------------------------------------
+  // Get the file's owner
+  uid_t owner() const;
+
+  //--------------------------------------------------------------------------
+  // Get the file's group
+  gid_t group() const;
+
+  //--------------------------------------------------------------------------
+  // Get the file's owner & group
+  bool set_ownership(uid_t owner, uid_t group) const;
+
+  // String version
+  bool set_ownership(const string& owner, const string& group) const
+  { return set_ownership(user_name_to_id(owner), group_name_to_id(group)); }
+
   //--------------------------------------------------------------------------
   // Delete the file/directory (directories are always deleted recursively)
   // Returns whether successful
@@ -138,6 +165,28 @@ public:
   // With parents set, acts like 'mkdir -p' and creates full path if required
   // Returns whether successful
   bool ensure(bool parents=false, int mode=0777) const;
+
+  //--------------------------------------------------------------------------
+  //Handy octal conversion functions for file modes
+  //Convert integer to octal string
+  static string itoo(int mode_i);
+
+  //Convert octal string to integer
+  static int otoi(const string& mode_s);
+
+  //--------------------------------------------------------------------------
+  //Handy user/group id functions for ownership
+  // Get user name from uid
+  static string user_id_to_name(uid_t uid);
+
+  // Get user id from name
+  static uid_t user_name_to_id(const string& uname);
+
+  // Get group name from gid
+  static string group_id_to_name(gid_t gid);
+
+  // Get group id from name
+  static gid_t group_name_to_id(const string& gname);
 };
 
 //------------------------------------------------------------------------

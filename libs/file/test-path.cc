@@ -36,6 +36,9 @@ int main(int argc, char **argv)
   cout << "     readable: " << (path.readable()?"Yes":"No") << endl;
   cout << "    writeable: " << (path.writeable()?"Yes":"No") << endl;
   cout << "       length: " << path.length() << endl;
+  cout << "         mode: " << File::Path::itoo(path.mode()) << endl;
+  cout << "        owner: " << File::Path::user_id_to_name(path.owner()) << endl;
+  cout << "        group: " << File::Path::group_id_to_name(path.group()) << endl;
 
   // Check for resolve request
   if (argc >= 3)

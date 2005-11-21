@@ -13,6 +13,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <utime.h>
+#include <pwd.h>
+#include <grp.h>
+#include <sstream>
 
 namespace ObTools { namespace File {
 
@@ -163,6 +166,44 @@ bool Path::set_last_modified(time_t t) const
 }
 
 //--------------------------------------------------------------------------
+// Get the file's mode
+mode_t Path::mode() const
+{
+  struct stat64 sb;
+  return stat64(c_str(), &sb)?0:sb.st_mode;
+}
+
+//--------------------------------------------------------------------------
+// Set file permissions mode (chmod)
+bool Path::set_mode(mode_t mode) const
+{
+  return !chmod(c_str(), mode);
+}
+
+//--------------------------------------------------------------------------
+// Get the file's owner
+uid_t Path::owner() const
+{
+  struct stat64 sb;
+  return stat64(c_str(), &sb)?0:sb.st_uid;
+}
+
+//--------------------------------------------------------------------------
+// Get the file's group
+gid_t Path::group() const
+{
+  struct stat64 sb;
+  return stat64(c_str(), &sb)?0:sb.st_gid;
+}
+
+//--------------------------------------------------------------------------
+// Get the file's owner & group
+bool Path::set_ownership(uid_t owner, uid_t group) const
+{
+  return !chown(c_str(), owner, group);
+}
+
+//--------------------------------------------------------------------------
 // Delete the file/directory (directories are always deleted recursively)
 // Returns whether successful
 bool Path::erase() const
@@ -201,6 +242,109 @@ bool Path::ensure(bool parents, int mode) const
   }
 
   return !::mkdir(c_str(), mode);
+}
+
+//--------------------------------------------------------------------------
+// Convert integer to octal string
+string Path::itoo(int mode_i)
+{
+  ostringstream oss;
+  oss << oct << mode_i;
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
+// Convert octal string to integer
+int Path::otoi(const string& mode_s)
+{
+  int n=0;
+  for(string::const_iterator p=mode_s.begin(); p!=mode_s.end(); p++)
+    n=n*8+(*p-'0');
+  return n;
+}
+
+//--------------------------------------------------------------------------
+// Get user name from uid
+string Path::user_id_to_name(uid_t uid)
+{
+  // Painful reentrant way of doing this!
+  int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+  char *buf = (char *)malloc(buflen);
+  if (!buf) abort();
+
+  struct passwd user;
+  struct passwd *uptr;
+  int rc = getpwuid_r(uid, &user, buf, buflen, &uptr);
+  if (rc || !uptr)
+  {
+    free(buf);
+    return "UNKNOWN";
+  }
+
+  string name(uptr->pw_name);
+  free(buf);
+  return name;
+}
+
+//--------------------------------------------------------------------------
+// Get user id from name
+uid_t Path::user_name_to_id(const string& uname)
+{
+  // Even more painful reentrant way of doing this, given we never use
+  // the name!
+  int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+  char *buf = (char *)malloc(buflen);
+  if (!buf) abort();
+
+  struct passwd user;
+  struct passwd *uptr;
+  int rc = getpwnam_r(uname.c_str(), &user, buf, buflen, &uptr);
+  free(buf);  // We don't use it
+
+  if (rc || !uptr) return 0;
+  return uptr->pw_uid;
+}
+
+//--------------------------------------------------------------------------
+// Get group name from gid
+string Path::group_id_to_name(gid_t gid)
+{
+  // Painful reentrant way of doing this!
+  int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+  char *buf = (char *)malloc(buflen);
+  if (!buf) abort();
+
+  struct group group;
+  struct group *gptr;
+  int rc = getgrgid_r(gid, &group, buf, buflen, &gptr);
+  if (rc || !gptr)
+  {
+    free(buf);
+    return "UNKNOWN";
+  }
+
+  string name(gptr->gr_name);
+  free(buf);
+  return name;
+}
+
+//--------------------------------------------------------------------------
+// Get group id from name
+gid_t Path::group_name_to_id(const string& gname)
+{
+  // Even more painful reentrant way of doing this, given we never use
+  // the name!
+  int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+  char *buf = (char *)malloc(buflen);
+  if (!buf) abort();
+
+  struct group group;
+  struct group *gptr;
+  int rc = getgrnam_r(gname.c_str(), &group, buf, buflen, &gptr);
+  free(buf);  // We don't use it
+
+  if (rc || !gptr) return 0;
+  return gptr->gr_gid;
 }
 
 //------------------------------------------------------------------------
