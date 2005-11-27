@@ -108,6 +108,11 @@ public:
   { return Duration((double)n/(1ULL<<NTP_SHIFT)); }
 
   //------------------------------------------------------------------------
+  // Validity checks - 0 time is not valid
+  bool valid() { return t!=0; }
+  bool operator!() { return !t; }
+
+  //------------------------------------------------------------------------
   // Convert to floating point seconds (e.g. for NTP timestamp in text)
   double seconds() const { return t; }
 
