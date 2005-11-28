@@ -8,10 +8,11 @@
 TYPE	= lib
 NAME   	= ot-file
 HEADERS = ot-file.h 
-OBJS  	= path.o
-TESTS 	= test-path
+OBJS  	= path.o directory.o
+TESTS 	= test-path test-dir
 TESTCMD	= ./test-path /foo/bar/wombat/fred.exe && \
-          ./test-path /usr/include/linux/ ../../foo  
+          ./test-path /usr/include/linux/ ../../foo && \
+	  ./test-dir /usr/bin/
 MT-VARIANTS = 1
 
 ROOT    = ../..

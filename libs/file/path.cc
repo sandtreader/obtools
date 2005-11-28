@@ -215,33 +215,22 @@ bool Path::erase() const
 }
 
 //--------------------------------------------------------------------------
+// Touch the file, creating it if not already existing, setting mtime if so
+// Returns whether successful
+bool Path::touch(mode_t mode) const
+{
+  int fd = creat(c_str(), mode);
+  if (fd < 0) return false;
+  close(fd);
+  return true;
+}
+
+//--------------------------------------------------------------------------
 // Rename file to new path
 // Note: You probably can't rename between filing systems
 bool Path::rename(const Path& new_path) const
 {
   return !::rename(c_str(), new_path.c_str());  
-}
-
-//--------------------------------------------------------------------------
-// Ensure a directory path exists
-// With parents set, acts like 'mkdir -p' and creates full path if required
-// Returns whether successful
-bool Path::ensure(bool parents, int mode) const
-{
-  // Bottom out empty paths
-  if (path.empty()) return true;
-
-  // Bottom out existing paths
-  if (exists()) return true;
-
-  if (parents)
-  {
-    // Split directory into leaf and parent dir and recurse to parent
-    Path ppath(dirname());
-    if (!ppath.ensure()) return false;
-  }
-
-  return !::mkdir(c_str(), mode);
 }
 
 //--------------------------------------------------------------------------

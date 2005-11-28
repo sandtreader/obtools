@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <sys/types.h>
+#include <list>
 
 namespace ObTools { namespace File { 
 
@@ -29,7 +30,7 @@ using namespace std;
 // Path class
 class Path
 {
-private:
+protected:
   string path;
 
 #if defined(__WIN32__)
@@ -41,6 +42,10 @@ private:
 
 public:
   // Constructors-------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  // Copy constructor
+  Path(const Path& _o): path(_o.path) {}
+
   //--------------------------------------------------------------------------
   // Constructor from string
   Path(const string& _path): path(_path) {}
@@ -156,15 +161,14 @@ public:
   bool erase() const;
 
   //--------------------------------------------------------------------------
+  // Touch the file, creating it if not already existing, setting mtime if so
+  // Returns whether successful
+  bool touch(mode_t mode=0644) const;
+
+  //--------------------------------------------------------------------------
   // Rename file to new path
   // Note: You probably can't rename between filing systems
   bool rename(const Path& new_path) const;
-
-  //--------------------------------------------------------------------------
-  // Ensure a directory path exists
-  // With parents set, acts like 'mkdir -p' and creates full path if required
-  // Returns whether successful
-  bool ensure(bool parents=false, int mode=0777) const;
 
   //--------------------------------------------------------------------------
   //Handy octal conversion functions for file modes
@@ -192,6 +196,40 @@ public:
 //------------------------------------------------------------------------
 // << operator to write Path to ostream
 ostream& operator<<(ostream& s, const Path& p);
+
+//==========================================================================
+// Directory class
+// Adds directory iterator to basic Path
+class Directory: public Path
+{
+public:
+  //--------------------------------------------------------------------------
+  // Constructors, as Path (q.v.) 
+  Directory(const Path& _o): Path(_o) {}
+  Directory(const string& _path): Path(_path) {}
+  Directory(const string& dir, const string& leaf): Path(dir, leaf) {}
+  Directory(const Path& _path, const string& leaf): Path(_path, leaf) {}
+
+  //--------------------------------------------------------------------------
+  // Ensure a directory path exists
+  // With parents set, acts like 'mkdir -p' and creates full path if required
+  // Returns whether successful
+  bool ensure(bool parents=false, int mode=0777) const;
+
+   //--------------------------------------------------------------------------
+  // Get list of directory contents, as leaf strings
+  // If all is set, hidden/dotfiles are returned (including . and ..)
+  // Return whether successful (directory readable)
+  // Fills in leaves if so
+  bool inspect(list<string>& leaves, bool all=false);
+
+  //--------------------------------------------------------------------------
+  // Get list of directory contents, as full paths prefixed by directory path
+  // If all is set, hidden/dotfiles are returned (including . and ..)
+  // Returns whether successful (directory readable)
+  // Fills in paths if so
+  bool inspect(list<Path>& paths, bool all=false);
+};
 
 //==========================================================================
 }} //namespaces
