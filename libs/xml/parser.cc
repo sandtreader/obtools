@@ -139,6 +139,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
 
   //OK, now we have a valid new element
   Element *e = new Element(name);
+  e->line = line;
 
   //Now loop looking for attributes or >
   bool empty=false;
@@ -209,8 +210,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
   }
 
   //Add this as a child of the last open element, if any
-  if (elements.size()) 
-    elements.back()->children.push_back(e);
+  if (elements.size()) elements.back()->add(e);
 
   //Process namespaces etc. for this element
   initial_processing(e);
@@ -256,12 +256,11 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
     else
     {
       //Complain, but ignore it
-      string err = "Mis-nested tags - expected </";
-      err+=e->name;
-      err+="> but got </";
-      err+=name;
-      err+=">";
-      error(err);
+      ostringstream oss;
+      oss << "Mis-nested tags - expected </" << e->name 
+	  << ">, opened at line " << e->line << ", but got </"
+	  << name << ">";
+      error(oss.str());
     }
   }
   else
@@ -344,8 +343,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 	e->children.back()->content+=' ';
       e->children.back()->content+=content;
     }
-    else
-      e->children.push_back(new Element("", content));
+    else e->add(new Element("", content));
   }
 }
 

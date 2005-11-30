@@ -2,21 +2,24 @@
 // ObTools::XML: xpath.cc
 //
 // Micro XPath processor
-// Only handles very basic x/y/z/@foo syntax (for now!)
+// Only handles very basic x/y/z[3]/@foo syntax (for now!)
 //
 // Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "ot-xml.h"
+#include "unistd.h"
+
 using namespace ObTools::XML;
 
 //------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
-// Only first element of intermediate steps is used - cousins are not merged!
+// Only first (or n'th) element of intermediate steps is used - 
+// cousins are not merged!
 list<Element *> XPathProcessor::get_elements(const string& path)
 {
-  list<Element *> empty;  // Fallback for no results
+  list<Element *> el;
   Element *current = &root;
   string::size_type pos=0;
   string::size_type size=path.size();
@@ -29,37 +32,66 @@ list<Element *> XPathProcessor::get_elements(const string& path)
     // If it stops here, it's the root they want
     if (pos==size)
     {
-      empty.push_back(current);  // OK, it's not quite so empty any more
-      return empty;
+      el.push_back(current);
+      return el;
     }
 
     // Locate next step delimiter, or end
     string::size_type delim = path.find('/', pos);
     if (delim == string::npos) delim=size;
 
-    // Extract step
-    string step(path, pos, delim-pos);
+    string::size_type name_end;
+    int count = -1;
 
-    // Get elements - single if intermediate, all if last
-    if (delim == size)
+    // Look for [ within step indicating count
+    string::size_type bopen = path.find('[', pos);
+    if (bopen != string::npos && bopen<delim)
     {
-      // Last step - get all children of this name
-      return current->get_children(step);
+      // Find closing ] and get count inside
+      string::size_type bclose = path.find(']', bopen);
+      if (bclose != string::npos && bclose<delim && bclose-bopen>1)
+      {
+	string ns(path, bopen+1, bclose-bopen-1);
+	count = atoi(ns.c_str())-1;  // We count from zero
+      }
+
+      name_end = bopen;
     }
     else
     {
-      // Intermediate - just move to first of this name
-      Element& child = current->get_child(step);
-      if (child.valid())
-	current = &child;
-      else
-	return empty;
+      name_end = delim;
     }
+    
+    // Extract name
+    string name(path, pos, name_end-pos);
+
+    // Get elements to return if this is the last one and not counted
+    if (delim == size && count<0)
+    {
+      // Last step - get all children of this name
+      return current->get_children(name);
+    }
+
+    // Need to find a single element, either to return or continue with
+    // Get first or counted child
+    Element& child = current->get_child(name, count<0?0:count);
+    if (child.valid())
+      current = &child;
+    else
+      return el;
+
+    // If at end, return this one, otherwise loop
+    if (delim == size)
+    {
+      el.push_back(current);
+      return el;
+    }
+
     // Move to next step
     pos = delim+1;
   }
 
-  return empty;
+  return el;
 }
 
 //------------------------------------------------------------------------

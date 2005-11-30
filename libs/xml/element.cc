@@ -10,6 +10,7 @@
 #include "ot-xml.h"
 #include <ctype.h>
 #include <sstream>
+#include <algorithm>
 
 #ifdef __BORLANDC__
 #include "ot-fix.h"
@@ -242,21 +243,27 @@ Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
 }
 
 //--------------------------------------------------------------------------
-// Find first (or only) child element of any type
+// Find n'th (first, by default) child element, whatever it is
 // Returns Element::none if none
 // Const and non-const implementations
-const Element& Element::get_child() const
+const Element& Element::get_child(int n) const
 {
   list<Element *>::const_iterator p=children.begin();
+  for(;n && p!=children.end(); ++p, --n)
+    ;
+
   if (p!=children.end())
     return **p;
   else
     return Element::none;
 }
 
-Element& Element::get_child()
+Element& Element::get_child(int n)
 {
   list<Element *>::iterator p=children.begin();
+  for(;n && p!=children.end(); ++p, --n)
+    ;
+
   if (p!=children.end())
     return **p;
   else
@@ -264,27 +271,27 @@ Element& Element::get_child()
 }
 
 //--------------------------------------------------------------------------
-// Find first (or only) child element of given name
+// Find n'th (first, by default) child element of given name
 // Returns Element::none if none
 // Const and non-const implementations
-const Element& Element::get_child(const string& ename) const
+const Element& Element::get_child(const string& ename, int n) const
 {
   for(list<Element *>::const_iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    if ((*p)->name==ename) return **p;
+    if ((*p)->name==ename && !n--) return **p;
   }
   return Element::none;
 }
 
-Element& Element::get_child(const string& ename)
+Element& Element::get_child(const string& ename, int n)
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       p++)
   {
-    if ((*p)->name==ename) return **p;
+    if ((*p)->name==ename && !n--) return **p;
   }
   return Element::none;
 }
@@ -628,6 +635,45 @@ void Element::set_attr_real(const string& attname, double value)
 }
 
 //--------------------------------------------------------------------------
+// Get XPath position relative to root (not including the root itself)
+// Returns an XPath string that can be used to identify this element in
+// the same document
+string Element::get_xpath() const
+{
+  string xpath;
+
+  // Loop up through parents, stop at root
+  for(const Element *current=this; 
+      current && current->parent; 
+      current=current->parent)
+  {
+    ostringstream oss;
+    oss << "/" << current->name;
+
+    // Check where we are in the list of siblings with the same name
+    int count=0;
+    int mycount=0;
+    list<Element *>& sibs = current->parent->children;
+
+    for(list<Element *>::const_iterator p=sibs.begin();
+	p!=sibs.end();
+	++p)
+    {
+      if (*p == current) mycount = count;
+      if ((*p)->name == current->name) count++;
+    }
+
+    // Add count part if required
+    if (count>1) oss << "[" << mycount+1 << "]";
+
+    // Add this to the front
+    xpath.insert(0, oss.str());
+  }
+
+  return xpath;
+}
+
+//--------------------------------------------------------------------------
 // Translate name using given map:
 //   If not present, leave it and return true
 //   If present but mapped to "", leave it return false (=> delete me)
@@ -669,6 +715,36 @@ bool Element::translate(map<string, string>& trans_map)
   //We know it's not empty - change name
   name = tp->second;
   return true;  // Leave me alone now
+}
+
+//--------------------------------------------------------------------------
+// Detach from parent
+void Element::detach()
+{
+  if (parent) parent->children.remove(this);
+  parent = 0;
+}
+
+//--------------------------------------------------------------------------
+// Replace with the given element at same position in parent
+// Detaches this element and attaches the new one
+void Element::replace_with(Element *e)
+{
+  if (!parent) return;
+
+  // Find current position in parent
+  list<Element *>& l = parent->children;
+  list<Element *>::iterator p = find(l.begin(), l.end(), this);
+
+  // If there, swap it with 'e' and detach
+  if (p!=l.end())
+  {
+    l.insert(p, e);
+    e->parent = parent;
+
+    l.erase(p);
+    parent = 0;
+  }
 }
 
 //--------------------------------------------------------------------------

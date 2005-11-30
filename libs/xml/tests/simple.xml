@@ -6,7 +6,11 @@
   More &#42;content&#x2a;
   <bar attr3="&quot;val3&quot;"/>
   <wombat>Wombats are<!-- an inconvenient comment -->go!</wombat>
-  <cellar><wombat>A buried wombat</wombat></cellar>
+  <cellar>
+    <wombat>A buried wombat</wombat>
+    <wombat>Another wombat in the first cellar</wombat>
+  </cellar>
+  <cellar><wombat>A wombat in the second cellar</wombat></cellar>
   copy as ref: &#xa9; copy as UTF8: ©
 <XX1:bing xmlns:XX1="namespace1" XX1:fred="1">
   <XX1:bong xmlns="namespace2" jim="2">
