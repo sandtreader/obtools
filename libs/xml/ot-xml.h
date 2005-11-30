@@ -648,6 +648,20 @@ public:
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
   double get_value_real(const string& path, double def=0.0);
+
+  //--------------------------------------------------------------------------
+  // Delete the element(s) at the given path
+  void delete_elements(const string& path);
+
+  //--------------------------------------------------------------------------
+  // Add an element below the given path
+  // Takes the element and attaches to given path
+  void add_element(const string& path, Element *ne);
+
+  //--------------------------------------------------------------------------
+  // Replace an element at the given path with the new one
+  // Takes the element and attaches to given path, detachs and deletes the old
+  void replace_element(const string& path, Element *ne);
 };
 
 //==========================================================================

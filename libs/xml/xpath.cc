@@ -181,3 +181,39 @@ double XPathProcessor::get_value_real(const string& path, double def)
   return def;
 }
 
+//--------------------------------------------------------------------------
+// Delete the element(s) at the given path
+void XPathProcessor::delete_elements(const string& path)
+{
+  list<Element *> els = get_elements(path);
+  for(list<Element *>::iterator p = els.begin(); p!=els.end(); ++p)
+  {
+    Element *e = *p;
+    e->detach();
+    delete e;
+  }
+}
+
+//--------------------------------------------------------------------------
+// Add an element below the given path
+// Takes the element and attaches to given path
+void XPathProcessor::add_element(const string& path, Element *ne)
+{
+  Element *e = get_element(path);
+  if (e) e->add(ne);
+}
+
+//--------------------------------------------------------------------------
+// Replace an element at the given path with the new one
+// Takes the element and attaches to given path, detachs and deletes the old
+void XPathProcessor::replace_element(const string& path, Element *ne)
+{
+  Element *e = get_element(path);
+  if (e)
+  {
+    e->replace_with(ne);
+    delete e;
+  }
+}
+
+
