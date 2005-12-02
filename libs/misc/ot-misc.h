@@ -201,7 +201,7 @@ public:
   // width gives number of bytes per line
   // split is interval of spaces between bytes: 0 is no spaces
   // ascii gives printable ASCII listing as well if set
-  Dumper(ostream& _sout, int _width=16, int _split=4, bool _ascii=false): 
+  Dumper(ostream& _sout, int _width=16, int _split=4, bool _ascii=true): 
     sout(_sout), width(_width), split(_split), ascii(_ascii) {}
 
   //------------------------------------------------------------------------
