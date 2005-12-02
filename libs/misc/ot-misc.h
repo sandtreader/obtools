@@ -193,14 +193,16 @@ class Dumper
   ostream& sout;
   int width;
   int split;
+  bool ascii;
 
 public:
   //------------------------------------------------------------------------
   // Constructor
   // width gives number of bytes per line
   // split is interval of spaces between bytes: 0 is no spaces
-  Dumper(ostream& _sout, int _width=16, int _split=4): 
-    sout(_sout), width(_width), split(_split) {}
+  // ascii gives printable ASCII listing as well if set
+  Dumper(ostream& _sout, int _width=16, int _split=4, bool _ascii=false): 
+    sout(_sout), width(_width), split(_split), ascii(_ascii) {}
 
   //------------------------------------------------------------------------
   // Dump a block

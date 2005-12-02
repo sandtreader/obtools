@@ -9,6 +9,7 @@
 
 #include "ot-misc.h"
 #include <iomanip>
+#include <ctype.h>
 
 namespace ObTools { namespace Misc {
 
@@ -30,6 +31,24 @@ void Dumper::dump(void *block, int length)
       if (split && !(i%split)) sout << ' ';
       sout << hex << setw(2) << setfill('0') << (int)(p[offset+i]);
     }
+    if (ascii)
+    {
+      // Pad if last line
+      for(int i=w; i<width; i++)
+      {
+	if (split && !(i%split)) sout << ' ';
+	cout << "  ";
+      }
+	
+      cout << " | ";
+      for(int i=0; i<w; i++)
+      {
+	unsigned char c=p[offset+i];
+	if (!isprint(c)) c='.';
+	cout << c;
+      }
+    }
+
     sout << endl;
 
     offset+=w;

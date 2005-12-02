@@ -18,7 +18,7 @@ using namespace ObTools;
 
 int main()
 {
-  Misc::Dumper dumper(cout);
+  Misc::Dumper dumper(cout, 16, 4, true);
 
   char *s = "Mary had a little lamb, its fleece was white as snow\nAnd everywhere that Mary went, the lamb was sure to go\n";
 
