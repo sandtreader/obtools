@@ -40,7 +40,7 @@ void Dumper::dump(void *block, int length)
 	sout << "  ";
       }
 	
-      cout << " | ";
+      sout << " | ";
       for(int i=0; i<w; i++)
       {
 	unsigned char c=p[offset+i];
