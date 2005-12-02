@@ -37,7 +37,7 @@ void Dumper::dump(void *block, int length)
       for(int i=w; i<width; i++)
       {
 	if (split && !(i%split)) sout << ' ';
-	cout << "  ";
+	sout << "  ";
       }
 	
       cout << " | ";
@@ -45,7 +45,7 @@ void Dumper::dump(void *block, int length)
       {
 	unsigned char c=p[offset+i];
 	if (!isprint(c)) c='.';
-	cout << c;
+	sout << c;
       }
     }
 
