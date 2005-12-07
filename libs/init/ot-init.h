@@ -168,7 +168,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  AutoRegister(Registry<SUPER, CP>& _reg, const KEY& _name):
+  AutoRegister(Registry<SUPER, CP, KEY>& _reg, const KEY& _name):
     reg(_reg), name(_name) {}
 
   //------------------------------------------------------------------------
