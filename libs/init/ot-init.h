@@ -122,10 +122,10 @@ public:
 // Registry template
 // A place to register Factories for superclass <SUPER> by name, 
 // with create parameters CP
-template<class SUPER, class CP=XML::Element&> class Registry
+template<class SUPER, class CP=XML::Element&, class KEY=string> class Registry
 {
 private:
-  map<string, Factory<SUPER, CP> *> factories;
+  map<KEY, Factory<SUPER, CP> *> factories;
 
 public:
   //------------------------------------------------------------------------
@@ -134,15 +134,15 @@ public:
 
   //------------------------------------------------------------------------
   // Register a factory by name
-  void add(const string& name, Factory<SUPER, CP>& f)
+  void add(const KEY& name, Factory<SUPER, CP>& f)
   { factories[name] = &f; }
     
   //------------------------------------------------------------------------
   // Create an object by name
   // Returns the object, or 0 if no factories available or create fails
-  SUPER *create(const string& name, CP cp)
+  SUPER *create(const KEY& name, CP cp)
   { 
-    typename map<string, Factory<SUPER, CP> *>::iterator p;
+    typename map<KEY, Factory<SUPER, CP> *>::iterator p;
     p = factories.find(name);
     if (p!=factories.end())
       return p->second->create(cp);
@@ -157,18 +157,18 @@ public:
 // on the given registry
 // <SUPER> is the superclass used in the register
 // <SUB> is the subclass being initialised here
-template<class SUPER, class SUB, class CP=XML::Element&> 
+template<class SUPER, class SUB, class CP=XML::Element&, class KEY=string> 
   class AutoRegister: private AutoAction
 {
 private:
   NewFactory<SUPER, SUB, CP> factory;
-  Registry<SUPER, CP>& reg;
-  string name;
+  Registry<SUPER, CP, KEY>& reg;
+  KEY name;
 
 public:
   //------------------------------------------------------------------------
   // Constructor
-  AutoRegister(Registry<SUPER, CP>& _reg, const string& _name):
+  AutoRegister(Registry<SUPER, CP>& _reg, const KEY& _name):
     reg(_reg), name(_name) {}
 
   //------------------------------------------------------------------------
