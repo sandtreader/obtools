@@ -7,7 +7,7 @@
 
 TYPE	= superlib
 NAME	= ot-general
-VERSION	= 1.2.0
+VERSION	= 1.2.1
 DEPENDS = xml misc text net log init chan time web file
 MT-VARIANTS = 1
 
