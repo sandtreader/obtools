@@ -147,7 +147,7 @@ extern "C" void _unlock_mutex(void *m);
 class Condition
 {
 private:
-  bool flag;
+  volatile bool flag;
   pthread_cond_t cv;
   Mutex mutex;
 
@@ -224,8 +224,8 @@ class RMutex
 private:
   Mutex mutex;
   Condition available;
-  int count;
-  pthread_t owner;
+  volatile int count;
+  volatile pthread_t owner;
 
 public:
   //--------------------------------------------------------------------------
@@ -291,7 +291,7 @@ class Claimable
 {
 private:
   Mutex mutex;
-  int claims;
+  volatile int claims;
 
 public:
   //--------------------------------------------------------------------------
