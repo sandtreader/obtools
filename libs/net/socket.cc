@@ -183,7 +183,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
   // Silently loop on EINTR
   do
   {
-    size = ::write(fd, buf, count); 
+    size = ::send(fd, buf, count, MSG_NOSIGNAL); 
   }
   while (size<0 && errno == EINTR);
 #endif
