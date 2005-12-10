@@ -108,17 +108,21 @@ void MultiClient::dispatch(Message *msg)
     // Try all the subscribers
     for(list<Subscriber *>::iterator p = subscribers.begin();
 	p!=subscribers.end();
-	p++)
+	)
     {
-      Subscriber *sub = *p;
-      if (Text::pattern_match(sub->subject, subject))
+      list<Subscriber *>::iterator q = p++;  // Protect from deletion
+      Subscriber *sub = *q;
+      
+      // This is where we kill dead ones
+      if (sub->dead && !sub->active)
       {
-	// Lock subscriber to prevent delete 
-	sub->mutex.lock();
-	if (sub->active)    // Check it hasn't gone inactive 
-	  handlers.push_back(sub);
-	else
-	  sub->mutex.unlock();  // Let it die
+	delete sub;
+	subscribers.erase(q);
+      }
+      else if (Text::pattern_match(sub->subject, subject))
+      {
+	sub->active++;  // Protected by global lock
+	handlers.push_back(sub);
       }
     }
   }
@@ -131,19 +135,29 @@ void MultiClient::dispatch(Message *msg)
 	      << subject << endl;
   }
 
-  // Now have own safe list of locked subscribers - no-one can interfere
-  // with this, even if they try unsubscribing now
+  // Now have own safe list of subscribers with active set - no-one can 
+  // interfere with this, even if they try unsubscribing now
   for(list<Subscriber *>::iterator p = handlers.begin();
       p!=handlers.end();
       p++)
   {
     Subscriber *sub = *p;
     sub->handle(*msg); 
-
-    // Now it's safe to delete
-    sub->mutex.unlock();
   }
 
+  // Deactivate subscribers again inside global lock
+  {
+    MT::RLock l(mutex);
+
+    for(list<Subscriber *>::iterator p = handlers.begin();
+	p!=handlers.end();
+	p++)
+    {
+      Subscriber *sub = *p;
+      sub->active--;
+    }
+  }
+  
   delete msg;
 }
 
@@ -160,6 +174,8 @@ retry:
       p++)
   {
     Subscriber *sub = *p;
+    if (sub->dead) continue;
+
     SubscriptionMessage req(SubscriptionMessage::JOIN, sub->subject);
     string id = req.get_id();
 
@@ -354,10 +370,7 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
     error_log << "Unable to unsubscribe for " << sub->subject << endl;
   }
 
-  {
-    MT::RLock l(mutex);
-    subscribers.remove(sub);
-  }
+  sub->dead = true;  // Trigger deletion in dispatch() when safe
 }
 
 //------------------------------------------------------------------------
@@ -373,34 +386,31 @@ MultiClient::~MultiClient()
 //------------------------------------------------------------------------
 // Constructor - register into client
 Subscriber::Subscriber(MultiClient& _client, const string& _subject):
-  client(_client), subject(_subject), mutex(), active(true)
+  client(_client), subject(_subject), active(0), dead(false)
 {
   client.register_subscriber(this);
 }
 
 //------------------------------------------------------------------------
-// Manual unsubscription.  Use this if there is any chance messages may
-// still be arriving in another thread when you call the destructor
-// May block waiting for existing messages to complete
+// Manual unsubscription.  Always use this to unsubscribe and delete a
+// dynamic subscription in preference to the destructor.  If you call this,
+// don't delete the Subscriber yourself - it will be done when it is safe
+// to do so.
 void Subscriber::disconnect()
 {
-  if (active)
-  {
-    // Unregister first
-    client.deregister_subscriber(this);
-
-    // Now temporarily lock the mutex and go inactive to ensure no 
-    // more messages are handled
-    MT::Lock lock(mutex);
-    active = false;
-  }
+  client.deregister_subscriber(this);
 }
 
 //------------------------------------------------------------------------
 // Destructor - deregister from client
 Subscriber::~Subscriber()
 {
-  disconnect();
+  if (!dead)
+  {
+    // Enforce disconnect()
+    cerr << "XMLMesh Subscriber deleted through destructor, not disconnect\n";
+    abort();
+  }
 }
 
 }} // namespaces

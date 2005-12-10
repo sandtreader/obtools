@@ -153,7 +153,10 @@ class MultiClient;  // forward
 // thread.  Also, if there is any chance that a message could arrive, or
 // already be active, through another thread while deleting it (which
 // is usually the case with dynamic subscriptions) call disconnect()
-// first!
+// instead
+
+// ** THIS MEANS SUBSCRIBER OBJECTS SHOULD NEVER BE INCLUDED OR AUTO  **
+// ** only new()'ed, and disconnected()'ed rather than delete()'ed    **
 
 // [Technical rationale:  This object is both the subscription and the 
 //  message handler.  The destructor can only unsubscribe once the 
@@ -161,11 +164,8 @@ class MultiClient;  // forward
 //  'become' just a Subscriber, with no implementation of handle(), so you
 //  will get 'pure virtual method called' aborts() if a message is already
 //  in progress.  In any case, your child class state is no longer valid at
-//  that point.  disconnect() safely deregisters and makes the subscriber
-//  inactive, to guarantee that when the destructor is called there cannot
-//  be any outstanding or new messages handled through it.  Note it may have
-//  to block waiting for existing messages to be handled to ensure this -
-//  beware of deadlocks!]
+//  that point.  disconnect() safely deregisters and requests a delayed 
+//  death if anything (including the caller) is active inside the handler
 class Subscriber
 {
 protected:
@@ -173,18 +173,19 @@ protected:
 
 public:
   string subject;
-  MT::Mutex mutex; 
-  bool active;
+  int active;        // Number of handlers using this
+  bool dead;         // Death requested 
 
   //------------------------------------------------------------------------
-  // Constructor/destructor register/unregister into multiclient
+  // Constructor: register into multiclient
   Subscriber(MultiClient& _client, const string& _subject);
   virtual ~Subscriber();
 
   //------------------------------------------------------------------------
-  // Manual unsubscription.  Use this if there is any chance messages may
-  // still be arriving in another thread when you call the destructor
-  // May block waiting for existing messages to complete
+  // Manual unsubscription.  Always use this to unsubscribe and delete a
+  // dynamic subscription in preference to the destructor.  If you call this,
+  // don't delete the Subscriber yourself - it will be done when it is safe
+  // to do so.
   void disconnect();
 
   //------------------------------------------------------------------------

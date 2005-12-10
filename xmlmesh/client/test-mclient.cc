@@ -67,7 +67,7 @@ int main(int argc, char **argv)
   XMLMesh::OTMPMultiClient client(server);
 
   // Subscribe to information
-  InfoSubscriber infosub(client); 
+  InfoSubscriber *infosub = new InfoSubscriber(client); 
   
   // Loop for a while sending out messages
   for(int i=0; i<10; i++)
@@ -79,6 +79,9 @@ int main(int argc, char **argv)
 
   // Sleep while stuff comes back
   sleep(5);
+
+  // Disconnect, rather than delete
+  infosub->disconnect();
 
   return 0;  
 }
