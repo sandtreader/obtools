@@ -20,6 +20,7 @@ using namespace ObTools;
 // Mutex and global state
 MT::RMutex mutex;
 int n;  
+int nback, nfore;
 
 //--------------------------------------------------------------------------
 // Test thread class
@@ -35,12 +36,15 @@ void TestThread::run()
 {
   for(;;)
   {
-    MT::RLock lock(mutex);
     {
-      // Lock it again
-      MT::RLock lock2(mutex);
-      n++;
-      n--;
+      MT::RLock lock(mutex);
+      {
+	// Lock it again
+	MT::RLock lock2(mutex);
+	n++;
+	n--;
+	nback++;
+      }
     }
   }
 }
@@ -50,22 +54,30 @@ void TestThread::run()
 int main()
 {
   n=0;
-  TestThread t;
+  nback=0;
+  nfore=0;
+  TestThread t1;
+  TestThread t2;
 
   for(;;)
   {
-    for(int i=0; i<100000; i++)
+    for(int i=0; i<1000; i++)
     {
-      MT::RLock lock(mutex);
       {
-	// Lock it again
-	MT::RLock lock2(mutex);
-	n++;
-	n--;
+        MT::RLock lock(mutex);
+	{
+	  // Lock it again
+	  MT::RLock lock2(mutex);
+	  n++;
+	  n--;
+	  nfore++;
+	}
       }
     }
 
-    cout << "N is " << n << endl;
+    MT::RLock lock(mutex);
+    cout << "N is " << n << " (" << nback << " in bg, " 
+	 << nfore << " in fg)\n";
   }
   return 0;  
 }
