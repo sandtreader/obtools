@@ -232,6 +232,29 @@ public:
 };
 
 //==========================================================================
+// Transaction - provide transaction on given connection while it exists,
+// rolls back if killed without commit
+class Transaction
+{
+private:
+  Connection& conn;
+  bool committed;
+
+public:
+  //------------------------------------------------------------------------
+  //Constructor 
+  Transaction(Connection& _conn);
+
+  //------------------------------------------------------------------------
+  //Commit - returns whether commit command ran OK
+  bool commit();
+
+  //------------------------------------------------------------------------
+  //Destructor
+  ~Transaction();
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_DB_H
 

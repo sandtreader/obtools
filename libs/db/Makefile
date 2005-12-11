@@ -7,7 +7,7 @@
 
 TYPE	= lib
 HEADERS = ot-db.h
-OBJS  	= connection.o row.o
+OBJS  	= connection.o row.o transaction.o
 DEPENDS = log text
 VARIANTS = release-pgsql debug-pgsql single-release-pgsql single-debug-pgsql
 VARIANT-release-pgsql 		= RELEASE MULTI POSTGRES
