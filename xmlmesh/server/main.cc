@@ -52,7 +52,7 @@ int main(int argc, char **argv)
   ofstream logstream(logfile.c_str(),ios::app);
   if (!logstream)
   {
-    cerr << "central-authd: Unable to open logfile " << logfile << endl;
+    cerr << "xmlmesh-server: Unable to open logfile " << logfile << endl;
     return 2;
   }
   Log::StreamChannel chan_out(logstream);

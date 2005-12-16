@@ -1,18 +1,68 @@
+<!-- 
+  Configuration file for ObTools XMLMesh server
+  Copyright (c) xMill Consulting Limited 2005.  All rights reserved.
+-->
+
 <xmlmesh>
-  <log level="5"/>
+  <!-- Logging configuration
+
+       'level' is one of:
+
+         0 - Silence
+         1 - Errors only
+         2 - Session start/stop (default)
+         3 - Details & intermediate changes
+         4 - Debug
+         5 - Everything imaginable 
+
+       Production builds are only capable of outputting to level 3
+
+       'file' (default /var/log/obtools/xmlmesh.log) gives log file  -->
+  <log level="2" file="/var/log/obtools/xmlmesh.log"/>
+
+  <!-- Configured service modules - each has an 'id' used in routing below -->
   <services>
+
+    <!-- Main OTMP protocol server.  Binds to given 'port' (default 29167) -->
     <otmp-server port="29167" id="server">
+
+      <!-- Address filters:  Messages will only be
+           accepted from clients matching the given 'address'.
+	   Addresses may be single IP, CIDR or netmask format
+	   Single addresses may be quoted by name.
+	   If no filters exist, only localhost will be accepted -->
       <filter address="localhost"/>
-      <filter address="192.168.1.0/24"/>
-      <filter address="10.0.0.0/255.255.255.128"/>
+      <!-- <filter address="192.168.1.0/24"/> -->
+      <!-- <filter address="10.0.0.0/255.255.255.128"/> -->
     </otmp-server>
 
+    <!-- Request/response correlator: Matches returned responses to
+         original requests.  'timeout' (default 60) gives time in
+         seconds to wait for a response before assuming no-one is
+         going to respond and failing the request -->
     <correlator id="correlator" timeout="5"/>
+
+    <!-- Publisher:  Accepts subscriptions for message subject patterns and
+         reflects messages to subscribers.
+	 Accepts subscriptions for given 'subject' (default '*'=all) -->
     <publisher id="publisher"/>
+
+    <!-- Onward clients - to forward messages to another server, or to
+         subscribe for messages from another server.  Client connects to
+	 given 'server' and 'port' (default 29167)
+    <!-- <otmp-client server="another-server" port="29167" id="uplink"> -->
+      <!-- Each subscription element subscribes the client to the given
+           'subject' pattern on the remote server -->
+      <!-- <subscription subject="report.*"/> -->
+    <!-- </otmp-client> -->
   </services>
 
+  <!-- Routing between services.  Each route connects a 'from' service to
+       a 'to' service for the given 'subject' (default '*'=all) -->
   <routes>
     <route from="server" to="correlator"/>
     <route from="correlator" to="publisher"/>
+    <!-- route from="uplink" to="correlator" subject="report.*"/> -->
+    <!-- route from="correlator" to="uplink" subject="master.*"/> -->
   </routes>
 </xmlmesh>
