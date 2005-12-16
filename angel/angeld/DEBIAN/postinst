@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+if [ $1 = "configure" -o $1 = "reconfigure" ]; then
+  #Add to inittab!
+fi

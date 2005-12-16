@@ -1,0 +1,27 @@
+<!--
+   Configuration file for 'angel' command line utility
+   Copyright (c) 2005 xMill Consulting Limited.  All Rights Reserved 
+-->
+
+<angel>
+  <!-- Logging configuration
+
+       'level' is one of:
+
+         0 - Silence
+         1 - Errors only
+         2 - Session start/stop
+         3 - Details & intermediate changes
+         4 - Debug
+         5 - Everything imaginable 
+
+       Production builds are only capable of outputting to level 3
+
+       angel always logs to stdout    
+   -->
+  <log level="3"/>
+
+  <!-- XML Mesh connection, 'host' and 'port' (29167) -->
+  <xmlmesh host="localhost"/>
+
+</angel>

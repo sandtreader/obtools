@@ -1,0 +1,109 @@
+Ideas for 'angel' process monitor
+Copyright (c) xMill Consulting 2005
+
+
+
+Overview
+--------
+
+'angeld': init-like process creation and monitoring daemon
+'angel': command-line tool
+
+Communicates via XMLMesh
+
+Features
+--------
+
+Define processes in individual XML files in /etc/angel/processes/
+
+bar.xml:
+
+<process name="bar">
+  <command>/x/y/z/bar args</command>
+  <start level="default" auto="yes"/>
+  <identity user="root" group="root"/>
+  <stdout>
+    <file>/var/log/foo/bar.log</file>
+    <rotate>... rotate details? ...</rotate>
+    <timestamp>... prefix information ...<timestamp>
+  </stdout>
+  <stderr>
+    <command>... pipe to pass output to ...</command>
+    <rotate>... rotate details? ...</rotate>
+  </stderr>
+  <actions>
+    <failure>
+      <restart tries="5" delay="10"/>
+      <command>... thing to do on failure ...</command>
+    </failure>
+    <wontstart>
+      <command>... thing to do if it won't (re)start ...</command>
+    </wontstart>
+  </actions> 
+  <depends name="foo"/>
+
+  <contains name="foo"/>  <!-- Create psuedo-processes -->
+</process>
+
+angeld reads all files and sorts out dependency tree, then starts processes
+in dependency order.  Each process is then monitored, and if it fails, both 
+it and (in order) everything that depends on it is restarted.
+
+Processes are started with given identity and with stdout/stderr to given
+logfile.
+
+angeld responds to obtools.angel.* messages by default, but can add prefix
+e.g. obtools.angel.central.*
+
+Global config in /etc/angel/angeld.cfg.xml
+
+<angeld>
+  <... xmlmesh details ...>
+  <... log level ...>
+  <... own log file ...>
+  <... own identity? ...>
+  <... defaults for various things ...>
+</angeld>
+
+Command-line
+------------
+
+'angel' command line can be run from any XMLMesh-connected host, and uses
+word commands - e.g.
+
+angel                         Summary information on what's running
+angel restart bar             Restart specific process 
+angel stop bar                Stop specific process 
+angel kill bar                FOD specific process
+angel start bar               Start specific process 
+angel show bar                Specific info on given process
+angel go <level>              Go to named level (runlevel/telinit equiv)
+angel log [<n>|24]            Show last N lines of angel log
+
+Global config, overridable with flags in /etc/angel/angel.cfg.xml:
+
+<angel>
+  <xmlmesh details>
+  <log level>
+</angel>
+
+angel on <machine> ...command...   Change XMLMesh prefix for routing
+
+e.g. angel on central restart pump
+
+Distributed use
+---------------
+
+angel CLI can talk to any mesh.
+
+'on' changes the message subject to (e.g.) obtools.angel.central.* to talk
+to multiple machines
+
+Distributed logging:  Logging - either angel's or processes - can be passed 
+over mesh
+
+Version II!:
+Distributed dependency:  Depends and contains can contain 'on="machine" and
+query/register on remote angel for changes, startup order etc.
+
+<depends name="pump" on="central"/>

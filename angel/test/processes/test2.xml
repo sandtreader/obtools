@@ -1,0 +1,6 @@
+<!-- Angel test process 'test2' -->
+<process id="test2">
+  <name>Test Process 2</name>
+  <command>../test/test-process/build-debug/test-process "Test2"</command>
+  <depends id="test1"/>
+</process>
