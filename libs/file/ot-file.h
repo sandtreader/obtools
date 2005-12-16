@@ -216,19 +216,21 @@ public:
   // Returns whether successful
   bool ensure(bool parents=false, int mode=0777) const;
 
-   //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
   // Get list of directory contents, as leaf strings
+  // pattern takes a glob pattern (see Text::pattern_match)
   // If all is set, hidden/dotfiles are returned (including . and ..)
   // Return whether successful (directory readable)
   // Fills in leaves if so
-  bool inspect(list<string>& leaves, bool all=false);
+  bool inspect(list<string>& leaves, const string& pattern="*", 
+	       bool all=false);
 
   //--------------------------------------------------------------------------
   // Get list of directory contents, as full paths prefixed by directory path
-  // If all is set, hidden/dotfiles are returned (including . and ..)
+  // Other parameters as above
   // Returns whether successful (directory readable)
   // Fills in paths if so
-  bool inspect(list<Path>& paths, bool all=false);
+  bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
 };
 
 //==========================================================================

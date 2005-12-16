@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-file.h"
+#include "ot-text.h"
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -42,10 +43,12 @@ bool Directory::ensure(bool parents, int mode) const
 
 //--------------------------------------------------------------------------
 // Get list of directory contents, as leaf strings
+// pattern takes a glob pattern (see Text::pattern_match)
 // If all is set, hidden/dotfiles are returned (including . and ..)
-// Returns whether successful (directory readable)
+// Return whether successful (directory readable)
 // Fills in leaves if so
-bool Directory::inspect(list<string>& leaves, bool all)
+bool Directory::inspect(list<string>& leaves, const string& pattern, 
+			bool all)
 {
   DIR *dir = opendir(c_str());
   if (!dir) return false;
@@ -53,7 +56,8 @@ bool Directory::inspect(list<string>& leaves, bool all)
   struct dirent *de;
   while ((de=readdir(dir))!=0) 
   {
-    if (all || de->d_name[0] != '.')
+    if ((all || de->d_name[0] != '.') 
+     && Text::pattern_match(pattern, de->d_name))
       leaves.push_back(string(de->d_name));
   }
 
@@ -63,14 +67,14 @@ bool Directory::inspect(list<string>& leaves, bool all)
 
 //--------------------------------------------------------------------------
 // Get list of directory contents, as full paths prefixed by directory path
-// If all is set, hidden/dotfiles are returned (including . and ..)
+// Other parameters as above
 // Returns whether successful (directory readable)
 // Fills in paths if so
-bool Directory::inspect(list<Path>& paths, bool all)
+bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
 {
   // Get leaves
   list<string> leaves;
-  if (!inspect(leaves, all)) return false;
+  if (!inspect(leaves, pattern, all)) return false;
 
   // Now convert each leaf into a Path
   for(list<string>::iterator p=leaves.begin(); p!=leaves.end(); ++p)
