@@ -17,8 +17,13 @@
 
        Production builds are only capable of outputting to level 3
 
-       'file' (default /var/log/obtools/xmlmesh.log) gives log file  -->
-  <log level="2" file="/var/log/obtools/xmlmesh.log"/>
+       'file' (default /var/log/obtools/xmlmesh.log) gives log file  
+
+       'timestamp' gives strftime(3) format for timestamp prefix.  
+       Plain text can also be added.  If empty, nothing is added 
+  -->
+  <log level="2" file="/var/log/obtools/xmlmesh.log"
+       timestamp="%a %d %b %H:%M:%S: "/>
 
   <!-- Configured service modules - each has an 'id' used in routing below -->
   <services>

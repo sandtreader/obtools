@@ -12,6 +12,7 @@
 #include <fstream>
 
 #define DEFAULT_LOGFILE "/var/log/obtools/xmlmesh.log"
+#define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%S: "
 #define PID_FILE        "/var/run/ot-xmlmesh.pid"
 
 using namespace std;
@@ -59,7 +60,8 @@ int main(int argc, char **argv)
 #else
   Log::StreamChannel chan_out(cout);
 #endif
-  Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
+  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp", 
+						 DEFAULT_TIMESTAMP), chan_out);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
   Log::logger.connect(level_out);
