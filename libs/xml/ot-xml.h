@@ -649,19 +649,42 @@ public:
   // Returns 0.0 if present but bogus
   double get_value_real(const string& path, double def=0.0);
 
+  //------------------------------------------------------------------------
+  // Set value, either attribute or content of single (first) element
+  // Returns whether value was settable
+  // Can only set content or attributes of existing elements - use add_element
+  // to create new ones. 
+  bool set_value(const string& path, const string& value);
+
+  //--------------------------------------------------------------------------
+  // Boolean value set
+  // Sets value to 'yes' or 'no'
+  bool set_value_bool(const string& path, bool value);
+
+  //--------------------------------------------------------------------------
+  // Integer value set
+  bool set_value_int(const string& path, int value);
+
+  //--------------------------------------------------------------------------
+  // Real value set
+  bool set_value_real(const string& path, double value);
+
   //--------------------------------------------------------------------------
   // Delete the element(s) at the given path
-  void delete_elements(const string& path);
+  // Returns whether any such element existed
+  bool delete_elements(const string& path);
 
   //--------------------------------------------------------------------------
   // Add an element below the given path
   // Takes the element and attaches to given path
-  void add_element(const string& path, Element *ne);
+  // Returns whether the parent element existed
+  bool add_element(const string& path, Element *ne);
 
   //--------------------------------------------------------------------------
   // Replace an element at the given path with the new one
   // Takes the element and attaches to given path, detachs and deletes the old
-  void replace_element(const string& path, Element *ne);
+  // Returns whether the old element existed
+  bool replace_element(const string& path, Element *ne);
 };
 
 //==========================================================================
@@ -757,6 +780,49 @@ public:
   // using given attribute name as key, content as value
   map<string, string> get_map(const string& path,
 			      const char *name_attr = "name");
+
+  //------------------------------------------------------------------------
+  // XPath value set - either attribute or content of single (first) element
+  // Returns whether value was settable
+  // Can only set content or attributes of existing elements - use add_element
+  // to create new ones. 
+  bool set_value(const string& path, const string& value);
+
+  //--------------------------------------------------------------------------
+  // XPath Boolean value set - sets to 'yes' or 'no'
+  bool set_value_bool(const string& path, bool value);
+
+  //--------------------------------------------------------------------------
+  // Integer value set
+  bool set_value_int(const string& path, int value);
+
+  //--------------------------------------------------------------------------
+  // Real value set
+  bool set_value_real(const string& path, double value);
+
+  //--------------------------------------------------------------------------
+  // Delete the element(s) at the given path
+  // Returns whether any such element existed
+  bool delete_elements(const string& path);
+
+  //--------------------------------------------------------------------------
+  // Add an element below the given path
+  // Takes the element and attaches to given path
+  // Returns whether the parent element existed
+  bool add_element(const string& path, Element *ne);
+
+  //--------------------------------------------------------------------------
+  // Replace an element at the given path with the new one
+  // Takes the element and attaches to given path, detachs and deletes the old
+  // Returns whether the old element existed
+  bool replace_element(const string& path, Element *ne);
+
+  //------------------------------------------------------------------------
+  // Write back file from changes made to in-memory document
+  // Writes back to first (or only) file in filename list
+  // Returns whether successful
+  // NB: All comments are lost!
+  bool write();
 };
 
 //==========================================================================

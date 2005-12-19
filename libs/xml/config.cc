@@ -8,6 +8,8 @@
 //==========================================================================
 
 #include "ot-xml.h"
+#include <unistd.h>
+#include <stdio.h>
 #include <fstream>
 
 using namespace ObTools::XML;
@@ -149,5 +151,96 @@ map<string, string> Configuration::get_map(const string& path,
 
   return values;
 }
+
+//------------------------------------------------------------------------
+// XPath value set - either attribute or content of single (first) element
+// Returns whether value was settable
+// Can only set content or attributes of existing elements - use add_element
+// to create new ones. 
+bool Configuration::set_value(const string& path, const string& value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.set_value(path, value); 
+}
+
+//--------------------------------------------------------------------------
+// XPath Boolean value set - sets to 'yes' or 'no'
+bool Configuration::set_value_bool(const string& path, bool value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.set_value_bool(path, value); 
+}
+
+//--------------------------------------------------------------------------
+// Integer value set
+bool Configuration::set_value_int(const string& path, int value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.get_value_int(path, value); 
+}
+
+//--------------------------------------------------------------------------
+// Real value set
+bool Configuration::set_value_real(const string& path, double value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.get_value_real(path, value); 
+}
+
+//--------------------------------------------------------------------------
+// Delete the element(s) at the given path
+// Returns whether any such element existed
+bool Configuration::delete_elements(const string& path)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.delete_elements(path); 
+}
+
+//--------------------------------------------------------------------------
+// Add an element below the given path
+// Takes the element and attaches to given path
+// Returns whether the parent element existed
+bool Configuration::add_element(const string& path, Element *ne)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.add_element(path, ne); 
+}
+
+//--------------------------------------------------------------------------
+// Replace an element at the given path with the new one
+// Takes the element and attaches to given path, detachs and deletes the old
+// Returns whether the old element existed
+bool Configuration::replace_element(const string& path, Element *ne)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.replace_element(path, ne); 
+}
   
+//------------------------------------------------------------------------
+// Update file from changes made to in-memory document
+// Writes back to first (or only) file in filename list
+// Update is atomic with rename
+// Returns whether successful
+// NB: All comments are lost!
+bool Configuration::write()
+{
+  string fn = filenames.front();
+  if (fn.empty()) return false;
+
+  // Create and open temporary file
+  string tfn = fn+",update";
+  ofstream f(tfn.c_str());
+  if (f)
+  {
+    f << parser.get_root();
+    f.close();
+
+    // Attempt atomic update
+    if (!::rename(tfn.c_str(), fn.c_str())) return true;
+
+    unlink(tfn.c_str());
+  }
+  
+  return false;
+}
 

@@ -10,6 +10,7 @@
 
 #include "ot-xml.h"
 #include "unistd.h"
+#include <sstream>
 
 using namespace ObTools::XML;
 
@@ -181,39 +182,117 @@ double XPathProcessor::get_value_real(const string& path, double def)
   return def;
 }
 
+//------------------------------------------------------------------------
+// Set value either attribute or content of single (first) element
+// Returns whether value was settable
+// Can only set content or attributes of existing elements - use add_element
+// to create new ones. 
+bool XPathProcessor::set_value(const string& path, const string& value)
+{
+  // See if it's an attribute step at the end
+  string::size_type att = path.rfind('@');
+
+  if (att != string::npos)
+  {
+    // Strip off attribute step to get final element
+    string spath(path, 0, att);
+    Element *e = get_element(spath);
+    if (e)
+    {
+      // Set attribute
+      string aname(path, att+1);
+      e->set_attr(aname, value);
+      return true;
+    }
+  }
+  else
+  {
+    // Use path as is and set content
+    Element *e = get_element(path);
+    if (e)
+    {
+      e->content = value;
+      return true;
+    }
+  }
+
+  // Failed 
+  return false;
+}
+
+//--------------------------------------------------------------------------
+// Boolean value set
+// Sets value to 'yes' or 'no'
+bool XPathProcessor::set_value_bool(const string& path, bool value)
+{
+  return set_value(path, value?"yes":"no");
+}
+
+//--------------------------------------------------------------------------
+// Integer value set
+bool XPathProcessor::set_value_int(const string& path, int value)
+{
+  ostringstream oss;
+  oss << value;
+  return set_value(path, oss.str());
+}
+
+//--------------------------------------------------------------------------
+// Real value set
+bool XPathProcessor::set_value_real(const string& path, double value)
+{
+  ostringstream oss;
+  oss << value;
+  return set_value(path, oss.str());
+}
+
 //--------------------------------------------------------------------------
 // Delete the element(s) at the given path
-void XPathProcessor::delete_elements(const string& path)
+// Returns whether any such element existed
+bool XPathProcessor::delete_elements(const string& path)
 {
   list<Element *> els = get_elements(path);
+  bool any = false;
   for(list<Element *>::iterator p = els.begin(); p!=els.end(); ++p)
   {
     Element *e = *p;
     e->detach();
     delete e;
+    any = true;
   }
+
+  return any;
 }
 
 //--------------------------------------------------------------------------
 // Add an element below the given path
 // Takes the element and attaches to given path
-void XPathProcessor::add_element(const string& path, Element *ne)
+// Returns whether the parent element existed
+bool XPathProcessor::add_element(const string& path, Element *ne)
 {
   Element *e = get_element(path);
-  if (e) e->add(ne);
+  if (e)
+  {
+    e->add(ne);
+    return true;
+  }
+  else return false;
 }
 
 //--------------------------------------------------------------------------
 // Replace an element at the given path with the new one
 // Takes the element and attaches to given path, detachs and deletes the old
-void XPathProcessor::replace_element(const string& path, Element *ne)
+// Returns whether the old element existed
+bool XPathProcessor::replace_element(const string& path, Element *ne)
 {
   Element *e = get_element(path);
   if (e)
   {
     e->replace_with(ne);
     delete e;
+    return true;
   }
+  else return false;
 }
 
 
