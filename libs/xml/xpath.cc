@@ -280,6 +280,55 @@ bool XPathProcessor::add_element(const string& path, Element *ne)
 }
 
 //--------------------------------------------------------------------------
+// Add an element below the given path with given name
+// Creates empty element of given name below path
+// Returns new element if created, or 0 if parent didn't exist
+Element *XPathProcessor::add_element(const string& path, const string& name)
+{
+  Element *e = get_element(path);
+  if (e)
+  {
+    Element *child = new Element(name);
+    e->add(child);
+    return child;
+  }
+  else return 0;
+}
+
+//--------------------------------------------------------------------------
+// Ensure the given element path exists
+// Creates empty elements to fulfill the entire path if they don't already
+// exist.  Uses the first of any given name for path if more than one
+// Returns pointer to eventual child element (cannot fail)
+Element *XPathProcessor::ensure_path(const string& path)
+{
+  // See if it already exists
+  Element *e = get_element(path);
+  if (e) return e;
+
+  // Then we must create it - first make sure the parent path exists
+  // Find last / (if any)
+  string::size_type delim = path.rfind('/');
+  Element *parent = &root;
+  string child_name = path;
+
+  if (delim != string::npos)  // Has a /
+  {
+    if (delim)  // Ignore leading /
+    {
+      string parent_path(path, 0, delim);
+      parent = ensure_path(parent_path);
+    }
+    child_name = string(path, delim+1);
+  }
+
+  // Create element here
+  Element *child = new Element(child_name);
+  parent->add(child);
+  return child;
+}
+
+//--------------------------------------------------------------------------
 // Replace an element at the given path with the new one
 // Takes the element and attaches to given path, detachs and deletes the old
 // Returns whether the old element existed

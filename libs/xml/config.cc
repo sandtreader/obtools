@@ -176,7 +176,7 @@ bool Configuration::set_value_bool(const string& path, bool value)
 bool Configuration::set_value_int(const string& path, int value)
 { 
   XPathProcessor xpath(get_root());
-  return xpath.get_value_int(path, value); 
+  return xpath.set_value_int(path, value); 
 }
 
 //--------------------------------------------------------------------------
@@ -184,7 +184,7 @@ bool Configuration::set_value_int(const string& path, int value)
 bool Configuration::set_value_real(const string& path, double value)
 { 
   XPathProcessor xpath(get_root());
-  return xpath.get_value_real(path, value); 
+  return xpath.set_value_real(path, value); 
 }
 
 //--------------------------------------------------------------------------
@@ -204,6 +204,27 @@ bool Configuration::add_element(const string& path, Element *ne)
 {
   XPathProcessor xpath(get_root());
   return xpath.add_element(path, ne); 
+}
+
+//--------------------------------------------------------------------------
+// Add an element below the given path with given name
+// Creates empty element of given name below path
+// Returns new element if created, or 0 if parent didn't exist
+Element *Configuration::add_element(const string& path, const string& name)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.add_element(path, name); 
+}
+
+//--------------------------------------------------------------------------
+// Ensure the given element path exists
+// Creates empty elements to fulfill the entire path if they don't already
+// exist.  Uses the first of any given name for path if more than one
+// Returns pointer to eventual child element (cannot fail)
+Element *Configuration::ensure_path(const string& path)
+{
+  XPathProcessor xpath(get_root());
+  return xpath.ensure_path(path); 
 }
 
 //--------------------------------------------------------------------------

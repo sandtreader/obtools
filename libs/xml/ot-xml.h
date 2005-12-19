@@ -681,6 +681,19 @@ public:
   bool add_element(const string& path, Element *ne);
 
   //--------------------------------------------------------------------------
+  // Add an element below the given path with given name
+  // Creates empty element of given name below path
+  // Returns new element if created, or 0 if parent didn't exist
+  Element *add_element(const string& path, const string& name);
+
+  //--------------------------------------------------------------------------
+  // Ensure the given element path exists
+  // Creates empty elements to fulfill the entire path if they don't already
+  // exist.  Uses the first of any given name for path if more than one
+  // Returns pointer to eventual child element (cannot fail)
+  Element *ensure_path(const string& path);
+
+  //--------------------------------------------------------------------------
   // Replace an element at the given path with the new one
   // Takes the element and attaches to given path, detachs and deletes the old
   // Returns whether the old element existed
@@ -810,6 +823,19 @@ public:
   // Takes the element and attaches to given path
   // Returns whether the parent element existed
   bool add_element(const string& path, Element *ne);
+
+  //--------------------------------------------------------------------------
+  // Add an element below the given path with given name
+  // Creates empty element of given name below path
+  // Returns new element if created, or 0 if parent didn't exist
+  Element *add_element(const string& path, const string& name);
+
+  //--------------------------------------------------------------------------
+  // Ensure the given element path exists
+  // Creates empty elements to fulfill the entire path if they don't already
+  // exist.  Uses the first of any given name for path if more than one
+  // Returns pointer to eventual child element (cannot fail)
+  Element *ensure_path(const string& path);
 
   //--------------------------------------------------------------------------
   // Replace an element at the given path with the new one
