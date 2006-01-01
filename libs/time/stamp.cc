@@ -261,11 +261,19 @@ string Stamp::iso() const
 Stamp Stamp::now()
 {
   Stamp s;
+#if defined(__WIN32__)
+  // Use time() - useless for high-res timing, but apparently no better
+  // way in Windows!?
+  time_t t = ::time(NULL);
+  s.t = (ntp_stamp_t)(t+EPOCH_1970)<< NTP_SHIFT;
+#else
   struct timeval tv;
   gettimeofday(&tv, 0);
 
   s.t = (ntp_stamp_t)(tv.tv_sec + EPOCH_1970) << NTP_SHIFT;
   s.t += ((ntp_stamp_t)tv.tv_usec << NTP_SHIFT)/MICRO;
+#endif
+
   return s;
 }
 
