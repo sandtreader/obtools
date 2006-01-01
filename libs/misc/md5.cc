@@ -11,7 +11,15 @@
 
 #include "ot-misc.h"
 #include <stdint.h>
+
+#if defined(__WIN32__)
+// Assume Windows is always little-endian
+#define __LITTLE_ENDIAN 1
+#define __BYTE_ORDER __LITTLE_ENDIAN
+#else
 #include <endian.h>
+#endif
+
 #include <sstream>
 #include <iomanip>
 
