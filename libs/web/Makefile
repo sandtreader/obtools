@@ -17,6 +17,7 @@ TESTCMD += && ./test-url "http://foo.com:81/x/y/z?x=1&z=2\#frag"
 TESTCMD += && ./test-url "/x/y/z?x=1&z=2\#frag"
 DEPENDS = net xml text misc
 MT-VARIANTS = 1
+SOCKET  = 1
 
 #Catch ourselves recursing in SINGLE mode and suppress server and use of MT
 ifndef SINGLE
