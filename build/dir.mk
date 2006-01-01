@@ -9,6 +9,8 @@
 
 all:	$(patsubst %,%-all,$(SUBS))
 
+cross:	$(patsubst %,%-cross,$(SUBS))
+
 test: 	$(patsubst %,%-test,$(SUBS))
 
 #Overridable for deeper structures
@@ -41,6 +43,7 @@ subdoc:	$(patsubst %,%-docfile,$(SUBS))
 # Submake template to run on every lib
 define sub_template
 $(1)-all: 	; $$(MAKE) -C $(1)
+$(1)-cross: 	; $$(MAKE) -C $(1) cross
 $(1)-clean: 	; $$(MAKE) -C $(1) clean
 $(1)-test: 	; $$(MAKE) -C $(1) test
 $(1)-release: 	; $$(MAKE) -C $(1) RELEASEDIR=../$(RELEASEDIR) release

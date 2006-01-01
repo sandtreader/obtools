@@ -23,7 +23,7 @@
 # TESTS:     List of test executables to build
 # TESTCMD:   Test command
 # CONFIGS:   Configs and other files copied to release
-# VARIANTS:  List of build variants
+# VARIANTS:  List of build variants (see below)
 # VARIANT-xx: Flags for each variant
 # DIRTY:     Extra things to delete on 'make clean' (as well as build- dirs)
 # CLEANCMD:  Extra clean command on 'make clean'
@@ -36,9 +36,14 @@
 # DEBUG:     Build debug version
 # MULTI:     Build multi-threaded version
 # SINGLE:    Build single-threaded version
+# MINGW:     Build MinGW version (cross-compiled from Linux)
+# (implicit: If no cross version, build native)
 
 # If VARIANTS is undefined, defaults to standard release/debug set, plus
 # single/multi versions if MT-VARIANTS is set, multi being the default
+
+# If CROSS-COMPILE is set (e.g. by 'make cross'), build cross-compiled 
+# versions - currently only MINGW.
 
 # If DEBIAN-NAME is defined, builds a Debian .deb package only in release
 # target, according to its type, using the following defines:
@@ -54,19 +59,56 @@ ifndef EVALWORKS
 $(error eval is broken - you need GNU make 3.80 or greater)
 endif
 
-# Default VARIANTS and flags if not set
-ifndef VARIANTS
+#Check for cross-compilation
+ifdef CROSS-COMPILE
+# - Future - check for which
+
+#MinGW versions
 ifdef MT-VARIANTS
+ ifndef VARIANTS
+VARIANTS = release-mingw debug-mingw single-release-mingw single-debug-mingw
+ endif
+VARIANT-release-mingw		= MINGW RELEASE MULTI
+VARIANT-debug-mingw		= MINGW DEBUG MULTI
+VARIANT-single-release-mingw	= MINGW RELEASE SINGLE
+VARIANT-single-debug-mingw	= MINGW DEBUG SINGLE
+else
+ ifndef VARIANTS
+VARIANTS = debug-mingw release-mingw
+ endif
+VARIANT-debug-mingw		= MINGW DEBUG
+VARIANT-release-mingw		= MINGW RELEASE
+endif
+
+else #!CROSS-COMPILE
+# Default native build
+ifdef MT-VARIANTS
+ ifndef VARIANTS
 VARIANTS = release debug single-release single-debug
+ endif
 VARIANT-release			= RELEASE MULTI
 VARIANT-debug			= DEBUG MULTI
 VARIANT-single-release		= RELEASE SINGLE
 VARIANT-single-debug		= DEBUG SINGLE
 else
+ ifndef VARIANTS
 VARIANTS = debug release
+ endif
 VARIANT-debug		= DEBUG
 VARIANT-release		= RELEASE
 endif
+
+endif #!CROSS-COMPILE
+
+#Compiler override for MINGW build
+ifdef MINGW
+CC = i586-mingw32msvc-cc
+CXX = i586-mingw32msvc-g++
+LD = i586-mingw32msvc-ld
+AR = i586-mingw32msvc-ar
+EXE-SUFFIX = .exe
+CPPFLAGS += -DMINGW
+PLATFORM = -mingw
 endif
 
 # Suffix rules for shared objects
@@ -90,22 +132,28 @@ RELEASABLE   = $(LIB)
 RELEASE-NAME = $(LIB)
 endif
 
+#Don't build SA in MINGW
+ifdef MINGW
+TARGETS = $(LIB)
+else
 TARGETS = $(LIB) $(SALIB) .copied
+endif
 ifdef DEBUG         # Only build tests in DEBUG version
-TARGETS += $(TESTS)
+#Expand tests to include suffix, if set
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
 endif
 endif
 
 #Targets for executable
 ifeq ($(TYPE), exe)
-TARGETS = $(NAME)
+TARGETS = $(NAME)$(EXE-SUFFIX)
 RELEASABLE = $(NAME)
 RELEASE-NAME = $(NAME)
 endif
 
 #Targets for multiple executables
 ifeq ($(TYPE), exes)
-TARGETS = $(NAME)
+TARGETS = $(patsubst %,%$(EXE-SUFFIX),$(NAME))
 RELEASABLE = $(NAME)
 #Blank allows copy to work below
 RELEASE-NAME = 
@@ -147,7 +195,13 @@ CPPFLAGS += -W -Wall
 # Check if we want multithreading and/or debugging
 ifdef MULTI
 CPPFLAGS += -D_REENTRANT
+
+#MinGW uses the win32-pthread library
+ifdef MINGW
+EXTRALIBS += -lpthreadGC2
+else
 EXTRALIBS += -lpthread
+endif
 endif
 
 ifdef SINGLE
@@ -177,7 +231,7 @@ endif
 #Sort out dependencies
 define dep_template
 #Expand DIR-xxx for each dependency
-CPPFLAGS += -I$(DIR-$(1))/build$(LIB-SINGLEP)$(LIB-DEBUGP)
+CPPFLAGS += -I$(DIR-$(1))/build$(LIB-SINGLEP)$(LIB-DEBUGP)$(PLATFORM)
 
 #Add library dependency for tests/exe/dlmod
 LIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
@@ -207,6 +261,10 @@ vpath % ..
 
 # Main target: build all variants
 all:	$(patsubst %,build-%,$(VARIANTS))
+
+# Cross compile: recurse with CROSS-COMPILE set
+cross:
+	$(MAKE) CROSS-COMPILE=1
 
 # Top-level clean target
 clean:
@@ -278,7 +336,7 @@ endif
 
 #Test harnesses:
 define test_template
-$(1): $(1).o $$(LIB) $$(LIBS)
+$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(LIBS)
 	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
 TESTOBJS += $(1).o
 endef
@@ -287,7 +345,7 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 
 #Executable
 ifeq ($(TYPE), exe)
-$(NAME): $(OBJS) $(LIBS)
+$(NAME)$(EXE-SUFFIX): $(OBJS) $(LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ $(EXTRALIBS)
 endif
 
@@ -297,7 +355,7 @@ define exe_template
 #limitation of make - you can't call templates inside an ifeq, or it
 #complains (wrongly) of missing endifs
 ifeq ($(TYPE), exes)
-$(1): $(1).o $$(LIBS)
+$(1)$$(EXE-SUFFIX): $(1).o $$(LIBS)
 	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
 EXEOBJS += $(1).o
 endif

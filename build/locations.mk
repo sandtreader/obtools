@@ -60,10 +60,10 @@ define lib_template
 DIR-$(1) = $$(ROOT)/$(2)
 ifneq ($(3), NOLIB)
 VARIANTS-$(1) = $(3)
-LIBS-$(1)-release = $$(DIR-$(1))/build-release$(3)/ot-$(1).a
-LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$(3)/ot-$(1).a
-LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release$(3)/ot-$(1).a
-LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug$(3)/ot-$(1).a
+LIBS-$(1)-release = $$(DIR-$(1))/build-release$(3)$$(PLATFORM)/ot-$(1).a
+LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$(3)$$(PLATFORM)/ot-$(1).a
+LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release$(3)$$(PLATFORM)/ot-$(1).a
+LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug$(3)$$(PLATFORM)/ot-$(1).a
 endif
 endef
 

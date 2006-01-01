@@ -1,0 +1,39 @@
+ObTools build notes
+-------------------
+
+Cross-compilation
+-----------------
+
+Currently uses mingw to cross compile from Linux onto Windows.  Not tested
+compiling natively on Windows under MinGW or commercial IDEs.  There are some 
+remnant borland.mak files for libraries lying around, but these are 
+seriously out of date.
+
+To install MinGW under Debian:
+
+# apt-get install mingw32
+
+To build cross-compiled versions
+
+$ make cross
+
+Threads in cross-compiled versions
+----------------------------------
+
+To build the MT threaded code (that is, most of it!), you need the 
+'pthreads-win32' packages from 
+
+ftp://sources.redhat.com/pub/pthreads-win32/dll-latest
+
+We use the GC version - Gnu compiler, no exception handling (we don't 
+expect C++ EH in thread cancellation in libpthread, so no reason to expect
+it here either).  So...
+
+1) Copy {pthread,semaphore,sched}.h to /usr/lib/i586-mingwmsvc/3.4.2/include/
+(your version may vary)
+
+2) Copy libpthreadGC2.a to /usr/lib/i586-mingwmsvc/3.4.2/
+
+3) Copy pthreadGC2.dll to Windows PATH
+
+
