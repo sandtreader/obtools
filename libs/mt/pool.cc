@@ -37,10 +37,11 @@ static void *_pool_start(void *arg)
 
 //--------------------------------------------------------------------------
 // Constructor - automatically starts thread in !in_use state
-PoolThread::PoolThread(IPoolReplacer& _replacer): replacer(_replacer)
+PoolThread::PoolThread(IPoolReplacer& _replacer): Thread(), replacer(_replacer)
 {
   self = this;
-  pthread_create(&thread, NULL, _pool_start, &self) == 0; 
+  pthread_create(&thread, NULL, _pool_start, &self); 
+  running = true;
 }
 
 //--------------------------------------------------------------------------

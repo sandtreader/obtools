@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+#include <stdlib.h>
 
 using namespace std;
 using namespace ObTools;
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
     threads[i] = new TestThread(i);
 
   cout << "Started:\n";
-  sleep(5);
+  MT::Thread::sleep(5);
 
   cout << "Cancelling half:\n";
   for(i=0; i<numthreads/2; i++)

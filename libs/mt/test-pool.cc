@@ -57,9 +57,14 @@ int main()
     else
     {
       cout << "No spare threads\n";
-      sleep(1);
+      ObTools::MT::Thread::sleep(1);
     }
   }
+
+  cout << "Shutting down\n";
+  pool.shutdown();
+  cout << "Done\n";
+
   return 0;  
 }
 

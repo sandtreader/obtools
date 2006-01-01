@@ -25,12 +25,13 @@ using namespace std;
 class Thread
 {
 public:
-  pthread_t thread;
+  bool running;          // True if thread created and thread handle valid
+  pthread_t thread;      // thread handle - not necessarily an integer type!
   Thread *self;          // Used as start argument; must outlive thread
 
   //--------------------------------------------------------------------------
   // Default Constructor - does nothing
-  Thread(): thread(0) {}
+  Thread(): running(false) {}
 
   //--------------------------------------------------------------------------
   // Virtual run routine - called once thread has started by start()
@@ -51,11 +52,11 @@ public:
 
   //--------------------------------------------------------------------------
   // Join - caller waits for this thread to end
-  void join() { if (thread) pthread_join(thread, NULL); }
+  void join() { if (running) pthread_join(thread, NULL); }
 
   //--------------------------------------------------------------------------
   // Detach - let it die silently when it ends, we aren't going to join with it
-  void detach() { if (thread) pthread_detach(thread); }
+  void detach() { if (running) pthread_detach(thread); }
 
   //--------------------------------------------------------------------------
   // Cancel - ask it to stop
@@ -67,11 +68,21 @@ public:
 
   //--------------------------------------------------------------------------
   // Test if it has stopped
-  bool operator!() { return !thread; }
+  bool operator!() { return !running; }
 
   //--------------------------------------------------------------------------
   // Destructor - ask it to cancel if started
   virtual ~Thread();
+
+  //--------------------------------------------------------------------------
+  // Portable sleep()/usleep() functions - this is a convenient place to
+  // put these, since thread implementations often need to do this
+
+  // Sleep for given number of seconds
+  static void sleep(int secs);
+
+  // Sleep for given number of microseconds
+  static void usleep(int usecs);
 };
 
 //==========================================================================
@@ -126,7 +137,7 @@ private:
   // These are here only to be private, and hence inaccessible
   // Initialisation of mutex is just to keep the compiler happy
   Lock(const Lock& x): mutex(x.mutex) { }
-  void operator=(const Lock& x) { }
+  void operator=(const Lock&) { }
 
 public:
   //--------------------------------------------------------------------------
@@ -225,12 +236,13 @@ private:
   Mutex mutex;
   Condition available;
   volatile int count;
-  volatile pthread_t owner;
+  volatile bool owned;
+  pthread_t owner;
 
 public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises mutex 
-  RMutex(): mutex(), available(true), count(0), owner(0) {}
+  RMutex(): mutex(), available(true), count(0), owned(false) {}
   
   //--------------------------------------------------------------------------
   // Lock the mutex, block if locked
@@ -240,14 +252,16 @@ public:
     for(;;) // May loop if we lose the race after wait()
     {
       // Wait for it to be available
-      if (owner!=self) available.wait();
+      if (owned && !pthread_equal(owner, self)) available.wait();
 
       // Take it
       Lock lock(mutex);
 
-      if (!count || owner==self)  // Make sure we're still OK
+      // Make sure we're still OK
+      if (!count || (owned && pthread_equal(owner,self)))  
       {
 	++count;
+	owned=true;
 	owner=self;
 	available.clear();
 	return;
@@ -263,7 +277,7 @@ public:
 
     if (!--count) 
     {
-      owner = 0;
+      owned = false;
       available.signal();    // Wake up waiters
     }
   }
@@ -276,7 +290,7 @@ class RLock
 private:
   RMutex& mutex;
   RLock(const RLock& x): mutex(x.mutex) { }
-  void operator=(const RLock& x) { }
+  void operator=(const RLock&) { }
 
 public:
   RLock(RMutex &m): mutex(m) { mutex.lock(); }
@@ -446,7 +460,8 @@ private:
   list<T *> threads;  // All of them
   list<T *> spares;   // Just the spare ones
   PoolReplacer<T> replacer;
-  
+  bool shutting_down;
+
   // Add another spare thread to the pool
   void add_spare()
   {
@@ -468,7 +483,7 @@ public:
   // min-max is range of number of threads the pool will keep alive
   // min must be at least 1
   ThreadPool(unsigned int min=1, unsigned int max=10): 
-    min_spares(min), max_threads(max), replacer(*this)
+    min_spares(min), max_threads(max), replacer(*this), shutting_down(false)
   { fill(); }
 
   //--------------------------------------------------------------------------
@@ -476,6 +491,7 @@ public:
   // 0 if none available
   T *remove()
   {
+    if (shutting_down) return 0;
     Lock lock(mutex);
     fill();  // Try and make spares
     if (!spares.size()) return 0; 
@@ -489,6 +505,7 @@ public:
   // Replace a thread in the pool
   void replace(T *t)
   {
+    if (shutting_down) return;  // Just lose it
     Lock lock(mutex);
 
     // Empty spares above minimum amount, allowing for the one we're about
@@ -508,13 +525,23 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Shut down pool - cancel and stop all threads
+  void shutdown()
+  {
+    shutting_down = true;
+    Lock lock(mutex);
+    for(typename list<T *>::iterator p=threads.begin(); p!=threads.end(); p++)
+      delete *p;
+    threads.clear();
+    spares.clear();
+  }
+
+  //--------------------------------------------------------------------------
   // Destructor
   // Kill all threads 
   ~ThreadPool()
   {
-    Lock lock(mutex);
-    for(typename list<T *>::iterator p=threads.begin(); p!=threads.end(); p++)
-      delete *p;
+    shutdown();
   }
 };
 

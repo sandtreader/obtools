@@ -21,8 +21,8 @@ extern "C" void *_thread_start(void *arg)
   // Call virtual run() in subclass
   self->run();
 
-  // Clear thread for any future method calls
-  self->thread = 0;
+  // Clear validity for any future method calls
+  self->running = false;
 
   // Die
   pthread_exit(NULL);
@@ -43,7 +43,9 @@ extern "C" void _unlock_mutex(void *m)
 bool Thread::start()
 {
   self = this;
-  return pthread_create(&thread, NULL, _thread_start, &self) == 0; 
+  if (pthread_create(&thread, NULL, _thread_start, &self)) return false;
+  running = true;
+  return true;
 }
 
 //--------------------------------------------------------------------------
@@ -54,20 +56,21 @@ bool Thread::set_priority(int priority, bool realtime)
 {
   struct sched_param param;
   param.sched_priority = priority;
-  return pthread_setschedparam(thread, realtime?SCHED_RR:SCHED_OTHER, 
-			       &param) == 0;
+  return running && !pthread_setschedparam(thread, 
+					  realtime?SCHED_RR:SCHED_OTHER, 
+					  &param);
 }
 
 //--------------------------------------------------------------------------
 // Cancel - ask it to stop
 void Thread::cancel()
 {
-  if (thread)
+  if (running)
   {
     pthread_cancel(thread);
     // Join to make sure it has cleanly finished before we exit
-    if (thread) pthread_join(thread, NULL);
-    thread = 0;
+    if (running) pthread_join(thread, NULL);
+    running = false;
   }
 }
 
@@ -76,6 +79,28 @@ void Thread::cancel()
 Thread::~Thread()
 {
   cancel();
+}
+
+//--------------------------------------------------------------------------
+// Sleep for given number of seconds
+void Thread::sleep(int secs)
+{
+#ifdef MINGW
+    Sleep(1000*secs);
+#else
+    ::sleep(secs);
+#endif
+}
+
+//--------------------------------------------------------------------------
+// Sleep for given number of micro-seconds
+void Thread::usleep(int usecs)
+{
+#ifdef MINGW
+  Sleep(usecs/1000);
+#else
+  ::usleep(usecs);
+#endif
 }
 
 }} // namespaces
