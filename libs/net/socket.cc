@@ -13,14 +13,12 @@
 #define SOCKCLOSE closesocket
 #define SOCKIOCTL ioctlsocket
 #define SOCKERRNO WSAGetLastError()
-#define CHECKFD(fd) if (fd == INVALID_SOCKET) fd=-1;
 typedef int socklen_t;
 #else
 #include <sys/ioctl.h>
 #define SOCKCLOSE close
 #define SOCKIOCTL ioctl
 #define SOCKERRNO errno
-#define CHECKFD(fd)
 #endif
 
 #include <errno.h>
@@ -44,10 +42,10 @@ Socket::~Socket()
 // Close
 void Socket::close()
 {
-  if (fd>=0)
+  if (fd != INVALID_FD)
   {
     ::SOCKCLOSE(fd);
-    fd = -1;
+    fd = INVALID_FD;
   }
 }
 
@@ -146,7 +144,6 @@ ostream& operator<<(ostream& s, const SocketError& e)
 TCPSocket::TCPSocket()
 {
   fd = socket(PF_INET, SOCK_STREAM, 0); 
-  CHECKFD(fd)
 }
 
 //--------------------------------------------------------------------------
@@ -339,7 +336,6 @@ void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
 UDPSocket::UDPSocket()
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
-  CHECKFD(fd)
 }
 
 //--------------------------------------------------------------------------
@@ -347,7 +343,6 @@ UDPSocket::UDPSocket()
 UDPSocket::UDPSocket(int port)
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
-  CHECKFD(fd)
   if (!Socket::bind(port)) close();
 }
 
@@ -357,12 +352,11 @@ UDPSocket::UDPSocket(int port)
 UDPSocket::UDPSocket(EndPoint remote)
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
-  CHECKFD(fd)
 
   struct sockaddr_in saddr;
   remote.set(saddr);
 
-  if (fd>=0 && connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+  if (fd!=INVALID_FD && connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
     close();
 }
 
@@ -473,7 +467,8 @@ int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
   int res;
 
 #ifdef __WIN32__
-#error No idea if this works in Windows
+#warning No idea if this works in Windows
+  return -99;
 #else
   struct msghdr mh;
   mh.msg_name = &saddr;

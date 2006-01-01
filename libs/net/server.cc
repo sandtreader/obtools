@@ -9,6 +9,13 @@
 
 #include "ot-net.h"
 
+#ifdef __WIN32__
+#include <io.h>
+#define SOCKCLOSE closesocket
+#else
+#define SOCKCLOSE close
+#endif
+
 namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
@@ -16,11 +23,11 @@ namespace ObTools { namespace Net {
 // doesn't return unless it all falls apart.
 void TCPServer::run()
 {
-  if (fd < 0) return;
+  if (fd == INVALID_FD) return;
 
   // Set REUSEADDR for fast restarts (e.g. during development)
   int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int));
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&one, sizeof(int));
 
   // Bind to local port (this is Socket::bind())
   if (!bind(port)) return;
@@ -33,12 +40,8 @@ void TCPServer::run()
   {
     struct sockaddr_in saddr;
     socklen_t len = sizeof(saddr);
-    int new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
-#if defined(__WIN32__)
-    if (new_fd != INVALID_SOCKET)
-#else
-    if (new_fd >= 0)
-#endif
+    fd_t new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
+    if (new_fd != INVALID_FD)
     {
       EndPoint client(saddr);
 
@@ -48,7 +51,7 @@ void TCPServer::run()
       // there was a way to pass an allowed-list to the kernel...
       if (!verify(client))
       {
-	::close(new_fd);
+	::SOCKCLOSE(new_fd);
 	continue;
       }
 
@@ -67,7 +70,7 @@ void TCPServer::run()
       else
       {
 	// Dump it
-	::close(new_fd);
+	::SOCKCLOSE(new_fd);
       }
     }
   }

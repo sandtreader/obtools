@@ -20,6 +20,12 @@ TESTS  	+= test-server
 DEPENDS += mt
 endif
 
+#In MinGW, add Winsock library
+ifdef MINGW
+OBJS    += winsock.o
+EXTRALIBS += -lwsock32
+endif
+
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 

@@ -19,7 +19,7 @@
 
 // Windows headers & fixes
 #include <winsock.h>
-typedef int ssize_t;
+typedef int socklen_t;
 
 // Winsock initialisation
 extern bool winsock_initialise();
@@ -315,21 +315,28 @@ ostream& operator<<(ostream& s, const Port& p);
 class Socket
 {
 protected:
-  int fd;
+#if defined(__WIN32__)
+  typedef SOCKET fd_t;
+  static const fd_t INVALID_FD = INVALID_SOCKET;
+#else
+  typedef int fd_t;
+  static const fd_t INVALID_FD = -1;
+#endif
+  fd_t fd;
 
   // Simple constructor - subclasses provide the fd
   Socket(int _fd): fd(_fd) {}
 
   // Default constructor - set bad initially
-  Socket(): fd(-1) {}
- 
+  Socket(): fd(INVALID_FD) {}
+
   // Virtual destructor - default just closes
   virtual ~Socket();
 
 public:
   //--------------------------------------------------------------------------
   // Test for badness
-  bool operator!() const { return fd<0; }
+  bool operator!() const { return fd != INVALID_FD; }
 
   //--------------------------------------------------------------------------
   // Close

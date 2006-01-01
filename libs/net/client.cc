@@ -23,7 +23,8 @@ TCPClient::TCPClient(EndPoint endpoint):
   struct sockaddr_in saddr;
   server.set(saddr);
 
-  if (fd>=0 && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+  if (fd != INVALID_FD 
+   && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
     connected = true;
 }
 
