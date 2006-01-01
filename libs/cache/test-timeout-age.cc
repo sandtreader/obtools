@@ -21,7 +21,7 @@ int main()
 
   cache.add("foo", "FOO");
   cache.dump(cout, true); 
-  sleep(2);
+  MT::Thread::sleep(2);
 
   cache.add("bar", "BAR");
   cache.dump(cout, true);
@@ -31,7 +31,7 @@ int main()
     cache.tidy();
     cache.touch("foo");
     cache.dump(cout, true);
-    sleep(1);
+    MT::Thread::sleep(1);
   }
 
   return 0;  
