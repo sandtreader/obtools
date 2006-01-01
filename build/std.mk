@@ -28,6 +28,7 @@
 # DIRTY:     Extra things to delete on 'make clean' (as well as build- dirs)
 # CLEANCMD:  Extra clean command on 'make clean'
 # DOCFILE:   File (relative to ROOT) to append documentation to
+# SOCKET:    Set if socket support (e.g. winsock) required
 
 # This recurses on itself with target 'targets'
 
@@ -84,11 +85,11 @@ else #!CROSS-COMPILE
 # Default native build
 ifdef MT-VARIANTS
  ifndef VARIANTS
-VARIANTS = release debug single-release single-debug
+VARIANTS = release debug single-release single-debug 
  endif
-VARIANT-release			= RELEASE MULTI
+VARIANT-release			= RELEASE MULTI 
 VARIANT-debug			= DEBUG MULTI
-VARIANT-single-release		= RELEASE SINGLE
+VARIANT-single-release		= RELEASE SINGLE 
 VARIANT-single-debug		= DEBUG SINGLE
 else
  ifndef VARIANTS
@@ -109,15 +110,10 @@ AR = i586-mingw32msvc-ar
 EXE-SUFFIX = .exe
 CPPFLAGS += -DMINGW
 PLATFORM = -mingw
+ifdef SOCKET
+EXTRALIBS += -lwsock32
 endif
-
-# Suffix rules for shared objects
-SUFFIXES += .lo
-%.lo : %.c
-	$(COMPILE.c) -fpic $(OUTPUT_OPTION) $<
-
-%.lo : %.cc
-	$(COMPILE.cc) -fpic $(OUTPUT_OPTION) $<
+endif
 
 # Get locations
 include $(ROOT)/build/locations.mk
@@ -125,22 +121,22 @@ include $(ROOT)/build/locations.mk
 #Work out targets - libraries
 ifeq ($(TYPE), lib)
 ifdef OBJS   # If no objects, no library is built
-LIB 	= $(NAME).a
-SALIB	= $(NAME).sa
-LOBJS	= $(patsubst %.o,%.lo,$(OBJS))
+LIB          = $(NAME).a
 RELEASABLE   = $(LIB)
 RELEASE-NAME = $(LIB)
 endif
 
-#Don't build SA in MINGW
-ifdef MINGW
 TARGETS = $(LIB)
-else
-TARGETS = $(LIB) $(SALIB) .copied
-endif
+
 ifdef DEBUG         # Only build tests in DEBUG version
 #Expand tests to include suffix, if set
 TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+endif
+
+ifdef RELEASE
+ifndef MINGW
+CPPFLAGS += -fpic
+endif
 endif
 endif
 
@@ -181,12 +177,10 @@ endif
 
 SOLIB = $(SOLINK).$(VERSION)
 SONAME = $(SOLINK).$(VERSIONM)
-SALIBS = $(patsubst %.a,%.sa,$(LIBS))
 TARGETS = $(SOLIB)
 RELEASABLE = $(SOLIB)
 RELEASE-NAME = $(SOLIB)
 RELEASE-LINK = $(SONAME)
-CPPFLAGS += -fpic
 endif
 
 #Set standard flags
@@ -224,6 +218,11 @@ else
 LIB-DEBUGP = -release
 endif
 
+ifdef RELEASE
+#Moderate optimisation for release
+CPPFLAGS += -O2
+endif
+
 ifdef DEBIAN-VARIANT
 DEBIAN-VARIANT := -$(DEBIAN-VARIANT)
 endif
@@ -231,7 +230,7 @@ endif
 #Sort out dependencies
 define dep_template
 #Expand DIR-xxx for each dependency
-CPPFLAGS += -I$(DIR-$(1))/build$(LIB-SINGLEP)$(LIB-DEBUGP)$(PLATFORM)
+CPPFLAGS += -I$(DIR-$(1))
 
 #Add library dependency for tests/exe/dlmod
 LIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
@@ -241,7 +240,7 @@ $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
 
 # Sort out header propagation for superlibs
 define header_template
-SOHEADERS += $(DIR-$(1))/build$(LIB-SINGLEP)$(LIB-DEBUGP)$(VARIANTS-$(1))/*.h
+SOHEADERS += $(DIR-$(1))/*.h
 endef
 
 # ifeq...endif commented out due to 'eval' bug in make...
@@ -365,15 +364,8 @@ $(foreach exe,$(NAME),$(eval $(call exe_template,$(exe))))
 
 #Library
 ifeq ($(TYPE), lib)
-.copied: $(patsubst %,../%,$(HEADERS))
-	cp $(patsubst %,../%,$(HEADERS)) .
-	touch .copied
-
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)
-
-$(SALIB): $(LOBJS)
-	$(AR) r $@ $(LOBJS)
 endif
 
 #DL Mod
@@ -384,18 +376,15 @@ endif
 
 #Superlib
 ifeq ($(TYPE), superlib)
-$(SOLIB): $(SALIBS)
+$(SOLIB): $(LIBS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
-        $(SALIBS) -Wl,-no-whole-archive -lstdc++
+        $(LIBS) -Wl,-no-whole-archive -lstdc++
 	ln -fs $@ $(SOLINK)
 endif
 
 #Dependencies
 $(OBJS): $(patsubst %,../%,$(HEADERS)) Makefile
-ifeq ($(TYPE), lib)
-$(LOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
-endif
 ifdef TESTOBJS
 $(TESTOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
 endif
