@@ -67,7 +67,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Get network byte order integer
-  uint32_t nbo() const { return ::htonl(address); }
+  uint32_t nbo() const { return htonl(address); }
 
   //--------------------------------------------------------------------------
   // Get dotted quad
