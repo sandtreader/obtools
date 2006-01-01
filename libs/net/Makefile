@@ -12,6 +12,7 @@ OBJS  	= socket.o address.o client.o stream.o
 TESTS 	= test-client 
 TESTCMD	= ./test-client localhost
 MT-VARIANTS = 1
+SOCKET  = 1
 
 #Catch ourselves recursing in SINGLE mode and suppress server and use of MT
 ifndef SINGLE
@@ -20,10 +21,9 @@ TESTS  	+= test-server
 DEPENDS += mt
 endif
 
-#In MinGW, add Winsock library
+#In MinGW, add Winsock initialise interface
 ifdef MINGW
 OBJS    += winsock.o
-EXTRALIBS += -lwsock32
 endif
 
 ROOT    = ../..
