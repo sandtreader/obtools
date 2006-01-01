@@ -7,9 +7,12 @@
 
 TYPE	= superlib
 NAME	= ot-general
-VERSION	= 1.2.2
+VERSION	= 1.3.0
 DEPENDS = xml misc text net log init chan time web file
 MT-VARIANTS = 1
+
+#Only build release versions - debug is not PIC
+VARIANTS = release single-release
 
 DEBIAN-NAME    = libot-general
 DEBIAN-VERSION = $(VERSION)

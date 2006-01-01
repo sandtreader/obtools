@@ -7,13 +7,18 @@
 
 TYPE	= superlib
 NAME	= ot-codegen
-VERSION	= 1.0.0
+VERSION	= 1.1.0
 DEPENDS = cppt regen xmi
+
+#Only build default (MT) version
 MULTI	= 1
+
+#Only build release versions - debug is not PIC
+VARIANTS = release 
 
 DEBIAN-NAME    = libot-codegen
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 2
+DEBIAN-REVISION = 1
 
 ROOT	= ../../..
 include $(ROOT)/build/std.mk

@@ -7,13 +7,16 @@
 
 TYPE	= superlib
 NAME   	= ot-db-pgsql
-VERSION	= 1.0.0
+VERSION	= 1.1.0
 DEPENDS = db-pgsql
 MT-VARIANTS = 1
 
+#Only build release versions - debug is not PIC
+VARIANTS = release single-release
+
 DEBIAN-NAME    = libot-db-pgsql
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 2
+DEBIAN-REVISION = 1
 
 ifdef SINGLE
 DEBIAN-VARIANT = single
