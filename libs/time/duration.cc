@@ -10,6 +10,7 @@
 #include "ot-time.h"
 #include <sstream>
 #include <iomanip>
+#include <math.h>
 
 namespace ObTools { namespace Time {
 
