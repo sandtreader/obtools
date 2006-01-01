@@ -125,7 +125,7 @@ private:
 			  list<Element *>& l);
 
   //Prevent copy and assignment - don't want to do deep copy
-  Element(const Element& e) {}
+  Element(const Element&) {}
   const Element& operator=(const Element& e) { return e; }
 
 public:

@@ -12,10 +12,6 @@
 #include <sstream>
 #include <algorithm>
 
-#ifdef __BORLANDC__
-#include "ot-fix.h"
-#endif
-
 using namespace ObTools::XML;
 
 //--------------------------------------------------------------------------
@@ -31,7 +27,7 @@ void Element::write_attrs(ostream &s) const
       p!=attrs.end();
       p++)
   {
-    xmlchar delim;
+    xmlchar delim='"';
     const string &v = p->second;
     bool escquote=false;
 
@@ -49,11 +45,6 @@ void Element::write_attrs(ostream &s) const
 	//We'll be OK by swapping to using ' as delimiter
 	delim = '\'';
       }
-    }
-    else
-    {
-      //That's fine, we can use " as delimiter
-      delim = '"';
     }
 
     //But we must escape &, < and > as well
