@@ -225,7 +225,12 @@ public:
   {
     MT::RLock lock(mutex);
     MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) result = p->second.content;
+    if (p != cachemap.end())
+    {
+      result = p->second.content;
+      return true;
+    }
+    else return false;
   }
 
   //--------------------------------------------------------------------------
@@ -467,9 +472,9 @@ public:
   // Pointer returned is owned by cache and will be deleted by it
   CONTENT *lookup(const ID& id)
   {
-    MT::RLock lock(mutex);
-    MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) 
+    MT::RLock lock(this->mutex);
+    MapIterator p = this->cachemap.find(id);
+    if (p != this->cachemap.end()) 
       return p->second.content.ptr;
     else
       return 0;
@@ -481,12 +486,12 @@ public:
   // Pointer returned is detached from cache and should be disposed by caller
   CONTENT *detach(const ID& id)
   {
-    MT::RLock lock(mutex);
-    MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) 
+    MT::RLock lock(this->mutex);
+    MapIterator p = this->cachemap.find(id);
+    if (p != this->cachemap.end()) 
     {
       CONTENT *r = p->second.content.ptr;
-      cachemap.erase(p);
+      this->cachemap.erase(p);
       return r;
     }
     else return 0;
@@ -501,12 +506,12 @@ public:
     // Avoid locking around delete to prevent deadlocks if destruction
     // attempts locks itself
     {
-      MT::RLock lock(mutex);
-      MapIterator p = cachemap.find(id);
-      if (p != cachemap.end())
+      MT::RLock lock(this->mutex);
+      MapIterator p = this->cachemap.find(id);
+      if (p != this->cachemap.end())
       {
 	to_delete = p->second.content.ptr;
-	cachemap.erase(p);
+	this->cachemap.erase(p);
       }
     }
 	
@@ -522,17 +527,17 @@ public:
 
     // Avoid locking around delete
     {
-      MT::RLock lock(mutex);
+      MT::RLock lock(this->mutex);
 
-      for(MapIterator p = cachemap.begin();
-	  p!=cachemap.end();)
+      for(MapIterator p = this->cachemap.begin();
+	  p!=this->cachemap.end();)
       {
 	MapIterator q=p++;
 	MCType &mc = q->second;
-	if (!tidy_policy.keep_entry(mc.policy_data, now))
+	if (!this->tidy_policy.keep_entry(mc.policy_data, now))
 	{
 	  to_delete.push_back(q->second.content.ptr);
-	  cachemap.erase(q);
+	  this->cachemap.erase(q);
 	}
       }
     }
@@ -550,7 +555,7 @@ public:
   virtual bool evict()
   {
     // Number we need to evict
-    unsigned int needed = cachemap.size() - limit + 1;  
+    unsigned int needed = this->cachemap.size() - this->limit + 1;  
     if (needed <= 0) return true;
 
     while (needed)
@@ -559,16 +564,16 @@ public:
       PolicyData worst_data;
 
       {
-	MT::RLock lock(mutex);
-	MapIterator worst = cachemap.end();  
+	MT::RLock lock(this->mutex);
+	MapIterator worst = this->cachemap.end();  
 
 	// Show the policy all the entries, let them choose the worst
-	for(MapIterator p = cachemap.begin();
-	    p!=cachemap.end();
+	for(MapIterator p = this->cachemap.begin();
+	    p!=this->cachemap.end();
 	    ++p)
 	{
 	  MCType &mc = p->second;
-	  if (evictor_policy.check_worst(mc.policy_data, worst_data))
+	  if (this->evictor_policy.check_worst(mc.policy_data, worst_data))
 	  {
 	    // Keep this as the worst
 	    worst = p;
@@ -577,10 +582,10 @@ public:
 	}
 
 	// Did we find one?
-	if (worst!=cachemap.end())
+	if (worst!=this->cachemap.end())
 	{
 	  to_delete = worst->second.content.ptr;
-	  cachemap.erase(worst);
+	  this->cachemap.erase(worst);
 	  needed--;
 	}
 	else return false;  // Can't do it
@@ -597,16 +602,16 @@ public:
   //--------------------------------------------------------------------------
   // Iterators
   typedef PointerCacheIterator<ID, CONTENT> iterator;
-  iterator begin() { return iterator(cachemap.begin()); }
-  iterator end() { return iterator(cachemap.end()); }
+  iterator begin() { return iterator(this->cachemap.begin()); }
+  iterator end() { return iterator(this->cachemap.end()); }
 
   //--------------------------------------------------------------------------
   // Clear all content
   virtual void clear() 
   {
-    for(MapIterator p = cachemap.begin(); p!=cachemap.end(); ++p)
+    for(MapIterator p = this->cachemap.begin(); p!=this->cachemap.end(); ++p)
       delete(p->second.content.ptr); 
-    cachemap.clear(); 
+    this->cachemap.clear(); 
   }
 
   //--------------------------------------------------------------------------
@@ -732,7 +737,7 @@ public:
           NoEvictorPolicy<ID,CONTENT> >::Cache
     (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
-  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
+  void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -747,7 +752,7 @@ public:
                  NoEvictorPolicy<ID,CONTENT> >::PointerCache
     (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
-  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
+  void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -762,7 +767,7 @@ public:
           NoEvictorPolicy<ID,CONTENT> >::Cache
     (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
-  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
+  void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -777,7 +782,7 @@ public:
                  NoEvictorPolicy<ID,CONTENT> >::PointerCache
     (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
-  void set_timeout(int _timeout) { tidy_policy.timeout = _timeout; }
+  void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
 
 //==========================================================================
@@ -787,7 +792,7 @@ template<class ID, class CONTENT> class LRUEvictionCache:
                LRUEvictorPolicy<ID, CONTENT> >
 {
 public:
-  LRUEvictionCache(int _timeout, unsigned int _limit = 0): 
+  LRUEvictionCache(unsigned int _limit = 0): 
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           LRUEvictorPolicy<ID,CONTENT> >::Cache
     (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -800,7 +805,7 @@ template<class ID, class CONTENT> class LRUEvictionPointerCache:
                       LRUEvictorPolicy<ID, CONTENT> >
 {
 public:
-  LRUEvictionPointerCache(int _timeout, unsigned int _limit = 0): 
+  LRUEvictionPointerCache(unsigned int _limit = 0): 
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  LRUEvictorPolicy<ID,CONTENT> >::PointerCache
     (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -813,7 +818,7 @@ template<class ID, class CONTENT> class AgeEvictionCache:
                AgeEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeEvictionCache(int _timeout, unsigned int _limit = 0): 
+  AgeEvictionCache(unsigned int _limit = 0): 
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           AgeEvictorPolicy<ID,CONTENT> >::Cache
     (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -826,7 +831,7 @@ template<class ID, class CONTENT> class AgeEvictionPointerCache:
                       AgeEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeEvictionPointerCache(int _timeout, unsigned int _limit = 0): 
+  AgeEvictionPointerCache(unsigned int _limit = 0): 
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  AgeEvictorPolicy<ID,CONTENT> >::PointerCache
     (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>(), _limit) {}
