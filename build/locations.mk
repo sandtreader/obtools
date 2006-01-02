@@ -76,11 +76,11 @@ endef
 $(foreach lib,$(OT-LIBS),$(eval $(call split_template,$(subst :, ,$(lib)))))
 
 define shlib_template
-DIR-$(1) = $$(ROOT)/$(2)
-LIBS-$(1)-release = $$(DIR-$(1))/build-release/lib$(1).so
-LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug/lib$(1).so
-LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release/lib$(1)-single.so
-LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug/lib$(1)-single.so
+SDIR-$(1) = $$(ROOT)/$(2)
+#Include directory is actually the build-release one
+DIR-$(1) = $$(SDIR-$(1))/build-release
+LIBS-$(1)-release = $$(SDIR-$(1))/build-release/lib$(1).so
+LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release/lib$(1)-single.so
 endef
 
 # Split at spaces and pass on to lib_template as words
