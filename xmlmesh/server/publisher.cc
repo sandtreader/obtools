@@ -12,7 +12,6 @@
 #include "ot-text.h"
 
 #include <unistd.h>
-#include <netinet/in.h>
 #include <sstream>
 
 namespace ObTools { namespace XMLMesh {

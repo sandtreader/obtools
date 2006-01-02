@@ -12,7 +12,7 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 	  correlator.o publisher.o
 
 DEBIAN-NAME    = ot-xmlmesh
-DEBIAN-VERSION = 1.0.2
+DEBIAN-VERSION = 1.1.0
 DEBIAN-REVISION = 1
 
 #Build from static local libraries in DEBUG, installed .so's in release
@@ -24,11 +24,14 @@ DEPENDS = ot-general ot-xmlmesh
 endif
 
 ifdef RELEASE
+ifndef MINGW
 CPPFLAGS += -DDAEMON
+endif
 endif
 
 CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1
+SOCKET  = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
