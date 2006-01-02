@@ -79,8 +79,8 @@ define shlib_template
 SDIR-$(1) = $$(ROOT)/$(2)
 #Include directory is actually the build-release one
 DIR-$(1) = $$(SDIR-$(1))/build-release
-LIBS-$(1)-release = $$(SDIR-$(1))/build-release/lib$(1).so
-LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release/lib$(1)-single.so
+LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/lib$(1).so
+LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release$$(PLATFORM)/lib$(1)-single.so
 endef
 
 # Split at spaces and pass on to lib_template as words
