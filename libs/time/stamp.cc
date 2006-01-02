@@ -13,6 +13,12 @@
 #include <iostream>
 #include <sys/time.h>
 
+#if defined(__WIN32__)
+#include <windows.h>
+// Widely-quoted difference between Windows filetime and Unix time_t epochs
+#define FILETIME_UNIX_EPOCH_DIFF 11644473600ULL
+#endif
+
 namespace ObTools { namespace Time {
 
 // Look up table of cumulative days at start of each month (non leap-years)
@@ -262,10 +268,22 @@ Stamp Stamp::now()
 {
   Stamp s;
 #if defined(__WIN32__)
-  // Use time() - useless for high-res timing, but apparently no better
-  // way in Windows!?
-  time_t t = ::time(NULL);
-  s.t = (ntp_stamp_t)(t+EPOCH_1970)<< NTP_SHIFT;
+  FILETIME ft;
+  GetSystemTimeAsFileTime(&ft);
+
+  // Get get 64-bit FILETIME (100ns since 1-1-1601)
+  uint64_t t = ((uint64_t)ft.dwHighDateTime << 32) + ft.dwLowDateTime; 
+
+  // Split into seconds and microseconds
+  uint64_t secs = t/(10*MICRO);  // 10*(100ns) = 1us
+  uint64_t usecs = (t/10)-secs*MICRO;
+
+  // Convert Epochs - first to time_t (1970), then to NTP (1900)
+  secs -= FILETIME_UNIX_EPOCH_DIFF;
+  secs += EPOCH_1970;
+
+  // Now form NTP shifted version
+  s.t = (secs<<NTP_SHIFT) + (usecs<<NTP_SHIFT)/MICRO;
 #else
   struct timeval tv;
   gettimeofday(&tv, 0);
