@@ -30,6 +30,10 @@ public:
 
 int main()
 {
+#ifdef __WIN32__
+  winsock_initialise();
+#endif
+
   // Create command registry
   CLI::Registry reg;
   reg.add("foo", new FooHandler(), "Launch foos", "foo <options>");
