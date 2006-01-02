@@ -27,6 +27,10 @@ Server ObTools::XMLMesh::server;
 
 int main(int argc, char **argv)
 {
+#ifdef __WIN32__
+  winsock_initialise();
+#endif
+
   // Run initialisation sequence (auto-registration of modules etc.)
   Init::Sequence::run();
 

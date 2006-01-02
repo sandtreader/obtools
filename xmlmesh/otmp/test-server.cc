@@ -44,6 +44,10 @@ public:
 // Main
 int main()
 {
+#ifdef __WIN32__
+  winsock_initialise();
+#endif
+
   // Set up logging
   Log::StreamChannel   chan_out(cout);
   Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);

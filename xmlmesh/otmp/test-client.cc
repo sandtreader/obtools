@@ -40,6 +40,10 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
   Log::Streams log;
 
+#ifdef __WIN32__
+  winsock_initialise();
+#endif
+
   // Resolve name
   Net::IPAddress addr(host);
   if (!addr)
