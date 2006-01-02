@@ -336,7 +336,7 @@ protected:
 public:
   //--------------------------------------------------------------------------
   // Test for badness
-  bool operator!() const { return fd != INVALID_FD; }
+  bool operator!() const { return fd == INVALID_FD; }
 
   //--------------------------------------------------------------------------
   // Close
