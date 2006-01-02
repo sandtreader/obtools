@@ -159,7 +159,7 @@ public:
   //--------------------------------------------------------------------------
   // Down-cast constructor from general message on receipt
   // No data of interest, so don't include anything
-  OKMessage(const Message& msg): Message() {}
+  OKMessage(const Message&): Message() {}
 };
 
 //==========================================================================
