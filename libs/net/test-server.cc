@@ -46,6 +46,10 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
 
 int main()
 {
+#if defined(__WIN32__)
+  winsock_initialise();
+#endif
+
   TestServer server;
   server.run();
   return 0;
