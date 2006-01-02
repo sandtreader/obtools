@@ -17,6 +17,7 @@ namespace ObTools { namespace Net {
 //--------------------------------------------------------------------------
 // Constructor 
 TCPClient::TCPClient(EndPoint endpoint):
+  TCPSocket(),
   server(endpoint),
   connected(false)
 {
