@@ -13,11 +13,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-namespace ObTools { namespace File {
-
-#if defined(_WIN32)
-#error Sorry, you need to implement these with findfirst/findnext!
+#if defined(__WIN32__)
+#include <windows.h>
 #endif
+
+namespace ObTools { namespace File {
 
 //--------------------------------------------------------------------------
 // Ensure a directory path exists
@@ -38,7 +38,12 @@ bool Directory::ensure(bool parents, int mode) const
     if (!ppath.ensure()) return false;
   }
 
+#if defined(__WIN32__)
+  if (::mkdir(c_str())) return false;
+  return !::chmod(c_str(), mode);
+#else
   return !::mkdir(c_str(), mode);
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -50,6 +55,26 @@ bool Directory::ensure(bool parents, int mode) const
 bool Directory::inspect(list<string>& leaves, const string& pattern, 
 			bool all)
 {
+#if defined(__WIN32__)
+  // Use full '*' search, so we can use full pattern format without
+  // worrying whether Windows implements it natively
+  Path pat_path(*this, "*");
+  WIN32_FIND_DATA data;
+  HANDLE h = FindFirstFile(pat_path.c_str(), &data);
+  if (h != INVALID_HANDLE_VALUE)
+  {
+    for(;;)
+    {
+      if ((all || data.cFileName[0] != '.')
+       && Text::pattern_match(pattern, data.cFileName))
+	leaves.push_back(string(data.cFileName));
+
+      if (!FindNextFile(h, &data)) break;
+    }
+
+    FindClose(h);
+  }
+#else
   DIR *dir = opendir(c_str());
   if (!dir) return false;
 
@@ -62,6 +87,7 @@ bool Directory::inspect(list<string>& leaves, const string& pattern,
   }
 
   closedir(dir);
+#endif
   return true;
 }
 

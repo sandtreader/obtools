@@ -70,8 +70,8 @@ public:
 
   // Methods to split paths --------------------------------------------------
   //--------------------------------------------------------------------------
-  // Find whether it's an absolute path (begins with slash)
-  bool is_absolute() const { return !path.empty() && path[0] == SEPCHAR; }
+  // Find whether it's an absolute path
+  bool is_absolute() const;
 
   //--------------------------------------------------------------------------
   // Get directory: everything before last slash, if any, not including
@@ -139,6 +139,7 @@ public:
   // String version
   bool set_mode(const string& mode) const { return set_mode(otoi(mode)); }
 
+#if !defined(__WIN32__) // Meaningless in Windows
   //--------------------------------------------------------------------------
   // Get the file's owner
   uid_t owner() const;
@@ -154,6 +155,7 @@ public:
   // String version
   bool set_ownership(const string& owner, const string& group) const
   { return set_ownership(user_name_to_id(owner), group_name_to_id(group)); }
+#endif // !__WIN32__
 
   //--------------------------------------------------------------------------
   // Delete the file/directory (directories are always deleted recursively)
@@ -178,6 +180,7 @@ public:
   //Convert octal string to integer
   static int otoi(const string& mode_s);
 
+#if !defined(__WIN32__) // Meaningless in Windows
   //--------------------------------------------------------------------------
   //Handy user/group id functions for ownership
   // Get user name from uid
@@ -191,6 +194,7 @@ public:
 
   // Get group id from name
   static gid_t group_name_to_id(const string& gname);
+#endif
 };
 
 //------------------------------------------------------------------------

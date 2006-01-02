@@ -13,9 +13,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <utime.h>
+#include <sstream>
+
+#if defined(__WIN32__)
+// Note: stati versions, still 32-bit time_t
+#define STRUCT_STAT struct _stati64
+#define STAT _stati64
+#define O_LARGEFILE 0
+#else
+#define STRUCT_STAT struct stat64
+#define STAT stat64
 #include <pwd.h>
 #include <grp.h>
-#include <sstream>
+#endif
 
 namespace ObTools { namespace File {
 
@@ -39,6 +49,22 @@ Path::Path(const Path& _path, const string& leaf)
     path = dir + leaf;
   else
     path = dir + SEPCHAR + leaf;
+}
+
+//--------------------------------------------------------------------------
+// Find whether it's an absolute path
+bool Path::is_absolute() const
+{
+#if defined(__WIN32__)
+  // Allow for c:\xxx form
+  return !path.empty() && (path[0] == SEPCHAR
+			   ||(path.size()>=3 
+			      && isalpha(path[0])
+			      && path[1]==':'
+			      && path[2]==SEPCHAR));
+#else
+  return !path.empty() && path[0] == SEPCHAR; 
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -104,16 +130,16 @@ Path Path::resolve(const Path& new_path) const
 // Does the file exist?
 bool Path::exists() const
 {
-  struct stat64 sb;  // Don't fail on large files
-  return !stat64(c_str(), &sb);
+  STRUCT_STAT sb;  // Don't fail on large files
+  return !STAT(c_str(), &sb);
 }
 
 //--------------------------------------------------------------------------
 // Is it a directory?
 bool Path::is_dir() const
 {
-  struct stat64 sb;
-  if (stat64(c_str(), &sb)) return false;
+  STRUCT_STAT sb;
+  if (STAT(c_str(), &sb)) return false;
   return S_ISDIR(sb.st_mode); 
 }
 
@@ -141,16 +167,16 @@ bool Path::writeable() const
 // Get the file's length
 uint64_t Path::length() const
 {
-  struct stat64 sb;
-  return stat64(c_str(), &sb)?0:sb.st_size;
+  STRUCT_STAT sb;
+  return STAT(c_str(), &sb)?0:sb.st_size;
 }
 
 //--------------------------------------------------------------------------
 // Get the file's last-modified time (mtime)
 time_t Path::last_modified() const
 {
-  struct stat64 sb;
-  return stat64(c_str(), &sb)?0:sb.st_mtime;
+  STRUCT_STAT sb;
+  return STAT(c_str(), &sb)?0:sb.st_mtime;
 }
 
 //--------------------------------------------------------------------------
@@ -169,8 +195,8 @@ bool Path::set_last_modified(time_t t) const
 // Get the file's mode
 mode_t Path::mode() const
 {
-  struct stat64 sb;
-  return stat64(c_str(), &sb)?0:sb.st_mode;
+  STRUCT_STAT sb;
+  return STAT(c_str(), &sb)?0:sb.st_mode;
 }
 
 //--------------------------------------------------------------------------
@@ -180,20 +206,21 @@ bool Path::set_mode(mode_t mode) const
   return !chmod(c_str(), mode);
 }
 
+#if !defined(__WIN32__) // Meaningless in Windows
 //--------------------------------------------------------------------------
 // Get the file's owner
 uid_t Path::owner() const
 {
-  struct stat64 sb;
-  return stat64(c_str(), &sb)?0:sb.st_uid;
+  STRUCT_STAT sb;
+  return STAT(c_str(), &sb)?0:sb.st_uid;
 }
 
 //--------------------------------------------------------------------------
 // Get the file's group
 gid_t Path::group() const
 {
-  struct stat64 sb;
-  return stat64(c_str(), &sb)?0:sb.st_gid;
+  STRUCT_STAT sb;
+  return STAT(c_str(), &sb)?0:sb.st_gid;
 }
 
 //--------------------------------------------------------------------------
@@ -202,6 +229,8 @@ bool Path::set_ownership(uid_t owner, uid_t group) const
 {
   return !chown(c_str(), owner, group);
 }
+
+#endif // !__WIN32__
 
 //--------------------------------------------------------------------------
 // Delete the file/directory (directories are always deleted recursively)
@@ -252,6 +281,7 @@ int Path::otoi(const string& mode_s)
   return n;
 }
 
+#if !defined(__WIN32__) // Meaningless in Windows
 //--------------------------------------------------------------------------
 // Get user name from uid
 string Path::user_id_to_name(uid_t uid)
@@ -335,6 +365,8 @@ gid_t Path::group_name_to_id(const string& gname)
   if (rc || !gptr) return 0;
   return gptr->gr_gid;
 }
+
+#endif // !__WIN32__
 
 //------------------------------------------------------------------------
 // << operator to write Path to ostream
