@@ -11,6 +11,7 @@ HEADERS = ot-xmlmesh-client.h ot-xmlmesh-client-otmp.h
 OBJS    = client.o transport-otmp.o
 DEPENDS = xmlmesh-core xmlmesh-otmp net log xml text soap misc
 MT-VARIANTS = 1
+SOCKET  = 1
 
 TESTS 	= test-client
 TESTCMD = ./test-client localhost
