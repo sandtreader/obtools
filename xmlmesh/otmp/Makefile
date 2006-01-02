@@ -10,6 +10,7 @@ NAME   	= ot-xmlmesh-otmp
 HEADERS = ot-xmlmesh-otmp.h
 DEPENDS = net log text
 MT-VARIANTS = 1
+SOCKET  = 1
 
 TESTS 	= test-client
 TESTCMD = ./test-client localhost

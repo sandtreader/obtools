@@ -11,7 +11,6 @@
 #include "ot-log.h"
 
 #include <unistd.h>
-#include <netinet/in.h>
 #include <sstream>
 
 // Time to sleep for if socket dies and won't come back
@@ -173,7 +172,7 @@ bool Client::send_messages(Log::Streams& log)
   while (!socket || !*socket)
   {
     log.detail << "OTMP(send): Socket is dead - waiting for improvement\n";
-    sleep(DEAD_SOCKET_SLEEP_TIME);
+    MT::Thread::sleep(DEAD_SOCKET_SLEEP_TIME);
   }
 
   // Deal with it
