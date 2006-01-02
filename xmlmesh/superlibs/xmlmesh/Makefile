@@ -7,9 +7,12 @@
 
 TYPE 	  = superlib
 NAME      = ot-xmlmesh
-VERSION   = 1.1.0
+VERSION   = 1.2.0
 DEPENDS   = xmlmesh-core xmlmesh-otmp xmlmesh-client soap
 MT-VARIANTS = 1
+
+#Only build release versions - debug is not PIC
+VARIANTS = release single-release
 
 DEBIAN-NAME    = libot-xmlmesh
 DEBIAN-VERSION = $(VERSION)
