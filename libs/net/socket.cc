@@ -150,6 +150,8 @@ TCPSocket::TCPSocket()
 // Raw stream read wrapper
 ssize_t TCPSocket::cread(void *buf, size_t count)
 { 
+  if (fd == INVALID_FD) return -1;
+
   ssize_t size;
 
 #ifdef __WIN32__
@@ -161,7 +163,7 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
   {
     size = ::read(fd, buf, count); 
   }
-  while (size<0 && errno == EINTR);
+  while (fd != INVALID_FD && size<0 && errno == EINTR);
 #endif
 
   return size;
@@ -171,6 +173,8 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
 // Raw stream write wrapper
 ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 { 
+  if (fd == INVALID_FD) return -1;
+
   ssize_t size;
 
 #ifdef __WIN32__
@@ -182,7 +186,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
   {
     size = ::send(fd, buf, count, MSG_NOSIGNAL); 
   }
-  while (size<0 && errno == EINTR);
+  while (fd != INVALID_FD && size<0 && errno == EINTR);
 #endif
 
   return size;
