@@ -167,7 +167,7 @@ class Random
 public:
   //------------------------------------------------------------------------
   // Constructor
-  Random() {}
+  Random();
 
   //------------------------------------------------------------------------
   // Get a random hex string up to N bytes (N*2 hex digits) long

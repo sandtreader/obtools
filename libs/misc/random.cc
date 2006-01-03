@@ -12,13 +12,27 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <stdlib.h>
 
 namespace ObTools { namespace Misc {
+
+//------------------------------------------------------------------------
+// Constructor
+Random::Random()
+{
+#if defined(__WIN32__)
+  srand(time(NULL));
+#endif
+}
 
 //------------------------------------------------------------------------
 // Get some random bytes in the given buffer
 static void _get_random_bytes(int n, unsigned char *p)
 {
+#if defined(__WIN32__)
+  // Suggestions for doing this better in Windows gratefully received!
+  for(int i=0; i<n; i++) p[i] = (unsigned char)(rand() & 0xff);
+#else
   // In Real Operating Systems (tm), /dev/urandom gives us an unlimited 
   // supply of random bytes from a hardware-assisted entropy pool
   ifstream f("/dev/urandom", ios_base::binary);  
@@ -35,6 +49,7 @@ static void _get_random_bytes(int n, unsigned char *p)
   // but it's safer (and easier ;-) to generate zeros to force the user
   // to fix the RNG for their platform
   memset(p, 0, n);
+#endif
 }
 
 //------------------------------------------------------------------------
