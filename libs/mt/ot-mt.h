@@ -424,6 +424,7 @@ class PoolThread: public Thread
 public:
   IPoolReplacer& replacer;
   Condition in_use;
+  bool dying;
 
   //--------------------------------------------------------------------------
   // Constructor - automatically starts thread in !in_use state
@@ -432,6 +433,11 @@ public:
   //--------------------------------------------------------------------------
   // Kick thread after being given parameters (members of subclasses)
   void kick();
+
+  //--------------------------------------------------------------------------
+  // Request it to die.  If 'wait' is set, waits for thread to exit
+  void die(bool wait=false);
+
 };
 
 //==========================================================================
@@ -510,11 +516,12 @@ public:
 
     // Empty spares above minimum amount, allowing for the one we're about
     // to replace
-    while (spares.size() > min_spares-1)
+    while (spares.size() && spares.size() > min_spares-1)
     {
       T *ts = spares.back();  // Kill last one entered
       spares.pop_back();
       threads.remove(ts);
+      ts->die(true);  // Wait for it to die before deletion
       delete ts;
     }
 
@@ -531,7 +538,21 @@ public:
     shutting_down = true;
     Lock lock(mutex);
     for(typename list<T *>::iterator p=threads.begin(); p!=threads.end(); p++)
+    {
+      T* t = *p;
+      // Ask it nicely
+      t->die();
+
+      // Wait for a bit while it's still running
+      for(int i=0; i<5; i++)
+      {
+	if (!*t) break;
+	Thread::usleep(10000);
+      }
+
+      // Then kill it with cancel if it hasn't already died
       delete *p;
+    }
     threads.clear();
     spares.clear();
   }

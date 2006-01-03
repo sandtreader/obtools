@@ -86,7 +86,11 @@ Thread::~Thread()
 void Thread::sleep(int secs)
 {
 #ifdef MINGW
-    Sleep(1000*secs);
+  // Use pthread_delay_np to provide cancellation point
+  struct timespec interval;
+  interval.tv_sec = secs;
+  interval.tv_nsec = 0;
+  pthread_delay_np(&interval);
 #else
     ::sleep(secs);
 #endif
@@ -97,7 +101,11 @@ void Thread::sleep(int secs)
 void Thread::usleep(int usecs)
 {
 #ifdef MINGW
-  Sleep(usecs/1000);
+  // Use pthread_delay_np to provide cancellation point
+  struct timespec interval;
+  interval.tv_sec = usecs/1000000;
+  interval.tv_nsec = (usecs % 1000000)*1000;
+  pthread_delay_np(&interval);
 #else
   ::usleep(usecs);
 #endif
