@@ -15,7 +15,7 @@ using namespace std;
 class TestServer: public ObTools::Net::TCPServer
 {
 public:
-  TestServer(): ObTools::Net::TCPServer(5000) {}
+  TestServer(int port): ObTools::Net::TCPServer(port) {}
 
   void process(ObTools::Net::TCPSocket& s, 
 	       ObTools::Net::EndPoint client);
@@ -44,13 +44,17 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
 //--------------------------------------------------------------------------
 // Main
 
-int main()
+int main(int argc, char **argv)
 {
+  int port = 11111;
+  if (argc > 1) port = atoi(argv[1]);
+
 #if defined(__WIN32__)
   winsock_initialise();
 #endif
 
-  TestServer server;
+  cout << "Starting server on port " << port << endl;
+  TestServer server(port);
   server.run();
   return 0;
 }
