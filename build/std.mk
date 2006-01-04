@@ -211,7 +211,7 @@ endif
 endif
 
 ifdef DEBUG
-CPPFLAGS += -g -DOBTOOLS_LOG_MAX_LEVEL=5 -DDEBUG
+CPPFLAGS += -g -DDEBUG
 LDFLAGS += -g
 LIB-DEBUGP = -debug
 else
