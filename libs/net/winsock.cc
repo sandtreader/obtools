@@ -24,7 +24,7 @@ static void winsock_shutdown()
 // Winsock initialisation
 bool winsock_initialise()
 {
-  WORD version = MAKEWORD(1,0);
+  WORD version = MAKEWORD(2,0);
   WSADATA wsa_data;
   int err = WSAStartup(version, &wsa_data);
 
