@@ -38,11 +38,12 @@ void TCPServer::run()
   if (::listen(fd, backlog)) return;
 
   // Now loop accepting connections into new threads
-  while (1)
+  while (alive)
   {
     struct sockaddr_in saddr;
     socklen_t len = sizeof(saddr);
     fd_t new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
+    if (!alive) break;
 
     if (new_fd != INVALID_FD)
     {
@@ -76,6 +77,18 @@ void TCPServer::run()
 	::SOCKCLOSE(new_fd);
       }
     }
+  }
+}
+
+//--------------------------------------------------------------------------
+// Shut down server
+void TCPServer::shutdown()
+{
+  if (alive)
+  {
+    alive = false;
+    close();
+    threadpool.shutdown(); 
   }
 }
 

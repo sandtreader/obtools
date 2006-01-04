@@ -39,6 +39,17 @@ Socket::~Socket()
 }
 
 //--------------------------------------------------------------------------
+// Graceful shutdown
+void Socket::shutdown()
+{
+#if defined(__WIN32__)
+  ::shutdown(fd, SD_BOTH);
+#else
+  ::shutdown(fd, SHUT_RDWR);
+#endif
+}
+
+//--------------------------------------------------------------------------
 // Close
 void Socket::close()
 {

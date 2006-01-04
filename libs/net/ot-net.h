@@ -343,6 +343,10 @@ public:
   void close();
 
   //--------------------------------------------------------------------------
+  // Graceful shutdown
+  void shutdown();
+
+  //--------------------------------------------------------------------------
   // Go non-blocking
   void go_nonblocking();
 
@@ -627,18 +631,19 @@ private:
   int port;
   int backlog;
   MT::ThreadPool<TCPWorkerThread> threadpool;
+  bool alive;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor.  
   TCPServer::TCPServer(int _port, int _backlog=5, 
 		       int min_spare=1, int max_threads=10):
-    TCPSocket(),
-    port(_port), backlog(_backlog), threadpool(min_spare, max_threads) {}
+    TCPSocket(), port(_port), backlog(_backlog), 
+    threadpool(min_spare, max_threads), alive(true) {}
 
   //--------------------------------------------------------------------------
   // Run server
-  // Doesn't return unless it all falls apart.
+  // Doesn't return unless shutdown() called
   void run();
 
   //--------------------------------------------------------------------------
@@ -653,6 +658,14 @@ public:
   // Called in its own thread, this use blocking IO to read and write the
   // socket, and should just return when the socket ends or when bored
   virtual void process(TCPSocket &s, EndPoint client)=0;
+
+  //--------------------------------------------------------------------------
+  // Shut down server
+  void shutdown();
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  virtual ~TCPServer() { shutdown(); }
 };
 
 //==========================================================================
