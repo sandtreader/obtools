@@ -40,9 +40,13 @@ enum Level
 //==========================================================================
 // Maximum log level ever allowed
 // Used to optimise out log calls above this level - see dump_ok etc. below
-// Overrideable in Makefile
+// Overrideable in Makefile, otherwise checks DEBUG
 #if !defined OBTOOLS_LOG_MAX_LEVEL
+#if defined(DEBUG)
+#define OBTOOLS_LOG_MAX_LEVEL LEVEL_DUMP
+#else
 #define OBTOOLS_LOG_MAX_LEVEL LEVEL_DETAIL
+#endif
 #endif
 
 //==========================================================================
