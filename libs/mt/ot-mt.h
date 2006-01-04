@@ -535,26 +535,29 @@ public:
   // Shut down pool - cancel and stop all threads
   void shutdown()
   {
-    shutting_down = true;
-    Lock lock(mutex);
-    for(typename list<T *>::iterator p=threads.begin(); p!=threads.end(); p++)
+    if (!shutting_down)
     {
-      T* t = *p;
-      // Ask it nicely
-      t->die();
-
-      // Wait for a bit while it's still running
-      for(int i=0; i<5; i++)
+      shutting_down = true;
+      Lock lock(mutex);
+      for(typename list<T *>::iterator p=threads.begin(); p!=threads.end();p++)
       {
-	if (!*t) break;
-	Thread::usleep(10000);
-      }
+	T* t = *p;
+	// Ask it nicely
+	t->die();
 
-      // Then kill it with cancel if it hasn't already died
-      delete *p;
+	// Wait for a bit while it's still running
+	for(int i=0; i<5; i++)
+	{
+	  if (!*t) break;
+	  Thread::usleep(10000);
+	}
+
+	// Then kill it with cancel if it hasn't already died
+	delete *p;
+      }
+      threads.clear();
+      spares.clear();
     }
-    threads.clear();
-    spares.clear();
   }
 
   //--------------------------------------------------------------------------
