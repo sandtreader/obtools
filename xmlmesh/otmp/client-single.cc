@@ -134,6 +134,13 @@ bool Client::wait(Message& msg)
 }
 
 //------------------------------------------------------------------------
+// Shut down client cleanly
+void Client::shutdown()
+{
+  if (socket) socket->close();
+}
+
+//------------------------------------------------------------------------
 // Destructor
 Client::~Client()
 {

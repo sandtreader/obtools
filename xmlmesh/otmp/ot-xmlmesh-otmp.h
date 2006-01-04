@@ -103,6 +103,8 @@ private:
   MT::Queue<Message> receive_q;
 #endif
 
+  bool alive;                  // Not being killed
+
   // Internal functions
   bool restart_socket(Log::Streams& log);
 
@@ -110,6 +112,10 @@ public:
   //------------------------------------------------------------------------
   // Constructors - takes server endpoint (address+port)
   Client(Net::EndPoint _server);
+
+  //------------------------------------------------------------------------
+  // Check it hasn't been killed
+  bool is_alive() { return alive; }
 
 #if !defined(_SINGLE)
   //------------------------------------------------------------------------
@@ -135,6 +141,10 @@ public:
   bool wait(Message& msg);
 
   //------------------------------------------------------------------------
+  // Shut down client cleanly
+  void shutdown();
+
+  //------------------------------------------------------------------------
   // Destructor
   virtual ~Client();
 };
@@ -151,6 +161,7 @@ struct ClientSession
   Net::TCPSocket& socket;
   Net::EndPoint client;
   SessionMap& map;
+  bool alive;
 
   // Thread and queue stuff
   MT::Queue<Message> send_q;  
@@ -159,7 +170,7 @@ struct ClientSession
   // Adds this session to the given map - destructor removes it again
   ClientSession(Net::TCPSocket& _socket, Net::EndPoint _client,
 		SessionMap& _map):
-    socket(_socket), client(_client), map(_map)
+    socket(_socket), client(_client), map(_map), alive(true)
   { _map[_client] = this; }
 
   // Destructor
@@ -213,6 +224,7 @@ private:
   ClientMessageQueue& receive_q;  // Note:  Not mine
   SessionMap client_sessions;  // Map of sessions
   list<Net::MaskedAddress> filters;  // List of allowed client masks
+  bool alive;                  // Not being killed
 
 public:
   //------------------------------------------------------------------------
@@ -222,6 +234,10 @@ public:
   Server(ClientMessageQueue& receive_queue,
 	 int port=0, int backlog=5, 
 	 int min_spare_threads=1, int max_threads=10);
+
+  //------------------------------------------------------------------------
+  // Check it hasn't been killed
+  bool is_alive() { return alive; }
 
   //--------------------------------------------------------------------------
   // Allow a given client address to connect (optionally with netmask)

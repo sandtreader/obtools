@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   XMLMesh::OTMP::Client client(server);
 
   // Loop for a while sending and receiving
-  for(int i=0; i<30; i++)
+  for(int i=0; i<10; i++)
   {
 #if defined(__WIN32__)
     // Can't use MT::Thread::sleep because may not have MT
@@ -83,6 +83,10 @@ int main(int argc, char **argv)
 	cout << "RESTART\n";
     }
   }
+
+  cout << "Shutting down\n";
+  client.shutdown();
+  cout << "Done\n";
 
   return 0;  
 }

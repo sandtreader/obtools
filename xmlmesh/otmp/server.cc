@@ -25,10 +25,11 @@ class ServerSendThread: public MT::Thread
 
   void run() 
   { 
-    for(;;)
+    while (session.alive)
     {
       // Block for a message
       Message msg = session.send_q.wait();
+      if (!session.alive) break;
 
       // Deal with it
       OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(ssend): Sending message length " 
@@ -49,9 +50,11 @@ class ServerSendThread: public MT::Thread
       catch (Net::SocketError se)
       {
 	log.error << "OTMP(ssend): " << se << endl;
-	cancel();
+	break;
       }
     }
+
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(ssend): Thread shutting down\n";)
   }
 
 public:
@@ -96,13 +99,13 @@ void Server::process(Net::TCPSocket& socket,
 
   // Loop receiving messages and posting to receive_q
   // Stop if send thread unhappy, too
-  while (!!socket && !!send_thread)
+  while (alive && !!socket && !!send_thread)
   {
     try
     {
       // Try to read a 4-byte tag
       uint32_t tag;
-      if (!socket.read_nbo_int(tag)) break;  // Clean shutdown
+      if (!socket.read_nbo_int(tag) || !alive) break;  // Clean shutdown
 
       if (tag == TAG_MESSAGE)
       {
@@ -139,7 +142,7 @@ void Server::process(Net::TCPSocket& socket,
     }
     catch (Net::SocketError se)
     {
-      log.error << "OTMP(recv): " << se << endl;
+      log.error << "OTMP(srecv): " << se << endl;
       obit = "failed";
       break;
     }
@@ -149,8 +152,24 @@ void Server::process(Net::TCPSocket& socket,
   ClientMessage emsg(client, ClientMessage::FINISHED);
   receive_q.send(emsg);
 
-  if (!!send_thread) 
-    send_thread.cancel();
+  if (!!send_thread)
+  {
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(serv): Shutting down send\n";)
+
+    // Shut down session cleanly
+    session.alive=false;
+
+    // Wait for it to die
+    for(int i=0; i<5; i++)
+    {
+      session.send_q.send(Message());  // Wake up thread with bogus message
+      MT::Thread::usleep(10000);
+      if (!send_thread) break;
+    }
+
+    // If still not dead, cancel it
+    if (!!send_thread) send_thread.cancel();
+  }
   else
     obit = "failed (send)";
 
@@ -166,7 +185,8 @@ Server::Server(ClientMessageQueue& receive_queue,
 	       int min_spare_threads, int max_threads):
   TCPServer((port?port:DEFAULT_PORT), backlog, 
 	    min_spare_threads, max_threads),
-  receive_q(receive_queue)
+  receive_q(receive_queue),
+  alive(true)
 {
 
 }

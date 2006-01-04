@@ -31,17 +31,22 @@ class ClientReceiveThread: public MT::Thread
 
   void run() 
   { 
-    for(;;)
+    while (client.is_alive())
     {
       // Loop while socket is happy
       while (client.receive_messages(log));
 
-      // Log fault and sleep before retrying
-      log.error << "OTMP(recv): Socket failed, can't restart\n";
-      log.error << "OTMP(recv): Sleeping for " 
-		<< DEAD_SOCKET_SLEEP_TIME << " seconds\n";
-      sleep(DEAD_SOCKET_SLEEP_TIME);
+      if (client.is_alive())
+      {
+	// Log fault and sleep before retrying
+	log.error << "OTMP(recv): Socket failed, can't restart\n";
+	log.error << "OTMP(recv): Sleeping for " 
+		  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
+	sleep(DEAD_SOCKET_SLEEP_TIME);
+      }
     }
+
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(recv): Thread shut down\n";)
   }
 
 public:
@@ -134,9 +139,12 @@ bool Client::receive_messages(Log::Streams& log)
   }
   catch (Net::SocketError se)
   {
-    log.error << "OTMP(recv): " << se << endl;
-    //Try to restart socket
-    return restart_socket(log);
+    if (alive)
+    {
+      log.error << "OTMP(recv): " << se << endl;
+      return restart_socket(log);
+    }
+    else return false;
   }
 
   return true;
@@ -152,7 +160,9 @@ class ClientSendThread: public MT::Thread
 
   void run() 
   { 
-    for(;;) client.send_messages(log);
+    while (client.is_alive()) client.send_messages(log);
+
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP(send): Thread shut down\n";)
   }
 
 public:
@@ -166,7 +176,10 @@ bool Client::send_messages(Log::Streams& log)
 {
   // Wait for message to go out, and send it
   Message msg = send_q.wait();
- 
+
+  // Check if we're still alive
+  if (!alive) return false;
+
   // Check that socket is OK - if not, sleep hoping the receive thread
   // can reanimate it
   while (!socket || !*socket)
@@ -196,9 +209,13 @@ bool Client::send_messages(Log::Streams& log)
   }
   catch (Net::SocketError se)
   {
-    log.error << "OTMP(send): " << se << endl;
-    //Try to restart socket
-    return restart_socket(log);
+    if (alive)
+    {
+      log.error << "OTMP(send): " << se << endl;
+      //Try to restart socket
+      return restart_socket(log);
+    }
+    else return false;
   }
 
   return true;
@@ -209,7 +226,7 @@ bool Client::send_messages(Log::Streams& log)
 
 //------------------------------------------------------------------------
 // Constructors
-Client::Client(Net::EndPoint _server): server(_server)
+Client::Client(Net::EndPoint _server): server(_server), alive(true)
 {
   socket = 0;
 
@@ -245,9 +262,39 @@ bool Client::wait(Message& msg)
 }
 
 //------------------------------------------------------------------------
+// Shut down client cleanly
+void Client::shutdown()
+{
+  if (alive)
+  {
+    alive = false; // Don't try to restart socket when we close it
+
+    // Shutdown the socket, to force failure on blocking calls in threads
+    if (socket) socket->shutdown();
+
+    // Send a bogus message on the queue to force the send thread to wake up
+    send_q.send(Message());
+
+    // Wait for threads to exit cleanly
+    for(int i=0; i<5; i++)
+    {
+      if (!*receive_thread && !*send_thread) break;
+      MT::Thread::usleep(10000);
+    }
+
+    // If still not dead, cancel them
+    if (!!*receive_thread) receive_thread->cancel();
+    if (!!*send_thread) send_thread->cancel();
+  }
+}
+
+//------------------------------------------------------------------------
 // Destructor
 Client::~Client()
 {
+  shutdown();
+
+  // Now it's safe to delete them
   delete receive_thread;
   delete send_thread;
   if (socket) delete socket;
