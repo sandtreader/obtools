@@ -153,16 +153,16 @@ uint64_t Reader::read_nbo_64() throw (Error)
 
 //--------------------------------------------------------------------------
 // Skip N bytes
-void Reader::skip(int n)
+void Reader::skip(int n) throw (Error)
 {
   read(0, n);
 }
 
 //--------------------------------------------------------------------------
 // Skip to given alignment (bytes) from current offset
-void Reader::align(int n)
+void Reader::align(int n) throw (Error)
 { 
-  skip(n*((offset+n-1)/n) - offset);  // Bytes to skip
+  skip((size_t)(n*((offset+n-1)/n) - offset));  // Bytes to skip
 }
 
 }} // namespaces

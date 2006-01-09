@@ -30,6 +30,20 @@ size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
   return count;
 }
 
+//--------------------------------------------------------------------------
+// Skip N bytes
+void BlockReader::skip(int n) throw (Error)
+{
+  if (offset+n > length)
+  {
+    n = length-offset;
+    throw Error(1, "Skip beyond end of block");
+  }
+
+  offset += n;
+  data += n;
+}
+
 //==========================================================================
 // Block Writer
 
@@ -45,6 +59,21 @@ void BlockWriter::basic_write(const void *buf, size_t count) throw (Error)
   }
   else throw Error(1, "Data block overflowed");
 }
+
+//--------------------------------------------------------------------------
+// Skip N bytes
+void BlockWriter::skip(int n) throw (Error)
+{
+  // Must fit, or error
+  if (offset+n <= length)
+  {
+    memset(data, 0, n);
+    data += n;
+    offset += n;
+  }
+  else throw Error(1, "Data block overflowed in skip");
+}
+
 
 }} // namespaces
 

@@ -40,7 +40,7 @@ ostream& operator<<(ostream& s, const Error& e);
 class Reader
 {
 protected:
-  size_t offset;
+  uint64_t offset;
 
 public:
   //--------------------------------------------------------------------------
@@ -105,15 +105,15 @@ public:
 
   //--------------------------------------------------------------------------
   // Get current offset
-  size_t get_offset() { return offset; }
+  uint64_t get_offset() { return offset; }
 
   //--------------------------------------------------------------------------
   // Skip N bytes
-  void skip(int n);
+  virtual void skip(int n) throw (Error);
 
   //--------------------------------------------------------------------------
   // Skip to given alignment (bytes) from current offset
-  void align(int n);
+  void align(int n) throw (Error);
 };
 
 //==========================================================================
@@ -121,7 +121,7 @@ public:
 class Writer
 {
 protected:
-  size_t offset;
+  uint64_t offset;
 
 public:
   //--------------------------------------------------------------------------
@@ -172,11 +172,15 @@ public:
 
   //--------------------------------------------------------------------------
   // Get current offset
-  size_t get_offset() { return offset; }
+  uint64_t get_offset() { return offset; }
 
   //--------------------------------------------------------------------------
+  // Skip N bytes, writing zero
+  virtual void skip(int n) throw (Error);
+
+ //--------------------------------------------------------------------------
   // Pad to given alignment (bytes) from given current offset
-  void align(int n);
+  void align(int n) throw (Error);
 };
 
 //==========================================================================
@@ -255,6 +259,7 @@ public:
 
   // Read implementations
   virtual size_t basic_read(void *buf, size_t count) throw (Error);
+  virtual void skip(int n) throw (Error);
 };
 
 //==========================================================================
@@ -272,6 +277,7 @@ public:
 
   // Write implementation
   virtual void basic_write(const void *buf, size_t count) throw (Error);
+  virtual void skip(int n) throw (Error);
 
   // Get length remaining in block
   size_t get_remaining() { return length-offset; }
