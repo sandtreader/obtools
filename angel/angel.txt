@@ -107,3 +107,12 @@ Distributed dependency:  Depends and contains can contain 'on="machine" and
 query/register on remote angel for changes, startup order etc.
 
 <depends name="pump" on="central"/>
+
+Cron replacement
+----------------
+
+Processes define schedule to run on
+
+<schedule every="day" at="3am"/>
+
+

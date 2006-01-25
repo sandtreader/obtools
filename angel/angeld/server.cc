@@ -10,6 +10,7 @@
 #include "angeld.h"
 #include "ot-file.h"
 #include "ot-xmlmesh-client-otmp.h"
+#include <errno.h>
 
 #define DEFAULT_PROCESS_DIR "/etc/angel/processes/"
 

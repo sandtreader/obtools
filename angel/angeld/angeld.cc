@@ -9,6 +9,7 @@
 
 #include "angeld.h"
 #include <fstream>
+#include <errno.h>
 
 #define DEFAULT_LOGFILE "/var/log/angel/angeld.log"
 #define PID_FILE        "/var/run/angeld.pid"
