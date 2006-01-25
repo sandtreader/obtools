@@ -32,6 +32,17 @@ size_t StreamReader::basic_read(void *buf, size_t count) throw (Error)
   return n;
 }
 
+// Rewind implementation
+void StreamReader::rewind(size_t n) throw (Error)
+{
+  if (n<=offset)
+  {
+    offset-=n;
+    sin.seekg(-n, ios_base::cur);
+  }
+  else throw Error(1, "Rewound too far");
+}
+
 //==========================================================================
 // Stream Writer
 
@@ -42,6 +53,17 @@ void StreamWriter::basic_write(const void *buf, size_t count) throw (Error)
 
   sout.write((char *)buf, count);
   offset += count;
+}
+
+// Rewind implementation
+void StreamWriter::rewind(size_t n) throw (Error)
+{
+  if (n<=offset)
+  {
+    offset-=n;
+    sout.seekp(-n, ios_base::cur);
+  }
+  else throw Error(1, "Rewound too far");
 }
 
 }} // namespaces

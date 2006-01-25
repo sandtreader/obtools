@@ -83,12 +83,12 @@ void Writer::write_nbo_64(uint64_t i) throw (Error)
 
 //--------------------------------------------------------------------------
 // Skip N bytes, writing zero
-void Writer::skip(int n) throw (Error)
+void Writer::skip(size_t n) throw (Error)
 {
   static char buf[256] = { 0 };
   while (n)
   {
-    int i = n;
+    size_t i = n;
     if (i > 256) i=256;
     basic_write(buf, i); 
     n-=i;
@@ -97,7 +97,7 @@ void Writer::skip(int n) throw (Error)
 
 //--------------------------------------------------------------------------
 // Pad to given alignment (bytes) from current offset
-void Writer::align(int n) throw (Error)
+void Writer::align(size_t n) throw (Error)
 { 
   skip((int)(n*((offset+n-1)/n) - offset));  // Bytes to pad
 }

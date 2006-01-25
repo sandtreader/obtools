@@ -25,6 +25,7 @@ int main()
   bw.align(4);
   bw.skip(4);
   bw.write_nbo_32(0xDEADBEEF);
+  bw.rewind(4);
   bw.write_nbo_32(0x5041554C);
   bw.write_nbo_64(0x0102030405060708LL);
   bw.write("end");
@@ -38,6 +39,7 @@ int main()
   cout << hex << br.read_nbo_24() << endl;
   br.align(4);
   br.skip(8);
+  br.rewind(4);
   cout << hex << br.read_nbo_32() << endl;
   cout << hex << br.read_nbo_64() << endl;
   string s;

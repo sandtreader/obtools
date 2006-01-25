@@ -30,9 +30,8 @@ size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
   return count;
 }
 
-//--------------------------------------------------------------------------
 // Skip N bytes
-void BlockReader::skip(int n) throw (Error)
+void BlockReader::skip(size_t n) throw (Error)
 {
   if (offset+n > length)
   {
@@ -42,6 +41,17 @@ void BlockReader::skip(int n) throw (Error)
 
   offset += n;
   data += n;
+}
+
+// Rewind implementation
+void BlockReader::rewind(size_t n) throw (Error)
+{
+  if (n<=offset)
+  {
+    data-=n;
+    offset-=n;
+  }
+  else throw Error(1, "Rewound too far");
 }
 
 //==========================================================================
@@ -60,9 +70,8 @@ void BlockWriter::basic_write(const void *buf, size_t count) throw (Error)
   else throw Error(1, "Data block overflowed");
 }
 
-//--------------------------------------------------------------------------
 // Skip N bytes
-void BlockWriter::skip(int n) throw (Error)
+void BlockWriter::skip(size_t n) throw (Error)
 {
   // Must fit, or error
   if (offset+n <= length)
@@ -74,6 +83,16 @@ void BlockWriter::skip(int n) throw (Error)
   else throw Error(1, "Data block overflowed in skip");
 }
 
+// Rewind implementation
+void BlockWriter::rewind(size_t n) throw (Error)
+{
+  if (n<=offset)
+  {
+    data-=n;
+    offset-=n;
+  }
+  else throw Error(1, "Rewound too far");
+}
 
 }} // namespaces
 

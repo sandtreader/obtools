@@ -109,11 +109,23 @@ public:
 
   //--------------------------------------------------------------------------
   // Skip N bytes
-  virtual void skip(int n) throw (Error);
+  virtual void skip(size_t n) throw (Error);
 
   //--------------------------------------------------------------------------
   // Skip to given alignment (bytes) from current offset
-  void align(int n) throw (Error);
+  void align(size_t n) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Whether rewindable - not by default
+  virtual bool rewindable() { return false; }
+
+  //--------------------------------------------------------------------------
+  // Rewind N bytes - can't do it by default
+  virtual void rewind(size_t) throw (Error) { throw Error(2, "Can't rewind"); }
+
+  //--------------------------------------------------------------------------
+  // Rewind to beginning
+  void rewind() throw (Error) { rewind(offset); }
 };
 
 //==========================================================================
@@ -176,11 +188,23 @@ public:
 
   //--------------------------------------------------------------------------
   // Skip N bytes, writing zero
-  virtual void skip(int n) throw (Error);
+  virtual void skip(size_t n) throw (Error);
 
- //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
   // Pad to given alignment (bytes) from given current offset
-  void align(int n) throw (Error);
+  void align(size_t n) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Whether rewindable - not by default
+  virtual bool rewindable() { return false; }
+
+  //--------------------------------------------------------------------------
+  // Rewind N bytes - can't do it by default
+  virtual void rewind(size_t) throw (Error) { throw Error(2, "Can't rewind"); }
+
+  //--------------------------------------------------------------------------
+  // Rewind to beginning
+  void rewind() throw (Error) { rewind(offset); }
 };
 
 //==========================================================================
@@ -196,6 +220,9 @@ public:
 
   // Read implementations
   virtual size_t basic_read(void *buf, size_t count) throw (Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Error);
+  void rewind() { Reader::rewind(); }
 };
 
 //==========================================================================
@@ -211,6 +238,9 @@ public:
 
   // Write implementation
   virtual void basic_write(const void *buf, size_t count) throw (Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Error);
+  void rewind() { Writer::rewind(); }
 };
 
 //==========================================================================
@@ -259,7 +289,10 @@ public:
 
   // Read implementations
   virtual size_t basic_read(void *buf, size_t count) throw (Error);
-  virtual void skip(int n) throw (Error);
+  virtual void skip(size_t n) throw (Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Error);
+  void rewind() { Reader::rewind(); }
 };
 
 //==========================================================================
@@ -277,7 +310,10 @@ public:
 
   // Write implementation
   virtual void basic_write(const void *buf, size_t count) throw (Error);
-  virtual void skip(int n) throw (Error);
+  virtual void skip(size_t n) throw (Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Error);
+  void rewind() { Writer::rewind(); }
 
   // Get length remaining in block
   size_t get_remaining() { return length-offset; }
