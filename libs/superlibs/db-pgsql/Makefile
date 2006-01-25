@@ -7,7 +7,7 @@
 
 TYPE	= superlib
 NAME   	= ot-db-pgsql
-VERSION	= 1.1.0
+VERSION	= 1.2.0
 DEPENDS = db-pgsql
 MT-VARIANTS = 1
 

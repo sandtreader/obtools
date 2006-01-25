@@ -7,7 +7,7 @@
 
 TYPE	= superlib
 NAME	= ot-codegen
-VERSION	= 1.1.0
+VERSION	= 1.2.0
 DEPENDS = cppt regen xmi
 
 #Only build default (MT) version
