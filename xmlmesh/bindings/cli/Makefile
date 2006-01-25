@@ -10,7 +10,7 @@ NAME   	= xmlmesh-send xmlmesh-receive
 
 DEBIAN-NAME    = ot-xmlmesh-cli
 DEBIAN-VERSION = 1.2.0
-DEBIAN-REVISION = 1
+DEBIAN-REVISION = 2
 
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \

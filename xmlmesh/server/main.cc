@@ -10,6 +10,7 @@
 #include "server.h"
 #include "ot-log.h"
 #include <fstream>
+#include <errno.h>
 
 #define DEFAULT_LOGFILE "/var/log/obtools/xmlmesh.log"
 #define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%S: "

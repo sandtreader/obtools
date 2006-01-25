@@ -7,7 +7,7 @@
 
 TYPE 	  = superlib
 NAME      = ot-xmlmesh
-VERSION   = 1.2.0
+VERSION   = 1.3.0
 DEPENDS   = xmlmesh-core xmlmesh-otmp xmlmesh-client soap
 MT-VARIANTS = 1
 

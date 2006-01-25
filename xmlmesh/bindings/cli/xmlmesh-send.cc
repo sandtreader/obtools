@@ -13,6 +13,7 @@
 #include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
 #include <fstream>
+#include <errno.h>
 
 #if !defined(_SINGLE)
 #error Do NOT build multithreaded - no guarantee that send() will complete!
