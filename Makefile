@@ -13,6 +13,10 @@ all:
 	$(MAKE) -C xmlmesh
 	$(MAKE) -C angel
 
+cross: 
+	$(MAKE) -C libs cross
+	$(MAKE) -C xmlmesh cross
+
 clean: 
 	-@rm -f *~
 	-@rm -rf doc.out
