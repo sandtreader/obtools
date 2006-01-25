@@ -102,7 +102,7 @@ endif
 endif #!CROSS-COMPILE
 
 #Compiler override for MINGW build
-ifdef MINGW
+ifdef MINGW 
 CC = i586-mingw32msvc-cc
 CXX = i586-mingw32msvc-g++
 LD = i586-mingw32msvc-ld
@@ -113,6 +113,9 @@ PLATFORM = -mingw
 ifdef SOCKET
 EXTRALIBS += -lwsock32
 endif
+else
+CC = gcc-3.4
+CXX = g++-3.4
 endif
 
 # Get locations
