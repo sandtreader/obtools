@@ -170,6 +170,10 @@ public:
   Random();
 
   //------------------------------------------------------------------------
+  // Get random binary bytes up to N bytes long
+  void generate_binary(unsigned char *p, int n);
+
+  //------------------------------------------------------------------------
   // Get a random hex string up to N bytes (N*2 hex digits) long
   string generate_hex(int n);
 
@@ -207,6 +211,24 @@ public:
   //------------------------------------------------------------------------
   // Dump a block
   void dump(void *block, int length);
+};
+
+//==========================================================================
+//PKCS5 padding support 
+class PKCS5
+{
+ public:
+  //------------------------------------------------------------------------
+  // Pad a block of data to given length multiple
+  // Returns copied and padded malloc'ed data block, and modifies length
+  // to length of padded block
+  static unsigned char *pad(const unsigned char *data, int& length, 
+			    int multiple);
+
+  //------------------------------------------------------------------------
+  // Unpad a block of data 
+  // Returns original length of block - data is not copied or modified
+  static int PKCS5::original_length(const unsigned char *data, int length);
 };
 
 //==========================================================================
