@@ -20,19 +20,15 @@ namespace ObTools { namespace Misc {
 // Constructor
 Random::Random()
 {
-#if defined(__WIN32__)
+  // Do this even in Unix just in case /dev/urandom fails
   srand(time(NULL));
-#endif
 }
 
 //------------------------------------------------------------------------
-// Get some random bytes in the given buffer
-static void _get_random_bytes(int n, unsigned char *p)
+// Get random binary bytes up to N bytes long
+void Random::generate_binary(unsigned char *p, int n)
 {
-#if defined(__WIN32__)
-  // Suggestions for doing this better in Windows gratefully received!
-  for(int i=0; i<n; i++) p[i] = (unsigned char)(rand() & 0xff);
-#else
+#if !defined(__WIN32__)
   // In Real Operating Systems (tm), /dev/urandom gives us an unlimited 
   // supply of random bytes from a hardware-assisted entropy pool
   ifstream f("/dev/urandom", ios_base::binary);  
@@ -41,15 +37,13 @@ static void _get_random_bytes(int n, unsigned char *p)
   {
     f.read((char *)p, n);
 
-    // Check we read it, otherwise drop through to zero
+    // Check we read it, otherwise drop through to pseudo
     if (f.gcount() == n) return;
   }
-
-  // It's tempting to try a software version here, a la UUID algorithm,
-  // but it's safer (and easier ;-) to generate zeros to force the user
-  // to fix the RNG for their platform
-  memset(p, 0, n);
 #endif
+
+  // Generate pseudo-random as a fallback
+  for(int i=0; i<n; i++) p[i] = (unsigned char)(rand() & 0xff);
 }
 
 //------------------------------------------------------------------------
@@ -57,7 +51,7 @@ static void _get_random_bytes(int n, unsigned char *p)
 string Random::generate_hex(int n)
 {
   unsigned char *p = new unsigned char[n];
-  _get_random_bytes(n, p);
+  generate_binary(p, n);
 
   ostringstream oss;
   for(int i=0; i<n; i++)
@@ -72,7 +66,7 @@ string Random::generate_hex(int n)
 uint32_t Random::generate_32()
 {
   unsigned char buf[4];
-  _get_random_bytes(4, buf);
+  generate_binary(buf, 4);
   return *(uint32_t *)buf;  // Big endian, little endian, who cares?
 }
 
@@ -81,7 +75,7 @@ uint32_t Random::generate_32()
 uint64_t Random::generate_64()
 {
   unsigned char buf[8];
-  _get_random_bytes(8, buf);
+  generate_binary(buf, 8);
   return *(uint64_t *)buf;  
 }
 
