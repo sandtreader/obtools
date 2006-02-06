@@ -8,10 +8,11 @@
 TYPE	= lib
 NAME   	= ot-crypto
 HEADERS = ot-crypto.h
-OBJS  	= pkcs5.o
-TESTS 	= test-pkcs5
+OBJS  	= pkcs5.o des-key.o
+TESTS 	= test-pkcs5 test-des-key
 DEPENDS = misc
-TESTCMD	= ./test-pkcs5
+TESTCMD	= ./test-pkcs5 && ./test-des-key
+EXTLIBS = /usr/lib/libcrypto.so
 MT-VARIANTS = 1
 
 ROOT    = ../..
