@@ -11,16 +11,35 @@
 #include <sstream>
 #include <iomanip>
 #include <ctype.h>
+#include "ot-chan.h"
 #include "ot-crypto.h"
 
 namespace ObTools { namespace Crypto {
+
+//------------------------------------------------------------------------
+// Copy constructor - just copies base key and rebuilds schedule
+DESKey::DESKey(const DESKey& k)
+{
+  memcpy(key, k.key, 8);
+  load();
+}
+
+//------------------------------------------------------------------------
+// Assignment operator - ditto
+DESKey& DESKey::operator=(const DESKey& k)
+{
+  memcpy(key, k.key, 8);
+  load();
+  return *this;
+}
 
 //------------------------------------------------------------------------
 // Check and load the key from base data - sets valid true or false 
 // after checking it
 void DESKey::load()
 {
-  valid = !DES_set_key_checked(&key, &schedule);
+  // IVs are always valid, and schedule not used
+  valid = is_key?!DES_set_key_checked(&key, &schedule):true;
 }
 
 //------------------------------------------------------------------------
@@ -31,8 +50,8 @@ void DESKey::create()
   do
   {
     DES_random_key(&key);
-    DES_set_odd_parity(&key);
-  } while (DES_is_weak_key(&key));
+    if (is_key) DES_set_odd_parity(&key);
+  } while (is_key && DES_is_weak_key(&key));
 
   load();
 }
@@ -102,6 +121,21 @@ string DESKey::str() const
   ostringstream oss;
   write(oss);
   return oss.str();
+}
+  
+//------------------------------------------------------------------------
+// Read from channel (8 binary bytes)
+void DESKey::read(Channel::Reader& reader) throw (Channel::Error)
+{
+  reader.read(key, 8);
+  load();
+}
+
+//------------------------------------------------------------------------
+// Write to channel (8 binary bytes)
+void DESKey::write(Channel::Writer& writer) const throw (Channel::Error)
+{
+  writer.write(key, 8);
 }
 
 //------------------------------------------------------------------------
