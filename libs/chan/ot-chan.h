@@ -148,6 +148,12 @@ public:
   virtual void basic_write(const void *buf, size_t count) throw (Error) = 0;
 
   //--------------------------------------------------------------------------
+  // Write exact amount of data to the channel from a binary buffer
+  // Aliased to match Reader::read()
+  void write(const void *buf, size_t count) throw (Error)
+  { basic_write(buf, count); }
+
+  //--------------------------------------------------------------------------
   // Write a string to the channel
   // Throws Error on failure
   void write(const string& s) throw (Error);
