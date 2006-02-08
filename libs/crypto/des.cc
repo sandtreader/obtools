@@ -36,19 +36,20 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
     switch (nkeys)
     {
       case 1:
-	DES_ncbc_encrypt(data, data, length, &keys[0].schedule, &iv.key, enc);
+	OpenSSL::DES_ncbc_encrypt(data, data, length, 
+				  &keys[0].schedule, &iv.key, enc);
 	break;
 
       case 2:
-	DES_ede2_cbc_encrypt(data, data, length,
-			     &keys[0].schedule, &keys[1].schedule, 
-			     &iv.key, enc);
+	OpenSSL::DES_ede2_cbc_encrypt(data, data, length,
+				      &keys[0].schedule, &keys[1].schedule, 
+				      &iv.key, enc);
 	break;
 
       case 3:
-	DES_ede3_cbc_encrypt(data, data, length,
-			     &keys[0].schedule, &keys[1].schedule,
-			     &keys[2].schedule, &iv.key, enc);
+	OpenSSL::DES_ede3_cbc_encrypt(data, data, length,
+				      &keys[0].schedule, &keys[1].schedule,
+				      &keys[2].schedule, &iv.key, enc);
 	break;
 
       default: return false;
@@ -63,19 +64,21 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
       {
 	case 1:
 	{
-	  DES_cblock *block = (DES_cblock *)data;
-	  DES_ecb_encrypt(block, block, &keys[0].schedule, enc);
+	  OpenSSL::DES_cblock *block = (OpenSSL::DES_cblock *)data;
+	  OpenSSL::DES_ecb_encrypt(block, block, &keys[0].schedule, enc);
 	}
 	break;
 
 	case 2:
-	  DES_ecb2_encrypt(data, data, &keys[0].schedule, &keys[1].schedule,
-			   enc);
+	  OpenSSL::DES_ecb2_encrypt(data, data, 
+				    &keys[0].schedule, &keys[1].schedule,
+				    enc);
 	  break;
 
 	case 3:
-	  DES_ecb3_encrypt(data, data, &keys[0].schedule, &keys[1].schedule,
-			   &keys[2].schedule, enc);
+	  OpenSSL::DES_ecb3_encrypt(data, data, 
+				    &keys[0].schedule, &keys[1].schedule,
+				    &keys[2].schedule, enc);
 	  break;
 
 	default: return false;

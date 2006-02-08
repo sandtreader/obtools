@@ -16,7 +16,13 @@
 #include <string>
 #include <map>
 
+// Wrap OpenSSL in its own namespace to distinguish from our wrappers of 
+// the same or similar names
+namespace OpenSSL
+{
 #include <openssl/des.h>
+#include <openssl/rsa.h>
+}
 
 namespace ObTools { namespace Crypto { 
 
@@ -24,7 +30,7 @@ namespace ObTools { namespace Crypto {
 using namespace std;
 
 //==========================================================================
-// DES key (des.cc)
+// DES key (des-key.cc)
 // 8-byte key, also used for IV 
 class DESKey
 {
@@ -32,8 +38,8 @@ private:
   void load();
 
 public:
-  DES_cblock key;                 // Original 8-byte key
-  DES_key_schedule schedule;      // Expanded key for optimised processing
+  OpenSSL::DES_cblock key;            // Original 8-byte key
+  OpenSSL::DES_key_schedule schedule; // Expanded key for optimised processing
   bool is_key;                    // True if a key, false if an IV
   bool valid;                     // Whether key/schedule is valid
   
@@ -152,6 +158,22 @@ public:
   // Decrypt a block in place - shorthand for above
   bool decrypt(unsigned char *data, int length)
   { return encrypt(data, length, false); }
+};
+
+//==========================================================================
+// RSA key (rsa-key.cc)
+// N-byte private or public key
+class RSAKey
+{
+private:
+  OpenSSL::RSA *rsa;
+
+public:
+  bool valid;                     // Whether key is valid
+  
+  //------------------------------------------------------------------------
+  // Default constructor
+  RSAKey(): valid(false) {}
 };
 
 //==========================================================================
