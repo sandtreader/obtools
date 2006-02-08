@@ -113,7 +113,7 @@ ostream& operator<<(ostream& s, const DESKey& k);
 // number of keys and whether IV set 
 class DES
 {
-private:
+public:
   static const int MAX_KEYS = 3;
 
   // Keys: 1-3
@@ -123,7 +123,6 @@ private:
   // IV
   DESKey iv;  // Remains invalid if not used
 
-public:
   //------------------------------------------------------------------------
   // Default constructor
   DES(): nkeys(0), iv(false) {}
