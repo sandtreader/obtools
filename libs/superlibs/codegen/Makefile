@@ -18,7 +18,7 @@ VARIANTS = release
 
 DEBIAN-NAME    = libot-codegen
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 1
+DEBIAN-REVISION = 2
 
 ROOT	= ../../..
 include $(ROOT)/build/std.mk

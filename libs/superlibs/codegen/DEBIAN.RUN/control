@@ -3,8 +3,7 @@ Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
-Depends: libot-general (>= 1.0.0)
+Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3), libot-general (>= 1.0.0)
 Description: ObTools codegen libraries 
  The ObTools code generation libraries provide useful facilities for UML/XMI
  parsing and code generation

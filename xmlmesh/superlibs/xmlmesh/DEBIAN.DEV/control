@@ -9,5 +9,4 @@ Description: ObTools XMLMesh message bus shared libraries (development files)
  .
  This package provides libraries for building clients which use XMLMesh for 
  communication.
-Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
-Depends: libot-general-dev (>= 1.0.0)
+Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3), libot-general-dev (>= 1.0.0)
