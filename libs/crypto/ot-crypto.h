@@ -81,7 +81,7 @@ public:
   void read(istream& sin);
 
   //------------------------------------------------------------------------
-  // Write to stream - reads 16 hex characters
+  // Write to stream - writes 16 hex characters
   void write(ostream& sout) const;
 
   //------------------------------------------------------------------------
@@ -166,15 +166,101 @@ public:
 class RSAKey
 {
 private:
-  OpenSSL::RSA *rsa;
+  // Copy and assignment are banned!
+  RSAKey(const RSAKey&) {}
+  RSAKey& operator=(const DESKey&) { return *this; }
 
 public:
-  bool valid;                     // Whether key is valid
+  OpenSSL::RSA *rsa;
+
+  bool is_private; // Private or public?
+  bool valid;      // Whether key is valid
   
   //------------------------------------------------------------------------
   // Default constructor
-  RSAKey(): valid(false) {}
+  RSAKey(bool _private = false):
+    rsa(0), is_private(_private), valid(false) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from string - PEM format
+  RSAKey(const string& text, bool _private):
+    rsa(0), is_private(_private), valid(false) { read(text); }
+
+  //------------------------------------------------------------------------
+  // Create a new key from random data
+  // Seed PRNG first!
+  void create(int size=1024, int exponent=65537);
+
+  //------------------------------------------------------------------------
+  // Read from stream - reads PEM format
+  // If force_private is set, reads a private key PEM block even if a
+  // public key is wanted (use for testing both ends with a single key)
+  void read(istream& sin, bool force_private = false);
+
+  //------------------------------------------------------------------------
+  // Write to stream - writes PEM format
+  // If force_public is set, writes a public key PEM block even if
+  // a private key is held - use to generate new public/private pairs 
+  void write(ostream& sout, bool force_public = false) const;
+
+  //------------------------------------------------------------------------
+  // Read from string - reads 16 hex characters
+  // If force_private is set, reads a private key even if public (see above)
+  void read(const string& text, bool force_private = false);
+
+  //------------------------------------------------------------------------
+  // Convert to string (PEM format)
+  // force_public forces public key output from private key (see above)
+  string str(bool force_public = false) const;
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~RSAKey();
 };
+
+//------------------------------------------------------------------------
+// >> operator to read key from istream (PEM format)
+istream& operator>>(istream& s, RSAKey& k);
+
+//------------------------------------------------------------------------
+// << operator to write key to ostream (PEM format)
+ostream& operator<<(ostream& s, const RSAKey& k);
+
+//==========================================================================
+// RSA crypto object
+class RSA
+{
+public:
+  RSAKey key;
+
+  //------------------------------------------------------------------------
+  // Default constructor
+  RSA(bool is_private=false): key(is_private) {}
+
+  //------------------------------------------------------------------------
+  // Get cyphertext size
+  int cypher_size();
+
+  //------------------------------------------------------------------------
+  // Get maximum plaintext size
+  int max_plaintext();
+
+  //------------------------------------------------------------------------
+  // Encrypt a block 
+  // Length may be up to max_plaintext() bytes
+  // Returns whether successful (key set up correctly)
+  // 'to' must be writable to cypher_size() bytes
+  bool encrypt(const unsigned char *from, int length, unsigned char *to);
+
+  //------------------------------------------------------------------------
+  // Decrypt a block 
+  // Returns decrypted length of block
+  // Assumes 'from' data is always cypher_size() bytes
+  // 'to' must be writable to get_size() bytes 
+  // (unless you _really_ understand padding!)
+  int decrypt(const unsigned char *from, unsigned char *to);
+};
+
 
 //==========================================================================
 // PKCS5 padding support 
