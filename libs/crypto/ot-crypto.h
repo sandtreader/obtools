@@ -187,6 +187,11 @@ public:
     rsa(0), is_private(_private), valid(false) { read(text); }
 
   //------------------------------------------------------------------------
+  // Set from string for already created ones
+  void set(const string& text, bool _private)
+  { is_private = _private; read(text); }
+
+  //------------------------------------------------------------------------
   // Create a new key from random data
   // Seed PRNG first!
   void create(int size=1024, int exponent=65537);
@@ -256,7 +261,7 @@ public:
   // Decrypt a block 
   // Returns decrypted length of block
   // Assumes 'from' data is always cypher_size() bytes
-  // 'to' must be writable to get_size() bytes 
+  // 'to' must be writable to cypher_size() bytes 
   // (unless you _really_ understand padding!)
   int decrypt(const unsigned char *from, unsigned char *to);
 };

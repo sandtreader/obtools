@@ -77,7 +77,7 @@ void RSAKey::read(const string& text, bool force_private)
   if (is_private || force_private)
     rsa = OpenSSL::PEM_read_bio_RSAPrivateKey(bio, 0, 0, 0);
   else
-    rsa = OpenSSL::PEM_read_bio_RSAPublicKey(bio, 0, 0, 0);
+    rsa = OpenSSL::PEM_read_bio_RSA_PUBKEY(bio, 0, 0, 0);
 
   // Clean up
   OpenSSL::BIO_free(bio);
@@ -100,7 +100,7 @@ string RSAKey::str(bool force_public) const
   if (is_private && !force_public)
     OpenSSL::PEM_write_bio_RSAPrivateKey(bio, rsa, 0, 0, 0, 0, 0);
   else
-    OpenSSL::PEM_write_bio_RSAPublicKey(bio, rsa);
+    OpenSSL::PEM_write_bio_RSA_PUBKEY(bio, rsa);
 
   // Grr. BIO_flush is a macro so we have to hack the namespaces...
   {
