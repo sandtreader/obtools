@@ -11,7 +11,11 @@
 #include "ot-misc.h"
 #include <iostream>
 
+#define KEY_LEN 1024
 #define MAX_LEN 256
+#define PLAINTEXT_LEN 16
+#define NUM_ENCRYPT_CYCLES 1
+#define NUM_DECRYPT_CYCLES 500
 
 using namespace std;
 using namespace ObTools;
@@ -31,21 +35,29 @@ void test(Crypto::RSA& encryptor, Crypto::RSA& decryptor,
   cout << endl << what << " - original of " << plaintext_size << " bytes:\n";
   dumper.dump(data, plaintext_size);
 
-  if (!encryptor.encrypt(data, plaintext_size, cypher))
+  for(int i=0; i<NUM_ENCRYPT_CYCLES; i++)
   {
-    cerr << what << " - can't encrypt!\n";
-    exit(2);
+    if (!encryptor.encrypt(data, plaintext_size, cypher))
+    {
+      cerr << what << " - can't encrypt!\n";
+      exit(2);
+    }
   }
 
   cout << what << " - encrypted:\n";
   dumper.dump(cypher, cypher_size);
 
-  int n = decryptor.decrypt(cypher, result);
+  int n;
 
-  if (!n)
+  for(int i=0; i<NUM_DECRYPT_CYCLES; i++)
   {
-    cerr << what << " - can't decrypt!\n";
-    exit(2);
+    n = decryptor.decrypt(cypher, result);
+
+    if (!n)
+    {
+      cerr << what << " - can't decrypt!\n";
+      exit(2);
+    }
   }
 
   cout << what << " - decrypted " << n << " bytes:\n";
@@ -64,7 +76,7 @@ void test(Crypto::RSA& encryptor, Crypto::RSA& decryptor,
 int main()
 {
   Crypto::RSA rsa_pri(true);
-  rsa_pri.key.create();
+  rsa_pri.key.create(KEY_LEN);
   cout << "Private key:\n" << rsa_pri.key << endl;
 
   Crypto::RSA rsa_pub(false);  
@@ -76,6 +88,8 @@ int main()
 
   int max_plaintext = rsa_pri.max_plaintext();
   cout << "Max plaintext: " << max_plaintext << endl;
+
+  if (max_plaintext > PLAINTEXT_LEN) max_plaintext = PLAINTEXT_LEN;
 
   // Public encrypt, private decrypt
   test(rsa_pub, rsa_pri, "Public-to-Private", cypher_size, max_plaintext);
