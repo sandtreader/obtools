@@ -109,6 +109,7 @@ LD = i586-mingw32msvc-ld
 AR = i586-mingw32msvc-ar
 EXE-SUFFIX = .exe
 CPPFLAGS += -DMINGW
+LDFLAGS += -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc 
 PLATFORM = -mingw
 ifdef SOCKET
 EXTRALIBS += -lwsock32
@@ -421,7 +422,7 @@ EXCLUDE-LIBS = $(subst $(SPACE),$(COMMA),$(strip $(DLLLIBS) $(EXTRALIBS)))
 $(DLL-NAME): $(LIBS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,--out-implib=$(IMPLIB-NAME)   \
-          -Wl,--export-all-symbols -Wl,--enable-auto-import              \
+          -Wl,--export-all-symbols                                       \
           -Wl,--whole-archive $(LIBS) -Wl,--no-whole-archive             \
 	  -Wl,--exclude-libs,$(EXCLUDE-LIBS)                             \
           $(DLLLIBS) -lstdc++ $(EXTRALIBS)
