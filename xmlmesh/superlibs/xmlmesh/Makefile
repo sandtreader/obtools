@@ -5,14 +5,22 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-TYPE 	  = superlib
+ifdef MINGW
+TYPE	= dll
+else
+TYPE	= superlib
+endif
 NAME      = ot-xmlmesh
 VERSION   = 1.3.0
 DEPENDS   = xmlmesh-core xmlmesh-otmp xmlmesh-client soap
+DLL-DEPENDS = ot-general
 MT-VARIANTS = 1
 
 #Only build release versions - debug is not PIC
+#Don't override in MinGW
+ifndef CROSS-COMPILE
 VARIANTS = release single-release
+endif
 
 DEBIAN-NAME    = libot-xmlmesh
 DEBIAN-VERSION = $(VERSION)

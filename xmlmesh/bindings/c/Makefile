@@ -11,6 +11,7 @@ HEADERS = ot-xmlmesh-c.h
 OBJS    = xmlmesh-c.o
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp net xml soap log text misc
 MT-VARIANTS = 1
+SOCKET = 1
 
 # Suppress MT library if single 
 ifndef SINGLE
