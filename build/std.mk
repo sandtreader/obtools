@@ -186,6 +186,23 @@ RELEASE-NAME = $(SOLIB)
 RELEASE-LINK = $(SONAME)
 endif
 
+#Targets for Windows DLL
+ifeq ($(TYPE), dll)
+
+#Make sure library name is changed to reflect singleness, because directory
+#location is lost in dependencies
+ifdef SINGLE
+DLL-NAME = $(NAME)-single.dll
+else
+DLL-NAME = $(NAME).dll
+endif
+
+IMPLIB-NAME = $(DLL-NAME).a
+TARGETS = $(DLL-NAME)
+RELEASABLE = $(DLL-NAME) $(IMPLIB-NAME)
+RELEASE-NAME = 
+endif
+
 #Set standard flags
 CPPFLAGS += -W -Wall
 
@@ -241,13 +258,21 @@ endef
 
 $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
 
+# Additional dependencies for DLL
+define dll_dep_template
+DLLLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
+endef
+
+$(foreach dep,$(DLL-DEPENDS),$(eval $(call dll_dep_template,$(dep))))
+
 # Sort out header propagation for superlibs
 define header_template
-SOHEADERS += $(DIR-$(1))/*.h
+SOHEADERS += $(wildcard $(DIR-$(1))/*.h)
 endef
 
 # ifeq...endif commented out due to 'eval' bug in make...
 #ifeq ($(TYPE), superlib)
+#Actually also used for DLL anyway
 $(foreach dep,$(DEPENDS),$(eval $(call header_template,$(dep))))
 #endif
 
@@ -382,8 +407,24 @@ ifeq ($(TYPE), superlib)
 $(SOLIB): $(LIBS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
-        $(LIBS) -Wl,-no-whole-archive -lstdc++
+        $(LIBS) -Wl,-no-whole-archive -lstdc++ $(EXTRALIBS)
 	ln -fs $@ $(SOLINK)
+endif
+
+#DLL
+ifeq ($(TYPE), dll)
+#Aarggh!
+COMMA:= ,
+EMPTY:=
+SPACE:= $(EMPTY) $(EMPTY)
+EXCLUDE-LIBS = $(subst $(SPACE),$(COMMA),$(strip $(DLLLIBS) $(EXTRALIBS)))
+$(DLL-NAME): $(LIBS)
+	cp $(SOHEADERS) .
+	$(CC) $(LDFLAGS) -shared -o $@ -Wl,--out-implib=$(IMPLIB-NAME)   \
+          -Wl,--export-all-symbols -Wl,--enable-auto-import              \
+          -Wl,--whole-archive $(LIBS) -Wl,--no-whole-archive             \
+	  -Wl,--exclude-libs,$(EXCLUDE-LIBS)                             \
+          $(DLLLIBS) -lstdc++ $(EXTRALIBS)
 endif
 
 #Dependencies

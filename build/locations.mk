@@ -20,6 +20,7 @@ OT-LIBS = cli:libs/cli     			\
 	  db-pgsql:libs/db:-pgsql 		\
 	  cache:libs/cache:NOLIB  		\
 	  chan:libs/chan			\
+	  crypto:libs/crypto			\
 	  file:libs/file                        \
 	  init:libs/init			\
 	  log:libs/log     			\
@@ -79,8 +80,15 @@ define shlib_template
 SDIR-$(1) = $$(ROOT)/$(2)
 #Include directory is actually the build-release one
 DIR-$(1) = $$(SDIR-$(1))/build-release
+ifdef MINGW
+LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/$(1).dll.a
+LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release$$(PLATFORM)/$(1)-single.dll.a
+LIBS-$(1)-debug = $$(SDIR-$(1))/build-debug$$(PLATFORM)/$(1).dll.a
+LIBS-$(1)-single-debug = $$(SDIR-$(1))/build-single-debug$$(PLATFORM)/$(1)-single.dll.a
+else
 LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/lib$(1).so
 LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release$$(PLATFORM)/lib$(1)-single.so
+endif
 endef
 
 # Split at spaces and pass on to lib_template as words

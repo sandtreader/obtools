@@ -36,4 +36,33 @@ it here either).  So...
 
 3) Copy pthreadGC2.dll to Windows PATH
 
+Crypto in cross-compiled versions
+---------------------------------
+
+To build with the OpenSSL library, you need to cross-link the usual OpenSSL
+headers into the MinGW include directory:
+
+ln -sf /usr/include/openssl /usr/i586-mingwmsvc/include/
+
+Prebuilt OpenSSL DLLs are available from:
+
+http://www.slproweb.com/products/Win32OpenSSL.html
+
+Copy the libeay32.a import library to /usr/i586-mingwmsvc/lib/ to allow the
+DLL build to use it
+
+Postgres in cross-compiled versions
+-----------------------------------
+
+To build with the Postgres library, you don't need to cross link because the 
+build takes the headers from the Unix place anyway.  
+
+Download the PQ DLL and implib from:
+
+ftp://gborg.postgresql.org/pub/oledb/stable/libpq-7.4.1.zip
+
+and copy libpqdll.lib to /usr/i586-mingwmsvc/lib/libpq.a
+
+Install the DLL in c:\windows\system or wherever
+
 
