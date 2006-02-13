@@ -22,6 +22,7 @@ namespace OpenSSL
 {
 #include <openssl/des.h>
 #include <openssl/rsa.h>
+#include <openssl/sha.h>
 }
 
 namespace ObTools { namespace Crypto { 
@@ -266,7 +267,6 @@ public:
   int decrypt(const unsigned char *from, unsigned char *to);
 };
 
-
 //==========================================================================
 // PKCS5 padding support 
 class PKCS5
@@ -283,6 +283,51 @@ class PKCS5
   // Unpad a block of data 
   // Returns original length of block - data is not copied or modified
   static int PKCS5::original_length(const unsigned char *data, int length);
+};
+
+//==========================================================================
+// SHA1 digest/hash support
+// Either use as an object for repeated partial blocks, or use the static
+// digest() to do an entire block
+class SHA1
+{
+ private:
+  OpenSSL::SHA_CTX *sha;
+
+  static string hex20(unsigned char *b);
+
+ public:
+  static const int DIGEST_LENGTH = 20;
+
+  //------------------------------------------------------------------------
+  // Constructor
+  SHA1();
+
+  //------------------------------------------------------------------------
+  // Update digest with a block of data
+  void update(const void *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // Get result - writes DIGEST_LENGTH bytes to result
+  void get_result(unsigned char *result);
+
+  //------------------------------------------------------------------------
+  // Get result as a hex string
+  string get_result();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~SHA1();
+
+  //------------------------------------------------------------------------
+  // Static: Get hash of block of data.  Writes DIGEST_LENGTH bytes to result
+  static void digest(const void *data, size_t length,
+		     unsigned char *result);
+
+  //------------------------------------------------------------------------
+  // Ditto, but returning hex string
+  static string digest(const void *data, size_t length);
+
 };
 
 //==========================================================================
