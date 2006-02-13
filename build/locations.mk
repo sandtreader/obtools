@@ -79,7 +79,7 @@ $(foreach lib,$(OT-LIBS),$(eval $(call split_template,$(subst :, ,$(lib)))))
 define shlib_template
 SDIR-$(1) = $$(ROOT)/$(2)
 #Include directory is actually the build-release one
-DIR-$(1) = $$(SDIR-$(1))/build-release
+DIR-$(1) = $$(SDIR-$(1))/build-release$$(PLATFORM)
 ifdef MINGW
 LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/$(1).dll.a
 LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release$$(PLATFORM)/$(1)-single.dll.a
