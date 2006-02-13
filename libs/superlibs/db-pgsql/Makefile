@@ -16,7 +16,7 @@ VARIANTS = release single-release
 
 DEBIAN-NAME    = libot-db-pgsql
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 2
+DEBIAN-REVISION = 3
 
 ifdef SINGLE
 DEBIAN-VARIANT = single

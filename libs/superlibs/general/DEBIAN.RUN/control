@@ -3,7 +3,7 @@ Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
+Depends: libc6 (>= 2.3.2.ds1-21), libstdc++6 (>= 3.4.3-13)
 Description: ObTools general-purpose libraries 
  The ObTools libraries provide a range of useful interfaces and objects for
  multithreaded & network applications in C++
