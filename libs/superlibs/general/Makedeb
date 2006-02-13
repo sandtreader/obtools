@@ -58,6 +58,7 @@ echo "Depends: libot-general (>= $DEB_VERSION)" >> $DEB_DEV_DIR/DEBIAN/control
 echo "Version: $DEB_VERSION" >> $DEB_DEV_DIR/DEBIAN/control
 
 install -m 0644 $RELEASE_DIR/ot-chan$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-crypto$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-file$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-init$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-log$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
@@ -78,6 +79,7 @@ install -m 0644 $RELEASE_DIR/ot-cache.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-chan.h $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli-telnet.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-crypto.h $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-file.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-init.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-log.h $DEB_DEV_DIR/usr/include/obtools/

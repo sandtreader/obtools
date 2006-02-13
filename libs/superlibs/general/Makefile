@@ -7,8 +7,8 @@
 
 TYPE	= superlib
 NAME	= ot-general
-VERSION	= 1.4.0
-DEPENDS = xml misc text net log init chan time web file
+VERSION	= 1.5.0
+DEPENDS = xml misc text net log init chan time web file crypto
 MT-VARIANTS = 1
 
 #Only build release versions - debug is not PIC
