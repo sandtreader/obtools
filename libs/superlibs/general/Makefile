@@ -5,14 +5,30 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+ifdef MINGW
+TYPE	= dll
+else
 TYPE	= superlib
+endif
 NAME	= ot-general
 VERSION	= 1.5.0
 DEPENDS = xml misc text net log init chan time web file crypto
 MT-VARIANTS = 1
+SOCKET  = 1
+EXTLIBS = -lcrypto
 
 #Only build release versions - debug is not PIC
+#Don't override in MinGW
+ifndef CROSS-COMPILE
 VARIANTS = release single-release
+endif
+
+ifdef MINGW
+# Include libeay32 import library
+EXTLIBS = -leay32
+else
+EXTLIBS = -lcrypto
+endif
 
 DEBIAN-NAME    = libot-general
 DEBIAN-VERSION = $(VERSION)

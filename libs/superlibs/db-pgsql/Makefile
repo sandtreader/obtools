@@ -5,14 +5,24 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+ifdef MINGW
+TYPE	= dll
+else
 TYPE	= superlib
+endif
 NAME   	= ot-db-pgsql
 VERSION	= 1.2.0
 DEPENDS = db-pgsql
 MT-VARIANTS = 1
 
+DLL-DEPENDS = ot-general
+EXTLIBS = -lpq
+
 #Only build release versions - debug is not PIC
+#Don't override in MinGW
+ifndef CROSS-COMPILE
 VARIANTS = release single-release
+endif
 
 DEBIAN-NAME    = libot-db-pgsql
 DEBIAN-VERSION = $(VERSION)

@@ -13,8 +13,14 @@ TESTS 	= test-pkcs5 test-des-key test-des test-rsa-key test-rsa test-sha1
 DEPENDS = misc chan net 
 TESTCMD	= ./test-pkcs5 && ./test-des-key && ./test-des \
        && ./test-rsa-key && ./test-rsa && ./test-sha1
+SOCKET = 1
 
+ifdef MINGW
+# Include libeay32 import library
+EXTLIBS = -leay32
+else
 EXTLIBS = -lcrypto
+endif
 
 MT-VARIANTS = 1
 
