@@ -5,6 +5,12 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+###Doesn't currently build in Windows - linkage problems with libpq
+ifdef CROSS-COMPILE
+targets:
+else
+###
+
 ifdef MINGW
 TYPE	= dll
 else
@@ -36,3 +42,6 @@ ROOT    = ../../..
 include $(ROOT)/build/std.mk
 
 
+####
+endif
+####
