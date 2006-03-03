@@ -14,6 +14,7 @@ stop)	echo -n "Stopping ObTools XMLMesh server: ot-xmlmesh"
         ;;
 restart|force-reload) echo -n "Restarting ObTools XMLMesh server"
         start-stop-daemon --stop --retry 5 --quiet --pidfile /var/run/ot-xmlmesh.pid --name ot-xmlmesh
+	sleep 2
         start-stop-daemon --start --quiet --pidfile /var/run/ot-xmlmesh.pid --name ot-xmlmesh --startas /usr/sbin/ot-xmlmesh
         echo "."
         ;;
