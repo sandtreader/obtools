@@ -120,7 +120,16 @@ void Server::run()
     for(list<Service *>::iterator p=services.begin();
 	p!=services.end();
 	p++)
-      (*p)->tick();
+    {
+      Service *s = *p;
+      if (s->started()) 
+	s->tick();
+      else
+      {
+	log.error << "Service failed to start - shutting down\n";
+	return;
+      }
+    }
   }
 }
 

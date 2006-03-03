@@ -24,6 +24,9 @@ class OTMPServerThread: public MT::Thread
   void run()
   {
     server.run();
+
+    Log::Streams log;
+    log.error << "OTMP server exited: Can't listen on port?\n";
   }
 
 public:
@@ -61,6 +64,10 @@ public:
   // Constructor - default to standard OTMP port
   OTMPServer(XML::Element& cfg);
 
+  //------------------------------------------------------------------------
+  // Check the service is happy
+  bool started();
+
   //--------------------------------------------------------------------------
   // OTMP Message dispatcher
   // Fetch OTMP messages and send them up as internal messages
@@ -81,6 +88,8 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   message_thread(*this)
 {
   bool filtered = false;
+  log.summary << "OTMP server on port " << port << endl;
+
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(filter, cfg, "filter")
     string addr = filter["address"];
     Net::MaskedAddress ma(addr);
@@ -99,9 +108,16 @@ OTMPServer::OTMPServer(XML::Element& cfg):
 
   server_thread.start();
   message_thread.start();
+}
 
-  log.summary << "OTMP Server '" << id << "' started on port " 
-	      << port << endl;
+//------------------------------------------------------------------------
+// Check the service is happy
+// Override to close down startup if initialisation failed
+bool OTMPServer::started()
+{
+  if (!!otmp && !!server_thread) return true;
+  log.error << "OTMP server failed to start\n";
+  return false;
 }
 
 //--------------------------------------------------------------------------

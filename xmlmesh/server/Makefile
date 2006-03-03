@@ -29,6 +29,8 @@ CPPFLAGS += -DDAEMON
 endif
 endif
 
+CPPFLAGS += -DOT_XMLMESH_VERSION=$(DEBIAN-VERSION)
+
 CONFIGS = xmlmesh.cfg.xml
 MULTI   = 1
 SOCKET  = 1

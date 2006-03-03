@@ -270,6 +270,11 @@ public:
   {}
 
   //------------------------------------------------------------------------
+  // Check the service is happy
+  // Override to close down startup if initialisation failed
+  virtual bool started() { return true; }
+
+  //------------------------------------------------------------------------
   // Add a new route on the given subject pattern
   void add_route(const string& subject, Service& service)
   { routes.push_back(MessageRoute(subject, service)); }

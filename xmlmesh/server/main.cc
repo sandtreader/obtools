@@ -82,7 +82,10 @@ int main(int argc, char **argv)
   pidfile.close();
 #endif
 
-  log.summary << "xmlmesh-server starting\n";
+#define FURKLE2(_x) #_x
+#define FURKLE(_x) FURKLE2(_x)
+  log.summary << "ObTools XMLMesh server '" << argv[0] << "' version " 
+	      << FURKLE(OT_XMLMESH_VERSION) << " starting\n";
   
   // Configure server 
   server.configure(config);
