@@ -18,6 +18,7 @@
 # OBJS:      List of local objects to build in the exe/lib/dlmod
 # HEADERS:   Internal header dependencies / released headers for libs
 # DEPENDS:   List of ObTools libraries we depend on
+# CONTAINS:  List of libraries we contain (superlibs, dlls)
 # EXTINCS:   List of external include directories
 # EXTLIBS:   List of external libraries 
 # TESTS:     List of test executables to build
@@ -202,6 +203,13 @@ IMPLIB-NAME = $(DLL-NAME).a
 TARGETS = $(DLL-NAME)
 RELEASABLE = $(DLL-NAME) $(IMPLIB-NAME)
 RELEASE-NAME = 
+
+#Note: Build release version tests, too
+#Expand tests to include suffix, if set
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+#Set LIB to build test properly
+LIB = $(IMPLIB-NAME)
+
 endif
 
 #Set standard flags
@@ -253,29 +261,19 @@ define dep_template
 #Expand DIR-xxx for each dependency
 CPPFLAGS += -I$(DIR-$(1))
 
-#Add library dependency for tests/exe/dlmod
-LIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
+#Add external dependency (not --whole-archive) for superlib/DLL
+DEPLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
 endef
 
 $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
 
-# Additional dependencies for DLL
-define dll_dep_template
-DLLLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
-endef
-
-$(foreach dep,$(DLL-DEPENDS),$(eval $(call dll_dep_template,$(dep))))
-
-# Sort out header propagation for superlibs
-define header_template
+# Additional dependencies for contained libraries
+define contain_template
+INCLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
 SOHEADERS += $(wildcard $(DIR-$(1))/*.h)
 endef
 
-# ifeq...endif commented out due to 'eval' bug in make...
-#ifeq ($(TYPE), superlib)
-#Actually also used for DLL anyway
-$(foreach dep,$(DEPENDS),$(eval $(call header_template,$(dep))))
-#endif
+$(foreach con,$(CONTAINS),$(eval $(call contain_template,$(con))))
 
 #Add external libraries and includes
 CPPFLAGS += $(patsubst %,-I%,$(EXTINCS))
@@ -364,7 +362,7 @@ endif
 
 #Test harnesses:
 define test_template
-$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(LIBS)
+$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
 	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
 TESTOBJS += $(1).o
 endef
@@ -373,7 +371,7 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 
 #Executable
 ifeq ($(TYPE), exe)
-$(NAME)$(EXE-SUFFIX): $(OBJS) $(LIBS)
+$(NAME)$(EXE-SUFFIX): $(OBJS) $(DEPLIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ $(EXTRALIBS)
 endif
 
@@ -383,7 +381,7 @@ define exe_template
 #limitation of make - you can't call templates inside an ifeq, or it
 #complains (wrongly) of missing endifs
 ifeq ($(TYPE), exes)
-$(1)$$(EXE-SUFFIX): $(1).o $$(LIBS)
+$(1)$$(EXE-SUFFIX): $(1).o $$(DEPLIBS)
 	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
 EXEOBJS += $(1).o
 endif
@@ -399,16 +397,16 @@ endif
 
 #DL Mod
 ifeq ($(TYPE), dlmod)
-$(NAME).so: $(OBJS) $(LIBS)
+$(NAME).so: $(OBJS) $(DEPLIBS)
 	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ $^ -lstdc++ $(EXTRALIBS)
 endif
 
 #Superlib
 ifeq ($(TYPE), superlib)
-$(SOLIB): $(LIBS)
+$(SOLIB): $(INCLIBS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
-        $(LIBS) -Wl,-no-whole-archive -lstdc++ $(EXTRALIBS)
+        $(INCLIBS) -Wl,-no-whole-archive $(DEPLIBS) -lstdc++ $(EXTRALIBS) 
 	ln -fs $@ $(SOLINK)
 endif
 
@@ -418,14 +416,16 @@ ifeq ($(TYPE), dll)
 COMMA:= ,
 EMPTY:=
 SPACE:= $(EMPTY) $(EMPTY)
-EXCLUDE-LIBS = $(subst $(SPACE),$(COMMA),$(strip $(DLLLIBS) $(EXTRALIBS)))
-$(DLL-NAME): $(LIBS)
+EXCLUDE-LIBS = $(subst $(SPACE),$(COMMA),$(strip $(DEPLIBS) $(EXTRALIBS)))
+$(DLL-NAME): $(INCLIBS) $(OBJS)
+ifdef SOHEADERS
 	cp $(SOHEADERS) .
+endif
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,--out-implib=$(IMPLIB-NAME)   \
-          -Wl,--export-all-symbols                                       \
-          -Wl,--whole-archive $(LIBS) -Wl,--no-whole-archive             \
+	  $(OBJS)							 \
+          -Wl,--whole-archive $(INCLIBS) -Wl,--no-whole-archive          \
 	  -Wl,--exclude-libs,$(EXCLUDE-LIBS)                             \
-          $(DLLLIBS) -lstdc++ $(EXTRALIBS)
+          $(DEPLIBS) -lstdc++ $(EXTRALIBS)
 endif
 
 #Dependencies

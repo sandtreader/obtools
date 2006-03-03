@@ -18,10 +18,10 @@ TYPE	= superlib
 endif
 NAME   	= ot-db-pgsql
 VERSION	= 1.2.0
-DEPENDS = db-pgsql
+CONTAINS = db-pgsql
 MT-VARIANTS = 1
 
-DLL-DEPENDS = ot-general
+DEPENDS = ot-general
 EXTLIBS = -lpq
 
 #Only build release versions - debug is not PIC

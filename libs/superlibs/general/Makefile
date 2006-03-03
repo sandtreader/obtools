@@ -12,7 +12,7 @@ TYPE	= superlib
 endif
 NAME	= ot-general
 VERSION	= 1.5.0
-DEPENDS = xml misc text net log init chan time web file crypto
+CONTAINS = xml misc text net log init chan time web file crypto
 MT-VARIANTS = 1
 SOCKET  = 1
 EXTLIBS = -lcrypto
@@ -40,7 +40,7 @@ endif
 
 # Supress MT, CLI & CACHE libraries if single
 ifndef SINGLE
-DEPENDS += mt cache cli
+CONTAINS += mt cache cli
 endif
 
 ROOT    = ../../..
