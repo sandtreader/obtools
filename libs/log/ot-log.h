@@ -265,7 +265,7 @@ extern Stream Dump;
 #endif
 
 //==========================================================================
-// Log streams structure - use in multi-threaded code to get yoursel a
+// Log streams structure - use in multi-threaded code to get yourself a
 // thread-local stream group
 // e.g.
 //   ObTools::Log::Streams log;  // On stack or thread-local object
