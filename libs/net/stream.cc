@@ -66,7 +66,10 @@ int TCPStreamBuf::uflow()
   else if (s.cread(&cc, 1) == 1)
     return bufc=cc;
   else
+  {
+    bufc = -1;
     return traits_type::eof();
+  }
 }
 
 //------------------------------------------------------------------------

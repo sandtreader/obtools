@@ -32,10 +32,18 @@ void TCPServer::run()
 #endif
 
   // Bind to local port (this is Socket::bind())
-  if (!bind(port)) return;
+  if (!bind(port))
+  {
+    TCPSocket::close();
+    return;
+  }
 
   // Start listing with backlog
-  if (::listen(fd, backlog)) return;
+  if (::listen(fd, backlog))
+  {
+    TCPSocket::close();
+    return;
+  }
 
   // Now loop accepting connections into new threads
   while (alive)
