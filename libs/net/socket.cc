@@ -77,6 +77,26 @@ void Socket::go_blocking()
 }
 
 //--------------------------------------------------------------------------
+// Turn on keepalives
+void Socket::enable_keepalive()
+{
+  int one = 1;
+  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(int));
+}
+
+//--------------------------------------------------------------------------
+// Set timeout (receive and send) in seconds
+void Socket::set_timeout(int secs)
+{
+  struct timeval tv;
+  tv.tv_sec = secs;
+  tv.tv_usec = 0;
+
+  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
+  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(struct timeval));
+}
+
+//--------------------------------------------------------------------------
 // Bind to a local port (TCP or UDP servers)
 // Whether successful
 bool Socket::bind(int port)

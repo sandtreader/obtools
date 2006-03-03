@@ -355,6 +355,14 @@ public:
   void go_blocking();
 
   //--------------------------------------------------------------------------
+  // Turn on keepalives
+  void enable_keepalive();
+
+  //--------------------------------------------------------------------------
+  // Set timeout (receive and send) in seconds
+  void set_timeout(int secs);
+
+  //--------------------------------------------------------------------------
   // Bind to a local port (TCP or UDP servers)
   // Whether successful
   bool bind(int port);
