@@ -28,4 +28,19 @@ ostream& operator<<(ostream& s, const PropertyList& pl)
   return s;
 }
 
+//------------------------------------------------------------------------
+// Variable interpolation of property list into a string
+// Replaces (e.g.) $var with value from property list
+// You can (optionally) specify variable escape start ('$'), 
+// escaped escape ('$$') and variable end string ('')
+// Unset variables are not substituted
+string interpolate(const string& text,
+		   const string& start="$",
+		   const string& escape="$$",
+		   const string& end="")
+{
+
+}
+
+
 }} // namespaces
