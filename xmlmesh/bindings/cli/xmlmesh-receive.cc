@@ -38,6 +38,7 @@ void usage(char *pname)
   cout << "for each message, with argv[1] as subject and message text on stdin.\n";
 
   cout << "Options:\n";
+  cout << "  -o --observe     Observe only, don't return response even if requested\n";
   cout << "  -c --check       Check return code of receiver and send OK or Error\n";
   cout << "                   If return code is non-zero, any output will go into fault\n";
   cout << "  -r --response    Return response body from output of receiver\n";
@@ -69,6 +70,7 @@ int main(int argc, char **argv)
   string process;
   bool check = false;
   bool get_response = false;
+  bool observe = false;
   string response_subject;
   bool soap = false;
   bool foreground = false;
@@ -84,7 +86,9 @@ int main(int argc, char **argv)
 
     if (opt[0] == '-')
     {
-      if (opt == "-c" || opt == "--check")
+      if (opt == "-o" || opt == "--observe")
+	observe = true;
+      else if (opt == "-c" || opt == "--check")
 	check = true;
       else if (opt == "-r" || opt == "--response")
 	get_response = true;
@@ -286,9 +290,9 @@ int main(int argc, char **argv)
 				    response, false, msg.get_id());
 	      client.send(rmsg);
 	    }
-	    else
+	    else if (!observe)
 	    {
-	      log.error << "RSVP requested but neither "
+	      log.error << "RSVP requested but no --observe, "
 			<< "--check nor --get_response specified\n";
 	      client.respond(SOAP::Fault::CODE_RECEIVER, 
 			     "Receiver not configured to return result", msg);
