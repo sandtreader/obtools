@@ -12,8 +12,8 @@ TYPE	= superlib
 endif
 NAME	= ot-codegen
 VERSION	= 1.2.0
-DEPENDS = cppt regen xmi
-DLL-DEPENDS = ot-general
+CONTAINS = cppt regen xmi
+DEPENDS = ot-general
 
 #Only build default (MT) version
 MULTI	= 1
