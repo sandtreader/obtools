@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::Text: test-md5.cc
+// ObTools::Misc: test-md5.cc
 //
 // Test harness for Misc library md5 functions
 //

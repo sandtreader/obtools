@@ -65,6 +65,58 @@ public:
 };
 
 //==========================================================================
+//CRC calculator class
+//Various 16-bit CRC algorithms - note only single block at a time
+//Note:  This is a minefield!
+//There seems general agreement about the parameters of CRC16, the only
+//difference in implementation comes from whether it is reflected or not,
+//which probably indicates a hardware or software origin.
+
+//But there is a long-running argument about exactly what CCITT is 'supposed'
+//to be.  The most prelevant is probably the plain CCITT below; with
+//CCITT_ZERO the next - but I'm inclined to agree with Joe Geluso 
+//that CCITT_MOD may be the 'right' answer, so all three are offered!
+
+//Some CCITT versions flip the result; CRC-16 never does
+
+//References:
+//   http://www.ross.net/crc/crcpaper.html
+//   http://www.joegeluso.com/software/articles/ccitt.htm
+// and
+//   http://www.zorn.breitbandkatze.de/crc.html
+
+class CRC
+{
+private:
+  uint16_t combinations[256];
+
+public:
+  typedef uint16_t crc_t;
+
+  enum Algorithm
+  {
+    ALGORITHM_CRC16 = 0,       // x^16 + x^15 + x^2 + 1, init 0x0000 
+    ALGORITHM_CCITT = 1,       // x^16 + x^12 + x^5 + 1, init 0xFFFF
+    ALGORITHM_CCITT_ZERO = 2,  // x^16 + x^12 + x^5 + 1, init 0x0000 
+    ALGORITHM_CCITT_MOD  = 3   // x^16 + x^12 + x^5 + 1, init 0x1DOF
+  } algorithm;
+
+  bool reflected;  // If clear, software-like with top bit first,
+                   // If set, network-like with low bit first
+  bool flip;       // If set, flips (^0xFFFF) the result
+
+  //------------------------------------------------------------------------
+  // Constructor (creates internal combination table, relatively expensive)
+  CRC(Algorithm _alg = ALGORITHM_CRC16, bool _reflected = false,
+      bool _flip = false);
+
+  //------------------------------------------------------------------------
+  // Calculate new CRC for a block
+  crc_t calculate(const unsigned char *data, size_t length);
+};
+
+
+//==========================================================================
 //Propertylist class
 //Simple sugaring of a string-string map
 class PropertyList: public map<string, string>
