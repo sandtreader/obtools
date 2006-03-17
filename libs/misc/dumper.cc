@@ -15,9 +15,9 @@ namespace ObTools { namespace Misc {
 
 //------------------------------------------------------------------------
 // Dump a block
-void Dumper::dump(void *block, int length)
+void Dumper::dump(const void *block, int length)
 {
-  unsigned char *p = (unsigned char *)block;
+  const unsigned char *p = (const unsigned char *)block;
   int offset = 0;
 
   while (offset < length)
