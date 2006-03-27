@@ -101,6 +101,24 @@ string toupper(const string& text);
 // MD5 sum a string (returns hex string)
 string md5(const string& text);
 
+//==========================================================================
+// Conversion functions (convert.cc)
+
+//--------------------------------------------------------------------------
+// Integer to string
+string itos(int i);
+
+//--------------------------------------------------------------------------
+// String to integer
+int stoi(const string& s);
+
+//--------------------------------------------------------------------------
+// Float to string (0 default)
+string ftos(double f);
+
+//--------------------------------------------------------------------------
+// String to float (0.0 default)
+double stof(const string& s);
 
 //==========================================================================
 }} //namespaces
