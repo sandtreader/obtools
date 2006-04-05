@@ -36,6 +36,7 @@
 # Standard variant flags:
 # RELEASE:   Build release version
 # DEBUG:     Build debug version
+# PROFILED:  Build profiled version
 # MULTI:     Build multi-threaded version
 # SINGLE:    Build single-threaded version
 # MINGW:     Build MinGW version (cross-compiled from Linux)
@@ -46,6 +47,8 @@
 
 # If CROSS-COMPILE is set (e.g. by 'make cross'), build cross-compiled 
 # versions - currently only MINGW.
+
+# If PROFILE is set (e.g. by 'make profile'), build profiled versions
 
 # If DEBIAN-NAME is defined, builds a Debian .deb package only in release
 # target, according to its type, using the following defines:
@@ -83,10 +86,39 @@ VARIANT-release-mingw		= MINGW RELEASE
 endif
 
 else #!CROSS-COMPILE
+
+#Check for PROFILE - native only
+ifdef PROFILE
+# Profiled native build
+ifdef MT-VARIANTS
+ ifndef VARIANTS
+VARIANTS = release-profiled single-release-profiled
+  ifndef RELEASE-VARIANTS-ONLY
+VARIANTS += debug-profiled single-debug-profiled
+  endif
+ endif
+VARIANT-release-profiled	= PROFILED RELEASE MULTI 
+VARIANT-debug-profiled		= PROFILED DEBUG MULTI
+VARIANT-single-release-profiled	= PROFILED RELEASE SINGLE 
+VARIANT-single-debug-profiled	= PROFILED DEBUG SINGLE
+else
+ ifndef VARIANTS
+VARIANTS = release-profiled 
+  ifndef RELEASE-VARIANTS-ONLY
+VARIANTS += debug-profiled 
+  endif
+ endif
+VARIANT-debug-profiled		= PROFILED DEBUG
+VARIANT-release-profiled	= PROFILED RELEASE
+endif
+else #!PROFILE
 # Default native build
 ifdef MT-VARIANTS
  ifndef VARIANTS
-VARIANTS = release debug single-release single-debug 
+VARIANTS = release single-release
+  ifndef RELEASE-VARIANTS-ONLY
+VARIANTS += debug single-debug
+  endif
  endif
 VARIANT-release			= RELEASE MULTI 
 VARIANT-debug			= DEBUG MULTI
@@ -94,12 +126,15 @@ VARIANT-single-release		= RELEASE SINGLE
 VARIANT-single-debug		= DEBUG SINGLE
 else
  ifndef VARIANTS
-VARIANTS = debug release
+VARIANTS = release
+  ifndef RELEASE-VARIANTS-ONLY
+VARIANTS += debug
+  endif
  endif
 VARIANT-debug		= DEBUG
 VARIANT-release		= RELEASE
 endif
-
+endif #!PROFILE
 endif #!CROSS-COMPILE
 
 #Compiler override for MINGW build
@@ -172,12 +207,20 @@ endif
 ifeq ($(TYPE), superlib)
 VERSIONM = $(word 1,$(subst ., ,$(VERSION)))
 
-#Make sure library name is changed to reflect singleness, because directory
-#location is lost in dependencies
+#Make sure library name is changed to reflect singleness & profiledness, 
+#because directory location is lost in dependencies
 ifdef SINGLE
+ ifdef PROFILED
+SOLINK = lib$(NAME)-single-profiled.so
+ else
 SOLINK = lib$(NAME)-single.so
+ endif
 else
+ ifdef PROFILED
+SOLINK = lib$(NAME)-profiled.so
+ else
 SOLINK = lib$(NAME).so
+ endif
 endif
 
 SOLIB = $(SOLINK).$(VERSION)
@@ -252,6 +295,12 @@ ifdef RELEASE
 CPPFLAGS += -O2
 endif
 
+ifdef PROFILED
+CPPFLAGS += -pg -DPROFILE
+LDFLAGS += -pg
+LIB-PROFILEDP = -profiled
+endif
+
 ifdef DEBIAN-VARIANT
 DEBIAN-VARIANT := -$(DEBIAN-VARIANT)
 endif
@@ -262,14 +311,14 @@ define dep_template
 CPPFLAGS += -I$(DIR-$(1))
 
 #Add external dependency (not --whole-archive) for superlib/DLL
-DEPLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
+DEPLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP)$(LIB-PROFILEDP))
 endef
 
 $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
 
 # Additional dependencies for contained libraries
 define contain_template
-INCLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP))
+INCLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP)$(LIB-PROFILEDP))
 SOHEADERS += $(wildcard $(DIR-$(1))/*.h)
 endef
 
@@ -291,6 +340,10 @@ all:	$(patsubst %,build-%,$(VARIANTS))
 # Cross compile: recurse with CROSS-COMPILE set
 cross:
 	$(MAKE) CROSS-COMPILE=1
+
+# Profile: recurse with PROFILE set
+profile:
+	$(MAKE) PROFILE=1
 
 # Top-level clean target
 clean:
