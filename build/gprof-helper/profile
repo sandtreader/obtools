@@ -1,5 +1,8 @@
 #!/bin/sh
 #Script to run profiled code under gprof-helper.so, so threads are profiled
+# e.g. 
+# profile myprog arg1 arg2
+
 set -e
 LD_PRELOAD=/usr/local/lib/gprof-helper.so $*
 
