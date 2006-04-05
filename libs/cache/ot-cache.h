@@ -726,6 +726,32 @@ public:
 ////////////////////////////////////////////////////////////////////////////
 
 //==========================================================================
+// Basic cache, no eviction, no tidying
+template<class ID, class CONTENT> class BasicCache:
+  public Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+               NoEvictorPolicy<ID, CONTENT> >
+{
+public:
+  BasicCache(unsigned int _limit=0): 
+    Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+          NoEvictorPolicy<ID,CONTENT> >::Cache
+    (NoTidyPolicy<ID, CONTENT>(), NoEvictorPolicy<ID, CONTENT>(), _limit) {}
+};
+
+//==========================================================================
+// Basic pointer cache, no eviction, no tidying
+template<class ID, class CONTENT> class BasicPointerCache:
+  public PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+               NoEvictorPolicy<ID, CONTENT> >
+{
+public:
+  BasicPointerCache(unsigned int _limit = 0): 
+    PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
+                 NoEvictorPolicy<ID,CONTENT> >::PointerCache
+    (NoTidyPolicy<ID, CONTENT>(), NoEvictorPolicy<ID, CONTENT>(), _limit) {}
+};
+
+//==========================================================================
 // Use Timeout cache, no eviction
 template<class ID, class CONTENT> class UseTimeoutCache:
   public Cache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
