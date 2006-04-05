@@ -25,10 +25,7 @@ DEPENDS = ot-general
 EXTLIBS = -lpq
 
 #Only build release versions - debug is not PIC
-#Don't override in MinGW
-ifndef CROSS-COMPILE
-VARIANTS = release single-release
-endif
+RELEASE-ONLY-VARIANTS = 1
 
 DEBIAN-NAME    = libot-db-pgsql
 DEBIAN-VERSION = $(VERSION)

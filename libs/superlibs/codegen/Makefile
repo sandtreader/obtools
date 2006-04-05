@@ -19,10 +19,7 @@ DEPENDS = ot-general
 MULTI	= 1
 
 #Only build release versions - debug is not PIC
-#Don't override in MinGW
-ifndef CROSS-COMPILE
-VARIANTS = release 
-endif
+RELEASE-ONLY-VARIANTS = 1
 
 DEBIAN-NAME    = libot-codegen
 DEBIAN-VERSION = $(VERSION)
