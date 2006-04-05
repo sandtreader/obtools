@@ -11,17 +11,14 @@ else
 TYPE	= superlib
 endif
 NAME	= ot-general
-VERSION	= 1.5.0
+VERSION	= 1.5.1
 CONTAINS = xml misc text net log init chan time web file crypto
 MT-VARIANTS = 1
 SOCKET  = 1
 EXTLIBS = -lcrypto
 
 #Only build release versions - debug is not PIC
-#Don't override in MinGW
-ifndef CROSS-COMPILE
-VARIANTS = release single-release
-endif
+RELEASE-ONLY-VARIANTS = 1
 
 ifdef MINGW
 # Include libeay32 import library
