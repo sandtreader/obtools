@@ -80,20 +80,28 @@ void Socket::go_blocking()
 // Turn on keepalives
 void Socket::enable_keepalive()
 {
+#ifdef __WIN32__
+#warning enable_keepalive not implemented in Windows
+#else
   int one = 1;
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(int));
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Set timeout (receive and send) in seconds
 void Socket::set_timeout(int secs)
 {
+#ifdef __WIN32__
+#warning set_timeout not implemented in Windows
+#else
   struct timeval tv;
   tv.tv_sec = secs;
   tv.tv_usec = 0;
 
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
   setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(struct timeval));
+#endif
 }
 
 //--------------------------------------------------------------------------
