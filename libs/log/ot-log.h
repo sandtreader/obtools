@@ -37,15 +37,24 @@ enum Level
   LEVEL_DUMP    = 5    // Gory detail (packet dumps etc.)
 };
 
+// Parallel macros for use in preprocessor 
+#define OBTOOLS_LOG_LEVEL_NONE    0
+#define OBTOOLS_LOG_LEVEL_ERROR   1
+#define OBTOOLS_LOG_LEVEL_SUMMARY 2
+#define OBTOOLS_LOG_LEVEL_DETAIL  3
+#define OBTOOLS_LOG_LEVEL_DEBUG   4
+#define OBTOOLS_LOG_LEVEL_DUMP    5
+
 //==========================================================================
 // Maximum log level ever allowed
 // Used to optimise out log calls above this level - see dump_ok etc. below
-// Overrideable in Makefile, otherwise checks DEBUG
+// Overrideable in Makefile, otherwise checks DEBUG and PROFILE
+// (Don't want unused debugging in PROFILE versions messing up figures)
 #if !defined OBTOOLS_LOG_MAX_LEVEL
-#if defined(DEBUG)
-#define OBTOOLS_LOG_MAX_LEVEL LEVEL_DUMP
+#if defined(DEBUG) && !defined(PROFILE)
+#define OBTOOLS_LOG_MAX_LEVEL OBTOOLS_LOG_LEVEL_DUMP
 #else
-#define OBTOOLS_LOG_MAX_LEVEL LEVEL_DETAIL
+#define OBTOOLS_LOG_MAX_LEVEL OBTOOLS_LOG_LEVEL_DETAIL
 #endif
 #endif
 
@@ -256,10 +265,10 @@ extern Stream Detail;
 // Only provide debug streams if allowed - this forces people to use the
 // LOG_IF_DEBUG/DUMP macros to optimise out code which would otherwise
 // still generate the logging, but get thrown away at the LevelFilter
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
 extern Stream Debug;
 #endif
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
 extern Stream Dump;
 #endif
 #endif
@@ -277,22 +286,22 @@ struct Streams
   Stream error;
   Stream summary;
   Stream detail;
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
   Stream debug;
 #endif
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
   Stream dump;
 #endif
 
   Streams():
     error  (logger, LEVEL_ERROR),
     summary(logger, LEVEL_SUMMARY),
-    detail (logger, LEVEL_DETAIL),
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
-    debug  (logger, LEVEL_DEBUG),
+    detail (logger, LEVEL_DETAIL)
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
+    , debug  (logger, LEVEL_DEBUG)
 #endif
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
-    dump   (logger, LEVEL_DUMP) 
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
+    , dump   (logger, LEVEL_DUMP) 
 #endif
     {}
 };
@@ -303,14 +312,13 @@ struct Streams
 // e.g.
 //  OBTOOLS_LOG_IF_DUMP(ObTools::Log::Dump << "Packet: " << packet;)
 
-#
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
 #define OBTOOLS_LOG_IF_DEBUG(_s) _s
 #else
 #define OBTOOLS_LOG_IF_DEBUG(_s)
 #endif
 
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
 #define OBTOOLS_LOG_IF_DUMP(_s) _s
 #else
 #define OBTOOLS_LOG_IF_DUMP(_s)

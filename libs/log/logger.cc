@@ -27,10 +27,10 @@ Distributor logger;
 Stream Error  (logger, LEVEL_ERROR);
 Stream Summary(logger, LEVEL_SUMMARY);
 Stream Detail (logger, LEVEL_DETAIL);
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DEBUG
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
 Stream Debug  (logger, LEVEL_DEBUG);
 #endif
-#if OBTOOLS_LOG_MAX_LEVEL >= LEVEL_DUMP
+#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
 Stream Dump   (logger, LEVEL_DUMP);
 #endif
 #endif
