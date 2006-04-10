@@ -17,6 +17,10 @@ cross:
 	$(MAKE) -C libs cross
 	$(MAKE) -C xmlmesh cross
 
+profile: 
+	$(MAKE) -C libs profile
+	$(MAKE) -C xmlmesh profile
+
 clean: 
 	-@rm -f *~
 	-@rm -rf doc.out
