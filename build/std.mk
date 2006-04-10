@@ -168,8 +168,11 @@ endif
 
 TARGETS = $(LIB)
 
-ifdef DEBUG         # Only build tests in DEBUG version
+ifdef DEBUG         # Only build tests in DEBUG & PROFILED versions
 #Expand tests to include suffix, if set
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+endif
+ifdef PROFILED 
 TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
 endif
 
@@ -296,9 +299,23 @@ CPPFLAGS += -O2
 endif
 
 ifdef PROFILED
-CPPFLAGS += -pg -DPROFILE
-LDFLAGS += -pg
+#Standard for any profile method
+CPPFLAGS += -DPROFILE
 LIB-PROFILEDP = -profiled
+
+#Use HRPROF (hrprof.sourceforge.net) to get better resolution on IA64
+#We build this in build/hrprof
+CPPFLAGS += -finstrument-functions 
+EXTRALIBS += -lhrprof
+
+#Alternate if we do our own profiling
+#CPPFLAGS += -finstrument-functions 
+#DEPLIBS += $(ROOT)/tools/profile/ot-profile.a
+
+#Alternate using standard GNU gprof
+#CPPFLAGS += -pg 
+#LDFLAGS += -pg
+
 endif
 
 ifdef DEBIAN-VARIANT
