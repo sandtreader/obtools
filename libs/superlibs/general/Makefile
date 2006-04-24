@@ -11,8 +11,8 @@ else
 TYPE	= superlib
 endif
 NAME	= ot-general
-VERSION	= 1.5.1
-CONTAINS = xml misc text net log init chan time web file crypto
+VERSION	= 1.6.0
+CONTAINS = xml misc text net log init chan time web file crypto hash
 MT-VARIANTS = 1
 SOCKET  = 1
 EXTLIBS = -lcrypto
