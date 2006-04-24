@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::Misc: ot-cache.h
+// ObTools::Cache: ot-cache.h
 //
 // Public definitions for ObTools::Cache
 // General-purpose 'evictor cache' template
