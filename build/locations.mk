@@ -22,6 +22,7 @@ OT-LIBS = cli:libs/cli     			\
 	  chan:libs/chan			\
 	  crypto:libs/crypto			\
 	  file:libs/file                        \
+	  hash:libs/hash:NOLIB  		\
 	  init:libs/init			\
 	  log:libs/log     			\
 	  misc:libs/misc   			\
