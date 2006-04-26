@@ -473,7 +473,7 @@ endif
 
 #Superlib
 ifeq ($(TYPE), superlib)
-$(SOLIB): $(INCLIBS)
+$(SOLIB): $(INCLIBS) $(SOHEADERS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
         $(INCLIBS) -Wl,-no-whole-archive $(DEPLIBS) -lstdc++ $(EXTRALIBS) 
@@ -487,7 +487,7 @@ COMMA:= ,
 EMPTY:=
 SPACE:= $(EMPTY) $(EMPTY)
 EXCLUDE-LIBS = $(subst $(SPACE),$(COMMA),$(strip $(DEPLIBS) $(EXTRALIBS)))
-$(DLL-NAME): $(INCLIBS) $(OBJS)
+$(DLL-NAME): $(INCLIBS) $(OBJS) $(SOHEADERS)
 ifdef SOHEADERS
 	cp $(SOHEADERS) .
 endif
