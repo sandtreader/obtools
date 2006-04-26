@@ -25,7 +25,7 @@ DEPENDS = ot-general
 EXTLIBS = -lpq
 
 #Only build release versions - debug is not PIC
-RELEASE-ONLY-VARIANTS = 1
+RELEASE-VARIANTS-ONLY = 1
 
 DEBIAN-NAME    = libot-db-pgsql
 DEBIAN-VERSION = $(VERSION)

@@ -18,7 +18,7 @@ SOCKET  = 1
 EXTLIBS = -lcrypto
 
 #Only build release versions - debug is not PIC
-RELEASE-ONLY-VARIANTS = 1
+RELEASE-VARIANTS-ONLY = 1
 
 ifdef MINGW
 # Include libeay32 import library

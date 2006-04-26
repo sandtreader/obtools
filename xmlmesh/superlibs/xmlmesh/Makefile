@@ -18,7 +18,7 @@ MT-VARIANTS = 1
 
 #Only build release versions - debug is not PIC
 #Don't override in MinGW
-RELEASE-ONLY-VARIANTS = 1
+RELEASE-VARIANTS-ONLY = 1
 
 DEBIAN-NAME    = libot-xmlmesh
 DEBIAN-VERSION = $(VERSION)
