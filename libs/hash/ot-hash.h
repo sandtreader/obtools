@@ -208,8 +208,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Delete an ID (bottom bits only)
-  // Returns whether found and deleted
-  bool remove(HASH_ID_T id)
+  // Returns old index if found, otherwise INVALID_INDEX
+  INDEX_T remove(HASH_ID_T id)
   {
     // Get hash to start with
     HASH_INDEX_T i = (HASH_INDEX_T)(id % size);
@@ -227,6 +227,9 @@ public:
       // Check for hit (most likely case)
       if (p->id == id)
       {
+	// Remember index for result
+	INDEX_T index = p->index;
+
 	// Splice out from collision chain...
 	// If we're at the head with other things following, we can't leave 
 	// this empty, so we pull forward the next one, and delete that instead
@@ -271,7 +274,7 @@ public:
 	p->next = freelist;
 	freelist = i;
 
-	return true;
+	return index;
       }
 
       // Chain to next
@@ -281,7 +284,7 @@ public:
 	i = p->next;
       }
       else
-	return false;
+	return INVALID_INDEX;
     }
   }
 
@@ -570,6 +573,11 @@ public:
   unsigned long capacity() { return (1<<nbits)*block_size; }
 
   //--------------------------------------------------------------------------
+  // Get total memory used
+  unsigned long memory() 
+  { return (1<<nbits)*(sizeof(block_t)+block_size*sizeof(entry_t)); }
+
+  //--------------------------------------------------------------------------
   // Add an ID mapped to the given index
   // Whether successful (can only fail if table is full)
   bool add(ID_T id, INDEX_T index)
@@ -602,11 +610,11 @@ public:
   }
 
   //--------------------------------------------------------------------------
-  // Delete an ID (bottom bits only)
-  // Returns whether found and deleted
-  bool remove(ID_T id)
+  // Lookup and remove an ID
+  // Returns previous main table index, or INVALID_INDEX if not found
+  INDEX_T lookup_and_remove(ID_T id)
   {
-    if (!built) return false;
+    if (!built) return INVALID_INDEX;
 
     // Cut into top and bottom
     ID_T top = id >> top_shift;
@@ -616,6 +624,12 @@ public:
     block_t *block = table[top];
     return block->remove(bottom);
   }
+
+  //--------------------------------------------------------------------------
+  // Delete an ID (bottom bits only)
+  // Returns whether found and deleted
+  bool remove(ID_T id)
+  { return lookup_and_remove(id) != INVALID_INDEX; }
 
   //--------------------------------------------------------------------------
   // Validate internal consistency, dumping errors to given stream

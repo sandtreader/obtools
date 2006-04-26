@@ -28,7 +28,11 @@ int main(int argc, char **argv)
   if (argc > 4) prob = atoi(argv[4]);
 
   // Create hash table with default types
+  cout << "Creating table with " << bits << " top bits, " 
+       << (1<<bits) << " blocks of " << bsize << " entries\n";
   Hash::Table<> hash(bits, bsize);
+  cout << "Total capacity: " << hash.capacity() << " entries\n";
+  cout << "Total memory: " << (hash.memory() >> 20) << "MB\n";
 
   if (n)
   {
