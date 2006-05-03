@@ -117,6 +117,20 @@ MaskedAddress::MaskedAddress(const string& cidr):
   else address = IPAddress(cidr);
 }
 
+//--------------------------------------------------------------------------
+// Get CIDR form (full netmask type)
+string MaskedAddress::get_cidr()
+{
+  string s = address.get_dotted_quad();
+  if (!!mask)
+  {
+    s += '/';
+    s += mask.get_dotted_quad();
+  }
+
+  return s;
+}
+
 //------------------------------------------------------------------------
 // << operator to write MaskedAddress to ostream
 // e.g. cout << addr;

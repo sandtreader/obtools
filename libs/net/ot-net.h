@@ -137,6 +137,10 @@ public:
   MaskedAddress(const string& cidr);
 
   //--------------------------------------------------------------------------
+  // Get CIDR form (/24 type)
+  string get_cidr();
+
+  //--------------------------------------------------------------------------
   // Comparators - same if both are the same
   // == operator 
   bool operator==(const MaskedAddress& o) const 
