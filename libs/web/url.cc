@@ -22,9 +22,16 @@ URL::URL(XML::Element& xml)
   string scheme = xpath["scheme"];
   if (scheme.size())
   {
-    urls << scheme << "://" << xpath["host"];
-    string port = xpath["port"];
-    if (port.size()) urls << ":" << port;
+    urls << scheme << ":";
+
+    string host = xpath["host"];
+    if (host.size())
+    {
+      urls << "//" << host;
+      
+      string port = xpath["port"];
+      if (port.size()) urls << ":" << port;
+    }
   }
 
   // Now path (all URLs have this)
@@ -51,32 +58,48 @@ bool URL::split(XML::Element& xml)
   string::size_type p = text.find(':');
   if (p != string::npos)
   {
-    if (length < p+3 || text[p+1]!='/' || text[p+2]!='/') return false;
     xml.add("scheme", string(text, 0, p));
 
-    // Extract host and optional port
-    string::size_type slash = text.find('/', p+3);
-    string host;
-    if (slash == string::npos)
-      host = string(text, p+3);
-    else
-      host = string(text, p+3, slash-p-3);
+    // Get host and port if specified
+    if (length > p+2 && text[p+1]=='/' && text[p+2]=='/')
+    {
+      // Check for empty host
+      if  (length == p+3) return false;
 
-    p = host.find(':');
-    if (p == string::npos)
-      xml.add("host", host);
+      string::size_type slash = text.find('/', p+3);
+      string host;
+      if (slash == string::npos)
+	host = string(text, p+3);
+      else
+	host = string(text, p+3, slash-p-3);
+
+      p = host.find(':');
+      if (p == string::npos)
+	xml.add("host", host);
+      else
+      {
+	xml.add("host", string(host, 0, p));
+	xml.add("port", string(host, p+1));
+      }
+
+      p = slash;
+    }
     else
     {
-      xml.add("host", string(host, 0, p));
-      xml.add("port", string(host, p+1));
-    }
+      // No //host given - technically invalid, but we'll allow it to
+      // handle (e.g.) misimplemented RTSP horrors like rtsp:/media.mpg
 
-    p = slash;
+      // Skip over colon
+      p++;
+    }
   }
   else p=0;
 
   // If no slash, that's it
   if (p == string::npos) return true;
+
+  // If nothing left, that's it
+  if (p >= length) return true;
 
   // Extract path and query
   string::size_type query = text.find('?', p);
