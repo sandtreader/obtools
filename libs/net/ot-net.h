@@ -137,8 +137,12 @@ public:
   MaskedAddress(const string& cidr);
 
   //--------------------------------------------------------------------------
+  // Get number of network bits in mask
+  int get_network_bits() const;
+
+  //--------------------------------------------------------------------------
   // Get CIDR form (/24 type)
-  string get_cidr();
+  string get_cidr() const;
 
   //--------------------------------------------------------------------------
   // Comparators - same if both are the same
@@ -160,7 +164,7 @@ public:
 //------------------------------------------------------------------------
 // << operator to write MaskedAddress to ostream
 // e.g. cout << addr;
-// Always outputs in DQ mask form
+// Always outputs in CIDR /N form
 ostream& operator<<(ostream& s, const MaskedAddress& ip);
 
 //==========================================================================

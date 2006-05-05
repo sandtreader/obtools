@@ -9,6 +9,7 @@
 
 #include "ot-net.h"
 #include <ctype.h>
+#include <sstream>
 
 #if !defined(__WIN32__)
 #include <netdb.h>
@@ -118,27 +119,38 @@ MaskedAddress::MaskedAddress(const string& cidr):
 }
 
 //--------------------------------------------------------------------------
-// Get CIDR form (full netmask type)
-string MaskedAddress::get_cidr()
+// Get number of network bits in mask
+int MaskedAddress::get_network_bits() const
 {
-  string s = address.get_dotted_quad();
-  if (!!mask)
-  {
-    s += '/';
-    s += mask.get_dotted_quad();
-  }
+  // Binary chop - no more than 5 operations
+  uint32_t a = mask.hbo();
+  int n=0;
 
-  return s;
+  if (a & 0xFFFF0000UL) { n+=16; a &= 0xFFFF; }
+  if (a & 0xFF00)       { n+= 8; a &= 0xFF;   }
+  if (a & 0xF0)         { n+= 4; a &= 0xF;    }
+  if (a & 0xC0)         { n+= 2; a &= 3;      }
+  if (a & 2)            { n+= 1; a &= 1;      }
+  return n+a;
+}
+
+//--------------------------------------------------------------------------
+// Get CIDR form (full netmask type)
+string MaskedAddress::get_cidr() const
+{
+  ostringstream s;
+  s << *this;
+  return s.str();
 }
 
 //------------------------------------------------------------------------
 // << operator to write MaskedAddress to ostream
 // e.g. cout << addr;
-// Always outputs in DQ mask form
+// Always outputs in CIDR /N form
 ostream& operator<<(ostream& s, const MaskedAddress& ip)
 {
   s << ip.address;
-  if (!!ip.mask) s << '/' << ip.mask;
+  if (!!ip.mask) s << '/' << ip.get_network_bits();
   return s;
 }
 
