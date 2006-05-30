@@ -355,6 +355,10 @@ public:
   void shutdown();
 
   //--------------------------------------------------------------------------
+  // Finish sending, but keep read-side open to receive results (e.g. HTTP)
+  void finish();
+
+  //--------------------------------------------------------------------------
   // Go non-blocking
   void go_nonblocking();
 
@@ -501,21 +505,38 @@ class TCPStreamBuf: public streambuf
 {
 private:
   TCPSocket& s;
-  int bufc;           // One-character buffer
-  bool held;          // True if we're holding a putback
+  int in_buf_size; 
+  char *in_buf;       // Input buffer (may be zero for unbuffered)
+  int out_buf_size;
+  char *out_buf;      // Output buffer (may be zero for unbuffered)
 
 protected:
   // Streambuf overflow - handles characters
   int overflow(int); 
+  int sync();
    
   // Streambuf underflows - see STL manual for awful details
   int underflow();
   int uflow();
-  int pbackfail(int c);
+  int showmanyc();
+
+  // putback beyond buffer function - always fails
+  int pbackfail(int) { return traits_type::eof(); }
 
 public:
+  // Standard buffer sizes
+  static const int DEFAULT_IN_BUFFER = 1024;
+  static const int DEFAULT_OUT_BUFFER = 1024;
+
+  //--------------------------------------------------------------------------
   // Constructor
-  TCPStreamBuf(TCPSocket& _s);
+  TCPStreamBuf(TCPSocket& _s, 
+	       int _in_buf_size = DEFAULT_IN_BUFFER,
+	       int _out_buf_size = DEFAULT_OUT_BUFFER);
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  ~TCPStreamBuf();
 };
 
 //TCP stream

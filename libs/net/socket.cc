@@ -50,6 +50,17 @@ void Socket::shutdown()
 }
 
 //--------------------------------------------------------------------------
+// Finish sending, but keep read-side open to receive results (e.g. HTTP)
+void Socket::finish()
+{
+#if defined(__WIN32__)
+  ::shutdown(fd, SD_SEND);
+#else
+  ::shutdown(fd, SHUT_WR);
+#endif
+}
+
+//--------------------------------------------------------------------------
 // Close
 void Socket::close()
 {

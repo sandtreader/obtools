@@ -7,83 +7,99 @@
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-
-// !!! This is very ugly, inefficient, and needs implementing with proper 
-// buffers!
-
 #include "ot-net.h"
 
 namespace ObTools { namespace Net {
 
 //------------------------------------------------------------------------
 // TCPStreamBuf Constructor 
-TCPStreamBuf::TCPStreamBuf(TCPSocket& _s): s(_s), bufc(-1), held(false)
+TCPStreamBuf::TCPStreamBuf(TCPSocket& _s, int _in_buf_size, int _out_buf_size):
+  s(_s), 
+  in_buf_size(_in_buf_size), in_buf(0),
+  out_buf_size(_out_buf_size), out_buf(0)
 {
-  // use unbuffered IO, since the socket buffers anyway
-  setp(0,0); 
-  setg(0,0,0);
+  // Must always have a one-character input buffer
+  if (!in_buf_size) in_buf_size = 1;
+  in_buf = new char[in_buf_size];
+  setg(in_buf, in_buf+in_buf_size, in_buf+in_buf_size);
+
+  // And a one-character output buffer, although we tell the streambuf
+  // there is one less than there really is, so there's always room for
+  // the extra character in overflow()
+  if (!out_buf_size) out_buf_size = 1;
+  out_buf = new char[out_buf_size];
+  setp(out_buf, out_buf+out_buf_size-1); 
 }
 
 //------------------------------------------------------------------------
 // TCPStreamBuf overflow() function
+// Sends out and clears buffer, plus character given
 int TCPStreamBuf::overflow(int c)
 {
-  char cc=(char)c;
-  if (s.cwrite(&cc, 1) == 1)
-    return 0;
-  else
-    return traits_type::eof();
+  char *p = pptr();
+
+  // We know we can always add an extra character, because we advertise
+  // one less than we have
+  if (c != traits_type::eof()) *p++ = (char)c;
+
+  // Now send out what we have
+  int n = s.cwrite(out_buf, p-out_buf);
+
+  // Return EOF if it failed
+  if (n != p-out_buf) return traits_type::eof();
+
+  // Reset buffer
+  setp(out_buf, out_buf+out_buf_size-1);
+  return 0;
+}
+
+//------------------------------------------------------------------------
+// TCPStreamBuf sync() function
+// Synchronises output
+int TCPStreamBuf::sync()
+{
+  // Send out if we need to
+  if (pptr() > pbase()) overflow(traits_type::eof());
+  return 0;
 }
 
 //------------------------------------------------------------------------
 // TCPStreamBuf underflow() function
+// Refill buffers and return next character (but do not remove it)
 int TCPStreamBuf::underflow()
 {
-  if (held)
+  // Read a buffer full
+  int n = s.cread(in_buf, in_buf_size);
+  if (n>0)
   {
-    held = false;
-    return bufc;
+    setg(in_buf, in_buf, in_buf+n);
+    return *in_buf;
   }
-
-  // Force a character into the 'buffer'
-  if (bufc<0) uflow();
-  if (bufc>=0)
-    return bufc;
-  else
-    return traits_type::eof();
+  else return traits_type::eof();
 }
 
 //------------------------------------------------------------------------
 // TCPStreamBuf uflow() function
 int TCPStreamBuf::uflow()
 {
-  char cc;
-  if (held)
-  {
-    held = false;
-    return bufc;
-  }
-  else if (s.cread(&cc, 1) == 1)
-    return bufc=cc;
-  else
-  {
-    bufc = -1;
-    return traits_type::eof();
-  }
+  int c = underflow();
+  if (c != traits_type::eof()) gbump(1);  // Move over it
+  return c;
 }
 
 //------------------------------------------------------------------------
-// TCPStreamBuf pbackfail() function
-// We need this otherwise putback doesn't work with no buffering
-int TCPStreamBuf::pbackfail(int c)
+// TCPStreamBuf showmanyc() function
+int TCPStreamBuf::showmanyc()
 {
-  if (held)
-    return traits_type::eof();
-  else
-  {
-    held = true;
-    return bufc=c;
-  }
+  return egptr()-gptr();
+}
+
+//------------------------------------------------------------------------
+// TCPStreamBuf Destructor 
+TCPStreamBuf::~TCPStreamBuf()
+{
+  if (in_buf) delete[] in_buf;
+  if (out_buf) delete[] out_buf;
 }
 
 
