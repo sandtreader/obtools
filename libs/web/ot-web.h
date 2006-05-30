@@ -2,9 +2,9 @@
 // ObTools::Net: ot-web.h
 //
 // Public definitions for ObTools::Web
-// Web protocols parsers and helpers
+// Web protocols parsers, helpers and client/server
 // 
-// Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2005-2006 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
@@ -16,9 +16,11 @@
 #include <string>
 #include "ot-xml.h"
 #include "ot-misc.h"
+#include "ot-net.h"
 
 #if !defined(_SINGLE)
 #include "ot-mt.h"
+#include "ot-log.h"
 #endif
 
 namespace ObTools { namespace Web { 
@@ -64,7 +66,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Split text into XML
-  // Pass in an empty named element, and this will fill it up as above
+  // Pass in an empty element, and this will fill it up as above
+  // Name of element is set to 'url'
   // Returns whether successful (valid URL)
   bool split(XML::Element& xml);
 };
@@ -116,6 +119,10 @@ public:
   // Insert a header
   void put(const string& name, const string& value)
   { xml.add(name, value); }
+
+  //------------------------------------------------------------------------
+  // Add a current date header to RFC 822 standard
+  void put_date(const string& header="date");
 
   //--------------------------------------------------------------------------
   // Split multi-value headers at commas
@@ -209,7 +216,11 @@ public:
   HTTPMessage() {}
 
   //--------------------------------------------------------------------------
-  // Constructor for requests
+  // Constructors for requests
+  HTTPMessage(const string& _method, const URL& _url, 
+	      const string& _version = "HTTP/1.0"):
+    method(_method), url(_url), version(_version) {}
+
   HTTPMessage(const string& _method, const string& _url, 
 	      const string& _version = "HTTP/1.0"):
     method(_method), url(_url), version(_version) {}
@@ -225,9 +236,24 @@ public:
   bool is_request() { return !method.empty(); }
 
   //--------------------------------------------------------------------------
+  // Read request/response and headers from a stream
+  // Leave stream ready to read body (if any)
+  // Returns whether successful
+  bool read_headers(istream &in);
+
+  //--------------------------------------------------------------------------
   // Read from a stream
   // Returns whether successful
-  bool read(istream &in);
+  // If read_to_eof is set, it will try to read a body up to EOF if there
+  // is no Content-Length header present.  Set this for HTTP, but not for
+  // RTSP, where the stream continues and lack of Content-Length reliably
+  // means lack of body
+  bool read(istream &in, bool read_to_eof = false);
+
+  //--------------------------------------------------------------------------
+  // Write request/response and headers to a stream
+  // Returns whether successful
+  bool write_headers(ostream &out) const;
 
   //--------------------------------------------------------------------------
   // Write to a stream
@@ -244,6 +270,155 @@ istream& operator>>(istream& s, HTTPMessage& msg);
 // << operator to write HTTPMessage to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const HTTPMessage& msg);
+
+//==========================================================================
+// HTTP Client class (http-client.cc)
+// Currently simple HTTP/1.0 client - one fetch per connection - but
+// interface allows for a persistent HTTP/1.1 socket later
+class HTTPClient
+{
+private:
+  Net::EndPoint server;
+  string user_agent;    // String to quote in User-Agent: header
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor from server
+  HTTPClient(Net::EndPoint _server, const string& _ua=""): 
+    server(_server), user_agent(_ua) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor from URL - extracts server from host/port parts
+  HTTPClient(URL& url, const string& _ua="");
+
+  //--------------------------------------------------------------------------
+  // Basic operation - send HTTP message and receive HTTP response
+  // Whether successfully sent (even if error received)
+  bool fetch(HTTPMessage& request, HTTPMessage& response);
+
+  //--------------------------------------------------------------------------
+  // Simple GET operation on a URL
+  // Returns result code, fills in body if provided, reason code if not
+  int get(URL url, string& body);
+
+  //--------------------------------------------------------------------------
+  // Simple POST operation on a URL
+  // Returns result code, fills in response_body if provided, 
+  // reason code if not
+  int post(URL url, const string& request_body, string& response_body);
+};
+
+#if !defined(_SINGLE)
+// Server requires threads
+
+//==========================================================================
+// HTTP Server abstract class (http-server.cc)
+// Multi-threaded server for HTTP - manages HTTP protocol state, and 
+// passes request messages to subclasses
+class HTTPServer: public Net::TCPServer
+{
+private:
+  int timeout;    // Socket inactivity timeout
+  string version; // Version reported in Server: header
+
+  //--------------------------------------------------------------------------
+  // Implementation of worker process method
+  void process(Net::TCPSocket &s, Net::EndPoint client);
+
+protected:
+  //--------------------------------------------------------------------------
+  // Helper to generate error in response, and log it
+  bool error(Web::HTTPMessage& response, int code, const string& reason)
+  {
+    Log::Streams log;
+    log.error << "HTTP error: " << code << " " << reason << endl;
+    response.code = code; response.reason = reason; return true;
+  }
+
+  //--------------------------------------------------------------------------
+  // Abstract interface to handle requests
+  // Return whether handled - fill in response for normal errors, only
+  // return false if things are really bad, and we'll return 500
+  // response is pre-initialised with 200 OK, no body
+  // If the cost of generating a body is not too great, handlers may treat
+  // HEAD requests just like GET, and the server will suppress the body
+  virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
+			      Net::EndPoint client) = 0;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  // See ObTools::Net::TCPServer for details of threadpool management
+  HTTPServer(int port=80, const string& _version="", int backlog=5, 
+	     int min_spare=1, int max_threads=10, int _timeout=90):
+    Net::TCPServer(port, backlog, min_spare, max_threads),
+    timeout(_timeout), version(_version) {}
+
+  //--------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~HTTPServer() {}
+};
+
+//==========================================================================
+// URL handler - registers for pattern matched URLs and handles them
+// Subclass to implement handler
+class URLHandler
+{
+public:
+  string url;   // URL (patterns allowed)
+
+  //--------------------------------------------------------------------------
+  // Constructor
+  URLHandler(const string& _url): url(_url) {}
+
+  //--------------------------------------------------------------------------
+  // Abstract interface to handle requests
+  // Return whether handled - fill in response for normal errors, only
+  // return false if things are really bad, and we'll return 500
+  // response is pre-initialised with 200 OK, no body
+  virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
+			      Net::EndPoint client) = 0;
+
+  //--------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~URLHandler() {}
+};
+
+//==========================================================================
+// Simple HTTP server which just fields GET and/or POST requests to a list 
+// of registered URLs (http-server.cc)
+// Handlers are checked in order, so later ones can be defaults
+class SimpleHTTPServer: public HTTPServer
+{
+  MT::Mutex mutex;               // Around global state
+  list<URLHandler *> handlers;
+
+  // Implementation of general request handler
+  bool handle_request(HTTPMessage& request, HTTPMessage& response,
+		      Net::EndPoint client);
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  SimpleHTTPServer(int port=80, const string& _version="", int backlog=5, 
+		   int min_spare=1, int max_threads=10, int _timeout=90):
+    HTTPServer(port, _version, backlog, min_spare, max_threads, _timeout),
+    mutex() {}
+
+  //--------------------------------------------------------------------------
+  // Add a handler - will be deleted on destruction of server
+  void add(URLHandler *h) { MT::Lock lock(mutex); handlers.push_back(h); }
+
+  //--------------------------------------------------------------------------
+  // Remove a handler
+  void remove(URLHandler *h) { MT::Lock lock(mutex); handlers.remove(h); }
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  ~SimpleHTTPServer();
+};
+
+#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces

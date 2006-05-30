@@ -3,74 +3,81 @@
 //
 // Test HTTP server - just receives request and sends back junk
 //
-// Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2006 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "ot-web.h"
-#include "ot-net.h"
+#include <sstream>
+
 using namespace std;
+using namespace ObTools;
+
+#define SERVER_PORT 5080
+#define SERVER_VERSION "ObTools Test HTTP Server"
 
 //--------------------------------------------------------------------------
-// Test server class
-class TestServer: public ObTools::Net::TCPServer
+// Handler for /test*
+class TestURLHandler: public Web::URLHandler
 {
 public:
-  TestServer(): ObTools::Net::TCPServer(5000) {}
+  TestURLHandler(): URLHandler("/test*") {}
 
-  void process(ObTools::Net::TCPSocket& s, 
-	       ObTools::Net::EndPoint client);
+  bool handle_request(Web::HTTPMessage& request, Web::HTTPMessage& response,
+		      Net::EndPoint client)
+  {
+    ostringstream oss;
+    oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
+    oss << "<H1>" << SERVER_VERSION << "</H1>\n";
+    oss << "<P>" << request.method << " request from " << client << endl;
+    oss << "<P>URL: " << request.url << endl;
+    oss << "<P>Body: " << request.body << endl;
+    response.body = oss.str();
+    
+    return true;
+  }
 };
 
-void TestServer::process(ObTools::Net::TCPSocket& s, 
-			 ObTools::Net::EndPoint client)
+//--------------------------------------------------------------------------
+// Default handler
+class DefaultURLHandler: public Web::URLHandler
 {
-  cerr << "Got connection from " << client << endl;
+public:
+  DefaultURLHandler(): URLHandler("*") {}
 
-  try
+  bool handle_request(Web::HTTPMessage& /*request*/, 
+		      Web::HTTPMessage& response,
+		      Net::EndPoint /*client*/)
   {
-    ObTools::Net::TCPStream ss(s);
-    ObTools::Web::HTTPMessage msg;
-
-    if (msg.read(ss))
-    {
-      cout << msg.version << " request: " << msg.method << " for " 
-	   << msg.url << endl;
-      cout << msg.headers.xml;
-      if (msg.body.size()) cout << "Body:\n" << msg.body << endl;
-
-      // Send back a nice response
-      ObTools::Web::HTTPMessage response(200, "OK");
-      response.headers.put("server", "ObTools Web test server");
-      response.body = "<TITLE>That worked</TITLE><P>Thanks!</P>\n";
-
-      if (!response.write(ss))
-      {
-	cerr << "HTTP response generation failed\n";
-      }
-    }
-    else
-    {
-      cerr << "HTTP Parse failed\n";
-    }
+    ostringstream oss;
+    oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
+    oss << "<H1>" << SERVER_VERSION << "</H1>\n";
+    oss << "<P>Nothing registered for this url\n";
+    oss << "<P>Please try <A HREF='/test/foo'>/test</A>\n";
+    response.body = oss.str();
+    
+    return true;
   }
-  catch (ObTools::Net::SocketError se)
-  {
-    cerr << se << endl;
-  }
-} 
-
+};
 
 //--------------------------------------------------------------------------
 // Main
-
 int main()
 {
 #ifdef __WIN32__
   winsock_initialise();
 #endif
 
-  TestServer server;
+  Log::StreamChannel chan_out(cout);
+  Log::logger.connect(chan_out);
+  Log::Streams log;
+
+  log.summary << "Test HTTP server running on port " << SERVER_PORT << endl;
+
+  Web::SimpleHTTPServer server(SERVER_PORT, SERVER_VERSION);
+  server.add(new TestURLHandler());
+  server.add(new DefaultURLHandler());
+
   server.run();
   return 0;
 }

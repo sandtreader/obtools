@@ -14,14 +14,18 @@
 namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
-// Read from a stream
+// Read request/response and headers from a stream
+// Leave stream ready to read body (if any)
 // Returns whether successful
-bool HTTPMessage::read(istream &in)
+bool HTTPMessage::read_headers(istream &in)
 {
-  // Read first line
+  // Read first line - be lenient about blank lines, as per RFC
   string line;
-  if (!MIMEHeaders::getline(in, line)) return false;
-
+  do
+  {
+    if (!MIMEHeaders::getline(in, line)) return false;
+  } while (line.empty());
+  
   // Split line into method, URI and version, and set in root
   string::size_type sp1 = line.find(' ');
   if (sp1 == string::npos) return false;
@@ -64,22 +68,34 @@ bool HTTPMessage::read(istream &in)
   }
 
   // Now read headers
-  if (!headers.read(in)) return false;
+  return headers.read(in);
+}
 
-  // Finally read body - check for Content-Length header and use to limit 
+//--------------------------------------------------------------------------
+// Read from a stream
+// Returns whether successful
+bool HTTPMessage::read(istream &in, bool read_to_eof)
+{
+  // Read start line & headers
+  if (!read_headers(in)) return false;
+
+  // Only allow read to eof for POST (ugly HTTP-specific hack, but
+  // the protocol mixes levels here)
+  if (method != "POST") read_to_eof = false;
+
+  // Read body - check for Content-Length header and use to limit 
   // length if present
-  int length = atoi(headers.get("content-length").c_str());
-  
-  // !!! For now, assume lack of content-length means no body at all!
-  // This is true of RTSP, but not HTTP in general
-  // This is potentially protocol-specific - some methods never have bodies,
-  // some can have.  Old HTTP clients implementing POST may not provide
-  // a Content-Length!
+  int length = Text::stoi(headers.get("content-length"));
 
-  // Note: Code to handle read-to-end-of-stream meaning of length=0
-  // is still in here
+  // If no content-length, there are two possibilities:
+  //  1) In RTSP, this genuinely has no body and stops here
+  //  2) In HTTP, it may have a body up to the end of stream
+  //
+  // We only allow (2) if we've been explicitly enabled to, otherwise
+  // we will break body-less RTSP messages
+
   body.clear();
-  if (length)
+  if (length || read_to_eof)
   {
     // Try to read this much or up to end of stream
     int count = 0;
@@ -92,8 +108,6 @@ bool HTTPMessage::read(istream &in)
       in.read(buf, wanted);
       int got = in.gcount();
 
-      if (length && wanted != got) return false;  // Failed early
-
       // Add to body content
       body.append(buf, got);
       count += got;
@@ -104,9 +118,9 @@ bool HTTPMessage::read(istream &in)
 }
 
 //--------------------------------------------------------------------------
-// Write to a stream
+// Write request/response and headers to a stream
 // Returns whether successful
-bool HTTPMessage::write(ostream &out) const
+bool HTTPMessage::write_headers(ostream &out) const
 {
   // Check stream is OK
   if (out.fail()) return false;
@@ -128,7 +142,16 @@ bool HTTPMessage::write(ostream &out) const
     out << "Content-length: " << body.size() << "\r\n";
 
   // Output headers
-  if (!headers.write(out)) return false;
+  return headers.write(out);
+}
+
+//--------------------------------------------------------------------------
+// Write to a stream
+// Returns whether successful
+bool HTTPMessage::write(ostream &out) const
+{
+  // Output headers
+  if (!write_headers(out)) return false;
 
   // Output body (if any)
   out << body;

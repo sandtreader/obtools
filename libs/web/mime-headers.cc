@@ -9,8 +9,20 @@
 
 #include "ot-web.h"
 #include "ot-text.h"
+#include <time.h>
 
 namespace ObTools { namespace Web {
+
+//------------------------------------------------------------------------
+// Add a current date header to RFC 822 standard
+void MIMEHeaders::put_date(const string& header)
+{
+  // Add date
+  time_t now = time(NULL);
+  char buf[64];
+  strftime(buf, 64, "%a, %b %d %Y %H:%M:%S GMT", gmtime(&now));
+  put(header, buf);
+}
 
 //--------------------------------------------------------------------------
 // Get a line

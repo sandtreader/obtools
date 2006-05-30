@@ -52,6 +52,9 @@ URL::URL(XML::Element& xml)
 // Split text into XML
 bool URL::split(XML::Element& xml)
 {
+  // Set XML element name so it will print OK
+  xml.name = "url";
+
   string::size_type length = text.size();
 
   // Extract scheme
