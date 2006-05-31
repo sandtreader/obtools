@@ -18,7 +18,9 @@ static const char base64_chars[] =
 
 //--------------------------------------------------------------------------
 // Encode a binary block
-string Base64::encode(const unsigned char *block, size_t length)
+// Split gives length of line to split at - default (76) is to RFC
+// Set 0 to suppress split altogether
+string Base64::encode(const unsigned char *block, size_t length, int split)
 {
   string base64;
 
@@ -27,6 +29,7 @@ string Base64::encode(const unsigned char *block, size_t length)
   const unsigned char *p = block;
   uint32_t n = 0;
   int count = 1;  
+  int chars = 0;
 
   for(size_t i=0; i<rlength; i++)
   {
@@ -57,11 +60,12 @@ string Base64::encode(const unsigned char *block, size_t length)
 	  base64 += extra_63;
       }
 
+      // Split if requested
+      chars += count;
+      if (split && !(chars%split)) base64 += "\r\n";
+
       n = 0;
       count = 1;
-
-      // CRLF after every 57 bytes (76 characters)
-      if (i%57==56) base64 += "\r\n";
     }
   }
 
@@ -92,7 +96,7 @@ string Base64::encode(uint64_t n)
     n <<= 8;
   }
 
-  return encode(buf, count);
+  return encode(buf, count, 0);
 }
 
 //--------------------------------------------------------------------------
