@@ -9,12 +9,12 @@ TYPE	= exes
 NAME   	= xmlmesh-send xmlmesh-receive
 
 DEBIAN-NAME    = ot-xmlmesh-cli
-DEBIAN-VERSION = 1.2.1
+DEBIAN-VERSION = 1.3.0
 DEBIAN-REVISION = 1
 
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
-	  net log xml soap text cache misc
+	  net log xml soap web text cache misc
 else
 DEPENDS	= ot-xmlmesh ot-general
 endif

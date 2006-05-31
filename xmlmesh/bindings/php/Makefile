@@ -10,12 +10,12 @@ NAME   	= php_xmlmesh
 OBJS 	= php_xmlmesh.o
 
 DEBIAN-NAME    = ot-xmlmesh-php
-DEBIAN-VERSION = 1.0.0
+DEBIAN-VERSION = 1.1.0
 DEBIAN-REVISION = 2
 
 ifdef DEBUG
 DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
-	  net log xml soap text cache misc
+	  net log xml soap web text cache misc
 else
 DEPENDS	= xmlmesh-c ot-xmlmesh ot-general
 endif
