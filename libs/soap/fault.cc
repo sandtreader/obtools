@@ -148,7 +148,7 @@ VersionMismatchFault::VersionMismatchFault():
 {
   add_header("env:Upgrade")
     .add("env:SupportedEnvelope", "qname", "ns1:Envelope")
-    .set_attr("xmlns:ns1", NS_ENVELOPE);
+    .set_attr("xmlns:ns1", NS_ENVELOPE_1_2);
 }
 
 //==========================================================================

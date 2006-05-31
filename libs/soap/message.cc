@@ -13,10 +13,10 @@ namespace ObTools { namespace SOAP {
 
 //------------------------------------------------------------------------
 // Default constructor - empty header and body
-Message::Message()
+Message::Message(const string& ns)
 {
   doc = new XML::Element("env:Envelope");
-  doc->set_attr("xmlns:env", NS_ENVELOPE);
+  doc->set_attr("xmlns:env", ns);
   doc->add("env:Header");
   doc->add("env:Body");
 }
@@ -45,6 +45,16 @@ Message::Message(istream& in_s, Parser& p): doc(0)
   }
   catch (ObTools::XML::ParseFailed)
   {}
+}
+
+//------------------------------------------------------------------------
+// Replace with another message - like a copy constructor, but explicit
+// and destroys the original
+void Message::take(Message& original) 
+{ 
+  if (doc) delete doc;
+  doc=original.doc; 
+  original.doc=0; 
 }
 
 //------------------------------------------------------------------------

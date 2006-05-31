@@ -15,7 +15,8 @@ namespace ObTools { namespace SOAP {
 // Constructor - use given stream for errors
 Parser::Parser(ostream& s): XML::Parser(s)
 { 
-  fix_namespace(NS_ENVELOPE, "env"); 
+  fix_namespace(NS_ENVELOPE_1_1, "env"); 
+  fix_namespace(NS_ENVELOPE_1_2, "env"); 
 }
 
 //------------------------------------------------------------------------

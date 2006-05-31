@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"> 
+  <env:Body> 
+    <ConvertPlaceToLonLatPt xmlns="http://terraservice-usa.com/"> 
+      <place> 
+	<City>Towel</City> 
+	<State/> 
+	<Country></Country> 
+      </place> 
+    </ConvertPlaceToLonLatPt> 
+  </env:Body> 
+</env:Envelope>

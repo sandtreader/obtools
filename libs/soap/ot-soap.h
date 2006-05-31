@@ -4,7 +4,7 @@
 // Public definitions for ObTools::SOAP
 // Support for SOAP messages
 // 
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2003-2006 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
@@ -14,7 +14,8 @@
 #include <string>
 #include <list>
 #include <map>
-#include <ot-xml.h>
+#include "ot-xml.h"
+#include "ot-web.h"
 
 namespace ObTools { namespace SOAP { 
 
@@ -25,7 +26,8 @@ using namespace std;
 // Specification constants
 
 // Namespaces
-const char NS_ENVELOPE[] = "http://www.w3.org/2003/05/soap-envelope";
+const char NS_ENVELOPE_1_1[] = "http://schemas.xmlsoap.org/soap/envelope/";
+const char NS_ENVELOPE_1_2[] = "http://www.w3.org/2003/05/soap-envelope";
 
 // Role names
 const char RN_NONE[] = "http://www.w3.org/2003/05/soap-envelope/role/none";
@@ -85,7 +87,8 @@ private:
 public:
   //------------------------------------------------------------------------
   // Default constructor - empty header and body
-  Message();
+  // Provide envelope namespace if not 1_2 (www.w3.org...)
+  Message(const string& ns = NS_ENVELOPE_1_2);
 
   //------------------------------------------------------------------------
   // Constructor from XML text, using the given parser
@@ -99,6 +102,11 @@ public:
   // Check for validity
   bool valid() { return doc!=0; }
   bool operator!() { return !valid(); }
+
+  //------------------------------------------------------------------------
+  // Replace with another message - like a copy constructor, but explicit
+  // and destroys the original
+  void take(Message& original);
 
   //------------------------------------------------------------------------
   // Add a namespace attribute to the envelope
@@ -286,6 +294,88 @@ public:
 			  const string& value);
 
 };
+
+//==========================================================================
+// HTTP Client class (http-client.cc)
+// Extends Web::HTTPClient to provide SOAP interface
+class HTTPClient: private Web::HTTPClient
+{
+public:
+  //--------------------------------------------------------------------------
+  // Constructor from server
+  HTTPClient(Net::EndPoint _server, const string& _ua=""): 
+    Web::HTTPClient(_server, _ua) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor from URL - extracts server from host/port parts
+  HTTPClient(Web::URL& url, const string& _ua=""):
+    Web::HTTPClient(url, _ua) {}
+
+  //--------------------------------------------------------------------------
+  // Simple request POST operation on a specified URL and SOAP action
+  // Returns result code, fills in response
+  int post(Web::URL& url, const string& soap_action,
+	   Message& request, Message& response);
+
+  //--------------------------------------------------------------------------
+  // Simple request POST operation to root URL
+  // Returns result code, fills in response
+  int post(const string& soap_action, Message& request, Message& response)
+  { Web::URL url("/"); return post(url, soap_action, request, response); }
+
+};
+
+#if !defined(_SINGLE)
+// HTTP Server requires threads
+
+//==========================================================================
+// SOAP URL handler abstract class (url-handler.cc)
+// Like Web::URLHandler, but provides SOAP message interface
+// Use with standard Web::SimpleHTTPServer, just like Web::URLHandler
+class URLHandler: public Web::URLHandler
+{
+private:
+  // Namespace map for Parser
+  map<string, string> ns_map;
+
+  //--------------------------------------------------------------------------
+  // Implementation of standard HTTP handler
+  bool handle_request(Web::HTTPMessage& http_request, 
+		      Web::HTTPMessage& http_response,
+		      Net::EndPoint client);
+
+protected:
+  //--------------------------------------------------------------------------
+  // Abstract interface to handle SOAP messages
+  // http_request, http_response and client are made available for complex 
+  // use, but can be ignored
+  virtual bool handle_message(Message& request, Message& response,
+			      Web::HTTPMessage& http_request,
+			      Web::HTTPMessage& http_response,
+			      Net::EndPoint client) = 0;
+
+  //--------------------------------------------------------------------------
+  // Handy support for generating faults - fills in response with fault
+  // Always returns true - use in return statements in handler
+  // e.g. return fault(SOAP::Fault::CODE_SENDER, "In your dreams, mate");
+  bool fault(Message& response, Fault::Code code, const string& reason);
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor - takes URL pattern
+  URLHandler(const string& _url): Web::URLHandler(_url) {}
+
+  //--------------------------------------------------------------------------
+  // Register namespace translation (see ot-xml.h)
+  void fix_namespace(const string& name, const string& prefix)
+  { ns_map[name] = prefix; }
+
+  //--------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~URLHandler() {}
+};
+
+#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces
