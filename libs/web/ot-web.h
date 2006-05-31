@@ -278,14 +278,16 @@ ostream& operator<<(ostream& s, const HTTPMessage& msg);
 class HTTPClient
 {
 private:
-  Net::EndPoint server;
   string user_agent;    // String to quote in User-Agent: header
+
+protected:
+  Net::EndPoint server;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor from server
   HTTPClient(Net::EndPoint _server, const string& _ua=""): 
-    server(_server), user_agent(_ua) {}
+    user_agent(_ua), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
