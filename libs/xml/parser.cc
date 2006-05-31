@@ -704,7 +704,7 @@ void Parser::substitute_name(string& name, bool usedef)
 // Any prefix used for this namespace in the document will be replaced
 // for the given prefix.  This allows you to normalise the tags you
 // check for
-void Parser::fix_namespace(const char *name, const char *prefix)
+void Parser::fix_namespace(const string& name, const string& prefix)
 {
   user_ns_map[name]=prefix;
   flags |= PARSER_FIX_NAMESPACES;
