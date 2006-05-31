@@ -144,8 +144,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Decode a base64 string into a binary block.  
-  // Will not write more than 'max_length' bytes
-  // Returns real length decoded
+  // Returns real length decoded if it fitted, max_length+1 if it didn't
+  // - but it will never actually write more than max_length bytes
   size_t decode(const string& base64, unsigned char *block, size_t max_length);
 
   //--------------------------------------------------------------------------

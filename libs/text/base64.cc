@@ -108,8 +108,8 @@ size_t Base64::binary_length(const string& base64)
 
 //--------------------------------------------------------------------------
 // Decode a base64 string into a binary block.  
-// Will not write more than 'max_length' bytes
-// Returns real length decoded
+// Returns real length decoded if it fitted, max_length+1 if it didn't
+// - but it will never actually write more than max_length bytes
 size_t Base64::decode(const string& base64, unsigned char *block, 
 		      size_t max_length)
 {
@@ -151,7 +151,7 @@ size_t Base64::decode(const string& base64, unsigned char *block,
 	if (written < max_length)
 	  block[written++] = (unsigned char)(n >> 16);
 	else
-	  return written;
+	  return max_length+1;
 	n <<=8;
       }
 
@@ -170,7 +170,7 @@ size_t Base64::decode(const string& base64, unsigned char *block,
       if (written < max_length)
 	block[written++] = (unsigned char)(n >> 16);
       else
-	return written;
+	return max_length+1;
       n <<=8;
     }
   }
@@ -183,8 +183,8 @@ size_t Base64::decode(const string& base64, unsigned char *block,
 // Returns whether successful - if so, sets 'n'
 bool Base64::decode(const string& base64, uint64_t& n)
 {
-  unsigned char buf[9];  // One extra to see if it overflows
-  size_t len = decode(base64, buf, 9);
+  unsigned char buf[8];  
+  size_t len = decode(base64, buf, 8);
   if (len > 8) return false;
 
   // Accumulate in N, top byte first
