@@ -8,10 +8,10 @@
 TYPE	= lib
 NAME   	= ot-text
 HEADERS = ot-text.h 
-OBJS  	= ws.o pattern.o case.o subst.o convert.o
-TESTS 	= test-ws test-pattern test-case test-subst test-convert
+OBJS  	= ws.o pattern.o case.o subst.o convert.o base64.o
+TESTS 	= test-ws test-pattern test-case test-subst test-convert test-base64
 TESTCMD	= ./test-ws && ./test-pattern && ./test-case && ./test-subst \
-          && ./test-convert
+          && ./test-convert && ./test-base64 hello
 MT-VARIANTS = 1
 
 ROOT    = ../..

@@ -114,6 +114,47 @@ string ftos(double f);
 double stof(const string& s);
 
 //==========================================================================
+// Base64 encoder/decoder
+class Base64
+{
+  char pad;            // Character to use for padding ('='), or 0 for none
+  char extra_62;       // Character to use for index 62 ('+')
+  char extra_63;       // Character to use for index 63 ('/')
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  Base64(char _pad='=', char _extra_62='+', char _extra_63='/'):
+    pad(_pad), extra_62(_extra_62), extra_63(_extra_63) {}
+
+  //--------------------------------------------------------------------------
+  // Encode a binary block
+  string encode(const unsigned char *block, size_t length);
+
+  //--------------------------------------------------------------------------
+  // Encode a 64-bit integer, top byte first (big-endian)
+  // Will reduce size to 4 bytes if it fits
+  string encode(uint64_t n);
+
+  //--------------------------------------------------------------------------
+  // Get length of binary block required for decode 
+  // This is a maximum estimate - real length may be less than this, but
+  // will never be more
+  size_t binary_length(const string& base64);
+
+  //--------------------------------------------------------------------------
+  // Decode a base64 string into a binary block.  
+  // Will not write more than 'max_length' bytes
+  // Returns real length decoded
+  size_t decode(const string& base64, unsigned char *block, size_t max_length);
+
+  //--------------------------------------------------------------------------
+  // Decode a 64-bit integer, top byte first (big-endian)
+  // Returns whether successful - if so, sets 'n'
+  bool decode(const string& base64, uint64_t& n);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
 
