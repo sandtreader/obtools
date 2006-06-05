@@ -17,7 +17,7 @@ DEBIAN-REVISION = 1
 #Build from static local libraries in DEBUG, installed .so's in release
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
-          net log mt xml soap text cache init misc file
+          net log mt xml soap web text cache init misc file
 else
 DEPENDS = ot-general ot-xmlmesh
 endif
