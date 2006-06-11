@@ -740,6 +740,11 @@ public:
   bool read(const string& ename, ostream& err=cerr);
 
   //------------------------------------------------------------------------
+  // Reload configuration file as the same element as before
+  // Returns whether successful
+  bool reload(ostream& err=cerr);
+
+  //------------------------------------------------------------------------
   // Get root element
   // Returns Element::none if not valid
   Element& get_root() { return parser.get_root(); }

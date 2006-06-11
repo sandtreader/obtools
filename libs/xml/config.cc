@@ -56,6 +56,15 @@ bool Configuration::read(const string& ename, ostream& err)
 }
 
 //------------------------------------------------------------------------
+// Reload configuration file as the same element as before
+// Returns whether successful
+bool Configuration::reload(ostream& err)
+{
+  string ename = get_root().name;
+  return read(ename, err);
+}
+
+//------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
 // Only first element of intermediate steps is used - list is not merged!
 list<Element *> Configuration::get_elements(const string& path)
