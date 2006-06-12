@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 namespace ObTools { namespace Text { 
 
