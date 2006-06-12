@@ -292,7 +292,8 @@ class PKCS5
 class SHA1
 {
  private:
-  OpenSSL::SHA_CTX *sha;
+  OpenSSL::SHA_CTX sha_ctx;
+  bool finished;
 
   static string hex20(unsigned char *b);
 

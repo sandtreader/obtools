@@ -20,24 +20,24 @@ namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
 // Constructor
-SHA1::SHA1()
+SHA1::SHA1(): finished(false)
 {
-  OpenSSL::SHA1_Init(sha);
+  OpenSSL::SHA1_Init(&sha_ctx);
 }
 
 //------------------------------------------------------------------------
 // Update digest with a block of data
 void SHA1::update(const void *data, size_t length)
 {
-  if (sha) OpenSSL::SHA1_Update(sha, data, (unsigned long)length);
+  if (!finished) OpenSSL::SHA1_Update(&sha_ctx, data, (unsigned long)length);
 }
 
 //------------------------------------------------------------------------
 // Get result - writes DIGEST_LENGTH bytes to result
 void SHA1::get_result(unsigned char *result)
 {
-  if (sha) OpenSSL::SHA1_Final(result, sha);
-  sha = 0;
+  if (!finished) OpenSSL::SHA1_Final(result, &sha_ctx);
+  finished = true;
 }
 
 //------------------------------------------------------------------------
@@ -54,25 +54,25 @@ string SHA1::hex20(unsigned char *b)
 // Get result as a hex string
 string SHA1::get_result()
 {
-  unsigned char buf[DIGEST_LENGTH];
-  if (sha) 
+  if (!finished)
   {
-    OpenSSL::SHA1_Final(buf, sha);
-    sha = 0;
+    unsigned char buf[DIGEST_LENGTH];
+    OpenSSL::SHA1_Final(buf, &sha_ctx);
+    finished = true;
     return hex20(buf);
   }
-  else return "!";
+  else return "REUSED SHA1!";
 }
 
 //------------------------------------------------------------------------
 // Destructor
 SHA1::~SHA1()
 {
-  if (sha)
+  if (!finished)
   {
     // Dump into a fake buffer
     unsigned char bucket[DIGEST_LENGTH];
-    OpenSSL::SHA1_Final(bucket, sha);
+    OpenSSL::SHA1_Final(bucket, &sha_ctx);
   }
 }
 
