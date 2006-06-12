@@ -80,10 +80,6 @@ public:
   Duration(double _t): t(_t) {}
 
   //------------------------------------------------------------------------
-  // Constructor from time_t
-  Duration(time_t _t): t(_t+EPOCH_1970) {}
-
-  //------------------------------------------------------------------------
   // Constructor from string
   // Accepts any of the following forms:
   //  1234       seconds
@@ -144,6 +140,12 @@ public:
   bool operator>(const Duration& o) const { return t>o.t; }
   bool operator<=(const Duration& o) const { return t<=o.t; }
   bool operator>=(const Duration& o) const { return t>=o.t; }
+
+  //------------------------------------------------------------------------
+  // Constructor-like static function to return monotonic clock - baseline
+  // unknown, but guaranteed never to get mangled by ntpd, DST et al.
+  // Returns Duration(0.0) if clock not available
+  static Duration clock();
 };
 
 //==========================================================================

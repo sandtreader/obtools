@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <math.h>
+#include <time.h>
 
 namespace ObTools { namespace Time {
 
@@ -161,5 +162,21 @@ string Duration::hms() const
 
   return oss.str();
 }
+
+//------------------------------------------------------------------------
+// Constructor-like static function to return monotonic clock - baseline
+// unknown, but guaranteed never to get mangled by ntpd, DST et al.
+// Returns Duration(0.0) if clock not available
+Duration Duration::clock()
+{
+#if defined(CLOCK_MONOTONIC)
+  struct timespec ts;
+  if (!clock_gettime(CLOCK_MONOTONIC, &ts))
+    return Duration((double)ts.tv_sec+(double)ts.tv_nsec/1.0e9);
+#endif
+
+  return Duration();
+}
+
 
 }} // namespaces

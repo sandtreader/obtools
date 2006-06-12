@@ -18,6 +18,9 @@ using namespace ObTools;
 
 int main()
 {
+  // Show clock
+  cout << "Monotonic clock: " << Time::Duration::clock().seconds() << endl;
+
   // Read a line at a time, and convert to duration
   while (!cin.eof())
   {
