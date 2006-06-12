@@ -18,7 +18,7 @@
 #if defined(__WIN32__)
 
 // Windows headers & fixes
-#include <winsock.h>
+#include <winsock2.h>
 typedef int socklen_t;
 
 // Winsock initialisation
