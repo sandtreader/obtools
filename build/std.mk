@@ -137,6 +137,9 @@ endif
 endif #!PROFILE
 endif #!CROSS-COMPILE
 
+#Choose base libraries
+EXTRALIBS = -lstdc++ -lrt
+
 #Compiler override for MINGW build
 ifdef MINGW 
 CC = i586-mingw32msvc-cc
@@ -433,7 +436,7 @@ endif
 #Test harnesses:
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ $$^ $$(EXTRALIBS)
 TESTOBJS += $(1).o
 endef
 
@@ -442,7 +445,7 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 #Executable
 ifeq ($(TYPE), exe)
 $(NAME)$(EXE-SUFFIX): $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -o $@ $^ -lstdc++ $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
 endif
 
 #Multiple executables
@@ -452,7 +455,7 @@ define exe_template
 #complains (wrongly) of missing endifs
 ifeq ($(TYPE), exes)
 $(1)$$(EXE-SUFFIX): $(1).o $$(DEPLIBS)
-	$$(CC) $$(LDFLAGS) -o $$@ $$^ -lstdc++ $$(EXTRALIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ $$^ $$(EXTRALIBS)
 EXEOBJS += $(1).o
 endif
 endef
@@ -468,7 +471,7 @@ endif
 #DL Mod
 ifeq ($(TYPE), dlmod)
 $(NAME).so: $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ $^ -lstdc++ $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ $^ $(EXTRALIBS)
 endif
 
 #Superlib
@@ -476,7 +479,7 @@ ifeq ($(TYPE), superlib)
 $(SOLIB): $(INCLIBS) $(SOHEADERS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
-        $(INCLIBS) -Wl,-no-whole-archive $(DEPLIBS) -lstdc++ $(EXTRALIBS) 
+        $(INCLIBS) -Wl,-no-whole-archive $(DEPLIBS) $(EXTRALIBS) 
 	ln -fs $@ $(SOLINK)
 endif
 
@@ -495,7 +498,7 @@ endif
 	  $(OBJS)							 \
           -Wl,--whole-archive $(INCLIBS) -Wl,--no-whole-archive          \
 	  -Wl,--exclude-libs,$(EXCLUDE-LIBS)                             \
-          $(DEPLIBS) -lstdc++ $(EXTRALIBS)
+          $(DEPLIBS) $(EXTRALIBS)
 endif
 
 #Dependencies
