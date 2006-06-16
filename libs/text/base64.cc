@@ -20,7 +20,9 @@ static const char base64_chars[] =
 // Encode a binary block
 // Split gives length of line to split at - default (76) is to RFC
 // Set 0 to suppress split altogether
-string Base64::encode(const unsigned char *block, size_t length, int split)
+// line_end is string to split with, and indent for next line
+string Base64::encode(const unsigned char *block, size_t length, 
+		      int split, const string& line_end)
 {
   string base64;
 
@@ -62,7 +64,7 @@ string Base64::encode(const unsigned char *block, size_t length, int split)
 
       // Split if requested
       chars += count;
-      if (split && !(chars%split)) base64 += "\r\n";
+      if (split && !(chars%split)) base64 += line_end;
 
       n = 0;
       count = 1;

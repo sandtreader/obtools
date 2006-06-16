@@ -132,7 +132,9 @@ public:
   // Encode a binary block
   // Split gives length of line to split at - default (76) is to RFC
   // Set 0 to suppress split altogether
-  string encode(const unsigned char *block, size_t length, int split=76);
+  // line_end is string to split with, and indent for next line
+  string encode(const unsigned char *block, size_t length, 
+		int split=76, const string& line_end = "\r\n");
 
   //--------------------------------------------------------------------------
   // Encode a 64-bit integer, top byte first (big-endian)
