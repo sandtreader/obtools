@@ -519,6 +519,14 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Decide whether to allow deletion from tidy or eviction
+  // Always OK here - override to prevent deletion of active objects
+  // Getting this call indicates the cache thinks the object is a candidate 
+  // for deletion, so shutting down gracefully to accept the call next time is
+  // a good idea
+  virtual bool delete_allowed(CONTENT *) { return true; }
+
+  //--------------------------------------------------------------------------
   // Run background evictor policy
   virtual void tidy() 
   { 
@@ -534,7 +542,8 @@ public:
       {
 	MapIterator q=p++;
 	MCType &mc = q->second;
-	if (!this->tidy_policy.keep_entry(mc.policy_data, now))
+	if (!this->tidy_policy.keep_entry(mc.policy_data, now)
+	    && delete_allowed(q->second.content.ptr))
 	{
 	  to_delete.push_back(q->second.content.ptr);
 	  this->cachemap.erase(q);
@@ -584,6 +593,9 @@ public:
 	// Did we find one?
 	if (worst!=this->cachemap.end())
 	{
+	  // Fail if blocked by subclass
+	  if (!delete_allowed(worst->second.content.ptr)) return false;
+
 	  to_delete = worst->second.content.ptr;
 	  this->cachemap.erase(worst);
 	  needed--;
