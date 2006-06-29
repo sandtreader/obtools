@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <unistd.h>
 #include <stdlib.h>
 
 using namespace std;
@@ -36,7 +35,7 @@ void TestThread::run()
     cout << n << ": " << i << endl;
     sleep(1);
   }
-  cout << n << " finished\n";
+  cout << n << " finished" << endl;
 }
 
 //--------------------------------------------------------------------------
@@ -46,27 +45,27 @@ int main(int argc, char **argv)
   int numthreads = 10;
   if (argc > 1) numthreads = atoi(argv[1]);
 
-  cout << numthreads << " threads:\n";
+  cout << numthreads << " threads:" << endl;
 
   vector<TestThread *> threads(numthreads);
 
   int i;
-  cout << "Starting:\n";
+  cout << "Starting:" << endl;
   for(i=0; i<numthreads; i++)
     threads[i] = new TestThread(i);
 
-  cout << "Started:\n";
+  cout << "Started:" << endl;
   MT::Thread::sleep(5);
 
-  cout << "Cancelling half:\n";
+  cout << "Cancelling half:" << endl;
   for(i=0; i<numthreads/2; i++)
     threads[i]->cancel();
 
-  cout << "Joining:\n";
+  cout << "Joining:" << endl;
   for(i=0; i<numthreads; i++)
     threads[i]->join();
 
-  cout << "Done\n";
+  cout << "Done" << endl;
   return 0;  
 }
 

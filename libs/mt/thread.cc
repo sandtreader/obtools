@@ -85,7 +85,7 @@ Thread::~Thread()
 // Sleep for given number of seconds
 void Thread::sleep(int secs)
 {
-#ifdef MINGW
+#if (defined(MINGW) || defined(BORLAND))
   // Use pthread_delay_np to provide cancellation point
   struct timespec interval;
   interval.tv_sec = secs;
@@ -100,7 +100,7 @@ void Thread::sleep(int secs)
 // Sleep for given number of micro-seconds
 void Thread::usleep(int usecs)
 {
-#ifdef MINGW
+#if (defined(MINGW) || defined(BORLAND))
   // Use pthread_delay_np to provide cancellation point
   struct timespec interval;
   interval.tv_sec = usecs/1000000;

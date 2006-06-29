@@ -10,9 +10,9 @@
 #include "ot-mt.h"
 #include <cstdlib>
 #include <iostream>
-#include <unistd.h>
 
 using namespace std;
+using namespace ObTools::MT;
 
 //--------------------------------------------------------------------------
 // Test thread class
@@ -34,7 +34,7 @@ void TestThread::run()
     cout << n << ": " << i << endl;
     sleep(1);
   }
-  cout << n << " finished\n";
+  cout << n << " finished" << endl;
 }
 
 //--------------------------------------------------------------------------
@@ -56,14 +56,14 @@ int main()
     }
     else
     {
-      cout << "No spare threads\n";
+      cout << "No spare threads" << endl;
       ObTools::MT::Thread::sleep(1);
     }
   }
 
-  cout << "Shutting down\n";
+  cout << "Shutting down" << endl;
   pool.shutdown();
-  cout << "Done\n";
+  cout << "Done" << endl;
 
   return 0;  
 }
