@@ -4,13 +4,14 @@
 # Copyright (c) xMill Consulting Limited 2005
 
 AR = tlib
+CC = bcc32
 
 #Flags:
 # -P:      Always assume C++
 # -w-inl:  Turn off "[code] in function is not expanded inline" warnings
 #            (a.k.a., "this compiler generates bad code for common idioms")
 
-CPPFLAGS = -P -w-inl $(CPPDEFS)
+CPPFLAGS = -tWM -tWC -v -y -P -DBORLAND -DDEBUG -w-inl $(CPPDEFS)
 
 !ifdef INCDEPS
 INCS = -I$(INCDEPS)
@@ -44,7 +45,9 @@ $(TESTS): $(LIB)
 # Library
 !ifdef LIB
 $(LIB):  $(OBJS) 
-    $(AR) /u "$@" $?
+    $(AR) /u "$@" $(OBJS)
+# Using OBJS instead of $? here to retain double quotes.  Otherwise tlib
+# treats hyphens in filenames as remove directives.
 !endif
 
 .cc.obj:
