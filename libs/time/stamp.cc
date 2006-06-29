@@ -11,12 +11,14 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
-#include <sys/time.h>
 
 #if defined(__WIN32__)
 #include <windows.h>
 // Widely-quoted difference between Windows filetime and Unix time_t epochs
 #define FILETIME_UNIX_EPOCH_DIFF 11644473600ULL
+#include <time.h>
+#else
+#include <sys/time.h>
 #endif
 
 namespace ObTools { namespace Time {
