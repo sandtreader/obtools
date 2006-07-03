@@ -22,6 +22,7 @@ void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
   try
   {
     io << prompt;
+    io.flush();
 
     // Read lines and handle them
     string line;
@@ -49,6 +50,7 @@ void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
 	  }
 
 	  io << prompt;
+	  io.flush();
 	break;
 
 	default:
