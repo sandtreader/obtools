@@ -1,0 +1,11 @@
+<!-- Example ObTools::Script script -->
+<script>
+  <log>Delay for 2 seconds</log>
+  <delay time="2"/>
+  <log>Done</log>
+  <repeat times="5">
+    <log>Delay for 5 seconds, randomised</log>
+    <delay time="5" random="yes"/>
+    <log>Done</log>
+  </repeat>
+</script>

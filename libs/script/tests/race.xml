@@ -1,0 +1,14 @@
+<!-- Example ObTools::Script script -->
+<script>
+  <race>
+
+    <repeat times="5">
+      <log>Thread 1</log>
+    </repeat>
+
+    <repeat times="10">
+      <log>Thread 2</log>
+    </repeat>
+
+  </race>
+</script>

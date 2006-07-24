@@ -2,7 +2,8 @@
 // ObTools::Script: sequence.cc
 //
 // Sequence action
-//
+// <sequence>...</sequence>
+
 // Copyright (c) 2006 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
@@ -29,7 +30,7 @@ bool SequenceAction::create_current()
     return false;
   }
 
-  current = language.create_action(**it);
+  current = script.create_action(**it);
   return (current != 0);
 }
 

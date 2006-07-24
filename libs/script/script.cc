@@ -13,9 +13,18 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 //Constructor - takes top-level script element
-Script::Script(Language& language, XML::Element& _xml): 
-  SequenceAction(Action::CP(language, _xml))
+Script::Script(Language& _language, XML::Element& _xml): 
+  SequenceAction(Action::CP(*this, _xml)), language(_language)
 {
+}
+
+//------------------------------------------------------------------------
+//Tick the script, setting time stamp
+//Returns whether it is still running
+bool Script::tick()
+{
+  now = Time::Stamp::now();
+  return SequenceAction::tick();
 }
 
 //------------------------------------------------------------------------

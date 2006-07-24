@@ -22,9 +22,9 @@ void Language::register_action(const string& name, factory_t& factory)
 //------------------------------------------------------------------------
 //Instantiate an action from the given XML element
 //Returns 0 if it fails
-Action *Language::create_action(XML::Element& xml)
+Action *Language::create_action(Script& script, XML::Element& xml)
 {
-  Action *a = action_registry.create(xml.name, Action::CP(*this, xml));
+  Action *a = action_registry.create(xml.name, Action::CP(script, xml));
   if (a) return a;
   Log::Streams log;
   log.error << "Unknown action '" << xml.name << "' at line " 

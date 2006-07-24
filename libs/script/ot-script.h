@@ -12,6 +12,8 @@
 
 #include "ot-xml.h"
 #include "ot-init.h"
+#include "ot-misc.h"
+#include "ot-time.h"
 
 namespace ObTools { namespace Script {
 
@@ -19,17 +21,16 @@ namespace ObTools { namespace Script {
 using namespace std;
 
 // Forward
-class Language;
+class Script;
 
 //==========================================================================
 // Script action (abstract)
 // Dynamically created during run - only active actions on the stack will
 // be instantiated at any one time 
-
 class Action
 {
 protected:
-  Language& language;     // Language we're a part of
+  Script& script;         // Top-level script we're a part of
   XML::Element& xml;      // XML element we were created from
 
 public:
@@ -38,12 +39,11 @@ public:
   // Create parameters - have to be bundled for use with Init::Factory
   struct CP
   {
-    Language& language;
+    Script& script;
     XML::Element& xml;
-    CP(Language& _language, XML::Element& _xml): 
-      language(_language), xml(_xml) {}
+    CP(Script& _script, XML::Element& _xml): script(_script), xml(_xml) {}
   };
-  Action(CP cp): language(cp.language), xml(cp.xml) {}
+  Action(CP cp): script(cp.script), xml(cp.xml) {}
 
   //------------------------------------------------------------------------
   // Tick action
@@ -96,7 +96,7 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  bool tick();
+  virtual bool tick();
 
   //------------------------------------------------------------------------
   // Restart sequence
@@ -130,6 +130,55 @@ public:
 };
 
 //==========================================================================
+// Parallel action
+// Action which executes other actions in parallel (like PAR in Occam)
+class ParallelAction: public Action
+{
+private:
+  bool race;
+  bool started;
+  list<Action *> actions;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  // If 'race' is set, the entire group is stopped when the first one 
+  // finishes; otherwise, the group continues until the last finishes
+  ParallelAction(CP cp, bool race);
+
+  //------------------------------------------------------------------------
+  // Tick action
+  // Returns whether still active
+  bool tick();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  virtual ~ParallelAction();
+};
+
+//==========================================================================
+// Group action
+// Sugar for ParallelAction with race semantics
+class GroupAction: public ParallelAction
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  GroupAction(CP cp): ParallelAction(cp, false) {}
+};
+
+//==========================================================================
+// Race action
+// Sugar for ParallelAction with race semantics
+class RaceAction: public ParallelAction
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  RaceAction(CP cp): ParallelAction(cp, true) {}
+};
+
+//==========================================================================
 //Log action
 // e.g. <log level="1">Something happened</log>
 class LogAction: public SingleAction
@@ -145,17 +194,22 @@ public:
 };
 
 //==========================================================================
-// Top-level script 
-class Script: public SequenceAction
+//Delay action
+// e.g. <delay time="1" random="yes"/>
+class DelayAction: public Action
 {
+  Time::Stamp start;
+  Time::Duration time;
+
 public:
   //------------------------------------------------------------------------
-  //Constructor - takes language and top-level script element
-  Script(Language& language, XML::Element& _xml);
+  // Constructor
+  DelayAction(Action::CP cp);
 
   //------------------------------------------------------------------------
-  //Run the script to the end
-  void run();
+  // Tick action
+  // Returns whether still active
+  bool tick();
 };
 
 //==========================================================================
@@ -180,9 +234,9 @@ public:
   Language(): action_registry() {};
 
   //------------------------------------------------------------------------
-  //Instantiate an action from the given XML element
+  //Instantiate an action from the given script and XML element
   //Returns 0 if it fails
-  Action *create_action(XML::Element& xml);
+  Action *create_action(Script& script, XML::Element& xml);
 
   //------------------------------------------------------------------------
   //Run the script to the end
@@ -191,13 +245,48 @@ public:
 
 //==========================================================================
 // Base script language class with standard bindings:
-//  <repeat times="N"/>
+//  <sequence>...</sequence>
+//  <repeat times="N">...</repeat>
+//  <group>...</group>
+//  <race>...</race>
+//  <delay time="N" random="yes"/>
+//  <log level="N">text</log>
+//
 class BaseLanguage: public Language
 {
 public:
   //------------------------------------------------------------------------
   //Constructor
   BaseLanguage();
+};
+
+//==========================================================================
+// Top-level script 
+class Script: public SequenceAction
+{
+public:
+  Language& language;       // Language in use
+  Misc::PropertyList vars;  // Global variables for script actions
+  Time::Stamp now;          // Consistent time for ticks
+
+  //------------------------------------------------------------------------
+  //Constructor - takes language and top-level <script> XML element
+  Script(Language& _language, XML::Element& _xml);
+
+  //------------------------------------------------------------------------
+  //Instantiate an action from the given XML element
+  //Returns 0 if it fails
+  Action *create_action(XML::Element& xml)
+  { return language.create_action(*this, xml); }
+
+  //------------------------------------------------------------------------
+  //Tick the script, setting time stamp
+  //Returns whether it is still running
+  bool tick();
+
+  //------------------------------------------------------------------------
+  //Run the script to the end
+  void run();
 };
 
 //==========================================================================
