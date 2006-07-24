@@ -9,7 +9,8 @@ TYPE	= lib
 NAME   	= ot-script
 HEADERS = ot-script.h
 OBJS  	= language.o baselang.o script.o \
-          sequence.o repeat.o parallel.o log.o delay.o
+          sequence.o repeat.o parallel.o replicate.o \
+          log.o delay.o
 DEPENDS = xml log text misc init time
 TESTS 	= test-script
 TESTCMD	= ./test-script ../tests/test.xml

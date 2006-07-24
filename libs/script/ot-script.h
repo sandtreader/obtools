@@ -179,6 +179,34 @@ public:
 };
 
 //==========================================================================
+// Replicated action
+// Action which runs N copies of the same sequence
+// <replicate copies="5" spread="1"/>
+class ReplicatedAction: public Action
+{
+private:
+  int copies;
+  Time::Duration spread;
+  int started;
+  Time::Stamp last_start;
+  list<Action *> actions;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ReplicatedAction(CP cp);
+
+  //------------------------------------------------------------------------
+  // Tick action
+  // Returns whether still active
+  bool tick();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  virtual ~ReplicatedAction();
+};
+
+//==========================================================================
 //Log action
 // e.g. <log level="1">Something happened</log>
 class LogAction: public SingleAction
@@ -249,6 +277,7 @@ public:
 //  <repeat times="N">...</repeat>
 //  <group>...</group>
 //  <race>...</race>
+//  <replicate copies="N" spread="T">...</replicate>
 //  <delay time="N" random="yes"/>
 //  <log level="N">text</log>
 //
