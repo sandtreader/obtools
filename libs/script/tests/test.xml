@@ -1,0 +1,7 @@
+<!-- Example ObTools::Script script -->
+<script>
+  <repeat times="5">
+    <log>Hello, world</log>
+    <log level="3">Test</log>
+  </repeat>
+</script>
