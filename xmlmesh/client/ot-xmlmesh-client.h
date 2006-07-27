@@ -233,6 +233,7 @@ private:
   map<string, MultiClientRequest *> requests;  // Active requests, by id
   MT::Thread *dispatch_thread;                 // Message dispatch thread
   MT::ThreadPool<MultiClientWorker> workers;   // Worker thread pool 
+  MT::Queue<Message *> pending_queue;          // Queued messages
   MT::RMutex mutex;                            // Global state lock
 
 public:

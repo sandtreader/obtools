@@ -56,10 +56,11 @@ public:
 void MultiClient::handle(Message &msg, Log::Streams& log)
 {
   string ref = msg.get_ref();
-  MT::RLock l(mutex);
 
   if (ref.size())
   {
+    MT::RLock l(mutex);
+
     // Check if it is for one of our requests
     MultiClientRequest *req = requests[ref];
     if (req)
@@ -79,6 +80,7 @@ void MultiClient::handle(Message &msg, Log::Streams& log)
     // initiate an outgoing request and get the result - otherwise
     // we end up in deadlock
     MultiClientWorker *t = workers.remove();
+
     if (t)
     {
       t->client = this;
@@ -88,7 +90,10 @@ void MultiClient::handle(Message &msg, Log::Streams& log)
     else
     {
       log.error << "Mesh client has no spare workers - '" 
-		<< msg.get_subject() << "' message lost\n";
+		<< msg.get_subject() << "' message queued\n";
+
+      // Queue a copy for an existing worker to catch
+      pending_queue.send(new Message(msg));
     }
   }
 }
@@ -97,67 +102,77 @@ void MultiClient::handle(Message &msg, Log::Streams& log)
 // Dispatch a message (worker thread)
 void MultiClient::dispatch(Message *msg)
 {
-  string subject = msg->get_subject();
-  list<Subscriber *> handlers;
-
+  // May loop to handle pending message
+  for(;;)
   {
-    // Lock while reading subscriber list
-    MT::RLock l(mutex);
+    string subject = msg->get_subject();
+    list<Subscriber *> handlers;
 
-    // Try all the subscribers
-    for(list<Subscriber *>::iterator p = subscribers.begin();
-	p!=subscribers.end();
-	)
     {
-      list<Subscriber *>::iterator q = p++;  // Protect from deletion
-      Subscriber *sub = *q;
-      
-      // This is where we kill dead ones
-      if (sub->dead && !sub->active)
+      // Lock while reading subscriber list
+      MT::RLock l(mutex);
+
+      // Try all the subscribers
+      for(list<Subscriber *>::iterator p = subscribers.begin();
+	  p!=subscribers.end();
+	  )
       {
-	delete sub;
-	subscribers.erase(q);
-      }
-      else if (Text::pattern_match(sub->subject, subject))
-      {
-	sub->active++;  // Protected by global lock
-	handlers.push_back(sub);
+	list<Subscriber *>::iterator q = p++;  // Protect from deletion
+	Subscriber *sub = *q;
+
+	// This is where we kill dead ones
+	if (sub->dead && !sub->active)
+	{
+	  delete sub;
+	  subscribers.erase(q);
+	}
+	else if (Text::pattern_match(sub->subject, subject))
+	{
+	  sub->active++;  // Protected by global lock
+	  handlers.push_back(sub);
+	}
       }
     }
-  }
 
-  // Complain if no-one wanted it
-  if (handlers.empty())
-  {
-    Log::Streams log;
-    log.error << "Unhandled message received with subject " 
-	      << subject << endl;
-  }
+    // Complain if no-one wanted it
+    if (handlers.empty())
+    {
+      Log::Streams log;
+      log.error << "Unhandled message received with subject " 
+		<< subject << endl;
+    }
 
-  // Now have own safe list of subscribers with active set - no-one can 
-  // interfere with this, even if they try unsubscribing now
-  for(list<Subscriber *>::iterator p = handlers.begin();
-      p!=handlers.end();
-      p++)
-  {
-    Subscriber *sub = *p;
-    sub->handle(*msg); 
-  }
-
-  // Deactivate subscribers again inside global lock
-  {
-    MT::RLock l(mutex);
-
+    // Now have own safe list of subscribers with active set - no-one can 
+    // interfere with this, even if they try unsubscribing now
     for(list<Subscriber *>::iterator p = handlers.begin();
 	p!=handlers.end();
 	p++)
     {
       Subscriber *sub = *p;
-      sub->active--;
+      sub->handle(*msg); 
     }
+
+    // Deactivate subscribers again inside global lock
+    {
+      MT::RLock l(mutex);
+
+      for(list<Subscriber *>::iterator p = handlers.begin();
+	  p!=handlers.end();
+	  p++)
+      {
+	Subscriber *sub = *p;
+	sub->active--;
+      }
+    }
+
+    delete msg;
+
+    // Check for pending messages and handle them immediately
+    if (pending_queue.poll())
+      msg = pending_queue.wait();
+    else
+      break;
   }
-  
-  delete msg;
 }
 
 //------------------------------------------------------------------------
