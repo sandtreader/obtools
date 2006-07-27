@@ -169,7 +169,7 @@ class RSAKey
 private:
   // Copy and assignment are banned!
   RSAKey(const RSAKey&) {}
-  RSAKey& operator=(const DESKey&) { return *this; }
+  RSAKey& operator=(const RSAKey&) { return *this; }
 
 public:
   OpenSSL::RSA *rsa;

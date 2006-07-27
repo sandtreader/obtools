@@ -1,4 +1,4 @@
-# Borland makefile for net library
+# Borland makefile for crypto library
 # Copyright (c) xMill Consulting Limited 2005
 
 LIB = ot-crypto.lib
