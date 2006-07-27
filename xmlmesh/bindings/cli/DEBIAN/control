@@ -2,7 +2,7 @@ Package: ot-xmlmesh-cli
 Priority: optional
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libot-general-single (>= 1.0.0), libot-xmlmesh-single (>= 1.0.0)
+Depends: libot-general-single (>= 1.6.2), libot-xmlmesh-single (>= 1.5.0)
 Description: ObTools XMLMesh message bus command line interface
  XMLMesh is a SOAP-based XML message bus for integration of distributed
  components using simple XML messages
