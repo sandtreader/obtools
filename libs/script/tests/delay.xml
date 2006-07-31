@@ -1,4 +1,4 @@
-<!-- Example ObTools::Script script -->
+<!-- Example ObTools::Script script demonstrating <delay> -->
 <script>
   <log>Delay for 2 seconds</log>
   <delay time="2"/>
