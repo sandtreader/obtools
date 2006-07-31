@@ -23,7 +23,7 @@ Generator::Generator(const string& _config_file,
 		     ostream& _sout, ostream &_serr):
   config_file(_config_file),
   ok(false),
-  config(_config_file, 
+  config(_config_file, _serr,
 	 XML::PARSER_OPTIMISE_CONTENT 
        | XML::PARSER_PRESERVE_WHITESPACE
        | XML::PARSER_BE_LENIENT),
