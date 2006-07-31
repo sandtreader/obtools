@@ -709,20 +709,25 @@ private:
   list<string> filenames;
   Parser parser;
 
+protected:
+  ostream& serr;  // Error output stream
+
 public:
   //------------------------------------------------------------------------
   // Constructors
   // No files - add later
-  Configuration(int parse_flags=PARSER_OPTIMISE_CONTENT)
-    :parser(parse_flags) {  }
+  Configuration(ostream& _serr=cerr, int parse_flags=PARSER_OPTIMISE_CONTENT)
+    :parser(_serr, parse_flags), serr(_serr) {  }
 
   // Single filename
-  Configuration(const string& fn, int parse_flags=PARSER_OPTIMISE_CONTENT)
-    :parser(parse_flags) { filenames.push_back(fn); }
+  Configuration(const string& fn, ostream& _serr=cerr,
+		int parse_flags=PARSER_OPTIMISE_CONTENT)
+    :parser(_serr, parse_flags), serr(_serr) { filenames.push_back(fn); }
 
   // List of filenames - front() is tried first
-  Configuration(list<string>& fns, int parse_flags=PARSER_OPTIMISE_CONTENT)
-    :filenames(fns), parser(parse_flags) {}
+  Configuration(list<string>& fns, ostream& _serr=cerr,
+		int parse_flags=PARSER_OPTIMISE_CONTENT)
+    :filenames(fns), parser(_serr, parse_flags), serr(_serr) {}
 
   //------------------------------------------------------------------------
   // Add a filename to the config list, post creation
@@ -737,12 +742,12 @@ public:
   // Read configuration file
   // Returns whether successful
   // ename is the expected root element name - fails if wrong
-  bool read(const string& ename, ostream& err=cerr);
+  bool read(const string& ename);
 
   //------------------------------------------------------------------------
   // Reload configuration file as the same element as before
   // Returns whether successful
-  bool reload(ostream& err=cerr);
+  bool reload();
 
   //------------------------------------------------------------------------
   // Get root element

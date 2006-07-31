@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fstream>
+#include <errno.h>
 
 using namespace ObTools::XML;
 
@@ -18,7 +19,7 @@ using namespace ObTools::XML;
 // Read configuration file
 // Returns whether successful
 // ename is the expected root element name - fails if wrong
-bool Configuration::read(const string& ename, ostream& err)
+bool Configuration::read(const string& ename)
 {
   // Run through list of filenames to find one that will open
   for(list<string>::iterator p = filenames.begin();
@@ -34,15 +35,15 @@ bool Configuration::read(const string& ename, ostream& err)
       }
       catch (ParseFailed)
       {
-	err << "Bad XML in config file\n";
+	serr << "Bad XML in config file\n";
 	return false;
       }
 
       Element& root = parser.get_root();
       if (root.name != ename)
       {
-	err << "Bad root in config file - expected <" << ename 
-	    << ">, got <" << root.name << ">\n";
+	serr << "Bad root in config file - expected <" << ename 
+	     << ">, got <" << root.name << ">\n";
 	return false;
       }
 
@@ -58,10 +59,10 @@ bool Configuration::read(const string& ename, ostream& err)
 //------------------------------------------------------------------------
 // Reload configuration file as the same element as before
 // Returns whether successful
-bool Configuration::reload(ostream& err)
+bool Configuration::reload()
 {
   string ename = get_root().name;
-  return read(ename, err);
+  return read(ename);
 }
 
 //------------------------------------------------------------------------
@@ -255,7 +256,11 @@ bool Configuration::replace_element(const string& path, Element *ne)
 bool Configuration::write()
 {
   string fn = filenames.front();
-  if (fn.empty()) return false;
+  if (fn.empty())
+  {
+    serr << "Config: no filename available for write\n";
+    return false;
+  }
 
   // Create and open temporary file
   string tfn = fn+",update";
@@ -268,9 +273,14 @@ bool Configuration::write()
     // Attempt atomic update
     if (!::rename(tfn.c_str(), fn.c_str())) return true;
 
+    serr << "Config: Can't rename " << tfn << " to " << fn << ": " 
+	 << strerror(errno) << endl;
+
     unlink(tfn.c_str());
   }
-  
+  else serr << "Config: can't open " << tfn << " for update: "
+	    << strerror(errno) << endl;
+   
   return false;
 }
 
