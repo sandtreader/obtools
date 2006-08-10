@@ -375,6 +375,14 @@ public:
   void set_timeout(int secs);
 
   //--------------------------------------------------------------------------
+  // Set socket priority (0-7)
+  void set_priority(int prio);
+
+  //--------------------------------------------------------------------------
+  // Set IP TOS field
+  void set_tos(int tos);
+
+  //--------------------------------------------------------------------------
   // Bind to a local port (TCP or UDP servers)
   // Whether successful
   bool bind(int port);

@@ -118,6 +118,32 @@ void Socket::set_timeout(int secs)
 }
 
 //--------------------------------------------------------------------------
+// Set socket priority (0-7)
+void Socket::set_priority(int prio)
+{
+#ifdef __WIN32__
+#warning set_priority not implemented in Windows
+#else
+  unsigned long n = (unsigned long)prio;
+
+  setsockopt(fd, SOL_SOCKET, SO_PRIORITY, &n, sizeof(unsigned long));
+#endif
+}
+
+//--------------------------------------------------------------------------
+// Set IP TOS field
+void Socket::set_tos(int tos)
+{
+#ifdef __WIN32__
+#warning set_tos not implemented in Windows
+#else
+  unsigned long n = (unsigned long)tos;
+
+  setsockopt(fd, IPPROTO_IP, IP_TOS, &n, sizeof(unsigned long));
+#endif
+}
+
+//--------------------------------------------------------------------------
 // Bind to a local port (TCP or UDP servers)
 // Whether successful
 bool Socket::bind(int port)
