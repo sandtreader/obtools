@@ -9,5 +9,5 @@ Description: ObTools general-purpose libraries (single-threaded dev. files)
  .
  This package is additional to libot-general-dev and provides files for 
  building *single-threaded* applications which use the libraries
-Depends: libc6 (>= 2.3.2), libstdc++5 (>= 3.3.3)
+Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3)
 Depends: libot-general-dev (>= 1.0.0)
