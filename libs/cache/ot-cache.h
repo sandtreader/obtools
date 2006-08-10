@@ -673,7 +673,7 @@ template<class ID, class CONTENT> class UseTimeoutTidyPolicy:
   public TidyPolicy<ID, CONTENT>
 {
 public:
-  int timeout;  // In seconds
+  int timeout;  // In seconds, 0 = never times out
 
   UseTimeoutTidyPolicy(int _timeout): timeout(_timeout) {}
 
@@ -681,7 +681,7 @@ public:
   // Background check whether to keep an entry
   // Checks time since last use isn't greater than timeout
   bool keep_entry(const PolicyData& pd, time_t now)
-  { return now-pd.use_time < timeout; }
+  { return !timeout || now-pd.use_time < timeout; }
 };
 
 //==========================================================================
