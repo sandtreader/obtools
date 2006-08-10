@@ -70,15 +70,13 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
 	break;
 
 	case 2:
-	  OpenSSL::DES_ecb2_encrypt((OpenSSL::DES_cblock *)data,
-				    (OpenSSL::DES_cblock *)data, 
+	  OpenSSL::DES_ecb2_encrypt(data, data, 
 				    &keys[0].schedule, &keys[1].schedule,
 				    enc);
 	  break;
 
 	case 3:
-	  OpenSSL::DES_ecb3_encrypt((OpenSSL::DES_cblock *)data,
-				    (OpenSSL::DES_cblock *)data, 
+	  OpenSSL::DES_ecb3_encrypt(data, data, 
 				    &keys[0].schedule, &keys[1].schedule,
 				    &keys[2].schedule, enc);
 	  break;
