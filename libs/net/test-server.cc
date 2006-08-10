@@ -24,7 +24,8 @@ public:
 void TestServer::process(ObTools::Net::TCPSocket& s, 
 			 ObTools::Net::EndPoint client)
 {
-  cerr << "Got connection from " << client << endl;
+  cerr << "Got connection from " << client 
+       << " (" << s.get_mac(client.host) << ")" << endl;
 
   try
   {

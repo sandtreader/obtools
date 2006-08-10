@@ -390,6 +390,13 @@ public:
   // Get remote address
   // Only works if socket is connected.  
   EndPoint remote();
+
+  //--------------------------------------------------------------------------
+  // Get MAC address from ARP for any address (upper case hex with colons)
+  // Device name (e.g. "eth0") can be specified - if not given, all interfaces
+  // are searched
+  // Returns empty string if it can't find it
+  string get_mac(IPAddress ip, const string& device_name="");
 };
 
 //==========================================================================

@@ -16,6 +16,8 @@
 typedef int socklen_t;
 #else
 #include <sys/ioctl.h>
+#include <net/if_arp.h>
+#include <net/if.h>
 #define SOCKCLOSE close
 #define SOCKIOCTL ioctl
 #define SOCKERRNO errno
@@ -159,6 +161,63 @@ EndPoint Socket::remote()
     return EndPoint();
 }
 
+//--------------------------------------------------------------------------
+// Get MAC address from ARP for any address (upper case hex with colons)
+// Device name (e.g. "eth0") can be specified - if not given, all interfaces
+// are searched
+// Returns empty string if it can't find it
+string Socket::get_mac(IPAddress ip, const string& device_name)
+{
+#ifdef __WIN32__
+#warning get_mac not implemented in Windows
+  return "";
+#else
+  // Check if device specified - if not, lookup all Ethernet interfaces 
+  // and recurse
+  if (device_name.empty())
+  {
+    struct if_nameindex *ifs = if_nameindex();
+    if (!ifs) return "";
+
+    for(struct if_nameindex *ifp = ifs; ifp->if_name; ifp++)
+    {
+      string ifname = ifp->if_name;
+
+      // Ignore lo and aliases
+      if (ifname=="lo" || ifname.find(':') != string::npos) continue;
+
+      // Recurse with this interface, return if it succeeds
+      string mac = get_mac(ip, ifname);
+      if (!mac.empty()) return mac;
+    }
+
+    if_freenameindex(ifs);
+
+    // No interfaces found it
+    return "";
+  }
+
+  // Normal behaviour with device name given
+  struct arpreq arp;
+  memset(&arp, 0, sizeof(arp));
+  struct sockaddr_in *sin = (struct sockaddr_in *)&arp.arp_pa;
+  sin->sin_family = AF_INET;
+  sin->sin_addr.s_addr = ip.nbo();
+  strncpy(arp.arp_dev, device_name.c_str(), sizeof(arp.arp_dev));
+
+  if (SOCKIOCTL(fd, SIOCGARP, &arp)<0) return "";
+
+  // Check its complete
+  if (!(arp.arp_flags & ATF_COM)) return "";
+
+  // Create upper-case hex string
+  char mac[18];
+  unsigned char *p = (unsigned char *)arp.arp_ha.sa_data;
+  sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
+	  p[0], p[1], p[2], p[3], p[4], p[5]);
+  return mac;
+#endif
+}
 
 //==========================================================================
 // Socket exceptions
