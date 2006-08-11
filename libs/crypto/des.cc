@@ -9,6 +9,14 @@
 
 #include <stdlib.h>
 #include "ot-crypto.h"
+#include <openssl/opensslv.h>
+
+// Make build with both 0.9.7 and 0.9.8
+#if OPENSSL_VERSION_NUMBER >= 0x908000L
+#define DES_CBLOCK_CAST(_x) ((OpenSSL::DES_cblock *)(_x))
+#else
+#define DES_CBLOCK_CAST(_x) _x
+#endif
 
 namespace ObTools { namespace Crypto {
 
@@ -70,13 +78,15 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
 	break;
 
 	case 2:
-	  OpenSSL::DES_ecb2_encrypt(data, data, 
+	  OpenSSL::DES_ecb2_encrypt(DES_CBLOCK_CAST(data), 
+				    DES_CBLOCK_CAST(data), 
 				    &keys[0].schedule, &keys[1].schedule,
 				    enc);
 	  break;
 
 	case 3:
-	  OpenSSL::DES_ecb3_encrypt(data, data, 
+	  OpenSSL::DES_ecb3_encrypt(DES_CBLOCK_CAST(data), 
+				    DES_CBLOCK_CAST(data), 
 				    &keys[0].schedule, &keys[1].schedule,
 				    &keys[2].schedule, enc);
 	  break;
