@@ -45,7 +45,7 @@
          original requests.  'timeout' (default 60) gives time in
          seconds to wait for a response before assuming no-one is
          going to respond and failing the request -->
-    <correlator id="correlator" timeout="5"/>
+    <correlator id="correlator" timeout="15"/>
 
     <!-- Publisher:  Accepts subscriptions for message subject patterns and
          reflects messages to subscribers.

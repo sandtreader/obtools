@@ -3,7 +3,7 @@ Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: g++-3.4, postgresql-dev (>= 7.4.1), libot-general-dev (>= 1.0.0)
+Depends: g++-3.4, postgresql-dev (>= 7.4.1), libot-general-dev (>= 1.6.4)
 Description: ObTools Postgres database libraries (development files)
  The ObTools database library provides a generic database interface in C++.
  This is the Postgres interface version

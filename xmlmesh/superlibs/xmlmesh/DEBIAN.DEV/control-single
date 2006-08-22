@@ -9,5 +9,4 @@ Description: ObTools XMLMesh message bus shared libraries (single threaded dev f
  .
  This package is additional to libot-xmlmesh-dev and provides libraries for
  building *single-threaded* clients which use XMLMesh for communication.
-Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3)
-Depends: libot-xmlmesh-dev (>= 1.0.0), libot-general-single-dev (>= 1.0.0)
+Depends: libot-xmlmesh-dev (>= 1.5.0), libot-general-single-dev (>= 1.6.4)
