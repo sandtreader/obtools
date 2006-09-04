@@ -13,6 +13,7 @@
 
 #include <string>
 #include <map>
+#include <list>
 #include <stdint.h>
 #include <iostream>
 #include <sstream>
@@ -73,7 +74,7 @@ public:
 //which probably indicates a hardware or software origin.
 
 //But there is a long-running argument about exactly what CCITT is 'supposed'
-//to be.  The most prelevant is probably the plain CCITT below; with
+//to be.  The most prevelant is probably the plain CCITT below; with
 //CCITT_ZERO the next - but I'm inclined to agree with Joe Geluso 
 //that CCITT_MOD may be the 'right' answer, so all three are offered!
 
@@ -264,6 +265,74 @@ public:
   // Dump a block
   void dump(const void *block, int length);
 };
+
+//==========================================================================
+//Range set - stores a list of integer ranges - e.g. file fragments, and
+//offers various useful operations on them (range.cc)
+class RangeSet
+{
+public:
+  // Integer size typedefs 
+  typedef uint64_t off_t;
+  typedef uint64_t len_t;
+
+  // Internal record of a single range
+  struct Range
+  {
+    off_t start;
+    len_t length;
+    Range(off_t _start, len_t _length): start(_start), length(_length) {}
+  };
+
+  // List of ranges, stored in order
+  list<Range> ranges;
+
+  // Expected total length - provides information for various operations 
+  // below.  Will be modified by insertions if exceeded - hence 0 is fine
+  // if you want just to count the total length seen so far
+  len_t total_length;
+
+  //------------------------------------------------------------------------
+  // Constructor
+  RangeSet(len_t _total_length=0): total_length(_total_length) {}
+
+  //------------------------------------------------------------------------
+  // Insert a range
+  // Optimises against adjacent ranges, overlaps allowed
+  void insert(off_t start, len_t length);
+
+  //------------------------------------------------------------------------
+  // Check if a given range is all present
+  bool contains(off_t start, len_t length) const;
+
+  //------------------------------------------------------------------------
+  // Check if the set is complete up to total_length
+  bool is_complete() const { return contains(0, total_length); } 
+
+  //------------------------------------------------------------------------
+  // Return a new set of all the 'holes' in the set, up to the total_length
+  RangeSet invert() const;
+
+  //------------------------------------------------------------------------
+  // Show the set as a string 'fuel gauge' of the given string length
+  // Each character in the string maps to a fractional part of the range
+  // (measured to total_length):
+  //   ' ' (space):  No range present in this fraction
+  //   '-'        :  Part of range present in this fraction
+  //   '='        :  Full range present in this fraction
+  // Most simply, this gives a fuel gauge for monotonically increasing
+  // ranges, but also allows for insertion at multiple points
+  string gauge(unsigned int length=50) const;
+
+  //------------------------------------------------------------------------
+  // Dump the set to the given output, one line per range, in form
+  // start, length
+  void dump(ostream& sout) const;
+};
+
+//------------------------------------------------------------------------
+// << operator to write RangeSet to ostream
+ostream& operator<<(ostream& s, const RangeSet& rs);
 
 //==========================================================================
 }} //namespaces
