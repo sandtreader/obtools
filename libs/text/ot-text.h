@@ -56,6 +56,16 @@ string remove_word(string& text);
 vector<string> split_words(const string& text);
 
 //==========================================================================
+// Record split functions (split.cc)
+
+//--------------------------------------------------------------------------
+// Split a string into fields using the given delimiter
+// Canonicalises fields (removed leading and trailing whitespace, folds
+// multiple internal whitespace into one) if canonicalise is set
+vector<string> split(const string& text, char delim=',', 
+		     bool canonicalise = true);
+
+//==========================================================================
 // Pattern matching functions (pattern.cc)
 // NB - Unix 'glob' style patterns, not full regexp
 
