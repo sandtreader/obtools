@@ -13,7 +13,7 @@
 
 // Make build with both 0.9.7 and 0.9.8
 #if OPENSSL_VERSION_NUMBER >= 0x908000L
-#define DES_CBLOCK_CAST(_x) ((OpenSSL::DES_cblock *)(_x))
+#define DES_CBLOCK_CAST(_x) ((DES_cblock *)(_x))
 #else
 #define DES_CBLOCK_CAST(_x) _x
 #endif
@@ -44,20 +44,18 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
     switch (nkeys)
     {
       case 1:
-	OpenSSL::DES_ncbc_encrypt(data, data, length, 
-				  &keys[0].schedule, &iv.key, enc);
+	DES_ncbc_encrypt(data, data, length, &keys[0].schedule, &iv.key, enc);
 	break;
 
       case 2:
-	OpenSSL::DES_ede2_cbc_encrypt(data, data, length,
-				      &keys[0].schedule, &keys[1].schedule, 
-				      &iv.key, enc);
+	DES_ede2_cbc_encrypt(data, data, length, &keys[0].schedule, 
+			     &keys[1].schedule, &iv.key, enc);
 	break;
 
       case 3:
-	OpenSSL::DES_ede3_cbc_encrypt(data, data, length,
-				      &keys[0].schedule, &keys[1].schedule,
-				      &keys[2].schedule, &iv.key, enc);
+	DES_ede3_cbc_encrypt(data, data, length,
+			     &keys[0].schedule, &keys[1].schedule,
+			     &keys[2].schedule, &iv.key, enc);
 	break;
 
       default: return false;
@@ -72,23 +70,23 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
       {
 	case 1:
 	{
-	  OpenSSL::DES_cblock *block = (OpenSSL::DES_cblock *)data;
-	  OpenSSL::DES_ecb_encrypt(block, block, &keys[0].schedule, enc);
+	  DES_cblock *block = (DES_cblock *)data;
+	  DES_ecb_encrypt(block, block, &keys[0].schedule, enc);
 	}
 	break;
 
 	case 2:
-	  OpenSSL::DES_ecb2_encrypt(DES_CBLOCK_CAST(data), 
-				    DES_CBLOCK_CAST(data), 
-				    &keys[0].schedule, &keys[1].schedule,
-				    enc);
+	  DES_ecb2_encrypt(DES_CBLOCK_CAST(data), 
+			   DES_CBLOCK_CAST(data), 
+			   &keys[0].schedule, &keys[1].schedule,
+			   enc);
 	  break;
 
 	case 3:
-	  OpenSSL::DES_ecb3_encrypt(DES_CBLOCK_CAST(data), 
-				    DES_CBLOCK_CAST(data), 
-				    &keys[0].schedule, &keys[1].schedule,
-				    &keys[2].schedule, enc);
+	  DES_ecb3_encrypt(DES_CBLOCK_CAST(data), 
+			   DES_CBLOCK_CAST(data), 
+			   &keys[0].schedule, &keys[1].schedule,
+			   &keys[2].schedule, enc);
 	  break;
 
 	default: return false;
@@ -100,4 +98,7 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
 }
 
 }} // namespaces
+
+
+
 

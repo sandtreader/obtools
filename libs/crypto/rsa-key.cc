@@ -14,12 +14,9 @@
 #include "ot-chan.h"
 #include "ot-crypto.h"
 
-namespace OpenSSL
-{
 #include "openssl/bio.h"
 #include "openssl/buffer.h"
 #include "openssl/pem.h"
-}
 
 namespace ObTools { namespace Crypto {
 
@@ -28,7 +25,7 @@ namespace ObTools { namespace Crypto {
 // Must seed PRNG first 
 void RSAKey::create(int size, int exponent)
 {
-  rsa = OpenSSL::RSA_generate_key(size, exponent, 0, 0);
+  rsa = RSA_generate_key(size, exponent, 0, 0);
   if (rsa) valid = true;
 }
 
@@ -61,26 +58,26 @@ void RSAKey::read(const string& text, bool force_private)
   int length = text.size()+1; // C string
 
   // Create 'BIO'
-  OpenSSL::BIO *bio = OpenSSL::BIO_new(OpenSSL::BIO_s_mem());
+  BIO *bio = BIO_new(BIO_s_mem());
   if (!bio) return;
 
   // Create memory buffer
-  OpenSSL::BUF_MEM *buf = OpenSSL::BUF_MEM_new();
+  BUF_MEM *buf = BUF_MEM_new();
   if (!buf) return;
-  OpenSSL::BUF_MEM_grow(buf, length);
+  BUF_MEM_grow(buf, length);
   memcpy(buf->data, text.c_str(), length);
 
   // Attach to BIO (auto free of buf)
-  OpenSSL::BIO_set_mem_buf(bio, buf, BIO_CLOSE);
+  BIO_set_mem_buf(bio, buf, BIO_CLOSE);
 
   // Read key
   if (is_private || force_private)
-    rsa = OpenSSL::PEM_read_bio_RSAPrivateKey(bio, 0, 0, 0);
+    rsa = PEM_read_bio_RSAPrivateKey(bio, 0, 0, 0);
   else
-    rsa = OpenSSL::PEM_read_bio_RSA_PUBKEY(bio, 0, 0, 0);
+    rsa = PEM_read_bio_RSA_PUBKEY(bio, 0, 0, 0);
 
   // Clean up
-  OpenSSL::BIO_free(bio);
+  BIO_free(bio);
 
   if (rsa) valid = true;
 }
@@ -93,27 +90,23 @@ string RSAKey::str(bool force_public) const
   if (!valid) return "INVALID!";
 
   // Create 'BIO'
-  OpenSSL::BIO *bio = OpenSSL::BIO_new(OpenSSL::BIO_s_mem());
+  BIO *bio = BIO_new(BIO_s_mem());
   if (!bio) return "";
 
   // Write key
   if (is_private && !force_public)
-    OpenSSL::PEM_write_bio_RSAPrivateKey(bio, rsa, 0, 0, 0, 0, 0);
+    PEM_write_bio_RSAPrivateKey(bio, rsa, 0, 0, 0, 0, 0);
   else
-    OpenSSL::PEM_write_bio_RSA_PUBKEY(bio, rsa);
+    PEM_write_bio_RSA_PUBKEY(bio, rsa);
 
-  // Grr. BIO_flush is a macro so we have to hack the namespaces...
-  {
-    using namespace OpenSSL;
-    BIO_flush(bio);
-  }
+  BIO_flush(bio);
 
   // Get buffer
-  OpenSSL::BUF_MEM *buf;
-  OpenSSL::BIO_get_mem_ptr(bio, &buf);
+  BUF_MEM *buf;
+  BIO_get_mem_ptr(bio, &buf);
   string key(buf->data, buf->length);
 
-  OpenSSL::BIO_free(bio);  // buf goes too
+  BIO_free(bio);  // buf goes too
   return key;
 }
   
@@ -137,7 +130,7 @@ ostream& operator<<(ostream& s, const RSAKey& k)
 // Destructor
 RSAKey::~RSAKey()
 {
-  if (rsa) OpenSSL::RSA_free(rsa);
+  if (rsa) RSA_free(rsa);
 }
 
 }} // namespaces

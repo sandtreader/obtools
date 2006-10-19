@@ -16,7 +16,7 @@ namespace ObTools { namespace Crypto {
 // Get cyphertext size
 int RSA::cypher_size()
 {
-  return key.valid?OpenSSL::RSA_size(key.rsa):0;
+  return key.valid?RSA_size(key.rsa):0;
 }
 
 //------------------------------------------------------------------------
@@ -24,7 +24,7 @@ int RSA::cypher_size()
 int RSA::max_plaintext()
 {
   // Allow for PKCS1 padding
-  return key.valid?OpenSSL::RSA_size(key.rsa)-11:0;
+  return key.valid?RSA_size(key.rsa)-11:0;
 }
 
 //------------------------------------------------------------------------
@@ -39,11 +39,9 @@ bool RSA::encrypt(const unsigned char *from, int length,
 
   int res;
   if (key.is_private)
-    res = OpenSSL::RSA_private_encrypt(length, from, to, key.rsa, 
-				       RSA_PKCS1_PADDING);
+    res = RSA_private_encrypt(length, from, to, key.rsa, RSA_PKCS1_PADDING);
   else
-    res = OpenSSL::RSA_public_encrypt(length, from, to, key.rsa, 
-				      RSA_PKCS1_PADDING);
+    res = RSA_public_encrypt(length, from, to, key.rsa, RSA_PKCS1_PADDING);
 
   return res>=0;
 }
@@ -61,11 +59,9 @@ int RSA::decrypt(const unsigned char *from, unsigned char *to)
   int res;
   int length = cypher_size();
   if (key.is_private)
-    res = OpenSSL::RSA_private_decrypt(length, from, to, key.rsa, 
-				       RSA_PKCS1_PADDING);
+    res = RSA_private_decrypt(length, from, to, key.rsa, RSA_PKCS1_PADDING);
   else
-    res = OpenSSL::RSA_public_decrypt(length, from, to, key.rsa, 
-				      RSA_PKCS1_PADDING);
+    res = RSA_public_decrypt(length, from, to, key.rsa, RSA_PKCS1_PADDING);
 
   return (res<0)?0:res;
 }

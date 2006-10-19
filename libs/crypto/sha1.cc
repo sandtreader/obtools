@@ -12,31 +12,27 @@
 #include <sstream>
 #include <iomanip>
 
-namespace OpenSSL
-{
-}
-
 namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
 // Constructor
 SHA1::SHA1(): finished(false)
 {
-  OpenSSL::SHA1_Init(&sha_ctx);
+  SHA1_Init(&sha_ctx);
 }
 
 //------------------------------------------------------------------------
 // Update digest with a block of data
 void SHA1::update(const void *data, size_t length)
 {
-  if (!finished) OpenSSL::SHA1_Update(&sha_ctx, data, (unsigned long)length);
+  if (!finished) SHA1_Update(&sha_ctx, data, (unsigned long)length);
 }
 
 //------------------------------------------------------------------------
 // Get result - writes DIGEST_LENGTH bytes to result
 void SHA1::get_result(unsigned char *result)
 {
-  if (!finished) OpenSSL::SHA1_Final(result, &sha_ctx);
+  if (!finished) SHA1_Final(result, &sha_ctx);
   finished = true;
 }
 
@@ -57,7 +53,7 @@ string SHA1::get_result()
   if (!finished)
   {
     unsigned char buf[DIGEST_LENGTH];
-    OpenSSL::SHA1_Final(buf, &sha_ctx);
+    SHA1_Final(buf, &sha_ctx);
     finished = true;
     return hex20(buf);
   }
@@ -72,7 +68,7 @@ SHA1::~SHA1()
   {
     // Dump into a fake buffer
     unsigned char bucket[DIGEST_LENGTH];
-    OpenSSL::SHA1_Final(bucket, &sha_ctx);
+    SHA1_Final(bucket, &sha_ctx);
   }
 }
 
@@ -80,7 +76,7 @@ SHA1::~SHA1()
 // Static: Get hash of block of data.  Writes DIGEST_LENGTH bytes to result
 void SHA1::digest(const void *data, size_t length, unsigned char *result)
 {
-  OpenSSL::SHA1((const unsigned char *)data, (unsigned long)length, result);
+  ::SHA1((const unsigned char *)data, (unsigned long)length, result);
 }
 
 //------------------------------------------------------------------------

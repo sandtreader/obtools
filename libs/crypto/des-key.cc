@@ -39,7 +39,7 @@ DESKey& DESKey::operator=(const DESKey& k)
 void DESKey::load()
 {
   // IVs are always valid, and schedule not used
-  valid = is_key?!OpenSSL::DES_set_key_checked(&key, &schedule):true;
+  valid = is_key?!DES_set_key_checked(&key, &schedule):true;
 }
 
 //------------------------------------------------------------------------
@@ -49,9 +49,9 @@ void DESKey::create()
 {
   do
   {
-    OpenSSL::DES_random_key(&key);
-    if (is_key) OpenSSL::DES_set_odd_parity(&key);
-  } while (is_key && OpenSSL::DES_is_weak_key(&key));
+    DES_random_key(&key);
+    if (is_key) DES_set_odd_parity(&key);
+  } while (is_key && DES_is_weak_key(&key));
 
   load();
 }

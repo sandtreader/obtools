@@ -16,14 +16,9 @@
 #include <string>
 #include <map>
 
-// Wrap OpenSSL in its own namespace to distinguish from our wrappers of 
-// the same or similar names
-namespace OpenSSL
-{
 #include <openssl/des.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
-}
 
 namespace ObTools { namespace Crypto { 
 
@@ -39,8 +34,8 @@ private:
   void load();
 
 public:
-  OpenSSL::DES_cblock key;            // Original 8-byte key
-  OpenSSL::DES_key_schedule schedule; // Expanded key for optimised processing
+  DES_cblock key;            // Original 8-byte key
+  DES_key_schedule schedule; // Expanded key for optimised processing
   bool is_key;                    // True if a key, false if an IV
   bool valid;                     // Whether key/schedule is valid
   
@@ -172,7 +167,7 @@ private:
   RSAKey& operator=(const RSAKey&) { return *this; }
 
 public:
-  OpenSSL::RSA *rsa;
+  RSA *rsa;
 
   bool is_private; // Private or public?
   bool valid;      // Whether key is valid
@@ -292,7 +287,7 @@ class PKCS5
 class SHA1
 {
  private:
-  OpenSSL::SHA_CTX sha_ctx;
+  SHA_CTX sha_ctx;
   bool finished;
 
   static string hex20(unsigned char *b);
