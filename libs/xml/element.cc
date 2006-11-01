@@ -541,6 +541,23 @@ int Element::get_attr_int(const string& attname, int def) const
 }
 
 //--------------------------------------------------------------------------
+// Get the integer value of an attribute of the given name, from hex string
+// Returns attribute value
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+int Element::get_attr_hex(const string& attname, int def) const
+{
+  map<string,string>::const_iterator p=attrs.find(attname);
+  if (p!=attrs.end()) 
+  {
+    istringstream iss(p->second);
+    iss >> hex >> def;
+  }
+
+  return def;
+}
+
+//--------------------------------------------------------------------------
 // Get the 64-bit integer value of an attribute of the given name
 // Returns attribute value
 // Defaults to default value given (or 0) if not present
@@ -554,6 +571,26 @@ uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
 
   return def;
 }
+
+//--------------------------------------------------------------------------
+// Get the 64-bit integer value of an attribute of the given name, from hex
+// string
+// Returns attribute value
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+uint64_t Element::get_attr_hex64(const string& attname, uint64_t def) const
+{
+  map<string,string>::const_iterator p=attrs.find(attname);
+
+  if (p!=attrs.end()) 
+  {
+    istringstream iss(p->second);
+    iss >> hex >> def;
+  }
+
+  return def;
+}
+
 
 //--------------------------------------------------------------------------
 // Get the real value of an attribute of the given name
@@ -598,12 +635,32 @@ void Element::set_attr_int(const string& attname, int value)
 }
 
 //--------------------------------------------------------------------------
+// Set an attribute (integer, hex)
+// (_int qualifier not strictly necessary here, but matches get_attr_int)
+void Element::set_attr_hex(const string& attname, int value)
+{
+  ostringstream oss;
+  oss << hex << value;
+  attrs[attname] = oss.str();
+}
+
+//--------------------------------------------------------------------------
 // Set an attribute (64-bit integer)
 // (_int64 qualifier not strictly necessary here, but matches get_attr_int64)
 void Element::set_attr_int64(const string& attname, uint64_t value)
 {
   ostringstream oss;
   oss << value;
+  attrs[attname] = oss.str();
+}
+
+//--------------------------------------------------------------------------
+// Set an attribute (64-bit integer, hex)
+// (_int64 qualifier not strictly necessary here, but matches get_attr_int64)
+void Element::set_attr_hex64(const string& attname, uint64_t value)
+{
+  ostringstream oss;
+  oss << hex << value;
   attrs[attname] = oss.str();
 }
 
