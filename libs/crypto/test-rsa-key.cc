@@ -16,17 +16,17 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Test public or private
-void test(bool priv)
+void test(bool priv, const string& pass_phrase="")
 {
   Crypto::RSAKey k(priv);
   k.create();
 
   if (k.valid)
   {
-    cout << "Created RSA key:\n" << k << endl;
-    string ks = k.str();
+    string ks = k.str(pass_phrase);
+    cout << "Created RSA key:\n" << ks << endl;
 
-    Crypto::RSAKey k2(ks, priv);
+    Crypto::RSAKey k2(ks, priv, pass_phrase);
     if (k2.valid)
       cout << "Read back:\n" << k2 << endl;
     else
@@ -54,11 +54,17 @@ void test(bool priv)
 // Main
 int main()
 {
+  Crypto::Library library;
+
   cout << "\nPublic key:\n";
   test(false);
 
   cout << "\nPrivate key:\n";
   test(true);
+
+  cout << "\nPrivate key with passphrase:\n";
+  test(true, "hello");
+
   return 0;  
 }
 

@@ -26,6 +26,26 @@ namespace ObTools { namespace Crypto {
 using namespace std;
 
 //==========================================================================
+// Overall library initialiser singleton
+// Keep one of these alive for the entire operation of the program
+class Library
+{
+private:
+  // One-shot initialiser - returns true only first time called
+  static bool should_initialise()
+  { static bool i = false; if (i) return false; i = true; return true; }
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Library();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Library();
+};
+
+//==========================================================================
 // DES key (des-key.cc)
 // 8-byte key, also used for IV 
 class DESKey
@@ -178,14 +198,22 @@ public:
     rsa(0), is_private(_private), valid(false) {}
 
   //------------------------------------------------------------------------
-  // Constructor from string - PEM format
+  // Constructor from string - PEM format with pass-phrase
+  RSAKey(const string& text, bool _private, const string& pass_phrase):
+    rsa(0), is_private(_private), valid(false) { read(text, pass_phrase); }
+
+  // Stub for backwards linkage compatibility
   RSAKey(const string& text, bool _private):
     rsa(0), is_private(_private), valid(false) { read(text); }
 
   //------------------------------------------------------------------------
-  // Set from string for already created ones
+  // Set from string for already created ones, with pass-phrase
+  void set(const string& text, bool _private, const string& pass_phrase)
+  { is_private = _private; read(text, pass_phrase); }
+
+  // Backwards compatibility stub
   void set(const string& text, bool _private)
-  { is_private = _private; read(text); }
+  { set(text, _private, ""); }
 
   //------------------------------------------------------------------------
   // Create a new key from random data
@@ -193,26 +221,45 @@ public:
   void create(int size=1024, int exponent=65537);
 
   //------------------------------------------------------------------------
-  // Read from stream - reads PEM format
+  // Read from stream - reads PEM format, with pass phrase
   // If force_private is set, reads a private key PEM block even if a
   // public key is wanted (use for testing both ends with a single key)
-  void read(istream& sin, bool force_private = false);
+  void read(istream& sin, const string& pass_phrase, 
+	    bool force_private = false);
+
+  // Backwards compatibility stub
+  void read(istream& sin, bool force_private = false)
+  { read(sin, "", force_private); }
 
   //------------------------------------------------------------------------
-  // Write to stream - writes PEM format
+  // Write to stream - writes PEM format, with pass phrase
   // If force_public is set, writes a public key PEM block even if
   // a private key is held - use to generate new public/private pairs 
-  void write(ostream& sout, bool force_public = false) const;
+  void write(ostream& sout, const string& pass_phrase, 
+	     bool force_public = false) const;
+
+  // Backwards compatibility stub
+  void write(ostream& sout, bool force_public = false) const
+  { write(sout, "", force_public); }
 
   //------------------------------------------------------------------------
-  // Read from string - reads 16 hex characters
+  // Read from string - reads PEM format, with pass phrase
   // If force_private is set, reads a private key even if public (see above)
-  void read(const string& text, bool force_private = false);
+  void read(const string& text, const string& pass_phrase,
+	    bool force_private = false);
 
+  // Backwards compatibility stub
+  void read(const string& text, bool force_private = false)
+  { read(text, "", force_private); }
+    
   //------------------------------------------------------------------------
-  // Convert to string (PEM format)
+  // Convert to string (PEM format) with pass_phrase
   // force_public forces public key output from private key (see above)
-  string str(bool force_public = false) const;
+  string str(const string& pass_phrase, bool force_public = false) const;
+
+  // Backwards compatibility stub
+  string str(bool force_public = false) const
+  { return str("", force_public); }
 
   //------------------------------------------------------------------------
   // Destructor
