@@ -124,6 +124,24 @@ string ftos(double f);
 // String to float (0.0 default)
 double stof(const string& s);
 
+//--------------------------------------------------------------------------
+// Integer to hex
+string itox(unsigned int i);
+
+//--------------------------------------------------------------------------
+// Hex to integer (0 default)
+unsigned int xtoi(const string& s);
+
+//--------------------------------------------------------------------------
+// Binary to hex (simple, use Misc::Dumper for long blocks)
+string btox(const unsigned char *data, unsigned int length);
+
+//--------------------------------------------------------------------------
+// Hex to binary
+// Reads up to max_length bytes into data, returns number actually read
+unsigned int xtob(const string& hex, unsigned char *data, 
+		  unsigned int max_length);
+
 //==========================================================================
 // Base64 encoder/decoder
 class Base64

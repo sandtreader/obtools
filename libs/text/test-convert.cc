@@ -20,6 +20,7 @@ int main()
 {
   string si = "1234567890";
   string sf = "12345.6789";
+  string sx = "deadbeef";
 
   cout << "Integer string: " << si 
        << " -> " << Text::stoi(si) 
@@ -28,6 +29,17 @@ int main()
   cout << "Float string:   " << sf 
        << " -> " << Text::stof(sf) 
        << " -> " << Text::ftos(Text::stof(sf)) << endl;
+
+  cout << "Hex string:     " << sx 
+       << " -> " << Text::xtoi(sx) 
+       << " -> " << Text::itox(Text::xtoi(sx)) << endl;
+
+  unsigned char buf[4];
+  int l = Text::xtob(sx, buf, 4);
+  cout << "Hex string:     " << sx
+       << " -> " << l << " bytes binary ["
+       << hex << (int)buf[0] << (int)buf[1] << (int)buf[2] << (int)buf[3] 
+       << dec << "] -> " << Text::btox(buf, 4) << endl;
 
   return 0;  
 }
