@@ -15,6 +15,7 @@ TESTCMD	= ./test-soap < ../tests/soap1-2.xml \
        && ./test-http-client http://terraservice.net/terraService.asmx \
              < ../tests/place.soap.xml
 MT-VARIANTS = 1
+SOCKET = 1
 
 ifndef SINGLE
 OBJS += url-handler.o
