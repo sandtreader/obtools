@@ -282,6 +282,7 @@ public:
     off_t start;
     len_t length;
     Range(off_t _start, len_t _length): start(_start), length(_length) {}
+    off_t end() const { return start+length; }  // One past the end
   };
 
   // List of ranges, stored in order

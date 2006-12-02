@@ -30,7 +30,17 @@ int main()
     cout << "Inserting " << length << " at " << start << endl;
     s.insert(start, length);
     cout << s;
-    cout << "[" << s.gauge() << "]" << endl;
+    cout << "[" << s.gauge(s.total_length<50?s.total_length:50) << "]" 
+	 << " (" << s.total_length << ")\n";
+    cout << "Complete? " << (s.is_complete()?"Yes":"No") << endl;
+    cout << "Includes 15,5? " << (s.contains(15,5)?"Yes":"No") << endl;
+    Misc::RangeSet inv = s.invert();
+    cout << "Inverse:\n";
+    cout << inv;
+    cout << "[" << inv.gauge(inv.total_length<50?inv.total_length:50) << "]" 
+	 << " (" << inv.total_length << ")\n";
+
+    cout << "\n-----------------------------------------------------------------------------\n\n";
   }
 
   return 0;  

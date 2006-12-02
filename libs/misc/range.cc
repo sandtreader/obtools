@@ -27,6 +27,8 @@ namespace ObTools { namespace Misc {
 // Optimises against adjacent ranges, overlaps allowed
 void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
 {
+  off_t end = start+length;
+
   // Find the first range which starts after or at the new one
   list<Range>::iterator prev_p = ranges.end();
   list<Range>::iterator next_p;
@@ -38,11 +40,10 @@ void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
     ;
 
   // If there was one before, check if it overlaps or touches us
-  if (prev_p != ranges.end()
-      && prev_p->start + prev_p->length >= start)
+  if (prev_p != ranges.end() && prev_p->end() >= start)
   {
     // Extend this one to include this if it's smaller
-    if (start+length > prev_p->start+prev_p->length)
+    if (end > prev_p->end())
       prev_p->length = start+length-prev_p->start;
 
     // Use this one as the one to check for overlaps afterwards
@@ -78,21 +79,52 @@ void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
   }
 
   // Check if total_length exceeded 
-  if (start+length>total_length) total_length = start+length;
+  if (end>total_length) total_length = end;
 }
 
 //------------------------------------------------------------------------
 // Check if a given range is all present
 bool RangeSet::contains(off_t start, len_t length) const
 {
+  off_t end = start+length;
 
+  // Because the set is always optimal, there must be a single range
+  // which includes both the start and end
+  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    if (start >= r.start && start < r.end() && end <= r.end()) return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------
 // Return a new set of all the 'holes' in the set
 RangeSet RangeSet::invert() const
 {
+  RangeSet inverse;
+  const Range *last = 0;
 
+  // Walk filling in gaps between last end (or 0) and new start
+  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    if (last)
+      inverse.ranges.push_back(Range(last->end(), r.start-last->end()));
+    else if (r.start > 0)
+      inverse.ranges.push_back(Range(0, r.start));
+
+    last = &r;
+  }
+
+  // Complete with gap (if any) between final end and total length
+  if (last && total_length > last->end())
+    inverse.ranges.push_back(Range(last->end(), total_length-last->end()));
+
+  // Total length is the same as ours
+  inverse.total_length = total_length;
+  return inverse;
 }
 
 //------------------------------------------------------------------------
@@ -111,17 +143,34 @@ string RangeSet::gauge(unsigned int length) const
 
   for(unsigned int i=0; i<length; i++)
   {
-    // Calculate (exactly, avoiding rounding and overflow) start of this 
-    // fraction and start of next
-    off_t this_start = (off_t)((double)total_length*i/(double)length);
-    off_t next_start = (off_t)((double)total_length*(i+1)/(double)length);
+    // Calculate (exactly, avoiding rounding and overflow) start and end 
+    // of this fraction (end=start of next) 
+    double this_start = (double)total_length*i/(double)length;
+    double this_end   = (double)total_length*(i+1)/(double)length;
 
     int contained = 0;  // 0 = none, 1 = some, 2 = all
 
-    while(p!=ranges.end())
+    while (p!=ranges.end())
     {
+      const Range& r = *p;
 
-      ++p;
+      // Skip to next fraction if not yet overlapping this range
+      if ((double)r.start >= this_end) break;
+
+      // Check if we've already left this range
+      if (this_start >= (double)r.end()) 
+      { 
+	++p;
+	continue;
+      }
+
+      // So we have an overlap - is it total?
+      if ((double)r.start <= this_start && (double)r.end() >= this_end)
+	contained = 2;
+      else
+	contained = 1;
+
+      break;
     }
 
     s += " -="[contained];
