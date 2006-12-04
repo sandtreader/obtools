@@ -138,7 +138,7 @@ endif #!PROFILE
 endif #!CROSS-COMPILE
 
 #Choose base libraries
-EXTRALIBS = -lstdc++ -lrt
+EXTRALIBS = -lstdc++ 
 
 #Compiler override for MINGW build
 ifdef MINGW 
@@ -156,6 +156,7 @@ endif
 else
 CC = gcc-3.4
 CXX = g++-3.4
+EXTRALIBS += -lrt
 endif
 
 # Get locations
