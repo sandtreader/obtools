@@ -48,7 +48,7 @@ int main(int argc, char **argv)
       // Check it isn't already there
       do
       {
-	id = (uint32_t)(random()^(random()<<1));
+	id = (uint32_t)(rand()^(rand()<<1));
       } while (hash.lookup(id) != Hash::INVALID_INDEX);
 
       // Try to add it
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	     << i << " got " << j << endl;
 
       // Delete according to probability
-      if (prob && random()%100<prob) hash.remove(id);
+      if (prob && rand()%100<prob) hash.remove(id);
     }
   }
   else
