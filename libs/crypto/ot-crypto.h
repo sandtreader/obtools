@@ -228,8 +228,7 @@ public:
 	    bool force_private = false);
 
   // Backwards compatibility stub
-  void read(istream& sin, bool force_private = false)
-  { read(sin, "", force_private); }
+  void read(istream& sin, bool force_private = false);
 
   //------------------------------------------------------------------------
   // Write to stream - writes PEM format, with pass phrase
@@ -239,8 +238,7 @@ public:
 	     bool force_public = false) const;
 
   // Backwards compatibility stub
-  void write(ostream& sout, bool force_public = false) const
-  { write(sout, "", force_public); }
+  void write(ostream& sout, bool force_public = false) const;
 
   //------------------------------------------------------------------------
   // Read from string - reads PEM format, with pass phrase
@@ -249,8 +247,7 @@ public:
 	    bool force_private = false);
 
   // Backwards compatibility stub
-  void read(const string& text, bool force_private = false)
-  { read(text, "", force_private); }
+  void read(const string& text, bool force_private = false);
     
   //------------------------------------------------------------------------
   // Convert to string (PEM format) with pass_phrase
@@ -258,8 +255,7 @@ public:
   string str(const string& pass_phrase, bool force_public = false) const;
 
   // Backwards compatibility stub
-  string str(bool force_public = false) const
-  { return str("", force_public); }
+  string str(bool force_public = false) const;
 
   //------------------------------------------------------------------------
   // Destructor

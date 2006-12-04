@@ -42,6 +42,10 @@ void RSAKey::read(istream& sin, const string& pass_phrase,
   read(key, pass_phrase, force_private);
 }
 
+// Backwards compatibility stub
+void RSAKey::read(istream& sin, bool force_private)
+{ read(sin, "", force_private); }
+
 //------------------------------------------------------------------------
 // Write to stream - writes PEM format
 // If force_public is set, writes a public key PEM block even if
@@ -51,6 +55,10 @@ void RSAKey::write(ostream& sout, const string& pass_phrase,
 {
   sout << str(pass_phrase, force_public);
 }
+
+// Backwards compatibility stub
+void RSAKey::write(ostream& sout, bool force_public) const
+{ write(sout, "", force_public); }
 
 //------------------------------------------------------------------------
 // Read from string - reads PEM format, with pass phrase
@@ -90,6 +98,10 @@ void RSAKey::read(const string& text,
   if (rsa) valid = true;
 }
 
+// Backwards compatibility stub
+void RSAKey::read(const string& text, bool force_private)
+{ read(text, "", force_private); }
+
 //------------------------------------------------------------------------
 // Convert to PEM format string with pass phrase
 // force_public forces public key output from private key (see above)
@@ -128,6 +140,10 @@ string RSAKey::str(const string& pass_phrase, bool force_public) const
   return key;
 }
   
+// Backwards compatibility stub
+string RSAKey::str(bool force_public) const
+{ return str("", force_public); }
+
 //------------------------------------------------------------------------
 // >> operator to read key from istream
 istream& operator>>(istream& s, RSAKey& k)
