@@ -55,8 +55,12 @@ int main(int argc, char **argv)
   }
   else
   {
-    size = TEST_SIZE;
-    for(int i=0; i<TEST_SIZE; i++) data[i]=(unsigned char)i;
+    size = 0;
+    while (cin && size<TEST_SIZE)
+    {
+      int c = cin.get();
+      if (c>=0) data[size++] = c;
+    }
   }
 
   cout << "CRCs of:\n";
