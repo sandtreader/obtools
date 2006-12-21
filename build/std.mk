@@ -312,10 +312,6 @@ LIB-PROFILEDP = -profiled
 CPPFLAGS += -finstrument-functions 
 EXTRALIBS += -lhrprof
 
-#Alternate if we do our own profiling
-#CPPFLAGS += -finstrument-functions 
-#DEPLIBS += $(ROOT)/tools/profile/ot-profile.a
-
 #Alternate using standard GNU gprof
 #CPPFLAGS += -pg 
 #LDFLAGS += -pg
