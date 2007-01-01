@@ -65,7 +65,7 @@ void MD5::initialise()
 //------------------------------------------------------------------------
 // Update to reflect the concatenation of another buffer full
 // of bytes. (taken from MD5Update())
-void MD5::update(char *buf, unsigned len)
+void MD5::update(const char *buf, unsigned len)
 {
   uint32_t t;
 

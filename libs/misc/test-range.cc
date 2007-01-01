@@ -18,21 +18,33 @@ using namespace ObTools;
 
 int main()
 {
-  Misc::RangeSet s;
+  Misc::RangeSet s(5);
+  bool begin = true;
 
   // Read numbers from cin
   while (cin)
   {
-    Misc::RangeSet::off_t start, length;
-    cin >> start >> length;
-    if (!cin) break;
+    if (begin)
+    {
+      cout << "At start, empty:\n";
+      begin = false;
+    }
+    else
+    {
+      Misc::RangeSet::off_t start, length;
+      cin >> start >> length;
+      if (!cin) break;
 
-    cout << "Inserting " << length << " at " << start << endl;
-    s.insert(start, length);
+      cout << "Inserting " << length << " at " << start << endl;
+      s.insert(start, length);
+    }
+
     cout << s;
     cout << "[" << s.gauge(s.total_length<50?s.total_length:50) << "]" 
 	 << " (" << s.total_length << ")\n";
     cout << "Complete? " << (s.is_complete()?"Yes":"No") << endl;
+    cout << "Coverage: " << s.coverage() << ", " 
+	 << s.percentage_complete() << "%\n";
     cout << "Includes 15,5? " << (s.contains(15,5)?"Yes":"No") << endl;
     Misc::RangeSet inv = s.invert();
     cout << "Inverse:\n";

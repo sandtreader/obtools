@@ -100,6 +100,19 @@ bool RangeSet::contains(off_t start, len_t length) const
 }
 
 //------------------------------------------------------------------------
+// Get total coverage of the set (sum of all range lengths)
+RangeSet::len_t RangeSet::coverage() const
+{
+  len_t sum = 0;
+
+  // Simply add up all the range lengths
+  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+    sum += p->length;
+
+  return sum;
+}
+
+//------------------------------------------------------------------------
 // Return a new set of all the 'holes' in the set
 RangeSet RangeSet::invert() const
 {
@@ -119,8 +132,16 @@ RangeSet RangeSet::invert() const
   }
 
   // Complete with gap (if any) between final end and total length
-  if (last && total_length > last->end())
-    inverse.ranges.push_back(Range(last->end(), total_length-last->end()));
+  if (last)
+  {
+    if (total_length > last->end())
+      inverse.ranges.push_back(Range(last->end(), total_length-last->end()));
+  }
+  else if (total_length > 0)
+  {
+    // Empty set - add whole range
+    inverse.ranges.push_back(Range(0, total_length));
+  }
 
   // Total length is the same as ours
   inverse.total_length = total_length;

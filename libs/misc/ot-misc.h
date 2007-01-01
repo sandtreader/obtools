@@ -48,7 +48,7 @@ public:
   //------------------------------------------------------------------------
   // Update to reflect the concatenation of another buffer full
   // of bytes. 
-  void update(char *buf, unsigned len);
+  void update(const char *buf, unsigned len);
 
   //------------------------------------------------------------------------
   // Final wrapup
@@ -293,6 +293,11 @@ public:
   // if you want just to count the total length seen so far
   len_t total_length;
 
+  // Iterator types
+  typedef list<Range>::iterator iterator;
+  iterator begin() { return ranges.begin(); }
+  iterator end()   { return ranges.end();   }
+
   //------------------------------------------------------------------------
   // Constructor
   RangeSet(len_t _total_length=0): total_length(_total_length) {}
@@ -307,8 +312,17 @@ public:
   bool contains(off_t start, len_t length) const;
 
   //------------------------------------------------------------------------
+  // Get total coverage of the set (sum of all range lengths)
+  len_t coverage() const;
+
+  //------------------------------------------------------------------------
   // Check if the set is complete up to total_length
   bool is_complete() const { return contains(0, total_length); } 
+
+  //------------------------------------------------------------------------
+  // Get percentage coverage
+  int percentage_complete() 
+  { return total_length?(100*coverage()/total_length):100; }
 
   //------------------------------------------------------------------------
   // Return a new set of all the 'holes' in the set, up to the total_length
