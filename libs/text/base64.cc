@@ -102,6 +102,15 @@ string Base64::encode(uint64_t n)
 }
 
 //--------------------------------------------------------------------------
+// Encode a binary string - options as encode above
+string Base64::encode(const string& binary, int split, 
+		      const string& line_end)
+{
+  return encode((const unsigned char *)binary.c_str(), binary.size(), 
+		split, line_end);
+}
+
+//--------------------------------------------------------------------------
 // Get length of binary block required for decode 
 // This is a maximum estimate - real length may be less than this, but
 // will never be more
@@ -196,6 +205,22 @@ bool Base64::decode(const string& base64, uint64_t& n)
   // Accumulate in N, top byte first
   n = 0;
   for(size_t i=0; i<len; i++) { n<<=8; n|=buf[i]; }
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Decode base64 text into the given (binary) string
+// Returns whether successful - if so, appends data to binary
+// Requires temporary buffer equal to the binary_length() of the string
+bool Base64::decode(const string& base64, string& binary)
+{
+  size_t max_length = binary_length(base64);
+  unsigned char *buf = new unsigned char[max_length];
+
+  size_t len = decode(base64, buf, max_length);
+  if (len > max_length) return false;
+
+  binary.append((const char *)buf, len);
   return true;
 }
 
