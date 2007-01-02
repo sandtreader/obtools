@@ -27,6 +27,9 @@ namespace ObTools { namespace Misc {
 // Optimises against adjacent ranges, overlaps allowed
 void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
 {
+  // Catch daftness which would otherwise break us
+  if (!length) return;
+
   off_t end = start+length;
 
   // Find the first range which starts after or at the new one
@@ -86,6 +89,9 @@ void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
 // Remove a range
 void RangeSet::remove(RangeSet::off_t start, RangeSet::len_t length)
 {
+  // Catch daftness which would otherwise break us
+  if (!length) return;
+
   off_t end = start+length;
 
   // Find the first range that ends after or at the start point
