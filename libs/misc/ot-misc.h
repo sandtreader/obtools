@@ -308,6 +308,14 @@ public:
   void insert(off_t start, len_t length);
 
   //------------------------------------------------------------------------
+  // Remove a range
+  void remove(off_t start, len_t length);
+
+  //------------------------------------------------------------------------
+  // Clear the set
+  void clear() { ranges.clear(); }
+
+  //------------------------------------------------------------------------
   // Check if a given range is all present
   bool contains(off_t start, len_t length) const;
 

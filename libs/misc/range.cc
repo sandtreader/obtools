@@ -83,6 +83,66 @@ void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
 }
 
 //------------------------------------------------------------------------
+// Remove a range
+void RangeSet::remove(RangeSet::off_t start, RangeSet::len_t length)
+{
+  off_t end = start+length;
+
+  // Find the first range that ends after or at the start point
+  list<Range>::iterator p;
+
+  for (p=ranges.begin(); p!=ranges.end() && p->end() <= start; p++)
+    ;
+
+  if (p == ranges.end()) return;  // All end before - nothing to do
+
+  // Now check every range until we reach one that starts after our end
+  while (p!=ranges.end() && p->start < end)
+  {
+    list<Range>::iterator q=p++;  // Protect from deletion
+    off_t q_start = q->start;
+    off_t q_end = q->end();
+
+    // Check for various cases:
+    // (1) Range entirely covered by deletion
+    if (start <= q_start && end >= q_end)
+    {
+      // Remove it entirely
+      ranges.erase(q);
+    }
+    // (2) Range truncated right by start
+    else if (end >= q_end)
+    {
+      // Adjust length 
+      q->length = start-q_start;
+    }
+    // (3) Range truncated left by end
+    else if (start <= q_start)
+    {
+      // Shift start and adjust length
+      q->length -= (end-q_start);
+      q->start = end;
+
+      // Stop here
+      break;
+    }
+    // (4) Worst case - deletion is in the middle of the range
+    else
+    {
+      // Truncate the current one to hold the left-hand end
+      q->length = start-q_start;
+
+      // Create a new one to hold the right-hand end, inserted after
+      // the current one, or at end
+      ranges.insert(p, Range(end, q_end-end));
+
+      // Stop here
+      break;
+    }
+  }
+}
+
+//------------------------------------------------------------------------
 // Check if a given range is all present
 bool RangeSet::contains(off_t start, len_t length) const
 {

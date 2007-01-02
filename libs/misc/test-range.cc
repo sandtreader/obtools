@@ -32,11 +32,27 @@ int main()
     else
     {
       Misc::RangeSet::off_t start, length;
-      cin >> start >> length;
+      char action;
+
+      cin >> action >> start >> length;
       if (!cin) break;
 
-      cout << "Inserting " << length << " at " << start << endl;
-      s.insert(start, length);
+      switch (action)
+      {
+	case '+':
+	  cout << "Inserting " << length << " at " << start << endl;
+	  s.insert(start, length);
+	  break;
+
+	case '-':
+	  cout << "Removing " << length << " at " << start << endl;
+	  s.remove(start, length);
+	  break;
+
+	default:
+	  cout << "Bogus action '" << action << "' ignored\n";
+	  break;
+      }
     }
 
     cout << s;
