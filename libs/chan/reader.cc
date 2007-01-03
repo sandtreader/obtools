@@ -33,12 +33,12 @@ bool Reader::try_read(void *buf, size_t count) throw (Error)
   while (done < count)
   {
     size_t size = basic_read(p, count-done);
-    if (size == count-done)
+    if (size)
     {
       if (p) p += size;
       done += size;
     }
-    else if (size || done)
+    else if (done)
       throw Error(0, "EOF");
     else
       return false;
@@ -59,7 +59,7 @@ void Reader::read(void *buf, size_t count) throw (Error)
   while (done < count)
   {
     size_t size = basic_read(p, count-done);
-    if (size == count-done)
+    if (size)
     {
       if (p) p += size;
       done += size;
@@ -83,7 +83,7 @@ void Reader::read(string& s, size_t count) throw (Error)
     if (count-done < n) n = count-done;
 
     size_t size = basic_read(buf, n);
-    if (size == n)
+    if (size)
     {
       s.append(buf, size);
       done += size;
