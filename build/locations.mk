@@ -17,7 +17,9 @@
 # 3: Optional variant suffix of build directory, OR 'NOLIB' for templates
 OT-LIBS = cli:libs/cli     			\
 	  cppt:libs/cppt   			\
-	  db-pgsql:libs/db:-pgsql 		\
+	  db:libs/db		 		\
+	  db-mysql:libs/db-mysql 		\
+	  db-pgsql:libs/db-pgsql 		\
 	  cache:libs/cache:NOLIB  		\
 	  chan:libs/chan			\
 	  crypto:libs/crypto			\
@@ -49,7 +51,9 @@ OT-LIBS = cli:libs/cli     			\
 # 1: Library name, including variant (as put into DEPENDS)
 # 2: Directory of source, relative to ROOT
 OT-SHLIBS = ot-general:libs/superlibs/general			\
-	    ot-db-pgsql:libs/superlibs/db			\
+	    ot-db:libs/superlibs/db				\
+	    ot-db-pgsql:libs/superlibs/db-pgsql			\
+	    ot-db-mysql:libs/superlibs/db-mysql			\
 	    ot-codegen:libs/superlibs/codegen			\
 	    ot-xmlmesh:xmlmesh/superlibs/xmlmesh		
 
