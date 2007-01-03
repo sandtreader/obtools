@@ -1,0 +1,14 @@
+Package: libot-db-dev
+Priority: optional
+Section: libs
+Architecture: i386
+Maintainer: Paul Clark <paul@xmill.com>
+Depends: g++-3.4, libot-general-dev (>= 1.6.4)
+Conflicts: libot-db-pgsql-dev (< 2.0.0)
+Description: ObTools generic database libraries (development files)
+ The ObTools database library provides a generic database interface in C++.
+ This is the generic support library, which requires a specific driver
+ library to actually do anything useful
+ .
+ This package provides development files for building applications which
+ use the library

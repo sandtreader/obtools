@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+#Last one out remove from ld.so.conf
+if [ "\$1" = "remove" -o "\$1" = "purge" ]; then
+    if [ ! -d /usr/lib/obtools ]; then
+        grep -vs ^/usr/lib/obtools\$ /etc/ld.so.conf > /etc/ld.so.conf.new
+        mv /etc/ld.so.conf.new /etc/ld.so.conf
+    fi
+    ldconfig
+fi
+
+
