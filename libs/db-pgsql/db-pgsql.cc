@@ -37,7 +37,7 @@ bool ResultSet::fetch(Row& row)
     int nf = PQnfields(res);
     row.clear();
     for(int i=0; i<nf; i++)
-      row.add(PQfname(res, i), PQgetvalue(res, row_cursor, i));
+      row.add_unescaped(PQfname(res, i), PQgetvalue(res, row_cursor, i));
 
     row_cursor++;
     return true;
@@ -47,13 +47,14 @@ bool ResultSet::fetch(Row& row)
 
 //------------------------------------------------------------------------
 //Get first value of next row from result set
+//Value is unescaped
 //Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
   PGresult *res = (PGresult *)pgres;
   if (row_cursor < PQntuples(res) && PQnfields(res) > 0)
   {
-    value = PQgetvalue(res, row_cursor++, 0);
+    value = Row::unescape(PQgetvalue(res, row_cursor++, 0));
     return true;
   }
   else return false;

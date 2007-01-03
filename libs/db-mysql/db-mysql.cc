@@ -49,10 +49,10 @@ bool ResultSet::fetch(Row& row)
   {
     row.clear();
 
-    // Load all the fields by name into the row
+    // Load all the fields by name into the row, unescaping as we go
     MYSQL_FIELD *fields = (MYSQL_FIELD *)myfields;
     for(unsigned int i=0; i<mynum_fields; i++)
-      row.add(fields[i].name, myrow[i]);
+      row.add_unescaped(fields[i].name, myrow[i]);
 
     return true;
   }
@@ -61,6 +61,7 @@ bool ResultSet::fetch(Row& row)
 
 //------------------------------------------------------------------------
 //Get first value of next row from result set
+//Value is unescaped
 //Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
@@ -71,7 +72,7 @@ bool ResultSet::fetch(string& value)
 
   if (myrow && mynum_fields > 0)
   {
-    value = myrow[0];
+    value = Row::unescape(myrow[0]);
     return true;
   }
   else return false;

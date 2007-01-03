@@ -3,13 +3,29 @@
 //
 // Implementation of result row
 //
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2003-2007 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "ot-db.h"
+#include "ot-text.h"
+#include <sstream>
 
 namespace ObTools { namespace DB {
+
+//------------------------------------------------------------------------
+// Add integer value to row
+void Row::add(string fieldname, int value)
+{
+  fields[fieldname] = Text::itos(value);
+}
+
+//------------------------------------------------------------------------
+// Add boolean value to row
+void Row::add(string fieldname, bool value)
+{
+  fields[fieldname] = value?"t":"f";
+}
 
 //------------------------------------------------------------------------
 //Get value of field of given name, or default if not found
@@ -68,5 +84,51 @@ bool Row::get_bool(string fieldname, bool def) const
   return def;
 }
 
+//------------------------------------------------------------------------
+// Get string with field names in order, separated by commas and spaces
+string Row::get_fields() const
+{
+  string result;
+  for(map<string, string>::const_iterator p = fields.begin(); 
+      p!=fields.end(); ++p)
+  {
+    if (!result.empty()) result += ", ";
+    result += p->first;
+  }
+
+  return result;
+}
+
+//------------------------------------------------------------------------
+// Get string with field values in order, separated by commas and spaces,
+// each delimited with single quotes (e.g. for INSERT)
+string Row::get_escaped_values() const
+{
+  string result;
+  for(map<string, string>::const_iterator p = fields.begin(); 
+      p!=fields.end(); ++p)
+  {
+    if (!result.empty()) result += ", ";
+    result += "'" + escape(p->second) + "'";
+  }
+
+  return result;
+}
+
+//------------------------------------------------------------------------
+// Escape a string, doubling single quotes and backslashes
+string Row::escape(const string& s)
+{
+  string s2 = Text::subst(s, "\\", "\\\\");
+  return Text::subst(s2, "'", "''");
+}
+
+//------------------------------------------------------------------------
+// Unescape a string, singling double quotes and backslashes
+string Row::unescape(const string& s)
+{
+  string s2 = Text::subst(s, "\\\\", "\\");
+  return Text::subst(s2, "''", "'");
+}
 
 }} // namespaces

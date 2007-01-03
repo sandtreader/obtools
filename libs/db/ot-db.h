@@ -25,22 +25,44 @@ namespace ObTools { namespace DB {
 using namespace std;
 
 //==========================================================================
+// IMPORTANT
+
+// Note on escaping quotes and backslashes:
+//  1) All fields stored in the Row::fields map are _unescaped_
+//  2) The driver unescapes all data as it fetches it
+//  3) In raw operations such as exec() and query() it is up to the caller
+//     to escape string values in the SQL
+//  4) In 'cooked' operations such as insert() and select() where this 
+//     library constructs its own SQL all values are escaped automatically
+
+//==========================================================================
 // Database row (same for all drivers)
-class Row
+struct Row
 {
-private:
   map<string, string> fields;
 
-public:
   //------------------------------------------------------------------------
   //Clear the row
   void clear() 
   { fields.clear(); }
 
   //------------------------------------------------------------------------
-  //Add name/value pair(Drivers only)
+  //Add name/value pair
   void add(const string& fieldname, const string& value)
   { fields[fieldname] = value; }
+
+  //------------------------------------------------------------------------
+  //Add name/value pair, unescaping value (for use by drivers only)
+  void add_unescaped(const string& fieldname, const string& value)
+  { fields[fieldname] = unescape(value); }
+
+  //------------------------------------------------------------------------
+  // Add integer value to row
+  void add(string fieldname, int value);
+
+  //------------------------------------------------------------------------
+  // Add boolean value to row
+  void add(string fieldname, bool value);
 
   //------------------------------------------------------------------------
   //Finds whether the row contains a value for the given fieldname
@@ -68,6 +90,26 @@ public:
   //------------------------------------------------------------------------
   //Get boolean value of field of given name, or default if not found
   bool get_bool(string fieldname, bool def=false) const;
+
+  //------------------------------------------------------------------------
+  // Get string with field names in order, separated by commas and spaces
+  string get_fields() const; 
+
+  //------------------------------------------------------------------------
+  // Get string with field values in order, separated by commas and spaces,
+  // each escaped and delimited with single quotes (e.g. for INSERT)
+  string get_escaped_values() const;
+
+  //==========================================================================
+  // Static helper functions
+
+  //------------------------------------------------------------------------
+  // Escape a string, doubling single quotes and backslashes
+  static string escape(const string& s);
+
+  //------------------------------------------------------------------------
+  // Unescape a string, singling double quotes and backslashes
+  static string unescape(const string& s);
 };
 
 //==========================================================================
@@ -86,6 +128,7 @@ public:
 
   //------------------------------------------------------------------------
   //Get first value of next row from result set
+  //Value is unescaped
   //Whether another was found - if so, writes into value
   virtual bool fetch(string& value)=0;
 
@@ -234,16 +277,12 @@ public:
 	     const string& table, const string& id_field="id",
 	     bool in_transaction=false);
 
-  //==========================================================================
-  // Static helper functions
-
   //------------------------------------------------------------------------
-  // Escape a string, doubling single quotes
-  static string escape(const string& s);
-
-  //------------------------------------------------------------------------
-  // Unescape a string, singling double quotes
-  static string unescape(const string& s);
+  // Do an INSERT and retrieve the last inserted serial ID, from row data
+  // Each field in the row is inserted by name
+  // Returns ID, or 0 if failed
+  int insert(Row& row, const string& table, const string& id_field="id",
+	     bool in_transaction=false);
 };
 
 //==========================================================================
@@ -371,8 +410,12 @@ struct AutoConnection
 	     bool in_transaction=false)
   { return conn?conn->insert(sql, table, id_field, in_transaction):0; }
 
-  static string escape(const string& s) { return Connection::escape(s); }
-  static string unescape(const string& s) { return Connection::unescape(s); }
+  int insert(Row& row, const string& table, const string& id_field="id",
+	     bool in_transaction=false)
+  { return conn?conn->insert(row, table, id_field, in_transaction):0; }
+
+  static string escape(const string& s) { return Row::escape(s); }
+  static string unescape(const string& s) { return Row::unescape(s); }
 
   //------------------------------------------------------------------------
   // Destructor

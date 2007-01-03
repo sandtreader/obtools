@@ -47,6 +47,7 @@ public:
 
   //------------------------------------------------------------------------
   //Get first value of next row from result set
+  //Value is unescaped
   //Whether another was found - if so, writes into value
   bool fetch(string& value);
 

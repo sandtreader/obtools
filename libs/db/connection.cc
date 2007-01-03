@@ -9,7 +9,7 @@
 //==========================================================================
 
 #include "ot-db.h"
-#include "ot-text.h"
+#include <sstream>
 
 namespace ObTools { namespace DB {
 
@@ -104,17 +104,24 @@ int Connection::insert(const string& sql,
 }			 
 
 //------------------------------------------------------------------------
-// Escape a string, doubling single quotes
-string Connection::escape(const string& s)
+// Do an INSERT and retrieve the last inserted serial ID, from row data
+// Each field in the row is inserted by name
+// Note: All fields are escaped on insertion
+// Returns ID, or 0 if failed
+int Connection::insert(Row& row, const string& table, const string& id_field,
+		       bool in_transaction)
 {
-  return Text::subst(s, "'", "''");
+  ostringstream oss;
+  oss << "INSERT INTO " << table;
+  oss << " (" << row.get_fields() << ")";
+  oss << " VALUES (" << row.get_escaped_values() << ")";
+  return insert(oss.str(), table, id_field, in_transaction);
 }
 
-//------------------------------------------------------------------------
-// Unescape a string, singling double quotes
-string Connection::unescape(const string& s)
-{
-  return Text::subst(s, "''", "'");
-}
+// !!! Do similar for:
+//  SELECT fill in values in row based on where clause
+//                ditto based on id value (int, string) and row
+//  UPDATE ditto, but updating values from row
+//  DELETE deleting from where clause, and id value (int, string)
 
 }} // namespaces
