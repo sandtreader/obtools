@@ -1,19 +1,26 @@
 #==========================================================================
-# Makefile for ObTools::DB - generic database support
+# Makefile for ObTools::DB - MySQL driver
 #
-# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
+# Copyright (c) 2006 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+NAME    = ot-db-mysql
 TYPE	= lib
-NAME    = ot-db
-HEADERS = ot-db.h
-OBJS  	= connection.o row.o transaction.o
-DEPENDS = log text
+HEADERS = ot-db-mysql.h
+OBJS  	= db-mysql.o
+DEPENDS = log text db
+EXTINCS = /usr/include/mysql
+TESTS 	= test-mysql
+TESTCMD	= ./test-mysql
+
 MT-VARIANTS = 1
 
 #Don't use MT in SINGLE
-ifndef SINGLE
+ifdef SINGLE
+EXTLIBS = -lmysqlclient -lz
+else
+EXTLIBS = -lmysqlclient_r -lz
 DEPENDS += mt
 endif
 

@@ -1,15 +1,19 @@
 #==========================================================================
-# Makefile for ObTools::DB - generic database support
+# Makefile for ObTools::DB - Postgres driver
 #
 # Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
+NAME	= ot-db-pgsql
 TYPE	= lib
-NAME    = ot-db
-HEADERS = ot-db.h
-OBJS  	= connection.o row.o transaction.o
-DEPENDS = log text
+HEADERS = ot-db-pgsql.h
+OBJS  	= db-pgsql.o
+DEPENDS = log text db
+EXTINCS = /usr/include/postgresql/
+EXTLIBS = -lpq
+TESTS 	= test-pgsql
+TESTCMD	= ./test-pgsql
 MT-VARIANTS = 1
 
 #Don't use MT in SINGLE
