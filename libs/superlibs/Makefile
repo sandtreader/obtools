@@ -6,5 +6,5 @@
 #==========================================================================
 
 RELEASEDIR = ../release
-SUBS = general db codegen
+SUBS = general db db-pgsql db-mysql codegen
 include ../../build/dir.mk
