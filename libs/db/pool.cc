@@ -19,6 +19,11 @@ ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
 			       unsigned _min, unsigned _max):
   factory(_factory), min_connections(_min), max_connections(_max), mutex()
 {
+  Log::Streams log;
+  log.summary << "Creating database connection pool with ("
+	      << min_connections << "-" << max_connections 
+	      << ") connections\n";
+
   // Create minimum number of connections
   for(unsigned i=0; i<min_connections; i++)
   {
@@ -90,7 +95,7 @@ void ConnectionPool::release(Connection *conn)
   MT::Lock lock(mutex);
 
   // Check for double release
-  if (find(available.begin(), available.end(), conn) != available.end())
+  if (find(available.begin(), available.end(), conn) == available.end())
     available.push_back(conn);
   else
   {

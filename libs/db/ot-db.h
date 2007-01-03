@@ -233,6 +233,17 @@ public:
   int insert(const string& sql, 
 	     const string& table, const string& id_field="id",
 	     bool in_transaction=false);
+
+  //==========================================================================
+  // Static helper functions
+
+  //------------------------------------------------------------------------
+  // Escape a string, doubling single quotes
+  static string escape(const string& s);
+
+  //------------------------------------------------------------------------
+  // Unescape a string, singling double quotes
+  static string unescape(const string& s);
 };
 
 //==========================================================================
@@ -279,7 +290,8 @@ public:
 };
 
 #if !defined(_SINGLE)
-// Connection pooling makes no sense in single threaded mode
+// Connection pooling makes no sense in single threaded mode - you should
+// hold a single global connection open for the lifetime of the application
 
 //==========================================================================
 // Database connection pool - maintains list of database connections which
@@ -312,6 +324,59 @@ public:
   //------------------------------------------------------------------------
   // Destructor
   ~ConnectionPool();
+};
+
+//==========================================================================
+// Handy auto class to claim/release a connection and provide stubs to
+// using it
+// e.g.
+// {
+//   DB::AutoConnection conn(db_pool);
+//   Result r = conn.query(...);
+//   ...
+// }
+struct AutoConnection
+{
+  ConnectionPool& pool;
+  Connection *conn;
+
+  //------------------------------------------------------------------------
+  // Constructor from pool
+  AutoConnection(ConnectionPool& _pool): pool(_pool)
+  { conn = pool.claim(); }
+
+  //------------------------------------------------------------------------
+  // Stub functions for every connection operation - see above
+  bool exec(const string& sql) { return conn?conn->exec(sql):false; }
+
+  Result query(const string& sql) { return conn?conn->query(sql):Result(); }
+
+  bool query(const string& sql, Row& row) 
+  { return conn?conn->query(sql, row):false; }
+
+  bool query(const string& sql, string& value)
+  { return conn?conn->query(sql, value):false; }
+
+  string query_string(const string& sql, const string& def="")
+  { return conn?conn->query_string(sql, def):def; }
+
+  int query_int(const string& sql, int def=0)
+  { return conn?conn->query_int(sql, def):def; }
+
+  bool query_bool(const string& sql, bool def=false)
+  { return conn?conn->query_bool(sql, def):def; }
+
+  int insert(const string& sql, 
+	     const string& table, const string& id_field="id",
+	     bool in_transaction=false)
+  { return conn?conn->insert(sql, table, id_field, in_transaction):0; }
+
+  static string escape(const string& s) { return Connection::escape(s); }
+  static string unescape(const string& s) { return Connection::unescape(s); }
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~AutoConnection() { if (conn) pool.release(conn); }
 };
 
 #endif // !_SINGLE

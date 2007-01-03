@@ -15,7 +15,7 @@ namespace ObTools { namespace DB {
 //Constructor 
 Transaction::Transaction(Connection& _conn): conn(_conn), committed(false)
 {
-  if (!conn.exec("BEGIN TRANSACTION")) committed = true;  // Make commit fail
+  if (!conn.exec("START TRANSACTION")) committed = true;  // Make commit fail
 }
 
 //------------------------------------------------------------------------

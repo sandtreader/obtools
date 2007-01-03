@@ -9,6 +9,7 @@
 //==========================================================================
 
 #include "ot-db.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace DB {
 
@@ -87,7 +88,7 @@ int Connection::insert(const string& sql,
 		       const string& table, const string& id_field,
 		       bool in_transaction)
 {
-  if (!in_transaction && !exec("BEGIN TRANSACTION")) return 0;
+  if (!in_transaction && !exec("START TRANSACTION")) return 0;
   if (!exec(sql)) return 0;
 
   // Assume autoincrementing IDs always increase, so max is the largest
@@ -97,11 +98,23 @@ int Connection::insert(const string& sql,
   sql2 += table;
   int id=query_int(sql2);
 
-  if (!in_transaction) exec("COMMIT TRANSACTION");
+  if (!in_transaction) exec("COMMIT");
 
   return id;
 }			 
 
+//------------------------------------------------------------------------
+// Escape a string, doubling single quotes
+string Connection::escape(const string& s)
+{
+  return Text::subst(s, "'", "''");
+}
 
+//------------------------------------------------------------------------
+// Unescape a string, singling double quotes
+string Connection::unescape(const string& s)
+{
+  return Text::subst(s, "''", "'");
+}
 
 }} // namespaces
