@@ -83,6 +83,24 @@ public:
 };
 
 //==========================================================================
+//PostgreSQL connection factory
+class ConnectionFactory: public DB::ConnectionFactory
+{
+  // Connection details
+  string conninfo;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ConnectionFactory(const string& _conninfo):  conninfo(_conninfo) {}
+
+  //------------------------------------------------------------------------
+  // Interface to create a new connection 
+  DB::Connection *create() 
+  { return new PG::Connection(conninfo); }
+};
+
+//==========================================================================
 }}} //namespaces
 #endif // !__OBTOOLS_DB_PGSQL_H
 

@@ -15,6 +15,10 @@
 #include <iostream>
 #include <stdint.h>
 
+#if !defined(_SINGLE)
+#include "ot-mt.h"
+#endif
+
 namespace ObTools { namespace DB { 
 
 //Make our lives easier without polluting anyone else
@@ -253,6 +257,64 @@ public:
   //Destructor
   ~Transaction();
 };
+
+//==========================================================================
+// Database connection factory - abstract interface implemented in driver
+// subclasses.  Factories will store the connection details and create
+// a new connection with them on demand
+class ConnectionFactory
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ConnectionFactory() {}
+
+  //------------------------------------------------------------------------
+  // Interface to create a new connection 
+  virtual Connection *create() = 0;
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~ConnectionFactory() {}
+};
+
+#if !defined(_SINGLE)
+// Connection pooling makes no sense in single threaded mode
+
+//==========================================================================
+// Database connection pool - maintains list of database connections which
+// can be claimed and released
+class ConnectionPool
+{
+  ConnectionFactory& factory;
+  unsigned min_connections;        // Number started on creation
+  unsigned max_connections;        // Maximum ever created
+
+  // Current connections
+  MT::Mutex mutex;                 // On connection lists
+  list<Connection *> connections;  // All connections
+  list<Connection *> available;    // Connections available for use
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ConnectionPool(ConnectionFactory& _factory, unsigned _min, unsigned _max);
+
+  //------------------------------------------------------------------------
+  // Claim a connection
+  // Returns connection, or 0 if one could not be created or all are active
+  Connection *claim();
+
+  //------------------------------------------------------------------------
+  // Release a connection after use
+  void release(Connection *conn);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~ConnectionPool();
+};
+
+#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces

@@ -87,6 +87,33 @@ public:
 };
 
 //==========================================================================
+//MySQL connection factory
+class ConnectionFactory: public DB::ConnectionFactory
+{
+  // Connection details
+  string host;
+  string user;
+  string passwd;
+  string dbname;
+  int port;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ConnectionFactory(const string& _host, const string& _user,
+		    const string& _passwd, const string& _dbname,
+		    unsigned int _port=0):
+    host(_host), user(_user), passwd(_passwd), dbname(_dbname), port(_port)
+  {}
+
+  //------------------------------------------------------------------------
+  // Interface to create a new connection 
+  DB::Connection *create() 
+  { return new MySQL::Connection(host, user, passwd, dbname, port); }
+};
+
+
+//==========================================================================
 }}} //namespaces
 #endif // !__OBTOOLS_DB_MYSQL_H
 

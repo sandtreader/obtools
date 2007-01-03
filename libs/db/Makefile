@@ -12,9 +12,10 @@ OBJS  	= connection.o row.o transaction.o
 DEPENDS = log text
 MT-VARIANTS = 1
 
-#Don't use MT in SINGLE
+#Don't use MT in SINGLE, only provide pool in MT
 ifndef SINGLE
 DEPENDS += mt
+OBJS += pool.o
 endif
 
 ROOT    = ../..
