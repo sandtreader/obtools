@@ -103,7 +103,7 @@ Connection::Connection(const string& host, const string& user,
 			    dbname.c_str(), port, 0, 0))
     {
       log.error << "DB: Can't connect to MySQL on " << host << ": "
-		<< mysql_error(conn);
+		<< mysql_error(conn) << endl;
       mysql_close(conn);
       conn = 0;
     }
@@ -113,7 +113,7 @@ Connection::Connection(const string& host, const string& user,
   if (conn)
   {
     // OK, we have a connection
-    log.detail << "MySQL connected\n";
+    log.detail << "MySQL connected to " << dbname << " on " << host << endl;
     myconn = conn;
     valid = true;
   }
