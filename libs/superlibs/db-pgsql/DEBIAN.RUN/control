@@ -3,9 +3,9 @@ Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libpq3 (>= 7.4.1), libot-general (>= 1.6.4)
-Description: ObTools Postgres database libraries 
+Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libpq3 (>= 7.4.1), libot-general (>= 1.6.4), libot-db (>= 2.0.0)
+Description: ObTools Postgres database driver library
  The ObTools database library provides a generic database interface in C++.
- This is the Postgres interface version
+ This is the Postgres interface driver
  .
  This package provides the standard multithreaded shared runtime libraries

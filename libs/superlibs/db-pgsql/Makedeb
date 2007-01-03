@@ -61,7 +61,6 @@ install -m 0644 $RELEASE_DIR/ot-db-pgsql$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 
 if [ -z $VARIANT ]; then
 #Only install common header files in base - Depends on variants reflects this
-install -m 0644 $RELEASE_DIR/ot-db.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-db-pgsql.h $DEB_DEV_DIR/usr/include/obtools/
 fi
 
