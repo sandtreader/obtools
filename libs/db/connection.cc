@@ -108,7 +108,7 @@ int Connection::insert(const string& sql,
 // Each field in the row is inserted by name
 // Note: All fields are escaped on insertion
 // Returns ID, or 0 if failed
-int Connection::insert(Row& row, const string& table, const string& id_field,
+int Connection::insert(const string& table, Row& row, const string& id_field,
 		       bool in_transaction)
 {
   ostringstream oss;
@@ -118,10 +118,159 @@ int Connection::insert(Row& row, const string& table, const string& id_field,
   return insert(oss.str(), table, id_field, in_transaction);
 }
 
-// !!! Do similar for:
-//  SELECT fill in values in row based on where clause
-//                ditto based on id value (int, string) and row
-//  UPDATE ditto, but updating values from row
-//  DELETE deleting from where clause, and id value (int, string)
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// with the given WHERE clause
+// If where is empty, doesn't add a WHERE at all
+// Returns query result as query()
+Result Connection::select(const string& table, const Row& row, 
+			  const string& where)
+{
+  ostringstream oss;
+  oss << "SELECT " << row.get_fields() << " FROM " << table;
+  if (!where.empty()) oss << " WHERE " << where;
+  return query(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// matching the given integer ID
+// Returns query result as query()
+Result Connection::select_by_id(const string& table, const Row& row, 
+				int id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = " << id;
+  return select(table, row, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// matching the given string ID
+// ID value is escaped
+// Returns query result as query()
+Result Connection::select_by_id(const string& table, const Row& row, 
+				const string& id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = '" << row.escape(id) << "'";
+  return select(table, row, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// with the given WHERE clause, and return the single (first) row as
+// the values in the row
+// If where is empty, doesn't add a WHERE at all
+// Returns whether row fetched
+bool Connection::select_row(const string& table, Row& row, 
+			    const string& where)
+{
+  Result result = select(table, row, where);
+  if (!result) return false;
+  row.clear();
+  return result.fetch(row);
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// with the given integer ID, and return the single (first) row as
+// the values in the row
+// Returns whether row fetched
+bool Connection::select_row_by_id(const string& table, Row& row,  
+				  int id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = " << id;
+  return select_row(table, row, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// with the given string ID, and return the single (first) row as
+// the values in the row
+// ID value is escaped
+// Returns whether row fetched
+bool Connection::select_row_by_id(const string& table, Row& row,  
+				  const string& id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = '" << row.escape(id) << "'";
+  return select_row(table, row, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do an UPDATE for all fields in the given row in the given table 
+// with the given WHERE clause.  Values are escaped automatically
+// If where is empty, doesn't add a WHERE at all
+// Returns whether successful
+bool Connection::update(const string& table, const Row& row, 
+			const string& where)
+{
+  ostringstream oss;
+  oss << "UPDATE " << table << " SET " << row.get_escaped_assignments();
+  if (!where.empty()) oss << " WHERE " << where;
+  return exec(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do an UPDATE for all fields in the given row in the given table 
+// matching the given integer ID
+// Returns whether successful
+bool Connection::update_id(const string& table, const Row& row, 
+			   int id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = " << id;
+  return update(table, row,  oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do an UPDATE for all fields in the given row in the given table 
+// matching the given string ID
+// ID value is escaped
+// Returns whether successful
+bool Connection::update_id(const string& table, const Row& row,  
+			   const string& id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = '" << row.escape(id) << "'";
+  return update(table, row,  oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a DELETE in the given table with the given WHERE clause
+// If where is empty, doesn't add a WHERE at all
+// Returns whether successful
+bool Connection::delete_all(const string& table, const string& where)
+{
+  ostringstream oss;
+  oss << "DELETE FROM " << table;
+  if (!where.empty()) oss << " WHERE " << where;
+  return exec(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do an DELETE in the given table matching the given integer ID
+// Returns whether successful
+bool Connection::delete_id(const string& table, 
+			   int id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = " << id;
+  return delete_all(table, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a DELETE in the given table matching the given string ID
+// ID value is escaped
+// Returns whether successful
+bool Connection::delete_id(const string& table, 
+			   const string& id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = '" << Row::escape(id) << "'";
+  return delete_all(table, oss.str());
+}
 
 }} // namespaces

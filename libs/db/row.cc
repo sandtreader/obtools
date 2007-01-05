@@ -116,6 +116,23 @@ string Row::get_escaped_values() const
 }
 
 //------------------------------------------------------------------------
+// Get string with field names and values in order with '=', 
+// separated by commas and spaces, values delimited with single quotes 
+// (e.g. for UPDATE)
+string Row::get_escaped_assignments() const
+{
+  string result;
+  for(map<string, string>::const_iterator p = fields.begin(); 
+      p!=fields.end(); ++p)
+  {
+    if (!result.empty()) result += ", ";
+    result += p->first + " = '" + escape(p->second) + "'";
+  }
+
+  return result;
+}
+
+//------------------------------------------------------------------------
 // Escape a string, doubling single quotes and backslashes
 string Row::escape(const string& s)
 {

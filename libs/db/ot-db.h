@@ -48,8 +48,17 @@ struct Row
 
   //------------------------------------------------------------------------
   //Add name/value pair
-  void add(const string& fieldname, const string& value)
-  { fields[fieldname] = value; }
+  Row& add(const string& fieldname, const string& value)
+  { fields[fieldname] = value; return *this; }
+
+  //------------------------------------------------------------------------
+  //Add a null entry (used for select() to identify desired fields)
+  Row& add(const string& fieldname)
+  { fields[fieldname] = ""; return *this; }
+
+  //------------------------------------------------------------------------
+  // Handy operator to add null values to a row, for select()
+  Row& operator<<(const string& fieldname) { return add(fieldname); }
 
   //------------------------------------------------------------------------
   //Add name/value pair, unescaping value (for use by drivers only)
@@ -99,6 +108,12 @@ struct Row
   // Get string with field values in order, separated by commas and spaces,
   // each escaped and delimited with single quotes (e.g. for INSERT)
   string get_escaped_values() const;
+
+  //------------------------------------------------------------------------
+  // Get string with field names and values in order with '=', 
+  // separated by commas and spaces, values delimited with single quotes 
+  // (e.g. for UPDATE)
+  string get_escaped_assignments() const;
 
   //==========================================================================
   // Static helper functions
@@ -281,8 +296,98 @@ public:
   // Do an INSERT and retrieve the last inserted serial ID, from row data
   // Each field in the row is inserted by name
   // Returns ID, or 0 if failed
-  int insert(Row& row, const string& table, const string& id_field="id",
+  int insert(const string& table, Row& row, const string& id_field="id",
 	     bool in_transaction=false);
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // with the given WHERE clause
+  // If where is empty, doesn't add a WHERE at all
+  // Returns query result as query()
+  Result select(const string& table, const Row& row, const string& where="");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // matching the given integer ID
+  // Returns query result as query()
+  Result select_by_id(const string& table, const Row& row,  
+		      int id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // matching the given string ID
+  // ID value is escaped
+  // Returns query result as query()
+  Result select_by_id(const string& table, const Row& row,  
+		      const string& id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // with the given WHERE clause, and return the single (first) row as
+  // the values in the row (unescaped)
+  // If where is empty, doesn't add a WHERE at all
+  // Returns whether row fetched
+  bool select_row(const string& table, Row& row, const string& where="");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // with the given integer ID, and return the single (first) row as
+  // the values in the row (unescaped)
+  // Returns whether row fetched
+  bool select_row_by_id(const string& table, Row& row, 
+			int id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // with the given string ID, and return the single (first) row as
+  // the values in the row (unescaped)
+  // ID value is escaped
+  // Returns whether row fetched
+  bool select_row_by_id(const string& table, Row& row, 
+			const string& id, const string& id_field = "id");
+
+
+  //------------------------------------------------------------------------
+  // Do an UPDATE for all fields in the given row in the given table 
+  // with the given WHERE clause.  Values are escaped automatically
+  // If where is empty, doesn't add a WHERE at all
+  // Returns whether successful
+  bool update(const string& table, const Row& row, const string& where="");
+
+  //------------------------------------------------------------------------
+  // Do an UPDATE for all fields in the given row in the given table 
+  // matching the given integer ID
+  // Returns whether successful
+  bool update_id(const string& table, const Row& row, 
+		 int id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do an UPDATE for all fields in the given row in the given table 
+  // matching the given string ID
+  // ID value is escaped
+  // Returns whether successful
+  bool update_id(const string& table, const Row& row, 
+		 const string& id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do a DELETE in the given table with the given WHERE clause
+  // If where is empty, doesn't add a WHERE at all
+  // Returns whether successful
+  bool delete_all(const string& table, const string& where = "");
+
+  //------------------------------------------------------------------------
+  // Do an DELETE in the given table matching the given integer ID
+  // Returns whether successful
+  bool delete_id(const string& table, 
+		 int id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do a DELETE in the given table matching the given string ID
+  // ID value is escaped
+  // Returns whether successful
+  bool delete_id(const string& table, 
+		 const string& id, const string& id_field = "id");
+
 };
 
 //==========================================================================
@@ -410,9 +515,53 @@ struct AutoConnection
 	     bool in_transaction=false)
   { return conn?conn->insert(sql, table, id_field, in_transaction):0; }
 
-  int insert(Row& row, const string& table, const string& id_field="id",
+  int insert(const string& table, Row& row, const string& id_field="id",
 	     bool in_transaction=false)
-  { return conn?conn->insert(row, table, id_field, in_transaction):0; }
+  { return conn?conn->insert(table, row, id_field, in_transaction):0; }
+
+  Result select(const string& table, const Row& row, const string& where="")
+  { return conn?conn->select(table, row, where):Result(); }
+
+  Result select_by_id(const string& table, const Row& row,  
+		      int id, const string& id_field = "id")
+  { return conn?conn->select_by_id(table, row, id, id_field):Result(); }
+
+  Result select_by_id(const string& table, const Row& row,  
+		      const string& id, const string& id_field = "id")
+  { return conn?conn->select_by_id(table, row, id, id_field):Result(); }
+
+  bool select_row(const string& table, Row& row, const string& where="")
+  { return conn?conn->select_row(table, row, where):false; }
+
+  bool select_row_by_id(const string& table, Row& row, 
+			int id, const string& id_field = "id")
+  { return conn?conn->select_row_by_id(table, row, id, id_field):false; }
+
+  bool select_row_by_id(const string& table, Row& row, 
+			const string& id, const string& id_field = "id")
+  { return conn?conn->select_row_by_id(table, row, id, id_field):false; }
+
+  bool update(const string& table, const Row& row, const string& where="")
+  { return conn?conn->update(table, row, where):false; }
+
+  bool update_id(const string& table, const Row& row, 
+		 int id, const string& id_field = "id")
+  { return conn?conn->update_id(table, row, id, id_field):false; }
+
+  bool update_id(const string& table, const Row& row, 
+		 const string& id, const string& id_field = "id")
+  { return conn?conn->update_id(table, row, id, id_field):false; }
+
+  bool delete_all(const string& table, const string& where = "")
+  { return conn?conn->delete_all(table, where):false; }
+
+  bool delete_id(const string& table, 
+		 int id, const string& id_field = "id")
+  { return conn?conn->delete_id(table, id, id_field):false; }
+
+  bool delete_id(const string& table, 
+		 const string& id, const string& id_field = "id")
+  { return conn?conn->delete_id(table, id, id_field):false; }
 
   static string escape(const string& s) { return Row::escape(s); }
   static string unescape(const string& s) { return Row::unescape(s); }
