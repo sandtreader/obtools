@@ -200,6 +200,66 @@ bool Connection::select_row_by_id(const string& table, Row& row,
 }
 
 //------------------------------------------------------------------------
+// Do a SELECT for a single field in the given table 
+// with the given WHERE clause, and return the (unescaped) value
+// If where is empty, doesn't add a WHERE at all
+// Returns value or empty string if not found
+string Connection::select_value(const string& table, const string& field,
+				const string& where)
+{
+  ostringstream oss;
+  oss << "SELECT " << field << " FROM " << table;
+  if (!where.empty()) oss << " WHERE " << where;
+  return query_string(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for a single field in the given table 
+// with the given integer ID, and return the (unescaped) value
+// Returns value or empty string if not found
+string Connection::select_value_by_id(const string& table, 
+				      const string& field,
+				      int id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = " << id;
+  return select_value(table, field, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for a single field in the given table 
+// with the given integer ID, and return the (unescaped) value
+// ID value is escaped
+// Returns value or empty string if not found
+string Connection::select_value_by_id(const string& table, 
+				      const string& field,  
+				      const string& id, const string& id_field)
+{
+  ostringstream oss;
+  oss << id_field << " = '" << Row::escape(id) << "'";
+  return select_value(table, field, oss.str());
+}
+
+//------------------------------------------------------------------------
+// Check if a row exists with the given integer ID
+// Returns whether the row exists
+bool Connection::exists_id(const string& table, 
+			   int id, const string& id_field)
+{
+  return !select_value_by_id(table, id_field, id, id_field).empty();
+}
+
+//------------------------------------------------------------------------
+// Check if a row exists with the given string ID
+// ID value is escaped
+// Returns whether the row exists
+bool Connection::exists_id(const string& table, 
+			   const string& id, const string& id_field)
+{
+  return !select_value_by_id(table, id_field, id, id_field).empty();
+}
+
+//------------------------------------------------------------------------
 // Do an UPDATE for all fields in the given row in the given table 
 // with the given WHERE clause.  Values are escaped automatically
 // If where is empty, doesn't add a WHERE at all

@@ -346,6 +346,41 @@ public:
   bool select_row_by_id(const string& table, Row& row, 
 			const string& id, const string& id_field = "id");
 
+  //------------------------------------------------------------------------
+  // Do a SELECT for a single field in the given table 
+  // with the given WHERE clause, and return the (unescaped) value
+  // If where is empty, doesn't add a WHERE at all
+  // Returns value or empty string if not found
+  string select_value(const string& table, const string& field,
+		      const string& where = "");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for a single field in the given table 
+  // with the given integer ID, and return the (unescaped) value
+  // Returns value or empty string if not found
+  string select_value_by_id(const string& table, 
+			    const string& field,
+			    int id, const string& id_field = "id");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for a single field in the given table 
+  // with the given integer ID, and return the (unescaped) value
+  // ID value is escaped
+  // Returns value or empty string if not found
+  string select_value_by_id(const string& table, const string& field,
+			    const string& id, const string& id_field = "");
+
+  //------------------------------------------------------------------------
+  // Check if a row exists with the given integer ID
+  // Returns whether the row exists
+  bool exists_id(const string& table, int id, const string& id_field = "");
+
+  //------------------------------------------------------------------------
+  // Check if a row exists with the given string ID
+  // ID value is escaped
+  // Returns whether the row exists
+  bool exists_id(const string& table, const string& id, 
+		 const string& id_field = "");
 
   //------------------------------------------------------------------------
   // Do an UPDATE for all fields in the given row in the given table 
@@ -540,6 +575,26 @@ struct AutoConnection
   bool select_row_by_id(const string& table, Row& row, 
 			const string& id, const string& id_field = "id")
   { return conn?conn->select_row_by_id(table, row, id, id_field):false; }
+
+  string select_value(const string& table, const string& field,
+		      const string& where = "")
+  { return conn?conn->select_value(table, field, where):""; }
+
+  string select_value_by_id(const string& table, 
+			    const string& field,
+			    int id, const string& id_field = "id")
+  { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
+
+  string select_value_by_id(const string& table, const string& field,
+			    const string& id, const string& id_field = "")
+  { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
+
+  bool exists_id(const string& table, int id, const string& id_field = "")
+  { return conn?conn->exists_id(table, id, id_field):false; }
+
+  bool exists_id(const string& table, const string& id, 
+		 const string& id_field = "")
+  { return conn?conn->exists_id(table, id, id_field):false; }
 
   bool update(const string& table, const Row& row, const string& where="")
   { return conn?conn->update(table, row, where):false; }
