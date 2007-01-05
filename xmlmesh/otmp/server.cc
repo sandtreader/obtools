@@ -90,8 +90,9 @@ void Server::process(Net::TCPSocket& socket,
   // Create client session and map it (autoremoved on destruction)
   ClientSession session(socket, client, client_sessions);
 
-  // Start send thread
+  // Start send thread and detach it
   ServerSendThread send_thread(session);
+  send_thread.detach();
 
   // Tell the queue the client has arrived
   ClientMessage bmsg(client, ClientMessage::STARTED);
