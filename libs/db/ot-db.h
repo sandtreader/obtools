@@ -368,19 +368,19 @@ public:
   // ID value is escaped
   // Returns value or empty string if not found
   string select_value_by_id(const string& table, const string& field,
-			    const string& id, const string& id_field = "");
+			    const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Check if a row exists with the given integer ID
   // Returns whether the row exists
-  bool exists_id(const string& table, int id, const string& id_field = "");
+  bool exists_id(const string& table, int id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Check if a row exists with the given string ID
   // ID value is escaped
   // Returns whether the row exists
   bool exists_id(const string& table, const string& id, 
-		 const string& id_field = "");
+		 const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Do an UPDATE for all fields in the given row in the given table 
@@ -586,14 +586,14 @@ struct AutoConnection
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
 
   string select_value_by_id(const string& table, const string& field,
-			    const string& id, const string& id_field = "")
+			    const string& id, const string& id_field = "id")
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
 
-  bool exists_id(const string& table, int id, const string& id_field = "")
+  bool exists_id(const string& table, int id, const string& id_field = "id")
   { return conn?conn->exists_id(table, id, id_field):false; }
 
   bool exists_id(const string& table, const string& id, 
-		 const string& id_field = "")
+		 const string& id_field = "id")
   { return conn?conn->exists_id(table, id, id_field):false; }
 
   bool update(const string& table, const Row& row, const string& where="")
