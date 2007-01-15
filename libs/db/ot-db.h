@@ -284,8 +284,8 @@ public:
   //------------------------------------------------------------------------
   //Do an INSERT and retrieve the last inserted (max) automatic ID
   //Returns ID, or 0 if failed
-  //Note:  You can do an ordinary exec() for INSERT if you don't care about
-  //the auto-generated ID used - it's probably faster
+  //Fetches max(<id_field>) inside a transaction, unless id_field is ""
+  //If id_field is "", does a normal insert and returns 1
   //Set in_transaction only if you're already doing a transaction; by
   //default this function may create its own
   int insert(const string& sql, 
@@ -295,6 +295,7 @@ public:
   //------------------------------------------------------------------------
   // Do an INSERT and retrieve the last inserted serial ID, from row data
   // Each field in the row is inserted by name
+  // id_field can be "", as above
   // Returns ID, or 0 if failed
   int insert(const string& table, Row& row, const string& id_field="id",
 	     bool in_transaction=false);
