@@ -200,6 +200,26 @@ public:
 };
 
 //==========================================================================
+// Base36 encoder/decoder
+class Base36
+{
+public:
+  //--------------------------------------------------------------------------
+  // Default constructor 
+  Base36() {}
+
+  //--------------------------------------------------------------------------
+  // Encode a 64-bit integer 
+  // Uses as many characters as required
+  string encode(uint64_t n);
+
+  //--------------------------------------------------------------------------
+  // Decode a 64-bit integer
+  // Returns whether successful - if so, sets 'n'
+  bool decode(const string& base36, uint64_t& n);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
 
