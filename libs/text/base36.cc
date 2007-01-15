@@ -38,6 +38,8 @@ string Base36::encode(uint64_t n)
 // Returns whether successful - if so, sets 'n'
 bool Base36::decode(const string& base36, uint64_t& n)
 {
+  if (base36.empty()) return false;
+
   n = 0;
   for(string::const_iterator p = base36.begin(); p!=base36.end(); ++p)
   {
