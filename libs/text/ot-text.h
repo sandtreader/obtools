@@ -211,12 +211,12 @@ public:
   //--------------------------------------------------------------------------
   // Encode a 64-bit integer 
   // Uses as many characters as required
-  string encode(uint64_t n);
+  static string encode(uint64_t n);
 
   //--------------------------------------------------------------------------
   // Decode a 64-bit integer
   // Returns whether successful - if so, sets 'n'
-  bool decode(const string& base36, uint64_t& n);
+  static bool decode(const string& base36, uint64_t& n);
 };
 
 //==========================================================================
