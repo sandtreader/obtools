@@ -365,7 +365,7 @@ public:
 
   //------------------------------------------------------------------------
   // Do a SELECT for a single field in the given table 
-  // with the given integer ID, and return the (unescaped) value
+  // with the given string ID, and return the (unescaped) value
   // ID value is escaped
   // Returns value or empty string if not found
   string select_value_by_id(const string& table, const string& field,

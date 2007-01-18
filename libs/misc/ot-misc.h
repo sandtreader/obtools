@@ -116,6 +116,27 @@ public:
   crc_t calculate(const unsigned char *data, size_t length);
 };
 
+//==========================================================================
+// CRC32 calculator class
+// There isn't much argument about this one - this is the V.42 version
+// as used in PNG, Ethernet etc.
+class CRC32
+{
+private:
+  uint32_t combinations[256];
+
+public:
+  typedef uint32_t crc_t;
+
+  //------------------------------------------------------------------------
+  // Constructor (creates internal combination table, relatively expensive)
+  CRC32();
+
+  //------------------------------------------------------------------------
+  // Calculate new CRC for a block
+  crc_t calculate(const unsigned char *data, size_t length);
+};
+
 
 //==========================================================================
 //Propertylist class
