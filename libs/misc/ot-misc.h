@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <sstream>
+#include "ot-xml.h"
 
 namespace ObTools { namespace Misc { 
 
@@ -367,6 +368,22 @@ public:
   // Most simply, this gives a fuel gauge for monotonically increasing
   // ranges, but also allows for insertion at multiple points
   string gauge(unsigned int length=50) const;
+
+  //------------------------------------------------------------------------
+  // Read from XML - reads <range start="x" length="y"/> elements
+  // (or other element name if provided) from given parent element.  
+  // Ranges may overlap and will be optimised
+  // together.  Also reads total_length attribute of parent if present
+  void read_from_xml(const XML::Element& parent, 
+		     const string& element_name="range");
+
+  //------------------------------------------------------------------------
+  // Convert to XML
+  // Adds <range start="x" length="y"/> elements to the given XML element
+  // or other element name if provided
+  // and adds total_length attribute to parent
+  void RangeSet::add_to_xml(XML::Element& parent, 
+			    const string& element_name="range") const;
 
   //------------------------------------------------------------------------
   // Dump the set to the given output, one line per range, in form

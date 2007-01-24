@@ -62,6 +62,15 @@ int main()
     cout << "Coverage: " << s.coverage() << ", " 
 	 << s.percentage_complete() << "%\n";
     cout << "Includes 15,5? " << (s.contains(15,5)?"Yes":"No") << endl;
+    cout << "XML:\n";
+    XML::Element e("rangeset");
+    s.add_to_xml(e);
+    cout << e;
+    Misc::RangeSet s2;
+    s2.read_from_xml(e);
+    cout << "Read back from XML (total length " << s2.total_length << "):\n";
+    cout << s2 << endl;
+
     Misc::RangeSet inv = s.invert();
     cout << "Inverse:\n";
     cout << inv;

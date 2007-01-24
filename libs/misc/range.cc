@@ -15,6 +15,7 @@
 //   => Set is always optimal
 
 #include "ot-misc.h"
+#include "ot-xml.h"
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -264,6 +265,41 @@ string RangeSet::gauge(unsigned int length) const
   }
 
   return s;
+}
+
+//------------------------------------------------------------------------
+// Read from XML - reads <range start="x" length="y"/> elements
+// (or other element name if provided) from given parent element.  
+// Ranges may overlap and will be optimised
+// together.  Also reads total_length attribute of parent if present
+void RangeSet::read_from_xml(const XML::Element& parent, 
+			     const string& element_name)
+{
+  total_length = parent.get_attr_int64("total_length");
+  for(XML::Element::const_iterator p(parent.get_children(element_name));p;++p)
+  {
+    const XML::Element& range = *p;
+    insert(range.get_attr_int64("start"), range.get_attr_int64("length"));
+  }
+}
+
+//------------------------------------------------------------------------
+// Convert to XML
+// Adds <range start="x" length="y"/> elements to the given XML element
+// or other element name if provided
+// and adds total_length attribute to parent
+void RangeSet::add_to_xml(XML::Element& parent, 
+			  const string& element_name) const
+{
+  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    XML::Element& re = parent.add(element_name);
+    re.set_attr_int64("start", r.start);
+    re.set_attr_int64("length", r.length);
+  }
+
+  parent.set_attr_int64("total_length", total_length);
 }
 
 //------------------------------------------------------------------------
