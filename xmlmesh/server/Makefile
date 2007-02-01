@@ -13,7 +13,7 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 
 DEBIAN-NAME    = ot-xmlmesh
 DEBIAN-VERSION = 1.4.1
-DEBIAN-REVISION = 1
+DEBIAN-REVISION = 2
 
 #Build from static local libraries in DEBUG, installed .so's in release
 ifdef DEBUG
