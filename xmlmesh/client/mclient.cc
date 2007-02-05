@@ -10,9 +10,17 @@
 #include "ot-xmlmesh-client.h"
 #include "ot-log.h"
 #include "ot-text.h"
+#include "ot-time.h"
 
 #include <unistd.h>
 #include <sstream>
+
+// Define for message handler timing - note that it actually outputs at
+// 'detail' level, so you can get timing from a debug version without
+// all the rest of the debugging
+#if defined(DEBUG)
+#define TIME_MESSAGES 1
+#endif
 
 namespace ObTools { namespace XMLMesh {
 
@@ -149,7 +157,18 @@ void MultiClient::dispatch(Message *msg)
 	p++)
     {
       Subscriber *sub = *p;
+#if defined(TIME_MESSAGES)
+      Time::Stamp start = Time::Stamp::now();
+#endif
+
       sub->handle(*msg); 
+
+#if defined(TIME_MESSAGES)
+      Time::Duration taken = Time::Stamp::now() - start;
+      Log::Streams log;
+      log.detail << "Incoming message '" << subject << "' handled in " 
+		 << taken.seconds() << "s\n";
+#endif
     }
 
     // Deactivate subscribers again inside global lock
@@ -315,8 +334,20 @@ bool MultiClient::request(Message& req, Message& response)
     return false;
   }
 
+#if defined(TIME_MESSAGES)
+  Time::Stamp start = Time::Stamp::now();
+#endif
+
   // Block on response flag
   mcr.done.wait();
+
+#if defined(TIME_MESSAGES)
+  Time::Duration taken = Time::Stamp::now() - start;
+  Log::Streams log;
+  log.detail << "Outgoing message '" << req.get_subject() 
+	     << "' responded to in " 
+	     << taken.seconds() << "s\n";
+#endif
 
   // Remove it from map 
   {
