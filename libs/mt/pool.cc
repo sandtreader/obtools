@@ -64,11 +64,15 @@ void PoolThread::kick()
 // Request it to die.  If 'wait' is set, waits for thread to exit
 void PoolThread::die(bool wait)
 {
-  if (running)
+  if (valid && running)
   {
     dying = true;
     in_use.signal();  // Release from wait
-    if (wait) pthread_join(thread, NULL);  // Wait for it to die
+    if (wait)
+    {
+      if (!joined) pthread_join(thread, NULL);  // Wait for it to die
+      joined = true;
+    }
   }
 }
 

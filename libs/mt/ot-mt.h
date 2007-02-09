@@ -25,13 +25,15 @@ using namespace std;
 class Thread
 {
 public:
-  bool running;          // True if thread created and thread handle valid
+  bool valid;            // True if thread created and thread handle valid
+  bool running;          // True if thread still running
+  bool joined;           // True if thread joined or detached
   pthread_t thread;      // thread handle - not necessarily an integer type!
   Thread *self;          // Used as start argument; must outlive thread
 
   //--------------------------------------------------------------------------
   // Default Constructor - does nothing
-  Thread(): running(false) {}
+  Thread(): valid(false), running(false), joined(false) {}
 
   //--------------------------------------------------------------------------
   // Virtual run routine - called once thread has started by start()
@@ -52,11 +54,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Join - caller waits for this thread to end
-  void join() { if (running) pthread_join(thread, NULL); }
+  void join() 
+  { if (valid && !joined) pthread_join(thread, NULL); joined=true; }
 
   //--------------------------------------------------------------------------
   // Detach - let it die silently when it ends, we aren't going to join with it
-  void detach() { if (running) pthread_detach(thread); }
+  void detach() 
+  { if (valid && !joined) pthread_detach(thread); joined=true; }
 
   //--------------------------------------------------------------------------
   // Cancel - ask it to stop

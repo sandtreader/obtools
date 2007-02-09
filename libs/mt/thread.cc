@@ -18,10 +18,13 @@ extern "C" void *_thread_start(void *arg)
 {
   Thread *self = *(Thread **)arg;
 
+  // Start running
+  self->running = true;
+
   // Call virtual run() in subclass
   self->run();
 
-  // Clear validity for any future method calls
+  // Stop running
   self->running = false;
 
   // Die
@@ -44,7 +47,7 @@ bool Thread::start()
 {
   self = this;
   if (pthread_create(&thread, NULL, _thread_start, &self)) return false;
-  running = true;
+  valid = true;
   return true;
 }
 
@@ -56,21 +59,24 @@ bool Thread::set_priority(int priority, bool realtime)
 {
   struct sched_param param;
   param.sched_priority = priority;
-  return running && !pthread_setschedparam(thread, 
-					  realtime?SCHED_RR:SCHED_OTHER, 
-					  &param);
+  return valid && !pthread_setschedparam(thread, 
+					 realtime?SCHED_RR:SCHED_OTHER, 
+					 &param);
 }
 
 //--------------------------------------------------------------------------
 // Cancel - ask it to stop
 void Thread::cancel()
 {
-  if (running)
+  if (valid)
   {
-    pthread_cancel(thread);
-    // Join to make sure it has cleanly finished before we exit
-    if (running) pthread_join(thread, NULL);
+    // Try to cancel if not already stopped
+    if (running) pthread_cancel(thread);
     running = false;
+
+    // Join to make sure it has cleanly finished before we exit
+    if (!joined) pthread_join(thread, NULL);
+    joined = true;
   }
 }
 
