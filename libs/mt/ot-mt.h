@@ -357,6 +357,16 @@ public:
 // Like pthread_rwlock, but provides ability for recursive use by writer
 // that would otherwise deadlock
 // Implements writer priority
+
+// The mutex can be used recursively as follows:
+//    A read within another read is OK (obviously)
+//    A write within another write is OK
+//    A read within a write is OK
+// but
+//    A write within a read is NOT OK
+
+// Hence if mixed-mode recursion is required, lock for write first
+
 class RWMutex
 {
 private:
@@ -372,12 +382,17 @@ private:
   volatile bool writer_active;
   BasicCondVar no_writer;
 
+  // Support for recursive locks
+  volatile int count;
+  pthread_t writer;
+
 public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises mutex 
   RWMutex(): 
     mutex(), readers_active(0), no_readers(),
-    writers_waiting(0), writer_active(false), no_writer()
+    writers_waiting(0), writer_active(false), no_writer(),
+    count(0)
     {}
   
   //--------------------------------------------------------------------------
@@ -386,11 +401,22 @@ public:
   {
     Lock lock(mutex);
 
-    // Wait until there are no writers, either queued or active
-    while (writers_waiting || writer_active) no_writer.wait(mutex);
+    // Check if we already own this as a writer
+    if (!writer_active || !pthread_equal(writer, pthread_self()))
+    {
+      // If I'm the first reader in, wait until there are no writers, 
+      // either queued or active - after that, my presence will protect
+      // the rest (including any that recurse inside me)
+      // NB:  Without this check, a recursed read which happens after a
+      // writer has started waiting for the lock will deadlock with it
+      if (!readers_active)
+      {
+	while (writers_waiting || writer_active) no_writer.wait(mutex);
+      }
 
-    // Claim it and block writers
-    readers_active++;
+      // Claim it and block writers
+      readers_active++;
+    }
   }
 
   //--------------------------------------------------------------------------
@@ -399,8 +425,12 @@ public:
   { 
     Lock lock(mutex);
 
-    // Wake up all writers so they can proceed through the no-readers gate
-    if (!--readers_active) no_readers.broadcast();  
+    // Check if we already own this as a writer
+    if (!writer_active || !pthread_equal(writer, pthread_self()))
+    {
+      // Wake up all writers so they can proceed through the no-readers gate
+      if (!--readers_active) no_readers.broadcast();  
+    }
   }
 
   //--------------------------------------------------------------------------
@@ -408,19 +438,33 @@ public:
   void lock_writer() 
   {
     Lock lock(mutex);
-    
-    // Show there are writers waiting, to ensure priority
-    writers_waiting++;
+    pthread_t self = pthread_self();
 
-    // Wait until there are no readers
-    while (readers_active) no_readers.wait(mutex);
+    // Check if we already own this
+    if (writer_active && pthread_equal(writer, self))
+    {
+      // Accumulate another one, but don't lock again
+      count++;
+    }
+    else
+    {
+      // Show there are writers waiting, to ensure priority
+      writers_waiting++;
 
-    // Wait until there are no other writers using it
-    while (writer_active) no_writer.wait(mutex);
+      // Wait until there are no readers
+      while (readers_active) no_readers.wait(mutex);
+
+      // Wait until there are no other writers using it
+      while (writer_active) no_writer.wait(mutex);
     
-    // We're not waiting any more, we're active
-    writers_waiting--;
-    writer_active = true;
+      // We're not waiting any more, we're active
+      writers_waiting--;
+      writer_active = true;
+
+      // Show we now own this
+      writer = self;
+      count = 1;
+    }
   }  
 
   //--------------------------------------------------------------------------
@@ -428,11 +472,16 @@ public:
   void unlock_writer()
   { 
     Lock lock(mutex);
-    writer_active = false;                  // Let other writers go
 
-    // Wake up all writers and readers - note reader may be ahead of a
-    // writer in the queue, and we must ensure the writer gets woken up
-    no_writer.broadcast();
+    // Check we've bottomed out any recursion
+    if (!--count)
+    {
+      writer_active = false;                  // Let other writers go
+
+      // Wake up all writers and readers - note reader may be ahead of a
+      // writer in the queue, and we must ensure the writer gets woken up
+      no_writer.broadcast();
+    }
   }
 };
 
