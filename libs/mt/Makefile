@@ -9,7 +9,8 @@ TYPE	= lib
 NAME   	= ot-mt
 HEADERS = ot-mt.h
 OBJS  	= thread.o pool.o
-TESTS 	= test-thread test-pool test-queue test-mutex test-rmutex
+TESTS 	= test-thread test-pool test-queue test-mutex test-rmutex \
+	  test-rwmutex
 TESTCMD	= ./test-thread 10 && ./test-queue
 #Both standard variants are multithreaded, of course
 MULTI 	= 1

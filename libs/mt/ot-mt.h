@@ -94,7 +94,8 @@ class Mutex
 {
 private:
   pthread_mutex_t mutex;
-  friend class Condition;   // So it can use my mutex for cond_wait
+  friend class BasicCondVar;
+  friend class Condition;   // So they can use my mutex for cond_wait
 
 public:
   //--------------------------------------------------------------------------
@@ -150,11 +151,65 @@ public:
 };
 
 //==========================================================================
-// Condition variable class (boolean condition)
+// BasicCondVar class - basic condition variable like pthread_condvar
+// Uses caller's mutex to allow mutex to extend beyond the wait() call
+
+// NB All wait(), signal() and broadcast() calls must be made with 
+// mutex locked
 
 // Cancellation handler to unlock a mutex
 extern "C" void _unlock_mutex(void *m);
 
+class BasicCondVar
+{
+private:
+  pthread_cond_t cv;
+
+public:
+  //--------------------------------------------------------------------------
+  // Default Constructor - initialises condvar
+  BasicCondVar()
+  { 
+    pthread_cond_init(&cv, NULL); 
+  }
+  
+  //--------------------------------------------------------------------------
+  // Destructor - destroys condvar 
+  ~BasicCondVar() 
+  { 
+    pthread_cond_destroy(&cv); 
+  }
+
+  //--------------------------------------------------------------------------
+  // Wait on the condvar using caller's mutex
+  // Note mutex should already be locked, will be unlocked during wait
+  // and then relocked again
+  void wait(Mutex& mutex)
+  { 
+    // Handle unlock of mutex should cond_wait be cancelled
+    pthread_cleanup_push(_unlock_mutex, &mutex.mutex);
+    pthread_cond_wait(&cv, &mutex.mutex);
+    pthread_cleanup_pop(0);
+  }
+
+  //--------------------------------------------------------------------------
+  // Signal the condition 
+  void signal()
+  { 
+    pthread_cond_signal(&cv);
+  }
+
+  //--------------------------------------------------------------------------
+  // Broadcast the condition to multiple waiters
+  void broadcast()
+  { 
+    pthread_cond_broadcast(&cv);
+  }
+};
+
+//==========================================================================
+// Condition variable class (boolean condition)
+// Implements safe signalling on a simple boolean variable
 class Condition
 {
 private:
@@ -298,57 +353,115 @@ public:
 };
 
 //==========================================================================
-// Claimable class
-// A claimable object can be Claimed - see below
-// Use as a mixin
-class Claimable
+// Multiple readers/single writer Mutex class
+// Like pthread_rwlock, but provides ability for recursive use by writer
+// that would otherwise deadlock
+// Implements writer priority
+class RWMutex
 {
 private:
+  // Internal mutex, only locked transiently
   Mutex mutex;
-  volatile int claims;
+
+  // Count and condition for readers
+  volatile int readers_active;
+  BasicCondVar no_readers;
+
+  // Count and condition for writers
+  volatile int writers_waiting;
+  volatile bool writer_active;
+  BasicCondVar no_writer;
 
 public:
   //--------------------------------------------------------------------------
-  // Default Constructor 
-  Claimable(): mutex(), claims(0) {}
+  // Default Constructor - initialises mutex 
+  RWMutex(): 
+    mutex(), readers_active(0), no_readers(),
+    writers_waiting(0), writer_active(false), no_writer()
+    {}
+  
+  //--------------------------------------------------------------------------
+  // Lock the mutex for read
+  void lock_reader() 
+  {
+    Lock lock(mutex);
+
+    // Wait until there are no writers, either queued or active
+    while (writers_waiting || writer_active) no_writer.wait(mutex);
+
+    // Claim it and block writers
+    readers_active++;
+  }
 
   //--------------------------------------------------------------------------
-  // Stake a claim
-  void claim() { Lock lock(mutex); claims++; }
+  // Unlock the mutex for read
+  void unlock_reader()
+  { 
+    Lock lock(mutex);
+
+    // Wake up all writers so they can proceed through the no-readers gate
+    if (!--readers_active) no_readers.broadcast();  
+  }
 
   //--------------------------------------------------------------------------
-  // Release a claim
-  void release() { Lock lock(mutex); claims--; }
+  // Lock the mutex for write
+  void lock_writer() 
+  {
+    Lock lock(mutex);
+    
+    // Show there are writers waiting, to ensure priority
+    writers_waiting++;
+
+    // Wait until there are no readers
+    while (readers_active) no_readers.wait(mutex);
+
+    // Wait until there are no other writers using it
+    while (writer_active) no_writer.wait(mutex);
+    
+    // We're not waiting any more, we're active
+    writers_waiting--;
+    writer_active = true;
+  }  
 
   //--------------------------------------------------------------------------
-  // Check whether claimed
-  // Note:  Locking here ensures we can't get in while another thread is
-  // inside a claim or release method
-  bool is_claimed() { Lock lock(mutex); return claims!=0; }
+  // Unlock the mutex for write
+  void unlock_writer()
+  { 
+    Lock lock(mutex);
+    writer_active = false;                  // Let other writers go
+
+    // Wake up all writers and readers - note reader may be ahead of a
+    // writer in the queue, and we must ensure the writer gets woken up
+    no_writer.broadcast();
+  }
 };
 
 //==========================================================================
-// Claim class
-// Temporary claim on a Claimable object
-// Note that a 'claim' is not a 'lock' - it is not exclusive.  The idea
-// here is to state that you are interested in the claimed object, and 
-// would prefer it didn't get deleted under you.  Use this where multiple
-// threads need to use an object which might get deleted - each user stakes
-// a claim while it needs the object, and the reaper avoids deleting any
-// which are claimed.
-class Claim
+// Reader/Writer Lock class - as Lock, but claiming reader side of an RWMutex
+class RWReadLock
 {
 private:
-  Claimable &target;
+  RWMutex& mutex;
+  RWReadLock(const RWReadLock& x): mutex(x.mutex) { }
+  void operator=(const RWReadLock&) { }
 
 public:
-  //--------------------------------------------------------------------------
-  // Constructor - claim the target
-  Claim(Claimable& _target): target(_target) { target.claim(); }
+  RWReadLock(RWMutex &m): mutex(m) { mutex.lock_reader(); }
+  ~RWReadLock() { mutex.unlock_reader(); }
+};
 
-  //--------------------------------------------------------------------------
-  // Destructor - release the target
-  ~Claim() { target.release(); }
+//==========================================================================
+// Ditto, but for writer side
+class RWWriteLock
+{
+private:
+  RWMutex& mutex;
+  RWWriteLock(const RWWriteLock& x): mutex(x.mutex) { }
+  void operator=(const RWWriteLock&) { }
+
+public:
+  RWWriteLock(RWMutex &m): mutex(m) { mutex.lock_writer(); }
+  ~RWWriteLock() { mutex.unlock_writer(); }
 };
 
 //==========================================================================
