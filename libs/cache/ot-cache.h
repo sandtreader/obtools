@@ -179,8 +179,8 @@ protected:
   EVICTOR_POLICY evictor_policy;
 
 public:
-  // Overall recursive mutex
-  MT::RMutex mutex;
+  // Overall readers/writer mutex
+  MT::RWMutex mutex;
 
   //--------------------------------------------------------------------------
   // Constructor
@@ -198,7 +198,7 @@ public:
   { 
     if (limit && cachemap.size() > limit && !evict()) return false;
 
-    MT::RLock lock(mutex);  // NB Don't lock around evict
+    MT::RWWriteLock lock(mutex);  // NB Don't lock around evict
     cachemap[id] = MCType(content); 
     return true; 
   }
@@ -207,7 +207,7 @@ public:
   // Check (without copying) whether a given ID exists in the cache
   bool contains(const ID& id)
   { 
-    MT::RLock lock(mutex);
+    MT::RWReadLock lock(mutex);
     return (cachemap.find(id) != cachemap.end()); 
   }
 
@@ -223,7 +223,7 @@ public:
   // Whether found - if not, result is not changed
   bool lookup(const ID& id, CONTENT& result)
   {
-    MT::RLock lock(mutex);
+    MT::RWReadLock lock(mutex);
     MapIterator p = cachemap.find(id);
     if (p != cachemap.end())
     {
@@ -238,7 +238,12 @@ public:
   // Ignored if ID doesn't exist
   void touch(const ID& id)
   {
-    MT::RLock lock(mutex);
+    // NB:  Uses read lock, because structure isn't changed, only policy
+    // data.  This does introduce a vanishingly small possibility that
+    // use_count could miss a count, but since this is only used for
+    // statistical eviction, that's a minor problem compared to the cost
+    // of enforcing a single write lock on a very common operation
+    MT::RWReadLock lock(mutex);
     MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) p->second.policy_data.touch();
   }
@@ -247,7 +252,7 @@ public:
   // Remove content of given ID
   virtual void remove(const ID& id) 
   { 
-    MT::RLock lock(mutex);
+    MT::RWWriteLock lock(mutex);
     MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) cachemap.erase(p);
   }
@@ -257,7 +262,7 @@ public:
   virtual void tidy() 
   { 
     time_t now = time(0);
-    MT::RLock lock(mutex);
+    MT::RWWriteLock lock(mutex);
 
     for(MapIterator p = cachemap.begin();
 	p!=cachemap.end();)
@@ -275,7 +280,7 @@ public:
   // Returns whether there is now room
   virtual bool evict()
   {
-    MT::RLock lock(mutex);
+    MT::RWWriteLock lock(mutex);
 
     // Number we need to evict
     unsigned int needed = cachemap.size() - limit + 1;  
@@ -316,7 +321,7 @@ public:
   // Dump contents to given stream
   void dump(ostream& s, bool show_content=false)
   { 
-    MT::RLock lock(mutex);
+    MT::RWReadLock lock(mutex);
     time_t now = time(0);
 
     s << "Cache size " << cachemap.size() << ", limit " << limit << ":\n";
@@ -346,7 +351,11 @@ public:
 
   //--------------------------------------------------------------------------
   // Clear all content
-  virtual void clear() { cachemap.clear(); }
+  virtual void clear() 
+  {
+    MT::RWWriteLock lock(mutex);
+    cachemap.clear(); 
+  }
 
   //--------------------------------------------------------------------------
   // Virtual destructor 
@@ -472,7 +481,7 @@ public:
   // Pointer returned is owned by cache and will be deleted by it
   CONTENT *lookup(const ID& id)
   {
-    MT::RLock lock(this->mutex);
+    MT::RWReadLock lock(this->mutex);
     MapIterator p = this->cachemap.find(id);
     if (p != this->cachemap.end()) 
       return p->second.content.ptr;
@@ -486,7 +495,7 @@ public:
   // Pointer returned is detached from cache and should be disposed by caller
   CONTENT *detach(const ID& id)
   {
-    MT::RLock lock(this->mutex);
+    MT::RWWriteLock lock(this->mutex);
     MapIterator p = this->cachemap.find(id);
     if (p != this->cachemap.end()) 
     {
@@ -506,7 +515,7 @@ public:
     // Avoid locking around delete to prevent deadlocks if destruction
     // attempts locks itself
     {
-      MT::RLock lock(this->mutex);
+      MT::RWWriteLock lock(this->mutex);
       MapIterator p = this->cachemap.find(id);
       if (p != this->cachemap.end())
       {
@@ -535,7 +544,7 @@ public:
 
     // Avoid locking around delete
     {
-      MT::RLock lock(this->mutex);
+      MT::RWWriteLock lock(this->mutex);
 
       for(MapIterator p = this->cachemap.begin();
 	  p!=this->cachemap.end();)
@@ -573,7 +582,7 @@ public:
       PolicyData worst_data;
 
       {
-	MT::RLock lock(this->mutex);
+	MT::RWWriteLock lock(this->mutex);
 	MapIterator worst = this->cachemap.end();  
 
 	// Show the policy all the entries, let them choose the worst
@@ -621,6 +630,7 @@ public:
   // Clear all content
   virtual void clear() 
   {
+    MT::RWWriteLock lock(this->mutex);
     for(MapIterator p = this->cachemap.begin(); p!=this->cachemap.end(); ++p)
       delete(p->second.content.ptr); 
     this->cachemap.clear(); 
