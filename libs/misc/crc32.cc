@@ -55,4 +55,12 @@ CRC32::crc_t CRC32::calculate(const unsigned char *data, size_t length)
   return crc ^ 0xFFFFFFFFUL;  // Flip
 }
 
+//------------------------------------------------------------------------
+// Calculate a CRC for a string (can be binary)
+CRC32::crc_t CRC32::calculate(const string& data)
+{
+  return calculate((const unsigned char *)data.c_str(), data.size());
+}
+
+
 }} // namespaces

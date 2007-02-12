@@ -115,6 +115,10 @@ public:
   //------------------------------------------------------------------------
   // Calculate new CRC for a block
   crc_t calculate(const unsigned char *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // Calculate a CRC for a string (can be binary)
+  crc_t calculate(const string& data);
 };
 
 //==========================================================================
@@ -136,6 +140,10 @@ public:
   //------------------------------------------------------------------------
   // Calculate new CRC for a block
   crc_t calculate(const unsigned char *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // Calculate a CRC for a string (can be binary)
+  crc_t calculate(const string& data);
 };
 
 

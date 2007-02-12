@@ -115,4 +115,11 @@ CRC::crc_t CRC::calculate(const unsigned char *data, size_t length)
   return crc;
 }
 
+//------------------------------------------------------------------------
+// Calculate a CRC for a string (can be binary)
+CRC::crc_t CRC::calculate(const string& data)
+{
+  return calculate((const unsigned char *)data.c_str(), data.size());
+}
+
 }} // namespaces
