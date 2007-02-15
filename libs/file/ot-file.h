@@ -21,6 +21,12 @@
 #include <sys/types.h>
 #include <list>
 
+// Define uid_t and gid_t in Windows to make build easier
+#if defined(__WIN32__)
+typedef int uid_t;
+typedef int gid_t;
+#endif
+
 namespace ObTools { namespace File { 
 
 //Make our lives easier without polluting anyone else
@@ -139,7 +145,6 @@ public:
   // String version
   bool set_mode(const string& mode) const { return set_mode(otoi(mode)); }
 
-#if !defined(__WIN32__) // Meaningless in Windows
   //--------------------------------------------------------------------------
   // Get the file's owner
   uid_t owner() const;
@@ -155,7 +160,6 @@ public:
   // String version
   bool set_ownership(const string& owner, const string& group) const
   { return set_ownership(user_name_to_id(owner), group_name_to_id(group)); }
-#endif // !__WIN32__
 
   //--------------------------------------------------------------------------
   // Delete the file/directory (directories are always deleted recursively)
@@ -180,7 +184,6 @@ public:
   //Convert octal string to integer
   static int otoi(const string& mode_s);
 
-#if !defined(__WIN32__) // Meaningless in Windows
   //--------------------------------------------------------------------------
   //Handy user/group id functions for ownership
   // Get user name from uid
@@ -194,7 +197,6 @@ public:
 
   // Get group id from name
   static gid_t group_name_to_id(const string& gname);
-#endif
 };
 
 //------------------------------------------------------------------------

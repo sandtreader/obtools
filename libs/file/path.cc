@@ -206,31 +206,40 @@ bool Path::set_mode(mode_t mode) const
   return !chmod(c_str(), mode);
 }
 
-#if !defined(__WIN32__) // Meaningless in Windows
 //--------------------------------------------------------------------------
 // Get the file's owner
 uid_t Path::owner() const
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return 0;
+#else
   STRUCT_STAT sb;
   return STAT(c_str(), &sb)?0:sb.st_uid;
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Get the file's group
 gid_t Path::group() const
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return 0;
+#else
   STRUCT_STAT sb;
   return STAT(c_str(), &sb)?0:sb.st_gid;
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Get the file's owner & group
 bool Path::set_ownership(uid_t owner, uid_t group) const
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return true;
+#else
   return !chown(c_str(), owner, group);
+#endif
 }
-
-#endif // !__WIN32__
 
 //--------------------------------------------------------------------------
 // Delete the file/directory (directories are always deleted recursively)
@@ -281,11 +290,13 @@ int Path::otoi(const string& mode_s)
   return n;
 }
 
-#if !defined(__WIN32__) // Meaningless in Windows
 //--------------------------------------------------------------------------
 // Get user name from uid
 string Path::user_id_to_name(uid_t uid)
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return "?";
+#else
   // Painful reentrant way of doing this!
   int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
   char *buf = (char *)malloc(buflen);
@@ -303,12 +314,16 @@ string Path::user_id_to_name(uid_t uid)
   string name(uptr->pw_name);
   free(buf);
   return name;
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Get user id from name
 uid_t Path::user_name_to_id(const string& uname)
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return 0;
+#else
   // Even more painful reentrant way of doing this, given we never use
   // the name!
   int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
@@ -322,12 +337,16 @@ uid_t Path::user_name_to_id(const string& uname)
 
   if (rc || !uptr) return 0;
   return uptr->pw_uid;
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Get group name from gid
 string Path::group_id_to_name(gid_t gid)
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return "?";
+#else
   // Painful reentrant way of doing this!
   int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
   char *buf = (char *)malloc(buflen);
@@ -345,12 +364,16 @@ string Path::group_id_to_name(gid_t gid)
   string name(gptr->gr_name);
   free(buf);
   return name;
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Get group id from name
 gid_t Path::group_name_to_id(const string& gname)
 {
+#if defined(__WIN32__) // Meaningless in Windows
+  return 0;
+#else
   // Even more painful reentrant way of doing this, given we never use
   // the name!
   int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
@@ -364,9 +387,8 @@ gid_t Path::group_name_to_id(const string& gname)
 
   if (rc || !gptr) return 0;
   return gptr->gr_gid;
+#endif
 }
-
-#endif // !__WIN32__
 
 //------------------------------------------------------------------------
 // << operator to write Path to ostream
