@@ -72,7 +72,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Test if it has stopped
-  bool operator!() { return !running; }
+  bool operator!() { return !valid || !running; }
 
   //--------------------------------------------------------------------------
   // Destructor - ask it to cancel if started

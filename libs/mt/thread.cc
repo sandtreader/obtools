@@ -18,9 +18,6 @@ extern "C" void *_thread_start(void *arg)
 {
   Thread *self = *(Thread **)arg;
 
-  // Start running
-  self->running = true;
-
   // Call virtual run() in subclass
   self->run();
 
@@ -48,6 +45,9 @@ bool Thread::start()
   self = this;
   if (pthread_create(&thread, NULL, _thread_start, &self)) return false;
   valid = true;
+  running = true;  // Set before it actually starts, in case caller checks
+                   // before it runs - otherwise it could delete us again
+                   // before we've even started!
   return true;
 }
 

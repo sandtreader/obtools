@@ -49,7 +49,8 @@ PoolThread::PoolThread(IPoolReplacer& _replacer):
   Thread(), replacer(_replacer), in_use(false), dying(false) 
 {
   self = this;
-  pthread_create(&thread, NULL, _pool_start, &self); 
+  pthread_create(&thread, NULL, _pool_start, &self);
+  valid = true;
   running = true;
 }
 
