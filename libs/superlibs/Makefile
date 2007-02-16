@@ -7,4 +7,5 @@
 
 RELEASEDIR = ../release
 SUBS = general db db-pgsql db-mysql codegen
+SUBS_CROSS = general
 include ../../build/dir.mk

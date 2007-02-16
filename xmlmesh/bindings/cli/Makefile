@@ -6,7 +6,11 @@
 #==========================================================================
 
 TYPE	= exes
-NAME   	= xmlmesh-send xmlmesh-receive
+NAME   	= xmlmesh-send 
+
+ifndef CROSS-COMPILE
+NAME += xmlmesh-receive
+endif
 
 DEBIAN-NAME    = ot-xmlmesh-cli
 DEBIAN-VERSION = 1.3.0
@@ -21,6 +25,7 @@ endif
 
 #Only needs single-threaded
 SINGLE = 1
+SOCKET = 1
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk

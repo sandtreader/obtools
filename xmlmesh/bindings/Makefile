@@ -6,6 +6,7 @@
 #==========================================================================
 
 SUBS = c php cli
+SUBS_CROSS = c cli
 RELEASEDIR = ../release
 include ../../build/dir.mk
 

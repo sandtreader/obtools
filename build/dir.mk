@@ -9,7 +9,12 @@
 
 all:	$(patsubst %,%-all,$(SUBS))
 
-cross:	$(patsubst %,%-cross,$(SUBS))
+# Use standard SUBS if not overridden
+ifndef SUBS_CROSS
+SUBS_CROSS = $(SUBS)
+endif
+
+cross:	$(patsubst %,%-cross,$(SUBS_CROSS))
 
 profile: $(patsubst %,%-profile,$(SUBS))
 
