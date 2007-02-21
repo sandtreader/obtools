@@ -263,14 +263,24 @@ bool Configuration::write()
   }
 
   // Create and open temporary file
-  string tfn = fn+",update";
+  string tfn = fn+"~new";
+
   ofstream f(tfn.c_str());
   if (f)
   {
     f << parser.get_root();
     f.close();
 
-    // Attempt atomic update
+    // Attempt atomic update - but can't do that in Windows
+#if defined(__WIN32__)
+    if (::unlink(fn.c_str()))
+    {
+      serr << "Config: Can't delete " << fn << " before rename: "
+	   << strerror(errno) << endl;
+      return false;
+    }
+#endif
+
     if (!::rename(tfn.c_str(), fn.c_str())) return true;
 
     serr << "Config: Can't rename " << tfn << " to " << fn << ": " 
