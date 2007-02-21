@@ -266,8 +266,12 @@ bool Path::touch(mode_t mode) const
 //--------------------------------------------------------------------------
 // Rename file to new path
 // Note: You probably can't rename between filing systems
+// In Windows, this deletes the old one first, so is not atomic
 bool Path::rename(const Path& new_path) const
 {
+#if defined(__WIN32__)
+  new_path.erase();  // Don't care if it fails or not
+#endif
   return !::rename(c_str(), new_path.c_str());  
 }
 
