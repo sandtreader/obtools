@@ -124,10 +124,6 @@ private:
   void append_descendants(const string& name, const string& prune, 
 			  list<Element *>& l);
 
-  //Prevent copy and assignment - don't want to do deep copy
-  Element(const Element&) {}
-  const Element& operator=(const Element& e) { return e; }
-
 public:
   //Element name ('tag') - empty for data 'elements'
   string name;
@@ -190,11 +186,49 @@ public:
   Element(const string& n, const string& a, const string& v, const string& c):
     name(n), content(c), parent(0), line(0) { set_attr(a,v); }
 
+  //--------------------------------------------------------------------------
+  // Shallow copy to an existing element
+  // Copies the name, direct content and attributes into the given element
+  // Children, parent and line are _not_ copied
+  void copy_to(Element& dest) const
+  { dest.name = name; dest.content = content;  dest.attrs = attrs; }
+
+  //--------------------------------------------------------------------------
+  // Shallow copy to a new element
+  Element *copy() const
+  { Element *dest = new Element(); copy_to(*dest); return dest; }
+
+  //--------------------------------------------------------------------------
+  // Deep copy to an existing element
+  // Copies the name, direct content and attributes into the given element
+  // and recursively copies children
+  // parent pointer of top element is not copied
+  void deep_copy_to(XML::Element& dest) const;
+
+  //--------------------------------------------------------------------------
+  // Deep copy to a new element
+  Element *deep_copy() const
+  { Element *dest = new Element(); deep_copy_to(*dest); return dest; }
+
+  //--------------------------------------------------------------------------
+  // Deep copy and assignment operators
+  Element(const Element& src): parent(0), line(0) 
+  { src.deep_copy_to(*this); }
+
+  const Element& operator=(const Element& src) 
+  { parent=0; line=src.line; 
+    clear_children(); src.deep_copy_to(*this); return src; }
+
   //------------------------------------------------------------------------
-  // Add a child element
+  // Add a child element, taking ownership
   Element& add(Element *child) 
   { children.push_back(child); child->parent = this; return *child; }
  
+  //------------------------------------------------------------------------
+  // Add a child element from a reference, copying
+  Element& add(Element &child) 
+  { return add(child.deep_copy()); }
+
   //------------------------------------------------------------------------
   // Add a new empty child element by name
   // Also 2-, 3- and 4-string options (see constructors above)

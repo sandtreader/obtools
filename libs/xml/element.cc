@@ -19,6 +19,20 @@ using namespace ObTools::XML;
 Element Element::none("!NONE!");
 
 //--------------------------------------------------------------------------
+// Deep copy to a new element
+// Copies the name, direct content and attributes into the given element
+// and recursively copies children
+// parent pointer of top element is not copied
+void Element::deep_copy_to(XML::Element& dest) const
+{
+  copy_to(dest);
+  for(list<Element *>::const_iterator p=children.begin();
+      p!=children.end();
+      p++)
+    dest.add((*p)->deep_copy());
+}
+
+//--------------------------------------------------------------------------
 // Write attributes to given stream
 void Element::write_attrs(ostream &s) const
 {
