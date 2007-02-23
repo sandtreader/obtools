@@ -15,7 +15,7 @@
 #include "ot-mt.h"
 #endif
 
-#include <time.h>
+#include "ot-time.h"
 #include <list>
 #include <string>
 #include <iostream>
@@ -64,13 +64,13 @@ class Message
 {
 public:
   Level level;
-  time_t timestamp;
+  Time::Stamp timestamp;
   string text;          // Line of text without EOL
 
   //--------------------------------------------------------------------------
   // Constructor
   Message(Level l, const string& t): level(l), text(t) 
-  { ::time(&timestamp); }
+  { timestamp=Time::Stamp::now(); }
 };
 
 //==========================================================================
@@ -142,6 +142,9 @@ public:
 //==========================================================================
 // TimestampFilter channel
 // Adds timestamps to the front of each message
+// Accepts strftime format, plus the following extensions:
+//   %*L:   The log level as a single digit
+//   %*S:   The exact floating point seconds time (use instead of %S)  
 class TimestampFilter: public Filter
 {
 private:

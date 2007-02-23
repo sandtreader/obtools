@@ -22,7 +22,7 @@ int main()
   Log::PatternFilter hfilter("H*", chan_out);
   Log::LevelFilter   level_out(Log::LEVEL_SUMMARY, hfilter);
 
-  Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_err);
+  Log::TimestampFilter tsfilter("%H:%M:%*S %a %d %b %Y [%*L]:", chan_err);
   Log::LevelFilter     level_err(Log::LEVEL_ERROR, tsfilter);
 
   Log::logger.connect(hfilter);
