@@ -191,6 +191,12 @@ public:
   time_t time() const { return (time_t)(t>>NTP_SHIFT)-EPOCH_1970; }
 
   //------------------------------------------------------------------------
+  // Get more accurate partial seconds count (0-59.999')
+  double seconds() const 
+  { ntp_stamp_t s = t%(60ULL<<NTP_SHIFT);  // Partial seconds
+    return (double)s/(1ULL<<NTP_SHIFT); }
+
+  //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
   ntp_stamp_t ntp() const { return t; } 
 
