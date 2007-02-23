@@ -5,12 +5,13 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = xml xmi cppt regen misc text mt net log cache db db-pgsql db-mysql \
-       cli init web soap chan time file crypto hash superlibs
+SUBS = xml xmi cppt regen misc text mt net time log cache   \
+       db db-pgsql db-mysql                                 \
+       cli init web soap chan file crypto hash superlibs
 
 #Different for cross compile
-SUBS_CROSS = xml xmi cppt regen misc text mt net log cache \
-             cli init web soap chan time file crypto hash superlibs
+SUBS_CROSS = xml xmi cppt regen misc text mt net time log cache \
+             cli init web soap chan file crypto hash superlibs
 
 ROOT = ..
 include ../build/dir.mk
