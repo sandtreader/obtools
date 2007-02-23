@@ -113,12 +113,12 @@ string toupper(const string& text);
 string itos(int i);
 
 //--------------------------------------------------------------------------
-// String to integer
+// String to integer (0 default)
 int stoi(const string& s);
 
 //--------------------------------------------------------------------------
-// Float to string (0 default)
-string ftos(double f);
+// Float to string, with zero padding
+string ftos(double f, int width=0, int prec=10, bool zero_pad=false);
 
 //--------------------------------------------------------------------------
 // String to float (0.0 default)

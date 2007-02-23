@@ -28,7 +28,7 @@ int main()
 
   cout << "Float string:   " << sf 
        << " -> " << Text::stof(sf) 
-       << " -> " << Text::ftos(Text::stof(sf)) << endl;
+       << " -> " << Text::ftos(Text::stof(sf), 16, 6, true) << endl;
 
   cout << "Hex string:     " << sx 
        << " -> " << Text::xtoi(sx) 

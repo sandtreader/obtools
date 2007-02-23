@@ -32,12 +32,12 @@ int stoi(const string& s)
 }
 
 //--------------------------------------------------------------------------
-// Float to string 
-string ftos(double f)
+// Float to string, with zero padding
+string ftos(double f, int width, int prec, bool zero_pad)
 {
   // Use sprintf for speed
-  char buf[21];  // Enough for %g format
-  snprintf(buf, 21, "%.10g", f);
+  char buf[41];  // Enough for %f format
+  snprintf(buf, 41, zero_pad?"%#0*.*f":"%#*.*f", width, prec, f);
   return string(buf);
 }
 
