@@ -19,11 +19,12 @@
 
        'file' (default /var/log/obtools/xmlmesh.log) gives log file  
 
-       'timestamp' gives strftime(3) format for timestamp prefix.  
+       'timestamp' gives strftime(3) format for timestamp prefix,
+       with extensions: %*S = seconds+milliseconds, %*L = log level
        Plain text can also be added.  If empty, nothing is added 
   -->
   <log level="2" file="/var/log/obtools/xmlmesh.log"
-       timestamp="%a %d %b %H:%M:%S: "/>
+       timestamp="%a %d %b %H:%M:%*S [%*L]: "/>
 
   <!-- Configured service modules - each has an 'id' used in routing below -->
   <services>
