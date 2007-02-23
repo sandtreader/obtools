@@ -15,7 +15,7 @@ DEBIAN-REVISION = 3
 
 ifdef DEBUG
 DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
-	  net log xml soap web text cache misc
+	  net log xml soap web text misc
 else
 DEPENDS	= xmlmesh-c ot-xmlmesh ot-general
 endif
