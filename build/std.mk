@@ -325,10 +325,13 @@ endif
 #Sort out dependencies
 define dep_template
 #Expand DIR-xxx for each dependency
-CPPFLAGS += -I$(DIR-$(1))
+INCS += $(DIR-$(1))
 
 #Add external dependency (not --whole-archive) for superlib/DLL
 DEPLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP)$(LIB-PROFILEDP))
+
+#Recurse to any child dependencies held by this dependency
+$(foreach dep2,$(DEPENDS-$(1)),$(eval $(call dep_template,$(dep2))))
 endef
 
 $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
@@ -340,6 +343,9 @@ SOHEADERS += $(wildcard $(DIR-$(1))/*.h)
 endef
 
 $(foreach con,$(CONTAINS),$(eval $(call contain_template,$(con))))
+
+#Add internal includes, duplicates removed
+CPPFLAGS += $(patsubst %,-I%,$(sort $(INCS)))
 
 #Add external libraries and includes
 CPPFLAGS += $(patsubst %,-I%,$(EXTINCS))
@@ -433,7 +439,7 @@ endif
 #Test harnesses:
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $$^ $$(EXTRALIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ -Wl,-\( $$^ -Wl,-\) $$(EXTRALIBS)
 TESTOBJS += $(1).o
 endef
 
@@ -442,7 +448,7 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 #Executable
 ifeq ($(TYPE), exe)
 $(NAME)$(EXE-SUFFIX): $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $@ -Wl,-\( $^ -Wl,-\) $(EXTRALIBS)
 endif
 
 #Multiple executables
@@ -452,7 +458,7 @@ define exe_template
 #complains (wrongly) of missing endifs
 ifeq ($(TYPE), exes)
 $(1)$$(EXE-SUFFIX): $(1).o $$(DEPLIBS)
-	$$(CC) $$(LDFLAGS) -o $$@ $$^ $$(EXTRALIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ -Wl,-\( $$^ -Wl,-\) $$(EXTRALIBS)
 EXEOBJS += $(1).o
 endif
 endef
@@ -468,7 +474,7 @@ endif
 #DL Mod
 ifeq ($(TYPE), dlmod)
 $(NAME).so: $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ $^ $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ -Wl,-\( $^ -Wl,-\) $(EXTRALIBS)
 endif
 
 #Superlib
@@ -476,7 +482,7 @@ ifeq ($(TYPE), superlib)
 $(SOLIB): $(INCLIBS) $(SOHEADERS)
 	cp $(SOHEADERS) .
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
-        $(INCLIBS) -Wl,-no-whole-archive $(DEPLIBS) $(EXTRALIBS) 
+        $(INCLIBS) -Wl,-no-whole-archive -Wl,-\( $(DEPLIBS) -Wl,-\) $(EXTRALIBS) 
 	ln -fs $@ $(SOLINK)
 endif
 
@@ -495,7 +501,7 @@ endif
 	  $(OBJS)							 \
           -Wl,--whole-archive $(INCLIBS) -Wl,--no-whole-archive          \
 	  -Wl,--exclude-libs,$(EXCLUDE-LIBS)                             \
-          $(DEPLIBS) $(EXTRALIBS)
+          -Wl,-\( $(DEPLIBS) -Wl,-\) $(EXTRALIBS)
 endif
 
 #Dependencies
