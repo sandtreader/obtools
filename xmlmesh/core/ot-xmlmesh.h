@@ -114,12 +114,12 @@ public:
   //--------------------------------------------------------------------------
   //Get XML Body content, still owned by Message, will be destroyed with it
   //Check for validity with !
-  const XML::Element& get_body();
+  XML::Element& get_body();
 
   //--------------------------------------------------------------------------
   //Ditto, but specifying a particular element name
   //Check for validity with !
-  const XML::Element& get_body(const string& name);
+  XML::Element& get_body(const string& name);
 
   //--------------------------------------------------------------------------
   //Get subject of a message

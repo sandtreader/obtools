@@ -221,7 +221,7 @@ SOAP::Message& Message::get_modifiable_soap()
 //--------------------------------------------------------------------------
 //Get XML Body content, still owned by Message, will be destroyed with it
 //Check for validity with !
-const XML::Element& Message::get_body()
+XML::Element& Message::get_body()
 {
   get_soap();  // Ensure soap_message exists
   return soap_message->get_body();
@@ -230,7 +230,7 @@ const XML::Element& Message::get_body()
 //--------------------------------------------------------------------------
 //Ditto, but specifying a particular element name
 //Check for validity with !
-const XML::Element& Message::get_body(const string& name)
+XML::Element& Message::get_body(const string& name)
 {
   get_soap();  // Ensure soap_message exists
   return soap_message->get_body(name);
