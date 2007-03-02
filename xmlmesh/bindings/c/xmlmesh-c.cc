@@ -21,6 +21,7 @@ extern "C" {
 // Initialise the client library
 void ot_xmlmesh_init()
 {
+#if defined DEBUG
   // Set up logging
   // Use statics to keep them outside this routine, but no-one else
   // needs to access them
@@ -28,6 +29,7 @@ void ot_xmlmesh_init()
   static Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
   static Log::LevelFilter     level_out(Log::LEVEL_SUMMARY, tsfilter);
   Log::logger.connect(level_out);
+#endif
 }
 
 //--------------------------------------------------------------------------
