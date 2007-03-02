@@ -156,7 +156,9 @@ endif
 else
 CC = gcc-3.4
 CXX = g++-3.4
+ifndef SINGLE
 EXTRALIBS += -lrt
+endif
 endif
 
 # Get locations
