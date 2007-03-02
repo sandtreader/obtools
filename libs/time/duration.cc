@@ -169,7 +169,9 @@ string Duration::hms() const
 // Returns Duration(0.0) if clock not available
 Duration Duration::clock()
 {
-#if defined(CLOCK_MONOTONIC)
+  // Don't use monotonic clock in single threaded mode, to avoid pulling
+  // in librt
+#if defined(CLOCK_MONOTONIC) && !defined(_SINGLE)
   struct timespec ts;
   if (!clock_gettime(CLOCK_MONOTONIC, &ts))
     return Duration((double)ts.tv_sec+(double)ts.tv_nsec/1.0e9);
