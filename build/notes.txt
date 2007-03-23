@@ -29,10 +29,10 @@ We use the GC version - Gnu compiler, no exception handling (we don't
 expect C++ EH in thread cancellation in libpthread, so no reason to expect
 it here either).  So...
 
-1) Copy {pthread,semaphore,sched}.h to /usr/lib/i586-mingwmsvc/3.4.2/include/
+1) Copy {pthread,semaphore,sched}.h to /usr/lib/gcc/i586-mingw32msvc/3.4.5/include/
 (your version may vary)
 
-2) Copy libpthreadGC2.a to /usr/lib/i586-mingwmsvc/3.4.2/
+2) Copy libpthreadGC2.a to /usr/lib/gcc/i586-mingw32msvc/3.4.5/
 
 3) Copy pthreadGC2.dll to Windows PATH
 
