@@ -127,6 +127,17 @@ Path Path::resolve(const Path& new_path) const
 }
 
 //--------------------------------------------------------------------------
+// Fix a path to local directory separator type
+// Use to convert '/'-separated paths (e.g. URLs) to local separator
+void Path::fix_slashes()
+{
+#if defined(__WIN32__)
+  for(string::iterator p=path.begin(); p!=path.end(); ++p)
+    if (*p == '/') *p = SEPCHAR;
+#endif
+}
+
+//--------------------------------------------------------------------------
 // Does the file exist?
 bool Path::exists() const
 {

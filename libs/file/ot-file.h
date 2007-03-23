@@ -96,6 +96,11 @@ public:
   // Get basename: leafname with extension (if any) removed
   string basename() const;
  
+  //--------------------------------------------------------------------------
+  // Fix a path to local directory separator type
+  // Use to convert '/'-separated paths (e.g. URLs) to local separator
+  void fix_slashes();
+
   // Methods to resolve paths ------------------------------------------------
   //--------------------------------------------------------------------------
   // Resolve one path against another:
