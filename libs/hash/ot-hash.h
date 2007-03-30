@@ -75,24 +75,31 @@ struct Stats
 };
 
 //==========================================================================
-// Hash block template - parameters as above
-template<class HASH_ID_T, class HASH_INDEX_T, class INDEX_T> class Block
+// Hash block template - parameters as above, plus helper for ID
+// splitting/comparison
+template<class HASH_ID_T, class HASH_INDEX_T, class INDEX_T,
+	 class HELPER_T> class Block
 {
 private:
   // Handy typedefs
   typedef Entry<HASH_ID_T, HASH_INDEX_T, INDEX_T> entry_t;
 
   int size;
+
+  // ID splitting helper
+  HELPER_T& helper;
+
   entry_t *table;        
   HASH_INDEX_T freelist;  // First available free entry for collisions
 #if !defined(_SINGLE)
   MT::Mutex mutex;  // On freelist state
 #endif
 
+
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  Block(int _size): size(_size)
+  Block(int _size, HELPER_T& _helper): size(_size), helper(_helper)
 #if !defined(_SINGLE)
   , mutex()
 #endif
@@ -124,7 +131,7 @@ public:
   bool add(HASH_ID_T id, INDEX_T index)
   {
     // Get hash to start with
-    HASH_INDEX_T start = (HASH_INDEX_T)(id % size);
+    HASH_INDEX_T start = helper.get_start(id);
     entry_t *p = table+start;
 
 #if !defined(_SINGLE)
@@ -162,7 +169,7 @@ public:
       // Remove 'q' from freelist, and clear back-link from the new head
       freelist = q->next;
       if (freelist != INVALID_HASH_INDEX)
-	table[freelist].id = INVALID_HASH_INDEX;
+	table[freelist].prev = INVALID_HASH_INDEX;
 
       // Set up q
       q->id = id;
@@ -182,7 +189,7 @@ public:
   INDEX_T lookup(HASH_ID_T id)
   {
     // Get hash to start with
-    HASH_INDEX_T start = (HASH_INDEX_T)(id % size);
+    HASH_INDEX_T start = helper.get_start(id);
     entry_t *p = table+start;
 
     // NB! This is not mutexed, because it doesn't touch the freelist
@@ -212,7 +219,7 @@ public:
   INDEX_T remove(HASH_ID_T id)
   {
     // Get hash to start with
-    HASH_INDEX_T i = (HASH_INDEX_T)(id % size);
+    HASH_INDEX_T i = helper.get_start(id);
     HASH_INDEX_T previous = INVALID_HASH_INDEX;
 
 #if !defined(_SINGLE)
@@ -362,7 +369,7 @@ public:
 
       // See if it's used and hashes to where it should be - 
       // if so, it's the head of a chain
-      if (p->used() && p->id % size == i)
+      if (p->used() && helper.get_start(p->id) == i)
       {
 	// Follow chain
 	for(HASH_INDEX_T j=i; j!=INVALID_HASH_INDEX; j=table[j].next)
@@ -397,10 +404,10 @@ public:
 
 	  // Check we hash correctly, too.  We could validly have the hash
 	  // of anything we have seen on the chain, including ourselves
-	  if (!valid_hashes[(HASH_INDEX_T)(q->id % size)])
+	  if (!valid_hashes[helper.get_start(q->id)])
 	  {
 	    sout << "Entry at " << j << " has wrong hash: " 
-		 << (q->id%size) << endl;
+		 << helper.get_start(q->id) << endl;
 	    ok = false;
 	  }
 	}
@@ -437,7 +444,7 @@ public:
 	stats_p.entries++;
 
 	// If it hashes to where it should be, it's the head of a chain
-	if (p->id % size == i)
+	if (helper.get_start(p->id) == i)
 	{
 	  int length = 0;
 
@@ -500,22 +507,25 @@ public:
 };
 
 //==========================================================================
-// Hash table template - parameters:
-//   ID_T:         Unsigned input ID type
+// General hash table template 
+
+// GeneralTable takes a splitter for ID type, which need not be integral,
+// as long as it has an assignment and comparison operator.
+// For the more common case of integer IDs, see Table below
+
+// Template parameters:
+//   ID_T:         Input ID type
 //   HASH_ID_T :   UNSIGNED integer type for lower part of ID
 //   HASH_INDEX_T: SIGNED integer type for index within hash block
 //   INDEX_T:      SIGNED integer type for output index
+//   HELPER_T:     Helper template for ID_T functions
 
-// Defaults are for a sensible 32 into 16+16 => 32 structure 
-template<class ID_T         = uint32_t, 
-         class HASH_ID_T    = uint16_t, 
-         class HASH_INDEX_T = int16_t,
-         class INDEX_T      = int32_t
-        > class Table
+template<class ID_T, class HASH_ID_T, class HASH_INDEX_T,
+         class INDEX_T, class HELPER_T> class GeneralTable
 {
 private:
   // Handy typedef
-  typedef Block<HASH_ID_T, HASH_INDEX_T, INDEX_T> block_t;
+  typedef Block<HASH_ID_T, HASH_INDEX_T, INDEX_T, HELPER_T> block_t;
   typedef Entry<HASH_ID_T, HASH_INDEX_T, INDEX_T> entry_t;
 
   int nbits;                // Number of bits of ID we take
@@ -523,27 +533,23 @@ private:
   block_t **table;          // Malloc'ed table of (2^bits) Block pointers
   bool built;               // Whether successfully built
 
-  // Precalculated stuff for speed
-  int top_shift;            // Shift for top bits     
-  ID_T bottom_mask;         // AND mask for bottom bits
+  // ID splitting helper
+  HELPER_T helper;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor
   // _nbits gives number of bits to chop off at top level
   // _block_size gives number of entries to create at each second-level block
-  Table(int _nbits, int _block_size):
-    nbits(_nbits), block_size(_block_size), table(0), built(false)
+  GeneralTable(int _nbits, int _block_size):
+    nbits(_nbits), block_size(_block_size), table(0), built(false), 
+    helper(_nbits, _block_size)
   {
     int nblocks = 1<<nbits;
     int size = nblocks*sizeof(block_t *);
     table = (block_t **)malloc(size);
 
     if (!table) return;
-
-    // Set shift and mask 
-    top_shift   = sizeof(ID_T)*8 - nbits;
-    bottom_mask = (ID_T)((1<<top_shift)-1);
 
     // Clear table for clean shutdown in case it fails
     int i;
@@ -552,7 +558,7 @@ public:
     // Build table 
     for(i=0; i<nblocks; i++)
     {
-      table[i] = new block_t(block_size);
+      table[i] = new block_t(block_size, helper);
       if (!*table[i]) return;
     }
     
@@ -585,8 +591,8 @@ public:
     if (!built) return false;
 
     // Cut into top and bottom
-    ID_T top = id >> top_shift;
-    HASH_ID_T bottom = (HASH_ID_T)(id & bottom_mask);
+    int top = helper.get_top(id);
+    HASH_ID_T bottom = helper.get_bottom(id);
 
     // Get Block and ask it
     block_t *block = table[top];
@@ -601,8 +607,8 @@ public:
     if (!built) return INVALID_INDEX;
 
     // Cut into top and bottom
-    ID_T top = id >> top_shift;
-    HASH_ID_T bottom = (HASH_ID_T)(id & bottom_mask);
+    int top = helper.get_top(id);
+    HASH_ID_T bottom = helper.get_bottom(id);
 
     // Get Block and ask it
     block_t *block = table[top];
@@ -617,8 +623,8 @@ public:
     if (!built) return INVALID_INDEX;
 
     // Cut into top and bottom
-    ID_T top = id >> top_shift;
-    HASH_ID_T bottom = (HASH_ID_T)(id & bottom_mask);
+    int top = helper.get_top(id);
+    HASH_ID_T bottom = helper.get_bottom(id);
 
     // Get Block and ask it
     block_t *block = table[top];
@@ -694,7 +700,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Destructor
-  ~Table()
+  ~GeneralTable()
   {
     if (table)
     {
@@ -705,6 +711,75 @@ public:
       free(table);
     }
   }
+};
+
+//==========================================================================
+// ID helper template for integral ID types - splits ID into integer top 
+// and bottom parts for hash
+// - Implement this for other ID types for GeneralTable
+template<class ID_T, class HASH_ID_T, class HASH_INDEX_T> class IntegerIDHelper
+{
+private:
+  int nbits;
+  int block_size;
+
+  int top_shift;            // Shift for top bits     
+  ID_T bottom_mask;         // AND mask for bottom bits
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  IntegerIDHelper(int _nbits, int _block_size): 
+    nbits(_nbits), block_size(_block_size)
+  {
+    top_shift   = sizeof(ID_T)*8 - nbits;
+    bottom_mask = (ID_T)((1<<top_shift)-1);
+  }
+
+  //--------------------------------------------------------------------------
+  // Get top array index from ID
+  int get_top(ID_T id) { return (int)(id >> top_shift); }
+
+  //--------------------------------------------------------------------------
+  // Get bottom hash ID from full ID
+  HASH_ID_T get_bottom(ID_T id) { return(HASH_ID_T)(id & bottom_mask); }
+
+  //--------------------------------------------------------------------------
+  // Get start offset in hash block from hash ID
+  HASH_INDEX_T get_start(HASH_ID_T id) 
+  { return(HASH_INDEX_T)(id % block_size); }
+
+};
+
+//==========================================================================
+// Standard hash table template for integer IDs
+
+// Template parameters:
+//   ID_T:         Input ID type
+//   HASH_ID_T :   UNSIGNED integer type for lower part of ID
+//   HASH_INDEX_T: SIGNED integer type for index within hash block
+//   INDEX_T:      SIGNED integer type for output index
+
+// Defaults are for a sensible 32 into 16+16 => 32 structure 
+template<class ID_T         = uint32_t, 
+         class HASH_ID_T    = uint16_t, 
+         class HASH_INDEX_T = int16_t,
+         class INDEX_T      = int32_t
+       > class Table:
+  public GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T, 
+                      INDEX_T, 
+		      IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> >
+{
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  // _nbits gives number of bits to chop off at top level
+  // _block_size gives number of entries to create at each second-level block
+  Table(int _nbits, int _block_size): 
+    GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T, INDEX_T, 
+                 IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> 
+                >::GeneralTable(_nbits, _block_size) 
+  {}
 };
 
 //==========================================================================
