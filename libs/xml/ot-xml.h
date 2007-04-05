@@ -630,6 +630,12 @@ public:
   // parser has died
   // Returns 0 if not valid
   Element *detach_root(); 
+
+  //------------------------------------------------------------------------
+  // Detach and delete the old root (if any) and replace with a new one
+  // Element is taken and will be deleted by parser if not detached/replaced
+  // itself
+  void replace_root(Element *e);
 };
 
 
@@ -910,6 +916,11 @@ public:
   // Takes the element and attaches to given path, detachs and deletes the old
   // Returns whether the old element existed
   bool replace_element(const string& path, Element *ne);
+
+  //------------------------------------------------------------------------
+  // Replace the root (if any) with a new one of the given name
+  // Returns the new root
+  Element *replace_root(const string& name);
 
   //------------------------------------------------------------------------
   // Write back file from changes made to in-memory document

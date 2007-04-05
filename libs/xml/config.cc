@@ -246,6 +246,16 @@ bool Configuration::replace_element(const string& path, Element *ne)
   XPathProcessor xpath(get_root());
   return xpath.replace_element(path, ne); 
 }
+
+//------------------------------------------------------------------------
+// Replace the root (if any) with a new one of the given name
+// Returns the new root
+Element *Configuration::replace_root(const string& name)
+{
+  XML::Element *e = new XML::Element(name);
+  parser.replace_root(e);
+  return e;
+}
   
 //------------------------------------------------------------------------
 // Update file from changes made to in-memory document

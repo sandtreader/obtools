@@ -569,6 +569,16 @@ Element *Parser::detach_root()
 }
 
 //------------------------------------------------------------------------
+// Detach and delete the old root (if any) and replace with a new one
+// Element is taken and will be deleted by parser if not detached/replaced
+// itself
+void Parser::replace_root(Element *e)
+{
+  if (root) delete root;
+  root = e;
+}
+
+//------------------------------------------------------------------------
 // Do initial processing on an element (after attributes read)
 // Handles namespace map building - actual processing of namespace is
 // done in final_processing
