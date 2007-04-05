@@ -526,6 +526,11 @@ struct AutoConnection
   { conn = pool.claim(); }
 
   //------------------------------------------------------------------------
+  // Check if connection is valid
+  bool ok() { return conn!=0; }
+  bool operator!() { return !conn; }
+
+  //------------------------------------------------------------------------
   // Stub functions for every connection operation - see above
   bool exec(const string& sql) { return conn?conn->exec(sql):false; }
 
