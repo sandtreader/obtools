@@ -3,7 +3,7 @@ Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libmysqlclient14 (>= 4.1), libot-general (>= 1.6.4), libot-db (>= 2.0.0)
+Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libmysqlclient15off (>= 5.0), libot-general (>= 1.6.4), libot-db (>= 2.0.0)
 Description: ObTools MySQL database driver library
  The ObTools database library provides a generic database interface in C++.
  This is the MySQL interface driver
