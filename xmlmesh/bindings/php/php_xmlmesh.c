@@ -36,7 +36,7 @@ ZEND_DECLARE_MODULE_GLOBALS(xmlmesh)
 /* Definition of INI-file items                                            */
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("xmlmesh.mesh_port", "29167", PHP_INI_ALL, 
-		      OnUpdateInt, mesh_port, 
+		      OnUpdateLong, mesh_port, 
 		      zend_xmlmesh_globals, xmlmesh_globals)
     STD_PHP_INI_ENTRY("xmlmesh.mesh_host", "localhost", PHP_INI_ALL, 
 		      OnUpdateString, mesh_host, 
@@ -55,7 +55,7 @@ zend_function_entry xmlmesh_functions[] =
   ZEND_FE(xmlmesh_send, NULL)
   ZEND_FE(xmlmesh_request, NULL)
   ZEND_FE(xmlmesh_simple_request, NULL)
-  {NULL, NULL, NULL}	
+  {NULL, NULL, NULL }
 };
 
 /* ======================================================================= */
