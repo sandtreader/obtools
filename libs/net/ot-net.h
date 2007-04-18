@@ -585,6 +585,10 @@ public:
   UDPSocket(EndPoint remote);
 
   //--------------------------------------------------------------------------
+  // Enable broadcast on this socket
+  void enable_broadcast();
+
+  //--------------------------------------------------------------------------
   // Raw datagram recv wrapper
   // NOTE:  All wrappers silently handle EINTR
   ssize_t crecv(void *buf, size_t len, int flags=0);

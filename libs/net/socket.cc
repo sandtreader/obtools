@@ -500,6 +500,15 @@ UDPSocket::UDPSocket(EndPoint remote)
 }
 
 //--------------------------------------------------------------------------
+// Enable broadcast on this socket
+void UDPSocket::enable_broadcast()
+{
+  unsigned long n = 1;
+
+  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &n, sizeof(unsigned long));
+}
+
+//--------------------------------------------------------------------------
 // Raw datagram recv wrapper
 ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
 { 
