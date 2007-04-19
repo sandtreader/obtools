@@ -14,6 +14,7 @@
 #define SOCKIOCTL ioctlsocket
 #define SOCKERRNO WSAGetLastError()
 typedef int socklen_t;
+typedef const char *sockopt_t;
 #else
 #include <sys/ioctl.h>
 #include <net/if_arp.h>
@@ -21,6 +22,7 @@ typedef int socklen_t;
 #define SOCKCLOSE close
 #define SOCKIOCTL ioctl
 #define SOCKERRNO errno
+typedef const void *sockopt_t;
 #endif
 
 #include <errno.h>
@@ -93,28 +95,22 @@ void Socket::go_blocking()
 // Turn on keepalives
 void Socket::enable_keepalive()
 {
-#ifdef __WIN32__
-#warning enable_keepalive not implemented in Windows
-#else
   int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(int));
-#endif
+  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (sockopt_t)&one, sizeof(int));
 }
 
 //--------------------------------------------------------------------------
 // Set timeout (receive and send) in seconds
 void Socket::set_timeout(int secs)
 {
-#ifdef __WIN32__
-#warning set_timeout not implemented in Windows
-#else
   struct timeval tv;
   tv.tv_sec = secs;
   tv.tv_usec = 0;
 
-  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
-  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(struct timeval));
-#endif
+  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (sockopt_t)&tv, 
+	     sizeof(struct timeval));
+  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (sockopt_t)&tv, 
+	     sizeof(struct timeval));
 }
 
 //--------------------------------------------------------------------------
@@ -505,7 +501,8 @@ void UDPSocket::enable_broadcast()
 {
   unsigned long n = 1;
 
-  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &n, sizeof(unsigned long));
+  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, (sockopt_t)&n, 
+	     sizeof(unsigned long));
 }
 
 //--------------------------------------------------------------------------
