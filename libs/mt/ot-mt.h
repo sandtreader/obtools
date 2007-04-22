@@ -659,6 +659,22 @@ public:
   { fill(); }
 
   //--------------------------------------------------------------------------
+  // Check if any threads available
+  bool available()
+  {
+    Lock lock(mutex);
+    return !spares.empty();
+  }
+
+  //--------------------------------------------------------------------------
+  // Check if any threads active
+  bool active()
+  {
+    Lock lock(mutex);
+    return spares.size() < threads.size();
+  }
+
+  //--------------------------------------------------------------------------
   // Remove a thread from the pool
   // 0 if none available
   T *remove()
