@@ -283,12 +283,7 @@ bool Configuration::write()
 
     // Attempt atomic update - but can't do that in Windows
 #if defined(__WIN32__)
-    if (::unlink(fn.c_str()))
-    {
-      serr << "Config: Can't delete " << fn << " before rename: "
-	   << strerror(errno) << endl;
-      return false;
-    }
+    ::unlink(fn.c_str());  // Doesn't matter if it fails
 #endif
 
     if (!::rename(tfn.c_str(), fn.c_str())) return true;
