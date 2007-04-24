@@ -258,7 +258,11 @@ bool Path::set_ownership(uid_t owner, uid_t group) const
 bool Path::erase() const
 {
   if (is_dir())
+#if defined(__WIN32__) // Meaningless in Windows
+    return !system((string("rmdir ")+path+" /s /q").c_str());
+#else
     return !system((string("rm -rf ")+path).c_str());
+#endif
   else
     return !unlink(c_str());
 }
