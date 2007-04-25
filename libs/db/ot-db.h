@@ -14,6 +14,7 @@
 #include <map>
 #include <iostream>
 #include <stdint.h>
+#include "ot-time.h"
 
 #if !defined(_SINGLE)
 #include "ot-mt.h"
@@ -481,16 +482,25 @@ class ConnectionPool
   ConnectionFactory& factory;
   unsigned min_connections;        // Number started on creation
   unsigned max_connections;        // Maximum ever created
+  Time::Duration max_inactivity;
 
   // Current connections
   MT::Mutex mutex;                 // On connection lists
   list<Connection *> connections;  // All connections
   list<Connection *> available;    // Connections available for use
 
+  // Background thread and timestamps
+  map<Connection *, Time::Stamp> last_used;
+  MT::Thread *background_thread;
+
+  // Internals
+  void fill_to_minimum();
+
 public:
   //------------------------------------------------------------------------
   // Constructor
-  ConnectionPool(ConnectionFactory& _factory, unsigned _min, unsigned _max);
+  ConnectionPool(ConnectionFactory& _factory, unsigned _min, unsigned _max,
+		 Time::Duration _max_inactivity);
 
   //------------------------------------------------------------------------
   // Claim a connection
@@ -500,6 +510,10 @@ public:
   //------------------------------------------------------------------------
   // Release a connection after use
   void release(Connection *conn);
+
+  //------------------------------------------------------------------------
+  // Run background timeout loop (called from internal thread)
+  void run_background();
 
   //------------------------------------------------------------------------
   // Destructor

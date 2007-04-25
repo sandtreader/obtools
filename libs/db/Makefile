@@ -9,7 +9,7 @@ TYPE	= lib
 NAME    = ot-db
 HEADERS = ot-db.h
 OBJS  	= connection.o row.o transaction.o
-DEPENDS = log text
+DEPENDS = log text time
 MT-VARIANTS = 1
 
 #Don't use MT in SINGLE, only provide pool in MT
