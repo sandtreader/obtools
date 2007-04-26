@@ -57,9 +57,10 @@ bool URL::split(XML::Element& xml)
 
   string::size_type length = text.size();
 
-  // Extract scheme
+  // Extract scheme - must be before / (query may contain a colon)
   string::size_type p = text.find(':');
-  if (p != string::npos)
+  string::size_type q = text.find('/');
+  if (p != string::npos && (q==string::npos || p<q))
   {
     xml.add("scheme", string(text, 0, p));
 
