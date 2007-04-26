@@ -1,10 +1,10 @@
-Package: libot-db-single
+Package: libot-db2-single
 Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libot-general-single (>= 1.6.4)
-Conflicts: libot-db-pgsql-single (< 2.0.0)
+Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libot-general2-single (>= 2.1.0)
+Conflicts: libot-db-pgsql-single
 Description: ObTools generic database libraries 
  The ObTools database library provides a generic database interface in C++.
  This is the generic support library, which requires a specific driver

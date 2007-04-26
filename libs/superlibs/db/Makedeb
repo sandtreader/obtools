@@ -54,7 +54,7 @@ mkdir -p $DEB_DEV_DIR/usr/include/obtools
 
 install -m 0644 $SRC_DIR/DEBIAN.DEV/control$VARIANT $DEB_DEV_DIR/DEBIAN/control
 
-echo "Depends: libot-db (>= $DEB_VERSION)" >> $DEB_DEV_DIR/DEBIAN/control
+echo "Depends: $NAME (>= $DEB_VERSION)" >> $DEB_DEV_DIR/DEBIAN/control
 echo "Version: $DEB_VERSION" >> $DEB_DEV_DIR/DEBIAN/control
 
 install -m 0644 $RELEASE_DIR/ot-db$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/

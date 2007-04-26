@@ -10,17 +10,17 @@ TYPE	= dll
 else
 TYPE	= superlib
 endif
-NAME      = ot-xmlmesh
+NAME      = ot-xmlmesh2
 VERSION   = 2.0.0
 CONTAINS  = xmlmesh-core xmlmesh-otmp xmlmesh-client
-DEPENDS   = ot-general
+DEPENDS   = ot-general2
 MT-VARIANTS = 1
 
 #Only build release versions - debug is not PIC
 #Don't override in MinGW
 RELEASE-VARIANTS-ONLY = 1
 
-DEBIAN-NAME    = libot-xmlmesh
+DEBIAN-NAME    = libot-xmlmesh2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 2
 

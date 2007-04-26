@@ -1,9 +1,9 @@
-Package: libot-general-single-dev
+Package: libot-general2-single-dev
 Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libot-general-dev (>= 1.6.4)
+Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libot-general2-dev (>= 2.1.0)
 Description: ObTools general-purpose libraries (single-threaded dev. files)
  The ObTools libraries provide a range of useful interfaces and objects for
  multithreaded & network applications in C++

@@ -1,10 +1,10 @@
-Package: libot-xmlmesh-single
+Package: libot-xmlmesh2-single
 Priority: optional
 Section: libs
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
 Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3)
-Depends: libot-general-single (>= 1.6.4)
+Depends: libot-general2-single (>= 2.1.0)
 Description: ObTools XMLMesh message bus shared libraries (single threaded)
  XMLMesh is a SOAP-based XML message bus for integration of distributed
  components using simple XML messages.  

@@ -10,17 +10,17 @@ TYPE	= dll
 else
 TYPE	= superlib
 endif
-NAME   	= ot-db
+NAME   	= ot-db2
 VERSION	= 2.1.0
 CONTAINS = db
 MT-VARIANTS = 1
 
-DEPENDS = ot-general
+DEPENDS = ot-general2
 
 #Only build release versions - debug is not PIC
 RELEASE-VARIANTS-ONLY = 1
 
-DEBIAN-NAME    = libot-db
+DEBIAN-NAME    = libot-db2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 1
 

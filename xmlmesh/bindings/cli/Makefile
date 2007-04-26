@@ -13,14 +13,14 @@ NAME += xmlmesh-receive
 endif
 
 DEBIAN-NAME    = ot-xmlmesh-cli
-DEBIAN-VERSION = 1.3.0
+DEBIAN-VERSION = 2.0.0
 DEBIAN-REVISION = 1
 
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
 	  net log xml soap web text misc
 else
-DEPENDS	= ot-xmlmesh ot-general
+DEPENDS	= ot-xmlmesh2 ot-general2
 endif
 
 #Only needs single-threaded

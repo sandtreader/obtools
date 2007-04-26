@@ -18,7 +18,7 @@ ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
           net log mt xml text init misc
 else
-DEPENDS = ot-general ot-xmlmesh
+DEPENDS = ot-general2 ot-xmlmesh2
 endif
 
 ifdef RELEASE

@@ -1,8 +1,8 @@
-Package: libot-codegen-dev
+Package: libot-codegen2-dev
 Priority: optional
 Section: libs
 Architecture: i386
-Depends: g++-3.4, libot-general-dev (>= 1.6.4)
+Depends: g++-3.4, libot-general2-dev (>= 2.1.0)
 Maintainer: Paul Clark <paul@xmill.com>
 Description: ObTools codegen libraries 
  The ObTools code generation libraries provide useful facilities for UML/XMI

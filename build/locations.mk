@@ -51,12 +51,12 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 # Each word split by ':' into
 # 1: Library name, including variant (as put into DEPENDS)
 # 2: Directory of source, relative to ROOT
-OT-SHLIBS = ot-general:libs/superlibs/general			\
-	    ot-db:libs/superlibs/db				\
-	    ot-db-pgsql:libs/superlibs/db-pgsql			\
-	    ot-db-mysql:libs/superlibs/db-mysql			\
-	    ot-codegen:libs/superlibs/codegen			\
-	    ot-xmlmesh:xmlmesh/superlibs/xmlmesh		
+OT-SHLIBS = ot-general2:libs/superlibs/general			\
+	    ot-db2:libs/superlibs/db				\
+	    ot-db-pgsql2:libs/superlibs/db-pgsql		\
+	    ot-db-mysql2:libs/superlibs/db-mysql		\
+	    ot-codegen2:libs/superlibs/codegen			\
+	    ot-xmlmesh2:xmlmesh/superlibs/xmlmesh		
 
 #==========================================================================
 # Template for standard Obtools library

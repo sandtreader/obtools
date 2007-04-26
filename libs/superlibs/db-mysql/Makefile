@@ -10,12 +10,12 @@ TYPE	= dll
 else
 TYPE	= superlib
 endif
-NAME   	= ot-db-mysql
+NAME   	= ot-db-mysql2
 VERSION	= 2.0.0
 CONTAINS = db-mysql
 MT-VARIANTS = 1
 
-DEPENDS = ot-general ot-db
+DEPENDS = ot-general2 ot-db2
 
 ifdef SINGLE
 EXTLIBS = -lmysqlclient -lz
@@ -26,7 +26,7 @@ endif
 #Only build release versions - debug is not PIC
 RELEASE-VARIANTS-ONLY = 1
 
-DEBIAN-NAME    = libot-db-mysql
+DEBIAN-NAME    = libot-db-mysql2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 2
 

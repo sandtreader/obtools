@@ -1,4 +1,4 @@
-Package: libot-xmlmesh-single-dev
+Package: libot-xmlmesh2-single-dev
 Priority: optional
 Section: libs
 Architecture: i386
@@ -9,4 +9,4 @@ Description: ObTools XMLMesh message bus shared libraries (single threaded dev f
  .
  This package is additional to libot-xmlmesh-dev and provides libraries for
  building *single-threaded* clients which use XMLMesh for communication.
-Depends: libot-xmlmesh-dev (>= 1.5.0), libot-general-single-dev (>= 1.6.4)
+Depends: libot-xmlmesh2-dev (>= 2.0.0), libot-general2-single-dev (>= 2.1.0)

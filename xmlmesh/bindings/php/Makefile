@@ -10,7 +10,7 @@ NAME   	= php_xmlmesh
 OBJS 	= php_xmlmesh.o
 
 DEBIAN-NAME    = ot-xmlmesh-php
-DEBIAN-VERSION = 1.2.0
+DEBIAN-VERSION = 2.0.0
 DEBIAN-REVISION = 1
 
 ifdef DEBUG
@@ -20,7 +20,7 @@ else
 # Module is very dependent on the order of ot-general and ot-xmlmesh
 # here, even though you'd normally assume they would be the other way round
 # If reversed, apache segfaults on startup with the module loaded!
-DEPENDS	= xmlmesh-c ot-general ot-xmlmesh 
+DEPENDS	= xmlmesh-c ot-general2 ot-xmlmesh2
 endif
 
 PHP	= /usr/include/php4

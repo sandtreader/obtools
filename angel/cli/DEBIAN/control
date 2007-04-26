@@ -2,7 +2,7 @@ Package: angel-cli
 Priority: optional
 Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libot-general (>= 1.1.1), libot-xmlmesh (>= 1.0.0)
+Depends: libot-general2 (>= 2.1.0), libot-xmlmesh (>= 2.0.0)
 Description: Angel command line utility
  Angel is a process manager designed for managing and monitoring complex
  distributed systems.  It fulfills some of the functions of init.d, but does

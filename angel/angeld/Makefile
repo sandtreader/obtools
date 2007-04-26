@@ -11,7 +11,7 @@ HEADERS = angeld.h
 OBJS 	= angeld.o server.o process.o
 
 DEBIAN-NAME    = angeld
-DEBIAN-VERSION = 0.1.0
+DEBIAN-VERSION = 0.2.0
 DEBIAN-REVISION = 1
 
 #Build from static local libraries in DEBUG, installed .so's in release
@@ -19,7 +19,7 @@ ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
           net log mt xml soap web text cache init misc file
 else
-DEPENDS = ot-general ot-xmlmesh
+DEPENDS = ot-general2 ot-xmlmesh2
 endif
 
 ifdef RELEASE

@@ -10,7 +10,7 @@ TYPE	= dll
 else
 TYPE	= superlib
 endif
-NAME	= ot-general
+NAME	= ot-general2
 VERSION	= 2.1.1
 CONTAINS = xml misc text net log init chan time web file crypto hash soap
 MT-VARIANTS = 1
@@ -27,7 +27,7 @@ else
 EXTLIBS = -lcrypto
 endif
 
-DEBIAN-NAME    = libot-general
+DEBIAN-NAME    = libot-general2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 1
 

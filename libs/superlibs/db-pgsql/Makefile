@@ -16,18 +16,18 @@ TYPE	= dll
 else
 TYPE	= superlib
 endif
-NAME   	= ot-db-pgsql
+NAME   	= ot-db-pgsql2
 VERSION	= 2.0.0
 CONTAINS = db-pgsql
 MT-VARIANTS = 1
 
-DEPENDS = ot-general ot-db
+DEPENDS = ot-general2 ot-db2
 EXTLIBS = -lpq
 
 #Only build release versions - debug is not PIC
 RELEASE-VARIANTS-ONLY = 1
 
-DEBIAN-NAME    = libot-db-pgsql
+DEBIAN-NAME    = libot-db-pgsql2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 1
 
