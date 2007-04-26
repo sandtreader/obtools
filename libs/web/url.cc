@@ -133,6 +133,77 @@ bool URL::split(XML::Element& xml)
 }
 
 //------------------------------------------------------------------------
+// Quick access to path of URL
+// Returns path or "" if can't read it
+string URL::get_path()
+{
+  XML::Element xml;
+  if (!split(xml)) return "";
+  return xml.get_child("path").content;
+}
+
+//------------------------------------------------------------------------
+// Quick access to query of URL
+// Returns query or "" if can't read it
+string URL::get_query()
+{
+  XML::Element xml;
+  if (!split(xml)) return "";
+  return xml.get_child("query").content;
+}
+
+//------------------------------------------------------------------------
+// Get query as a property list
+// Returns whether query was available, fills props if so
+// Note: Handles + for space and % decode in values
+bool URL::get_query(Misc::PropertyList& props)
+{
+  string query = get_query();
+  if (query.empty()) return false;
+
+  // Split on &
+  vector<string> params = Text::split(query, '&', false);
+  for(vector<string>::iterator p = params.begin(); p!=params.end(); ++p)
+  {
+    string& param = *p;
+    size_t q = param.find('=');
+    if (q && q != string::npos)
+    {
+      string name(param, 0, q);
+      string value;
+
+      // Fix up the value
+      for(++q; q<param.size(); ++q)
+      {
+	char c = param[q];
+	switch (c)
+	{
+	  case '+':
+	    value += ' ';
+	    break;
+
+	  case '%':
+	  {
+	    string hex;
+	    if (++q < param.size()) hex+=param[q];
+	    if (++q < param.size()) hex+=param[q];
+	    value += (char)Text::xtoi(hex);
+	    break;
+	  }
+
+	  default:
+	    value += c;
+	}
+      }
+
+      props.add(name, value);
+    }
+  }
+  
+  return true;
+}
+
+//------------------------------------------------------------------------
 // << operator to write URL to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const URL& u) 

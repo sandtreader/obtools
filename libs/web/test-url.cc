@@ -35,7 +35,14 @@ int main(int argc, char **argv)
 
   cout << "\n--- XML form\n";
   cout << root;
- 
+
+  cout << "Path: " << url.get_path() << endl;
+  cout << "Query: " << url.get_query() << endl;
+  ObTools::Misc::PropertyList props;
+  url.get_query(props);
+  cout << "Split query:\n";
+  props.dump(cout);
+
   cout << "\n--- Regenerated\n";
   ObTools::Web::URL url2(root);
   cout << url2 << endl;

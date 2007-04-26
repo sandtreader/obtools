@@ -14,7 +14,7 @@ TESTCMD	= ./test-mime < ../test.mime.txt
 TESTCMD += && ./test-http-file < ../test.http.txt
 TESTCMD += && ./test-http-file < ../test.http2.txt
 TESTCMD += && ./test-url "http://foo.com:81/x/y/z?x=1&z=2\#frag"
-TESTCMD += && ./test-url "/x/y/z?x=1&z=2\#frag"
+TESTCMD += && ./test-url "/x/y/z?x=1&z=2&space=foo+bar&percent=%25\#frag"
 TESTCMD += && ./test-http-client "http://www.xmill.com"
 DEPENDS = xml text misc net log
 MT-VARIANTS = 1

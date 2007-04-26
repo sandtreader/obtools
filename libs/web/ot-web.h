@@ -70,6 +70,22 @@ public:
   // Name of element is set to 'url'
   // Returns whether successful (valid URL)
   bool split(XML::Element& xml);
+
+  //------------------------------------------------------------------------
+  // Quick access to path of URL
+  // Returns path or "" if can't read it
+  string get_path();
+
+  //------------------------------------------------------------------------
+  // Quick access to query of URL
+  // Returns query or "" if can't read it
+  string get_query();
+
+  //------------------------------------------------------------------------
+  // Get query as a property list
+  // Returns whether query was available, fills props if so
+  // Note: Handles + for space and % decode in values
+  bool get_query(Misc::PropertyList& props);
 };
 
 //------------------------------------------------------------------------
