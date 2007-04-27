@@ -519,6 +519,14 @@ public:
 
 //==========================================================================
 // Queue template - send any message between threads safety
+// !!! NOTE:  Deprecated, use only for single-reader
+// With multiple readers and messages being sent in bursts, the messages
+// are likely to be serialised on one thread, because the Condition is not
+// signalled after the first time, and the other threads will not get
+// woken from their condition wait.
+
+// For all new code and multiple-reader scenarios, use MQueue below
+// Likely to be replaced and typedef'ed to MQueue at next major release
 template<class T> class Queue
 {
 private:
@@ -563,6 +571,60 @@ public:
 
 	// Clear flag if now empty
 	if (q.empty()) available.clear();
+
+	return msg;
+      }
+    }
+  }
+}; 
+
+//==========================================================================
+// Queue template - send any message between threads safety
+// Simpler and works for multiple readers - use in all new code
+// Uses the non-emptiness of the queue as the condition variable, and
+// signals on every send, to guarantee any waiters are woken
+template<class T> class MQueue
+{
+private:
+  queue<T> q;
+  Mutex mutex;
+  BasicCondVar available;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor 
+  MQueue() {}
+
+  //--------------------------------------------------------------------------
+  // Send a message (never blocks)
+  void send(T msg)
+  {
+    Lock lock(mutex);
+    q.push(msg);
+    available.signal(); 
+  }
+
+  //--------------------------------------------------------------------------
+  // See if any message is available before potentially blocking on wait()
+  bool poll() { return (!q.empty()); }
+
+  //--------------------------------------------------------------------------
+  // Wait to receive a message (blocking)
+  T wait()
+  {
+    // Can loop if someone else gets it
+    for(;;)
+    {
+      Lock lock(mutex);
+
+      // If nothing there, wait for availability signal
+      if (q.empty()) available.wait(mutex);
+
+      // Check again in case someone else got there first
+      if (!q.empty()) 
+      {
+	T msg = q.front();
+	q.pop();
 
 	return msg;
       }

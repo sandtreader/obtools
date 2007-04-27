@@ -33,6 +33,13 @@ void ReceiveThread::run()
   {
     int m = mq.wait();
     cout << "RX(" << n << "): " << m << endl;
+
+    // Sleep for sufficient time so that if we're working alone we
+    // couldn't do all 10 in the second it takes between bursts -
+    // but if other receivers are also running, we could
+    // This demonstrates that plain MT::Queue does not distributed bursty
+    // messages properly, hence why MT::MQueue exists
+    ObTools::MT::Thread::usleep(120000);
   }
 }
 
@@ -52,8 +59,11 @@ void TransmitThread::run()
   // Post numbers onto the queue
   for(int i=0; i<10; i++)
   {
-    cout << "TX(" << n << "): " << 100*n+i << endl;
-    mq.send(100*n+i);
+    for(int j=0; j<10; j++)
+    {
+      cout << "TX(" << n << "): " << 100*n+10*i+j << endl;
+      mq.send(100*n+10*i+j);
+    }
     sleep(1);
   }
 }
