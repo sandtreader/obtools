@@ -52,7 +52,7 @@ bool ResultSet::fetch(Row& row)
     // Load all the fields by name into the row, unescaping as we go
     MYSQL_FIELD *fields = (MYSQL_FIELD *)myfields;
     for(unsigned int i=0; i<mynum_fields; i++)
-      row.add_unescaped(fields[i].name, myrow[i]);
+      if (myrow[i]) row.add_unescaped(fields[i].name, myrow[i]);
 
     return true;
   }
