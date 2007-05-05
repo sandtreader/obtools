@@ -302,6 +302,12 @@ public:
 	     bool in_transaction=false);
 
   //------------------------------------------------------------------------
+  // INSERT into a join table with two foreign ID fields
+  // Returns whether successful
+  bool insert_join(const string& table, const string& field1, int id1,
+		   const string& field2, int id2);
+
+  //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
   // with the given WHERE clause
   // If where is empty, doesn't add a WHERE at all
@@ -425,6 +431,12 @@ public:
   bool delete_id(const string& table, 
 		 const string& id, const string& id_field = "id");
 
+  //------------------------------------------------------------------------
+  // DELETE from a join table with two foreign ID fields
+  // Returns whether successful
+  bool delete_join(const string& table, 
+		   const string& field1, int id1,
+		   const string& field2, int id2);
 };
 
 //==========================================================================
@@ -574,6 +586,10 @@ struct AutoConnection
 	     bool in_transaction=false)
   { return conn?conn->insert(table, row, id_field, in_transaction):0; }
 
+  bool insert_join(const string& table, const string& field1, int id1,
+		   const string& field2, int id2)
+  { return conn?conn->insert_join(table, field1, id1, field2, id2):false; }
+
   Result select(const string& table, const Row& row, const string& where="")
   { return conn?conn->select(table, row, where):Result(); }
 
@@ -637,6 +653,10 @@ struct AutoConnection
   bool delete_id(const string& table, 
 		 const string& id, const string& id_field = "id")
   { return conn?conn->delete_id(table, id, id_field):false; }
+
+  bool delete_join(const string& table, const string& field1, int id1,
+		   const string& field2, int id2)
+  { return conn?conn->delete_join(table, field1, id1, field2, id2):false; }
 
   static string escape(const string& s) { return Row::escape(s); }
   static string unescape(const string& s) { return Row::unescape(s); }

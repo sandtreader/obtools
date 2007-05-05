@@ -125,6 +125,20 @@ int Connection::insert(const string& table, Row& row, const string& id_field,
 }
 
 //------------------------------------------------------------------------
+// INSERT into a join table with two foreign ID fields
+// Returns whether successful
+bool Connection::insert_join(const string& table, 
+			     const string& field1, int id1,
+			     const string& field2, int id2)
+{
+  ostringstream oss;
+  oss << "INSERT INTO " << table;
+  oss << " (" << field1 << ", " << field2 << ")";
+  oss << " VALUES (" << id1 << ", " << id2 << ")";
+  return exec(oss.str());
+}			 
+
+//------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table 
 // with the given WHERE clause
 // If where is empty, doesn't add a WHERE at all
@@ -338,5 +352,17 @@ bool Connection::delete_id(const string& table,
   oss << id_field << " = '" << Row::escape(id) << "'";
   return delete_all(table, oss.str());
 }
+
+//------------------------------------------------------------------------
+// DELETE from a join table with two foreign ID fields
+// Returns whether successful
+bool Connection::delete_join(const string& table, 
+			     const string& field1, int id1,
+			     const string& field2, int id2)
+{
+  ostringstream oss;
+  oss << field1 << " = " << id1 << " AND " << field2 << " = " << id2;
+  return delete_all(table, oss.str());
+}			 
 
 }} // namespaces
