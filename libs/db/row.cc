@@ -24,7 +24,8 @@ void Row::add(string fieldname, int value)
 // Add boolean value to row
 void Row::add(string fieldname, bool value)
 {
-  fields[fieldname] = value?"t":"f";
+  // Make compatible with both Postgres and MySql
+  fields[fieldname] = value?"1":"0";  
 }
 
 //------------------------------------------------------------------------
@@ -74,6 +75,7 @@ bool Row::get_bool(string fieldname, bool def) const
     {
       case 'T': case 't':
       case 'Y': case 'y':
+      case '1':
 	return true;
 
       default:
