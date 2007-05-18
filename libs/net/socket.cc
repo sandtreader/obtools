@@ -140,7 +140,7 @@ void Socket::set_tos(int tos)
 }
 
 //--------------------------------------------------------------------------
-// Bind to a local port (TCP or UDP servers)
+// Bind to a local port (TCP or UDP servers), all local addresses
 // Whether successful
 bool Socket::bind(int port)
 {
@@ -149,6 +149,20 @@ bool Socket::bind(int port)
   saddr.sin_family      = AF_INET;
   saddr.sin_addr.s_addr = INADDR_ANY;
   saddr.sin_port        = htons(port);
+
+  return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+}
+
+//--------------------------------------------------------------------------
+// Bind to a local port (TCP or UDP servers), specified local address
+// Whether successful
+bool Socket::bind(EndPoint address)
+{
+  // Bind to local port, allow any remote address or port 
+  struct sockaddr_in saddr;
+  saddr.sin_family      = AF_INET;
+  saddr.sin_addr.s_addr = address.host.nbo();
+  saddr.sin_port        = htons(address.port);
 
   return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
 }

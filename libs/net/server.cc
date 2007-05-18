@@ -31,8 +31,9 @@ void TCPServer::run()
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int));
 #endif
 
-  // Bind to local port (this is Socket::bind())
-  if (!bind(port))
+  // Bind to local port (this is Socket::bind()), specifying address
+  // (which might be INADDR_ANY from our constructor
+  if (!bind(address))
   {
     TCPSocket::close();
     return;

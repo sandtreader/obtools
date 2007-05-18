@@ -383,9 +383,14 @@ public:
   void set_tos(int tos);
 
   //--------------------------------------------------------------------------
-  // Bind to a local port (TCP or UDP servers)
+  // Bind to a local port (TCP or UDP servers), all local addresses
   // Whether successful
   bool bind(int port);
+
+  //--------------------------------------------------------------------------
+  // Bind to a local port (TCP or UDP servers), specified local address
+  // Whether successful
+  bool bind(EndPoint address);
 
   //--------------------------------------------------------------------------
   // Get local address
@@ -684,17 +689,24 @@ public:
 class TCPServer: public TCPSocket
 {
 private:
-  int port;
+  EndPoint address;
   int backlog;
   MT::ThreadPool<TCPWorkerThread> threadpool;
   bool alive;
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor.  
+  // Constructor with just port (INADDR_ANY binding)
   TCPServer::TCPServer(int _port, int _backlog=5, 
 		       int min_spare=1, int max_threads=10):
-    TCPSocket(), port(_port), backlog(_backlog), 
+    TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog), 
+    threadpool(min_spare, max_threads), alive(true) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor with specified address (specific binding)
+  TCPServer::TCPServer(EndPoint _address, int _backlog=5, 
+		       int min_spare=1, int max_threads=10):
+    TCPSocket(), address(_address), backlog(_backlog), 
     threadpool(min_spare, max_threads), alive(true) {}
 
   //--------------------------------------------------------------------------
