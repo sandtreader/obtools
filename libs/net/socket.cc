@@ -160,9 +160,7 @@ bool Socket::bind(EndPoint address)
 {
   // Bind to local port, allow any remote address or port 
   struct sockaddr_in saddr;
-  saddr.sin_family      = AF_INET;
-  saddr.sin_addr.s_addr = address.host.nbo();
-  saddr.sin_port        = htons(address.port);
+  address.set(saddr);
 
   return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
 }

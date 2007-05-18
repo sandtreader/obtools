@@ -663,6 +663,11 @@ public:
   TCPClient(EndPoint endpoint);
 
   //--------------------------------------------------------------------------
+  // Constructor, binding specific local address/port
+  // port can be zero if you only want to bind address
+  TCPClient(EndPoint local, EndPoint remote);
+
+  //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !connected; }
 };
