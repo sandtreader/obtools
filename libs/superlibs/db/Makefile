@@ -11,7 +11,7 @@ else
 TYPE	= superlib
 endif
 NAME   	= ot-db2
-VERSION	= 2.1.1
+VERSION	= 2.1.2
 CONTAINS = db
 MT-VARIANTS = 1
 
