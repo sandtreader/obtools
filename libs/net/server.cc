@@ -51,10 +51,14 @@ void TCPServer::run()
   {
     struct sockaddr_in saddr;
     socklen_t len = sizeof(saddr);
-    fd_t new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
-    if (!alive) break;
 
-    if (new_fd != INVALID_FD)
+    // Get a thread before we accept, so we know we can handle the
+    // resulting connection - this forces overload connections into the
+    // backlog
+    TCPWorkerThread *thread = threadpool.wait();
+
+    fd_t new_fd = ::accept(fd, (struct sockaddr *)&saddr, &len);
+    if (alive && new_fd != INVALID_FD) 
     {
       EndPoint client(saddr);
 
@@ -68,24 +72,15 @@ void TCPServer::run()
 	continue;
       }
 
-      // Get a thread
-      TCPWorkerThread *thread = threadpool.remove();
-      if (thread)
-      {
-	// Fill in parameters
-	thread->server         = this;
-	thread->client_fd      = new_fd;
-	thread->client_ep      = client;
-
-	// Start it off
-	thread->kick();
-      }
-      else
-      {
-	// Dump it
-	::SOCKCLOSE(new_fd);
-      }
+      // Fill in parameters
+      thread->server         = this;
+      thread->client_fd      = new_fd;
+      thread->client_ep      = client;
+	
+      // Start it off
+      thread->kick();
     }
+    else threadpool.replace(thread);
   }
 }
 
