@@ -95,8 +95,12 @@ int Connection::insert(const string& sql,
 
   // Want ID back in transaction
   if (!in_transaction && !exec("START TRANSACTION")) return 0;
-  if (!exec(sql)) return 0;
-  
+  if (!exec(sql))
+  {
+    if (!in_transaction) exec("ROLLBACK");  // Try to roll back
+    return 0;
+  }
+
   // Assume autoincrementing IDs always increase, so max is the largest
   string sql2("SELECT max(");
   sql2 += id_field;
