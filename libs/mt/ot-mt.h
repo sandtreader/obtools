@@ -752,6 +752,21 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Wait for a thread from the pool
+  // Guarantees to return one eventually
+  T *wait()
+  {
+    // Busy wait if nothing available
+    // !!! Should provide a CondVar to allow us to block here
+    for(;;)
+    {
+      T *t = remove();
+      if (t) return t;
+      Thread::usleep(10000);
+    }
+  }
+
+  //--------------------------------------------------------------------------
   // Replace a thread in the pool
   void replace(T *t)
   {
