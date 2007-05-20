@@ -12,11 +12,13 @@ $xmlmesh_timeout = 5;
 $xmlmesh_last_error = "";
 
 //------------------------------------------------------------------------
-//Internal - send/receive XML message, return (optional) result in result_p
+//Internal - send/receive XML message, return (optional) result in response
 //Returns whether completed
 function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
 {
   global $xmlmesh_host, $xmlmesh_port, $xmlmesh_timeout, $xmlmesh_last_error;
+
+  // Open TCP socket to server
   $fp = fsockopen($xmlmesh_host, $xmlmesh_port, $errno, $errstr, 
 		  $xmlmesh_timeout);
   if ($fp) 
