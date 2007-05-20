@@ -1,5 +1,8 @@
 <?
-  $result = xmlmesh_request("this.isnt.going.to.work", "<foo/>");
-  header("Content-type: text/plain");
-  print $result;
+  include ("ot-xmlmesh.php");
+
+  if (xmlmesh_simple_request("foo", "<foo/>"))
+    print "OK\n";
+  else
+    print "Error: $xmlmesh_last_error\n";
 ?>
