@@ -23,6 +23,9 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
 		  $xmlmesh_timeout);
   if ($fp) 
   {
+    // Set timeout for response
+    stream_set_timeout($fp, $xmlmesh_timeout);
+
     // Invent unique ID
     $id = uniqid(rand(), true);
 
@@ -50,8 +53,14 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     
     // Read OTMP header back
     $header = "";
-    while (strlen($header) < 12 && !feof($fp)) $header .= fread($fp, 12);
-    if (strlen($header) < 12) 
+    $len = strlen($header);
+    while ($len < 12 && !feof($fp)) 
+    {
+      $header .= fread($fp, 12-$len);
+      $len = strlen($header);
+    }
+
+    if ($len < 12) 
     {
       $xmlmesh_last_error = "Truncated header in response";
       fclose($fp);
@@ -70,12 +79,16 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     $length = $harr["length"];
 
     $response = "";
-    while (strlen($response) < $length && !feof($fp)) 
-      $response .= fread($fp, $length-strlen($response));
+    $len = strlen($response);
+    while ($len < $length && !feof($fp)) 
+    {
+      $response .= fread($fp, $length-$len);
+      $len = strlen($response);
+    }
 
     fclose($fp);
 
-    if (strlen($response) < $length) 
+    if ($len < $length) 
     {
       $xmlmesh_last_error = "Truncated message in response";
       return false;
