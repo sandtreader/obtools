@@ -210,6 +210,10 @@ public:
   void split(Split &sp) const { sp = split(t); }
 
   //------------------------------------------------------------------------
+  // Alternate form, returning it
+  Split split() const { return split(t); }
+
+  //------------------------------------------------------------------------
   // Get the day of the week (Monday=1, Sunday=7)
   int weekday() const;
 
