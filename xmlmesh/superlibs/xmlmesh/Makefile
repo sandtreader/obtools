@@ -11,7 +11,7 @@ else
 TYPE	= superlib
 endif
 NAME      = ot-xmlmesh2
-VERSION   = 2.0.0
+VERSION   = 2.2.0
 CONTAINS  = xmlmesh-core xmlmesh-otmp xmlmesh-client
 DEPENDS   = ot-general2
 MT-VARIANTS = 1
