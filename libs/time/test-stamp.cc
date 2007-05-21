@@ -13,6 +13,9 @@
 using namespace std;
 using namespace ObTools;
 
+const char *days[] = { "Monday", "Tuesday", "Wednesday", "Thursday",
+		       "Friday", "Saturday", "Sunday" };
+
 //--------------------------------------------------------------------------
 // Main
 int main()
@@ -20,7 +23,7 @@ int main()
   Time::Stamp now = Time::Stamp::now();
   time_t t = now.time();
   cout << "now -> " << asctime(gmtime(&t))
-       << " -> " << now.iso() << endl;
+       << " -> " << now.iso() << " (" << days[now.weekday()-1] << ")\n";
 
   // Read a line at a time, and convert to stamp
   while (!cin.eof())
@@ -32,8 +35,8 @@ int main()
 
     time_t t = s.time();
     
-    cout << line << " -> " << s.iso()
-	 << " -> " << asctime(gmtime(&t)) << endl;
+    cout << line << " -> " << s.iso() << " (" << days[s.weekday()-1] 
+	 << ") -> " << asctime(gmtime(&t)) << endl;
   }
 
   return 0;

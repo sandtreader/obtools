@@ -265,6 +265,18 @@ string Stamp::iso() const
 }
 
 //------------------------------------------------------------------------
+// Get the day of the week (Monday=1, Sunday=7)
+int Stamp::weekday() const
+{
+  // Get days since epoch
+  unsigned long seconds = (unsigned long)(t>>NTP_SHIFT); 
+  unsigned long days = seconds/3600/24;
+
+  // 1st January 1900 was a Monday, so..
+  return 1+(days % 7);
+}
+
+//------------------------------------------------------------------------
 // Static constructor-like function for time now
 Stamp Stamp::now()
 {

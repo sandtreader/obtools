@@ -206,6 +206,14 @@ public:
   string iso() const;
 
   //------------------------------------------------------------------------
+  // Split the timestamp into individual items
+  void split(Split &sp) const { sp = split(t); }
+
+  //------------------------------------------------------------------------
+  // Get the day of the week (Monday=1, Sunday=7)
+  int weekday() const;
+
+  //------------------------------------------------------------------------
   // Static constructor-like function from NTP timestamp
   // (done this way to avoid ambiguity with time_t version)
   static Stamp from_ntp(ntp_stamp_t n) { Stamp s; s.t = n; return s; }
