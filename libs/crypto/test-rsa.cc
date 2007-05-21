@@ -14,8 +14,8 @@
 #define KEY_LEN 1024
 #define MAX_LEN 256
 #define PLAINTEXT_LEN 16
-#define NUM_ENCRYPT_CYCLES 1000
-#define NUM_DECRYPT_CYCLES 1
+#define NUM_ENCRYPT_CYCLES 1
+#define NUM_DECRYPT_CYCLES 10000
 
 using namespace std;
 using namespace ObTools;
@@ -92,10 +92,10 @@ int main()
   if (max_plaintext > PLAINTEXT_LEN) max_plaintext = PLAINTEXT_LEN;
 
   // Public encrypt, private decrypt
-  //test(rsa_pub, rsa_pri, "Public-to-Private", cypher_size, max_plaintext);
+  test(rsa_pub, rsa_pri, "Public-to-Private", cypher_size, max_plaintext);
 
   // Private encrypt, public decrypt
-  test(rsa_pri, rsa_pub, "Private-to-Public", cypher_size, max_plaintext);
+  //test(rsa_pri, rsa_pub, "Private-to-Public", cypher_size, max_plaintext);
 
   return 0;  
 }
