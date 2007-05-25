@@ -23,7 +23,7 @@ Element Element::none("!NONE!");
 // Copies the name, direct content and attributes into the given element
 // and recursively copies children
 // parent pointer of top element is not copied
-void Element::deep_copy_to(XML::Element& dest) const
+void Element::deep_copy_to(Element& dest) const
 {
   copy_to(dest);
   for(list<Element *>::const_iterator p=children.begin();
@@ -580,8 +580,12 @@ uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
 {
   map<string,string>::const_iterator p=attrs.find(attname);
 
-  // Warning: non-portable outside glibc/ISO-C-99 
-  if (p!=attrs.end()) return atoll(p->second.c_str());
+#ifdef BORLAND
+   if (p!=attrs.end()) return _atoi64(p->second.c_str());
+#else
+   // Warning: non-portable outside glibc/ISO-C-99
+   if (p!=attrs.end()) return atoll(p->second.c_str());
+#endif
 
   return def;
 }
