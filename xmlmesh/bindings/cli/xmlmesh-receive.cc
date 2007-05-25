@@ -239,6 +239,9 @@ int main(int argc, char **argv)
 	log.detail << "Child response:\n" << response;
       }
 
+      // Close its output
+      close(stdout_pipe[0]);
+
       // Wait for it to exit
       int status;
       int died = waitpid(child, &status, 0);

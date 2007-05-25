@@ -13,7 +13,7 @@ NAME += xmlmesh-receive
 endif
 
 DEBIAN-NAME    = ot-xmlmesh-cli
-DEBIAN-VERSION = 2.0.0
+DEBIAN-VERSION = 2.0.1
 DEBIAN-REVISION = 1
 
 ifdef DEBUG
