@@ -1,6 +1,7 @@
 <?
 // Native PHP implementation of ot-xmlmesh client
 // Copyright (c) xMill Consulting Limited 2007
+// v0.2
 
 // Replaces previous C module
 
@@ -30,7 +31,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     $id = uniqid(rand(), true);
 
     // Check RSVP flag
-    $rsvp = $rsvp?" x:rsvp='true'":"";
+    $xrsvp = $rsvp?" x:rsvp='true'":"";
 
     // Build SOAP envelope
     $soap = "<env:Envelope xmlns:env='http://www.w3.org/2003/05/soap-envelope'"
@@ -38,7 +39,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
           . "  <env:Header>\n"
           . "    <x:routing env:mustUnderstand='true' env:relay='true'"
           . "     env:role='http://www.w3.org/2003/05/soap-envelope/role/next'"
-          . "     x:id='$id' x:subject='$subject'$rsvp/>\n"
+          . "     x:id='$id' x:subject='$subject'$xrsvp/>\n"
           . "  </env:Header>\n"
           . "  <env:Body>\n"
           . "    $request\n"
@@ -50,10 +51,17 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     fwrite($fp, pack("N", strlen($soap)));   // Length
     fwrite($fp, pack("N", 0));               // Flags
     fwrite($fp, $soap);                      // Message
-    
+
+    // If not requiring a response, that's it
+    if (!$rsvp)
+    {
+      fclose($fp);
+      return true;
+    }
+
     // Read OTMP header back
     $header = "";
-    $len = strlen($header);
+    $len = 0;
     while ($len < 12 && !feof($fp)) 
     {
       $header .= fread($fp, 12-$len);
@@ -79,7 +87,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     $length = $harr["length"];
 
     $response = "";
-    $len = strlen($response);
+    $len = 0;
     while ($len < $length && !feof($fp)) 
     {
       $response .= fread($fp, $length-$len);
