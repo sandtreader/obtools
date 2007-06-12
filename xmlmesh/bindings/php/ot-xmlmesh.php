@@ -143,34 +143,69 @@ function xmlmesh_simple_request($subject, $request)
   if (_xmlmesh_transaction($subject, $request, $response, true))
   {
     // Create XML DOM & xpath
-    $dom = domxml_open_mem($response);
-    if (!$dom)
+    if ( phpversion() >= "5" )
     {
-      $xmlmesh_last_error = "Can't parse XML result";
-      return false;
-    }
+      $dom = new DOMDocument();
+      $dom->loadXML($response);
+      if (!$dom)
+      {
+        $xmlmesh_last_error = "Can't parse XML result";
+        return false;
+      }
+      $xpath = new DOMXPath( $dom );
+      $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
+      $xpath->registerNamespace( "x",  "http://obtools.com/ns/xmlmesh");
+      $obj = xpath_elements($xpath,"//x:ok");
 
-    // Look for an <x:ok> response
-    $xpath = $dom->xpath_new_context();
-    xpath_register_ns($xpath, "env","http://www.w3.org/2003/05/soap-envelope");
-    xpath_register_ns($xpath, "x",  "http://obtools.com/ns/xmlmesh");
-
-    $obj = $xpath->xpath_eval("//x:ok");
-    if ($obj->nodeset)
-    {
-      return true;
-    }
-    else
-    {
-      // Look for a Fault response
-      $obj = $xpath->xpath_eval("//env:Fault/env:Reason/env:Text");
-      $nodes = $obj->nodeset;
-      if ($nodes) 
-	$xmlmesh_last_error = $nodes[0]->get_content();
+      if ($obj)
+      {
+        return true;
+      }
       else
-	$xmlmesh_last_error = "Unknown fault";
+      {
+        // Look for a Fault response
+        $nodes = xpath_elements($xpath, "//env:Fault/env:Reason/env:Text");
+
+//   Need to check this!!!!
+        if ($nodes) 
+  	  $xmlmesh_last_error = $nodes[0]->nodeValue;
+        else
+  	  $xmlmesh_last_error = "Unknown fault";
       
-      return false;
+        return false;
+      }
+    }
+    else 
+    {
+      $dom = domxml_open_mem($response);
+      if (!$dom)
+      {
+        $xmlmesh_last_error = "Can't parse XML result";
+        return false;
+      }
+
+      // Look for an <x:ok> response
+      $xpath = $dom->xpath_new_context();
+      xpath_register_ns($xpath, "env","http://www.w3.org/2003/05/soap-envelope");
+      xpath_register_ns($xpath, "x",  "http://obtools.com/ns/xmlmesh");
+      $obj = $xpath->xpath_eval("//x:ok");
+
+      if ($obj->nodeset)
+      {
+        return true;
+      }
+      else
+      {
+        // Look for a Fault response
+        $obj = $xpath->xpath_eval("//env:Fault/env:Reason/env:Text");
+        $nodes = $obj->nodeset;
+        if ($nodes) 
+    	  $xmlmesh_last_error = $nodes[0]->get_content();
+        else
+	  $xmlmesh_last_error = "Unknown fault";
+      
+        return false;
+      }
     }
   }
   else return false;
