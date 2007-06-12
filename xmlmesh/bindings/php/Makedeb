@@ -14,21 +14,14 @@ SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 
 mkdir -p $DEB_DIR/DEBIAN
-mkdir -p $DEB_DIR/usr/lib/php4/20020429/
-#mkdir -p $DEB_DIR/usr/lib/php4/20050606/
+mkdir -p $DEB_DIR/usr/share/php
 
 install -m 0644 $SRC_DIR/DEBIAN/control $DEB_DIR/DEBIAN/control
-install -m 0755 $SRC_DIR/DEBIAN/postinst $DEB_DIR/DEBIAN/postinst
-install -m 0755 $SRC_DIR/DEBIAN/prerm $DEB_DIR/DEBIAN/prerm
+install -m 0644 $SRC_DIR/ot-xmlmesh.php $DEB_DIR/usr/share/php
+
 
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
 
-#Not sure if we're supposed to provide the same thing twice!
-install -s -m 0755 php_xmlmesh.so $DEB_DIR/usr/lib/php4/20020429/
-
-#!!! We're not - if we install it in the other directory we need to 
-# change the API version.
-#install -s -m 0755 php_xmlmesh.so $DEB_DIR/usr/lib/php4/20050606/
 
 fakeroot -- dpkg -b $DEB_DIR $PACKAGE
 cp $PACKAGE $SRC_DIR/../../release/

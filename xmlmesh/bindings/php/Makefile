@@ -5,29 +5,12 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-TYPE	= dlmod
-NAME   	= php_xmlmesh
-OBJS 	= php_xmlmesh.o
+NAME   	= php_xmlmesh_native
 
-DEBIAN-NAME    = ot-xmlmesh-php
-DEBIAN-VERSION = 2.0.0
+DEBIAN-NAME    = ot-xmlmesh-php-native
+DEBIAN-VERSION = 0.1.0
 DEBIAN-REVISION = 1
-
-ifdef DEBUG
-DEPENDS = xmlmesh-c xmlmesh-client xmlmesh-core xmlmesh-otmp \
-	  net log xml soap web text misc
-else
-# Module is very dependent on the order of ot-general and ot-xmlmesh
-# here, even though you'd normally assume they would be the other way round
-# If reversed, apache segfaults on startup with the module loaded!
-DEPENDS	= xmlmesh-c ot-general2 ot-xmlmesh2
-endif
-
-PHP	= /usr/include/php4
-EXTINCS = $(PHP) $(PHP)/TSRM $(PHP)/main $(PHP)/Zend
-
-#Only current works single-threaded, due to Apache fork/pthread weirdness
-SINGLE = 1
+RELEASEDIR = ../../release
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk

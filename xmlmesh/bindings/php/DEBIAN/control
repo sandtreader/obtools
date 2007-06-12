@@ -1,8 +1,9 @@
-Package: ot-xmlmesh-php
+Package: ot-xmlmesh-php-native
 Priority: optional
-Architecture: i386
+Architecture: all
 Maintainer: Paul Clark <paul@xmill.com>
-Depends: libot-general2-single (>= 2.1.0), libot-xmlmesh2-single (>= 2.0.0)
+#Depends: libot-xmlmesh2 (>= 2.0.0), php5 | php4-domxml , apache2 | apache
+Depends:  libot-xmlmesh2 (>= 2.0.0), php4-domxml | php5 , apache | apache2
 Description: ObTools XMLMesh message bus PHP interface
  XMLMesh is a SOAP-based XML message bus for integration of distributed
  components using simple XML messages
