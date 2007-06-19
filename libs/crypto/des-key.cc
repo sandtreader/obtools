@@ -18,7 +18,8 @@ namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
 // Copy constructor - just copies base key and rebuilds schedule
-DESKey::DESKey(const DESKey& k)
+DESKey::DESKey(const DESKey& k):
+  is_key(k.is_key)
 {
   memcpy(key, k.key, 8);
   load();
@@ -28,6 +29,7 @@ DESKey::DESKey(const DESKey& k)
 // Assignment operator - ditto
 DESKey& DESKey::operator=(const DESKey& k)
 {
+  is_key=k.is_key;
   memcpy(key, k.key, 8);
   load();
   return *this;

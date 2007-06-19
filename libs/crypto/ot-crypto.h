@@ -61,7 +61,9 @@ public:
   
   //------------------------------------------------------------------------
   // Default constructor
-  DESKey(bool _is_key = true): is_key(_is_key), valid(false) {}
+  DESKey(bool _is_key = true): is_key(_is_key), valid(false) {
+    memset(key,0,sizeof(key));
+  }
 
   //------------------------------------------------------------------------
   // Copy constructor - just copies base key and rebuilds schedule
@@ -73,11 +75,11 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from data block - requires 8 bytes of data
-  DESKey(const unsigned char *data) { read(data); }
+  DESKey(const unsigned char *data):is_key(true) { read(data); }
 
   //------------------------------------------------------------------------
   // Constructor from string - requires 16 hex characters
-  DESKey(const string& text) { read(text); }
+  DESKey(const string& text):is_key(true) { read(text); }
 
   //------------------------------------------------------------------------
   // Create a new key from random data
