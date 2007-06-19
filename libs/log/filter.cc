@@ -48,7 +48,14 @@ void TimestampFilter::log(Message& msg)
   // Now do strftime on what's left
   char stm[81];
   time_t time = msg.timestamp.time();
+#if defined(__WIN32__)
+  // Hope that localtime is reentrant!
   strftime(stm, 80, tmp_format.c_str(), localtime(&time));
+#else
+  // Know that localtime_r is reentrant!
+  struct tm tm;
+  strftime(stm, 80, tmp_format.c_str(), localtime_r(&time, &tm));
+#endif
 
   string nmsg(stm);
   nmsg += msg.text;
