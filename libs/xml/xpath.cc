@@ -172,6 +172,27 @@ int XPathProcessor::get_value_int(const string& path, int def)
 }
 
 //--------------------------------------------------------------------------
+// 64-bit integer value fetch
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+int XPathProcessor::get_value_int64(const string& path, uint64_t def)
+{
+  string v = get_value(path);
+
+  if (!v.empty()) 
+  {
+#ifdef BORLAND
+    return _atoi64(v.c_str());
+#else
+    // Warning: non-portable outside glibc/ISO-C-99
+    return atoll(v.c_str());
+#endif
+  }
+
+  return def;
+}
+
+//--------------------------------------------------------------------------
 // Real value fetch
 // Defaults to default value given (or 0.0) if not present
 // Returns 0.0 if present but bogus
@@ -231,6 +252,15 @@ bool XPathProcessor::set_value_bool(const string& path, bool value)
 //--------------------------------------------------------------------------
 // Integer value set
 bool XPathProcessor::set_value_int(const string& path, int value)
+{
+  ostringstream oss;
+  oss << value;
+  return set_value(path, oss.str());
+}
+
+//--------------------------------------------------------------------------
+// 64-bit integer value set
+bool XPathProcessor::set_value_int64(const string& path, uint64_t value)
 {
   ostringstream oss;
   oss << value;

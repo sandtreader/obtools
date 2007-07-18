@@ -708,6 +708,12 @@ public:
   int get_value_int(const string& path, int def=0);
 
   //--------------------------------------------------------------------------
+  // 64-bit integer value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_value_int64(const string& path, uint64_t def=0);
+
+  //--------------------------------------------------------------------------
   // Real value fetch
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
@@ -728,6 +734,10 @@ public:
   //--------------------------------------------------------------------------
   // Integer value set
   bool set_value_int(const string& path, int value);
+
+  //--------------------------------------------------------------------------
+  // 64-bit integer value set
+  bool set_value_int64(const string& path, uint64_t value);
 
   //--------------------------------------------------------------------------
   // Real value set
@@ -851,6 +861,12 @@ public:
   int get_value_int(const string& path, int def=0);
 
   //--------------------------------------------------------------------------
+  // 64-bit integer value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_value_int64(const string& path, uint64_t def=0);
+
+  //--------------------------------------------------------------------------
   // XPath Real value fetch
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
@@ -882,6 +898,10 @@ public:
   //--------------------------------------------------------------------------
   // Integer value set
   bool set_value_int(const string& path, int value);
+
+  //--------------------------------------------------------------------------
+  // 64-bit integer value set
+  bool set_value_int64(const string& path, uint64_t value);
 
   //--------------------------------------------------------------------------
   // Real value set

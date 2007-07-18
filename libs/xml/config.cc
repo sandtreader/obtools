@@ -113,6 +113,16 @@ int Configuration::get_value_int(const string& path, int def)
 }
 
 //--------------------------------------------------------------------------
+// 64-bit integer value fetch
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+int Configuration::get_value_int64(const string& path, uint64_t def)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.get_value_int64(path, def); 
+}
+
+//--------------------------------------------------------------------------
 // Real value fetch
 // Defaults to default value given (or 0.0) if not present
 // Returns 0.0 if present but bogus
@@ -187,6 +197,14 @@ bool Configuration::set_value_int(const string& path, int value)
 { 
   XPathProcessor xpath(get_root());
   return xpath.set_value_int(path, value); 
+}
+
+//--------------------------------------------------------------------------
+// 64-bit integer value set
+bool Configuration::set_value_int64(const string& path, uint64_t value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.set_value_int64(path, value); 
 }
 
 //--------------------------------------------------------------------------
