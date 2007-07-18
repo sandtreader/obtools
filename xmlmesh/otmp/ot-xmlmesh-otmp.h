@@ -151,8 +151,29 @@ public:
 
 #if !defined(_SINGLE)  // None of the server stuff works singlethreaded
 //==========================================================================
-// Handy typedef of a session map - maps endpoints to sessions
-typedef map<Net::EndPoint, struct ClientSession *> SessionMap;
+// Session map - maps endpoints to sessions
+class SessionMap
+{
+public:
+  MT::RWMutex mutex;  // On map
+  map<Net::EndPoint, struct ClientSession *> sessions;
+
+  //------------------------------------------------------------------------
+  // Add a session
+  void add(Net::EndPoint client, struct ClientSession *s)
+  {
+    MT::RWWriteLock lock(mutex);
+    sessions[client] = s;
+  }
+
+  //------------------------------------------------------------------------
+  // Remove a session
+  void remove(Net::EndPoint client)
+  {
+    MT::RWWriteLock lock(mutex);
+    sessions.erase(client);
+  }
+};
 
 //==========================================================================
 // Client Session structure - record of a single connection held by server
@@ -171,11 +192,11 @@ struct ClientSession
   ClientSession(Net::TCPSocket& _socket, Net::EndPoint _client,
 		SessionMap& _map):
     socket(_socket), client(_client), map(_map), alive(true)
-  { _map[_client] = this; }
+  { map.add(_client, this); }
 
   // Destructor
   // Ensures removal from the map on exception
-  ~ClientSession() { map.erase(client); }
+  ~ClientSession() { map.remove(client); }
 };
 
 //==========================================================================

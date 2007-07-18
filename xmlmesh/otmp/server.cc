@@ -160,16 +160,18 @@ void Server::process(Net::TCPSocket& socket,
     // Shut down session cleanly
     session.alive=false;
 
+    // Kill socket
+    socket.shutdown();
+
     // Wait for it to die
-    for(int i=0; i<5; i++)
+    while (!!send_thread)
     {
       session.send_q.send(Message());  // Wake up thread with bogus message
-      MT::Thread::usleep(10000);
+      MT::Thread::usleep(50000);
       if (!send_thread) break;
+      log.error << "Send thread won't die - waiting\n";
+      MT::Thread::usleep(250000);
     }
-
-    // If still not dead, cancel it
-    if (!!send_thread) send_thread.cancel();
   }
   else
     obit = "failed (send)";
@@ -199,8 +201,10 @@ Server::Server(ClientMessageQueue& receive_queue,
 bool Server::send(ClientMessage& msg)
 {
   // Look up client in map, and queue it on there
-  SessionMap::iterator p = client_sessions.find(msg.client);
-  if (p != client_sessions.end())
+  MT::RWReadLock lock(client_sessions.mutex);
+  map<Net::EndPoint, ClientSession *>::iterator p 
+    = client_sessions.sessions.find(msg.client);
+  if (p != client_sessions.sessions.end())
   {
     ClientSession *cs = p->second;
     cs->send_q.send(msg.msg);

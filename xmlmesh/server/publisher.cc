@@ -39,6 +39,7 @@ class Publisher: public Service
 {
 private:
   string subject_pattern;            // Pattern of allowed subjects
+  MT::RWMutex mutex;                 // On subscriptions list
   list<Subscription> subscriptions;
 
   bool handle_subscription(RoutingMessage& msg, Log::Streams& tlog);
@@ -110,6 +111,7 @@ bool Publisher::handle(RoutingMessage& msg)
     return false;
 
   // Try each subscription in turn to see if it wants it
+  MT::RWReadLock lock(mutex);
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();
       p++)
@@ -192,11 +194,12 @@ bool Publisher::subscribe(const string& subject,
 
     // (Re)subscribe
     Subscription sub(subject, path, client);
-    subscriptions.push_back(sub);
 
     tlog.detail << "Client " << path << " subscribed to "
 		<< subject << "\n";
 
+    MT::RWWriteLock lock(mutex);
+    subscriptions.push_back(sub);
     return true;
   }
   else return false;
@@ -211,6 +214,7 @@ void Publisher::unsubscribe(const string& subject,
 			    ServiceClient& client,
 			    Log::Streams& tlog)
 {
+  MT::RWWriteLock lock(mutex);  // Require write now because may need it later
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();
      )
@@ -237,6 +241,7 @@ void Publisher::unsubscribe(const string& subject,
 void Publisher::unsubscribe_all(ServiceClient& client,
 				Log::Streams& tlog)
 {
+  MT::RWWriteLock lock(mutex);  // Require write now because may need it later
   for(list<Subscription>::iterator p = subscriptions.begin();
       p!=subscriptions.end();
       )

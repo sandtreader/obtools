@@ -162,8 +162,8 @@ bool Correlator::handle(RoutingMessage& msg)
   if (our_ref.size())
   {
     // It's a response
-    // Look it up
-    Correlation *cr = request_cache.lookup(our_ref);
+    // Look it up and detach it
+    Correlation *cr = request_cache.detach(our_ref);
     if (cr)
     {
       tlog.detail << "Correlator: Found correlation:\n  " << *cr << endl;
@@ -174,10 +174,10 @@ bool Correlator::handle(RoutingMessage& msg)
       RoutingMessage newmsg(client, msg.message, path);
       originate(newmsg);
 
-      // Notify reply and remove it from cache
+      // Notify reply and delete correlation
       // (will detach itself from messages)
       cr->notify_replied();
-      request_cache.remove(our_ref);
+      delete cr;
 
       // Don't continue with this message in normal routing
       return false;
@@ -231,6 +231,8 @@ void Correlator::signal(Signal sig, ServiceClient& client)
     case Service::CLIENT_FINISHED:
     {
       // Check cache for any with this client, and delete it
+      // Note we need write lock even for scan because we may need to convert
+      MT::RWWriteLock lock(request_cache.mutex);
       for(CacheType::iterator p = request_cache.begin();
 	  p!=request_cache.end();
 	  )
