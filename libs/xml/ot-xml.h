@@ -391,36 +391,37 @@ public:
 
   //--------------------------------------------------------------------------
   // Set an attribute (string)
-  void set_attr(const string& attname, const string& value);
+  // Note:  All set_attr_xxx methods return *this, to allow chaining 
+  Element& set_attr(const string& attname, const string& value);
 
   //--------------------------------------------------------------------------
   // Set an attribute (integer)
   // (_int qualifier not strictly necessary here, but matches get_attr_int)
-  void set_attr_int(const string& attname, int value);
+  Element& set_attr_int(const string& attname, int value);
 
   //--------------------------------------------------------------------------
   // Set an attribute (integer, hex)
   // (_int qualifier not strictly necessary here, but matches get_attr_int)
-  void set_attr_hex(const string& attname, int value);
+  Element& set_attr_hex(const string& attname, int value);
 
   //--------------------------------------------------------------------------
   // Set an attribute (64-bit integer)
   // (_int64 qualifier not strictly necessary here, but matches get_attr_int64)
-  void set_attr_int64(const string& attname, uint64_t value);
+  Element& set_attr_int64(const string& attname, uint64_t value);
 
   //--------------------------------------------------------------------------
   // Set an attribute (64-bit integer, hex)
-  void set_attr_hex64(const string& attname, uint64_t value);
+  Element& set_attr_hex64(const string& attname, uint64_t value);
 
   //--------------------------------------------------------------------------
   // Set an attribute (bool)
   // (_bool qualifier not strictly necessary here, but matches get_attr_bool)
-  void set_attr_bool(const string& attname, bool value);
+  Element& set_attr_bool(const string& attname, bool value);
 
   //--------------------------------------------------------------------------
   // Set an attribute (real)
   // (_real qualifier not strictly necessary here, but matches get_attr_real)
-  void set_attr_real(const string& attname, double value);
+  Element& set_attr_real(const string& attname, double value);
 
   //--------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
