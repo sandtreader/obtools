@@ -11,7 +11,7 @@ else
 TYPE	= superlib
 endif
 NAME      = ot-xmlmesh2
-VERSION   = 2.2.0
+VERSION   = 2.2.1
 CONTAINS  = xmlmesh-core xmlmesh-otmp xmlmesh-client
 DEPENDS   = ot-general2
 MT-VARIANTS = 1
@@ -22,7 +22,7 @@ RELEASE-VARIANTS-ONLY = 1
 
 DEBIAN-NAME    = libot-xmlmesh2
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 2
+DEBIAN-REVISION = 1
 
 ifdef SINGLE
 DEBIAN-VARIANT = single
