@@ -663,6 +663,10 @@ public:
   TCPClient(EndPoint endpoint);
 
   //--------------------------------------------------------------------------
+  // Constructor with a timeout on connection (in seconds)
+  TCPClient(EndPoint endpoint, int timeout);
+
+  //--------------------------------------------------------------------------
   // Constructor, binding specific local address/port
   // port can be zero if you only want to bind address
   TCPClient(EndPoint local, EndPoint remote);

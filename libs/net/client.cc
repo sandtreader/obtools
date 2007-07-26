@@ -15,7 +15,7 @@ namespace ObTools { namespace Net {
 // TCP client
 
 //--------------------------------------------------------------------------
-// Constructor, allocating any local address/port
+// Constructor, allocating any local address/port and connecting to server
 TCPClient::TCPClient(EndPoint endpoint):
   TCPSocket(),
   server(endpoint),
@@ -27,6 +27,24 @@ TCPClient::TCPClient(EndPoint endpoint):
   if (fd != INVALID_FD 
    && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
     connected = true;
+}
+
+//--------------------------------------------------------------------------
+// Constructor with a timeout on connection (in seconds)
+TCPClient::TCPClient(EndPoint endpoint, int timeout):
+  TCPSocket(),
+  server(endpoint),
+  connected(false)
+{
+  struct sockaddr_in saddr;
+  server.set(saddr);
+
+  if (fd != INVALID_FD)
+  {
+    set_timeout(timeout);
+    if (!connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+      connected = true;
+  }
 }
 
 //--------------------------------------------------------------------------
