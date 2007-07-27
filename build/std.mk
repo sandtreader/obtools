@@ -273,6 +273,11 @@ CPPFLAGS += -D_REENTRANT
 
 #MinGW uses the win32-pthread library
 ifdef MINGW
+
+#Following required for thread-safe exception handling
+CPPFLAGS += -mthreads
+LDFLAGS += -mthreads
+
 EXTRALIBS += -lpthreadGC2
 else
 EXTRALIBS += -lpthread
