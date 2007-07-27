@@ -9,12 +9,12 @@ TYPE	= lib
 NAME   	= ot-hash
 # No OBJS
 HEADERS = ot-hash.h
-TESTS 	= test-hash
-TESTCMD	= ./test-hash
 MT-VARIANTS = 1
 
 ifdef MULTI
 DEPENDS = mt
+TESTS 	= test-hash
+TESTCMD	= ./test-hash
 endif
 
 ROOT    = ../..

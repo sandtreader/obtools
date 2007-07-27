@@ -13,19 +13,83 @@
 using namespace std;
 using namespace ObTools;
 
+// Globals
+int nruns = 0;
+int prob = 0;
+MT::Mutex mutex;
+
+//--------------------------------------------------------------------------
+// Test thread class
+class TestThread: public MT::Thread
+{
+  int n;
+  Hash::Table<>& hash;
+  virtual void run();
+
+public:
+  bool running;
+  TestThread(int _n, Hash::Table<>& _hash): n(_n), hash(_hash), running(true) 
+  { start(); }
+};
+
+void TestThread::run()
+{
+  cout << "Thread " << n << " creating " << nruns << " entries\n";
+  if (prob) cout << "Deleting with " << prob << "% probability\n";
+
+  // Fill it up with stuff
+  int i;
+  for(i=0; i<nruns; i++)
+  {
+    uint32_t id;
+
+    // Check it isn't already there
+    do
+    {
+      id = (uint32_t)(rand()^(rand()<<1));
+    } while (hash.lookup(id) != Hash::INVALID_INDEX);
+
+    // Try to add it
+    {
+      MT::Lock lock(mutex);
+      if (!hash.add(id, i))
+      {
+	cerr << "Adding failed after " << i << " entries\n";
+	break;
+      }
+    }
+
+    // Read it back
+    int32_t j = hash.lookup(id);
+    if (i != j)
+      cerr << "Lookup of " << id << " failed - expecting " 
+	   << i << " got " << j << endl;
+
+    // Delete according to probability
+    if (prob && rand()%100<prob) 
+    {
+      MT::Lock lock(mutex);
+      hash.remove(id);
+    }
+  }
+
+  cout << "Thread " << n << " finished\n";
+  running = false;
+}
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)
 {
-  int n = 0;
+  int nthreads = 0;
   int bits = 1;
   int bsize = 16;
-  int prob = 0;
 
-  if (argc > 1) n = atoi(argv[1]);
-  if (argc > 2) bits = atoi(argv[2]);
-  if (argc > 3) bsize = atoi(argv[3]);
-  if (argc > 4) prob = atoi(argv[4]);
+  if (argc > 1) nthreads = atoi(argv[1]);
+  if (argc > 2) nruns = atoi(argv[2]);
+  if (argc > 3) bits = atoi(argv[3]);
+  if (argc > 4) bsize = atoi(argv[4]);
+  if (argc > 5) prob = atoi(argv[5]);
 
   // Create hash table with default types
   cout << "Creating table with " << bits << " top bits, " 
@@ -34,39 +98,38 @@ int main(int argc, char **argv)
   cout << "Total capacity: " << hash.capacity() << " entries\n";
   cout << "Total memory: " << (hash.memory() >> 20) << "MB\n";
 
-  if (n)
+  if (nthreads)
   {
-    cout << "Creating " << n << " entries\n";
-    if (prob) cout << "Deleting with " << prob << "% probability\n";
+    cout << "Starting " << nthreads << " threads:" << endl;
 
-    // Fill it up with stuff
+    vector<TestThread *> threads(nthreads);
+
     int i;
-    for(i=0; i<n; i++)
+    cout << "Starting:" << endl;
+    for(i=0; i<nthreads; i++)
+      threads[i] = new TestThread(i, hash);
+
+    cout << "Waiting:" << endl;
+    for(;;)
     {
-      uint32_t id;
-
-      // Check it isn't already there
-      do
+      // Check the hash is OK
+      if (!hash.check(cerr)) 
       {
-	id = (uint32_t)(rand()^(rand()<<1));
-      } while (hash.lookup(id) != Hash::INVALID_INDEX);
-
-      // Try to add it
-      if (!hash.add(id, i))
-      {
-	cerr << "Adding failed after " << i << " entries\n";
-	break;
+	cerr << "Hash table is invalid!\n";
+	return 2;
       }
 
-      // Read it back
-      int32_t j = hash.lookup(id);
-      if (i != j)
-	cerr << "Lookup of " << id << " failed - expecting " 
-	     << i << " got " << j << endl;
+      bool any_running = false;
+      for(i=0; i<nthreads; i++)
+	if (threads[i]->running)
+	  any_running = true;
 
-      // Delete according to probability
-      if (prob && rand()%100<prob) hash.remove(id);
+      if (!any_running) break;
     }
+
+    cout << "Joining threads:" << endl;
+    for(i=0; i<nthreads; i++)
+      threads[i]->join();
   }
   else
   {
