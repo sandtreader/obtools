@@ -1,7 +1,7 @@
 #==========================================================================
 # Makefile for ObTools General super library
 #
-# Copyright (c) 2005 xMill Consulting Limited.  All rights reserved
+# Copyright (c) 2005-2007 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
@@ -11,7 +11,7 @@ else
 TYPE	= superlib
 endif
 NAME	= ot-general2
-VERSION	= 2.2.6
+VERSION	= 2.2.7
 CONTAINS = xml misc text net log init chan time web file crypto hash soap
 MT-VARIANTS = 1
 SOCKET  = 1
