@@ -13,22 +13,29 @@
 using namespace std;
 using namespace ObTools;
 
+// Handy typedef for type of hash to test
+// Note:  We extend the size of the hash index, because we don't assume
+// we have enough memory to provide full 32-bit coverage - otherwise we
+// will get collisions between different IDs which will confuse the test
+typedef Hash::Table<uint32_t, uint32_t, int16_t, int32_t> TestHash;
+
 // Globals
+int nthreads = 0;
 int nruns = 0;
+int nids = 1;
 int prob = 0;
-MT::Mutex mutex;
 
 //--------------------------------------------------------------------------
 // Test thread class
 class TestThread: public MT::Thread
 {
   int n;
-  Hash::Table<>& hash;
+  TestHash& hash;
   virtual void run();
 
 public:
   bool running;
-  TestThread(int _n, Hash::Table<>& _hash): n(_n), hash(_hash), running(true) 
+  TestThread(int _n, TestHash& _hash): n(_n), hash(_hash), running(true) 
   { start(); }
 };
 
@@ -41,35 +48,43 @@ void TestThread::run()
   int i;
   for(i=0; i<nruns; i++)
   {
-    uint32_t id;
+    vector<uint32_t> ids(nids);
 
-    // Check it isn't already there
-    do
+    // Create nids ids
+    for(int j=0; j<nids; j++)
     {
-      id = (uint32_t)(rand()^(rand()<<1));
-    } while (hash.lookup(id) != Hash::INVALID_INDEX);
-
-    // Try to add it
-    {
-      MT::Lock lock(mutex);
-      if (!hash.add(id, i))
+      // Check they aren't already there
+      do
       {
-	cerr << "Adding failed after " << i << " entries\n";
+	// Generate a random ID with thread uniqueness in lowest bits
+	ids[j] = ((uint32_t)(rand()^(rand()<<1))/nthreads)*nthreads+n;
+      } while (hash.lookup(ids[j]) != Hash::INVALID_INDEX);
+
+      // Now OK to add
+      if (!hash.add(ids[j], i*10+j))
+      {
+	cout << "Adding failed after " << i << " entries\n";
 	break;
       }
     }
 
-    // Read it back
-    int32_t j = hash.lookup(id);
-    if (i != j)
-      cerr << "Lookup of " << id << " failed - expecting " 
-	   << i << " got " << j << endl;
+    // Read them back
+    for(int j=0; j<nids; j++)
+    {
+      int32_t i2 = hash.lookup(ids[j]);
+      if (i2 != i*10+j)
+      {
+	cout << "Lookup of " << ids[j] << " failed - expecting " 
+	     << i+j << " got " << i2 << endl;
+	//	hash.dump(cout);
+      }
+    }
 
     // Delete according to probability
-    if (prob && rand()%100<prob) 
+    for(int j=0; j<nids; j++)
     {
-      MT::Lock lock(mutex);
-      hash.remove(id);
+      if (prob && rand()%100<prob) 
+	hash.remove(ids[j]);
     }
   }
 
@@ -81,20 +96,20 @@ void TestThread::run()
 // Main
 int main(int argc, char **argv)
 {
-  int nthreads = 0;
   int bits = 1;
   int bsize = 16;
 
   if (argc > 1) nthreads = atoi(argv[1]);
-  if (argc > 2) nruns = atoi(argv[2]);
-  if (argc > 3) bits = atoi(argv[3]);
-  if (argc > 4) bsize = atoi(argv[4]);
-  if (argc > 5) prob = atoi(argv[5]);
+  if (argc > 2) nruns    = atoi(argv[2]);
+  if (argc > 3) nids     = atoi(argv[3]);
+  if (argc > 4) bits     = atoi(argv[4]);
+  if (argc > 5) bsize    = atoi(argv[5]);
+  if (argc > 6) prob     = atoi(argv[6]);
 
   // Create hash table with default types
   cout << "Creating table with " << bits << " top bits, " 
        << (1<<bits) << " blocks of " << bsize << " entries\n";
-  Hash::Table<> hash(bits, bsize);
+  TestHash hash(bits, bsize);
   cout << "Total capacity: " << hash.capacity() << " entries\n";
   cout << "Total memory: " << (hash.memory() >> 20) << "MB\n";
 
@@ -113,9 +128,9 @@ int main(int argc, char **argv)
     for(;;)
     {
       // Check the hash is OK
-      if (!hash.check(cerr)) 
+      if (!hash.check(cout)) 
       {
-	cerr << "Hash table is invalid!\n";
+	cout << "Hash table is invalid!\n";
 	return 2;
       }
 
@@ -151,9 +166,9 @@ int main(int argc, char **argv)
 
   // Validate
   cout << "Validating hash table\n";
-  if (!hash.check(cerr)) 
+  if (!hash.check(cout)) 
   {
-    cerr << "Hash table is invalid!\n";
+    cout << "Hash table is invalid!\n";
     return 2;
   }
   cout << "Hash table OK\n";

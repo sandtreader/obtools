@@ -51,13 +51,13 @@ const int INVALID_HASH_INDEX = -1;
 //   INDEX_T:      SIGNED integer type for output index
 template<class HASH_ID_T, class HASH_INDEX_T, class INDEX_T> struct Entry
 {
-  union
-  {
-    HASH_ID_T id;      // Used:   ID (bottom bits only)
-    HASH_INDEX_T prev; // Unused: Previous entry in freelist
-  };
+  HASH_ID_T id;       // Used:   ID (bottom bits only)
+  HASH_INDEX_T prev;  // Previous entry in chain or freelist
 
   HASH_INDEX_T next;  // Chain to next in this bucket or freelist
+  HASH_INDEX_T head;  // Used: Link to head of my chain (where I hash to)
+                      // NB, this can be in the middle of a larger chain
+         // Also, set to INVALID_HASH_INDEX indicates an item being deleted
   INDEX_T index;      // Index into main table, or INVALID_INDEX if unused
 
   //--------------------------------------------------------------------------
@@ -92,7 +92,7 @@ private:
   entry_t *table;        
   HASH_INDEX_T freelist;  // First available free entry for collisions
 #if !defined(_SINGLE)
-  MT::Mutex mutex;  // On freelist state
+  MT::RWMutex mutex;      // On freelist and chain state
 #endif
 
 
@@ -113,8 +113,8 @@ public:
       entry_t *e = table+i;
       
       // Chain forwards and back, with end markers
-      e->next = (i<size-1)?(i+1):INVALID_HASH_INDEX;
-      e->prev = i?i-1:INVALID_HASH_INDEX;
+      e->next  = (i<size-1)?(i+1):INVALID_HASH_INDEX;
+      e->prev  = i?i-1:INVALID_HASH_INDEX;
       e->index = INVALID_INDEX;
     }
     freelist = 0;
@@ -135,7 +135,7 @@ public:
     entry_t *p = table+start;
 
 #if !defined(_SINGLE)
-    MT::Lock lock(mutex);
+    MT::RWWriteLock lock(mutex);
 #endif
 
     // Check this entry - if not used, take it, and also snap it out of 
@@ -144,7 +144,7 @@ public:
     {
       // Snap out forward pointer
       if (p->next != INVALID_HASH_INDEX)
-	table[p->next].id = p->id; 
+	table[p->next].prev = p->prev; 
 
       // Snap out previous pointer
       if (p->prev != INVALID_HASH_INDEX)
@@ -153,9 +153,11 @@ public:
 	freelist = p->next;
 
       // Clear chain and set index
-      p->id = id;
-      p->next = INVALID_HASH_INDEX;
-      p->index = index;  // Set last for atomic update in lookup
+      p->id    = id;
+      p->index = index;  
+      p->next  = INVALID_HASH_INDEX;
+      p->prev  = INVALID_HASH_INDEX;
+      p->head  = start;  // Where we would naturally hash to
 
       return true;
     }
@@ -172,11 +174,15 @@ public:
 	table[freelist].prev = INVALID_HASH_INDEX;
 
       // Set up q
-      q->id = id;
+      q->id    = id;
       q->index = index;
+      q->prev  = start;  // Back-link to 'p'
+      q->head  = start;  // Where we would hash to
 
       // Splice q into p's forward chain
       q->next = p->next;
+      if (p->next != INVALID_HASH_INDEX)
+	table[p->next].prev = qi;
       p->next = qi;  // Set last to ensure atomic update in lookup
       
       return true;
@@ -192,9 +198,9 @@ public:
     HASH_INDEX_T start = helper.get_start(id);
     entry_t *p = table+start;
 
-    // NB! This is not mutexed, because it doesn't touch the freelist
-    // However, changes to block chains must be made carefully to ensure
-    // atomic consistency
+#if !defined(_SINGLE)
+    MT::RWReadLock lock(mutex);
+#endif
 
     // Check for empty start
     if (p->index == INVALID_INDEX) return INVALID_INDEX;
@@ -220,10 +226,9 @@ public:
   {
     // Get hash to start with
     HASH_INDEX_T i = helper.get_start(id);
-    HASH_INDEX_T previous = INVALID_HASH_INDEX;
 
 #if !defined(_SINGLE)
-    MT::Lock lock(mutex);
+    MT::RWWriteLock lock(mutex);
 #endif
 
     // Search along chains until we hit or the chain runs out
@@ -238,60 +243,89 @@ public:
 	INDEX_T index = p->index;
 
 	// Splice out from collision chain...
-	// If we're at the head with other things following, we can't leave 
-	// this empty, so we pull forward the next one, and delete that instead
-	if (previous == INVALID_HASH_INDEX)
+	// We have to be very careful here...  The entry we are splicing out
+	// could be at the head of a chain for items which follow later.
+	// Because the chain is coalesced, multiple points along it can be
+	// heads of chains.  Hence we avoid actually deleting an entry if
+	// there is anything that requires it to be present
+
+	// The algorithm here is basically this:
+	//   To delete an entry, search forward for any later entry in the
+	//   same chain which hashes to the location to be deleted (using prev)
+	//   If found:  Replace the deleted entry with it, and delete
+	//              (recursively) the new gap
+	//   If not found:  Safe to snap out in place
+
+	// Start by trying to delete this one
+	HASH_INDEX_T to_delete_i = i;
+
+	// Loop while more to delete (flattening linear recursion on delete)
+	for(;;)
 	{
-	  if (p->next != INVALID_HASH_INDEX)
+	  entry_t *to_delete = table+to_delete_i;
+
+	  // First find 'q', an entry which hashes to here
+	  HASH_INDEX_T qi = to_delete->next;
+
+	  while (qi != INVALID_HASH_INDEX)
 	  {
-	    HASH_INDEX_T qi = p->next;
 	    entry_t *q = table+qi;
 
-	    // Pull forward data
-	    p->id = q->id;
-	    p->next = q->next;
-	    p->index = q->index;  // Safe to do with concurrent lookup
+	    // Does this hash to the one we're trying to delete?
+	    if (q->head == to_delete_i)
+	    {
+	      // Copy its data back to the one being deleted
+	      // note: next/prev remain the same
+	      to_delete->index = q->index;
+	      to_delete->id    = q->id; 
+	      to_delete->head  = q->head;
 
-	    // Now pretend we're deleting q
-	    p = q;
-	    i = qi;
+	      // Now continue and delete this one
+	      to_delete_i    = qi;
+	      to_delete      = table+qi;
+	      break;  // From search on qi
+	    }
+	    
+	    qi = q->next;
 	  }
-	  else
+
+	  // Did we reach the end?
+	  if (qi == INVALID_HASH_INDEX)
 	  {
-	    // At the start, but nothing following - that's OK, this chain
-	    // can go empty
+	    // Nothing relevant found - we can delete here
+
+	    // Snap out link from previous item in chain
+	    if (to_delete->prev != INVALID_HASH_INDEX)
+	      table[to_delete->prev].next = to_delete->next;
+
+	    // Ditto for prev link from next item
+	    if (to_delete->next != INVALID_HASH_INDEX)
+	      table[to_delete->next].prev = to_delete->prev;
+
+	    // Clear contents and back-link
+	    to_delete->index = INVALID_INDEX;
+	    to_delete->prev  = INVALID_HASH_INDEX;
+
+	    // This becomes the new head of the freelist
+	    // First back-link the current freelist (if any) to this
+	    if (freelist != INVALID_HASH_INDEX)
+	      table[freelist].prev = to_delete_i;
+
+	    // Now splice to head
+	    to_delete->next = freelist;
+	    freelist = to_delete_i;
+
+	    // Nothing more to delete
+	    break;
 	  }
 	}
-	else
-	{
-	  // Not at the start - splice out from previous link's next chain
-	  table[previous].next = p->next;  // Atomic change for lookup
-	}
-
-	// Clear contents and back-link
-	p->index = INVALID_INDEX;
-	p->prev = INVALID_HASH_INDEX;
-
-	// This becomes the new head of the freelist
-	// First back-link the current freelist (if any) to this
-	if (freelist != INVALID_HASH_INDEX)
-	  table[freelist].prev = i;
-
-	// Now splice to head
-	p->next = freelist;
-	freelist = i;
 
 	return index;
       }
 
       // Chain to next
-      if (p->next != INVALID_HASH_INDEX)
-      {
-	previous = i;
-	i = p->next;
-      }
-      else
-	return INVALID_INDEX;
+      i = p->next;
+      if (i == INVALID_HASH_INDEX) return INVALID_INDEX;
     }
   }
 
@@ -313,7 +347,7 @@ public:
     }
 
 #if !defined(_SINGLE)
-    MT::Lock lock(mutex);
+    MT::RWReadLock lock(mutex);
 #endif
 
     // Walk free list, checking forward and back links
@@ -365,12 +399,14 @@ public:
     for(HASH_INDEX_T i=0; i<size; i++)
     {
       entry_t *p = table+i;
-      map<HASH_INDEX_T, bool> valid_hashes;
+      HASH_INDEX_T start = helper.get_start(p->id);
 
       // See if it's used and hashes to where it should be - 
       // if so, it's the head of a chain
-      if (p->used() && helper.get_start(p->id) == i)
+      if (p->used() && start == i)
       {
+	HASH_INDEX_T previous = p->prev;  // May be in middle of chain
+
 	// Follow chain
 	for(HASH_INDEX_T j=i; j!=INVALID_HASH_INDEX; j=table[j].next)
 	{
@@ -393,7 +429,6 @@ public:
 
 	  entry_t *q = table+j;
 	  marks[j] = true;
-	  valid_hashes[j] = true;
 
 	  // Check we are used
 	  if (!q->used())
@@ -402,12 +437,19 @@ public:
 	    ok = false;
 	  }
 
-	  // Check we hash correctly, too.  We could validly have the hash
-	  // of anything we have seen on the chain, including ourselves
-	  if (!valid_hashes[helper.get_start(q->id)])
+	  // Check previous pointer
+	  if (q->prev != previous)
 	  {
-	    sout << "Entry at " << j << " has wrong hash: " 
-		 << helper.get_start(q->id) << endl;
+	    sout << "Entry at " << j << " has bad prev link\n";
+	    ok = false;
+	  }
+	  previous = j;
+
+	  // Check our head marker for where we hash to is correct
+	  HASH_INDEX_T q_start = helper.get_start(q->id);
+	  if (q_start != q->head)
+	  {
+	    sout << "Entry at " << j << " has bad head marker\n";
 	    ok = false;
 	  }
 	}
@@ -433,6 +475,10 @@ public:
   {
     stats_p.entries = 0;
     stats_p.max_chain = 0;
+
+#if !defined(_SINGLE)
+    MT::RWReadLock lock(mutex);
+#endif
 
     for(HASH_INDEX_T i=0; i<size; i++)
     {
@@ -469,7 +515,7 @@ public:
   void dump(ostream& sout)
   {
 #if !defined(_SINGLE)
-    MT::Lock lock(mutex);
+    MT::RWReadLock lock(mutex);
 #endif
 
     for(HASH_INDEX_T i=0; i<size; i++)
@@ -483,6 +529,9 @@ public:
 	     << resetiosflags(ios_base::left);
 	if (e->next != INVALID_HASH_INDEX) 
 	  sout << " next: " << e->next;
+	if (e->prev != INVALID_HASH_INDEX) 
+	  sout << " prev: " << e->prev;
+	sout << " head: " << e->head;
 	sout << endl;
       }
       else
@@ -492,7 +541,7 @@ public:
 	if (e->next != INVALID_HASH_INDEX) 
 	  sout << " next: " << e->next;
 	if (e->prev != INVALID_HASH_INDEX) 
-	  sout << " previous: " << e->id;
+	  sout << " previous: " << e->prev;
 	sout << endl;
       }
     }
