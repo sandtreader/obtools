@@ -236,6 +236,10 @@ public:
     {
       entry_t *p = table+i;
 
+      // If we hit freelist, stop (should only happen in first iteration
+      // if the entry doesn't exist, but good safety anyway)
+      if (!p->used()) return INVALID_INDEX;
+
       // Check for hit (most likely case)
       if (p->id == id)
       {
@@ -371,6 +375,16 @@ public:
       }
 
       entry_t *p = table+i;
+
+      // Check for loops
+      if (marks[i])
+      {
+	sout << "Freelist loops back to " << i << " after " << previous
+	     << endl;
+	ok = false;
+	break;
+      }
+
       marks[i] = true;
 
       // Check this is empty
@@ -640,12 +654,12 @@ public:
     if (!built) return false;
 
     // Cut into top and bottom
-    int top = helper.get_top(id);
-    HASH_ID_T bottom = helper.get_bottom(id);
+    int block_no = helper.get_block_no(id);
+    HASH_ID_T hash_id = helper.get_hash_id(id);
 
     // Get Block and ask it
-    block_t *block = table[top];
-    return block->add(bottom, index);
+    block_t *block = table[block_no];
+    return block->add(hash_id, index);
   }
 
   //--------------------------------------------------------------------------
@@ -656,12 +670,12 @@ public:
     if (!built) return INVALID_INDEX;
 
     // Cut into top and bottom
-    int top = helper.get_top(id);
-    HASH_ID_T bottom = helper.get_bottom(id);
+    int block_no = helper.get_block_no(id);
+    HASH_ID_T hash_id = helper.get_hash_id(id);
 
     // Get Block and ask it
-    block_t *block = table[top];
-    return block->lookup(bottom);
+    block_t *block = table[block_no];
+    return block->lookup(hash_id);
   }
 
   //--------------------------------------------------------------------------
@@ -672,12 +686,12 @@ public:
     if (!built) return INVALID_INDEX;
 
     // Cut into top and bottom
-    int top = helper.get_top(id);
-    HASH_ID_T bottom = helper.get_bottom(id);
+    int block_no = helper.get_block_no(id);
+    HASH_ID_T hash_id = helper.get_hash_id(id);
 
     // Get Block and ask it
-    block_t *block = table[top];
-    return block->remove(bottom);
+    block_t *block = table[block_no];
+    return block->remove(hash_id);
   }
 
   //--------------------------------------------------------------------------
@@ -763,8 +777,11 @@ public:
 };
 
 //==========================================================================
-// ID helper template for integral ID types - splits ID into integer top 
-// and bottom parts for hash
+// ID helper template for integral ID types - splits ID into block number
+// and hash ID parts
+// Note we use the _least significant_ part of the integer for the block
+// on the principle that this is likely to be more random than the upper
+// parts
 // - Implement this for other ID types for GeneralTable
 template<class ID_T, class HASH_ID_T, class HASH_INDEX_T> class IntegerIDHelper
 {
@@ -772,8 +789,7 @@ private:
   int nbits;
   int block_size;
 
-  int top_shift;            // Shift for top bits     
-  ID_T bottom_mask;         // AND mask for bottom bits
+  int block_mask;           // Mask of bottom bits to get block no
 
 public:
   //--------------------------------------------------------------------------
@@ -781,17 +797,16 @@ public:
   IntegerIDHelper(int _nbits, int _block_size): 
     nbits(_nbits), block_size(_block_size)
   {
-    top_shift   = sizeof(ID_T)*8 - nbits;
-    bottom_mask = (ID_T)((1<<top_shift)-1);
+    block_mask = (1<<nbits)-1;
   }
 
   //--------------------------------------------------------------------------
-  // Get top array index from ID
-  int get_top(ID_T id) { return (int)(id >> top_shift); }
+  // Get block array index from ID
+  int get_block_no(ID_T id) { return (int)(id & block_mask); }
 
   //--------------------------------------------------------------------------
-  // Get bottom hash ID from full ID
-  HASH_ID_T get_bottom(ID_T id) { return(HASH_ID_T)(id & bottom_mask); }
+  // Get hash ID within block from full ID
+  HASH_ID_T get_hash_id(ID_T id) { return(HASH_ID_T)(id >> nbits); }
 
   //--------------------------------------------------------------------------
   // Get start offset in hash block from hash ID
