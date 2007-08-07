@@ -30,6 +30,8 @@ static void *_pool_start(void *arg)
     // Call virtual run() in subclass
     self->run();
 
+    if (self->dying) break;
+
     // Make myself out of use again
     self->in_use.clear();
 
