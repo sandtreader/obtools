@@ -190,7 +190,8 @@ Result Connection::select_by_id(const string& table, const Row& row,
 bool Connection::select_row(const string& table, Row& row, 
 			    const string& where)
 {
-  Result result = select(table, row, where);
+  string limit_where = where+" LIMIT 1";
+  Result result = select(table, row, limit_where);
   if (!result) return false;
   row.clear();
   return result.fetch(row);
@@ -234,6 +235,7 @@ string Connection::select_value(const string& table, const string& field,
   ostringstream oss;
   oss << "SELECT " << field << " FROM " << table;
   if (!where.empty()) oss << " WHERE " << where;
+  oss << " LIMIT 1";
   return query_string(oss.str());
 }
 
