@@ -220,6 +220,27 @@ public:
 };
 
 //==========================================================================
+// Base16 'safe alphabet' encoder/decoder
+// Alphabet is "bcdg hjkl mpqr svwz" - no vowels, and also missing "fntxy"
+class Base16Alpha
+{
+public:
+  //--------------------------------------------------------------------------
+  // Default constructor 
+  Base16Alpha() {}
+
+  //--------------------------------------------------------------------------
+  // Encode a 64-bit integer 
+  // Uses as many characters as required
+  static string encode(uint64_t n);
+
+  //--------------------------------------------------------------------------
+  // Decode a 64-bit integer
+  // Returns whether successful - if so, sets 'n'
+  static bool decode(const string& base16, uint64_t& n);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
 
