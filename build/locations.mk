@@ -36,6 +36,7 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  soap:libs/soap:web,log,misc,xml	\
 	  text:libs/text   			\
 	  time:libs/time			\
+	  tube:libs/tube:net,log,mt,chan        \
 	  web:libs/web:xml,misc,log,net		\
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml     			\
