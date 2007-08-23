@@ -20,10 +20,6 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-#if !defined(_SINGLE)
-#error Do NOT build multithreaded - no guarantee that send() will complete!
-#endif
-
 using namespace std;
 using namespace ObTools;
 
@@ -330,6 +326,9 @@ int main(int argc, char **argv)
       }
     }
   } while (!oneshot);
+
+  // Sleep to ensure messages sent
+  MT::Thread::sleep(1);
 
   return 0;  
 }

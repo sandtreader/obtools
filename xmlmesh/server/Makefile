@@ -18,7 +18,7 @@ DEBIAN-REVISION = 2
 #Build from static local libraries in DEBUG, installed .so's in release
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
-          net log mt xml soap web text cache init misc
+          net log mt xml soap web text cache init misc tube
 else
 DEPENDS = ot-general2 ot-xmlmesh2
 endif
@@ -32,7 +32,6 @@ endif
 CPPFLAGS += -DOT_XMLMESH_VERSION=$(DEBIAN-VERSION)
 
 CONFIGS = xmlmesh.cfg.xml
-MULTI   = 1
 SOCKET  = 1
 
 ROOT    = ../..

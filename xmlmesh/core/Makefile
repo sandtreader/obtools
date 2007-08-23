@@ -9,13 +9,7 @@ TYPE	= lib
 NAME   	= ot-xmlmesh-core
 HEADERS = ot-xmlmesh.h
 OBJS    = message.o m-fault.o m-subscription.o
-DEPENDS = soap web xml net log misc
-MT-VARIANTS = 1
-
-# Suppress MT library if single 
-ifndef SINGLE
-DEPENDS += mt
-endif
+DEPENDS = soap web xml net log misc mt
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

@@ -18,13 +18,11 @@ DEBIAN-REVISION = 1
 
 ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
-	  net log xml soap web text misc
+	  net log xml soap web text misc mt tube
 else
 DEPENDS	= ot-xmlmesh2 ot-general2
 endif
 
-#Only needs single-threaded
-SINGLE = 1
 SOCKET = 1
 
 ROOT    = ../../..

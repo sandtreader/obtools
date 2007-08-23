@@ -14,7 +14,6 @@ NAME      = ot-xmlmesh2
 VERSION   = 2.2.1
 CONTAINS  = xmlmesh-core xmlmesh-otmp xmlmesh-client
 DEPENDS   = ot-general2
-MT-VARIANTS = 1
 
 #Only build release versions - debug is not PIC
 #Don't override in MinGW
@@ -23,10 +22,6 @@ RELEASE-VARIANTS-ONLY = 1
 DEBIAN-NAME    = libot-xmlmesh2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 1
-
-ifdef SINGLE
-DEBIAN-VARIANT = single
-endif
 
 ROOT      = ../../..
 include $(ROOT)/build/std.mk

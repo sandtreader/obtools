@@ -15,10 +15,6 @@
 #include <fstream>
 #include <errno.h>
 
-#if !defined(_SINGLE)
-#error Do NOT build multithreaded - no guarantee that send() will complete!
-#endif
-
 using namespace std;
 using namespace ObTools;
 
@@ -190,6 +186,7 @@ int main(int argc, char **argv)
   {
     XMLMesh::Message msg(subject, xml);
     if (!client.send(msg)) return 2;
+    MT::Thread::sleep(1);  // Wait for it to go out
   }
 
   return 0;  
