@@ -1,0 +1,4 @@
+#!/bin/sh
+#Just say OK
+echo "<x:ok/>"
+
