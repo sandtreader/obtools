@@ -37,13 +37,10 @@
 # RELEASE:   Build release version
 # DEBUG:     Build debug version
 # PROFILED:  Build profiled version
-# MULTI:     Build multi-threaded version
-# SINGLE:    Build single-threaded version
 # MINGW:     Build MinGW version (cross-compiled from Linux)
 # (implicit: If no cross version, build native)
 
-# If VARIANTS is undefined, defaults to standard release/debug set, plus
-# single/multi versions if MT-VARIANTS is set, multi being the default
+# If VARIANTS is undefined, defaults to standard release/debug set
 
 # If CROSS-COMPILE is set (e.g. by 'make cross'), build cross-compiled 
 # versions - currently only MINGW.
@@ -69,71 +66,37 @@ ifdef CROSS-COMPILE
 # - Future - check for which
 
 #MinGW versions
-ifdef MT-VARIANTS
- ifndef VARIANTS
-VARIANTS = release-mingw debug-mingw single-release-mingw single-debug-mingw
- endif
-VARIANT-release-mingw		= MINGW RELEASE MULTI
-VARIANT-debug-mingw		= MINGW DEBUG MULTI
-VARIANT-single-release-mingw	= MINGW RELEASE SINGLE
-VARIANT-single-debug-mingw	= MINGW DEBUG SINGLE
-else
- ifndef VARIANTS
+ifndef VARIANTS
 VARIANTS = debug-mingw release-mingw
- endif
+endif
 VARIANT-debug-mingw		= MINGW DEBUG
 VARIANT-release-mingw		= MINGW RELEASE
-endif
 
 else #!CROSS-COMPILE
 
 #Check for PROFILE - native only
 ifdef PROFILE
 # Profiled native build
-ifdef MT-VARIANTS
- ifndef VARIANTS
-VARIANTS = release-profiled single-release-profiled
-  ifndef RELEASE-VARIANTS-ONLY
-VARIANTS += debug-profiled single-debug-profiled
-  endif
- endif
-VARIANT-release-profiled	= PROFILED RELEASE MULTI 
-VARIANT-debug-profiled		= PROFILED DEBUG MULTI
-VARIANT-single-release-profiled	= PROFILED RELEASE SINGLE 
-VARIANT-single-debug-profiled	= PROFILED DEBUG SINGLE
-else
- ifndef VARIANTS
+ifndef VARIANTS
 VARIANTS = release-profiled 
-  ifndef RELEASE-VARIANTS-ONLY
+ ifndef RELEASE-VARIANTS-ONLY
 VARIANTS += debug-profiled 
-  endif
  endif
+endif
 VARIANT-debug-profiled		= PROFILED DEBUG
 VARIANT-release-profiled	= PROFILED RELEASE
-endif
+
 else #!PROFILE
 # Default native build
-ifdef MT-VARIANTS
- ifndef VARIANTS
-VARIANTS = release single-release
-  ifndef RELEASE-VARIANTS-ONLY
-VARIANTS += debug single-debug
-  endif
- endif
-VARIANT-release			= RELEASE MULTI 
-VARIANT-debug			= DEBUG MULTI
-VARIANT-single-release		= RELEASE SINGLE 
-VARIANT-single-debug		= DEBUG SINGLE
-else
- ifndef VARIANTS
+ifndef VARIANTS
 VARIANTS = release
-  ifndef RELEASE-VARIANTS-ONLY
+ ifndef RELEASE-VARIANTS-ONLY
 VARIANTS += debug
-  endif
  endif
+endif
 VARIANT-debug		= DEBUG
 VARIANT-release		= RELEASE
-endif
+
 endif #!PROFILE
 endif #!CROSS-COMPILE
 
@@ -156,9 +119,7 @@ endif
 else
 CC = gcc-3.4
 CXX = g++-3.4
-ifndef SINGLE
 EXTRALIBS += -lrt
-endif
 endif
 
 # Get locations
@@ -216,20 +177,12 @@ endif
 ifeq ($(TYPE), superlib)
 VERSIONM = $(word 1,$(subst ., ,$(VERSION)))
 
-#Make sure library name is changed to reflect singleness & profiledness, 
+#Make sure library name is changed to reflect profiledness, 
 #because directory location is lost in dependencies
-ifdef SINGLE
- ifdef PROFILED
-SOLINK = lib$(NAME)-single-profiled.so
- else
-SOLINK = lib$(NAME)-single.so
- endif
-else
- ifdef PROFILED
+ifdef PROFILED
 SOLINK = lib$(NAME)-profiled.so
- else
+else
 SOLINK = lib$(NAME).so
- endif
 endif
 
 SOLIB = $(SOLINK).$(VERSION)
@@ -243,14 +196,7 @@ endif
 #Targets for Windows DLL
 ifeq ($(TYPE), dll)
 
-#Make sure library name is changed to reflect singleness, because directory
-#location is lost in dependencies
-ifdef SINGLE
-DLL-NAME = $(NAME)-single.dll
-else
 DLL-NAME = $(NAME).dll
-endif
-
 IMPLIB-NAME = $(DLL-NAME).a
 TARGETS = $(DLL-NAME)
 RELEASABLE = $(DLL-NAME) $(IMPLIB-NAME)
@@ -267,8 +213,7 @@ endif
 #Set standard flags
 CPPFLAGS += -W -Wall
 
-# Check if we want multithreading and/or debugging
-ifdef MULTI
+# Always reentrant
 CPPFLAGS += -D_REENTRANT
 
 #MinGW uses the win32-pthread library
@@ -281,19 +226,6 @@ LDFLAGS += -mthreads
 EXTRALIBS += -lpthreadGC2
 else
 EXTRALIBS += -lpthread
-endif
-endif
-
-ifdef SINGLE
-CPPFLAGS += -D_SINGLE
-LIB-SINGLEP = -single
-ifeq ($(TYPE), lib)
-RELEASE-NAME = $(NAME)-single.a
-endif
-ifeq ($(TYPE), superlib)
-RELEASE-NAME = lib$(NAME)-single.so.$(VERSION)
-RELEASE-LINK = lib$(NAME)-single.so.$(VERSIONM)
-endif
 endif
 
 ifdef DEBUG
@@ -335,7 +267,7 @@ define dep_template
 INCS += $(DIR-$(1))
 
 #Add external dependency (not --whole-archive) for superlib/DLL
-DEPLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP)$(LIB-PROFILEDP))
+DEPLIBS += $(LIBS-$(1)$(LIB-DEBUGP)$(LIB-PROFILEDP))
 
 #Recurse to any child dependencies held by this dependency
 $(foreach dep2,$(DEPENDS-$(1)),$(eval $(call dep_template,$(dep2))))
@@ -345,7 +277,7 @@ $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
 
 # Additional dependencies for contained libraries
 define contain_template
-INCLIBS += $(LIBS-$(1)$(LIB-SINGLEP)$(LIB-DEBUGP)$(LIB-PROFILEDP))
+INCLIBS += $(LIBS-$(1)$(LIB-DEBUGP)$(LIB-PROFILEDP))
 SOHEADERS += $(wildcard $(DIR-$(1))/*.h)
 endef
 
