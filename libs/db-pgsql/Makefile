@@ -9,17 +9,11 @@ NAME	= ot-db-pgsql
 TYPE	= lib
 HEADERS = ot-db-pgsql.h
 OBJS  	= db-pgsql.o
-DEPENDS = log db text 
+DEPENDS = log db text mt
 EXTINCS = /usr/include/postgresql/
 EXTLIBS = -lpq
 TESTS 	= test-pgsql
 TESTCMD	= ./test-pgsql
-MT-VARIANTS = 1
-
-#Don't use MT in SINGLE
-ifndef SINGLE
-DEPENDS += mt
-endif
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

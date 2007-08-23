@@ -12,8 +12,6 @@ OBJS  	= thread.o pool.o
 TESTS 	= test-thread test-pool test-queue test-mutex test-rmutex \
 	  test-rwmutex test-mqueue
 TESTCMD	= ./test-thread 10 && ./test-queue && ./test-mqueue
-#Both standard variants are multithreaded, of course
-MULTI 	= 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

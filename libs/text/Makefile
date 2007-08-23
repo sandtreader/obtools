@@ -17,7 +17,6 @@ TESTCMD	= ./test-ws && ./test-pattern && ./test-case && ./test-subst \
           && ./test-base36 0 1 1000 1000000 1000000000 \
           && ./test-base16alpha 0 1 1000 1000000 1000000000 \
           && ./test-split
-MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

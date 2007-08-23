@@ -14,7 +14,6 @@ TESTCMD	= ./test-xml < ../tests/simple.xml && \
           ./test-xpath < ../tests/simple.xml && \
 	  ./test-config && \
 	  ./test-update
-MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

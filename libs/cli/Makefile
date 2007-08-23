@@ -12,7 +12,6 @@ OBJS  	= command.o group.o registry.o cli.o telnet.o
 DEPENDS = text net mt
 TESTS 	= test-cli test-telnet
 TESTCMD	= ./test-cli < ../test.txt
-MULTI    = 1
 SOCKET   = 1
 
 ROOT    = ../..

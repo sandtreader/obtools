@@ -14,7 +14,6 @@ TESTS 	= test-path test-dir
 TESTCMD	= ./test-path /foo/bar/wombat/fred.exe && \
           ./test-path /usr/include/linux/ ../../foo && \
 	  ./test-dir /usr/bin/
-MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

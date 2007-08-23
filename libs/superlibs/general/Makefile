@@ -12,8 +12,8 @@ TYPE	= superlib
 endif
 NAME	= ot-general2
 VERSION	= 2.2.8
-CONTAINS = xml misc text net log init chan time web file crypto hash soap
-MT-VARIANTS = 1
+CONTAINS = xml misc text net log init chan time web file crypto hash soap \
+	   mt cache cli tube
 SOCKET  = 1
 EXTLIBS = -lcrypto
 
@@ -30,15 +30,6 @@ endif
 DEBIAN-NAME    = libot-general2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 1
-
-ifdef SINGLE
-DEBIAN-VARIANT = single
-endif
-
-# Supress MT, CLI & CACHE libraries if single
-ifndef SINGLE
-CONTAINS += mt cache cli
-endif
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk

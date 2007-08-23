@@ -12,7 +12,6 @@ OBJS  	= duration.o stamp.o
 TESTS 	= test-duration test-stamp
 TESTCMD	= ./test-stamp < ../test.stamps.txt \
        && ./test-duration < ../test.durations.txt  
-MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

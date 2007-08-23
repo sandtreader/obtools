@@ -10,7 +10,7 @@ NAME   	= ot-crypto
 HEADERS = ot-crypto.h
 OBJS  	= pkcs5.o des-key.o des.o rsa-key.o rsa.o sha1.o library.o
 TESTS 	= test-pkcs5 test-des-key test-des test-rsa-key test-rsa test-sha1
-DEPENDS = misc chan net xml
+DEPENDS = misc chan net xml mt
 TESTCMD	= ./test-pkcs5 && ./test-des-key && ./test-des \
        && ./test-rsa-key && ./test-rsa && ./test-sha1
 SOCKET = 1
@@ -20,12 +20,6 @@ ifdef MINGW
 EXTLIBS = -leay32
 else
 EXTLIBS = -lcrypto
-endif
-
-MT-VARIANTS = 1
-
-ifndef SINGLE
-DEPENDS += mt
 endif
 
 ROOT    = ../..

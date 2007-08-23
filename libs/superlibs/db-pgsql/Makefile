@@ -19,7 +19,6 @@ endif
 NAME   	= ot-db-pgsql2
 VERSION	= 2.0.0
 CONTAINS = db-pgsql
-MT-VARIANTS = 1
 
 DEPENDS = ot-general2 ot-db2
 EXTLIBS = -lpq
@@ -30,10 +29,6 @@ RELEASE-VARIANTS-ONLY = 1
 DEBIAN-NAME    = libot-db-pgsql2
 DEBIAN-VERSION = $(VERSION)
 DEBIAN-REVISION = 1
-
-ifdef SINGLE
-DEBIAN-VARIANT = single
-endif
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk

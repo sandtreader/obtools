@@ -15,7 +15,6 @@ TESTS 	= test-md5 test-crc test-crc32 test-prop test-random \
 TESTCMD	= ./test-md5 && ./test-crc hello && ./test-crc32 hello \
        && ./test-prop && ./test-random \
        && ./test-dump && ./test-range < ../test-range.dat
-MT-VARIANTS = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

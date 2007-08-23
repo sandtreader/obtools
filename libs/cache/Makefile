@@ -12,7 +12,6 @@ HEADERS = ot-cache.h
 DEPENDS = mt
 TESTS 	= test-timeout-use test-timeout-age test-pointer
 TESTCMD	= ./test-pointer
-MULTI    = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

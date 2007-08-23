@@ -8,18 +8,11 @@
 TYPE	= lib
 NAME   	= ot-net
 HEADERS = ot-net.h
-OBJS  	= socket.o address.o client.o stream.o
-TESTS 	= test-client 
+OBJS  	= socket.o address.o client.o stream.o server.o
+TESTS 	= test-client test-server
 TESTCMD	= ./test-client localhost
-MT-VARIANTS = 1
+DEPENDS = mt
 SOCKET  = 1
-
-#Catch ourselves recursing in SINGLE mode and suppress server and use of MT
-ifndef SINGLE
-OBJS 	+= server.o
-TESTS  	+= test-server
-DEPENDS += mt
-endif
 
 #In MinGW, add Winsock initialise interface
 ifdef MINGW

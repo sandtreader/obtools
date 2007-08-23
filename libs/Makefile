@@ -7,11 +7,11 @@
 
 SUBS = xml xmi cppt regen misc text mt net time log cache   \
        db db-pgsql db-mysql                                 \
-       cli init web soap chan file crypto hash superlibs
+       cli init web soap chan file crypto hash tube superlibs
 
 #Different for cross compile
 SUBS_CROSS = xml xmi cppt regen misc text mt net time log cache \
-             cli init web soap chan file crypto hash superlibs
+             cli init web soap chan file crypto hash tube superlibs
 
 ROOT = ..
 include ../build/dir.mk
