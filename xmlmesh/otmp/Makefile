@@ -7,23 +7,13 @@
 
 TYPE	= lib
 NAME   	= ot-xmlmesh-otmp
+OBJS 	= server.o
 HEADERS = ot-xmlmesh-otmp.h
-DEPENDS = net log text
-MT-VARIANTS = 1
+DEPENDS = net log text mt tube
 SOCKET  = 1
 
-TESTS 	= test-client
+TESTS 	= test-client test-server
 TESTCMD = ./test-client localhost
-
-
-# Suppress MT library and server if single, build single-threaded client
-ifdef SINGLE
-OBJS   	= client-single.o
-else
-OBJS 	= client.o server.o
-DEPENDS += mt
-TESTS 	+= test-server
-endif
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

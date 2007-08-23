@@ -42,8 +42,11 @@ public:
 
 //--------------------------------------------------------------------------
 // Main
-int main()
+int main(int argc, char **argv)
 {
+  int port = XMLMesh::OTMP::DEFAULT_PORT;
+  if (argc > 1) port = atoi(argv[1]);
+
 #ifdef __WIN32__
   winsock_initialise();
 #endif
@@ -58,7 +61,7 @@ int main()
   MT::Queue<XMLMesh::OTMP::ClientMessage> q;
 
   // Create server 
-  XMLMesh::OTMP::Server server(q);
+  XMLMesh::OTMP::Server server(q, port);
   server.open();
 
   // Start reflector thread
