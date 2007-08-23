@@ -47,7 +47,9 @@ using namespace std;
 //    4:        4-byte NBO integer length ('L')
 //    8:        32-bits of flags (none yet defined, set to 0), NBO
 //    12-L+12: 'L' bytes of message, unterminated and unpadded
-
+//
+// Note: The top 8 bits (first byte) of flags are reserved for this protocol
+//
 // Error behaviour:  
 //   If a stream ends cleanly before the first chunk, or between chunks, this 
 //     is fine
