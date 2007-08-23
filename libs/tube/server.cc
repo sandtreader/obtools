@@ -20,6 +20,7 @@ namespace ObTools { namespace Tube {
 // Pulls messages off the given queue and sends them to the given socket
 class ServerSendThread: public MT::Thread
 {
+  Server& server;
   ClientSession& session;
   Log::Streams log;  // Private to this thread
 
@@ -32,7 +33,8 @@ class ServerSendThread: public MT::Thread
       if (!session.alive) break;
 
       // Deal with it
-      OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(ssend): Sending message "
+      OBTOOLS_LOG_IF_DEBUG(log.debug << server.name 
+			   << " (ssend): Sending message "
 			   << hex << msg.tag << dec << ", length " 
 			   << msg.data.size() 
 			   << " (flags " << msg.flags << ")\n";)
@@ -50,16 +52,18 @@ class ServerSendThread: public MT::Thread
       }
       catch (Net::SocketError se)
       {
-	log.error << "tube(ssend): " << se << endl;
+	log.error << server.name << " (ssend): " << se << endl;
 	break;
       }
     }
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(ssend): Thread shutting down\n";)
+    OBTOOLS_LOG_IF_DEBUG(log.debug << server.name 
+			 << " (ssend): Thread shutting down\n";)
   }
 
 public:
-  ServerSendThread(ClientSession& _session): session(_session) { start(); }
+  ServerSendThread(Server& _server, ClientSession& _session): 
+    server(_server), session(_session) { start(); }
 };
 
 //--------------------------------------------------------------------------
@@ -73,7 +77,7 @@ bool Server::verify(Net::EndPoint ep)
     if (*p == ep.host) return true;
 
   Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
-  error_log << "tube(serv): Rejected connection from " << ep << endl;
+  error_log << name << ": Rejected connection from " << ep << endl;
   return false;
 }
 
@@ -86,13 +90,13 @@ void Server::process(Net::TCPSocket& socket,
 
   const char *obit = "ended";
 
-  log.summary << "tube(serv): Got connection from " << client << endl;
+  log.summary << name << ": Got connection from " << client << endl;
 
   // Create client session and map it (autoremoved on destruction)
   ClientSession session(socket, client, client_sessions);
 
   // Start send thread and detach it
-  ServerSendThread send_thread(session);
+  ServerSendThread send_thread(*this, session);
   send_thread.detach();
 
   // Tell the queue the client has arrived
@@ -116,7 +120,7 @@ void Server::process(Net::TCPSocket& socket,
 	uint32_t len   = socket.read_nbo_int();
 	uint32_t flags = socket.read_nbo_int();
 
-	OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(srecv): Message "
+	OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Received message "
 			     << hex << tag << dec << ", length " 
 			     << len << " (flags " << flags << ")\n";)
 
@@ -124,7 +128,7 @@ void Server::process(Net::TCPSocket& socket,
 	string content;
 	if (!socket.read(content, len))
 	{
-	  log.error << "tube(srecv): Short message read - socket died\n";
+	  log.error << name << ": Short message read - socket died\n";
 	  obit = "died";
 	  break;
 	}
@@ -142,7 +146,7 @@ void Server::process(Net::TCPSocket& socket,
       else
       {
 	// Unrecognised tag
-	log.error << "tube(recv): Unrecognised tag " 
+	log.error << name << ": Unrecognised tag " 
 		  << hex << tag << dec << " - out-of-sync?\n";
 	obit = "unsynced";
 	break;
@@ -150,7 +154,7 @@ void Server::process(Net::TCPSocket& socket,
     }
     catch (Net::SocketError se)
     {
-      log.error << "tube(srecv): " << se << endl;
+      log.error << name << ": " << se << endl;
       obit = "failed";
       break;
     }
@@ -162,7 +166,7 @@ void Server::process(Net::TCPSocket& socket,
 
   if (!!send_thread)
   {
-    OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(serv): Shutting down send\n";)
+    OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Shutting down send\n";)
 
     // Shut down session cleanly
     session.alive=false;
@@ -183,17 +187,17 @@ void Server::process(Net::TCPSocket& socket,
   else
     obit = "failed (send)";
 
-  log.summary << "tube(serv): Connection from " << client
+  log.summary << name << ": Connection from " << client
 	      << " " << obit << endl;
 } 
 
 
 //------------------------------------------------------------------------
 // Constructor
-Server::Server(int port, int backlog, 
+Server::Server(int port, const string& _name, int backlog, 
 	       int min_spare_threads, int max_threads):
   TCPServer(port, backlog, min_spare_threads, max_threads),
-  alive(true)
+  alive(true), name(_name)
 {
 
 }

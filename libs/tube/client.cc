@@ -39,14 +39,15 @@ class ClientReceiveThread: public MT::Thread
       if (client.is_alive())
       {
 	// Log fault and sleep before retrying
-	log.error << "tube(recv): Socket failed, can't restart\n";
-	log.error << "tube(recv): Sleeping for " 
+	log.error << client.name << " (recv): Socket failed, can't restart\n";
+	log.error << client.name << " (recv): Sleeping for " 
 		  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
 	sleep(DEAD_SOCKET_SLEEP_TIME);
       }
     }
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(recv): Thread shut down\n";)
+    OBTOOLS_LOG_IF_DEBUG(log.debug << client.name 
+			 << " (recv): Thread shut down\n";)
   }
 
 public:
@@ -74,12 +75,12 @@ bool Client::restart_socket(Log::Streams& log)
   {
     // Leave it valid but unhappy to avoid crashing send thread
 
-    log.error << "tube: Can't open socket to " << server << endl;
+    log.error << name << ": Can't open socket to " << server << endl;
     return false;
   }
   else
   {
-    log.detail << "tube: Opened socket to " << server << endl;
+    log.detail << name << ": Opened socket to " << server << endl;
 
     if (!starting)
     {
@@ -113,7 +114,7 @@ bool Client::receive_messages(Log::Streams& log)
       uint32_t len   = socket->read_nbo_int();
       uint32_t flags = socket->read_nbo_int();
 
-      OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(recv): Message "
+      OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (recv): Message "
 			   << hex << tag << dec << ", length " << len 
 			   << " (flags " << flags << ")\n";)
 
@@ -121,7 +122,7 @@ bool Client::receive_messages(Log::Streams& log)
       string content;
       if (!socket->read(content, len))
       {
-	log.error << "tube(recv): Short message read - socket died\n";
+	log.error << name << " (recv): Short message read - socket died\n";
 	return restart_socket(log);
       }
 
@@ -134,7 +135,8 @@ bool Client::receive_messages(Log::Streams& log)
     else
     {
       // Unrecognised tag
-      log.error << "tube(recv): Unrecognised tag - out-of-sync?\n";
+      log.error << name << " (recv): Unrecognised tag " 
+		<< hex << tag << dec << " - out-of-sync?\n";
       //Try to restart socket
       return restart_socket(log);
     }
@@ -143,7 +145,7 @@ bool Client::receive_messages(Log::Streams& log)
   {
     if (alive)
     {
-      log.error << "tube(recv): " << se << endl;
+      log.error << name << " (recv): " << se << endl;
       return restart_socket(log);
     }
     else return false;
@@ -164,7 +166,7 @@ class ClientSendThread: public MT::Thread
   { 
     while (client.is_alive()) client.send_messages(log);
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(send): Thread shut down\n";)
+    OBTOOLS_LOG_IF_DEBUG(log.debug << client.name << " (send): Thread shut down\n";)
   }
 
 public:
@@ -186,12 +188,12 @@ bool Client::send_messages(Log::Streams& log)
   // can reanimate it
   while (!socket || !*socket)
   {
-    log.detail << "tube(send): Socket is dead - waiting for improvement\n";
+    log.detail << name <<" (send): Socket is dead - waiting for improvement\n";
     MT::Thread::sleep(DEAD_SOCKET_SLEEP_TIME);
   }
 
   // Deal with it
-  OBTOOLS_LOG_IF_DEBUG(log.debug << "tube(send): Sending message "
+  OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (send): Sending message "
 		       << hex << msg.tag << dec << ", length " 
 		       << msg.data.size() << " (flags " << msg.flags << ")\n";)
   OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
@@ -214,7 +216,7 @@ bool Client::send_messages(Log::Streams& log)
   {
     if (alive)
     {
-      log.error << "tube(send): " << se << endl;
+      log.error << name << " (send): " << se << endl;
       //Try to restart socket
       return restart_socket(log);
     }
@@ -229,7 +231,8 @@ bool Client::send_messages(Log::Streams& log)
 
 //------------------------------------------------------------------------
 // Constructors
-Client::Client(Net::EndPoint _server): server(_server), alive(true)
+Client::Client(Net::EndPoint _server, const string& _name): 
+  server(_server), alive(true), name(_name)
 {
   socket = 0;
 

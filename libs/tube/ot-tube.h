@@ -107,9 +107,12 @@ class Client
   virtual bool tag_recognised(tag_t /*tag*/) { return true; }
 
 public:
+  // Name for logging
+  string name;
+
   //------------------------------------------------------------------------
-  // Constructor - takes server endpoint (address+port)
-  Client(Net::EndPoint _server);
+  // Constructor - takes server endpoint (address+port) and optional name
+  Client(Net::EndPoint _server, const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Check it hasn't been killed
@@ -246,10 +249,13 @@ private:
   virtual bool handle_message(ClientMessage& msg)=0;
 
 public:
+  // Name for logging
+  string name;
+
   //------------------------------------------------------------------------
   // Constructor - takes port to listen on
   // The rest is thread/socket tuning - see Net::TCPServer
-  Server(int port, int backlog=5, 
+  Server(int port, const string& _name="Tube", int backlog=5, 
 	 int min_spare_threads=1, int max_threads=10);
 
   //------------------------------------------------------------------------
