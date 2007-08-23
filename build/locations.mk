@@ -41,7 +41,7 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml     			\
 	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
-	  xmlmesh-otmp:xmlmesh/otmp:net,log,text			\
+	  xmlmesh-otmp:xmlmesh/otmp:net,log,text,tube			\
 	  xmlmesh-client:xmlmesh/client:xmlmesh-otmp,xmlmesh-core	\
 	  xmlmesh-c:xmlmesh/bindings/c  	\
 	  toolgen:tools/toolgen			\
