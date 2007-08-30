@@ -337,6 +337,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 
 //--------------------------------------------------------------------------
 // Safe stream read wrapper
+// Returns amount actually read - not necessarily all required!
 // Throws SocketError on failure
 ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 { 
@@ -373,7 +374,7 @@ bool TCPSocket::read(string& s) throw (SocketError)
 
 //--------------------------------------------------------------------------
 // Read exact amount of data from the socket into a string
-// Returns whether stream has closed (last size was 0)
+// Returns whether data was all read, or stream closed (last size was zero)
 // Throws SocketError on failure
 bool TCPSocket::read(string& s, size_t count) throw (SocketError)
 {
@@ -393,6 +394,27 @@ bool TCPSocket::read(string& s, size_t count) throw (SocketError)
       done += size;
     }
     else return false;
+  }
+  
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Read exact amount of data from the socket into a buffer
+// Returns whether data was all read, or stream closed (last size was zero)
+// Throws SocketError on failure
+bool TCPSocket::read_exact(void *buf, size_t count) throw (SocketError)
+{
+  size_t done = 0;
+  unsigned char *cbuf = (unsigned char *)buf;
+
+  while (done < count)
+  {
+    ssize_t size = read(cbuf+done, count-done);
+    if (size)
+      done += size;
+    else 
+      return false;
   }
   
   return true;
@@ -452,7 +474,7 @@ bool operator>>(TCPSocket& s, string& t)
 uint32_t TCPSocket::read_nbo_int() throw (SocketError)
 {
   uint32_t n;
-  if (!read(&n, 4)) throw SocketError();
+  if (!read_exact(&n, 4)) throw SocketError();
   return ntohl(n);
 }
 
@@ -461,7 +483,7 @@ uint32_t TCPSocket::read_nbo_int() throw (SocketError)
 // Throws SocketError on non-EOF failure
 bool TCPSocket::read_nbo_int(uint32_t& n) throw (SocketError)
 {
-  if (!read(&n, 4)) return false;
+  if (!read_exact(&n, 4)) return false;
   n=ntohl(n);
   return true;
 }

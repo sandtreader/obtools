@@ -451,6 +451,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Safe stream read wrapper
+  // Returns amount actually read - not necessarily all required!
   // Throws SocketError on failure
   ssize_t read(void *buf, size_t count) throw (SocketError);
 
@@ -471,6 +472,12 @@ public:
   // Whether successful - all data was read before socket closed
   // Throws SocketError on failure
   bool read(string& s, size_t count) throw (SocketError);
+
+  //--------------------------------------------------------------------------
+  // Read exact amount of data from the socket into a buffer
+  // Returns whether data was all read, or stream closed (last size was zero)
+  // Throws SocketError on failure
+  bool read_exact(void *buf, size_t count) throw (SocketError);
 
   //--------------------------------------------------------------------------
   // Read everything to stream close, blocking until finished
