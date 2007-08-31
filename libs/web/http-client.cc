@@ -87,7 +87,10 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
 
     // Finish sending so server gets EOF
     ss.flush();
-    client.finish();
+#if !defined(__WIN32__)
+    client.finish();  // !!! Seems to cause loss of received data in Vista
+                      // !!! and doesn't send FIN anyway
+#endif
 
     // Read, allowing for EOF marker for end of body
     if (!response.read(ss, true))

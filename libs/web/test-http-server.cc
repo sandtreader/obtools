@@ -13,7 +13,7 @@
 using namespace std;
 using namespace ObTools;
 
-#define SERVER_PORT 5080
+#define SERVER_PORT 33333
 #define SERVER_VERSION "ObTools Test HTTP Server"
 
 //--------------------------------------------------------------------------
