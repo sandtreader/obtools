@@ -365,11 +365,19 @@ protected:
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor
+  // Constructor to bind to any interface
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(int port=80, const string& _version="", int backlog=5, 
 	     int min_spare=1, int max_threads=10, int _timeout=90):
     Net::TCPServer(port, backlog, min_spare, max_threads),
+    timeout(_timeout), version(_version) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor to bind to specific address
+  // See ObTools::Net::TCPServer for details of threadpool management
+  HTTPServer(Net::EndPoint address, const string& _version="", int backlog=5, 
+	     int min_spare=1, int max_threads=10, int _timeout=90):
+    Net::TCPServer(address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
   //--------------------------------------------------------------------------
@@ -417,10 +425,18 @@ class SimpleHTTPServer: public HTTPServer
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor
+  // Constructor on all interfaces
   SimpleHTTPServer(int port=80, const string& _version="", int backlog=5, 
 		   int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(port, _version, backlog, min_spare, max_threads, _timeout),
+    mutex() {}
+
+  //--------------------------------------------------------------------------
+  // Constructor for specific address
+  SimpleHTTPServer(Net::EndPoint address, const string& _version="", 
+		   int backlog=5, 
+		   int min_spare=1, int max_threads=10, int _timeout=90):
+    HTTPServer(address, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
 
   //--------------------------------------------------------------------------
