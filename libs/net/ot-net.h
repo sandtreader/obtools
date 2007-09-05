@@ -543,7 +543,7 @@ protected:
   // Streambuf underflows - see STL manual for awful details
   int underflow();
   int uflow();
-  int showmanyc();
+  streamsize showmanyc();
 
   // putback beyond buffer function - always fails
   int pbackfail(int) { return traits_type::eof(); }

@@ -89,7 +89,7 @@ int TCPStreamBuf::uflow()
 
 //------------------------------------------------------------------------
 // TCPStreamBuf showmanyc() function
-int TCPStreamBuf::showmanyc()
+streamsize TCPStreamBuf::showmanyc()
 {
   return egptr()-gptr();
 }
