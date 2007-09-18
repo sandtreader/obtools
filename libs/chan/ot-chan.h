@@ -326,6 +326,44 @@ public:
 };
 
 //==========================================================================
+// String reader
+class StringReader: public Reader
+{
+private:
+  const string& data;
+
+public:
+  // Constructor
+  StringReader(const string& _data):  data(_data) {}
+
+  // Read implementations
+  virtual size_t basic_read(void *buf, size_t count) throw (Error);
+  virtual void skip(size_t n) throw (Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Error);
+  void rewind() { Reader::rewind(); }
+};
+
+//==========================================================================
+// String writer
+class StringWriter: public Writer
+{
+private:
+  string& data;
+
+public:
+  // Constructor  
+  StringWriter(string& _data): data(_data) {}
+
+  // Write implementation
+  virtual void basic_write(const void *buf, size_t count) throw (Error);
+  virtual void skip(size_t n) throw (Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Error);
+  void rewind() { Writer::rewind(); }
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_CHAN_H
 
