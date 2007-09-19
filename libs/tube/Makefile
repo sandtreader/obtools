@@ -8,8 +8,8 @@
 TYPE	= lib
 NAME   	= ot-tube
 HEADERS = ot-tube.h
-OBJS  	= server.o client.o
-TESTS 	= test-server test-client
+OBJS  	= server.o sync-server.o client.o sync-client.o auto-sync-client.o
+TESTS 	= test-server test-sync-server test-client test-sync-client
 TESTCMD	= 
 DEPENDS = misc net log mt chan
 SOCKET  = 1

@@ -45,10 +45,17 @@ using namespace std;
 // chunk: 
 //    0:        4-byte tag, first char at 0 (equivalently, 32-bit NBO integer)
 //    4:        4-byte NBO integer length ('L')
-//    8:        32-bits of flags (none yet defined, set to 0), NBO
+//    8:        32-bits of flags (see below), NBO
 //    12-L+12: 'L' bytes of message, unterminated and unpadded
 //
-// Note: The top 8 bits (first byte) of flags are reserved for this protocol
+// Note: The top 16 bits (first two bytes) of flags are reserved for this 
+// protocol in synchronous request/response mode (see SyncClient/SyncServer
+// below)
+//
+//    Bit 31:     Response required  (message ID is valid)
+//    Bit 30:     Response provided  (message ID gives reference)
+//
+//    Bits 16-23: 8-bit message ID
 //
 // Error behaviour:  
 //   If a stream ends cleanly before the first chunk, or between chunks, this 
@@ -65,13 +72,30 @@ using namespace std;
 
 typedef uint32_t tag_t;
 typedef uint32_t flags_t;
+typedef unsigned char id_t;
+
+//==========================================================================
+// Flags
+enum 
+{
+  FLAG_RESPONSE_REQUIRED  = 0x80000000UL,
+  FLAG_RESPONSE_PROVIDED  = 0x40000000UL,
+
+  MASK_REQUEST_ID        = 0x00FF0000UL,
+  SHIFT_REQUEST_ID       = 16
+};
+
+//==========================================================================
+// Defaults
+
+const int DEFAULT_TIMEOUT = 5;
 
 //==========================================================================
 // Internal struct for carrying messages 
 // This is NOT used for directly encoding the stream!
 struct Message
 {
-  tag_t tag;
+  tag_t tag;               // Tag=0 indicates invalid
   // Length is implicit in data.size()
   tag_t flags;
   string data;  
@@ -79,12 +103,17 @@ struct Message
   Message(): tag(0), flags(0) {}
   Message(tag_t _tag, const string& _data="", int _flags=0): 
     tag(_tag), flags(_flags), data(_data) {}
+
+  // Check for validity
+  bool is_valid() { return tag!=0; }
+  bool operator!() { return !tag; }
 };
 
 //==========================================================================
-// Tube client
+// Basic asynchronous Tube client
 class Client
 {
+protected:
   // Network stuff
   Net::EndPoint server;
   Net::TCPClient *socket;
@@ -93,10 +122,10 @@ class Client
   MT::Mutex mutex;             // Global client mutex used for socket
                                // creation and restart
   MT::Thread *send_thread;
-  MT::Queue<Message> send_q;
+  MT::MQueue<Message> send_q;
 
   MT::Thread *receive_thread;
-  MT::Queue<Message> receive_q;
+  MT::MQueue<Message> receive_q;
 
   bool alive;                  // Not being killed
 
@@ -128,24 +157,105 @@ public:
   //------------------------------------------------------------------------
   // Send a message - never blocks, but can fail if the queue is full
   // Whether message queued
-  bool send(Message& msg);
+  virtual bool send(Message& msg);
 
   //------------------------------------------------------------------------
   // Check whether a message is available before blocking in wait()
-  bool poll();
+  virtual bool poll();
 
   //------------------------------------------------------------------------
   // Receive a message - blocks waiting for one to arrive
   // Returns false if the connection was restarted 
-  bool wait(Message& msg);
+  virtual bool wait(Message& msg);
 
   //------------------------------------------------------------------------
   // Shut down client cleanly
-  void shutdown();
+  virtual void shutdown();
 
   //------------------------------------------------------------------------
   // Destructor
   virtual ~Client();
+};
+
+//==========================================================================
+// Synchronous request-response client, but still providing a wait() 
+// interface for asynchronous messaging
+class SyncClient: public Client
+{
+private:
+  int timeout;      // Request timeout in seconds
+
+  // Request record 
+  struct Request
+  {
+    Time::Stamp started;
+    Message response;
+    MT::BasicCondVar ready;
+    Request(): started(Time::Stamp::now()) {}
+  };
+
+  // Request map, by ID
+  MT::Mutex request_mutex;
+  id_t request_id;
+  map<id_t, Request> requests; 
+
+  // Thread to run timeouts
+  MT::Thread *timeout_thread;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor - takes server endpoint (address+port), request timeout
+  // (in seconds) and optional name
+  SyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT, 
+	     const string& _name="Tube");
+
+  //------------------------------------------------------------------------
+  // Handle timeouts - called by background thread - do not call directly
+  void do_timeouts(Log::Streams& log);
+
+  //------------------------------------------------------------------------
+  // Request/response - blocks waiting for a response, or timeout/failure
+  // Returns whether a response was received, fills in response if so
+  bool request(Message& request, Message& response);
+
+  //------------------------------------------------------------------------
+  // Override of wait() which filters out responses, while leaving async
+  // message to be returned normally
+  // NB!  poll() will still return true for responses, so wait() may block
+  bool wait(Message& msg);
+
+  //------------------------------------------------------------------------
+  // Shut down client cleanly
+  virtual void shutdown();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  virtual ~SyncClient();
+};
+
+//==========================================================================
+// Automatic synchronous request-response client, handling waiting internally
+// and only providing a synchronous request() interface
+class AutoSyncClient: public SyncClient
+{
+private:
+  // Thread to run wait()
+  MT::Thread *dispatch_thread;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor - takes server endpoint (address+port), request timeout
+  // (in seconds) and optional name
+  AutoSyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT, 
+		 const string& _name="Tube");
+
+  //------------------------------------------------------------------------
+  // Shut down client cleanly
+  virtual void shutdown();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  virtual ~AutoSyncClient();
 };
 
 //==========================================================================
@@ -183,7 +293,7 @@ struct ClientSession
   bool alive;
 
   // Thread and queue stuff
-  MT::Queue<Message> send_q;  
+  MT::MQueue<Message> send_q;  
 
   // Constructor
   // Adds this session to the given map - destructor removes it again
@@ -291,6 +401,40 @@ public:
   // Sends the message to the endpoint given (most likely where it came from)
   // Whether message queued
   bool send(ClientMessage& msg);
+};
+
+//==========================================================================
+// Tube server for synchronous requests/responses
+// Provides a simpler interface to handle request-response messages
+// Also passes async messages to handle_async_message() but implements
+// this here as just logging an error 
+// Note send() can still be used to send async messages back
+class SyncServer: public Server
+{
+private:
+  //------------------------------------------------------------------------
+  // Function to handle an incoming client message, called from parent
+  bool handle_message(ClientMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Abstract function to handle a request - implement in subclass
+  // Return whether request handled OK, and fill in response
+  virtual bool handle_request(ClientMessage& request, Message& response) = 0;
+
+  //------------------------------------------------------------------------
+  // Function to handle asynchronous messages (not requiring a response)
+  // Implemented here just to log an error, but can be overridden if you
+  // still need to receive async messages
+  // Also called for STARTED and FINISHED psuedo-messages
+  // Return whether connection should be allowed to continue
+  virtual bool handle_async_message(ClientMessage& request);
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor - as Server
+  SyncServer(int port, const string& _name="Tube", int backlog=5, 
+	     int min_spare_threads=1, int max_threads=10):
+    Server(port, _name, backlog, min_spare_threads, max_threads) {}
 };
 
 //==========================================================================
