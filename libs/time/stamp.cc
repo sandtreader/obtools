@@ -237,7 +237,8 @@ Stamp::Stamp(const string& text)
 
 //------------------------------------------------------------------------
 // Convert to ISO timestamp string
-// Generates YYYY:MM:DD HH:MM:SS.sssZ form or empty if invalid
+// Generates YYYY:MM:DDTHH:MM:SS.sssZ form or empty if invalid
+// This format is also compatible with XML
 string Stamp::iso() const
 {
   if (!t) return "";  // Empty if invalid
@@ -256,7 +257,7 @@ string Stamp::iso() const
 
   oss << setw(2) << setfill('0') << sp.year  << '-'
       << setw(2) << setfill('0') << sp.month << '-'
-      << setw(2) << setfill('0') << sp.day   << ' '
+      << setw(2) << setfill('0') << sp.day   << 'T'
       << setw(2) << setfill('0') << sp.hour  << ':'
       << setw(2) << setfill('0') << sp.min   << ':'
       << pad << setprecision(prec) << sp.sec << "Z";
