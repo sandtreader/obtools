@@ -341,6 +341,14 @@ protected:
 
 public:
   //--------------------------------------------------------------------------
+  // Get fd
+  fd_t get_fd() { return fd; }
+
+  //--------------------------------------------------------------------------
+  // Detach fd so it does not get auto-closed
+  fd_t detach_fd() { fd_t t=fd; fd=INVALID_FD; return t; }
+
+  //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return fd == INVALID_FD; }
 
@@ -739,6 +747,14 @@ public:
   // Called in its own thread, this use blocking IO to read and write the
   // socket, and should just return when the socket ends or when bored
   virtual void process(TCPSocket &s, EndPoint client)=0;
+
+  //--------------------------------------------------------------------------
+  // Initiate an outgoing connection, and then treat it as if it was an
+  // incoming one - mainly for P2P
+  // Connection is run with a worker thread just like an incoming connection
+  // Timeout is in seconds
+  // Returns fd of connection
+  Socket::fd_t initiate(EndPoint addr, int timeout);
 
   //--------------------------------------------------------------------------
   // Shut down server

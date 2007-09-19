@@ -85,6 +85,39 @@ void TCPServer::run()
 }
 
 //--------------------------------------------------------------------------
+// Initiate an outgoing connection, and then treat it as if it was an
+// incoming one - mainly for P2P
+// Connection is run with a worker thread just like an incoming connection
+// Timeout is in seconds
+// Returns fd of connection
+Socket::fd_t TCPServer::initiate(EndPoint addr, int timeout)
+{
+  // Get a thread first
+  TCPWorkerThread *thread = threadpool.wait();
+
+  // Try to connect
+  TCPClient client(addr, timeout);
+
+  if (!!client)
+  {
+    fd_t fd = client.detach_fd();
+
+    thread->server         = this;
+    thread->client_fd      = fd;
+    thread->client_ep      = addr;
+	
+    // Start it off
+    thread->kick();
+    return fd;
+  }
+  else 
+  {
+    threadpool.replace(thread);
+    return INVALID_FD;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Shut down server
 void TCPServer::shutdown()
 {
