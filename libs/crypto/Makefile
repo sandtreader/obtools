@@ -10,7 +10,7 @@ NAME   	= ot-crypto
 HEADERS = ot-crypto.h
 OBJS  	= pkcs5.o des-key.o des.o rsa-key.o rsa.o sha1.o library.o
 TESTS 	= test-pkcs5 test-des-key test-des test-rsa-key test-rsa test-sha1
-DEPENDS = misc chan net xml mt
+DEPENDS = misc chan net xml mt text
 TESTCMD	= ./test-pkcs5 && ./test-des-key && ./test-des \
        && ./test-rsa-key && ./test-rsa && ./test-sha1
 SOCKET = 1

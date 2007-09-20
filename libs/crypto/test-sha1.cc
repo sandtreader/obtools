@@ -9,6 +9,7 @@
 
 #include "ot-crypto.h"
 #include "ot-misc.h"
+#include "ot-text.h"
 #include <iostream>
 
 using namespace std;
@@ -20,24 +21,40 @@ using namespace ObTools;
 //--------------------------------------------------------------------------
 // Main
 
-int main()
+int main(int argc, char **argv)
 {
   Misc::Random random;
 
+  // By default, generate our own data
   unsigned char buf[DATA_LEN];
   random.generate_binary(buf, DATA_LEN);
+  unsigned char *p = buf;
+  int length = DATA_LEN;
+
+  // Check for explicit string to SHA1
+  if (argc > 1) 
+  {
+    p = (unsigned char *)argv[1];
+    length = strlen(argv[1]);
+    cout << "Input: " << argv[1] << endl;
+  }
+  else cout << "Input: " << length << " bytes of random data\n";
 
   // Do it with static function
-  string d1 = Crypto::SHA1::digest(buf, DATA_LEN);
+  string d1 = Crypto::SHA1::digest(p, length);
   cout << "One-block digest: " << d1 << endl;
 
   // Now do it with multiple-block object
   Crypto::SHA1 sha1;
-  for(int i=0; i<DATA_LEN; i+=BLOCK_LEN)
-    sha1.update(buf+i, BLOCK_LEN);
+  for(int i=0; i<length; i+=BLOCK_LEN)
+    sha1.update(p+i, (length-i<BLOCK_LEN)?length-i:BLOCK_LEN);
 
   string d2 = sha1.get_result();
   cout << "  N-block digest: " << d2 << endl;
+
+  // Get Base64
+  Text::Base64 base64;
+  cout << "  Base64: " << base64.encode(p, length, 0) << endl;
 
   if (d1 == d2)
   {
