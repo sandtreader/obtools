@@ -36,7 +36,7 @@ int main(int argc, char **argv)
   {
     p = (unsigned char *)argv[1];
     length = strlen(argv[1]);
-    cout << "Input: " << argv[1] << endl;
+    cout << "Input: [" << argv[1] << "]\n";
   }
   else cout << "Input: " << length << " bytes of random data\n";
 
@@ -52,20 +52,24 @@ int main(int argc, char **argv)
   string d2 = sha1.get_result();
   cout << "  N-block digest: " << d2 << endl;
 
-  // Get Base64
-  Text::Base64 base64;
-  cout << "  Base64: " << base64.encode(p, length, 0) << endl;
-
   if (d1 == d2)
   {
     cout << "Digests match\n";
-    return 0;
   }
   else
   {
     cerr << "Digests differ!\n";
     return 2;
   }
+
+  // Get Base64
+  Text::Base64 base64;
+  unsigned char shabuf[Crypto::SHA1::DIGEST_LENGTH];
+  Crypto::SHA1::digest(p, length, shabuf);
+  cout << "  Base64: " << base64.encode(shabuf, Crypto::SHA1::DIGEST_LENGTH, 0)
+       << endl;
+
+  return 0;
 }
 
 
