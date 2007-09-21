@@ -91,22 +91,29 @@ enum
 const int DEFAULT_TIMEOUT = 5;
 
 //==========================================================================
-// Internal struct for carrying messages 
+// Internal struct for carrying messages (message.cc)
 // This is NOT used for directly encoding the stream!
 struct Message
 {
-  tag_t tag;               // Tag=0 indicates invalid
+  tag_t tag;               // tag=0 indicates invalid
   // Length is implicit in data.size()
   tag_t flags;
   string data;  
 
+  //------------------------------------------------------------------------
+  // Constructors
   Message(): tag(0), flags(0) {}
   Message(tag_t _tag, const string& _data="", int _flags=0): 
     tag(_tag), flags(_flags), data(_data) {}
 
+  //------------------------------------------------------------------------
   // Check for validity
   bool is_valid() { return tag!=0; }
   bool operator!() { return !tag; }
+
+  //------------------------------------------------------------------------
+  // Get a friendly string version of the tag
+  string stag();
 };
 
 //==========================================================================
@@ -155,7 +162,7 @@ public:
   bool send_messages(Log::Streams& log);
 
   //------------------------------------------------------------------------
-  // Send a message - never blocks, but can fail if the queue is full
+  // Send a message
   // Whether message queued
   virtual bool send(Message& msg);
 
@@ -248,6 +255,11 @@ public:
   // (in seconds) and optional name
   AutoSyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT, 
 		 const string& _name="Tube");
+
+  //------------------------------------------------------------------------
+  // Overrideable function to handle an asynchronous message - by default
+  // just errors
+  virtual void handle_async_message(Message& msg);
 
   //------------------------------------------------------------------------
   // Shut down client cleanly
@@ -397,7 +409,7 @@ public:
   bool send_messages();
 
   //------------------------------------------------------------------------
-  // Send a message - never blocks, but can fail if the queue is full
+  // Send a message
   // Sends the message to the endpoint given (most likely where it came from)
   // Whether message queued
   bool send(ClientMessage& msg);
@@ -409,6 +421,7 @@ public:
 // Also passes async messages to handle_async_message() but implements
 // this here as just logging an error 
 // Note send() can still be used to send async messages back
+// Note:  Requires a thread to call run()
 class SyncServer: public Server
 {
 private:
@@ -427,7 +440,7 @@ private:
   // still need to receive async messages
   // Also called for STARTED and FINISHED psuedo-messages
   // Return whether connection should be allowed to continue
-  virtual bool handle_async_message(ClientMessage& request);
+  virtual bool handle_async_message(ClientMessage& msg);
 
 public:
   //------------------------------------------------------------------------
@@ -435,6 +448,23 @@ public:
   SyncServer(int port, const string& _name="Tube", int backlog=5, 
 	     int min_spare_threads=1, int max_threads=10):
     Server(port, _name, backlog, min_spare_threads, max_threads) {}
+};
+
+
+//==========================================================================
+// Tube server for synchronous requests/responses with its own run()
+// thread 
+class AutoSyncServer: public SyncServer
+{
+  Net::TCPServerThread run_thread;
+
+public:
+  //------------------------------------------------------------------------
+ // Constructor - as Server
+  AutoSyncServer(int port, const string& _name="Tube", int backlog=5, 
+		 int min_spare_threads=1, int max_threads=10):
+    SyncServer(port, _name, backlog, min_spare_threads, max_threads),
+    run_thread(*this) {}
 };
 
 //==========================================================================

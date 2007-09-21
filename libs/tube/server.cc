@@ -35,9 +35,9 @@ class ServerSendThread: public MT::Thread
       // Deal with it
       OBTOOLS_LOG_IF_DEBUG(log.debug << server.name 
 			   << " (ssend): Sending message "
-			   << hex << msg.tag << dec << ", length " 
+			   << msg.stag() << ", length " 
 			   << msg.data.size() 
-			   << " (flags " << msg.flags << ")\n";)
+			   << " (flags " << hex << msg.flags << dec << ")\n";)
       OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
 
       try // Handle SocketErrors
@@ -113,30 +113,31 @@ void Server::process(Net::TCPSocket& socket,
       uint32_t tag;
       if (!socket.read_nbo_int(tag) || !alive) break;  // Clean shutdown
 
+      ClientMessage msg(client, tag);
+
       // Verify tag
       if (tag_recognised(tag))
       {
 	// Handle a TLV block
 	uint32_t len   = socket.read_nbo_int();
-	uint32_t flags = socket.read_nbo_int();
+	msg.msg.flags = socket.read_nbo_int();
 
 	OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Received message "
-			     << hex << tag << dec << ", length " 
-			     << len << " (flags " << flags << ")\n";)
+			     << msg.msg.stag() << ", length " 
+			     << len << " (flags " 
+			     << hex << msg.msg.flags << dec << ")\n";)
 
 	// Read the data
-	string content;
-	if (!socket.read(content, len))
+	if (!socket.read(msg.msg.data, len))
 	{
 	  log.error << name << ": Short message read - socket died\n";
 	  obit = "died";
 	  break;
 	}
 
-	OBTOOLS_LOG_IF_DUMP(log.dump << content << endl;)
+	OBTOOLS_LOG_IF_DUMP(log.dump << msg.msg.data << endl;)
 
 	// Post up a message
-	ClientMessage msg(client, tag, content, flags);
 	if (!handle_message(msg))
 	{
 	  obit = "killed by server";
@@ -147,7 +148,7 @@ void Server::process(Net::TCPSocket& socket,
       {
 	// Unrecognised tag
 	log.error << name << ": Unrecognised tag " 
-		  << hex << tag << dec << " - out-of-sync?\n";
+		  << msg.msg.stag() << " - out-of-sync?\n";
 	obit = "unsynced";
 	break;
       }
@@ -203,7 +204,7 @@ Server::Server(int port, const string& _name, int backlog,
 }
 
 //------------------------------------------------------------------------
-// Send a message - never blocks, but can fail if the queue is full
+// Send a message
 // Note:  It is safe to call this inside the handle_message() method
 // Whether message queued
 bool Server::send(ClientMessage& msg)

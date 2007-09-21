@@ -107,36 +107,36 @@ bool Client::receive_messages(Log::Streams& log)
     // Read a 4-byte tag
     uint32_t tag = socket->read_nbo_int();
 
+    Message msg(tag);
+
     // Verify acceptability
     if (tag_recognised(tag))
     {
       // Handle a TLV block
       uint32_t len   = socket->read_nbo_int();
-      uint32_t flags = socket->read_nbo_int();
+      msg.flags = socket->read_nbo_int();
 
       OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (recv): Message "
-			   << hex << tag << dec << ", length " << len 
-			   << " (flags " << flags << ")\n";)
+			   << msg.stag() << ", length " << len 
+			   << " (flags " << hex << msg.flags << dec << ")\n";)
 
       // Read the data
-      string content;
-      if (!socket->read(content, len))
+      if (!socket->read(msg.data, len))
       {
 	log.error << name << " (recv): Short message read - socket died\n";
 	return restart_socket(log);
       }
 
-      OBTOOLS_LOG_IF_DUMP(log.dump << content << endl;)
+      OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
 
       // Post up a message
-      Message msg(tag, content, flags);
       receive_q.send(msg);
     }
     else
     {
       // Unrecognised tag
       log.error << name << " (recv): Unrecognised tag " 
-		<< hex << tag << dec << " - out-of-sync?\n";
+		<< msg.stag() << " - out-of-sync?\n";
       //Try to restart socket
       return restart_socket(log);
     }
@@ -194,8 +194,9 @@ bool Client::send_messages(Log::Streams& log)
 
   // Deal with it
   OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (send): Sending message "
-		       << hex << msg.tag << dec << ", length " 
-		       << msg.data.size() << " (flags " << msg.flags << ")\n";)
+		       << msg.stag() << ", length " 
+		       << msg.data.size() 
+		       << " (flags " << hex << msg.flags << dec << ")\n";)
   OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
 
   try // Handle SocketErrors
@@ -243,7 +244,7 @@ Client::Client(Net::EndPoint _server, const string& _name):
 
 
 //------------------------------------------------------------------------
-// Send a message - never blocks, but can fail if the queue is full
+// Send a message
 // Whether message queued
 bool Client::send(Message& msg)
 {
@@ -264,7 +265,7 @@ bool Client::poll()
 bool Client::wait(Message& msg)
 {
   msg = receive_q.wait();    // Never fails
-  return msg.data.size()!=0; // Empty message on restart
+  return msg.is_valid();     // Empty message on restart
 }
 
 //------------------------------------------------------------------------

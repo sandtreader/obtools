@@ -93,7 +93,9 @@ bool SyncClient::request(Message& request, Message& response)
 
   // Add a request record
   id_t id = request_id++;
-  log.detail << name << ": Sending request ID " << (int)id << endl;
+
+  OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Sending request ID " << (int)id 
+		       << " - " << request.stag() << endl;)
 
   Request& req = requests[id] = Request();
 
@@ -116,6 +118,8 @@ bool SyncClient::request(Message& request, Message& response)
 // NB!  poll() will still return true for responses, so wait() may block
 bool SyncClient::wait(Message& msg)
 {
+  Log::Streams log;
+
   for(;;) // While processing responses
   {
     // Wait for any message, normally
@@ -124,13 +128,12 @@ bool SyncClient::wait(Message& msg)
     // Check if it's a response
     if (msg.flags & FLAG_RESPONSE_PROVIDED)
     {
-      Log::Streams log;
-
       // Get ID
       id_t id = (id_t)((msg.flags & MASK_REQUEST_ID)>>SHIFT_REQUEST_ID);
 
-      log.detail << name << ": Got response message for ID " 
-		 << (int)id << endl;
+      OBTOOLS_LOG_IF_DEBUG(log.debug << name 
+			   << ": Got response message for ID " 
+			   << (int)id << " - " << msg.stag() << endl;)
 
       // Lookup ID in mutex
       MT::Lock lock(request_mutex); 
@@ -145,7 +148,8 @@ bool SyncClient::wait(Message& msg)
       }
       else
       {
-	log.error << name << ": Response for unknown ID " << id << endl;
+	log.error << name << ": Response for unknown ID " << id 
+		  << " - " << msg.stag() << endl;
       }
 
       // Either way, drop this message, loop and get another one

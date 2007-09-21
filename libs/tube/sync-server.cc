@@ -65,7 +65,7 @@ bool SyncServer::handle_async_message(ClientMessage& msg)
   if (msg.action == ClientMessage::MESSAGE)
   {
     Log::Streams log;
-    log.error << "Unwanted asynchronous message " << hex << msg.msg.tag << dec 
+    log.error << "Unwanted asynchronous message " << msg.msg.stag() 
 	      << " received from " << msg.client << endl;
   }
 

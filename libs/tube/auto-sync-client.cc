@@ -24,7 +24,7 @@ namespace ObTools { namespace Tube {
 // Just repeatedly calls back into wait()
 class DispatchThread: public MT::Thread
 {
-  SyncClient& client;
+  AutoSyncClient& client;
   Log::Streams log;  // Thread local
 
   void run() 
@@ -34,10 +34,8 @@ class DispatchThread: public MT::Thread
       Message msg;
       client.wait(msg);
 
-      // Just drop it, if valid
-      if (msg.is_valid())
-	log.error << client.name << ": Non-response message " 
-		  << hex << msg.tag << dec << " ignored\n";
+      // Pass it to async handler, if valid
+      if (msg.is_valid()) client.handle_async_message(msg);
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << client.name 
@@ -45,8 +43,18 @@ class DispatchThread: public MT::Thread
   }
 
 public:
-  DispatchThread(SyncClient &_client): client(_client) { start(); }
+  DispatchThread(AutoSyncClient &_client): client(_client) { start(); }
 };
+
+//------------------------------------------------------------------------
+// Overrideable function to handle an asynchronous message - by default
+// just errors
+void AutoSyncClient::handle_async_message(Message& msg)
+{
+  Log::Streams log;
+  log.error << name << ": Non-response message " 
+	    << msg.stag() << " ignored\n";
+}
 
 //==========================================================================
 // Foreground stuff
