@@ -23,7 +23,7 @@
        with extensions: %*S = seconds+milliseconds, %*L = log level
        Plain text can also be added.  If empty, nothing is added 
   -->
-  <log level="2" file="/var/log/obtools/xmlmesh.log"
+  <log level="4" file="/var/log/obtools/xmlmesh.log"
        timestamp="%a %d %b %H:%M:%*S [%*L]: "/>
 
   <!-- Configured service modules - each has an 'id' used in routing below -->
@@ -38,7 +38,7 @@
 	   Single addresses may be quoted by name.
 	   If no filters exist, only localhost will be accepted -->
       <filter address="localhost"/>
-      <!-- <filter address="192.168.1.0/24"/> -->
+      <filter address="192.168.0.0/24"/>
       <!-- <filter address="10.0.0.0/255.255.255.128"/> -->
     </otmp-server>
 
