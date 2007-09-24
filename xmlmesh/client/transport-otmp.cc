@@ -16,12 +16,13 @@
 namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
-// Send a message - never blocks, but can fail if the queue is full
+// Send a message - can block if the queue is full
 // Whether message queued
 bool OTMPClientTransport::send(const string& data)
 {
   OTMP::Message otmp_msg(data);
-  return otmp.send(otmp_msg);
+  otmp.send(otmp_msg);
+  return true;
 }
 
 //------------------------------------------------------------------------

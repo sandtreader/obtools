@@ -67,7 +67,7 @@ public:
   Client(ClientTransport& _transport): transport(_transport) {}
 
   //------------------------------------------------------------------------
-  // Send a message - never blocks, but can fail if the queue is full
+  // Send a message - can block if queue full
   // Whether message queued
   bool send(Message& msg);
 
@@ -249,7 +249,7 @@ public:
   void start();
 
   //------------------------------------------------------------------------
-  // Send a message - never blocks, but can fail if the queue is full
+  // Send a message - can block if queue is full
   // Whether message queued
   bool send(Message& msg);
 

@@ -16,7 +16,7 @@
 namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
-// Send a message - never blocks, but can fail if the queue is full
+// Send a message - can block if the queue is full
 // Whether message queued
 bool Client::send(Message& msg)
 {
