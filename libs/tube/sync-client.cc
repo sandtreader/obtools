@@ -86,7 +86,7 @@ bool SyncClient::request(Message& request, Message& response)
   request.flags |= request_id << SHIFT_REQUEST_ID;
 
   // Send it
-  if (!send(request)) return false;
+  send(request);
 
   // Lock mutex from here in, but cv.wait() unlocks it during wait
   MT::Lock lock(request_mutex); 
@@ -148,7 +148,7 @@ bool SyncClient::wait(Message& msg)
       }
       else
       {
-	log.error << name << ": Response for unknown ID " << id 
+	log.error << name << ": Response for unknown ID " << (int)id 
 		  << " - " << msg.stag() << endl;
       }
 

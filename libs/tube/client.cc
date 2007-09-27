@@ -16,6 +16,12 @@
 // Time to sleep for if socket dies and won't come back
 #define DEAD_SOCKET_SLEEP_TIME 10
 
+// Default maximum send queue length
+#define DEFAULT_MAX_SEND_QUEUE 1024
+
+// Time to wait (us) if send queue full
+#define SEND_BUSY_WAIT_TIME 10000
+
 namespace ObTools { namespace Tube {
 
 //==========================================================================
@@ -233,7 +239,8 @@ bool Client::send_messages(Log::Streams& log)
 //------------------------------------------------------------------------
 // Constructors
 Client::Client(Net::EndPoint _server, const string& _name): 
-  server(_server), alive(true), name(_name)
+  server(_server), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
+  alive(true), name(_name)
 {
   socket = 0;
 
@@ -245,11 +252,13 @@ Client::Client(Net::EndPoint _server, const string& _name):
 
 //------------------------------------------------------------------------
 // Send a message
-// Whether message queued
-bool Client::send(Message& msg)
+// Can busy-wait if send queue is more than max_send_queue
+void Client::send(Message& msg)
 {
-  send_q.send(msg);  // Never fails, will eat all memory first
-  return true;  
+  while (send_q.waiting() > max_send_queue)  // Must allow zero to work
+    MT::Thread::usleep(SEND_BUSY_WAIT_TIME);
+
+  send_q.send(msg);
 }
 
 //------------------------------------------------------------------------

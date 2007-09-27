@@ -13,6 +13,12 @@
 #include <unistd.h>
 #include <sstream>
 
+// Default maximum send queue length
+#define DEFAULT_MAX_SEND_QUEUE 1024
+
+// Time to wait (us) if send queue full
+#define SEND_BUSY_WAIT_TIME 10000
+
 namespace ObTools { namespace Tube {
 
 //--------------------------------------------------------------------------
@@ -198,7 +204,7 @@ void Server::process(Net::TCPSocket& socket,
 Server::Server(int port, const string& _name, int backlog, 
 	       int min_spare_threads, int max_threads):
   TCPServer(port, backlog, min_spare_threads, max_threads),
-  alive(true), name(_name)
+  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
 }
@@ -206,7 +212,7 @@ Server::Server(int port, const string& _name, int backlog,
 //------------------------------------------------------------------------
 // Send a message
 // Note:  It is safe to call this inside the handle_message() method
-// Whether message queued
+// Whether message queued (client still connected)
 bool Server::send(ClientMessage& msg)
 {
   // Look up client in map, and queue it on there
@@ -216,6 +222,10 @@ bool Server::send(ClientMessage& msg)
   if (p != client_sessions.sessions.end())
   {
     ClientSession *cs = p->second;
+
+    while (cs->send_q.waiting() > max_send_queue) // Zero must work
+      MT::Thread::usleep(SEND_BUSY_WAIT_TIME);
+
     cs->send_q.send(msg.msg);
     return true;  
   }

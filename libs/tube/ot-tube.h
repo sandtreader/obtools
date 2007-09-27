@@ -130,6 +130,7 @@ protected:
                                // creation and restart
   MT::Thread *send_thread;
   MT::MQueue<Message> send_q;
+  int max_send_queue;          // Maximum send queue before we block send()
 
   MT::Thread *receive_thread;
   MT::MQueue<Message> receive_q;
@@ -157,14 +158,18 @@ public:
   bool is_alive() { return alive; }
 
   //------------------------------------------------------------------------
+  // Set maximum send queue
+  void set_max_send_queue(int q) { max_send_queue = q; }
+
+  //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
   bool receive_messages(Log::Streams& log);
   bool send_messages(Log::Streams& log);
 
   //------------------------------------------------------------------------
   // Send a message
-  // Whether message queued
-  virtual bool send(Message& msg);
+  // Can busy-wait if send queue is more than max_send_queue
+  void send(Message& msg);
 
   //------------------------------------------------------------------------
   // Check whether a message is available before blocking in wait()
@@ -361,6 +366,7 @@ private:
   SessionMap client_sessions;        // Map of sessions
   list<Net::MaskedAddress> filters;  // List of allowed client masks
   bool alive;                        // Not being killed
+  int max_send_queue;          // Maximum send queue before we block send()
 
   //------------------------------------------------------------------------
   // Overridable function to filter message tags - return true if tag
@@ -386,6 +392,10 @@ public:
   // Check it hasn't been killed
   bool is_alive() { return alive; }
 
+  //------------------------------------------------------------------------
+  // Set maximum send queue
+  void set_max_send_queue(int q) { max_send_queue = q; }
+
   //--------------------------------------------------------------------------
   // Allow a given client address to connect (optionally with netmask)
   void allow(Net::MaskedAddress addr) { filters.push_back(addr); }
@@ -410,8 +420,8 @@ public:
 
   //------------------------------------------------------------------------
   // Send a message
-  // Sends the message to the endpoint given (most likely where it came from)
-  // Whether message queued
+  // Note:  It is safe to call this inside the handle_message() method
+  // Whether message queued (client still connected)
   bool send(ClientMessage& msg);
 };
 
