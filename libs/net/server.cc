@@ -25,11 +25,8 @@ void TCPServer::run()
 {
   if (fd == INVALID_FD) return;
 
-#if !defined(__WIN32__)
   // Set REUSEADDR for fast restarts (e.g. during development)
-  int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int));
-#endif
+  enable_reuse();
 
   // Bind to local port (this is Socket::bind()), specifying address
   // (which might be INADDR_ANY from our constructor
@@ -85,18 +82,18 @@ void TCPServer::run()
 }
 
 //--------------------------------------------------------------------------
-// Initiate an outgoing connection, and then treat it as if it was an
-// incoming one - mainly for P2P
+// Initiate an outgoing connection, from the same local address as we use
+// for serving, and then treat it as if it was an incoming one - mainly for P2P
 // Connection is run with a worker thread just like an incoming connection
 // Timeout is in seconds
 // Returns fd of connection
-Socket::fd_t TCPServer::initiate(EndPoint addr, int timeout)
+Socket::fd_t TCPServer::initiate(EndPoint remote_address, int timeout)
 {
   // Get a thread first
   TCPWorkerThread *thread = threadpool.wait();
 
   // Try to connect
-  TCPClient client(addr, timeout);
+  TCPClient client(address, remote_address, timeout);
 
   if (!!client)
   {
@@ -104,7 +101,7 @@ Socket::fd_t TCPServer::initiate(EndPoint addr, int timeout)
 
     thread->server         = this;
     thread->client_fd      = fd;
-    thread->client_ep      = addr;
+    thread->client_ep      = remote_address;
 	
     // Start it off
     thread->kick();

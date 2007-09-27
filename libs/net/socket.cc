@@ -100,6 +100,14 @@ void Socket::enable_keepalive()
 }
 
 //--------------------------------------------------------------------------
+// Enable reuse
+void Socket::enable_reuse()
+{
+  int one = 1;
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (sockopt_t)&one, sizeof(int));
+}
+
+//--------------------------------------------------------------------------
 // Set timeout (receive and send) in seconds
 void Socket::set_timeout(int secs)
 {

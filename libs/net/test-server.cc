@@ -52,9 +52,7 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
 int main(int argc, char **argv)
 {
   int port = 11111;
-  int iport = 0;
   if (argc > 1) port = atoi(argv[1]);
-  if (argc > 2) iport = atoi(argv[2]);
 
 #if defined(__WIN32__)
   winsock_initialise();
@@ -63,24 +61,8 @@ int main(int argc, char **argv)
   cout << "Starting server on port " << port << endl;
   TestServer server(port);
 
-  if (iport)
-  {
-    ObTools::Net::EndPoint ep(ObTools::Net::IPAddress("127.0.0.1"), iport);
-    ObTools::Net::TCPSocket client(server.initiate(ep, 5));
+  server.run();
 
-    if (!client)
-    {
-      cerr << "Can't initiate peer connection to " << ep << endl;
-      return 2;
-    }
-
-    client << "Hello world\n";
-    ObTools::MT::Thread::sleep(1);
-  }
-  else
-  {
-    server.run();
-  }
   return 0;
 }
 

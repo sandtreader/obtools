@@ -377,6 +377,10 @@ public:
   void enable_keepalive();
 
   //--------------------------------------------------------------------------
+  // Enable reuse
+  void enable_reuse();
+
+  //--------------------------------------------------------------------------
   // Set timeout (receive and send) in seconds
   void set_timeout(int secs);
 
@@ -683,6 +687,11 @@ public:
   // Constructor, binding specific local address/port
   // port can be zero if you only want to bind address
   TCPClient(EndPoint local, EndPoint remote);
+
+  //--------------------------------------------------------------------------
+  // Constructor, binding specific local address/port and with timeout
+  // port can be zero if you only want to bind address
+  TCPClient(EndPoint local, EndPoint remote, int timeout);
 
   //--------------------------------------------------------------------------
   // Test for badness
