@@ -540,6 +540,10 @@ public:
   Queue() {}
 
   //--------------------------------------------------------------------------
+  // Get current length
+  int waiting() { Lock lock(mutex); return q.size(); }
+
+  //--------------------------------------------------------------------------
   // Send a message (never blocks)
   void send(T msg)
   {
@@ -550,7 +554,7 @@ public:
 
   //--------------------------------------------------------------------------
   // See if any message is available before potentially blocking on wait()
-  bool poll() { return (!q.empty()); }
+  bool poll() { Lock lock(mutex); return (!q.empty()); }
 
   //--------------------------------------------------------------------------
   // Wait to receive a message (blocking)
@@ -596,6 +600,10 @@ public:
   MQueue() {}
 
   //--------------------------------------------------------------------------
+  // Get current length
+  int waiting() { Lock lock(mutex); return q.size(); }
+
+  //--------------------------------------------------------------------------
   // Send a message (never blocks)
   void send(T msg)
   {
@@ -606,7 +614,7 @@ public:
 
   //--------------------------------------------------------------------------
   // See if any message is available before potentially blocking on wait()
-  bool poll() { return (!q.empty()); }
+  bool poll() { Lock lock(mutex); return (!q.empty()); }
 
   //--------------------------------------------------------------------------
   // Wait to receive a message (blocking)
