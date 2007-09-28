@@ -111,6 +111,12 @@ void Socket::enable_reuse()
 // Set timeout (receive and send) in seconds
 void Socket::set_timeout(int secs)
 {
+#ifdef __WIN32__
+  // Windows has it as an integer milliseconds (!)
+  int ms = secs*1000;
+  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&ms, sizeof(ms));
+  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&ms, sizeof(ms));
+#else
   struct timeval tv;
   tv.tv_sec = secs;
   tv.tv_usec = 0;
@@ -119,6 +125,7 @@ void Socket::set_timeout(int secs)
 	     sizeof(struct timeval));
   setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (sockopt_t)&tv, 
 	     sizeof(struct timeval));
+#endif
 }
 
 //--------------------------------------------------------------------------
