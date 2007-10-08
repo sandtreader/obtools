@@ -7,9 +7,9 @@
 #==========================================================================
 
 set -e
-
+TARGARCH=$4
 DEB_VERSION=$2-$3
-PACKAGE=$1_$2-$3_i386.deb
+PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 
@@ -26,6 +26,7 @@ install -m 0755 $SRC_DIR/DEBIAN/postinst $DEB_DIR/DEBIAN/postinst
 install -m 0755 $SRC_DIR/DEBIAN/prerm $DEB_DIR/DEBIAN/prerm
 
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
+echo "Architecture: $TARGARCH" >> $DEB_DIR/DEBIAN/control
 
 install -s -m 0755 xmlmesh-server $DEB_DIR/usr/sbin/ot-xmlmesh
 install -m 0644 $SRC_DIR/xmlmesh.cfg.xml $DEB_DIR/etc/obtools/xmlmesh.cfg.xml

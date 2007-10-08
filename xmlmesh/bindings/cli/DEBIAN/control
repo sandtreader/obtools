@@ -1,6 +1,5 @@
 Package: ot-xmlmesh-cli
 Priority: optional
-Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
 Depends: libot-general2-single (>= 2.1.0), libot-xmlmesh2-single (>= 2.0.0)
 Description: ObTools XMLMesh message bus command line interface

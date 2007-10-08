@@ -7,9 +7,10 @@
 #==========================================================================
 
 set -e
+TARGARCH=$4
 
 DEB_VERSION=$2-$3
-PACKAGE=$1_$2-$3_i386.deb
+PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 
@@ -24,6 +25,7 @@ install -m 0755 $SRC_DIR/DEBIAN/postinst $DEB_DIR/DEBIAN/postinst
 install -m 0755 $SRC_DIR/DEBIAN/prerm $DEB_DIR/DEBIAN/prerm
 
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
+echo "Architecture: $TARGARCH" >> $DEB_DIR/DEBIAN/control
 
 #Not sure if we're supposed to provide the same thing twice!
 #install -s -m 0755 php_xmlmesh.so $DEB_DIR/usr/lib/php4/20020429/

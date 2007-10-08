@@ -1,7 +1,6 @@
 Package: libot-db-pgsql2-dev
 Priority: optional
 Section: libs
-Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
 Depends: g++-3.4, postgresql-dev (>= 7.4.1) | libpq-dev, libot-general2-dev (>= 2.1.0), libot-db2-dev (>= 2.0.0)
 Description: ObTools Postgres database driver library (development files)

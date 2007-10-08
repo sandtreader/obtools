@@ -7,9 +7,10 @@
 #==========================================================================
 
 set -e
+TARGARCH=$4
 
 DEB_VERSION=$2-$3
-PACKAGE=$1_$2-$3_i386.deb
+PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 
@@ -19,6 +20,7 @@ mkdir -p $DEB_DIR/usr/bin/
 install -m 0644 $SRC_DIR/DEBIAN/control $DEB_DIR/DEBIAN/control
 
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
+echo "Architecture: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
 
 install -s -m 0755 xmlmesh-send $DEB_DIR/usr/bin/ot-xmlmesh-send
 install -s -m 0755 xmlmesh-receive $DEB_DIR/usr/bin/ot-xmlmesh-receive

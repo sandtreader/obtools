@@ -1,7 +1,6 @@
 Package: libot-xmlmesh2-dev
 Priority: optional
 Section: libs
-Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
 Description: ObTools XMLMesh message bus shared libraries (development files)
  XMLMesh is a SOAP-based XML message bus for integration of distributed

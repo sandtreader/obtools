@@ -11,15 +11,16 @@ set -e
 NAME=$1
 VERSION=$2
 REV=$3
-VARIANT=$4
+TARGARCH=$4
+VARIANT=$5
 DEB_VERSION=$VERSION-$3
 SRC_DIR=`dirname $0`
 RELEASE_DIR=$SRC_DIR/../../release
 
-PACKAGE_RUN=${NAME}${VARIANT}_$VERSION-${REV}_i386.deb
+PACKAGE_RUN=${NAME}${VARIANT}_$VERSION-${REV}_${TARGARCH}.deb
 DEB_RUN_DIR=/tmp/$PACKAGE_RUN.$$
 
-PACKAGE_DEV=${NAME}${VARIANT}-dev_$VERSION-${REV}_i386.deb
+PACKAGE_DEV=${NAME}${VARIANT}-dev_$VERSION-${REV}_${TARGARCH}.deb
 DEB_DEV_DIR=/tmp/$PACKAGE_DEV.$$
 
 # Split down Debian version 
@@ -39,6 +40,7 @@ install -m 0755 $SRC_DIR/DEBIAN.RUN/postinst $DEB_RUN_DIR/DEBIAN/postinst
 install -m 0755 $SRC_DIR/DEBIAN.RUN/postrm $DEB_RUN_DIR/DEBIAN/postrm
 
 echo "Version: $DEB_VERSION" >> $DEB_RUN_DIR/DEBIAN/control
+echo "Architecture: $TARGARCH" >> $DEB_RUN_DIR/DEBIAN/control
 
 install -s -m 0644 $NAME$VARIANT.so.$VERSION $DEB_RUN_DIR/usr/lib/obtools/$NAME$VARIANT.so.$VERSION
 
@@ -56,6 +58,7 @@ install -m 0644 $SRC_DIR/DEBIAN.DEV/control$VARIANT $DEB_DEV_DIR/DEBIAN/control
 
 echo "Depends: $NAME (>= $DEB_VERSION)" >> $DEB_DEV_DIR/DEBIAN/control
 echo "Version: $DEB_VERSION" >> $DEB_DEV_DIR/DEBIAN/control
+echo "Architecture: $TARGARCH" >> $DEB_DEV_DIR/DEBIAN/control
 
 install -m 0644 $RELEASE_DIR/ot-chan$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-crypto$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/

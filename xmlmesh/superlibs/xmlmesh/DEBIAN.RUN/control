@@ -1,7 +1,6 @@
 Package: libot-xmlmesh2
 Priority: optional
 Section: libs
-Architecture: i386
 Maintainer: Paul Clark <paul@xmill.com>
 Depends: libot-general2 (>= 2.3.2)
 Description: ObTools XMLMesh message bus shared libraries 

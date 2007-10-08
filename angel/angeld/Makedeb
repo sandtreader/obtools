@@ -9,7 +9,8 @@
 set -e
 
 DEB_VERSION=$2-$3
-PACKAGE=$1_$2-$3_i386.deb
+TARGARCH=$4
+PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 
@@ -24,6 +25,7 @@ install -m 0755 $SRC_DIR/DEBIAN/postinst $DEB_DIR/DEBIAN/postinst
 install -m 0755 $SRC_DIR/DEBIAN/prerm $DEB_DIR/DEBIAN/prerm
 
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
+echo "Architecture: $TARGARCH" >> $DEB_DIR/DEBIAN/control
 
 install -s -m 0755 angeld $DEB_DIR/usr/sbin/angeld
 install -m 0644 $SRC_DIR/angeld.cfg.xml $DEB_DIR/etc/angel/angeld.cfg.xml

@@ -61,6 +61,7 @@ ifndef EVALWORKS
 $(error eval is broken - you need GNU make 3.80 or greater)
 endif
 
+
 #Check for cross-compilation
 ifdef CROSS-COMPILE
 # - Future - check for which
@@ -125,6 +126,9 @@ endif
 # Get locations
 include $(ROOT)/build/locations.mk
 
+
+
+
 #Work out targets - libraries
 ifeq ($(TYPE), lib)
 ifdef OBJS   # If no objects, no library is built
@@ -146,7 +150,17 @@ endif
 ifdef RELEASE
 ifndef MINGW
 CPPFLAGS += -fpic
+
 endif
+endif
+endif
+
+# set target architecture
+HOSTTYPE=$(shell uname -m)
+TARGARCH  = i386
+ifdef HOSTTYPE
+ifeq ($(HOSTTYPE), x86_64)
+TARGARCH  = amd64
 endif
 endif
 
@@ -370,7 +384,7 @@ ifeq ($(TYPE), superlib)
 	cd ../$(RELEASEDIR); ln -fs $(RELEASE-NAME) $(RELEASE-LINK)
 endif
 ifdef DEBIAN-NAME
-	../Makedeb $(DEBIAN-NAME) $(DEBIAN-VERSION) $(DEBIAN-REVISION) $(DEBIAN-VARIANT)
+	../Makedeb $(DEBIAN-NAME) $(DEBIAN-VERSION) $(DEBIAN-REVISION) $(TARGARCH) $(DEBIAN-VARIANT)
 endif
 endif
 endif
