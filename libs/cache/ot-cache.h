@@ -234,9 +234,9 @@ public:
   }
 
   //--------------------------------------------------------------------------
-  // Touches an entry, renewing its use-time and incrementing use-count
-  // Ignored if ID doesn't exist
-  void touch(const ID& id)
+  /// Touches an entry, renewing its use-time and incrementing use-count
+  /// \return whether ID exists - ignored if not
+  bool touch(const ID& id)
   {
     // NB:  Uses read lock, because structure isn't changed, only policy
     // data.  This does introduce a vanishingly small possibility that
@@ -245,7 +245,12 @@ public:
     // of enforcing a single write lock on a very common operation
     MT::RWReadLock lock(mutex);
     MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) p->second.policy_data.touch();
+    if (p != cachemap.end()) 
+    {
+      p->second.policy_data.touch();
+      return true;
+    }
+    else return false;
   }
 
   //--------------------------------------------------------------------------
