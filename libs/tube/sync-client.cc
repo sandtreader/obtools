@@ -85,9 +85,6 @@ bool SyncClient::request(Message& request, Message& response)
   request.flags |= FLAG_RESPONSE_REQUIRED;
   request.flags |= request_id << SHIFT_REQUEST_ID;
 
-  // Send it
-  send(request);
-
   // Lock mutex from here in, but cv.wait() unlocks it during wait
   MT::Lock lock(request_mutex); 
 
@@ -98,6 +95,9 @@ bool SyncClient::request(Message& request, Message& response)
 		       << " - " << request.stag() << endl;)
 
   Request& req = requests[id] = Request();
+
+  // Send it
+  send(request);
 
   // Wait for signal, unlocking and then relocking mutex
   req.ready.wait(request_mutex);
