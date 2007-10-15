@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- Expansion test -->
+<expand>
+  This is some test text.  Is it going to work? <expand:value key="foo"/>
+
+  <expand:if key="true">This should be included</expand:if>
+  <expand:unless key="true">This should <b>not</b> be included</expand:unless>
+
+  <expand:foreach key="wombat">
+    Look children, here's <expand:index key="wombat"/>!
+    (its Latin name is <i><expand:index key="latin"/></i>)
+  </expand:foreach>
+
+  <p>This is <b>unexpanded</b> HTML text <img src="foo"/></p>
+</expand>
+
+

@@ -31,7 +31,7 @@ class Element; // Forward
 // Element list iterators
 // Actually contains a list of elements;  sequential forward access only
 // Usage is different from STL iterator:
-//    for(Element::iterator p(parent.children()); p; ++p)
+//    for(Element::iterator p(parent.children); p; ++p)
 //       XML::Element& child = *p;
 struct ElementIterator
 {
@@ -949,6 +949,42 @@ public:
   // Returns whether successful
   // NB: All comments are lost!
   bool write();
+};
+
+//==========================================================================
+// Text expander
+// Expands text using a simple tag language and a map of string values
+//   <expand:value key="xxx"/>  -> value of 'key' or "" if not present
+//   <expand:if key="xxx">      -> expands children if value of 'key'
+//                                 is present and begins with [YyTt1]
+//   <expand:unless key="xxx">  -> expands children unless value of 'key'
+//                                 is present and begins with [YyTt1]
+//   <expand:foreach key="xx" [index="i"]>
+//                              -> expands children for every key which has
+//                                 'xxx' as a prefix, making the remainder
+//                                 available as the given index name (or 'i')
+//   <expand:index key="xxx" [index="i"]/> 
+//                              -> Value of key ('xxx' plus the given index
+//                                 value (or 'i'))				//
+// All other child elements are output verbatim
+
+class Expander
+{
+  const map<string, string>& expansions;
+
+  // Internal
+  string expand_recursive(const XML::Element& root,
+			  map<string, string> indices);
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor - takes map of key-value pairs
+  Expander(const map<string, string>& _expansions): expansions(_expansions) {}
+
+  //--------------------------------------------------------------------------
+  // Expand an XML element into a string
+  // \return the expanded string
+  string expand(const XML::Element& root);
 };
 
 //==========================================================================
