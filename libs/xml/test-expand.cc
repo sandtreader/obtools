@@ -35,14 +35,14 @@ int main()
   map<string, string> expansions;
   expansions["foo"] = "Maybe!";
   expansions["true"] = "TRUE";
-  expansions["wombat0"] = "a small furry animal";
-  expansions["latin0"]  = "Vombatus primus";
+  expansions["wombat:1"] = "a small furry animal";
+  expansions["latin:1"]  = "Vombatus primus";
 
-  expansions["wombat1"] = "another small furry animal";
-  expansions["latin1"]  = "Vombatus secundus";
+  expansions["wombat:2"] = "another small furry animal";
+  expansions["latin:2"]  = "Vombatus secundus";
 
-  expansions["wombat2"] = "SFA#3";
-  expansions["latin2"]  = "Vombatus tertius";
+  expansions["wombat:3"] = "SFA#3";
+  expansions["latin:3"]  = "Vombatus tertius";
 
   // Expand
   ObTools::XML::Expander expander(expansions);

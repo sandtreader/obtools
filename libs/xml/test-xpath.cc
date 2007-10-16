@@ -50,6 +50,8 @@ int main()
   cout << "cellar[2]/wombat: " << xpath.get_value("cellar[2]/wombat") << endl;
   cout << "XX1:bing/XX1:bong/@jim: " 
        << xpath.get_value_int("XX1:bing/XX1:bong/@jim") << endl;
+  cout << "XX1:bing/XX1:bong/@long: " 
+       << xpath.get_value_int64("XX1:bing/XX1:bong/@long") << endl;
   cout << "XX1:bing/XX1:bong/random:element/@flag: " 
        << xpath.get_value_bool("XX1:bing/XX1:bong/random:element/@flag") 
        << endl;

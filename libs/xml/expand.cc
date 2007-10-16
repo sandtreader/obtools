@@ -101,7 +101,7 @@ string Expander::expand_recursive(const XML::Element& root,
 	}
       }
     }
-    else if (ce.name == "expand:index")
+    else if (ce.name == "expand:each")
     {
       // Get combined key with specified index from indices
       string key = ce["key"];
@@ -117,6 +117,14 @@ string Expander::expand_recursive(const XML::Element& root,
 	p = expansions.find(key);
 	if (p!=expansions.end()) text += p->second;
       }
+    }
+    else if (ce.name == "expand:index")
+    {
+      // Get index value
+      string index = ce.get_attr("index", "i");
+
+      map<string, string>::const_iterator p = indices.find(index);
+      if (p!=indices.end()) text += p->second;
     }
     else
     {

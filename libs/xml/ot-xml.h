@@ -712,7 +712,7 @@ public:
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_int64(const string& path, uint64_t def=0);
+  uint64_t get_value_int64(const string& path, uint64_t def=0);
 
   //--------------------------------------------------------------------------
   // Real value fetch
@@ -865,7 +865,7 @@ public:
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_int64(const string& path, uint64_t def=0);
+  uint64_t get_value_int64(const string& path, uint64_t def=0);
 
   //--------------------------------------------------------------------------
   // XPath Real value fetch
@@ -963,9 +963,11 @@ public:
 //                              -> expands children for every key which has
 //                                 'xxx' as a prefix, making the remainder
 //                                 available as the given index name (or 'i')
-//   <expand:index key="xxx" [index="i"]/> 
-//                              -> Value of key ('xxx' plus the given index
-//                                 value (or 'i'))				//
+//   <expand:each key="xxx" [index="i"]/> 
+//                              -> Value of key ['xxx' plus the given index
+//                                 value (or 'i')]
+//   <expand:index [index="i"]/> -> Index suffix for index ('i')  
+
 // All other child elements are output verbatim
 
 class Expander

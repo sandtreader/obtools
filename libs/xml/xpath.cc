@@ -175,7 +175,7 @@ int XPathProcessor::get_value_int(const string& path, int def)
 // 64-bit integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int XPathProcessor::get_value_int64(const string& path, uint64_t def)
+uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
 {
   string v = get_value(path);
 

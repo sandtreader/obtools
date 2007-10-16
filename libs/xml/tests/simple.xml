@@ -13,7 +13,7 @@
   <cellar><wombat>A wombat in the second cellar</wombat></cellar>
   copy as ref: &#xa9; copy as UTF8: ©
 <XX1:bing xmlns:XX1="namespace1" XX1:fred="1">
-  <XX1:bong xmlns="namespace2" jim="2">
+  <XX1:bong xmlns="namespace2" jim="2" long="5000000000">
     <wombat>I'm a namespace2 wombat - you shouldn't see me</wombat>
     <wombat xmlns="" random:stuff="3">I'm an ordinary wombat - hello
     </wombat>
