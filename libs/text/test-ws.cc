@@ -18,7 +18,9 @@ using namespace ObTools;
 
 int main()
 {
-  string text = "    \n    \n  Indented 2\n      Indented 6\n\n   ";
+  string text = "    \n    \n  Indented 2\n  \n\n    Indented 6\n\n   ";
+
+  cout << "Original:\n===\n" << text << "===\n";
 
   string temp = Text::canonicalise_space(text);
   cout << "Canonicalised: [" << temp << "]\n";
@@ -31,12 +33,17 @@ int main()
     cout << "  " << *p << endl;
   cout << endl;
 
-  text = Text::strip_blank_lines(text);
-  int ci = Text::get_common_indent(text);
-  cout << "Common indent is: " << ci << endl;
-  text = Text::remove_indent(text, ci);
+  string stext = Text::strip_blank_lines(text);
+  cout << "Stripped blank lines:\n===\n" << stext << "===\n";
 
-  cout << "===\n" << text << "===\n";
+  stext = Text::condense_blank_lines(text);
+  cout << "Condensed blank lines:\n===\n" << stext << "===\n";
+
+  int ci = Text::get_common_indent(stext);
+  cout << "Common indent is: " << ci << endl;
+  stext = Text::remove_indent(stext, ci);
+
+  cout << "Removed common indent:\n===\n" << stext << "===\n";
 
   return 0;  
 }

@@ -9,6 +9,7 @@
 
 #include "ot-text.h"
 #include <ctype.h>
+#include <limits.h>
 
 namespace ObTools { namespace Text {
 
@@ -43,6 +44,65 @@ string strip_blank_lines(const string& text)
     return text.substr(start, nl-start+1);
   else
     return text.substr(start); // Not blank, leave it
+}
+
+//--------------------------------------------------------------------------
+// Compress blank lines from a string
+// Removes _all_ blank lines at start and end of text (not just the first/last)
+// and also condenses multiple blank lines in a single one.
+// Horizontal whitespace is left alone
+// This is particularly useful to tidy the output of an XML::Expander...
+string condense_blank_lines(const string& text)
+{
+  bool is_blank = true;
+  int blank_lines = INT_MIN;  // Hack to ensure we don't issue any blank
+                              // lines at the start
+
+  string newtext;
+  string line;
+
+  // Run a simple state machine looking for blank lines
+  for(string::const_iterator p = text.begin(); p!=text.end(); p++)
+  {
+    char c=*p;
+    line += c;
+
+    switch (c)
+    {
+      case ' ':
+      case '\t':
+	// Just keep it in case line turns out not to be blank
+      break;
+
+      case '\n':
+	if (is_blank)
+	{
+	  // It was a blank line (or an empty one) - suppress it for now
+	  blank_lines++;
+	}
+	else
+	{
+	  // It wasn't blank - check if we have any suppressed
+	  if (blank_lines > 0) newtext += '\n';
+	  blank_lines = 0;
+	  newtext += line;  // Pass it through
+	}
+
+	// Set up for next one
+	line.clear();
+	is_blank = true;
+      break;
+
+      default:  // Any non-whitespace - line isn't blank
+	is_blank = false;
+      break;
+    }
+  }
+
+  // At the end, it doesn't matter if there are blank lines suppressed or
+  // not - we just drop them (it)
+
+  return newtext;
 }
 
 //--------------------------------------------------------------------------

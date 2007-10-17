@@ -29,6 +29,14 @@ using namespace std;
 string strip_blank_lines(const string& text);
 
 //--------------------------------------------------------------------------
+// Compress blank lines from a string
+// Removes _all_ blank lines at start and end of text (not just the first/last)
+// and also condenses multiple blank lines in a single one.
+// Horizontal whitespace is left alone
+// This is particularly useful to tidy the output of an XML::Expander...
+string condense_blank_lines(const string& text);
+
+//--------------------------------------------------------------------------
 // Find minimum leading whitespace (common indent) of a string
 // Tabs are treated as 8 spaces
 // Won't return more than 80
