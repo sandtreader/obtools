@@ -59,6 +59,11 @@ string canonicalise_space(const string& text);
 string remove_word(string& text);
 
 //--------------------------------------------------------------------------
+// Split a string into first line and remaining
+// Returns first line (without newline), removes it and newline from text
+string remove_line(string& text);
+
+//--------------------------------------------------------------------------
 // Get list of words from text
 // Text is canonicalised before splitting
 vector<string> split_words(const string& text);

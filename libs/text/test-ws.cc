@@ -44,6 +44,8 @@ int main()
   stext = Text::remove_indent(stext, ci);
 
   cout << "Removed common indent:\n===\n" << stext << "===\n";
+  cout << "First line is '" << Text::remove_line(stext) << "' leaving\n===\n"
+       << stext << "===\n";
 
   return 0;  
 }

@@ -264,6 +264,28 @@ string remove_word(string& text)
 }
 
 //--------------------------------------------------------------------------
+// Split a string into first line and remaining
+// Returns first line (without newline), removes it and newline from text
+string remove_line(string& text)
+{
+  // Find first newline of text
+  string::size_type nl = text.find('\n');
+  if (nl == string::npos)
+  {
+    // Take all of it
+    string line=text;
+    text="";
+    return line;
+  }
+  else
+  {
+    string line = text.substr(0, nl);
+    text = text.substr(nl+1);
+    return line;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Get list of words from text
 // Text is canonicalised before splitting
 vector<string> split_words(const string& text)
