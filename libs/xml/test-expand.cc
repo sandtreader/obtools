@@ -31,22 +31,23 @@ int main()
 
   cout << "Original element:\n" << root;
 
-  // Create an expansion map
-  map<string, string> expansions;
-  expansions["foo"] = "Maybe!";
-  expansions["true"] = "TRUE";
-  expansions["wombat:1"] = "a small furry animal";
-  expansions["latin:1"]  = "Vombatus primus";
+  // Create a values document
+  ObTools::XML::Element values("values");
+  values.add("foo", "Maybe!");
+  values.add("test", "true", "Yes");
 
-  expansions["wombat:2"] = "another small furry animal";
-  expansions["latin:2"]  = "Vombatus secundus";
+  values.add("wombat", "a small furry animal")
+    .set_attr("latin", "Vombatus primus");
 
-  expansions["wombat:3"] = "SFA#3";
-  expansions["latin:3"]  = "Vombatus tertius";
+  values.add("wombat", "another small furry animal")
+    .set_attr("latin", "Vombatus secundus");
+
+  values.add("wombat", "SFA#3")
+    .set_attr("latin", "Vombatus tertius");
 
   // Expand
-  ObTools::XML::Expander expander(expansions);
-  cout << "Expanded element:\n" << expander.expand(root);
+  ObTools::XML::Expander expander(root);
+  cout << "Expanded element:\n" << expander.expand(values);
 
   return 0;  
 }

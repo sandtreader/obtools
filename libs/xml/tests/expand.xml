@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
 <!-- Expansion test -->
 <expand>
-  This is some test text.  Is it going to work? <expand:value key="foo"/>
+  This is some test text.  Is it going to work? <expand:replace value="foo"/>
 
-  <expand:if key="true">This should be included</expand:if>
-  <expand:unless key="true">This should <b>not</b> be included</expand:unless>
+  <expand:set var="test"><expand:replace value="test/@true"/></expand:set>
+  <expand:if var="test">This should be included</expand:if>
+  <expand:unless var="test">This should <b>not</b> be included</expand:unless>
 
-  <expand:foreach key="wombat:">
-    <expand:index/>: Look children, here's <expand:each key="wombat:"/>!
-    (its Latin name is <i><expand:each key="latin:"/></i>)
-  </expand:foreach>
+  <expand:each element="wombat">
+    <expand:index/>: <expand:replace var="test"/>, look children, here's <expand:replace/>!
+    (its Latin name is <i><expand:replace value="@latin"/></i>)
+  </expand:each>
 
   <p>This is <b>unexpanded</b> HTML text <img src="foo"/></p>
 </expand>

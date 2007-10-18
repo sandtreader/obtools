@@ -12,134 +12,129 @@
 #include <stdio.h>
 #include <fstream>
 #include <errno.h>
+#include <sstream>
 
 namespace ObTools { namespace XML {
 
 //--------------------------------------------------------------------------
-// Expand an XML element into a string - see ot-xml.h for details
+// Expand the template with the given value document
 // \return the expanded string
-string Expander::expand(const XML::Element& root) 
+string Expander::expand(XML::Element& values)
 {
-  // Start with an empty index list
-  map<string, string> indices;
-  return expand_recursive(root, indices);
+  // Start with top-level template as context, empty vars
+  map<string, string> vars;
+  return expand_recursive(templ, values, 0, vars);
 }
 
 //--------------------------------------------------------------------------
-// Internal recursive expansion, taking map of current index values
-// (= essentially, variable stack)
-// Note:  Indices passed by value, so natural C++ stack will unwind and
-// provide hiding of outer indices of the same name
-string Expander::expand_recursive(const XML::Element& root,
-				  map<string, string> indices)
+// Internal recursive expansion, taking current template context and
+// value context
+string Expander::expand_recursive(const XML::Element& templ,
+				  XML::Element& values,
+				  int index,
+				  map<string, string>& vars)
 {
-  string text = root.content;  // In case it is optimised (in which case it
-                               // won't have any children)
+  string text = templ.content;  // In case it is optimised (in which case it
+                                   // won't have any children)
+
+  // Get an XPath reader on the values
+  XPathProcessor xpath(values);
 
   // Check all sub-elements
-  for(Element::iterator cp(root.children); cp; ++cp)
+  for(Element::iterator tp(templ.children); tp; ++tp)
   {
-    const Element& ce = *cp;
+    const Element& te = *tp;
 
-    if (ce.name.empty())
+    if (te.name.empty())
     {
       // Text element - use directly
-      text += ce.content;
+      text += te.content;
     }
-    else if (ce.name == "expand:value")
+    else if (te.name == "expand:replace"
+	     || te.name == "expand:if"
+	     || te.name == "expand:unless")
     {
-      // Simple expansion of the key 
-      string key = ce["key"];
-      map<string, string>::const_iterator p = expansions.find(key);
-      if (p!=expansions.end()) text += p->second;
-    }
-    else if (ce.name == "expand:if")
-    {
-      // Expand this recursively if value is 'true' (begins [TtYy1])
-      string key = ce["key"];
-      map<string, string>::const_iterator p = expansions.find(key);
-      if (p!=expansions.end())
+      // All take a value or var attribute
+      string value;
+      if (te.has_attr("var"))
       {
-	string value = p->second;
+	// Variable lookup
+	string var = te["var"];
+	value = vars[var];
+      }
+      else // Note - empty path is allowed
+      {
+	// XPath expression
+	string path = te["value"];
+	value = xpath[path];
+      }
+
+      if (te.name == "expand:replace")
+      {
+	// Simple expansion of the value
+	text += value;
+      }
+      else if (te.name == "expand:if")
+      {
+	// Expand this recursively if value is 'true' (begins [TtYy1])
 	char c = value.empty()?0:value[0];
 	if (c=='T' || c=='t' || c=='Y' || c=='y' || c=='1')
-	  text += expand_recursive(ce, indices);
+	  text += expand_recursive(te, values, index, vars);
       }
-    }
-    else if (ce.name == "expand:unless")
-    {
-      // Expand this recursively if value is not 'true' (begins [TtYy1])
-      string key = ce["key"];
-      map<string, string>::const_iterator p = expansions.find(key);
-      if (p!=expansions.end())
+      else if (te.name == "expand:unless")
       {
-	string value = p->second;
+	// Expand this recursively if value is not 'true' (begins [TtYy1])
 	char c = value.empty()?0:value[0];
 	if (c!='T' && c!='t' && c!='Y' && c!='y' && c!='1')
-	  text += expand_recursive(ce, indices);
+	  text += expand_recursive(te, values, index, vars);
       }
     }
-    else if (ce.name == "expand:foreach")
+    else if (te.name == "expand:each")
     {
-      // Iterate over every key beginning with 'key', setting index 'i' 
-      // (or specified) to current suffix
-      string key = ce["key"];
-      string index = ce.get_attr("index", "i");
+      // Get all elements matching 'element'
+      string path = te["element"];
+      list<Element *> elements = xpath.get_elements(path);
 
-      for(map<string, string>::const_iterator p = expansions.begin();
-	  p!=expansions.end(); ++p)
+      int i=0;
+      for(list<Element *>::iterator ep = elements.begin(); 
+	  ep!=elements.end(); ++ep)
       {
-	if (string(p->first, 0, key.size()) == key)
-	{
-	  string rest(p->first, key.size());
+	Element& e = **ep;
 
-	  // Set suffix in index
-	  indices[index] = rest;
-
-	  // Recurse to children with new index
-	  text += expand_recursive(ce, indices);
-	}
+	// Recurse to children with this element as new value structure
+	// and this loop's index, with new variables (provides scoping)
+	map<string, string> newvars = vars;
+	text += expand_recursive(te, e, i++, newvars);
       }
     }
-    else if (ce.name == "expand:each")
+    else if (te.name == "expand:index")
     {
-      // Get combined key with specified index from indices
-      string key = ce["key"];
-      string index = ce.get_attr("index", "i");
-
-      map<string, string>::const_iterator p = indices.find(index);
-      if (p!=indices.end())
-      {
-	// Add index value to key
-	key += p->second;
-
-	// Now expand as value
-	p = expansions.find(key);
-	if (p!=expansions.end()) text += p->second;
-      }
+      // Expand to current index in loop
+      int base = te.get_attr_int("from", 1);
+      ostringstream oss;
+      oss << index+base;
+      text += oss.str();
     }
-    else if (ce.name == "expand:index")
+    else if (te.name == "expand:set")
     {
-      // Get index value
-      string index = ce.get_attr("index", "i");
-
-      map<string, string>::const_iterator p = indices.find(index);
-      if (p!=indices.end()) text += p->second;
+      // Set a variable to the content
+      string var = te["var"];
+      vars[var] = expand_recursive(te, values, index, vars);
     }
     else
     {
       // Any other element - if it has children,
       // add start tag, expand content and then end-tag
-      if (ce.children.size())
+      if (te.children.size())
       {
-	text += ce.start_to_string();
-	text += expand_recursive(ce, indices);
-	text += ce.end_to_string();
+	text += te.start_to_string();
+	text += expand_recursive(te, values, index, vars);
+	text += te.end_to_string();
       }
       else
       {
 	// Output empty-close form
-	text += ce.to_string();
+	text += te.to_string();
       }
     }
   }

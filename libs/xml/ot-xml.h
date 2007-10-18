@@ -953,40 +953,49 @@ public:
 
 //==========================================================================
 // Text expander
-// Expands text using a simple tag language and a map of string values
-//   <expand:value key="xxx"/>  -> value of 'key' or "" if not present
-//   <expand:if key="xxx">      -> expands children if value of 'key'
-//                                 is present and begins with [YyTt1]
-//   <expand:unless key="xxx">  -> expands children unless value of 'key'
-//                                 is present and begins with [YyTt1]
-//   <expand:foreach key="xx" [index="i"]>
-//                              -> expands children for every key which has
-//                                 'xxx' as a prefix, making the remainder
-//                                 available as the given index name (or 'i')
-//   <expand:each key="xxx" [index="i"]/> 
-//                              -> Value of key ['xxx' plus the given index
-//                                 value (or 'i')]
-//   <expand:index [index="i"]/> -> Index suffix for index ('i')  
+// Expands text using a simple tag language from an XML document giving
+// expansion values
+// 'value's are XPath expressions in the value document
+
+//   <expand:replace value|var="xxx"/> 
+//     Expands to value of XPath or variable 'xxx' or "" if not present
+
+//   <expand:if value|var="xxx">  
+//     Expands children if XPath or variable 'xxx' is present and begins 
+//     with [YyTt1]
+
+//   <expand:unless value|var="xxx"> 
+//     Expands children unless XPath or variable 'xxx' is present and begins 
+//     with [YyTt1]
+
+//   <expand:each element="xxx">
+//     Expands children for every XPath 'xxx', making the element the new 
+//     context
+
+//   <expand:index [from="1"]/>
+//     Expands to loop index value, optionally from a given base (default 1)
 
 // All other child elements are output verbatim
 
 class Expander
 {
-  const map<string, string>& expansions;
+  const XML::Element& templ;
 
   // Internal
-  string expand_recursive(const XML::Element& root,
-			  map<string, string> indices);
+  string expand_recursive(const XML::Element& templ,
+			  XML::Element& values,
+			  int index,
+			  map<string, string>& vars);
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor - takes map of key-value pairs
-  Expander(const map<string, string>& _expansions): expansions(_expansions) {}
+  // Constructor - takes template XML document
+  Expander(const XML::Element& _templ): templ(_templ) {}
 
   //--------------------------------------------------------------------------
-  // Expand an XML element into a string
+  // Expand the template with the given value document
   // \return the expanded string
-  string expand(const XML::Element& root);
+  string expand(XML::Element& values);
 };
 
 //==========================================================================
