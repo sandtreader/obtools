@@ -202,9 +202,15 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to ISO timestamp string
-  // Generates YYYY:MM:DDTHH:MM:SS.sssZ form or empty if invalid
+  // Generates YYYY-MM-DDTHH:MM:SS.sssZ form or empty if invalid
   // This format is also compatible with XML
   string iso() const;
+
+  //------------------------------------------------------------------------
+  // Convert to ISO date
+  // Generates YYYY-MM-DD form or empty if invalid
+  // This format is also compatible with XML
+  string iso_date() const;
 
   //------------------------------------------------------------------------
   // Split the timestamp into individual items

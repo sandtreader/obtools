@@ -266,6 +266,24 @@ string Stamp::iso() const
 }
 
 //------------------------------------------------------------------------
+// Convert to ISO date
+// Generates YYYY-MM-DD form or empty if invalid
+// This format is also compatible with XML
+string Stamp::iso_date() const
+{
+  if (!t) return "";  // Empty if invalid
+
+  ostringstream oss;
+  Split sp = split(t);  
+
+  oss << setw(2) << setfill('0') << sp.year  << '-'
+      << setw(2) << setfill('0') << sp.month << '-'
+      << setw(2) << setfill('0') << sp.day;
+
+  return oss.str();
+}
+
+//------------------------------------------------------------------------
 // Get the day of the week (Monday=1, Sunday=7)
 int Stamp::weekday() const
 {
