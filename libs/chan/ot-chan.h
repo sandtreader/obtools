@@ -364,6 +364,77 @@ public:
 };
 
 //==========================================================================
+// Bitstream reader - wraps around any Reader (bit.cc)
+// Note: Bits read MSB first
+class BitReader
+{
+private:
+  Reader& reader;
+  int bits_valid;
+  int current_byte;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor  
+  BitReader(Reader& _reader): 
+    reader(_reader), bits_valid(0), current_byte(0) {}
+
+  //--------------------------------------------------------------------------
+  // Read a single bit from the channel, returning an integer
+  // Throws SocketError on failure or EOF
+  int read_bit() throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Read a single bit from the channel, returning a boolean
+  // Throws SocketError on failure or EOF
+  bool read_bool() throw (Error) { return read_bit()?true:false; }
+
+  //--------------------------------------------------------------------------
+  // Read up to 32 bits from the channel
+  // Returns bits in LSB of integer returned
+  // Throws SocketError on failure or EOF
+  uint32_t read_bits(int n) throw (Error);
+};
+
+//==========================================================================
+// Bitstream writer - wraps around any Writer (bit.cc)
+// Note: Bits written MSB first
+class BitWriter
+{
+private:
+  Writer& writer;
+  int bits_valid;
+  int current_byte;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor  
+  BitWriter(Writer& _writer): 
+    writer(_writer), bits_valid(0), current_byte(0) {}
+
+  //--------------------------------------------------------------------------
+  // Write a single bit to the channel
+  // Throws SocketError on failure or EOF
+  void write_bit(int bit) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Write a single bit to the channel as a boolean
+  // Throws SocketError on failure or EOF
+  void write_bool(bool bit) throw (Error) { write_bit(bit?1:0); }
+
+  //--------------------------------------------------------------------------
+  // Write up to 32 bits to the channel
+  // Writes bits from LSB of integer given
+  // Throws SocketError on failure or EOF
+  void write_bits(int n, uint32_t bits) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Flush remaining bits (if any) as a final byte, padding with zeros
+  // Throws SocketError on failure or EOF
+  void flush() throw (Error);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_CHAN_H
 
