@@ -232,6 +232,20 @@ public:
   // Unlike standard [], doesn't create a blank value if it doesn't exist
   string operator[](const string& name) const { return get(name); }
 
+  //------------------------------------------------------------------------
+  // Variable interpolation of property list into a string
+  // Replaces (e.g.) $var with value from property list
+  // Variables are terminated by non-alphanum or ";"
+  // $ and ; can be escaped as $$ and $;
+  // e.g.
+  //  $name   -> fred
+  //  $name;s -> freds
+  //  $name$name -> fredfred
+  //  $name$;s -> fred;s
+  //  $$name  -> $fred
+  // Unset variables are not substituted
+  string interpolate(const string& text);
+
   //--------------------------------------------------------------------------
   // Dump contents
   void dump(ostream& s, const string& prefix="    ", 

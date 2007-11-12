@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-misc.h"
+#include <ctype.h>
 
 namespace ObTools { namespace Misc {
 
@@ -31,15 +32,86 @@ ostream& operator<<(ostream& s, const PropertyList& pl)
 //------------------------------------------------------------------------
 // Variable interpolation of property list into a string
 // Replaces (e.g.) $var with value from property list
-// You can (optionally) specify variable escape start ('$'), 
-// escaped escape ('$$') and variable end string ('')
+// Variables are terminated by non-alphanum or ";"
+// $ and ; can be escaped as $$ and $;
+// e.g.
+//  $name   -> fred
+//  $name;s -> freds
+//  $name$name -> fredfred
+//  $name$;s -> fred;s
+//  $$name  -> $fred
 // Unset variables are not substituted
-string interpolate(const string& text,
-		   const string& start="$",
-		   const string& escape="$$",
-		   const string& end="")
+string PropertyList::interpolate(const string& text)
 {
+  string result;
 
+  for(string::const_iterator p = text.begin(); p!=text.end();)
+  {
+    char c = *p++;
+
+retry:
+    if (c == '$')
+    {
+      string var;
+      c=0;
+
+      // Read to nonalphanum
+      while (p!=text.end())
+      {
+	c = *p++;
+	if (isalnum(c))
+	{
+	  var += c;
+	  c=0;  // Don't reuse if at end
+	}
+	else break;
+      }
+
+      // If no word, must be non-alpha at start
+      if (var.empty())
+      {
+	switch (c)
+	{
+	  case '$':  // Escaped $, or $ at end
+	  case ';':  // Escaped ;
+	    result += c;
+	    break;
+
+          default:
+	    result += '$';  // Reinsert original
+	    result += c;
+	    break;
+	}
+      }
+      else
+      {
+	// Lookup word
+	const_iterator vp = find(var);
+	if (vp!=end())
+	{
+	  // Known word - replace with value
+	  result += vp->second;
+	}
+	else
+	{
+	  // Unknown - replace $ and word, and semi if used
+	  result += '$';
+	  result += var;
+	  if (c=';') result += c;
+	}
+
+	// Retry with this character (may be a $)
+	if (c && c!=';') goto retry;
+      }
+    }
+    else
+    {
+      // Any other character goes straight through
+      result += c;
+    }
+  }
+  
+  return result;
 }
 
 

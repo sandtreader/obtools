@@ -30,6 +30,14 @@ int main()
 
   pl.dump(cout, "-- ");
 
+  // Read lines to interpolate from stdin
+  while (cin)
+  {
+    string line;
+    cin >> line;
+    cout << "[" << line << "] -> [" << pl.interpolate(line) << "]\n";
+  }
+
   return 0;  
 }
 
