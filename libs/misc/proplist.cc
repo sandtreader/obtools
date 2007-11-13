@@ -97,7 +97,7 @@ retry:
 	  // Unknown - replace $ and word, and semi if used
 	  result += '$';
 	  result += var;
-	  if (c=';') result += c;
+	  if (c==';') result += c;
 	}
 
 	// Retry with this character (may be a $)
