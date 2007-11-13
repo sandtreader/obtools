@@ -55,11 +55,11 @@ retry:
       string var;
       c=0;
 
-      // Read to nonalphanum
+      // Read to nonalphanum (or '_')
       while (p!=text.end())
       {
 	c = *p++;
-	if (isalnum(c))
+	if (isalnum(c) || c=='_')
 	{
 	  var += c;
 	  c=0;  // Don't reuse if at end
