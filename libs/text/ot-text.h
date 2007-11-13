@@ -130,6 +130,14 @@ string itos(int i);
 int stoi(const string& s);
 
 //--------------------------------------------------------------------------
+// 64-bit integer to string
+string i64tos(uint64_t i);
+
+//--------------------------------------------------------------------------
+// String to 64-bit integer (0 default)
+uint64_t stoi64(const string& s);
+
+//--------------------------------------------------------------------------
 // Float to string, with zero padding
 string ftos(double f, int width=0, int prec=10, bool zero_pad=false);
 
@@ -144,6 +152,14 @@ string itox(unsigned int i);
 //--------------------------------------------------------------------------
 // Hex to integer (0 default)
 unsigned int xtoi(const string& s);
+
+//--------------------------------------------------------------------------
+// 64-bit integer to hex
+string i64tox(uint64_t i);
+
+//--------------------------------------------------------------------------
+// Hex to 64-bit integer (0 default)
+uint64_t xtoi64(const string& s);
 
 //--------------------------------------------------------------------------
 // Binary to hex (simple, use Misc::Dumper for long blocks)
