@@ -1,0 +1,8 @@
+$foo
+$bar
+$foo$bar
+$foo;s
+$$$foo$$$bar;
+$not
+$not;
+
