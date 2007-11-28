@@ -36,7 +36,7 @@ int stoi(const string& s)
 string i64tos(uint64_t i)
 {
   // Use sprintf for speed
-  char buf[21];  // Enough for 64-bit integers, just in case
+  char buf[21];  // Enough for 64-bits
   snprintf(buf, 21, "%llu", i);
   return string(buf);
 }
@@ -45,7 +45,11 @@ string i64tos(uint64_t i)
 // String to 64-bit integer (0 default)
 uint64_t stoi64(const string& s)
 {
-  return atoll(s.c_str());
+  // Note:  We can't use atoll here because it is signed and barfs on 
+  // anything over 2^63-1
+  uint64_t n = 0;
+  sscanf(s.c_str(), "%llu", &n);
+  return n;
 }
 
 //--------------------------------------------------------------------------
