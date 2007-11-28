@@ -9,6 +9,7 @@
 
 #include "ot-tube.h"
 #include "ot-log.h"
+#include "ot-misc.h"
 
 #include <unistd.h>
 #include <sstream>
@@ -44,7 +45,8 @@ class ServerSendThread: public MT::Thread
 			   << msg.stag() << ", length " 
 			   << msg.data.size() 
 			   << " (flags " << hex << msg.flags << dec << ")\n";)
-      OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
+      OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
+			  dumper.dump(msg.data);)
 
       try // Handle SocketErrors
       {
@@ -141,7 +143,8 @@ void Server::process(Net::TCPSocket& socket,
 	  break;
 	}
 
-	OBTOOLS_LOG_IF_DUMP(log.dump << msg.msg.data << endl;)
+	OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
+			    dumper.dump(msg.msg.data);)
 
 	// Post up a message
 	if (!handle_message(msg))

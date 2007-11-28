@@ -9,6 +9,7 @@
 
 #include "ot-tube.h"
 #include "ot-log.h"
+#include "ot-misc.h"
 
 #include <unistd.h>
 #include <sstream>
@@ -133,7 +134,8 @@ bool Client::receive_messages(Log::Streams& log)
 	return restart_socket(log);
       }
 
-      OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
+      OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
+			  dumper.dump(msg.data);)
 
       // Post up a message
       receive_q.send(msg);
@@ -203,7 +205,8 @@ bool Client::send_messages(Log::Streams& log)
 		       << msg.stag() << ", length " 
 		       << msg.data.size() 
 		       << " (flags " << hex << msg.flags << dec << ")\n";)
-  OBTOOLS_LOG_IF_DUMP(log.dump << msg.data << endl;)
+  OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
+		      dumper.dump(msg.data);)
 
   try // Handle SocketErrors
   {
