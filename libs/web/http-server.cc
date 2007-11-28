@@ -114,7 +114,7 @@ bool SimpleHTTPServer::handle_request(HTTPMessage& request,
 				      HTTPMessage& response,
 				      Net::EndPoint client)
 {
-  MT::Lock lock(mutex);
+  MT::RWReadLock lock(mutex);
 
   // Check all handlers for a URL match
   for(list<URLHandler *>::iterator p = handlers.begin(); 

@@ -295,6 +295,7 @@ class HTTPClient
 {
 private:
   string user_agent;    // String to quote in User-Agent: header
+  Net::EndPoint last_local_address;  // Address we connected from last, for P2P
 
 protected:
   Net::EndPoint server;
@@ -324,6 +325,10 @@ public:
   // Returns result code, fills in response_body if provided, 
   // reason code if not
   int post(URL url, const string& request_body, string& response_body);
+
+  //--------------------------------------------------------------------------
+  // Get the local address we last connected from (for P2P)
+  Net::EndPoint get_last_local_address() { return last_local_address; }
 };
 
 #if !defined(_SINGLE)
@@ -416,7 +421,7 @@ public:
 // Handlers are checked in order, so later ones can be defaults
 class SimpleHTTPServer: public HTTPServer
 {
-  MT::Mutex mutex;               // Around global state
+  MT::RWMutex mutex;               // Around global state
   list<URLHandler *> handlers;
 
   // Implementation of general request handler
@@ -441,11 +446,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Add a handler - will be deleted on destruction of server
-  void add(URLHandler *h) { MT::Lock lock(mutex); handlers.push_back(h); }
+  void add(URLHandler *h) 
+  { MT::RWWriteLock lock(mutex); handlers.push_back(h); }
 
   //--------------------------------------------------------------------------
   // Remove a handler
-  void remove(URLHandler *h) { MT::Lock lock(mutex); handlers.remove(h); }
+  void remove(URLHandler *h) 
+  { MT::RWWriteLock lock(mutex); handlers.remove(h); }
 
   //--------------------------------------------------------------------------
   // Destructor

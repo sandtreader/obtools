@@ -76,6 +76,8 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
     return false;
   }
 
+  last_local_address = client.local();
+
   try
   {
     Net::TCPStream ss(client);
