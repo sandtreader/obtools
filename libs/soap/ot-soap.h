@@ -298,7 +298,7 @@ public:
 //==========================================================================
 // HTTP Client class (http-client.cc)
 // Extends Web::HTTPClient to provide SOAP interface
-class HTTPClient: private Web::HTTPClient
+class HTTPClient: public Web::HTTPClient
 {
 public:
   //--------------------------------------------------------------------------
