@@ -181,12 +181,9 @@ uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
 
   if (!v.empty()) 
   {
-#ifdef BORLAND
-    return _atoi64(v.c_str());
-#else
-    // Warning: non-portable outside glibc/ISO-C-99
-    return atoll(v.c_str());
-#endif
+    // Note:  We can't use atoll here because it is signed and barfs on 
+    // anything over 2^63-1
+    sscanf(v.c_str(), "%llu", &def);
   }
 
   return def;

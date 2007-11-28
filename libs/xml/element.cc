@@ -580,12 +580,12 @@ uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
 {
   map<string,string>::const_iterator p=attrs.find(attname);
 
-#ifdef BORLAND
-   if (p!=attrs.end()) return _atoi64(p->second.c_str());
-#else
-   // Warning: non-portable outside glibc/ISO-C-99
-   if (p!=attrs.end()) return atoll(p->second.c_str());
-#endif
+  if (p!=attrs.end())
+  {
+    // Note:  We can't use atoll here because it is signed and barfs on 
+    // anything over 2^63-1
+    sscanf(p->second.c_str(), "%llu", &def);
+  }
 
   return def;
 }

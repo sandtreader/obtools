@@ -55,8 +55,8 @@ uint64_t Row::get_int64(string fieldname, uint64_t def) const
 {
   map<string,string>::const_iterator p=fields.find(fieldname);
 
-  // atoq is a glibc extension - porting needed for non glibc environments!
-  if (p!=fields.end()) return atoll(p->second.c_str());
+  // Use sscanf instead of atoll which is signed
+  if (p!=fields.end()) sscanf(p->second.c_str(), "%llu", &def);
 
   return def;
 }
