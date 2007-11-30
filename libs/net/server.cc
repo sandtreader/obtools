@@ -115,6 +115,22 @@ Socket::fd_t TCPServer::initiate(EndPoint remote_address, int timeout)
 }
 
 //--------------------------------------------------------------------------
+// Accept an existing socket into the server to be processed
+// Used for P2P where 'server' socket may be initiated at this end
+void TCPServer::take_over(int fd, Net::EndPoint remote_address)
+{
+  // Get a thread first
+  TCPWorkerThread *thread = threadpool.wait();
+
+  thread->server         = this;
+  thread->client_fd      = fd;
+  thread->client_ep      = remote_address;
+	
+  // Start it off
+  thread->kick();
+}
+    
+//--------------------------------------------------------------------------
 // Shut down server
 void TCPServer::shutdown()
 {

@@ -181,6 +181,39 @@ bool Socket::bind(EndPoint address)
 }
 
 //--------------------------------------------------------------------------
+// Select for read on a socket
+// Use to allow a timeout on read/accept on blocking sockets
+// Returns whether socket is readable within the given timeout (seconds)
+bool Socket::wait_readable(int timeout)
+{
+  fd_set rfds;
+  FD_ZERO(&rfds);
+  FD_SET(fd, &rfds);
+  struct timeval tv;
+  tv.tv_sec = timeout;
+  tv.tv_usec = 0;
+
+  return select(fd+1, &rfds, 0, 0, &tv) == 1;
+
+}
+
+//--------------------------------------------------------------------------
+// Select for write on a socket
+// Use to allow a timeout on connect/write on blocking sockets
+// Returns whether socket is readable within the given timeout (seconds)
+bool Socket::wait_writeable(int timeout)
+{
+  fd_set wfds;
+  FD_ZERO(&wfds);
+  FD_SET(fd, &wfds);
+  struct timeval tv;
+  tv.tv_sec = timeout;
+  tv.tv_usec = 0;
+
+  return select(fd+1, 0, &wfds, 0, &tv) == 1;
+}
+
+//--------------------------------------------------------------------------
 // Get local address
 // Only works if socket is bound or connected.  
 // Because of multihoming, IP address may only be available if connected 

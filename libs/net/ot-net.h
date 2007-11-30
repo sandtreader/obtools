@@ -403,6 +403,18 @@ public:
   bool bind(EndPoint address);
 
   //--------------------------------------------------------------------------
+  // Select for read on a socket
+  // Use to allow a timeout on read/accept on blocking sockets
+  // Returns whether socket is readable within the given timeout (seconds)
+  bool wait_readable(int timeout);
+
+  //--------------------------------------------------------------------------
+  // Select for write on a socket
+  // Use to allow a timeout on connect/write on blocking sockets
+  // Returns whether socket is readable within the given timeout (seconds)
+  bool wait_writeable(int timeout);
+
+  //--------------------------------------------------------------------------
   // Get local address
   // Only works if socket is bound or connected.  
   // Because of multihoming, IP address may only be available if connected 
@@ -694,8 +706,43 @@ public:
   TCPClient(EndPoint local, EndPoint remote, int timeout);
 
   //--------------------------------------------------------------------------
+  // Get server endpoint
+  EndPoint get_server() const { return server; }
+
+  //--------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !connected; }
+};
+
+//==========================================================================
+// TCP basic server (single-threaded, only listens for a single connection
+// at a time)
+class TCPSingleServer: public TCPSocket
+{
+private:
+  EndPoint address;
+  int backlog;
+  void start();
+  
+public:
+  //--------------------------------------------------------------------------
+  // Constructor with just port (INADDR_ANY binding)
+  TCPSingleServer::TCPSingleServer(int _port, int _backlog=5):
+    TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog) 
+    { start(); }
+
+  //--------------------------------------------------------------------------
+  // Constructor with specified address (specific binding)
+  TCPSingleServer::TCPSingleServer(EndPoint _address, int _backlog=5):
+    TCPSocket(), address(_address), backlog(_backlog) 
+    { start(); }
+
+  //--------------------------------------------------------------------------
+  // Listen for a connection and return a TCP socket
+  // If timeout is non-zero, times out and returns 0 if no connection in 
+  // that time
+  // Returns connected socket or 0 if it fails
+  TCPSocket *wait(int timeout=0);
 };
 
 //==========================================================================
@@ -764,6 +811,11 @@ public:
   // Timeout is in seconds
   // Returns fd of connection
   Socket::fd_t initiate(EndPoint addr, int timeout);
+
+  //--------------------------------------------------------------------------
+  // Accept an existing socket into the server to be processed
+  // Used for P2P where 'server' socket may be initiated at this end
+  void take_over(int fd, Net::EndPoint remote_address);
 
   //--------------------------------------------------------------------------
   // Shut down server
