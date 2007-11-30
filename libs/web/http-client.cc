@@ -76,6 +76,9 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
     return false;
   }
 
+  // Enable reuse and capture local address used, so P2P can turn around
+  // and offer a server on here immediately;
+  client.enable_reuse();
   last_local_address = client.local();
 
   try
