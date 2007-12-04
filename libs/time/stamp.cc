@@ -247,7 +247,7 @@ string Stamp::iso() const
   Split sp = split(t);  
 
   // Fudge to pad floating seconds, because setw() won't do it
-  char *pad = "";
+  const char *pad = "";
   if (sp.sec < 10) pad = "0";
 
   // Fix precision for small values

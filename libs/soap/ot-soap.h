@@ -183,7 +183,7 @@ public:
   //------------------------------------------------------------------------
   // Get a single header of a particular name
   // Returns whether successful;  fills in h if so
-  bool Message::get_header(const string& name, Header& h) const;
+  bool get_header(const string& name, Header& h) const;
 
   //------------------------------------------------------------------------
   // Destructor

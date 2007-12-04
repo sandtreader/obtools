@@ -322,7 +322,7 @@ class PKCS5
   //------------------------------------------------------------------------
   // Unpad a block of data 
   // Returns original length of block - data is not copied or modified
-  static int PKCS5::original_length(const unsigned char *data, int length);
+  static int original_length(const unsigned char *data, int length);
 };
 
 //==========================================================================

@@ -727,13 +727,13 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
-  TCPSingleServer::TCPSingleServer(int _port, int _backlog=5):
+  TCPSingleServer(int _port, int _backlog=5):
     TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog) 
     { start(); }
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
-  TCPSingleServer::TCPSingleServer(EndPoint _address, int _backlog=5):
+  TCPSingleServer(EndPoint _address, int _backlog=5):
     TCPSocket(), address(_address), backlog(_backlog) 
     { start(); }
 
@@ -774,15 +774,15 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
-  TCPServer::TCPServer(int _port, int _backlog=5, 
-		       int min_spare=1, int max_threads=10):
+  TCPServer(int _port, int _backlog=5, 
+	    int min_spare=1, int max_threads=10):
     TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog), 
     threadpool(min_spare, max_threads), alive(true) {}
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
-  TCPServer::TCPServer(EndPoint _address, int _backlog=5, 
-		       int min_spare=1, int max_threads=10):
+  TCPServer(EndPoint _address, int _backlog=5, 
+	    int min_spare=1, int max_threads=10):
     TCPSocket(), address(_address), backlog(_backlog), 
     threadpool(min_spare, max_threads), alive(true) {}
 

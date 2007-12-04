@@ -408,8 +408,8 @@ public:
   // Adds <range start="x" length="y"/> elements to the given XML element
   // or other element name if provided
   // and adds total_length attribute to parent
-  void RangeSet::add_to_xml(XML::Element& parent, 
-			    const string& element_name="range") const;
+  void add_to_xml(XML::Element& parent, 
+		  const string& element_name="range") const;
 
   //------------------------------------------------------------------------
   // Dump the set to the given output, one line per range, in form

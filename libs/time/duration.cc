@@ -148,7 +148,7 @@ string Duration::hms() const
   double secs = rt-hours*HOUR-mins*MINUTE;
 
   // Fudge to pad floating seconds, because setw() won't do it
-  char *pad = "";
+  const char *pad = "";
   if (secs < 10) pad = "0";
 
   // Fix precision for small values
