@@ -94,6 +94,30 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout):
   }
 }
 
+//--------------------------------------------------------------------------
+// Constructor, binding specific local address/port and with timeout and TTL
+// port can be zero if you only want to bind address
+TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl):
+  TCPSocket(),
+  server(remote),
+  connected(false)
+{
+  struct sockaddr_in saddr;
+  server.set(saddr);
+
+  if (fd!=INVALID_FD)
+  {
+    set_timeout(timeout);
+    set_ttl(ttl);
+
+    // Set REUSEADDR to force grab of local socket
+    enable_reuse();
+
+    // Bind local side first
+    if (bind(local) && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+	connected = true;
+  }
+}
 
 }} // namespaces
 

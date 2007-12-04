@@ -381,6 +381,10 @@ public:
   void enable_reuse();
 
   //--------------------------------------------------------------------------
+  // Set socket TTL
+  void set_ttl(int hops);
+
+  //--------------------------------------------------------------------------
   // Set timeout (receive and send) in seconds
   void set_timeout(int secs);
 
@@ -704,6 +708,11 @@ public:
   // Constructor, binding specific local address/port and with timeout
   // port can be zero if you only want to bind address
   TCPClient(EndPoint local, EndPoint remote, int timeout);
+
+  //--------------------------------------------------------------------------
+  // Constructor, binding specific local address/port and with timeout and TTL
+  // port can be zero if you only want to bind address
+  TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl);
 
   //--------------------------------------------------------------------------
   // Get server endpoint

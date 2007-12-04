@@ -108,6 +108,13 @@ void Socket::enable_reuse()
 }
 
 //--------------------------------------------------------------------------
+// Set socket TTL
+void Socket::set_ttl(int hops)
+{
+  setsockopt(fd, IPPROTO_IP, IP_TTL, (sockopt_t)&hops, sizeof(int));
+}
+
+//--------------------------------------------------------------------------
 // Set timeout (receive and send) in seconds
 void Socket::set_timeout(int secs)
 {
