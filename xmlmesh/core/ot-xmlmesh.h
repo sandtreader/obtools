@@ -95,16 +95,16 @@ public:
 
   //--------------------------------------------------------------------------
   // Get <message> text, but don't cache it
-  string Message::to_text() const;
+  string to_text() const;
 
   //--------------------------------------------------------------------------
   // Get <message> text and cache it
-  string Message::get_text();
+  string get_text();
 
   //--------------------------------------------------------------------------
   //Get SOAP Message, still owned by Message, will be destroyed with it
   //Check for validity with !
-  const SOAP::Message& Message::get_soap();
+  const SOAP::Message& get_soap();
 
   //--------------------------------------------------------------------------
   //Get SOAP message for modification - clears textual copy if any
