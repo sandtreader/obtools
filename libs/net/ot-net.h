@@ -225,6 +225,7 @@ public:
   EndPoint(): host(), port(0) {}
   EndPoint(IPAddress _host, int _port): host(_host), port(_port) {}
   EndPoint(uint32_t in, int _port): host(in), port(_port) {}
+  EndPoint(const string& hostname, int _port): host(hostname), port(_port) {}
 
   // Constructor from a sockaddr_in - note ntohl/ntohs here!
   EndPoint(const struct sockaddr_in& saddr):
