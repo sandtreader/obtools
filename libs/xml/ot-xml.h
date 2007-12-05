@@ -1,10 +1,9 @@
 //==========================================================================
-// ObTools::XML: ot-xml.h
-//
-// Public definitions for ObTools XML parser
-// 
-// Copyright (c) 2003-2005 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+/// \file obtools/libs/xml/ot-xml.h
+/// Public definitions for ObTools XML parser
+/// 
+/// Copyright (c) 2003-2007 xMill Consulting Limited.  All rights reserved
+//  @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #ifndef __OBTOOLS_XML_H
@@ -17,52 +16,62 @@
 #include <iostream>
 #include <stdint.h>
 
-namespace ObTools { namespace XML {
+namespace ObTools { 
+
+/// %XML parser/DOM/XPath library.
+/// Provides fairly complete but non-standard DOM
+/// and minimal XPath for configuration files
+namespace XML {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
 
-//Type to use for characters
+/// Type to use for characters
 typedef char xmlchar;
 
 class Element; // Forward
 
 //==========================================================================
-// Element list iterators
-// Actually contains a list of elements;  sequential forward access only
-// Usage is different from STL iterator:
-//    for(Element::iterator p(parent.children); p; ++p)
-//       XML::Element& child = *p;
+/// %Element list iterator.
+/// Actually contains a list of elements;  sequential forward access only.
+///
+/// \note Usage is different from STL iterator - e.g.
+/// \code
+///    for(Element::iterator p(parent.children()); p; ++p)
+///       XML::Element& child = *p;
+/// \endcode
 struct ElementIterator
 {
-  list<Element *> elements;
-  list<Element *>::const_iterator it;
+  list<Element *> elements;              ///< List we're iterating
+  list<Element *>::const_iterator it;    ///< Our internal iterator
 
   //------------------------------------------------------------------------
-  // Constructors
+  /// Constructor from element list
   ElementIterator(const list<Element *>& l): 
     elements(l), it(elements.begin()) {}
+
+  /// Copy constructor
   ElementIterator(const ElementIterator& o):
     elements(o.elements), it(elements.begin()) {}
 
   //------------------------------------------------------------------------
-  // Validity checks
+  /// Validity check
   bool valid() { return it != elements.end(); }
-  operator bool() { return valid(); }
-  bool operator!() { return !valid(); }
+  operator bool() { return valid(); }     ///< Cast to bool - checks validity
+  bool operator!() { return !valid(); }   ///< Not operator - checks invalidity
 
   //------------------------------------------------------------------------
-  // Incrementors
-  // Postincrement (p++) is not provided because it would be very inefficient
+  /// Incrementor.
+  /// Postincrement (p++) is not provided because it would be very inefficient
   ElementIterator& operator++() { it++; return *this; }
 
   //------------------------------------------------------------------------
-  // Derefs
-  Element& operator*() const { return **it; }
-  Element *operator->() const { return *it; }
+  // Dereference operators
+  Element& operator*() const { return **it; }  ///< Retrieve element
+  Element *operator->() const { return *it; }  ///< Access element through ptr
 };
 
-// Const equivalent
+/// Const equivalent to ElementIterator
 struct ConstElementIterator
 {
   list<const Element *> elements;
@@ -80,39 +89,40 @@ struct ConstElementIterator
 };
 
 //==========================================================================
-// XML Parser flags
+/// %XML %Parser flags
 enum 
 {
-  // Snap single text content elements back to parent-element.content
-  // Makes simple grammars a lot easier to access
+  /// Snap single text content elements back to parent-element.content.
+  /// Makes simple grammars a lot easier to access
   PARSER_OPTIMISE_CONTENT=1,
 
-  // Preserve whitespace as it (prepare for a flood of indentation strings!)
-  // BEWARE: If you use this, the << >> process isn't round-trip clean for
-  // whitespace, because the output adds its own indentation
+  /// Preserve whitespace as it is. Prepare for a flood of indentation strings!
+  /// \note If you use this, the << >> process isn't round-trip clean for
+  /// whitespace, because the output adds its own indentation
   PARSER_PRESERVE_WHITESPACE=2,
 
-  // Do namespace translation
-  // Automatically turned on if you call fix_namespace
+  /// Do namespace translation.
+  /// Automatically turned on if you call fix_namespace
   PARSER_FIX_NAMESPACES=4,
 
-  // Be lenient about & and < in contexts in which they couldn't be XML
-  // syntax - i.e., not followed by a name character, '#' (for &), 
-  // '!', '?' or '/' (for <) - and consider them just normal character data.
-  // This makes it more pleasant to include code, particularly C++ code, 
-  // in XML
-
-  // This mimics the behaviour of SGML (hooray!) (ISO 8879:B.7.3), but
-  // strictly violates XML (XML1.0:2.4), unless you consider it a form
-  // of error handling...  But seriously, folks, using this feature may
-  // mean your XML files are rejected by parsers who are less lenient
-  // (or by this parser without this flag set)
+  /// Be lenient with & and < in contexts in which they couldn't be
+  /// %XML syntax.
+  /// i.e., not followed by a name character, '#' (for &), 
+  /// '!', '?' or '/' (for <) - and consider them just normal character data.
+  /// This makes it more pleasant to include code, particularly C++ code, 
+  /// in %XML
+  ///
+  /// \note This mimics the behaviour of SGML (hooray!) (ISO 8879:B.7.3), but
+  /// strictly violates %XML (XML1.0:2.4), unless you consider it a form
+  /// of error handling...  But seriously, folks, using this feature may
+  /// mean your %XML files are rejected by parsers who are less lenient
+  /// (or by this parser without this flag set)
   PARSER_BE_LENIENT=8
 };
 
 //==========================================================================
-// XML Element class
-// XML document is a tree of these
+/// %XML %Element class.
+/// An %XML document is a tree of these
 class Element
 {
 private:
@@ -125,177 +135,189 @@ private:
 			  list<Element *>& l);
 
 public:
-  //Element name ('tag') - empty for data 'elements'
+  /// %Element name ('tag') - empty for data 'elements'
   string name;
 
-  //Element content - set only for data 'elements', or if 'OPTIMISE'
-  //flag set, when single data elements are snapped back to the content
-  //of the parent
+  /// %Element content. Set only for data 'elements', or if 'OPTIMISE'
+  /// flag set, when single data elements are snapped back to the content
+  /// of the parent
   string content;
 
-  //Attributes attr-name -> attr-value
-  //BEWARE of using [] to access this - will modify map and add empty
-  //attributes if it doesn't exist.  Use get_attr() in preference if
-  //you need to restream the input
+  /// Attributes - map of attr-name -> attr-value.
+  /// \note Beware of using [] to access this - will modify map and add empty
+  /// attributes if it doesn't exist.  Use get_attr() in preference if
+  /// you need to restream the input
   map<string,string> attrs;
 
-  //List of sub-elements
+  /// List of sub-elements
   list<Element *> children;
 
-  //Parent element
+  /// Parent element
   Element *parent;
 
   //Error support
-  int line;   // Line number of our start tag
+  int line;   ///< Line number of our start tag
 
   //--------------------------------------------------------------------------
-  // Non-element marker
+  /// Non-element marker
   static Element none;
 
   //--------------------------------------------------------------------------
   // Iterator defs
-  typedef ElementIterator iterator;
-  typedef ConstElementIterator const_iterator;
+  typedef ElementIterator iterator;            ///< Typedef of element iterator
+  typedef ConstElementIterator const_iterator; ///< Typedef of const iterator
 
   //--------------------------------------------------------------------------
-  // Validity checks
-  // Easy way of checking if you've got Element::none
-  // Don't use (e!=Element::none) - that compares values!
-  // Note we don't provide an operator bool due to problems with ambiguity
-  // of [] operator
+  /// Validity check.
+  /// Easy way of checking if you've got Element::none
+  /// \note Don't use \code(e!=Element::none)\endcode - that compares values!
+  /// \note We don't provide an operator bool due to problems with ambiguity
+  /// of [] operator
   bool valid() const { return this!=&none; }
-  bool operator!() const { return !valid(); }
+  bool operator!() const { return !valid(); }  ///< Invalidity check
 
   //------------------------------------------------------------------------
   // Constructors 
-  // Default - no name, no content, for later filling in
+  /// Default constructor - no name, no content, for later filling in
   Element():parent(0), line(0) { }
 
-  // One string: just the name
+  /// Constructor with one string: just the name
   Element(const string& n):name(n), parent(0), line(0) { }
 
-  // Two strings: name and textual content
+  /// Constructor with two strings: name and textual content
   Element(const string& n, const string& c):
     name(n), content(c), parent(0), line(0) {  }
 
-  // Three strings: name and one attribute - e.g. namespace
+  /// Constructor with three strings: name and one attribute - e.g. namespace
   Element(const string& n, const string& a, const string& v): 
     name(n), parent(0), line(0){ set_attr(a,v); }
 
-  // Four strings: name, one attribute and content
+  /// Constructor with four strings: name, one attribute and content
   Element(const string& n, const string& a, const string& v, const string& c):
     name(n), content(c), parent(0), line(0) { set_attr(a,v); }
 
   //--------------------------------------------------------------------------
-  // Shallow copy to an existing element
-  // Copies the name, direct content and attributes into the given element
-  // Children, parent and line are _not_ copied
+  /// Shallow copy to an existing element.
+  /// Copies the name, direct content and attributes into the given element
+  /// Children, parent and line are _not_ copied
   void copy_to(Element& dest) const
   { dest.name = name; dest.content = content;  dest.attrs = attrs; }
 
   //--------------------------------------------------------------------------
-  // Shallow copy to a new element
+  /// Shallow copy to a new element
   Element *copy() const
   { Element *dest = new Element(); copy_to(*dest); return dest; }
 
   //--------------------------------------------------------------------------
-  // Deep copy to an existing element
-  // Copies the name, direct content and attributes into the given element
-  // and recursively copies children
+  /// Deep copy to an existing element.
+  /// Copies the name, direct content and attributes into the given element
+  /// and recursively copies children
   // parent pointer of top element is not copied
   void deep_copy_to(XML::Element& dest) const;
 
   //--------------------------------------------------------------------------
-  // Deep copy to a new element
+  /// Deep copy to a new element
   Element *deep_copy() const
   { Element *dest = new Element(); deep_copy_to(*dest); return dest; }
 
   //--------------------------------------------------------------------------
-  // Deep copy and assignment operators
+  /// Copy constructor.  Does a deep copy
   Element(const Element& src): parent(0), line(0) 
   { src.deep_copy_to(*this); }
 
+  //--------------------------------------------------------------------------
+  /// Assignment operator.  Does a deep copy, deleting any existing children
   const Element& operator=(const Element& src) 
   { parent=0; line=src.line; 
     clear_children(); src.deep_copy_to(*this); return src; }
 
   //------------------------------------------------------------------------
-  // Add a child element, taking ownership
+  /// Add a child element, taking ownership
   Element& add(Element *child) 
   { children.push_back(child); child->parent = this; return *child; }
  
   //------------------------------------------------------------------------
-  // Add a child element from a reference, copying
+  /// Add a child element from a reference, copying
   Element& add(Element &child) 
   { return add(child.deep_copy()); }
 
   //------------------------------------------------------------------------
-  // Add a new empty child element by name
-  // Also 2-, 3- and 4-string options (see constructors above)
+  /// Add a new empty child element by name
+  /// \return New element
   Element& add(const string& n) { return add(new Element(n)); }
 
+  /// Add with two strings: name and textual content
+  /// \return New element
   Element& add(const string& n, const string& c) 
   { return add(new Element(n, c)); }
 
+  /// Add with three strings: name and one attribute - e.g. namespace
+  /// \return New element
   Element& add(const string& n, const string& a, const string& v) 
   { return add(new Element(n, a, v)); }
 
+  /// Add with four strings: name, one attribute and content
+  /// \return New element
   Element& add(const string& n, const string& a, 
 	       const string& v, const string& c) 
   { return add(new Element(n, a, v, c)); }
 
   //------------------------------------------------------------------------
-  // Add child elements from XML text - reparses text and adds resulting
-  // root as a child element.  Parser ostream & flags as Parser() below
-  // Returns added child, or 'none' if parse failed
+  /// Add child elements from XML text.  Reparses text and adds resulting
+  /// root as a child element.  ostream & parse_flags as Parser() below
+  /// \return Added child, or 'none' if parse failed
   Element& add_xml(const string& xml, ostream& serr = cerr,
 		   int parse_flags = PARSER_OPTIMISE_CONTENT);
 
   //------------------------------------------------------------------------
-  // Dump to given output stream
-  // with_pi controls whether to including the standard-compliant <?xml .. ?>
+  /// Dump to given output stream.
+  /// \param s stream to output to
+  /// \param with_pi controls whether to including the standard-compliant
+  /// <?xml .. ?>
   void write_to(ostream& s, bool with_pi=false) const; 
 
   //--------------------------------------------------------------------------
-  // Convert to a string
-  // with_pi controls whether to including the standard-compliant <?xml .. ?>
+  /// Convert to a string.
+  /// \param with_pi controls whether to including the standard-compliant 
+  /// <?xml .. ?>
   string to_string(bool with_pi=false) const;
 
   //--------------------------------------------------------------------------
-  // Write start-tag only to a given stream
-  // NB, always outputs unclosed start tag, even if empty
+  /// Write start-tag only to a given stream.
+  /// \note Always outputs unclosed start tag, even if empty
   void write_start_to(ostream &s) const;
 
   //--------------------------------------------------------------------------
-  // Convert start-tag to a string
+  /// Convert start-tag to a string
   string start_to_string() const;
 
   //--------------------------------------------------------------------------
-  // Write end-tag only to a given stream
+  /// Write end-tag only to a given stream
   void write_end_to(ostream &s) const;
 
   //--------------------------------------------------------------------------
-  // Convert end-tag to a string
+  /// Convert end-tag to a string
   string end_to_string() const;
 
   //------------------------------------------------------------------------
-  // 'Optimise' single text sub-elements back to 'content' string here
+  /// 'Optimise' single text sub-elements back to 'content' string here
   void optimise(); 
 
   //--------------------------------------------------------------------------
-  // Find n'th (first, by default) child element, whatever it is
-  // Returns Element::none if there isn't one 
-  // Const and non-const implementations (likewise rest of accessors)
-  const Element& get_child(int n=0) const;
+  /// Find n'th (first, by default) child element, whatever it is
+  /// \return Element::none if there isn't one 
   Element& get_child(int n=0);
+  const Element& get_child(int n=0) const;      ///< \copydoc get_child(int)
 
   //--------------------------------------------------------------------------
-  // Find n'th (first, by default) child element of given name
-  // Returns Element::none if there isn't one 
-  //   Use valid() to check which you've got - e.g.:
-  //     XML::Element& e = get_child(root, "foo");
-  //     if (e.valid())
-  //       //Use e
+  /// Find n'th (first, by default) child element of given name.
+  /// \return Element::none if there isn't one 
+  /// \note Use valid() to check which you've got - e.g.:
+  /// \code
+  ///     XML::Element& e = get_child(root, "foo");
+  ///     if (e.valid())
+  ///       //Use e
+  /// \endcode
   const Element& get_child(const string& ename, int n=0) const;
   Element& get_child(const string& ename, int n=0);
 
@@ -360,7 +382,7 @@ public:
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_attr_hex(const string& attname, int def) const;
+  int get_attr_hex(const string& attname, int def=0) const;
 
   //--------------------------------------------------------------------------
   // Get the 64-bit integer value of an attribute of the given name
@@ -375,7 +397,7 @@ public:
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  uint64_t get_attr_hex64(const string& attname, uint64_t def) const;
+  uint64_t get_attr_hex64(const string& attname, uint64_t def=0) const;
 
   //--------------------------------------------------------------------------
   // Get the real value of an attribute of the given name
@@ -709,10 +731,22 @@ public:
   int get_value_int(const string& path, int def=0);
 
   //--------------------------------------------------------------------------
+  // Hex value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_value_hex(const string& path, int def=0);
+
+  //--------------------------------------------------------------------------
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_value_int64(const string& path, uint64_t def=0);
+
+  //--------------------------------------------------------------------------
+  // 64-bit integer value fetch from hex
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  uint64_t get_value_hex64(const string& path, uint64_t def=0);
 
   //--------------------------------------------------------------------------
   // Real value fetch
@@ -737,8 +771,16 @@ public:
   bool set_value_int(const string& path, int value);
 
   //--------------------------------------------------------------------------
+  // Integer value set to hex
+  bool set_value_hex(const string& path, int value);
+
+  //--------------------------------------------------------------------------
   // 64-bit integer value set
   bool set_value_int64(const string& path, uint64_t value);
+
+  //--------------------------------------------------------------------------
+  // 64-bit integer value set to hex
+  bool set_value_hex64(const string& path, uint64_t value);
 
   //--------------------------------------------------------------------------
   // Real value set
@@ -862,10 +904,22 @@ public:
   int get_value_int(const string& path, int def=0);
 
   //--------------------------------------------------------------------------
+  // Integer hex value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  int get_value_hex(const string& path, int def=0);
+
+  //--------------------------------------------------------------------------
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_value_int64(const string& path, uint64_t def=0);
+
+  //--------------------------------------------------------------------------
+  // 64-bit integer hex value fetch
+  // Defaults to default value given (or 0) if not present
+  // Returns 0 if present but bogus
+  uint64_t get_value_hex64(const string& path, uint64_t def=0);
 
   //--------------------------------------------------------------------------
   // XPath Real value fetch
@@ -901,8 +955,16 @@ public:
   bool set_value_int(const string& path, int value);
 
   //--------------------------------------------------------------------------
+  // Integer value set to hex
+  bool set_value_hex(const string& path, int value);
+
+  //--------------------------------------------------------------------------
   // 64-bit integer value set
   bool set_value_int64(const string& path, uint64_t value);
+
+  //--------------------------------------------------------------------------
+  // 64-bit integer value set to hex
+  bool set_value_hex64(const string& path, uint64_t value);
 
   //--------------------------------------------------------------------------
   // Real value set

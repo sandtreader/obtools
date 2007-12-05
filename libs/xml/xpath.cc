@@ -172,6 +172,17 @@ int XPathProcessor::get_value_int(const string& path, int def)
 }
 
 //--------------------------------------------------------------------------
+// Hex value fetch
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+int XPathProcessor::get_value_hex(const string& path, int def)
+{
+  string v = get_value(path);
+  if (!v.empty()) sscanf(v.c_str(), "%x", &def);
+  return def;
+}
+
+//--------------------------------------------------------------------------
 // 64-bit integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
@@ -186,6 +197,17 @@ uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
     sscanf(v.c_str(), "%llu", &def);
   }
 
+  return def;
+}
+
+//--------------------------------------------------------------------------
+// 64-bit integer value fetch from hex
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+uint64_t XPathProcessor::get_value_hex64(const string& path, uint64_t def)
+{
+  string v = get_value(path);
+  if (!v.empty()) sscanf(v.c_str(), "%llx", &def);
   return def;
 }
 
@@ -256,11 +278,29 @@ bool XPathProcessor::set_value_int(const string& path, int value)
 }
 
 //--------------------------------------------------------------------------
+// Integer value set to hex
+bool XPathProcessor::set_value_hex(const string& path, int value)
+{
+  ostringstream oss;
+  oss << hex << value;
+  return set_value(path, oss.str());
+}
+
+//--------------------------------------------------------------------------
 // 64-bit integer value set
 bool XPathProcessor::set_value_int64(const string& path, uint64_t value)
 {
   ostringstream oss;
   oss << value;
+  return set_value(path, oss.str());
+}
+
+//--------------------------------------------------------------------------
+// 64-bit integer value set to hex
+bool XPathProcessor::set_value_hex64(const string& path, uint64_t value)
+{
+  ostringstream oss;
+  oss << hex << value;
   return set_value(path, oss.str());
 }
 

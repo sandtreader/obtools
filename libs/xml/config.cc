@@ -113,6 +113,16 @@ int Configuration::get_value_int(const string& path, int def)
 }
 
 //--------------------------------------------------------------------------
+// Integer hex value fetch
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+int Configuration::get_value_hex(const string& path, int def)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.get_value_hex(path, def); 
+}
+
+//--------------------------------------------------------------------------
 // 64-bit integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
@@ -120,6 +130,16 @@ uint64_t Configuration::get_value_int64(const string& path, uint64_t def)
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_int64(path, def); 
+}
+
+//--------------------------------------------------------------------------
+// 64-bit integer hex value fetch
+// Defaults to default value given (or 0) if not present
+// Returns 0 if present but bogus
+uint64_t Configuration::get_value_hex64(const string& path, uint64_t def)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.get_value_hex64(path, def); 
 }
 
 //--------------------------------------------------------------------------
@@ -200,11 +220,27 @@ bool Configuration::set_value_int(const string& path, int value)
 }
 
 //--------------------------------------------------------------------------
+// Integer value set to hex
+bool Configuration::set_value_hex(const string& path, int value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.set_value_hex(path, value); 
+}
+
+//--------------------------------------------------------------------------
 // 64-bit integer value set
 bool Configuration::set_value_int64(const string& path, uint64_t value)
 { 
   XPathProcessor xpath(get_root());
   return xpath.set_value_int64(path, value); 
+}
+
+//--------------------------------------------------------------------------
+// 64-bit integer value set to hex
+bool Configuration::set_value_hex64(const string& path, uint64_t value)
+{ 
+  XPathProcessor xpath(get_root());
+  return xpath.set_value_hex64(path, value); 
 }
 
 //--------------------------------------------------------------------------
