@@ -571,6 +571,15 @@ UDPSocket::UDPSocket(int port)
 }
 
 //--------------------------------------------------------------------------
+// Constructor - allocates socket and binds to local specific interface
+// (UDP server) - note 'bool' not used, just to disambiguate with client
+UDPSocket::UDPSocket(EndPoint local, bool)
+{
+  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  if (!Socket::bind(local)) close();
+}
+
+//--------------------------------------------------------------------------
 // Constructor - allocates socket and connects to remote port (UDP client)
 // Use this to obtain local addressing for packets sent to this endpoint
 UDPSocket::UDPSocket(EndPoint remote)

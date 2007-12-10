@@ -619,6 +619,11 @@ public:
   UDPSocket(int port);
 
   //--------------------------------------------------------------------------
+  // Constructor - allocates socket and binds to local specific interface
+  // (UDP server) - note 'bool' not used, just to disambiguate with client
+  UDPSocket(EndPoint local, bool);
+
+  //--------------------------------------------------------------------------
   // Constructor - allocates socket and connects to remote port (UDP client)
   // Use this to obtain local addressing for packets sent to this endpoint
   UDPSocket(EndPoint remote);
