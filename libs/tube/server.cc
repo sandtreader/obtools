@@ -213,6 +213,16 @@ Server::Server(int port, const string& _name, int backlog,
 }
 
 //------------------------------------------------------------------------
+// Constructor
+Server::Server(Net::EndPoint local, const string& _name, int backlog, 
+	       int min_spare_threads, int max_threads):
+  TCPServer(local, backlog, min_spare_threads, max_threads),
+  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+{
+
+}
+
+//------------------------------------------------------------------------
 // Send a message
 // Note:  It is safe to call this inside the handle_message() method
 // Whether message queued (client still connected)

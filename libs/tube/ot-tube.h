@@ -389,6 +389,11 @@ public:
 	 int min_spare_threads=1, int max_threads=10);
 
   //------------------------------------------------------------------------
+  // Constructor with defined local interface
+  Server(Net::EndPoint local, const string& _name="Tube", int backlog=5, 
+	 int min_spare_threads=1, int max_threads=10);
+
+  //------------------------------------------------------------------------
   // Check it hasn't been killed
   bool is_alive() { return alive; }
 
