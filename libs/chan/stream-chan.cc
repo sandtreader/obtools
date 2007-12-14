@@ -62,7 +62,8 @@ void StreamWriter::rewind(size_t n) throw (Error)
   if (n<=offset)
   {
     offset-=n;
-    sout.seekp(-n, ios_base::cur);
+    sout.seekp(-(streamoff)n, ios_base::cur);
+    if (!sout) throw Error(2, "Can't rewind");
   }
   else throw Error(1, "Rewound too far");
 }
