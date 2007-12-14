@@ -38,7 +38,8 @@ void StreamReader::rewind(size_t n) throw (Error)
   if (n<=offset)
   {
     offset-=n;
-    sin.seekg(-n, ios_base::cur);
+    sin.seekg(-(streamoff)n, ios_base::cur);
+    if (!sin) throw Error(2, "Can't rewind");
   }
   else throw Error(1, "Rewound too far");
 }
