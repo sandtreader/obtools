@@ -721,6 +721,10 @@ public:
   TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl);
 
   //--------------------------------------------------------------------------
+  // Constructor from existing fd
+  TCPClient(int fd, EndPoint remote);
+
+  //--------------------------------------------------------------------------
   // Get server endpoint
   EndPoint get_server() const { return server; }
 

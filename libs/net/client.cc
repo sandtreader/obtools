@@ -119,6 +119,14 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl):
   }
 }
 
+//--------------------------------------------------------------------------
+// Constructor from existing fd
+TCPClient::TCPClient(int _fd, EndPoint remote): 
+  TCPSocket(_fd), server(remote), connected(true)
+{
+
+}
+
 }} // namespaces
 
 
