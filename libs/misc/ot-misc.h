@@ -373,6 +373,10 @@ public:
   len_t coverage() const;
 
   //------------------------------------------------------------------------
+  // Get number of ranges
+  int count() const { return ranges.size(); }
+
+  //------------------------------------------------------------------------
   // Check if the set is complete up to total_length
   bool is_complete() const { return contains(0, total_length); } 
 
