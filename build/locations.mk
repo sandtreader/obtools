@@ -28,7 +28,7 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  hash:libs/hash:-:NOLIB  		\
 	  init:libs/init:xml			\
 	  log:libs/log:text,time 		\
-	  misc:libs/misc:xml   			\
+	  misc:libs/misc:xml,chan		\
 	  mt:libs/mt       			\
 	  net:libs/net     			\
 	  regen:libs/regen 			\
