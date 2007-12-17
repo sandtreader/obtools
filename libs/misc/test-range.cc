@@ -62,6 +62,8 @@ int main()
     cout << "Coverage: " << s.coverage() << ", " 
 	 << s.percentage_complete() << "%\n";
     cout << "Includes 15,5? " << (s.contains(15,5)?"Yes":"No") << endl;
+
+    // Test XML
     cout << "XML:\n";
     XML::Element e("rangeset");
     s.add_to_xml(e);
@@ -71,6 +73,22 @@ int main()
     cout << "Read back from XML (total length " << s2.total_length << "):\n";
     cout << s2 << endl;
 
+    // Test binary
+    cout << "Binary:\n";
+    unsigned char buf[8000];
+    Channel::BlockWriter bw(buf, sizeof(buf));
+    s.write(bw);
+
+    Misc::Dumper dumper(cout);
+    dumper.dump(buf, bw.get_offset());
+
+    Misc::RangeSet s3;
+    Channel::BlockReader br(buf, bw.get_offset());
+    s3.read(br);
+    cout << "Read back from binary (total length "<< s3.total_length<< "):\n";
+    cout << s3 << endl;
+
+    // Invert
     Misc::RangeSet inv = s.invert();
     cout << "Inverse:\n";
     cout << inv;

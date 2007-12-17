@@ -18,6 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include "ot-xml.h"
+#include "ot-chan.h"
 
 namespace ObTools { namespace Misc { 
 
@@ -410,6 +411,16 @@ public:
   // and adds total_length attribute to parent
   void add_to_xml(XML::Element& parent, 
 		  const string& element_name="range") const;
+
+  //------------------------------------------------------------------------
+  // Read as binary from a channel;  format as below
+  void read(Channel::Reader& chan) throw(Channel::Error);
+
+  //------------------------------------------------------------------------
+  // Write as binary to a channel
+  // Format is 4-byte count of entries, then alternating 64-bit offset, length
+  // All values NBO
+  void write(Channel::Writer& chan) const throw(Channel::Error);
 
   //------------------------------------------------------------------------
   // Dump the set to the given output, one line per range, in form

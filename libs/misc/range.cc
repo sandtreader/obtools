@@ -303,6 +303,37 @@ void RangeSet::add_to_xml(XML::Element& parent,
 }
 
 //------------------------------------------------------------------------
+// Read as binary from a channel;  format as below
+void RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
+{
+  total_length = chan.read_nbo_64();
+  uint32_t n = chan.read_nbo_32();
+  while (n--)
+  {
+    uint64_t start = chan.read_nbo_64();
+    uint64_t length = chan.read_nbo_64();
+    insert(start, length);
+  }
+}
+
+//------------------------------------------------------------------------
+// Write as binary to a channel
+// Format is 64-bit total length, then 4-byte count of entries, 
+// then alternating 64-bit offset, length
+// All values NBO
+void RangeSet::write(Channel::Writer& chan) const throw(Channel::Error)
+{
+  chan.write_nbo_64(total_length);
+  chan.write_nbo_32(ranges.size());
+  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    chan.write_nbo_64(r.start);
+    chan.write_nbo_64(r.length);
+  }
+}
+
+//------------------------------------------------------------------------
 // Dump the set to the given output, one line per range, in form
 // start, length
 void RangeSet::dump(ostream& sout) const
