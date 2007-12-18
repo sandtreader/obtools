@@ -247,7 +247,12 @@ Client::Client(Net::EndPoint _server, const string& _name):
 {
   socket = 0;
 
-  //Start send and receive threads - receive thread will 'restart' socket
+  // Try to start socket the first time, to try to ensure it's up before we
+  // start to send messages
+  Log::Streams log;
+  restart_socket(log);
+
+  // Start send and receive threads
   receive_thread = new ClientReceiveThread(*this);
   send_thread    = new ClientSendThread(*this);
 }
