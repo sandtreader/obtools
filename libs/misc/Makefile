@@ -17,6 +17,8 @@ TESTCMD	= ./test-md5 && ./test-crc hello && ./test-crc32 hello \
        && ./test-random \
        && ./test-dump && ./test-range < ../test-range.dat
 
+SOCKET  = 1  # Because chan needs net
+
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 

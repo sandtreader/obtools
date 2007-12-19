@@ -10,6 +10,7 @@
 #include "ot-net.h"
 #ifdef __WIN32__
 #include <io.h>
+#include <ws2tcpip.h>
 #define SOCKCLOSE closesocket
 #define SOCKIOCTL ioctlsocket
 #define SOCKERRNO WSAGetLastError()

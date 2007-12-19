@@ -10,8 +10,8 @@ SUBS = xml xmi cppt regen text mt net chan misc time log cache   \
        cli init web soap file crypto hash tube superlibs
 
 #Different for cross compile
-SUBS_CROSS = xml xmi cppt regen misc text mt net time log cache \
-             cli init web soap chan file crypto hash tube superlibs
+SUBS_CROSS = xml xmi cppt regen text mt net chan misc time log cache \
+             cli init web soap file crypto hash tube superlibs
 
 ROOT = ..
 include ../build/dir.mk
