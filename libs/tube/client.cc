@@ -11,9 +11,6 @@
 #include "ot-log.h"
 #include "ot-misc.h"
 
-#include <unistd.h>
-#include <sstream>
-
 // Time to sleep for if socket dies and won't come back
 #define DEAD_SOCKET_SLEEP_TIME 10
 

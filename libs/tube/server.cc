@@ -11,9 +11,6 @@
 #include "ot-log.h"
 #include "ot-misc.h"
 
-#include <unistd.h>
-#include <sstream>
-
 // Default maximum send queue length
 #define DEFAULT_MAX_SEND_QUEUE 1024
 
@@ -206,7 +203,7 @@ void Server::process(Net::TCPSocket& socket,
 // Constructor
 Server::Server(int port, const string& _name, int backlog, 
 	       int min_spare_threads, int max_threads):
-  TCPServer(port, backlog, min_spare_threads, max_threads),
+  Net::TCPServer(port, backlog, min_spare_threads, max_threads),
   alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
@@ -216,7 +213,7 @@ Server::Server(int port, const string& _name, int backlog,
 // Constructor
 Server::Server(Net::EndPoint local, const string& _name, int backlog, 
 	       int min_spare_threads, int max_threads):
-  TCPServer(local, backlog, min_spare_threads, max_threads),
+  Net::TCPServer(local, backlog, min_spare_threads, max_threads),
   alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
