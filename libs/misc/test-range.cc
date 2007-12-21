@@ -63,6 +63,18 @@ int main()
 	 << s.percentage_complete() << "%\n";
     cout << "Includes 15,5? " << (s.contains(15,5)?"Yes":"No") << endl;
 
+    // Set operations
+    Misc::RangeSet so;
+    so.insert(0,10);
+    so.insert(50,10);
+
+    cout << "+{0,10;50,10}:\n";
+    cout << (s+so);
+    cout << "-{0,10;50,10}:\n";
+    cout << (s-so);
+    cout << "^{0,10;50,10}:\n";
+    cout << (s^so);
+
     // Test XML
     cout << "XML:\n";
     XML::Element e("rangeset");
@@ -89,13 +101,15 @@ int main()
     cout << s3 << endl;
 
     // Invert
-    Misc::RangeSet inv = s.invert();
+    Misc::RangeSet inv = s.inverse();
     cout << "Inverse:\n";
     cout << inv;
+    // Gauge
     cout << "[" << inv.gauge(inv.total_length<50?inv.total_length:50) << "]" 
 	 << " (" << inv.total_length << ")\n";
 
     cout << "\n-----------------------------------------------------------------------------\n\n";
+
   }
 
   return 0;  

@@ -87,6 +87,17 @@ void RangeSet::insert(RangeSet::off_t start, RangeSet::len_t length)
 }
 
 //------------------------------------------------------------------------
+// Insert a range set (inserts every element = set union)
+void RangeSet::insert(const RangeSet& o)
+{
+  for(list<Range>::const_iterator p = o.ranges.begin(); p!=o.ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    insert(r.start, r.length);
+  }
+}
+
+//------------------------------------------------------------------------
 // Remove a range
 void RangeSet::remove(RangeSet::off_t start, RangeSet::len_t length)
 {
@@ -150,6 +161,17 @@ void RangeSet::remove(RangeSet::off_t start, RangeSet::len_t length)
 }
 
 //------------------------------------------------------------------------
+// Remove a range set (removes every element = set difference)
+void RangeSet::remove(const RangeSet& o)
+{
+  for(list<Range>::const_iterator p = o.ranges.begin(); p!=o.ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    remove(r.start, r.length);
+  }
+}
+
+//------------------------------------------------------------------------
 // Check if a given range is all present
 bool RangeSet::contains(off_t start, len_t length) const
 {
@@ -181,7 +203,7 @@ RangeSet::len_t RangeSet::coverage() const
 
 //------------------------------------------------------------------------
 // Return a new set of all the 'holes' in the set
-RangeSet RangeSet::invert() const
+RangeSet RangeSet::inverse() const
 {
   RangeSet inverse;
   const Range *last = 0;
@@ -213,6 +235,23 @@ RangeSet RangeSet::invert() const
   // Total length is the same as ours
   inverse.total_length = total_length;
   return inverse;
+}
+
+//------------------------------------------------------------------------
+// Return a new set which is the intersection of this set with another
+RangeSet RangeSet::intersection(const RangeSet& o) const
+{
+  // Ensure the other set extends to the same size as we do
+  RangeSet o2 = o;
+  o2.total_length = total_length;
+
+  // Get the inverse of the other set, to our full length
+  RangeSet io2 = o2.inverse();
+
+  // Subtract this from us - thus removing anything that is not in o
+  RangeSet r = *this;
+  r.remove(io2);
+  return r;
 }
 
 //------------------------------------------------------------------------

@@ -357,8 +357,40 @@ public:
   void insert(off_t start, len_t length);
 
   //------------------------------------------------------------------------
+  // Insert a range set (inserts every element = set union)
+  void insert(const RangeSet& o);
+
+  //------------------------------------------------------------------------
+  // Set union and addition operator
+  RangeSet set_union(const RangeSet& o) const
+  { RangeSet r=*this; r.insert(o); return r; }
+
+  RangeSet operator+(const RangeSet& o) const { return set_union(o); }
+
+  //------------------------------------------------------------------------
   // Remove a range
   void remove(off_t start, len_t length);
+
+  //------------------------------------------------------------------------
+  // Remove a range set (removes every element = set difference)
+  void remove(const RangeSet& o);
+
+  //------------------------------------------------------------------------
+  // Set difference, and subtraction operator
+  RangeSet difference(const RangeSet& o) const
+  { RangeSet r=*this; r.remove(o); return r; }
+
+  RangeSet operator-(const RangeSet& o) { return difference(o); }
+
+  //------------------------------------------------------------------------
+  // Return a new set of all the 'holes' in the set, up to the total_length
+  RangeSet inverse() const;
+
+  //------------------------------------------------------------------------
+  // Return a new set which is the intersection of this set with another
+  // and ^ operator
+  RangeSet intersection(const RangeSet& o) const;
+  RangeSet operator^(const RangeSet& o) const { return intersection(o); }
 
   //------------------------------------------------------------------------
   // Clear the set
@@ -384,10 +416,6 @@ public:
   // Get percentage coverage
   int percentage_complete() 
   { return total_length?(100*coverage()/total_length):100; }
-
-  //------------------------------------------------------------------------
-  // Return a new set of all the 'holes' in the set, up to the total_length
-  RangeSet invert() const;
 
   //------------------------------------------------------------------------
   // Show the set as a string 'fuel gauge' of the given string length
