@@ -255,7 +255,7 @@ RangeSet RangeSet::intersection(const RangeSet& o) const
 }
 
 //------------------------------------------------------------------------
-// Show the set as a string 'fuel gauge' of the given string length
+// Show the set as a string 'fuel gauge' of the given max string length
 // Each character in the string maps to a fractional part of the range
 // (measured to total_length):
 //   ' ' (space):  No range present in this fraction
@@ -263,10 +263,14 @@ RangeSet RangeSet::intersection(const RangeSet& o) const
 //   '='        :  Full range present in this fraction
 // Most simply, this gives a fuel gauge for monotonically increasing
 // ranges, but also allows for insertion at multiple points
+// If length is more than the total length of the range, it is reduced to it
+// (a character can never represent less than 1 unit)
 string RangeSet::gauge(unsigned int length) const
 {
   list<Range>::const_iterator p = ranges.begin(); 
   string s;
+
+  if (length > total_length) length = total_length;
 
   for(unsigned int i=0; i<length; i++)
   {

@@ -418,7 +418,7 @@ public:
   { return total_length?(100*coverage()/total_length):100; }
 
   //------------------------------------------------------------------------
-  // Show the set as a string 'fuel gauge' of the given string length
+  // Show the set as a string 'fuel gauge' of the given max string length
   // Each character in the string maps to a fractional part of the range
   // (measured to total_length):
   //   ' ' (space):  No range present in this fraction
@@ -426,6 +426,8 @@ public:
   //   '='        :  Full range present in this fraction
   // Most simply, this gives a fuel gauge for monotonically increasing
   // ranges, but also allows for insertion at multiple points
+  // If length is more than the total length of the range, it is reduced to it
+  // (a character can never represent less than 1 unit)
   string gauge(unsigned int length=50) const;
 
   //------------------------------------------------------------------------

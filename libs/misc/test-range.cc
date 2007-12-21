@@ -56,8 +56,7 @@ int main()
     }
 
     cout << s;
-    cout << "[" << s.gauge(s.total_length<50?s.total_length:50) << "]" 
-	 << " (" << s.total_length << ")\n";
+    cout << "[" << s.gauge(50) << "]" << " (" << s.total_length << ")\n";
     cout << "Complete? " << (s.is_complete()?"Yes":"No") << endl;
     cout << "Coverage: " << s.coverage() << ", " 
 	 << s.percentage_complete() << "%\n";
@@ -105,8 +104,7 @@ int main()
     cout << "Inverse:\n";
     cout << inv;
     // Gauge
-    cout << "[" << inv.gauge(inv.total_length<50?inv.total_length:50) << "]" 
-	 << " (" << inv.total_length << ")\n";
+    cout << "[" << inv.gauge(50) << "]"  << " (" << inv.total_length << ")\n";
 
     cout << "\n-----------------------------------------------------------------------------\n\n";
 
