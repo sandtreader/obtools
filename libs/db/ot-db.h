@@ -71,6 +71,10 @@ struct Row
   void add(string fieldname, int value);
 
   //------------------------------------------------------------------------
+  // Add a 64-bit integer value to row
+  void add_int64(string fieldname, uint64_t value);
+
+  //------------------------------------------------------------------------
   // Add boolean value to row
   void add(string fieldname, bool value);
 

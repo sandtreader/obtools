@@ -21,6 +21,13 @@ void Row::add(string fieldname, int value)
 }
 
 //------------------------------------------------------------------------
+// Add 64-bit integer value to row
+void Row::add_int64(string fieldname, uint64_t value)
+{
+  fields[fieldname] = Text::i64tos(value);
+}
+
+//------------------------------------------------------------------------
 // Add boolean value to row
 void Row::add(string fieldname, bool value)
 {
