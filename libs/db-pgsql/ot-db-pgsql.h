@@ -69,6 +69,10 @@ public:
   Connection(const string& conninfo);
 
   //------------------------------------------------------------------------
+  //Check if connection is really OK
+  bool ok();
+
+  //------------------------------------------------------------------------
   //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
   //Returns whether successful
   bool exec(const string& sql);

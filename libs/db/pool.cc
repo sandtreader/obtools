@@ -3,13 +3,15 @@
 //
 // Connection pooling
 //
-// Copyright (c) 2007 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2008 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
 #include "ot-db.h"
 #include "ot-log.h"
 #include <algorithm>
+
+#define BACKGROUND_SLEEP_TIME 10
 
 namespace ObTools { namespace DB {
 
@@ -50,24 +52,38 @@ ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
 // Create connections to minimum level (call within mutex)
 void ConnectionPool::fill_to_minimum()
 {
-  // Create minimum number of connections
-  for(unsigned i=connections.size(); i<min_connections; i++)
+  if (connections.size() < min_connections)
   {
-    Connection *conn = factory.create();
-    if (conn)
+    Log::Streams log;
+    log.detail << "Filling database connection pool with "
+	       << min_connections-connections.size() << " connections\n";
+
+    // Create minimum number of connections
+    for(unsigned i=connections.size(); i<min_connections; i++)
     {
-      if (!!*conn)
+      Connection *conn = factory.create();
+      if (conn)
       {
-	connections.push_back(conn);
-	available.push_back(conn);
-	last_used[conn] = Time::Stamp::now();
-      }
-      else
-      {
-	delete conn;
-	break;
+	if (!!*conn && conn->ok())
+	{
+	  connections.push_back(conn);
+	  available.push_back(conn);
+	  last_used[conn] = Time::Stamp::now();
+	}
+	else
+	{
+	  delete conn;
+	  break;
+	}
       }
     }
+  }
+
+  if (connections.size() < min_connections)
+  {
+    Log::Streams log;
+    log.error << "Can't fill database connection pool: "
+	       << min_connections-connections.size() << " failed\n";
   }
 }
 
@@ -80,12 +96,30 @@ Connection *ConnectionPool::claim()
   Connection *conn;
 
   // Check if we have one available
-  if (available.size())
+  while (available.size())
   {
     conn = available.front();
     available.pop_front();
-    last_used[conn] = Time::Stamp::now();
-    return conn;
+
+    // Check it's OK
+    if (!!*conn && conn->ok())
+    {
+      last_used[conn] = Time::Stamp::now();
+      OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
+			   dlog.debug << "Database connection claimed - "
+			   << connections.size() << " total, "
+			   << available.size() << " available\n";)
+      return conn;
+    }
+
+    // Otherwise delete it
+    Log::Streams log;
+    log.error << "Database connection failed - deleting from pool\n";
+
+    map<Connection *, Time::Stamp>::iterator p = last_used.find(conn);
+    if (p!=last_used.end()) last_used.erase(p);
+    connections.remove(conn);
+    delete conn;
   }
 
   // Are we allowed to create any more?
@@ -95,10 +129,14 @@ Connection *ConnectionPool::claim()
     conn = factory.create();
     if (conn)
     {
-      if (!!*conn)
+      if (!!*conn && conn->ok())
       {
 	connections.push_back(conn);
 	last_used[conn] = Time::Stamp::now();
+
+	OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
+			     dlog.debug << "New database connection created - "
+			     << "now "<< connections.size() << " in total\n";)
 	return conn;
       }
       else
@@ -125,7 +163,13 @@ void ConnectionPool::release(Connection *conn)
 
   // Check for double release
   if (find(available.begin(), available.end(), conn) == available.end())
+  {
     available.push_back(conn);
+    OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
+			 dlog.debug << "Database connection released - " 
+			 << connections.size() << " total, "
+			 << available.size() << " available\n";)
+  }
   else
   {
     Log::Streams log;
@@ -145,6 +189,29 @@ void ConnectionPool::run_background()
       MT::Lock lock(mutex);
       Time::Stamp now = Time::Stamp::now();
 
+      // Look for idle connections which have died
+      // Note:  We only check available (idle) connections because
+      // we can't be sure the ok() operation is thread-safe if it's
+      // being used 
+      for(list<Connection *>::iterator p = available.begin(); 
+	  p!=available.end();)
+      {
+	list<Connection *>::iterator q = p++;
+        Connection *conn = *q;
+
+	if (!*conn || !conn->ok())
+	{
+	  log.error<< "Idle database connection failed - removing from pool\n";
+	  
+	  map<Connection *, Time::Stamp>::iterator lp = last_used.find(conn);
+	  if (lp!=last_used.end()) last_used.erase(lp);
+	  available.erase(q);
+	  connections.remove(conn);
+	  delete conn;
+	}
+      }
+
+      // Now look for inactive ones to reap
       for(map<Connection *, Time::Stamp>::iterator p = last_used.begin(); 
 	  p!=last_used.end();)
       {
@@ -169,6 +236,7 @@ void ConnectionPool::run_background()
 	    last_used.erase(q);
 	    connections.remove(conn);
 	    available.remove(conn);
+	    delete conn;
 	  }
 	}
       }
@@ -177,7 +245,7 @@ void ConnectionPool::run_background()
       fill_to_minimum();
     }
 
-    sleep(1);
+    MT::Thread::sleep(BACKGROUND_SLEEP_TIME);
   }
 }
 

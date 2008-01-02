@@ -98,6 +98,17 @@ Connection::Connection(const string& conninfo):
 }
 
 //------------------------------------------------------------------------
+//Check whether connection is OK
+bool Connection::ok()
+{
+  PGconn *conn = (PGconn *)pgconn;
+  if (PQstatus(conn) == CONNECTION_OK) return true;
+
+  log.error << "Postgres connection failed: " << PQerrorMessage(conn) << endl;
+  return false;
+}
+
+//------------------------------------------------------------------------
 //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
 //Returns whether successful
 bool Connection::exec(const string& sql)

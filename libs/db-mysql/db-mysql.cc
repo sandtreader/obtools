@@ -121,6 +121,17 @@ Connection::Connection(const string& host, const string& user,
 }
 
 //------------------------------------------------------------------------
+//Check whether connection is OK
+bool Connection::ok()
+{
+  MYSQL *conn = (MYSQL *)myconn;
+  if (!mysql_ping(conn)) return true;
+
+  log.error << "MySQL connection failed: " << mysql_error(conn) << endl;
+  return false;
+}
+
+//------------------------------------------------------------------------
 //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
 //Returns whether successful
 bool Connection::exec(const string& sql)

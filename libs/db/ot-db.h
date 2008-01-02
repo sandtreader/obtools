@@ -245,6 +245,10 @@ public:
   // Virtual functions implemented by driver subclass
 
   //------------------------------------------------------------------------
+  //Check if connection is really OK
+  virtual bool ok()=0;
+
+  //------------------------------------------------------------------------
   //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
   //Returns whether successful
   virtual bool exec(const string& sql)=0;
