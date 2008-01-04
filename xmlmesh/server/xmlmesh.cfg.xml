@@ -55,7 +55,7 @@
 
     <!-- Onward clients - to forward messages to another server, or to
          subscribe for messages from another server.  Client connects to
-	 given 'server' and 'port' (default 29167)
+	 given 'server' and 'port' (default 29167) -->
     <!-- <otmp-client server="another-server" port="29167" id="uplink"> -->
       <!-- Each subscription element subscribes the client to the given
            'subject' pattern on the remote server -->
