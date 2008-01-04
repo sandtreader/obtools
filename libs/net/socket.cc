@@ -163,6 +163,40 @@ void Socket::set_tos(int tos)
 }
 
 //--------------------------------------------------------------------------
+// Join a multicast group address (IP_ADD_MEMBERSHIP)
+bool Socket::join_multicast(IPAddress address)
+{
+#ifdef __WIN32__
+#warning join_multicast not implemented in Windows
+  return false;
+#else
+  struct ip_mreqn mreq;
+  mreq.imr_multiaddr.s_addr = address.nbo();
+  mreq.imr_address.s_addr = INADDR_ANY;
+  mreq.imr_ifindex = 0; 
+
+  return !setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
+#endif
+}
+
+//--------------------------------------------------------------------------
+// Leave a multicast group address (IP_DROP_MEMBERSHIP)
+bool Socket::leave_multicast(IPAddress address)
+{
+#ifdef __WIN32__
+#warning leave_multicast not implemented in Windows
+  return false;
+#else
+  struct ip_mreqn mreq;
+  mreq.imr_multiaddr.s_addr = address.nbo();
+  mreq.imr_address.s_addr = INADDR_ANY;
+  mreq.imr_ifindex = 0; 
+
+  return !setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq));
+#endif
+}
+
+//--------------------------------------------------------------------------
 // Bind to a local port (TCP or UDP servers), all local addresses
 // Whether successful
 bool Socket::bind(int port)
@@ -586,6 +620,21 @@ UDPSocket::UDPSocket(EndPoint local, bool)
 UDPSocket::UDPSocket(EndPoint remote)
 {
   fd = socket(PF_INET, SOCK_DGRAM, 0); 
+
+  struct sockaddr_in saddr;
+  remote.set(saddr);
+
+  if (fd!=INVALID_FD && connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+    close();
+}
+
+//--------------------------------------------------------------------------
+// Constructor - allocates socket and binds to local specific interface
+// and then connects to remote port (UDP client)
+UDPSocket::UDPSocket(EndPoint local, EndPoint remote)
+{
+  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  if (!Socket::bind(local)) close();
 
   struct sockaddr_in saddr;
   remote.set(saddr);

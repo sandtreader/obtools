@@ -80,6 +80,15 @@ public:
   bool operator!() const { return address==BADADDR; }
 
   //--------------------------------------------------------------------------
+  // Check for broadcast
+  bool is_broadcast() const { return !address || address==BADADDR; }
+
+  //--------------------------------------------------------------------------
+  // Check for multicast (224-239.x.x.x)
+  bool is_multicast() const 
+  { return (address >> 28) == 0xE; }  // Top byte is 1110
+
+  //--------------------------------------------------------------------------
   // & operator - get network number given a mask
   IPAddress operator&(const IPAddress& mask) const 
   { return IPAddress(address & mask.address); }
@@ -398,6 +407,14 @@ public:
   void set_tos(int tos);
 
   //--------------------------------------------------------------------------
+  // Join a multicast group address (IP_ADD_MEMBERSHIP)
+  bool join_multicast(IPAddress address);
+
+  //--------------------------------------------------------------------------
+  // Leave a multicast group address (IP_DROP_MEMBERSHIP)
+  bool leave_multicast(IPAddress address);
+
+  //--------------------------------------------------------------------------
   // Bind to a local port (TCP or UDP servers), all local addresses
   // Whether successful
   bool bind(int port);
@@ -627,6 +644,11 @@ public:
   // Constructor - allocates socket and connects to remote port (UDP client)
   // Use this to obtain local addressing for packets sent to this endpoint
   UDPSocket(EndPoint remote);
+
+  //--------------------------------------------------------------------------
+  // Constructor - allocates socket and binds to local specific interface
+  // and then connects to remote port (UDP client)
+  UDPSocket(EndPoint local, EndPoint remote);
 
   //--------------------------------------------------------------------------
   // Enable broadcast on this socket
