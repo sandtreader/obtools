@@ -13,15 +13,11 @@ NAME += xmlmesh-receive
 endif
 
 DEBIAN-NAME    = ot-xmlmesh-cli
-DEBIAN-VERSION = 2.0.1
+DEBIAN-VERSION = 2.1.0
 DEBIAN-REVISION = 1
 
-ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
 	  net log xml soap web text misc mt tube
-else
-DEPENDS	= ot-xmlmesh2 ot-general2
-endif
 
 SOCKET = 1
 
