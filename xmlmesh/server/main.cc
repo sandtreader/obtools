@@ -9,6 +9,7 @@
 
 #include "server.h"
 #include "ot-log.h"
+#include "ot-file.h"
 #include <fstream>
 #include <errno.h>
 
@@ -90,9 +91,59 @@ int main(int argc, char **argv)
   // Configure server 
   server.configure(config);
 
+  // Drop privileges if root
+  if (!getuid())
+  {
+    string username = config["security/@user"];
+    string groupname = config["security/@group"];
+
+    // Set group first - needs to still be root
+    if (!groupname.empty())
+    {
+      gid_t gid = File::Path::group_name_to_id(groupname);
+
+      if (gid)
+      {
+	log.summary << "Changing to group " << groupname 
+		    << " (" << gid << ")\n";
+	if (setgid(gid))
+	{
+	  log.error << "Can't change group: " << strerror(errno) << endl;
+	  goto shutdown;
+	}
+      }
+      else 
+      {
+	log.error << "Can't find group " << groupname << "\n";
+	goto shutdown;
+      }
+    }
+
+    if (!username.empty())
+    {
+      uid_t uid = File::Path::user_name_to_id(username);
+
+      if (uid)
+      {
+	log.summary << "Changing to user " << username << " (" << uid << ")\n";
+	if (setuid(uid))
+	{
+	  log.error << "Can't change user: " << strerror(errno) << endl;
+	  goto shutdown;
+	}
+      }
+      else 
+      {
+	log.error << "Can't find user " << username << "\n";
+	goto shutdown;
+      }
+    }
+  }
+  
   // Run server (never returns)
   server.run();
 
+shutdown:
   return 0;  
 }
 

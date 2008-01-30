@@ -1,6 +1,6 @@
 <!-- 
   Configuration file for ObTools XMLMesh server
-  Copyright (c) xMill Consulting Limited 2005.  All rights reserved.
+  Copyright (c) xMill Consulting Limited 2005-2008.  All rights reserved.
 -->
 
 <xmlmesh>
@@ -25,6 +25,9 @@
   -->
   <log level="2" file="/var/log/obtools/xmlmesh.log"
        timestamp="%a %d %b %H:%M:%*S [%*L]: "/>
+
+  <!-- Drop to ordinary user privileges -->
+  <security user="nobody" group="nogroup"/>
 
   <!-- Configured service modules - each has an 'id' used in routing below -->
   <services>

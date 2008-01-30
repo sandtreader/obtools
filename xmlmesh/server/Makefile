@@ -12,12 +12,12 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 	  correlator.o publisher.o
 
 DEBIAN-NAME    = ot-xmlmesh
-DEBIAN-VERSION = 2.4.0
+DEBIAN-VERSION = 2.4.1
 DEBIAN-REVISION = 1
 
 #Always build statically
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
-          net log mt xml soap web text cache init misc tube
+          net log mt xml soap web text cache init misc tube file
 
 ifdef RELEASE
 ifndef MINGW
