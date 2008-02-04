@@ -91,6 +91,7 @@ int main(int argc, char **argv)
   // Configure server 
   server.configure(config);
 
+#ifndef __WIN32__
   // Drop privileges if root
   if (!getuid())
   {
@@ -139,6 +140,7 @@ int main(int argc, char **argv)
       }
     }
   }
+#endif
   
   // Run server (never returns)
   server.run();
