@@ -21,7 +21,7 @@ Element::Element(XMI::Reader& rdr, XML::Element& xe):
   id = source.get_attr("xmi.id");
 
   //If id is valid, add myself to the reader's idmap
-  if (!id.empty()) reader.record_element(id, this);
+  if (!id.empty()) reader.record_uml_element(id, this);
 }    
 
 
@@ -196,7 +196,7 @@ Element *Element::get_element_property(const string& attr_name,
 
   if (idref.empty()) return 0;
 
-  Element *e=reader.lookup_element(idref);
+  Element *e=reader.lookup_uml_element(idref);
   if (e) return e;
 
   reader.warning("Non-connected type idref in id ", id);
@@ -243,7 +243,7 @@ GeneralizableElement *Element::get_ge_property(const string& attr_name,
 // Element header printer 
 void Element::print_header(ostream& sout)
 {
-  sout << source.name << "(" << id << ")";
+  sout << source.name;
 }
 
 //--------------------------------------------------------------------------

@@ -24,13 +24,6 @@ Reader::Reader(ostream&s):
   xml_parser.fix_namespace("org.omg/UML1.3", "UML");
 }
 
-//--------------------------------------------------------------------------
-// Destructor
-Reader::~Reader()
-{
-  if (model) delete model;
-}
-
 //------------------------------------------------------------------------
 // Warning handler
 void Reader::warning(const char *warn, const string& detail) 
@@ -48,22 +41,48 @@ void Reader::error(const char *err, const string& detail)
 }
 
 //------------------------------------------------------------------------
-//Record an ID to element mappimg
-void Reader::record_element(const string& id, UML::Element *e)
+//Record an ID to UML element mappimg
+void Reader::record_uml_element(const string& id, UML::Element *e)
 {
-  idmap[id]=e;
+  uml_element_map[id]=e;
 }
 
 //------------------------------------------------------------------------
-// Lookup an element in the idmap by ID
+// Lookup an element in the UML element map by ID
 // Returns 0 if failed
-UML::Element *Reader::lookup_element(const string& id)
+UML::Element *Reader::lookup_uml_element(const string& id)
 {
-  map<string,UML::Element *>::iterator p=idmap.find(id);
-  if (p!=idmap.end())
-    return p->second;
+  map<string,UML::Element *>::iterator p=uml_element_map.find(id);
+  if (p!=uml_element_map.end()) return p->second;
 
-  warning("Bad element reference idref ", id);
+  warning("Bad UML element reference idref ", id);
+  return 0;
+}
+
+//------------------------------------------------------------------------
+// Gather XML element IDs from this element, and recurse
+void Reader::gather_xml_element_ids(XML::Element& e)
+{
+  //Get id 
+  string id = e["xmi.id"];
+
+  if (!id.empty())
+    xml_element_map[id] = &e;
+
+  // Recurse
+  for(XML::Element::iterator p(e.children); p; ++p)
+    gather_xml_element_ids(*p);
+}
+
+//------------------------------------------------------------------------
+// Lookup an element in the XML element map by ID
+// Returns 0 if failed
+XML::Element *Reader::lookup_xml_element(const string& id)
+{
+  map<string,XML::Element *>::iterator p=xml_element_map.find(id);
+  if (p!=xml_element_map.end()) return p->second;
+
+  warning("Bad XML element reference idref ", id);
   return 0;
 }
 
@@ -220,6 +239,9 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   XML::Element& modele = xmi_content.get_child("UML:Model");
   if (!modele.valid()) error("No <UML:Model> in <XMI.content>");
 
+  // Read elements with an ID into XML element map
+  gather_xml_element_ids(modele);
+
   //Now read model into a UML Model
   model = new UML::Model(*this, modele, uml_version);
 }
@@ -230,6 +252,13 @@ istream& ObTools::XMI::operator>>(istream& s, Reader& p) throw (ParseFailed)
 { 
   p.read_from(s);
   return s;
+}
+
+//--------------------------------------------------------------------------
+// Destructor
+Reader::~Reader()
+{
+  if (model) delete model;
 }
 
 

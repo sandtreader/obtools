@@ -52,7 +52,7 @@ struct Multiplicity
 
   // Reads multiplicity from UML:Multiplicity subelement
   // Returns default (1,1) if not found
-  static Multiplicity read_from(XML::Element& pare);
+  static Multiplicity read_from(XML::Element& pare, XMI::Reader& reader);
 };
 
 ostream& operator<<(ostream& s, const Multiplicity& m);
@@ -590,7 +590,7 @@ public:
 };
 
 //==========================================================================
-// UML StereoType 
+// UML Stereotype 
 // We don't bother with much of this except as a name, although it is
 // still inheritable from GE
 class Stereotype: public GeneralizableElement

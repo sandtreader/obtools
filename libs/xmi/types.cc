@@ -16,13 +16,25 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Reads multiplicity from UML:Multiplicity subelement
 // Returns default (1,1) if not found
-Multiplicity Multiplicity::read_from(XML::Element& pare)
+Multiplicity Multiplicity::read_from(XML::Element& pare,
+				     XMI::Reader& reader)
 {
   Multiplicity m;
+  XML::Element *real_me;
   XML::Element& me = pare.get_descendant("UML:Multiplicity");
-  if (me.valid())
+
+  // Check for ID ref
+  string idref = me["xmi.idref"];
+  if (!idref.empty())
   {
-    XML::Element& mr = me.get_descendant("UML:MultiplicityRange");
+    real_me = reader.lookup_xml_element(idref);
+    if (!real_me) return m;
+  }
+  else real_me = &me;  // Use this one
+
+  if (real_me->valid())
+  {
+    XML::Element& mr = real_me->get_descendant("UML:MultiplicityRange");
     if (mr.valid())
     {
       //Look either in attributes or sub-elements

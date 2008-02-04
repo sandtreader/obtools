@@ -22,7 +22,7 @@ Classifier::Classifier(XMI::Reader& rdr, XML::Element& xe)
   read_subelements("UML:Operation", create_element<Operation>, true);
 
   //Log me in the reader's classmap for instant access
-  reader.classmap[name] = this;
+  reader.class_map[name] = this;
 }
 
 

@@ -38,44 +38,61 @@ class Reader
 {
 private:
   ostream& serr;                       //error output stream
-  map<string, UML::Element *> idmap;   //map of ids to elements
+
+  // Map of IDs to created UML Elements
+  map<string, UML::Element *> uml_element_map;
+
+  // Map of ID'd XML elements for things like Multiplicity which aren't
+  // created in the model itself
+  map<string, XML::Element *> xml_element_map;  
 
   //We keep the following to ensure validity of the XML document for our
   //(and our model's) lifetime
   XML::Parser xml_parser;              
 
+  void gather_xml_element_ids(XML::Element& e);
   void upgrade_xmi_to_1_1(XML::Element &root);
-  void upgrade_uml_to_1_4(XML::Element &root);
 
 public:
   UML::Model *model;        
   double xmi_version;   // 0 if unknown  
-  map<string, UML::Classifier *> classmap;  //Public map of classifiers
+  map<string, UML::Classifier *> class_map;  // Map of classifiers
 
-  //Log a warning
-  void warning(const char *warn, const string& detail="");
-
-  //Log an error and bomb out
-  void error(const char *err, const string& detail="") throw (ParseFailed);
-
-  //Record an ID to element mappimg
-  void record_element(const string& id, UML::Element *e);
-
-  //Get element from ID - return 0 if not found
-  UML::Element *lookup_element(const string& id);
-
+  //------------------------------------------------------------------------
   // Constructor
   // s is output stream for parsing errors
   Reader(ostream &s=cerr);
-
-  // Destructor
-  ~Reader();
 
   //------------------------------------------------------------------------
   // Parse from given input stream
   // Throws ParseFailed if parse fails for any fatal reason
   // See also istream operator >> below, which is nicer
   void read_from(istream& s) throw (ParseFailed); 
+
+  //------------------------------------------------------------------------
+  // Log a warning
+  void warning(const char *warn, const string& detail="");
+
+  //------------------------------------------------------------------------
+  // Log an error and bomb out
+  void error(const char *err, const string& detail="") throw (ParseFailed);
+
+  //------------------------------------------------------------------------
+  // Record an ID to UML element mappimg
+  void record_uml_element(const string& id, UML::Element *e);
+
+  //------------------------------------------------------------------------
+  // Get UML element from ID - return 0 if not found
+  UML::Element *lookup_uml_element(const string& id);
+
+  //------------------------------------------------------------------------
+  // Get XML element from ID - return 0 if not found
+  // (Note: XML element map is built automatically)
+  XML::Element *lookup_xml_element(const string& id);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Reader();
 };
 
 //==========================================================================

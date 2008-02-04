@@ -22,7 +22,7 @@ AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe):
   is_navigable = get_bool_property("isNavigable", 
 				  "UML:AssociationEnd.isNavigable");
 
-  multiplicity = Multiplicity::read_from(source);
+  multiplicity = Multiplicity::read_from(source, reader);
 
   string ak  = get_property("aggregation", "UML:AssociationEnd.aggregation");
 

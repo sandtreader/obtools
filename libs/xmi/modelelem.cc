@@ -48,7 +48,7 @@ void ModelElement::build_refs()
 				    "UML:Stereotype");
   if (!idref.empty())
   {
-    Element *e=reader.lookup_element(idref);
+    Element *e=reader.lookup_uml_element(idref);
     if (e)
     {
       stereotype = dynamic_cast<Stereotype *>(e);

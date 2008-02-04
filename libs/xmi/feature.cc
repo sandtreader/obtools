@@ -43,7 +43,7 @@ StructuralFeature::StructuralFeature(XMI::Reader& rdr, XML::Element& xe):
   is_ordered = (get_property("ordering", "UML:StructuralFeature.ordering")
 		== "ordered");
 
-  multiplicity = Multiplicity::read_from(source);
+  multiplicity = Multiplicity::read_from(source, reader);
 }
 
 //--------------------------------------------------------------------------
