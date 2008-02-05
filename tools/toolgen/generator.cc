@@ -402,7 +402,9 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 
 	// Only output conditional if indexname is set
 	if (indexname.size()) sout << "  if (!" << indexname << ")\n  {\n  ";
-	generate_template(ce, te, tags, max_ci, indexname, countname, 
+	// Don't mess up outer max_ci with these fragments
+	int m = max_ci;
+	generate_template(ce, te, tags, m, indexname, countname, 
 			  mystream, script);
 	if (indexname.size()) sout << "  }\n";
       }
@@ -415,9 +417,28 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 	// Only output conditional if countname is set
 	if (countname.size()) 
 	  sout << "  if ("<<indexname<<"+1 == "<<countname<<")\n  {\n  ";
-	generate_template(ce, te, tags, max_ci, indexname, countname, 
+	int m = max_ci;
+	generate_template(ce, te, tags, m, indexname, countname, 
 			  mystream, script);
 	if (countname.size()) sout << "  }\n";
+      }
+      else if (ce.name == "xt:sep")  // Between items
+      {
+	// Process and clear script before conditional
+	process_script(script, tags, mystream, max_ci);
+	script.clear();
+
+	// Only output conditional if countname is set
+	if (countname.size()) 
+	  sout << "  if ("<<indexname<<"+1 < "<<countname<<")\n  {\n  ";
+	int m = max_ci;
+	generate_template(ce, te, tags, m, indexname, countname, 
+			  mystream, script);
+	if (countname.size()) sout << "  }\n";
+      }
+      else if (ce.name == "xt:nl")  // Force newline
+      {
+	sout << streamname << " << endl;\n";
       }
 
       // Recurse to sub-elements, except ignoring xt:xxx 
