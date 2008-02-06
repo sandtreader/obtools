@@ -30,7 +30,7 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  log:libs/log:text,time 		\
 	  misc:libs/misc:xml,chan		\
 	  mt:libs/mt       			\
-	  net:libs/net     			\
+	  net:libs/net:mt     			\
 	  regen:libs/regen 			\
 	  script:libs/script:log,misc,init	\
 	  soap:libs/soap:web,log,misc,xml	\
