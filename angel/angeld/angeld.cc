@@ -65,7 +65,7 @@ int main(int argc, char **argv)
   Log::Streams log;
 
 #if defined(DAEMON)
-  if (daemon(1, 1))
+  if (daemon(0, 0))
     log.error << "Can't become daemon: " << strerror(errno) << endl;
 
   // Create pid file
