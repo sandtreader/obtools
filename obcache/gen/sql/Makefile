@@ -6,10 +6,13 @@
 #==========================================================================
 
 TYPE	= exes
-NAME   	= ot-generate-sql-otpc-schema
-OBJS 	= ot-generate-sql-otpc-schema.o
+NAME   	= ot-generate-sql-otpc-schema \
+          ot-generate-sql-otpc-cpp-header
+OBJS 	= 
 DEPENDS = xmi regen text misc
-TESTCMD = ./ot-generate-sql-otpc-schema ../ot-generate-sql-otpc-schema.cfg.xml < ../../../models/test.xmi
+TESTCMD = ./ot-generate-sql-otpc-schema ../ot-generate-sql-otpc-schema.cfg.xml < ../../../models/test.xmi && \
+          ./ot-generate-sql-otpc-cpp-header ../ot-generate-sql-otpc-cpp.cfg.xml < ../../../models/test.xmi 
+
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
@@ -24,4 +27,7 @@ ot-generate-sql-otpc-schema.cc: ../schema.xmitoolgen.xml  \
                 Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 
+ot-generate-sql-otpc-cpp-header.cc: ../cpp-header.xmitoolgen.xml  \
+                Makefile $(XMITOOLGEN)
+	$(XMITOOLGEN) $< > $@
 
