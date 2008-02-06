@@ -8,7 +8,7 @@
 TYPE	= exe
 NAME   	= testtool
 OBJS 	= _testtool.o
-DEPENDS = xml regen text
+DEPENDS = xml regen text misc
 TESTCMD = ./testtool < ../test.xml
 VARIANTS = debug
 VARIANT-debug = DEBUG

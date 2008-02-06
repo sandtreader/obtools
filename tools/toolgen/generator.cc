@@ -61,6 +61,8 @@ void Generator::generate_legal()
   sout<< "\n// -- DO NOT EDIT -- \n\n";
   sout<<"//================================================================\n";
 
+#ifdef GPL
+  // !!! Needs rethinking if ever released under GPL
   sout<<"// This generated code is derived from two sources:\n";
   sout<<"//   1 - A standard tool framework created by ObTools toolgen\n";
   sout<<"//   2 - Code templates created from '" << config_file << "'\n";
@@ -108,6 +110,7 @@ void Generator::generate_legal()
   
   sout<<"//================================================================\n";
   sout<<"// Source 2: Code templates\n";
+#endif
   sout << config["xt:legal"] << endl;
   sout<<"//================================================================\n";
 }
@@ -118,11 +121,13 @@ void Generator::generate_includes()
 {
   sout << "\n#include \"ot-xml.h\"\n";
   sout << "\n#include \"ot-text.h\"\n";
+  sout << "\n#include \"ot-misc.h\"\n";
 
   sout << "#include <fstream>\n";
   sout << "#include <sstream>\n";
   sout << "#include <cstdlib>\n\n";
-  sout << "using namespace std;\n\n";
+  sout << "using namespace std;\n";
+  sout << "using namespace ObTools;\n\n";
 }
 
 //--------------------------------------------------------------------------
@@ -143,7 +148,7 @@ void Generator::generate_config_vars()
       ++p)
   {
     XML::Element *e = *p;
-    sout << "  map<string, string> " << e->get_attr("name") << ";\n";
+    sout << "  Misc::PropertyList " << e->get_attr("name") << ";\n";
   }
 
   // Produce variables for each variable
@@ -157,6 +162,60 @@ void Generator::generate_config_vars()
   }
 
   sout << "} _config;\n\n";
+}
+
+//--------------------------------------------------------------------------
+// Output code to read configuration items
+void Generator::generate_config_reader()
+{
+  string default_config_file = config["xt:config/@file"];
+  string config_root = config.get_value("xt:config/@root", "tool");
+
+  list<XML::Element *> maps = config.get_elements("xt:config/xt:map");
+  list<XML::Element *> vars = config.get_elements("xt:config/xt:var");
+
+  // Produce config reading code
+  sout << "  XML::Configuration _config_file;\n";
+  sout << "  if (argc > 1)\n";
+  sout << "    _config_file.add_file(argv[argc-1]);\n";
+  sout << "  else\n";
+  sout << "    _config_file.add_file(\"" << default_config_file << "\");\n";
+  sout << "  if (!_config_file.read(\"" << config_root << "\")) return 2;\n\n";
+
+  // Produce string maps for each map
+  for(list<XML::Element *>::iterator p = maps.begin();
+      p!=maps.end();
+      ++p)
+  {
+    XML::Element *e = *p;
+    string path = e->get_attr("path");
+    string name = e->get_attr("name");
+    string key = e->get_attr("key", "name");
+
+    sout << "  _config." << name << " = _config_file.get_map(\"" << path 
+	 << "\", \"" << key << "\");\n";
+  }
+
+  // Read variables for each config item
+  for(list<XML::Element *>::iterator p = vars.begin(); p!=vars.end(); ++p)
+  {
+    XML::Element *e = *p;
+    string type = e->get_attr("type", "string");
+    string type_suffix = "_"+type;
+    if (type_suffix == "_string") type_suffix="";
+
+    string path = e->get_attr("path");
+    string name = e->get_attr("name");
+    string def = e->get_attr("default");
+    if (!def.empty())
+    {
+      if (type == "string") def = "\"" + def + "\"";
+      def = ", "+def;
+    }
+
+    sout << "  _config." << name << " = _config_file.get_value" 
+	 << type_suffix << "(\"" << path << "\"" << def << ");\n";
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -224,7 +283,8 @@ void Generator::generate_use(XML::Element& use_e,
 			     const string& countname,
 			     const string& streamname)
 {
-  // Create script expansion for each parameter
+  // Create script expansion for each argument, recording which
+  // parameters have been set
   map <string, bool> params_used;
 
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(ae, use_e, "xt:arg")
@@ -322,7 +382,7 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 
     // Output Regen stream if wanted for this file
     if (xpath.get_value_bool("xt:file/@regen"))
-      sout << "  ObTools::ReGen::rofstream";
+      sout << "  ReGen::rofstream";
     else
       sout << "  ofstream";
 

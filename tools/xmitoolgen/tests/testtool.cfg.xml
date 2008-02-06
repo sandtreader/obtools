@@ -48,6 +48,13 @@
     </xt:tags>
   </xt:script>
 
+  <!-- Config items for tool -->
+  <xt:config file="xmi2cc.cfg.xml" root="xmicc">
+    <xt:map name="typemap" path="sql/type"/>
+    <xt:var name="association_type" path="association/@type" default="list"/>
+    <xt:var name="overwrite" path="overwrite/@files" type="bool"/>
+  </xt:config>
+
   <!-- Support code to be added to tool -->
   <xt:code>
     //Routine to return method signature of operation
@@ -101,20 +108,15 @@
       if (other->multiplicity.upper == 1)
         return type + " *" + name;
       else
-	return "list<" + type + " *> " + name +"s"; 
+	return _config.association_type+"<" + type + " *> " + name +"s"; 
     }
   </xt:code>
-
-  <!-- Config items for tool -->
-  <xt:config file="xmi2cc.cfg.xml">
-    <xt:map name="typemap" path="types/map"/>
-    <xt:var name="association_type" path="association-type"/>
-    <xt:var name="overwrite" path="overwrite" type="bool"/>
-  </xt:config>
 
   <!-- Recursive 'macro' template for packages -->
   <xt:define name="Package" scope="package">
     <xt:dir>$=p.name=$</xt:dir>
+
+    Building package $= p.name =$
 
     <!-- Recurse to sub-packages -->
     <xt:use template="Package"/>
@@ -180,8 +182,20 @@
     </xt:template>
   </xt:define>
 
-  <!-- Use recursive package macro on top-level model -->
-  <xt:use template="Package"/>
+  <!-- Template for top-level model -->
+  <xt:template name="Model" scope="model">
+    xmi2cc test tool
+
+    Configuration:
+      Association type: $= _config.association_type =$
+      Overwrite: $= _config.overwrite?"yes":"no" =$
+      Type map:
+    $( _config.typemap.dump(cout); )$
+
+    <!-- Use recursive package macro on top-level model -->
+    <xt:use template="Package"/>
+  </xt:template>
+
 </xt:tool>  
 
 

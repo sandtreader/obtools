@@ -75,6 +75,10 @@ protected:
 			 string& script);
 
   //--------------------------------------------------------------------------
+  // Output code to read configuration items
+  void generate_config_reader();
+
+  //--------------------------------------------------------------------------
   // Generate code to call root templates
   void generate_roots();
 

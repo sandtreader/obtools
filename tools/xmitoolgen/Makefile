@@ -8,7 +8,7 @@
 TYPE	= exe
 NAME   	= xmitoolgen
 OBJS 	= xmitoolgen.o
-DEPENDS = toolgen cppt xml text
+DEPENDS = toolgen cppt xml text misc
 CLEANCMD = $(MAKE) -C tests clean
 TESTCMD = $(MAKE) -C ../tests test
 

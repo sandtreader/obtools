@@ -311,7 +311,10 @@ void XMIGenerator::generate_main()
   sout<<"int main(int argc, char **argv)\n";
   sout<<"{\n";
 
-  sout<<"  // Load up XMI from input\n";
+  sout<<"  // Read configuration\n";
+  generate_config_reader();
+
+  sout<<"\n  // Load up XMI from input\n";
   sout<<"  ObTools::XMI::Reader reader;\n";
 
   sout<<"  try\n";

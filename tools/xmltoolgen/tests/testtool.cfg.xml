@@ -18,7 +18,7 @@
 
   <!-- Predefined template for titles -->
   <xt:define name="Title" element="title">
-    <xt:arg name="prefix" default="?"/>
+    <xt:param name="prefix" default="?"/>
     <H1>$= prefix =$: $= *title =$</H1>
   </xt:define>
 
@@ -52,7 +52,7 @@
 
     <!-- Book title -->
     <xt:use template="Title">
-      <xt:param name="prefix">Book</xt:param>
+      <xt:arg name="prefix">Book</xt:arg>
     </xt:use>
 
     <!-- Chapter links -->
