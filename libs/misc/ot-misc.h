@@ -160,9 +160,10 @@ public:
 
   //------------------------------------------------------------------------
   // Copy constructor and assignment operator from map<string, string>
-  PropertyList(const map<string, string>& o) { *this = o; }
+  PropertyList(const map<string, string>& o) 
+  { *(map<string, string> *)this = o; }
   PropertyList& operator=(const map<string, string>& o) 
-  { *this = o; return *this; }
+  { *(map<string, string> *)this = o; return *this; }
 
   //--------------------------------------------------------------------------
   // Add a value
