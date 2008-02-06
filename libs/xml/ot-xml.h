@@ -37,7 +37,7 @@ class Element; // Forward
 ///
 /// \note Usage is different from STL iterator - e.g.
 /// \code
-///    for(Element::iterator p(parent.children()); p; ++p)
+///    for(Element::iterator p(parent.children); p; ++p)
 ///       XML::Element& child = *p;
 /// \endcode
 struct ElementIterator
