@@ -90,11 +90,11 @@ void Processor::open_code()
 void Processor::open_expr()
 {
   if (started_text)
-    sout << "\" << ";
+    sout << "\" << (";
   else
   {
     //Start one, in expression state
-    sout << "  " << sname << " << ";
+    sout << "  " << sname << " << (";
     started_text = true;
   }
 }
@@ -111,6 +111,8 @@ void Processor::close_code()
 // Close C++ expr
 void Processor::close_expr()
 {
+  sout << ")";
+
   // If text already open, keep it on same line for readability
   if (started_text)
     sout << " << \"";
