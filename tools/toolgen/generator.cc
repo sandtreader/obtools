@@ -134,6 +134,9 @@ void Generator::generate_includes()
 // Output configuration variables from, er, configuration variables 
 void Generator::generate_config_vars()
 {
+  // Ignore if no config section
+  if (!config.get_element("xt:config")) return;
+
   list<XML::Element *> maps = config.get_elements("xt:config/xt:map");
   list<XML::Element *> vars = config.get_elements("xt:config/xt:var");
 
@@ -168,6 +171,9 @@ void Generator::generate_config_vars()
 // Output code to read configuration items
 void Generator::generate_config_reader()
 {
+  // Ignore if no config section
+  if (!config.get_element("xt:config")) return;
+
   string default_config_file = config["xt:config/@file"];
   string config_root = config.get_value("xt:config/@root", "tool");
 
