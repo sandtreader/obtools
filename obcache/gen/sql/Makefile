@@ -1,15 +1,15 @@
 #==========================================================================
-# Makefile for ObTools ObCache SQL Schema generator
+# Makefile for ObTools ObCache storage generator for 1-table-per-class SQL
 #
 # Copyright (c) 2008 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
 TYPE	= exe
-NAME   	= ot-generate-schema
-OBJS 	= _genschema.o
-DEPENDS = xmi regen text
-TESTCMD = ./ot-generate-schema < ../../../models/test.xmi
+NAME   	= ot-generate-sql-otpc
+OBJS 	= _sql-otpc.o
+DEPENDS = xmi regen text misc
+TESTCMD = ./ot-generate-sql-otpc < ../../../models/test.xmi
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
@@ -18,8 +18,8 @@ include $(ROOT)/build/std.mk
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-_genschema.cc: ../genschema.cfg.xml  \
+_sql-otpc.cc: ../sql-otpc.cfg.xml  \
                 $(DIR-xmitoolgen)/build-release/xmitoolgen Makefile
-	$(DIR-xmitoolgen)/build-release/xmitoolgen ../genschema.cfg.xml > _genschema.cc
+	$(DIR-xmitoolgen)/build-release/xmitoolgen ../sql-otpc.cfg.xml > _sql-otpc.cc
 
 
