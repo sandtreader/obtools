@@ -131,7 +131,7 @@ int main(int argc, char **argv)
   }
 
   // Go daemon
-  if (!foreground && daemon(1,1))
+  if (!foreground && daemon(0,0))
   {
     cerr << "Can't become daemon: " << strerror(errno) << endl;
     return 2;
