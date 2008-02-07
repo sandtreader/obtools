@@ -253,6 +253,16 @@ bool Path::set_ownership(uid_t owner, uid_t group) const
 }
 
 //--------------------------------------------------------------------------
+// Get the file's owner & group - string version
+bool Path::set_ownership(const string& owner, const string& group) const
+{ 
+  int uid = user_name_to_id(owner);
+  int gid = group_name_to_id(group);
+  if (uid < 0 || gid < 0) return false;
+  return set_ownership((uid_t)uid, (gid_t)gid); 
+}
+
+//--------------------------------------------------------------------------
 // Delete the file/directory (directories are always deleted recursively)
 // Returns whether successful
 bool Path::erase() const
@@ -338,10 +348,11 @@ string Path::user_id_to_name(uid_t uid)
 
 //--------------------------------------------------------------------------
 // Get user id from name
-uid_t Path::user_name_to_id(const string& uname)
+// Returns -1 if it fails
+int Path::user_name_to_id(const string& uname)
 {
 #if defined(__WIN32__) // Meaningless in Windows
-  return 0;
+  return -1;
 #else
   // Even more painful reentrant way of doing this, given we never use
   // the name!
@@ -354,7 +365,7 @@ uid_t Path::user_name_to_id(const string& uname)
   int rc = getpwnam_r(uname.c_str(), &user, buf, buflen, &uptr);
   free(buf);  // We don't use it
 
-  if (rc || !uptr) return 0;
+  if (rc || !uptr) return -1;
   return uptr->pw_uid;
 #endif
 }
@@ -388,10 +399,11 @@ string Path::group_id_to_name(gid_t gid)
 
 //--------------------------------------------------------------------------
 // Get group id from name
-gid_t Path::group_name_to_id(const string& gname)
+// Returns -1 if it fails
+int Path::group_name_to_id(const string& gname)
 {
 #if defined(__WIN32__) // Meaningless in Windows
-  return 0;
+  return -1;
 #else
   // Even more painful reentrant way of doing this, given we never use
   // the name!
@@ -404,7 +416,7 @@ gid_t Path::group_name_to_id(const string& gname)
   int rc = getgrnam_r(gname.c_str(), &group, buf, buflen, &gptr);
   free(buf);  // We don't use it
 
-  if (rc || !gptr) return 0;
+  if (rc || !gptr) return -1;
   return gptr->gr_gid;
 #endif
 }

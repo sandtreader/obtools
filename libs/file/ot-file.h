@@ -163,8 +163,7 @@ public:
   bool set_ownership(uid_t owner, uid_t group) const;
 
   // String version
-  bool set_ownership(const string& owner, const string& group) const
-  { return set_ownership(user_name_to_id(owner), group_name_to_id(group)); }
+  bool set_ownership(const string& owner, const string& group) const;
 
   //--------------------------------------------------------------------------
   // Delete the file/directory (directories are always deleted recursively)
@@ -195,13 +194,15 @@ public:
   static string user_id_to_name(uid_t uid);
 
   // Get user id from name
-  static uid_t user_name_to_id(const string& uname);
+  // Returns -1 if failed
+  static int user_name_to_id(const string& uname);
 
   // Get group name from gid
   static string group_id_to_name(gid_t gid);
 
   // Get group id from name
-  static gid_t group_name_to_id(const string& gname);
+  // Returns -1 if failed
+  static int group_name_to_id(const string& gname);
 };
 
 //------------------------------------------------------------------------
