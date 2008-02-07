@@ -101,13 +101,13 @@ int main(int argc, char **argv)
     // Set group first - needs to still be root
     if (!groupname.empty())
     {
-      gid_t gid = File::Path::group_name_to_id(groupname);
+      int gid = File::Path::group_name_to_id(groupname);
 
-      if (gid)
+      if (gid >= 0)
       {
 	log.summary << "Changing to group " << groupname 
 		    << " (" << gid << ")\n";
-	if (setgid(gid))
+	if (setgid((gid_t)gid))
 	{
 	  log.error << "Can't change group: " << strerror(errno) << endl;
 	  goto shutdown;
@@ -122,12 +122,12 @@ int main(int argc, char **argv)
 
     if (!username.empty())
     {
-      uid_t uid = File::Path::user_name_to_id(username);
+      int uid = File::Path::user_name_to_id(username);
 
-      if (uid)
+      if (uid >= 0)
       {
 	log.summary << "Changing to user " << username << " (" << uid << ")\n";
-	if (setuid(uid))
+	if (setuid((uid_t)uid))
 	{
 	  log.error << "Can't change user: " << strerror(errno) << endl;
 	  goto shutdown;
