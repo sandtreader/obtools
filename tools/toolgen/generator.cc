@@ -502,6 +502,30 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
 			  mystream, script);
 	if (countname.size()) sout << "  }\n";
       }
+      else if (ce.name == "xt:if")
+      {
+	// Process and clear script before conditional
+	process_script(script, tags, mystream, max_ci);
+	script.clear();
+
+	sout << "  if (" << ce.get_attr("cond", "0") << ")\n  {\n  ";
+	int m = max_ci;
+	generate_template(ce, te, tags, m, indexname, countname, 
+			  mystream, script);
+	sout << "  }\n";
+      }
+      else if (ce.name == "xt:unless")
+      {
+	// Process and clear script before conditional
+	process_script(script, tags, mystream, max_ci);
+	script.clear();
+
+	sout << "  if (!(" << ce.get_attr("cond", "0") << "))\n  {\n  ";
+	int m = max_ci;
+	generate_template(ce, te, tags, m, indexname, countname, 
+			  mystream, script);
+	sout << "  }\n";
+      }
       else if (ce.name == "xt:nl")  // Force newline
       {
 	sout << streamname << " << endl;\n";
