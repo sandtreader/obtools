@@ -9,8 +9,9 @@
 
 all: 
 	$(MAKE) -C libs
-	$(MAKE) -C tools
 	$(MAKE) -C xmlmesh
+	$(MAKE) -C tools
+	$(MAKE) -C obcache
 	$(MAKE) -C angel
 
 cross: 
@@ -25,14 +26,16 @@ clean:
 	-@rm -f *~
 	-@rm -rf doc.out
 	$(MAKE) -C libs clean
-	$(MAKE) -C tools clean
 	$(MAKE) -C xmlmesh clean
+	$(MAKE) -C tools clean
+	$(MAKE) -C obcache clean
 	$(MAKE) -C angel clean
 
 test: 
 	$(MAKE) -C libs test
-	$(MAKE) -C tools test
 	$(MAKE) -C xmlmesh test
+	$(MAKE) -C tools test
+	$(MAKE) -C obcache test
 	$(MAKE) -C angel test
 
 release:
