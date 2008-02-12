@@ -1,0 +1,20 @@
+<!-- Configuration file for ot-generate-memory-cpp -->
+<memory-cpp>
+
+  <!-- UML-to-C++ type mapping -->
+  <typemap>
+
+    <type name="int">int</type>
+    <type name="bool">bool</type>
+    <type name="string">string</type>
+    <type name="char4">uint32_t</type>
+    <type name="real">double</type>
+    <type name="timestamp">Time::Stamp</type>
+
+  </typemap>
+
+  <!-- C++ template type to use for associations -->
+  <association type="list"/>
+
+</memory-cpp>
+ 
