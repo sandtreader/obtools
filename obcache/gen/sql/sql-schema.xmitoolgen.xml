@@ -106,7 +106,8 @@
     DROP TABLE IF EXISTS root;
     CREATE TABLE root
     {
-      _id INTEGER AUTO_INCREMENT PRIMARY KEY
+      _id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- Unique object ID
+      _type BIGINT                            -- Type discriminator
     };
 
     <!-- Use recursive package macro on top-level model -->

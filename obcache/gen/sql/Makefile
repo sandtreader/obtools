@@ -1,5 +1,5 @@
 #==========================================================================
-# Makefile for ObTools ObCache storage generator for 1-table-per-class SQL
+# Makefile for ObTools ObCache storage generator for SQL
 #
 # Copyright (c) 2008 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
@@ -23,11 +23,9 @@ XMITOOLGEN = $(DIR-xmitoolgen)/build-release/xmitoolgen
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-ot-generate-sql-schema.cc: ../sql-schema.xmitoolgen.xml  \
-                Makefile $(XMITOOLGEN)
+ot-generate-sql-schema.cc: ../sql-schema.xmitoolgen.xml Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 
-ot-generate-sql-cpp.cc: ../sql-cpp.xmitoolgen.xml  \
-                Makefile $(XMITOOLGEN)
+ot-generate-sql-cpp.cc: ../sql-cpp.xmitoolgen.xml Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 
