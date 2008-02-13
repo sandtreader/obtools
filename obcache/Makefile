@@ -5,6 +5,6 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = storage memory
+SUBS = libs gen
 include ../build/dir.mk
 

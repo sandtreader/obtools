@@ -11,7 +11,7 @@ HEADERS = ot-obcache-sql.h
 OBJS    = storage.o
 DEPENDS = obcache-core db xml net log misc mt
 
-ROOT    = ../..
+ROOT    = ../../..
 include $(ROOT)/build/std.mk
 
 

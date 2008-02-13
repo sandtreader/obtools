@@ -6,10 +6,10 @@
 #==========================================================================
 
 TYPE	= exes
-NAME   	= ot-generate-memory-cpp
+NAME   	= ot-generate-core-cpp
 OBJS 	= 
 DEPENDS = xmi regen text misc
-TESTCMD = ./ot-generate-memory-cpp ../ot-generate-memory-cpp.cfg.xml < ../../../models/test.xmi 
+TESTCMD = ./ot-generate-core-cpp ../ot-generate-core-cpp.cfg.xml < ../../../models/test.xmi 
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
@@ -20,7 +20,7 @@ XMITOOLGEN = $(DIR-xmitoolgen)/build-release/xmitoolgen
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-ot-generate-memory-cpp.cc: ../memory.xmitoolgen.xml  \
+ot-generate-core-cpp.cc: ../core-cpp.xmitoolgen.xml  \
                 Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 

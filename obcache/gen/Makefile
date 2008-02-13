@@ -5,6 +5,6 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = memory sql
+SUBS = core sql
 include ../../build/dir.mk
 
