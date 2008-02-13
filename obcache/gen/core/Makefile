@@ -1,5 +1,5 @@
 #==========================================================================
-# Makefile for ObTools ObCache in-memory class generator for C++
+# Makefile for ObTools ObCache in-memory class generator
 #
 # Copyright (c) 2008 xMill Consulting Limited.  All rights reserved
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED

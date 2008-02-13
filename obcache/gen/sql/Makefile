@@ -6,12 +6,12 @@
 #==========================================================================
 
 TYPE	= exes
-NAME   	= ot-generate-sql-otpc-schema \
-          ot-generate-sql-otpc-cpp-header
+NAME   	= ot-generate-sql-schema \
+          ot-generate-sql-cpp
 OBJS 	= 
 DEPENDS = xmi regen text misc
-TESTCMD = ./ot-generate-sql-otpc-schema ../ot-generate-sql-otpc-schema.cfg.xml < ../../../models/test.xmi && \
-          ./ot-generate-sql-otpc-cpp-header ../ot-generate-sql-otpc-cpp.cfg.xml < ../../../models/test.xmi 
+TESTCMD = ./ot-generate-sql-schema ../ot-generate-sql-schema.cfg.xml < ../../../models/test.xmi && \
+          ./ot-generate-sql-cpp ../ot-generate-sql-cpp.cfg.xml < ../../../models/test.xmi 
 
 
 ROOT    = ../../..
@@ -23,11 +23,11 @@ XMITOOLGEN = $(DIR-xmitoolgen)/build-release/xmitoolgen
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-ot-generate-sql-otpc-schema.cc: ../schema.xmitoolgen.xml  \
+ot-generate-sql-schema.cc: ../sql-schema.xmitoolgen.xml  \
                 Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 
-ot-generate-sql-otpc-cpp-header.cc: ../cpp-header.xmitoolgen.xml  \
+ot-generate-sql-cpp.cc: ../sql-cpp.xmitoolgen.xml  \
                 Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 
