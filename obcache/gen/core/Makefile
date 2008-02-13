@@ -20,7 +20,6 @@ XMITOOLGEN = $(DIR-xmitoolgen)/build-release/xmitoolgen
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
-ot-generate-core-cpp.cc: ../core-cpp.xmitoolgen.xml  \
-                Makefile $(XMITOOLGEN)
+ot-generate-core-cpp.cc: ../core-cpp.xmitoolgen.xml Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
 

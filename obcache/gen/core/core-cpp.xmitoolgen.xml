@@ -152,8 +152,8 @@
 
       {
       public:
-	// Get type name
-	string get_type_name() { return "$= cl.name =$"; }
+	// Get type name, with package 'namespace'
+	string get_type_name() { return "$= p.name =$::$= cl.name =$"; }
 
         <xt:template scope="attribute">
 	  <xt:start>// Getter/setter interfaces for attributes
