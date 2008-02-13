@@ -286,6 +286,12 @@ public:
   int query_int(const string& sql, int def=0);
 
   //------------------------------------------------------------------------
+  //Execute a query and get single (only) 64-bit integer value from first 
+  //(only) row
+  //Returns value or default if not found
+  uint64_t query_int64(const string& sql, uint64_t def=0);
+
+  //------------------------------------------------------------------------
   //Execute a query and get single (only) integer value from first (only) row
   //Returns value or default if not found
   bool query_bool(const string& sql, bool def=false);
@@ -301,6 +307,11 @@ public:
 	     const string& table, const string& id_field="id",
 	     bool in_transaction=false);
 
+  // Ditto, with 64-bit ID
+  uint64_t insert64(const string& sql, 
+		    const string& table, const string& id_field="id",
+		    bool in_transaction=false);
+
   //------------------------------------------------------------------------
   // Do an INSERT and retrieve the last inserted serial ID, from row data
   // Each field in the row is inserted by name
@@ -309,11 +320,19 @@ public:
   int insert(const string& table, Row& row, const string& id_field="id",
 	     bool in_transaction=false);
 
+  // Ditto with 64-bit ID
+  uint64_t insert64(const string& table, Row& row, const string& id_field="id",
+		    bool in_transaction=false);
+
   //------------------------------------------------------------------------
   // INSERT into a join table with two foreign ID fields
   // Returns whether successful
   bool insert_join(const string& table, const string& field1, int id1,
 		   const string& field2, int id2);
+
+  // Ditto with 64-bit IDs
+  bool insert_join64(const string& table, const string& field1, uint64_t id1,
+		     const string& field2, uint64_t id2);
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
@@ -328,6 +347,10 @@ public:
   // Returns query result as query()
   Result select_by_id(const string& table, const Row& row,  
 		      int id, const string& id_field = "id");
+
+  // Ditto, with 64-bit ID
+  Result select_by_id64(const string& table, const Row& row,  
+			uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
@@ -352,6 +375,10 @@ public:
   // Returns whether row fetched
   bool select_row_by_id(const string& table, Row& row, 
 			int id, const string& id_field = "id");
+
+  // Ditto, with 64-bit ID
+  bool select_row_by_id64(const string& table, Row& row, 
+			  uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
@@ -378,6 +405,11 @@ public:
 			    const string& field,
 			    int id, const string& id_field = "id");
 
+  // Ditto, with 64-bit ID
+  string select_value_by_id64(const string& table, 
+			      const string& field,
+			      uint64_t id, const string& id_field = "id");
+
   //------------------------------------------------------------------------
   // Do a SELECT for a single field in the given table 
   // with the given string ID, and return the (unescaped) value
@@ -390,6 +422,10 @@ public:
   // Check if a row exists with the given integer ID
   // Returns whether the row exists
   bool exists_id(const string& table, int id, const string& id_field = "id");
+
+  // Ditto, with 64-bit ID
+  bool exists_id64(const string& table, uint64_t id, 
+		   const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Check if a row exists with the given string ID
@@ -412,6 +448,10 @@ public:
   bool update_id(const string& table, const Row& row, 
 		 int id, const string& id_field = "id");
 
+  // Ditto with 64-bit ID
+  bool update_id64(const string& table, const Row& row, 
+		   uint64_t id, const string& id_field = "id");
+
   //------------------------------------------------------------------------
   // Do an UPDATE for all fields in the given row in the given table 
   // matching the given string ID
@@ -432,6 +472,10 @@ public:
   bool delete_id(const string& table, 
 		 int id, const string& id_field = "id");
 
+  // Ditto with 64-bit ID
+  bool delete_id64(const string& table, 
+		   uint64_t id, const string& id_field = "id");
+
   //------------------------------------------------------------------------
   // Do a DELETE in the given table matching the given string ID
   // ID value is escaped
@@ -445,6 +489,12 @@ public:
   bool delete_join(const string& table, 
 		   const string& field1, int id1,
 		   const string& field2, int id2);
+
+  // Ditto with 64-bit ID
+  bool delete_join64(const string& table, 
+		     const string& field1, uint64_t id1,
+		     const string& field2, uint64_t id2);
+
 };
 
 //==========================================================================
@@ -582,6 +632,9 @@ struct AutoConnection
   int query_int(const string& sql, int def=0)
   { return conn?conn->query_int(sql, def):def; }
 
+  uint64_t query_int64(const string& sql, uint64_t def=0)
+  { return conn?conn->query_int64(sql, def):def; }
+
   bool query_bool(const string& sql, bool def=false)
   { return conn?conn->query_bool(sql, def):def; }
 
@@ -589,6 +642,11 @@ struct AutoConnection
 	     const string& table, const string& id_field="id",
 	     bool in_transaction=false)
   { return conn?conn->insert(sql, table, id_field, in_transaction):0; }
+
+  uint64_t insert64(const string& sql, 
+		    const string& table, const string& id_field="id",
+		    bool in_transaction=false)
+  { return conn?conn->insert64(sql, table, id_field, in_transaction):0; }
 
   int insert(const string& table, Row& row, const string& id_field="id",
 	     bool in_transaction=false)
@@ -598,12 +656,20 @@ struct AutoConnection
 		   const string& field2, int id2)
   { return conn?conn->insert_join(table, field1, id1, field2, id2):false; }
 
+  bool insert_join64(const string& table, const string& field1, uint64_t id1,
+		     const string& field2, uint64_t id2)
+  { return conn?conn->insert_join64(table, field1, id1, field2, id2):false; }
+
   Result select(const string& table, const Row& row, const string& where="")
   { return conn?conn->select(table, row, where):Result(); }
 
   Result select_by_id(const string& table, const Row& row,  
 		      int id, const string& id_field = "id")
   { return conn?conn->select_by_id(table, row, id, id_field):Result(); }
+
+  Result select_by_id64(const string& table, const Row& row,  
+			uint64_t id, const string& id_field = "id")
+  { return conn?conn->select_by_id64(table, row, id, id_field):Result(); }
 
   Result select_by_id(const string& table, const Row& row,  
 		      const string& id, const string& id_field = "id")
@@ -615,6 +681,10 @@ struct AutoConnection
   bool select_row_by_id(const string& table, Row& row, 
 			int id, const string& id_field = "id")
   { return conn?conn->select_row_by_id(table, row, id, id_field):false; }
+
+  bool select_row_by_id64(const string& table, Row& row, 
+			  uint64_t id, const string& id_field = "id")
+  { return conn?conn->select_row_by_id64(table, row, id, id_field):false; }
 
   bool select_row_by_id(const string& table, Row& row, 
 			const string& id, const string& id_field = "id")
@@ -629,12 +699,21 @@ struct AutoConnection
 			    int id, const string& id_field = "id")
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
 
+  string select_value_by_id64(const string& table, 
+			      const string& field,
+			      uint64_t id, const string& id_field = "id")
+  { return conn?conn->select_value_by_id64(table, field, id, id_field):""; }
+
   string select_value_by_id(const string& table, const string& field,
 			    const string& id, const string& id_field = "id")
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
 
   bool exists_id(const string& table, int id, const string& id_field = "id")
   { return conn?conn->exists_id(table, id, id_field):false; }
+
+  bool exists_id64(const string& table, uint64_t id, 
+		   const string& id_field = "id")
+  { return conn?conn->exists_id64(table, id, id_field):false; }
 
   bool exists_id(const string& table, const string& id, 
 		 const string& id_field = "id")
@@ -647,6 +726,10 @@ struct AutoConnection
 		 int id, const string& id_field = "id")
   { return conn?conn->update_id(table, row, id, id_field):false; }
 
+  bool update_id64(const string& table, const Row& row, 
+		   uint64_t id, const string& id_field = "id")
+  { return conn?conn->update_id64(table, row, id, id_field):false; }
+
   bool update_id(const string& table, const Row& row, 
 		 const string& id, const string& id_field = "id")
   { return conn?conn->update_id(table, row, id, id_field):false; }
@@ -658,6 +741,10 @@ struct AutoConnection
 		 int id, const string& id_field = "id")
   { return conn?conn->delete_id(table, id, id_field):false; }
 
+  bool delete_id64(const string& table, 
+		   uint64_t id, const string& id_field = "id")
+  { return conn?conn->delete_id64(table, id, id_field):false; }
+
   bool delete_id(const string& table, 
 		 const string& id, const string& id_field = "id")
   { return conn?conn->delete_id(table, id, id_field):false; }
@@ -665,6 +752,10 @@ struct AutoConnection
   bool delete_join(const string& table, const string& field1, int id1,
 		   const string& field2, int id2)
   { return conn?conn->delete_join(table, field1, id1, field2, id2):false; }
+
+  bool delete_join64(const string& table, const string& field1, uint64_t id1,
+		   const string& field2, uint64_t id2)
+  { return conn?conn->delete_join64(table, field1, id1, field2, id2):false; }
 
   static string escape(const string& s) { return Row::escape(s); }
   static string unescape(const string& s) { return Row::unescape(s); }
