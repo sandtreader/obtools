@@ -94,11 +94,12 @@ public:
 };
 
 //==========================================================================
-/// Cache template
+/// Object cache
 /// Maintains LRU cache of objects in memory
 /// Also implements Storage so it can be used by a Stub
-template<class T> class Cache:
-  ObTools::Cache::LRUEvictionPointerCache<object_id_t, T>, Storage
+class Cache:
+  public ObTools::Cache::LRUEvictionPointerCache<object_id_t, Object>, 
+  public Storage
 {
   Storage& storage;      ///< Real storage 
 
@@ -106,7 +107,7 @@ public:
   //--------------------------------------------------------------------------
   /// Constructor 
   Cache(Storage& _storage, unsigned int _limit=0):
-  ObTools::Cache::LRUEvictionPointerCache<object_id_t, T>::
+  ObTools::Cache::LRUEvictionPointerCache<object_id_t, Object>::
     LRUEvictionPointerCache(_limit),
     storage(_storage) {}
 
