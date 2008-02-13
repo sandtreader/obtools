@@ -46,7 +46,9 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  xmlmesh-c:xmlmesh/bindings/c  	\
 	  toolgen:tools/toolgen			\
 	  xmitoolgen:tools/xmitoolgen		\
-	  xmltoolgen:tools/xmltoolgen
+	  xmltoolgen:tools/xmltoolgen           \
+	  obcache-core:obcache/libs/core:cache       \
+	  obcache-sql:obcache/libs/sql:obcache-core,xml,db
 
 # List of shared libraries and associated directories
 # Each word split by ':' into
