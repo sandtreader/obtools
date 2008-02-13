@@ -9,6 +9,7 @@
 
 #include "ot-obcache-sql.h"
 #include "ot-log.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace ObCache { namespace SQL {
 
@@ -16,11 +17,25 @@ namespace ObTools { namespace ObCache { namespace SQL {
 // Load an object
 Object *Storage::load(object_id_t id) throw (Exception)
 {
-  // !!! Look up ID in main object table, to get type ref/name
-  // !!! Look up storer interface by type ref
-  // !!! Get DB connection
-  // !!! Get storer to load it
-  throw Exception("Not yet implemented!");
+  // Get DB connection
+  DB::AutoConnection db(db_pool);
+
+  // Look up ID in main object table, to get type ref
+  string types = db.select_value_by_id64("root", "_type", id, "_id");
+  if (types.empty())
+    throw Exception("Attempt to load non-existent object "+Text::i64tos(id));
+
+  type_id_t type = Text::stoi64(types);
+
+  // Look up storer interface by type ref
+  map<type_id_t, Storer *>::iterator p = storers.find(type);
+  if (p == storers.end())
+    throw Exception("Attempt to load unknown type "+Text::i64tos(type));
+
+  Storer *storer = p->second;
+
+  // Get storer to load it, using the same DB connection
+  return storer->load(id, db);
 }
 
 //--------------------------------------------------------------------------

@@ -19,11 +19,19 @@ namespace ObTools { namespace ObCache { namespace SQL {
 //Make our lives easier without polluting anyone else
 using namespace std;
 
+class Storer;  // Forward
+
+//==========================================================================
+// Typedefs
+
+typedef uint64_t type_id_t;        ///< Unique type discriminator ID
+
 //==========================================================================
 /// SQL Storage singleton class
 class Storage: public ObCache::Storage
 {
-  DB::ConnectionPool& db_pool;
+  DB::ConnectionPool& db_pool;       ///< Database connection pool
+  map<type_id_t, Storer *> storers;  ///< Map of type ID to storer for it
 
 public:
   //--------------------------------------------------------------------------
@@ -31,6 +39,11 @@ public:
   Storage(DB::ConnectionPool& _db_pool        ///< Database connection pool
 	  ):
     db_pool(_db_pool) {}
+
+  //--------------------------------------------------------------------------
+  /// Register a type storer
+  void register_storer(type_id_t type, Storer *storer)
+  { storers[type] = storer; }
 
   //--------------------------------------------------------------------------
   /// Load an object
@@ -48,12 +61,12 @@ class Storer
 public:
   //--------------------------------------------------------------------------
   /// Interface to load an object from the given DB connection
-  virtual Object *load(object_id_t id, DB::Connection& db) 
+  virtual Object *load(object_id_t id, DB::AutoConnection& db) 
     throw (Exception) = 0;
 
   //--------------------------------------------------------------------------
   /// Interface to save an object to the given DB connection
-  virtual void save(Object *ob, DB::Connection& db) throw (Exception) = 0;
+  virtual void save(Object *ob, DB::AutoConnection& db) throw (Exception) = 0;
 };
 
 //==========================================================================

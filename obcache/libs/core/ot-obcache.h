@@ -64,6 +64,10 @@ public:
   /// Save a real object
   /// Throw Exception if it can't be saved
   virtual void save(Object* ob) throw (Exception) = 0;
+
+  //--------------------------------------------------------------------------
+  /// Virtual destructor
+  virtual ~Storage() {}
 };
 
 //==========================================================================
