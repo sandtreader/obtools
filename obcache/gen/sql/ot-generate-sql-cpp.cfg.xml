@@ -1,5 +1,5 @@
-<!-- Configuration file for ot-generate-sql-otpc-cpp-{header, classes} -->
-<sql-otpc-cpp>
+<!-- Configuration file for ot-generate-sql-cpp -->
+<sql-cpp>
 
   <!-- UML-to-C++ type mapping -->
   <typemap>
@@ -13,5 +13,5 @@
 
   </typemap>
 
-</sql-otpc-cpp>
+</sql-cpp>
  

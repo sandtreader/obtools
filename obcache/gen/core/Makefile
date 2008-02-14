@@ -6,10 +6,10 @@
 #==========================================================================
 
 TYPE	= exes
-NAME   	= ot-generate-core-cpp
+NAME   	= ot-generate-core-cpp 
 OBJS 	= 
 DEPENDS = xmi regen text misc
-TESTCMD = ./ot-generate-core-cpp ../ot-generate-core-cpp.cfg.xml < ../../../models/test.xmi 
+TESTCMD = 
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
@@ -22,4 +22,3 @@ CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 #Template code
 ot-generate-core-cpp.cc: ../core-cpp.xmitoolgen.xml Makefile $(XMITOOLGEN)
 	$(XMITOOLGEN) $< > $@
-
