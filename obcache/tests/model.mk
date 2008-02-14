@@ -9,8 +9,7 @@
 
 # Set DEV for development within the ObCache world, otherwise
 # it uses installed packages
-# e.g.
-#   $ make DEV=1
+DEV=1
 
 # Build directory
 BUILD-DIR=build
@@ -57,7 +56,7 @@ sub-build:
 
 # Clean up
 clean:
-	-@rm -rf *~ $(BUILD_DIR)
+	-@rm -rf *~ $(BUILD-DIR)
 
 
 

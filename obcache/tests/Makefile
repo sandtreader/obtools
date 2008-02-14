@@ -6,5 +6,6 @@
 #==========================================================================
 
 SUBS = simple complete
+NORELEASE=1
 include ../../build/dir.mk
 

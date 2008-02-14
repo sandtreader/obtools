@@ -5,6 +5,7 @@
 # @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 #==========================================================================
 
-SUBS = libs gen
+SUBS = libs gen tests
+NORELEASE=1
 include ../build/dir.mk
 
