@@ -14,7 +14,7 @@
 #include <errno.h>
 
 #define DEFAULT_LOGFILE "/var/log/obtools/xmlmesh.log"
-#define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%S: "
+#define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
 #define PID_FILE        "/var/run/ot-xmlmesh.pid"
 
 using namespace std;
