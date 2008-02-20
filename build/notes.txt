@@ -17,6 +17,8 @@ To build cross-compiled versions
 
 $ make cross
 
+The mingw10.dll needs to be copied into the same location as executables.
+
 Threads in cross-compiled versions
 ----------------------------------
 
