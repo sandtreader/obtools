@@ -9,6 +9,7 @@ TYPE	= lib
 NAME   	= ot-xml
 HEADERS = ot-xml.h
 OBJS  	= element.o parser.o xpath.o config.o expand.o
+DEPENDS = text
 TESTS 	= test-xml test-xpath test-config test-update test-expand
 TESTCMD	= ./test-xml < ../tests/simple.xml && \
           ./test-xpath < ../tests/simple.xml && \

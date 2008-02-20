@@ -9,6 +9,7 @@
 //==========================================================================
 
 #include "ot-xml.h"
+#include "ot-text.h"
 #include "unistd.h"
 #include <sstream>
 
@@ -189,14 +190,7 @@ int XPathProcessor::get_value_hex(const string& path, int def)
 uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
 {
   string v = get_value(path);
-
-  if (!v.empty()) 
-  {
-    // Note:  We can't use atoll here because it is signed and barfs on 
-    // anything over 2^63-1
-    sscanf(v.c_str(), "%llu", &def);
-  }
-
+  if (!v.empty()) def = Text::stoi64(v);
   return def;
 }
 
@@ -207,7 +201,7 @@ uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
 uint64_t XPathProcessor::get_value_hex64(const string& path, uint64_t def)
 {
   string v = get_value(path);
-  if (!v.empty()) sscanf(v.c_str(), "%llx", &def);
+  if (!v.empty()) def = Text::xtoi64(v);
   return def;
 }
 

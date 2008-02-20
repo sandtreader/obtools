@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-xml.h"
+#include "ot-text.h"
 #include <ctype.h>
 #include <sstream>
 #include <algorithm>
@@ -579,14 +580,7 @@ int Element::get_attr_hex(const string& attname, int def) const
 uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
 {
   map<string,string>::const_iterator p=attrs.find(attname);
-
-  if (p!=attrs.end())
-  {
-    // Note:  We can't use atoll here because it is signed and barfs on 
-    // anything over 2^63-1
-    sscanf(p->second.c_str(), "%llu", &def);
-  }
-
+  if (p!=attrs.end()) def = Text::stoi64(p->second);
   return def;
 }
 
@@ -599,13 +593,7 @@ uint64_t Element::get_attr_int64(const string& attname, uint64_t def) const
 uint64_t Element::get_attr_hex64(const string& attname, uint64_t def) const
 {
   map<string,string>::const_iterator p=attrs.find(attname);
-
-  if (p!=attrs.end()) 
-  {
-    istringstream iss(p->second);
-    iss >> hex >> def;
-  }
-
+  if (p!=attrs.end()) def = Text::xtoi64(p->second);
   return def;
 }
 

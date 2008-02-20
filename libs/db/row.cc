@@ -63,7 +63,7 @@ uint64_t Row::get_int64(string fieldname, uint64_t def) const
   map<string,string>::const_iterator p=fields.find(fieldname);
 
   // Use sscanf instead of atoll which is signed
-  if (p!=fields.end()) sscanf(p->second.c_str(), "%llu", &def);
+  if (p!=fields.end()) def = Text::stoi64(p->second);
 
   return def;
 }

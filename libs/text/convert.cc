@@ -12,6 +12,15 @@
 #include <sstream>
 #include <stdio.h>
 
+// MinGW specials
+#ifdef MINGW
+#define FORMAT_UNSIGNED_64 "%I64u"
+#define FORMAT_HEX_64 "%I64x"
+#else
+#define FORMAT_UNSIGNED_64 "%llu"
+#define FORMAT_HEX_64 "%llx"
+#endif
+
 namespace ObTools { namespace Text {
 
 //--------------------------------------------------------------------------
@@ -37,7 +46,7 @@ string i64tos(uint64_t i)
 {
   // Use sprintf for speed
   char buf[21];  // Enough for 64-bits
-  snprintf(buf, 21, "%llu", i);
+  snprintf(buf, 21, FORMAT_UNSIGNED_64, (unsigned long long)i);
   return string(buf);
 }
 
@@ -47,9 +56,9 @@ uint64_t stoi64(const string& s)
 {
   // Note:  We can't use atoll here because it is signed and barfs on 
   // anything over 2^63-1
-  uint64_t n = 0;
-  sscanf(s.c_str(), "%llu", &n);
-  return n;
+  unsigned long long n = 0;
+  sscanf(s.c_str(), FORMAT_UNSIGNED_64, &n);
+  return (uint64_t)n;
 }
 
 //--------------------------------------------------------------------------
@@ -94,7 +103,7 @@ string i64tox(uint64_t i)
 {
   // Use sprintf for speed
   char buf[17];  // Enough for 64-bit integers, just in case
-  snprintf(buf, 17, "%llx", i);
+  snprintf(buf, 17, FORMAT_HEX_64, (unsigned long long)i);
   return string(buf);
 }
 
@@ -102,9 +111,9 @@ string i64tox(uint64_t i)
 // Hex to 64-bit integer (0 default)
 uint64_t xtoi64(const string& s)
 {
-  uint64_t n = 0;
-  sscanf(s.c_str(), "%llx", &n);
-  return n;
+  unsigned long long n = 0;
+  sscanf(s.c_str(), FORMAT_HEX_64, &n);
+  return (uint64_t)n;
 }
 
 //--------------------------------------------------------------------------
