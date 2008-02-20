@@ -39,7 +39,7 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  tube:libs/tube:net,log,mt,chan,misc   \
 	  web:libs/web:xml,misc,log,net		\
 	  xmi:libs/xmi:xml     			\
-	  xml:libs/xml     			\
+	  xml:libs/xml:text    			\
 	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
 	  xmlmesh-otmp:xmlmesh/otmp:net,log,text,tube			\
 	  xmlmesh-client:xmlmesh/client:xmlmesh-otmp,xmlmesh-core	\
