@@ -13,6 +13,7 @@
 
 // Time to sleep for if socket dies and won't come back
 #define DEAD_SOCKET_SLEEP_TIME 10
+#define RESTART_SOCKET_SLEEP_TIME 1
 
 // Default maximum send queue length
 #define DEFAULT_MAX_SEND_QUEUE 1024
@@ -46,7 +47,7 @@ class ClientReceiveThread: public MT::Thread
 	log.error << client.name << " (recv): Socket failed, can't restart\n";
 	log.error << client.name << " (recv): Sleeping for " 
 		  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
-	sleep(DEAD_SOCKET_SLEEP_TIME);
+	MT::Thread::sleep(DEAD_SOCKET_SLEEP_TIME);
       }
     }
 
@@ -151,6 +152,8 @@ bool Client::receive_messages(Log::Streams& log)
     if (alive)
     {
       log.error << name << " (recv): " << se << endl;
+      MT::Thread::sleep(RESTART_SOCKET_SLEEP_TIME);
+      log.summary << name << " (recv): Attempting to restart socket\n";
       return restart_socket(log);
     }
     else return false;
@@ -224,6 +227,9 @@ bool Client::send_messages(Log::Streams& log)
     if (alive)
     {
       log.error << name << " (send): " << se << endl;
+      MT::Thread::sleep(RESTART_SOCKET_SLEEP_TIME);
+      log.summary << name << " (send): Attempting to restart socket\n";
+
       //Try to restart socket
       return restart_socket(log);
     }
