@@ -66,6 +66,7 @@ void TCPServer::run()
       if (!verify(client))
       {
 	::SOCKCLOSE(new_fd);
+	threadpool.replace(thread);
 	continue;
       }
 
