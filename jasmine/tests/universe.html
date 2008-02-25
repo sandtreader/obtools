@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>Jasmine Universe test</title>
+<script src="../js/jasmine.js"></script>
+
+<script>
+// Ticker object which just logs time, delta and worst delta
+var ticker = new Object();
+ticker.last = 0;
+ticker.worst = 0;
+
+ticker.tick = function(now)
+{
+  document.getElementById("time").innerHTML = now.toString();
+  if (this.last)
+  {
+    var delta = now-this.last;
+    if (delta > this.worst) this.worst = delta;
+ 
+    document.getElementById("delta").innerHTML = delta.toString();
+    document.getElementById("worst").innerHTML = this.worst.toString();
+  }    
+  this.last = now;
+}
+
+Jasmine.Universe.add_ticker(ticker);
+Jasmine.Universe.start();
+</script>
+
+</head>
+<body>
+<h1>Jasmine Universe test</h1>
+<p>The time is now <span id="time">?</span> 
+- delta <span id="delta">?</span>
+- worst <span id="worst">?</span></p>
+</body>
+</html>
