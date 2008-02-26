@@ -12,13 +12,13 @@ var Jasmine = {};
 // Inheritance creator - inserts an intermediate prototype to
 // avoid derived methods moving into the base.  Also defines
 // 'parent' as the base prototype for super calls (super is reserved)
-Jasmine.inherit = function(derived, base)
+Function.prototype.inherits = function(base)
 {
   function Intermediate() {}
   Intermediate.prototype = base.prototype;  
-  derived.prototype = new Intermediate();
-  derived.prototype.constructor = derived;
-  derived.prototype.parent = base.prototype;
+  this.prototype = new Intermediate();
+  this.prototype.constructor = this;
+  this.prototype.parent = base.prototype;
 }
 
 //=============================================================
@@ -41,7 +41,8 @@ Jasmine.Universe.start = function()
 
 //-------------------------------------------------
 // Register a ticker
-// Tickers must provide a tick(now) function
+// Tickers must provide a tick(now) function which returns true
+// if it wants to continue
 Jasmine.Universe.add_ticker = function(t)
 {
   this.tickers.push(t);
@@ -54,8 +55,10 @@ Jasmine.Universe.tick = function()
   // Get new time
   this.now = new Date().getTime();
 
-  // Call all tickers
-  for (t in this.tickers) this.tickers[t].tick(this.now);
+  // Call all tickers, removing any that return false
+  for(var i=0; i<this.tickers.length; i++)
+    if (!this.tickers[i].tick(this.now))
+      this.tickers.splice(i--, 1);
 }
 
 //=============================================================
@@ -72,6 +75,20 @@ Jasmine.Point = function(x,y,z)
 Jasmine.Point.prototype.toString = function()
 {
   return "<"+this.x+","+this.y+","+this.z+">";
+}
+
+//-------------------------------------------------
+// Subtract points
+Jasmine.Point.prototype.minus = function(o)
+{
+  return new Jasmine.Point(this.x-o.x, this.y-o.y, this.z-o.z);
+}
+
+//-------------------------------------------------
+// Add points
+Jasmine.Point.prototype.plus = function(o)
+{
+  return new Jasmine.Point(this.x+o.x, this.y+o.y, this.z+o.z);
 }
 
 //=============================================================
@@ -123,90 +140,60 @@ Jasmine.Thing.prototype.toString = function()
 
 //=============================================================
 // DOMThing class - binding of a thing to a real DOM element
-// 2D co-ordinates and size are taken from CSS style
-// z is optional, defaults to 0
-Jasmine.DOMThing = function(id, z)
+// position and size are optional and will be set from the
+// element if not specified
+Jasmine.DOMThing = function(id, position, size)
 {
   this.id = id;
   this.element = document.getElementById(id);
   if (!this.element) return;  // Leave pos/size undefined
 
-  // Force absolute positioning and clipping
-  this.element.style.position = "absolute";
-  this.element.style.overflow = "hidden";
-
-  // Walk up offset tree to get real position
-  var left = top = 0;
-  for(var e=this.element; e && e.offsetParent; e=e.offsetParent)
-  {
-    left += e.offsetLeft;
-    top += e.offsetTop;
-  }
-
-  // And get real width/height
-  var width = this.element.offsetWidth || 0;
-  var height = this.element.offsetHeight || 0;
-
-  var pos = new Jasmine.Point(left, top, z);
-  var size = new Jasmine.Point(width, height);
-
-  this.parent.constructor.call(this, pos, size);
+  this.parent.constructor.call(this, position, size);
+  this.update_dom();
 }
 
-Jasmine.inherit(Jasmine.DOMThing, Jasmine.Thing);
+Jasmine.DOMThing.inherits(Jasmine.Thing);
 
 //-------------------------------------------------
-// Move to a new position - also moves DOM element
+// Reset style to stored position/size
+Jasmine.DOMThing.prototype.update_dom = function()
+{
+  this.element.style.left   = this.position.x+"px";
+  this.element.style.top    = this.position.y+"px";
+  this.element.style.width  = this.size.x+"px";
+  this.element.style.height = this.size.y+"px";
+}
+
+//-------------------------------------------------
+// Move permanently to a new position - also moves DOM element
 Jasmine.DOMThing.prototype.move_to = function(position)
 {
-  // Shift position in document relative to original
-  var dx = position.x-this.position.x;
-  this.element.style.left=(parseInt(this.element.style.left||"0", 10)+dx)+"px";
-
-  var dy = position.y-this.position.y;
-  this.element.style.top=(parseInt(this.element.style.top||"0", 10)+dy)+"px";
-
-  // Fix stored position
   this.parent.move_to.call(this, position);
+  this.update_dom();
 }
 
 //-------------------------------------------------
 // Move relatively - also moves DOM element
 Jasmine.DOMThing.prototype.move_by = function(delta)
 {
-  // Shift position in document relative to original
-  this.element.style.left=
-    (parseInt(this.element.style.left||"0", 10)+delta.x)+"px";
-
-  this.element.style.top=
-    (parseInt(this.element.style.top||"0", 10)+delta.y)+"px";
-
-  // Fix stored position
   this.parent.move_by.call(this, delta);
+  this.update_dom();
 }
 
 //-------------------------------------------------
 // Change to a new size - also resizes DOM element
 Jasmine.DOMThing.prototype.resize_to = function(size)
 {
-  // Set size absolutely
-  this.element.style.width = size.x+"px";
-  this.element.style.height = size.y+"px";
-
-  // Fix stored size
   this.parent.resize_to.call(this, size);
+  this.update_dom();
 }
 
 //-------------------------------------------------
 // Resize relatively - also resizes DOM element
 Jasmine.DOMThing.prototype.resize_by = function(delta)
 {
-  // Fix stored size
   this.parent.resize_by.call(this, delta);
-
-  // Reset DOM size
-  this.element.style.width = this.size.x+"px";
-  this.element.style.height = this.size.y+"px";
+  this.update_dom();
 }
 
 //-------------------------------------------------

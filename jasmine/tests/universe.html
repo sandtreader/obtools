@@ -8,6 +8,7 @@
 var ticker = new Object();
 ticker.last = 0;
 ticker.worst = 0;
+ticker.stop = 0;
 
 ticker.tick = function(now)
 {
@@ -21,6 +22,12 @@ ticker.tick = function(now)
     document.getElementById("worst").innerHTML = this.worst.toString();
   }    
   this.last = now;
+  return !this.stop;
+}
+
+function stop()
+{
+  ticker.stop = 1;
 }
 
 Jasmine.Universe.add_ticker(ticker);
@@ -34,4 +41,5 @@ Jasmine.Universe.start();
 - delta <span id="delta">?</span>
 - worst <span id="worst">?</span></p>
 </body>
+<p><a href="javascript:stop()">Stop</a>
 </html>

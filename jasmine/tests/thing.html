@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>Jasmine Thing test</h1>
-<div id="d1" style="border: solid 1px red">This is DIV 'd1'</div>
+<div id="d1" style="border: solid 1px red; position: absolute; overflow: hidden">This is DIV 'd1'</div>
 
 <script>
 with (Jasmine)
@@ -20,10 +20,8 @@ with (Jasmine)
   var thing = new Thing(p, p2);
   document.write("<p>Thing is "+thing);
 
-  var dom1 = new DOMThing("d1");
+  var dom1 = new DOMThing("d1", new Point(500,100), new Point(300,300));
   document.write("<p>DOMThing is <span id='d1data'>"+dom1+"</span>");
-  dom1.move_to(new Point(100,100));
-  dom1.resize_to(new Point(300,300));
 
   function move()
   {
@@ -37,6 +35,7 @@ with (Jasmine)
 
   setInterval("move()", 100);
 }
+
 
 </script>
 </html>

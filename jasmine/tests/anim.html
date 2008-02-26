@@ -1,0 +1,97 @@
+<html>
+<head>
+<title>Jasmine Animation test</title>
+<script src="../js/jasmine.js"></script>
+<script src="../js/jasmine_anim.js"></script>
+<style>
+.blob
+{
+  background-color: red;
+  position: absolute;
+}
+</style>
+
+</head>
+<body>
+<h1>Jasmine Animation test</h1>
+<p>LinearSignal: <span id="linear">?</span>
+<div class="blob" id="blob.linear"></div>
+<p>SawtoothSignal: <span id="sawtooth">?</span>
+<div class="blob" id="blob.sawtooth"></div>
+<p>TriangleSignal: <span id="triangle">?</span>
+<div class="blob" id="blob.triangle"></div>
+<p>SineSignal: <span id="sine">?</span>
+<div class="blob" id="blob.sine"></div>
+<p>RandomSignal: <span id="random">?</span>
+<div class="blob" id="blob.random"></div>
+<p>Interpolated point is <span id="point">?</span>
+<div class="blob" id="bigblob"></div>
+
+<script>
+with (Jasmine)
+{
+  // Create a target which sets value in given DOM id
+  function Target(id, y)
+  {
+    this.element = document.getElementById(id);
+    this.thing = new DOMThing("blob."+id, new Point(0, y), new Point(5,5));
+    this.last_v = 0;
+  }
+
+  Target.prototype.set = function(v)
+  {
+    this.element.innerHTML = v.toString();
+    this.thing.move_by(new Point((v-this.last_v)*1000, 0, 0));
+    this.last_v = v;
+  }
+
+  // Target to log a point in given Dom ID
+  function PointTarget(id)
+  {
+    this.element = document.getElementById(id);
+  }
+
+  PointTarget.prototype.set = function(point)
+  {
+    this.element.innerHTML = point.toString();
+  }
+
+  // Linear signal
+  Universe.add_ticker(new LinearSignal(new Target("linear", 50), 5000));
+
+  // Sawtooth signal
+  Universe.add_ticker(new SawtoothSignal(new Target("sawtooth", 100), 5000));
+
+  // Triangle signal
+  Universe.add_ticker(new TriangleSignal(new Target("triangle", 150), 5000));
+
+  // Sine signal
+  Universe.add_ticker(new SineSignal(new Target("sine", 200), 5000));
+
+  // Random signal
+  Universe.add_ticker(new RandomSignal(new Target("random", 250), 100));
+
+  // Create interpolator from Sawtooth
+  var i = new Interpolator(new PointTarget("point"),
+                           new Point(0,0,0), new Point(100,200,300));
+  Universe.add_ticker(new SawtoothSignal(i, 5000));
+
+  // Same, but with position and size binders on a real object
+  // Sine waves are 90o out of phase, producing an oval
+  var d = new DOMThing("bigblob", new Point(100,100), new Point(10,10));
+  var pbx = new PositionBinder(d);
+  var i2x = new Interpolator(pbx, new Point(0,0), new Point(800, 0));
+  Universe.add_ticker(new SineSignal(i2x, 5000));
+  var pby = new PositionBinder(d);
+  var i2y = new Interpolator(pby, new Point(0,0), new Point(0, 400));
+  Universe.add_ticker(new SineSignal(i2y, 5000, Math.PI/2));
+
+  var sb = new SizeBinder(d);
+  var i3 = new Interpolator(sb, new Point(0,0), new Point(20, 20));
+  Universe.add_ticker(new TriangleSignal(i3, 1000));
+
+  Universe.start();
+}
+</script>
+
+</html>
