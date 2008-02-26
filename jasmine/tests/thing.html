@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>Jasmine Thing test</title>
+<script src="../js/jasmine.js"></script>
+
+</head>
+<body>
+<h1>Jasmine Thing test</h1>
+<div id="d1" style="border: solid 1px red">This is DIV 'd1'</div>
+
+<script>
+with (Jasmine)
+{
+  var p = new Point(1,2,3);
+  document.write("<p>3D point is "+p);
+
+  var p2 = new Point(1,2);
+  document.write("<p>2D point is "+p2);
+
+  var thing = new Thing(p, p2);
+  document.write("<p>Thing is "+thing);
+
+  var dom1 = new DOMThing("d1");
+  document.write("<p>DOMThing is <span id='d1data'>"+dom1+"</span>");
+  dom1.move_to(new Point(100,100));
+  dom1.resize_to(new Point(300,300));
+
+  function move()
+  {
+    if (dom1.size.x > 0)
+    {
+      dom1.move_by(new Point(1,1));
+      dom1.resize_by(new Point(-2, -2));
+      document.getElementById("d1data").innerHTML = dom1.toString();
+    }
+  }
+
+  setInterval("move()", 100);
+}
+
+</script>
+</html>
