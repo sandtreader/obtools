@@ -116,10 +116,12 @@ Jasmine.RandomSignal.inherits(Jasmine.Signal);
 // Interpolator - generates Point between two other Points
 // according to input signal
 // Sends point to target with set(point)
-Jasmine.Interpolator = function(target, start, end)
+// Note unusual order of end, start - start is optional and
+// defaults to (0,0,0)
+Jasmine.Interpolator = function(target, end, start)
 {
   this.target = target;
-  this.start  = start;
+  this.start  = start || new Jasmine.Point(0,0,0);
   this.end    = end;
 }
 
