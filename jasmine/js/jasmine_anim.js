@@ -113,6 +113,37 @@ Jasmine.RandomSignal = function(target, period, cycles)
 Jasmine.RandomSignal.inherits(Jasmine.Signal);
 
 //=============================================================
+// Signal splitter - sends the same input signal to multiple
+// outputs, array of targets
+Jasmine.SignalSplitter = function(targets)
+{
+  this.targets = targets || [];
+}
+
+//-------------------------------------------------
+// Splitter set method - passes v on to targets
+Jasmine.SignalSplitter.prototype.set = function(v)
+{
+  for (t in this.targets) this.targets[t].set(v);
+}
+
+//-------------------------------------------------
+// Add a target to a splitter
+Jasmine.SignalSplitter.prototype.add = function(t)
+{
+  this.targets.push(t);
+}
+
+//-------------------------------------------------
+// Remove a target from a splitter 
+Jasmine.SignalSplitter.prototype.remove = function(t)
+{
+  for(var i=0; i<this.targets.length; i++)
+    if (this.targets[i] == t)
+      this.targets.splice(i--, 1);
+}
+
+//=============================================================
 // Interpolator - generates Point between two other Points
 // according to input signal
 // Sends point to target with set(point)

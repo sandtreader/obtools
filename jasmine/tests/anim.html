@@ -24,6 +24,10 @@
 <div class="blob" id="blob.sine"></div>
 <p>RandomSignal: <span id="random">?</span>
 <div class="blob" id="blob.random"></div>
+<p>SignalSplitter(1): <span id="split1">?</span>
+<div class="blob" id="blob.split1"></div>
+<p>SignalSplitter(2): <span id="split2">?</span>
+<div class="blob" id="blob.split2"></div>
 <p>Interpolated point is <span id="point">?</span>
 <div class="blob" id="bigblob"></div>
 
@@ -69,7 +73,16 @@ with (Jasmine)
   Universe.add_ticker(new SineSignal(new Target("sine", 200), 5000));
 
   // Random signal
-  Universe.add_ticker(new RandomSignal(new Target("random", 250), 100));
+  Universe.add_ticker(new RandomSignal(new Target("random", 250), 1000));
+
+  // Split signal
+  var s1 = new Target("split1", 300);
+  var s2 = new Target("split2", 320);
+
+  var sp = new SignalSplitter([ s1 ]);
+  sp.add( s2 );
+  Universe.add_ticker(new SineSignal(sp, 5000));
+  setTimeout("sp.remove(s2);", 10000);
 
   // Create interpolator from Sawtooth
   var i = new Interpolator(new PointTarget("point"),

@@ -91,12 +91,20 @@ Jasmine.Point.prototype.plus = function(o)
   return new Jasmine.Point(this.x+o.x, this.y+o.y, this.z+o.z);
 }
 
+//-------------------------------------------------
+// Multiply points (vector multiply)
+Jasmine.Point.prototype.times = function(o)
+{
+  return new Jasmine.Point(this.x*o.x, this.y*o.y, this.z*o.z);
+}
+
 //=============================================================
 // Thing class - superclass of all display objects
 Jasmine.Thing = function(position, size)
 {
   this.position = position;
   this.size = size;
+  this.container = null;   // May apply transform/projection
 }
 
 //-------------------------------------------------
@@ -132,6 +140,13 @@ Jasmine.Thing.prototype.resize_by = function(delta)
 }
 
 //-------------------------------------------------
+// Get transformed/projected position for display
+// Returns display Thing
+Jasmine.Thing.prototype.get_display = function()
+{
+}
+
+//-------------------------------------------------
 // Convert to string
 Jasmine.Thing.prototype.toString = function()
 {
@@ -149,19 +164,24 @@ Jasmine.DOMThing = function(id, position, size)
   if (!this.element) return;  // Leave pos/size undefined
 
   this.parent.constructor.call(this, position, size);
-  this.update_dom();
 }
 
 Jasmine.DOMThing.inherits(Jasmine.Thing);
 
 //-------------------------------------------------
-// Reset style to stored position/size
-Jasmine.DOMThing.prototype.update_dom = function()
+// Set style to (possibly transformed/projected) position/size
+Jasmine.DOMThing.prototype.display = function()
 {
-  this.element.style.left   = this.position.x+"px";
-  this.element.style.top    = this.position.y+"px";
-  this.element.style.width  = this.size.x+"px";
-  this.element.style.height = this.size.y+"px";
+  if (!this.element) return;
+
+  // Get display position/size
+  var loc = new Jasmine.Thing(this.position, this.size);
+  if (!!this.container) this.container.transform(loc);
+
+  this.element.style.left   = loc.position.x+"px";
+  this.element.style.top    = loc.position.y+"px";
+  this.element.style.width  = loc.size.x+"px";
+  this.element.style.height = loc.size.y+"px";
 }
 
 //-------------------------------------------------
@@ -169,7 +189,7 @@ Jasmine.DOMThing.prototype.update_dom = function()
 Jasmine.DOMThing.prototype.move_to = function(position)
 {
   this.parent.move_to.call(this, position);
-  this.update_dom();
+  this.display();
 }
 
 //-------------------------------------------------
@@ -177,7 +197,7 @@ Jasmine.DOMThing.prototype.move_to = function(position)
 Jasmine.DOMThing.prototype.move_by = function(delta)
 {
   this.parent.move_by.call(this, delta);
-  this.update_dom();
+  this.display();
 }
 
 //-------------------------------------------------
@@ -185,7 +205,7 @@ Jasmine.DOMThing.prototype.move_by = function(delta)
 Jasmine.DOMThing.prototype.resize_to = function(size)
 {
   this.parent.resize_to.call(this, size);
-  this.update_dom();
+  this.display();
 }
 
 //-------------------------------------------------
@@ -193,7 +213,7 @@ Jasmine.DOMThing.prototype.resize_to = function(size)
 Jasmine.DOMThing.prototype.resize_by = function(delta)
 {
   this.parent.resize_by.call(this, delta);
-  this.update_dom();
+  this.display();
 }
 
 //-------------------------------------------------
