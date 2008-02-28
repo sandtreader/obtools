@@ -25,11 +25,14 @@ with (Jasmine)
 
   function move()
   {
-    if (dom1.size.x > 0)
+    with (Jasmine)
     {
-      dom1.move_by(new Point(1,1));
-      dom1.resize_by(new Point(-2, -2));
-      document.getElementById("d1data").innerHTML = dom1.toString();
+      if (dom1.size.x > 0)
+      {
+	dom1.move_by(new Point(1,1));
+	dom1.resize_by(new Point(-2, -2));
+	document.getElementById("d1data").innerHTML = dom1.toString();
+      }
     }
   }
 

@@ -8,6 +8,7 @@
 {
   background-color: red;
   position: absolute;
+  overflow: hidden;
 }
 </style>
 
@@ -37,16 +38,22 @@ with (Jasmine)
   // Create a target which sets value in given DOM id
   function Target(id, y)
   {
-    this.element = document.getElementById(id);
-    this.thing = new DOMThing("blob."+id, new Point(0, y), new Point(5,5));
-    this.last_v = 0;
+    with (Jasmine)
+    {
+      this.element = document.getElementById(id);
+      this.thing = new DOMThing("blob."+id, new Point(0, y), new Point(5,5));
+      this.last_v = 0;
+    }
   }
 
   Target.prototype.set = function(v)
   {
-    this.element.innerHTML = v.toString();
-    this.thing.move_by(new Point((v-this.last_v)*1000, 0, 0));
-    this.last_v = v;
+    with (Jasmine)
+    {
+      this.element.innerHTML = v.toString();
+      this.thing.move_by(new Point((v-this.last_v)*1000, 0, 0));
+      this.last_v = v;
+    }
   }
 
   // Target to log a point in given Dom ID
