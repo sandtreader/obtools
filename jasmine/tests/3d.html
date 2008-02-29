@@ -16,14 +16,14 @@
 </head>
 <body>
 <h1>Jasmine 3D test</h1>
-<div class="blob" id="blob1"></div>
-<div class="blob" id="blob2"></div>
-<div class="blob" id="blob3"></div>
-<div class="blob" id="blob4"></div>
-<div class="blob" id="blob5"></div>
-<div class="blob" id="blob6"></div>
-<div class="blob" id="blob7"></div>
-<div class="blob" id="blob8"></div>
+<div class="blob" id="blob1" style="background-color: red;"></div>
+<div class="blob" id="blob2" style="background-color: green;"></div>
+<div class="blob" id="blob3" style="background-color: blue;"></div>
+<div class="blob" id="blob4" style="background-color: yellow;"></div>
+<div class="blob" id="blob5" style="background-color: cyan;"></div>
+<div class="blob" id="blob6" style="background-color: magenta;"></div>
+<div class="blob" id="blob7" style="background-color: black;"></div>
+<div class="blob" id="blob8" style="background-color: #808080;"></div>
 
 <script>
 with (Jasmine)
@@ -47,19 +47,19 @@ with (Jasmine)
   var ts = new Scale(new Vector(0,0,0));
   w.add_transformation(ts);
   w.add_transformation(new Perspective(500));
-  w.add_transformation(new Translation(new Vector(600,250)));
+  w.add_transformation(new Translation(new Vector(400,250)));
 
   // Animate
   var i1 = new VectorInterpolator(new PositionBinder(tr),
 		                  new Vector(0,Math.PI*2,0));
-  Universe.add_ticker(new SawtoothSignal(i1, 5000));
+  Universe.add_ticker(new SawtoothSignal(i1, 10000));
 
   var i2 = new VectorInterpolator(new PositionBinder(tr),
                                   new Vector(Math.PI*2,0,0));
-  Universe.add_ticker(new SineSignal(i2, 2000));
+  Universe.add_ticker(new SineSignal(i2, 20000));
 
   var i3 = new VectorInterpolator(new SizeBinder(ts), new Vector(200,200,200));
-  Universe.add_ticker(new SineSignal(i3, 10000));
+  Universe.add_ticker(new SineSignal(i3, 40000));
 
   Universe.add_ticker(w);
   Universe.start();
