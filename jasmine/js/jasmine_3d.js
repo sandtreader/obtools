@@ -114,8 +114,8 @@ Jasmine.Scale.prototype.resize_by = function(delta)
 // Transform a location in place
 Jasmine.Scale.prototype.transform = function(loc)
 {
-  loc.position = loc.position.times(this.scale);
-  loc.size     = loc.size.times(this.scale);
+  loc.position.multiply_by(this.scale);
+  loc.size.multiply_by(this.scale);
 }
 
 //============================================================================
@@ -164,14 +164,9 @@ Jasmine.Rotation.prototype.transform = function(loc)
   var zx = this.cosz*yx - this.sinz*xy;
   var zy = this.sinz*yx + this.cosz*xy;
     
-  loc.position = new Jasmine.Vector(zx, zy, yz);
-}
-
-//--------------------------------------------------------------------------
-// Transform a size - does nothing
-Jasmine.Rotation.prototype.transform_size = function(size, vector)
-{
-  return size;
+  loc.position.x = zx;
+  loc.position.y = zy;
+  loc.position.z = yz;
 }
 
 //============================================================================
@@ -200,15 +195,7 @@ Jasmine.Translation.prototype.move_by = function(delta)
 // Transform a location in place
 Jasmine.Translation.prototype.transform = function(loc)
 {
-  loc.position = loc.position.plus(this.translation);
-}
-
-//--------------------------------------------------------------------------
-// Transform a size
-Jasmine.Translation.prototype.transform_size = function(size, vector)
-{
-  // Does nothing
-  return size;
+  loc.position.add(this.translation);
 }
 
 //============================================================================
@@ -225,9 +212,13 @@ Jasmine.Perspective.prototype.transform = function(loc)
 {
   var d = this.depth;
   var f = d/(d+loc.position.z);
-  loc.position = new Jasmine.Vector(loc.position.x*f,
-				    loc.position.y*f);
-  loc.size     = new Jasmine.Vector(loc.size.x*f,
-				    loc.size.y*f);
+
+  loc.position.x *= f;
+  loc.position.y *= f;
+  // keep z for z-ordering
+
+  loc.size.x *= f;
+  loc.size.y *= f;
+  loc.size.z  = 0;
 }
 

@@ -71,6 +71,13 @@ Jasmine.Vector = function(x,y,z)
 }
 
 //--------------------------------------------------------------------------
+// Clone
+Jasmine.Vector.prototype.clone = function()
+{
+  return new Jasmine.Vector(this.x, this.y, this.z);
+}
+
+//--------------------------------------------------------------------------
 // Convert to string
 Jasmine.Vector.prototype.toString = function()
 {
@@ -78,24 +85,45 @@ Jasmine.Vector.prototype.toString = function()
 }
 
 //--------------------------------------------------------------------------
-// Subtract vectors
+// Subtract vectors, creating a new one
 Jasmine.Vector.prototype.minus = function(o)
 {
   return new Jasmine.Vector(this.x-o.x, this.y-o.y, this.z-o.z);
 }
 
 //--------------------------------------------------------------------------
-// Add vectors
+// Subtract vectors, modifying this
+Jasmine.Vector.prototype.subtract = function(o)
+{
+  this.x -= o.x; this.y -= o.y; this.z -= o.z;
+}
+
+//--------------------------------------------------------------------------
+// Add vectors, creating a new one
 Jasmine.Vector.prototype.plus = function(o)
 {
   return new Jasmine.Vector(this.x+o.x, this.y+o.y, this.z+o.z);
 }
 
 //--------------------------------------------------------------------------
-// Multiply vectors (vector multiply)
+// Add vectors, modifying this
+Jasmine.Vector.prototype.add = function(o)
+{
+  this.x += o.x; this.y += o.y; this.z += o.z;
+}
+
+//--------------------------------------------------------------------------
+// Multiply vectors (dot product), creating a new one
 Jasmine.Vector.prototype.times = function(o)
 {
   return new Jasmine.Vector(this.x*o.x, this.y*o.y, this.z*o.z);
+}
+
+//--------------------------------------------------------------------------
+// Multiply vectors (dot product), modifying this 
+Jasmine.Vector.prototype.multiply_by = function(o)
+{
+  this.x *= o.x; this.y *= o.y; this.z *= o.z;
 }
 
 //============================================================================
@@ -105,6 +133,13 @@ Jasmine.Thing = function(position, size)
   this.position = position;
   this.size = size;
   this.container = null;   // May apply transform/projection
+}
+
+//--------------------------------------------------------------------------
+// Clone, leaving container null
+Jasmine.Thing.prototype.clone = function()
+{
+  return new Jasmine.Thing(this.position.clone(), this.size.clone());
 }
 
 //--------------------------------------------------------------------------
@@ -118,9 +153,7 @@ Jasmine.Thing.prototype.move_to = function(position)
 // Move relatively
 Jasmine.Thing.prototype.move_by = function(delta)
 {
-  this.position.x += delta.x;
-  this.position.y += delta.y;
-  this.position.z += delta.z;
+  this.position.add(delta);
 }
 
 //--------------------------------------------------------------------------
@@ -134,16 +167,7 @@ Jasmine.Thing.prototype.resize_to = function(size)
 // Size relatively
 Jasmine.Thing.prototype.resize_by = function(delta)
 {
-  this.size.x += delta.x;
-  this.size.y += delta.y;
-  this.size.z += delta.z;
-}
-
-//--------------------------------------------------------------------------
-// Get transformed/projected position for display
-// Returns display Thing
-Jasmine.Thing.prototype.get_display = function()
-{
+  this.size.add(delta);
 }
 
 //--------------------------------------------------------------------------
@@ -175,8 +199,13 @@ Jasmine.DOMThing.prototype.display = function()
   if (!this.element) return;
 
   // Get display position/size
-  var loc = new Jasmine.Thing(this.position, this.size);
-  if (!!this.container) this.container.transform(loc);
+  var loc;
+  if (!!this.container)
+  {
+    loc = this.clone();
+    this.container.transform(loc);
+  }
+  else loc = this;
 
   this.element.style.left   = loc.position.x+"px";
   this.element.style.top    = loc.position.y+"px";
