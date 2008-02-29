@@ -11,16 +11,16 @@
 <script>
 with (Jasmine)
 {
-  var p = new Point(1,2,3);
-  document.write("<p>3D point is "+p);
+  var v1 = new Vector(1,2,3);
+  document.write("<p>3D vector is "+v1);
 
-  var p2 = new Point(1,2);
-  document.write("<p>2D point is "+p2);
+  var v2 = new Vector(1,2);
+  document.write("<p>2D vector is "+v2);
 
-  var thing = new Thing(p, p2);
+  var thing = new Thing(v1, v2);
   document.write("<p>Thing is "+thing);
 
-  var dom1 = new DOMThing("d1", new Point(500,100), new Point(300,300));
+  var dom1 = new DOMThing("d1", new Vector(500,100), new Vector(300,300));
   document.write("<p>DOMThing is <span id='d1data'>"+dom1+"</span>");
 
   function move()
@@ -29,8 +29,8 @@ with (Jasmine)
     {
       if (dom1.size.x > 0)
       {
-	dom1.move_by(new Point(1,1));
-	dom1.resize_by(new Point(-2, -2));
+	dom1.move_by(new Vector(1,1));
+	dom1.resize_by(new Vector(-2, -2));
 	document.getElementById("d1data").innerHTML = dom1.toString();
       }
     }

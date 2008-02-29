@@ -2,9 +2,9 @@
 // Animation support
 // (c) xMill Consulting Limited 2008.  All rights reserved.
 
-//=============================================================
+//============================================================================
 // Signal class - generates a 0-1 function over time
-//  Target: Object with a set(value 0..1) function
+//  Target: Object with a set_scalar(value 0..1) function
 //  F:      Single-value function providing waveform
 //  Period: Cycle/time period in ms
 //  Cycles: Number of cycles, 0=forever (default 0)
@@ -30,7 +30,7 @@ Jasmine.Signal.prototype.tick = function(now)
   if (this.cycles && c >= this.cycles)
   {
     // Force to end point
-    this.target.set(this.f(1.0));
+    this.target.set_scalar(this.f(1.0));
     return false;
   }
 
@@ -41,12 +41,12 @@ Jasmine.Signal.prototype.tick = function(now)
   v = this.f(v);
 
   // Call to target
-  this.target.set(v);
+  this.target.set_scalar(v);
 
   return true;
 }
 
-//=============================================================
+//============================================================================
 // Simple linear signal, 0..1 over period and stop
 Jasmine.LinearSignal = function(target, period)
 {
@@ -57,7 +57,7 @@ Jasmine.LinearSignal = function(target, period)
 
 Jasmine.LinearSignal.inherits(Jasmine.Signal);
 
-//=============================================================
+//============================================================================
 // Sawtooth signal, repeatedly 0..1
 Jasmine.SawtoothSignal = function(target, period, cycles)
 {
@@ -68,7 +68,7 @@ Jasmine.SawtoothSignal = function(target, period, cycles)
 
 Jasmine.SawtoothSignal.inherits(Jasmine.Signal);
 
-//=============================================================
+//============================================================================
 // Triangle signal, repeatedly 0..1..0
 Jasmine.TriangleSignal = function(target, period, cycles)
 {
@@ -79,7 +79,7 @@ Jasmine.TriangleSignal = function(target, period, cycles)
 
 Jasmine.TriangleSignal.inherits(Jasmine.Signal);
 
-//=============================================================
+//============================================================================
 // Sine signal, repeatedly 0..1..0 sine wave, with optional phase
 Jasmine.SineSignal = function(target, period, phase, cycles)
 {
@@ -94,7 +94,7 @@ Jasmine.SineSignal = function(target, period, phase, cycles)
 
 Jasmine.SineSignal.inherits(Jasmine.Signal);
 
-//=============================================================
+//============================================================================
 // Random signal, jumps beween 0..1 at start of every cycle
 // (when v jumps backwards)
 Jasmine.RandomSignal = function(target, period, cycles)
@@ -112,29 +112,29 @@ Jasmine.RandomSignal = function(target, period, cycles)
 
 Jasmine.RandomSignal.inherits(Jasmine.Signal);
 
-//=============================================================
-// Signal splitter - sends the same input signal to multiple
-// outputs, array of targets
+//============================================================================
+// Signal splitter - sends the same scalar input signal to 
+// multiple outputs, array of targets
 Jasmine.SignalSplitter = function(targets)
 {
   this.targets = targets || [];
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Splitter set method - passes v on to targets
-Jasmine.SignalSplitter.prototype.set = function(v)
+Jasmine.SignalSplitter.prototype.set_scalar = function(v)
 {
-  for (t in this.targets) this.targets[t].set(v);
+  for (t in this.targets) this.targets[t].set_scalar(v);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a target to a splitter
 Jasmine.SignalSplitter.prototype.add = function(t)
 {
   this.targets.push(t);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Remove a target from a splitter 
 Jasmine.SignalSplitter.prototype.remove = function(t)
 {
@@ -143,66 +143,89 @@ Jasmine.SignalSplitter.prototype.remove = function(t)
       this.targets.splice(i--, 1);
 }
 
-//=============================================================
-// Interpolator - generates Point between two other Points
+//============================================================================
+// ScalarInterpolator - generates value between two other values
 // according to input signal
-// Sends point to target with set(point)
+// Sends value to target with set_scalar(v)
 // Note unusual order of end, start - start is optional and
-// defaults to (0,0,0)
-Jasmine.Interpolator = function(target, end, start)
+// defaults to 0
+Jasmine.ScalarInterpolator = function(target, end, start)
 {
   this.target = target;
-  this.start  = start || new Jasmine.Point(0,0,0);
+  this.start  = start || 0;
   this.end    = end;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Interpolator set method - takes scalar 'v' and 
-// passes it on to target as interpolated Point
-Jasmine.Interpolator.prototype.set = function(v)
+// passes it on to target as interpolated value
+Jasmine.ScalarInterpolator.prototype.set_scalar = function(v)
 {
   var u = 1-v;
-  var point = new Jasmine.Point(
+  var i = u*this.start + v*this.end;
+  this.target.set_scalar(i);
+}
+
+//============================================================================
+// VectorInterpolator - generates Vector between two other Vectors
+// according to input signal
+// Sends vector to target with set_vector(vector)
+// Note unusual order of end, start - start is optional and
+// defaults to (0,0,0)
+Jasmine.VectorInterpolator = function(target, end, start)
+{
+  this.target = target;
+  this.start  = start || new Jasmine.Vector(0,0,0);
+  this.end    = end;
+}
+
+//--------------------------------------------------------------------------
+// Interpolator set method - takes scalar 'v' and 
+// passes it on to target as interpolated Vector
+Jasmine.VectorInterpolator.prototype.set_scalar = function(v)
+{
+  var u = 1-v;
+  var i = new Jasmine.Vector(
     u*this.start.x + v*this.end.x,
     u*this.start.y + v*this.end.y,
     u*this.start.z + v*this.end.z);
     
-  this.target.set(point);
+  this.target.set_vector(i);
 }
 
-//=============================================================
-// PositionBinder - acts as an Interpolator target which sets
+//============================================================================
+// PositionBinder - acts as an VectorInterpolator target which sets
 // the position of the target Thing with move_by (note, relative)
 Jasmine.PositionBinder = function(target)
 {
   this.target = target;
-  this.last = new Jasmine.Point(0,0,0);
+  this.last = new Jasmine.Vector(0,0,0);
 }
 
-//-------------------------------------------------
-Jasmine.PositionBinder.prototype.set = function(point)
+//--------------------------------------------------------------------------
+Jasmine.PositionBinder.prototype.set_vector = function(vector)
 {
   // Work out delta from last time
-  var delta = point.minus(this.last);
+  var delta = vector.minus(this.last);
   this.target.move_by(delta);
-  this.last = point;
+  this.last = vector;
 }
 
-//=============================================================
-// SizeBinder - acts as an Interpolator target which sets
+//============================================================================
+// SizeBinder - acts as an VectorInterpolator target which sets
 // the size of the target Thing with move_by (note, relative)
 Jasmine.SizeBinder = function(target)
 {
   this.target = target;
-  this.last = new Jasmine.Point(0,0,0);
+  this.last = new Jasmine.Vector(0,0,0);
 }
 
-//-------------------------------------------------
-Jasmine.SizeBinder.prototype.set = function(point)
+//--------------------------------------------------------------------------
+Jasmine.SizeBinder.prototype.set_vector = function(vector)
 {
   // Work out delta from last time
-  var delta = point.minus(this.last);
+  var delta = vector.minus(this.last);
   this.target.resize_by(delta);
-  this.last = point;
+  this.last = vector;
 }
 

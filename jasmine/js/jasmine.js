@@ -7,7 +7,7 @@
 // to avoid typing it all the time!
 var Jasmine = {};
 
-//=============================================================
+//============================================================================
 // Object support functions
 // Inheritance creator - inserts an intermediate prototype to
 // avoid derived methods moving into the base.  Also defines
@@ -21,14 +21,14 @@ Function.prototype.inherits = function(base)
   this.prototype.parent = base.prototype;
 }
 
-//=============================================================
+//============================================================================
 // Universe object (singleton class)
 Jasmine.Universe = new Object();
 
 // List of tickers
 Jasmine.Universe.tickers = [];
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Start method
 Jasmine.Universe.start = function()
 {
@@ -39,7 +39,7 @@ Jasmine.Universe.start = function()
   setInterval("Jasmine.Universe.tick()", 40);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Register a ticker
 // Tickers must provide a tick(now) function which returns true
 // if it wants to continue
@@ -48,7 +48,7 @@ Jasmine.Universe.add_ticker = function(t)
   this.tickers.push(t);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Universe interval tick
 Jasmine.Universe.tick = function()
 {
@@ -61,44 +61,44 @@ Jasmine.Universe.tick = function()
       this.tickers.splice(i--, 1);
 }
 
-//=============================================================
-// Point class - 2D or 3D point/size.  z is optional, default 0
-Jasmine.Point = function(x,y,z)
+//============================================================================
+// Vector class - 2D or 3D point/size.  z is optional, default 0
+Jasmine.Vector = function(x,y,z)
 {
   this.x = x;
   this.y = y;
   this.z = z||0;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to string
-Jasmine.Point.prototype.toString = function()
+Jasmine.Vector.prototype.toString = function()
 {
   return "<"+this.x+","+this.y+","+this.z+">";
 }
 
-//-------------------------------------------------
-// Subtract points
-Jasmine.Point.prototype.minus = function(o)
+//--------------------------------------------------------------------------
+// Subtract vectors
+Jasmine.Vector.prototype.minus = function(o)
 {
-  return new Jasmine.Point(this.x-o.x, this.y-o.y, this.z-o.z);
+  return new Jasmine.Vector(this.x-o.x, this.y-o.y, this.z-o.z);
 }
 
-//-------------------------------------------------
-// Add points
-Jasmine.Point.prototype.plus = function(o)
+//--------------------------------------------------------------------------
+// Add vectors
+Jasmine.Vector.prototype.plus = function(o)
 {
-  return new Jasmine.Point(this.x+o.x, this.y+o.y, this.z+o.z);
+  return new Jasmine.Vector(this.x+o.x, this.y+o.y, this.z+o.z);
 }
 
-//-------------------------------------------------
-// Multiply points (vector multiply)
-Jasmine.Point.prototype.times = function(o)
+//--------------------------------------------------------------------------
+// Multiply vectors (vector multiply)
+Jasmine.Vector.prototype.times = function(o)
 {
-  return new Jasmine.Point(this.x*o.x, this.y*o.y, this.z*o.z);
+  return new Jasmine.Vector(this.x*o.x, this.y*o.y, this.z*o.z);
 }
 
-//=============================================================
+//============================================================================
 // Thing class - superclass of all display objects
 Jasmine.Thing = function(position, size)
 {
@@ -107,14 +107,14 @@ Jasmine.Thing = function(position, size)
   this.container = null;   // May apply transform/projection
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Move to a new position
 Jasmine.Thing.prototype.move_to = function(position)
 {
   this.position = position;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Move relatively
 Jasmine.Thing.prototype.move_by = function(delta)
 {
@@ -123,14 +123,14 @@ Jasmine.Thing.prototype.move_by = function(delta)
   this.position.z += delta.z;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Change to a new size
 Jasmine.Thing.prototype.resize_to = function(size)
 {
   this.size = size;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Size relatively
 Jasmine.Thing.prototype.resize_by = function(delta)
 {
@@ -139,21 +139,21 @@ Jasmine.Thing.prototype.resize_by = function(delta)
   this.size.z += delta.z;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Get transformed/projected position for display
 // Returns display Thing
 Jasmine.Thing.prototype.get_display = function()
 {
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to string
 Jasmine.Thing.prototype.toString = function()
 {
   return ""+this.position+"+"+this.size;
 }
 
-//=============================================================
+//============================================================================
 // DOMThing class - binding of a thing to a real DOM element
 // position and size are optional and will be set from the
 // element if not specified
@@ -168,7 +168,7 @@ Jasmine.DOMThing = function(id, position, size)
 
 Jasmine.DOMThing.inherits(Jasmine.Thing);
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Set style to (possibly transformed/projected) position/size
 Jasmine.DOMThing.prototype.display = function()
 {
@@ -184,7 +184,7 @@ Jasmine.DOMThing.prototype.display = function()
   this.element.style.height = loc.size.y+"px";
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Move permanently to a new position - also moves DOM element
 Jasmine.DOMThing.prototype.move_to = function(position)
 {
@@ -192,7 +192,7 @@ Jasmine.DOMThing.prototype.move_to = function(position)
   this.display();
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Move relatively - also moves DOM element
 Jasmine.DOMThing.prototype.move_by = function(delta)
 {
@@ -200,7 +200,7 @@ Jasmine.DOMThing.prototype.move_by = function(delta)
   this.display();
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Change to a new size - also resizes DOM element
 Jasmine.DOMThing.prototype.resize_to = function(size)
 {
@@ -208,7 +208,7 @@ Jasmine.DOMThing.prototype.resize_to = function(size)
   this.display();
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Resize relatively - also resizes DOM element
 Jasmine.DOMThing.prototype.resize_by = function(delta)
 {
@@ -216,7 +216,7 @@ Jasmine.DOMThing.prototype.resize_by = function(delta)
   this.display();
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to string
 Jasmine.DOMThing.prototype.toString = function()
 {

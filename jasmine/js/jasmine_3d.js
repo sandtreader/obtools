@@ -2,7 +2,7 @@
 // 3D support (really 2.5D, since we're only displaying 2D objects)
 // (c) xMill Consulting Limited 2008.  All rights reserved.
 
-//=============================================================
+//============================================================================
 // 3D world - holds multiple Things (including sub-worlds)
 // and provides transformations for them.
 // Transformations are composable, and provide transform_position
@@ -17,7 +17,7 @@ Jasmine.World = function(things, transformations)
   this.container = null;  // We can be in parent world, too
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a Thing
 Jasmine.World.prototype.add = function(t)
 {
@@ -28,7 +28,7 @@ Jasmine.World.prototype.add = function(t)
   t.container = this;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Remove a Thing
 Jasmine.World.prototype.remove = function(t)
 {
@@ -37,14 +37,14 @@ Jasmine.World.prototype.remove = function(t)
       this.things.splice(i--, 1);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a transformation
 Jasmine.World.prototype.add_transformation = function(t)
 {
   this.transformations.push(t);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Remove a transformation
 Jasmine.World.prototype.remove_transformation = function(t)
 {
@@ -53,7 +53,7 @@ Jasmine.World.prototype.remove_transformation = function(t)
       this.transformations.splice(i--, 1);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Redisplay the world
 Jasmine.World.prototype.tick = function(now)
 {
@@ -61,14 +61,14 @@ Jasmine.World.prototype.tick = function(now)
   return true;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Redisplay all things
 Jasmine.World.prototype.display = function(now)
 {
   for (t in this.things) this.things[t].display();
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform location in place
 Jasmine.World.prototype.transform = function(loc)
 {
@@ -80,29 +80,37 @@ Jasmine.World.prototype.transform = function(loc)
   if (!!this.container) this.container.transform(loc);
 }
 
-//=============================================================
+//============================================================================
 // Scale transformation class:  
-//  scale:       'Point' containing x,y,z scales
+//  scale:       Vector containing x,y,z scales
 Jasmine.Scale = function(scale)
 {
-  this.set(scale);
+  this.set_vector(scale);
 }
 
-//-------------------------------------------------
-// Set the scale - can be used as a single Interpolator target
-Jasmine.Scale.prototype.set = function(scale)
+//--------------------------------------------------------------------------
+// Set the scale - can be used as a VectorInterpolator target
+Jasmine.Scale.prototype.set_vector = function(scale)
 {
   this.scale = scale;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
+// Set the scale with a scalar (all axes the same)
+// - can be used as a VectorInterpolator target
+Jasmine.Scale.prototype.set_scalar = function(scale)
+{
+  this.scale = new Jasmine.Vector(scale, scale, scale);
+}
+
+//--------------------------------------------------------------------------
 // Move the scale - can be used as a SizeBinder target
 Jasmine.Scale.prototype.resize_by = function(delta)
 {
-  this.set(this.scale.plus(delta));
+  this.set_vector(this.scale.plus(delta));
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform a location in place
 Jasmine.Scale.prototype.transform = function(loc)
 {
@@ -110,17 +118,17 @@ Jasmine.Scale.prototype.transform = function(loc)
   loc.size     = loc.size.times(this.scale);
 }
 
-//=============================================================
+//============================================================================
 // Rotation transformation class:  
-//  rotation:       'Point' containing x,y,z rotations (rad)
+//  rotation:      Vector of x,y,z rotations (rad)
 Jasmine.Rotation = function(rotation)
 {
-  this.set(rotation);
+  this.set_vector(rotation);
 }
 
-//-------------------------------------------------
-// Set the rotation - can be used as an Interpolator target
-Jasmine.Rotation.prototype.set = function(rotation)
+//--------------------------------------------------------------------------
+// Set the rotation - can be used as a VectorInterpolator target
+Jasmine.Rotation.prototype.set_vector = function(rotation)
 {
   this.rotation = rotation;
 
@@ -133,14 +141,14 @@ Jasmine.Rotation.prototype.set = function(rotation)
   this.cosz = Math.cos(rotation.z);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Move the rotation - can be used as a PositionBinder target
 Jasmine.Rotation.prototype.move_by = function(delta)
 {
-  this.set(this.rotation.plus(delta));
+  this.set_vector(this.rotation.plus(delta));
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform location in place
 Jasmine.Rotation.prototype.transform = function(loc)
 {
@@ -156,54 +164,54 @@ Jasmine.Rotation.prototype.transform = function(loc)
   var zx = this.cosz*yx - this.sinz*xy;
   var zy = this.sinz*yx + this.cosz*xy;
     
-  loc.position = new Jasmine.Point(zx, zy, yz);
+  loc.position = new Jasmine.Vector(zx, zy, yz);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform a size - does nothing
-Jasmine.Rotation.prototype.transform_size = function(size, point)
+Jasmine.Rotation.prototype.transform_size = function(size, vector)
 {
   return size;
 }
 
-//=============================================================
+//============================================================================
 // Translation transformation class:  
-//  translation:       'Point' containing x,y,z translation vector
+//  translation:       x,y,z translation Vector
 Jasmine.Translation = function(translation)
 {
-  this.set(translation);
+  this.set_vector(translation);
 }
 
-//-------------------------------------------------
-// Set the translation - can be used as an Interpolator target
-Jasmine.Translation.prototype.set = function(translation)
+//--------------------------------------------------------------------------
+// Set the translation - can be used as a VectorInterpolator target
+Jasmine.Translation.prototype.set_vector = function(translation)
 {
   this.translation = translation;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Move the translation - can be used as a PositionBinder target
 Jasmine.Translation.prototype.move_by = function(delta)
 {
-  this.set(this.translation.plus(delta));
+  this.set_vector(this.translation.plus(delta));
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform a location in place
 Jasmine.Translation.prototype.transform = function(loc)
 {
   loc.position = loc.position.plus(this.translation);
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform a size
-Jasmine.Translation.prototype.transform_size = function(size, point)
+Jasmine.Translation.prototype.transform_size = function(size, vector)
 {
   // Does nothing
   return size;
 }
 
-//=============================================================
+//============================================================================
 // Projection transformation class:  
 //  depth: Depth of field
 Jasmine.Perspective = function(depth)
@@ -211,15 +219,15 @@ Jasmine.Perspective = function(depth)
   this.depth = depth;
 }
 
-//-------------------------------------------------
+//--------------------------------------------------------------------------
 // Transform a location (perspective projection to 2D)
 Jasmine.Perspective.prototype.transform = function(loc)
 {
   var d = this.depth;
   var f = d/(d+loc.position.z);
-  loc.position = new Jasmine.Point(loc.position.x*f,
-				   loc.position.y*f);
-  loc.size     = new Jasmine.Point(loc.size.x*f,
-				   loc.size.y*f);
+  loc.position = new Jasmine.Vector(loc.position.x*f,
+				    loc.position.y*f);
+  loc.size     = new Jasmine.Vector(loc.size.x*f,
+				    loc.size.y*f);
 }
 

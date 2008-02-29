@@ -29,36 +29,36 @@
 with (Jasmine)
 {
   // Create 3D cube of blobs
-  var b1 = new DOMThing("blob1", new Point(-1,-1,-1), new Point(0.2,0.2));
-  var b2 = new DOMThing("blob2", new Point(-1,-1, 1), new Point(0.2,0.2));
-  var b3 = new DOMThing("blob3", new Point(-1, 1,-1), new Point(0.2,0.2));
-  var b4 = new DOMThing("blob4", new Point(-1, 1, 1), new Point(0.2,0.2));
-  var b5 = new DOMThing("blob5", new Point( 1,-1,-1), new Point(0.2,0.2));
-  var b6 = new DOMThing("blob6", new Point( 1,-1, 1), new Point(0.2,0.2));
-  var b7 = new DOMThing("blob7", new Point( 1, 1,-1), new Point(0.2,0.2));
-  var b8 = new DOMThing("blob8", new Point( 1, 1, 1), new Point(0.2,0.2));
+  var b1 = new DOMThing("blob1", new Vector(-1,-1,-1), new Vector(0.2,0.2));
+  var b2 = new DOMThing("blob2", new Vector(-1,-1, 1), new Vector(0.2,0.2));
+  var b3 = new DOMThing("blob3", new Vector(-1, 1,-1), new Vector(0.2,0.2));
+  var b4 = new DOMThing("blob4", new Vector(-1, 1, 1), new Vector(0.2,0.2));
+  var b5 = new DOMThing("blob5", new Vector( 1,-1,-1), new Vector(0.2,0.2));
+  var b6 = new DOMThing("blob6", new Vector( 1,-1, 1), new Vector(0.2,0.2));
+  var b7 = new DOMThing("blob7", new Vector( 1, 1,-1), new Vector(0.2,0.2));
+  var b8 = new DOMThing("blob8", new Vector( 1, 1, 1), new Vector(0.2,0.2));
 
   // Add them all to a World
   var w = new World([b1,b2,b3,b4,b5,b6,b7,b8]);
 
   // Add transformations
-  var tr = new Rotation(new Point(0,0,0));
+  var tr = new Rotation(new Vector(0,0,0));
   w.add_transformation(tr);
-  var ts = new Scale(new Point(0,0,0));
+  var ts = new Scale(new Vector(0,0,0));
   w.add_transformation(ts);
   w.add_transformation(new Perspective(500));
-  w.add_transformation(new Translation(new Point(600,250)));
+  w.add_transformation(new Translation(new Vector(600,250)));
 
   // Animate
-  var i1 = new Interpolator(new PositionBinder(tr),
-                            new Point(0,Math.PI*2,0));
+  var i1 = new VectorInterpolator(new PositionBinder(tr),
+		                  new Vector(0,Math.PI*2,0));
   Universe.add_ticker(new SawtoothSignal(i1, 5000));
 
-  var i2 = new Interpolator(new PositionBinder(tr),
-                            new Point(Math.PI*2,0,0));
+  var i2 = new VectorInterpolator(new PositionBinder(tr),
+                                  new Vector(Math.PI*2,0,0));
   Universe.add_ticker(new SineSignal(i2, 2000));
 
-  var i3 = new Interpolator(new SizeBinder(ts), new Point(200,200,200));
+  var i3 = new VectorInterpolator(new SizeBinder(ts), new Vector(200,200,200));
   Universe.add_ticker(new SineSignal(i3, 10000));
 
   Universe.add_ticker(w);

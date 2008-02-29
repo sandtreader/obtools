@@ -41,30 +41,30 @@ with (Jasmine)
     with (Jasmine)
     {
       this.element = document.getElementById(id);
-      this.thing = new DOMThing("blob."+id, new Point(0, y), new Point(5,5));
+      this.thing = new DOMThing("blob."+id, new Vector(0, y), new Vector(5,5));
       this.last_v = 0;
     }
   }
 
-  Target.prototype.set = function(v)
+  Target.prototype.set_scalar = function(v)
   {
     with (Jasmine)
     {
       this.element.innerHTML = v.toString();
-      this.thing.move_by(new Point((v-this.last_v)*1000, 0, 0));
+      this.thing.move_by(new Vector((v-this.last_v)*1000, 0, 0));
       this.last_v = v;
     }
   }
 
-  // Target to log a point in given Dom ID
-  function PointTarget(id)
+  // Target to log a vector in given Dom ID
+  function VectorTarget(id)
   {
     this.element = document.getElementById(id);
   }
 
-  PointTarget.prototype.set = function(point)
+  VectorTarget.prototype.set_vector = function(vector)
   {
-    this.element.innerHTML = point.toString();
+    this.element.innerHTML = vector.toString();
   }
 
   // Linear signal
@@ -92,28 +92,28 @@ with (Jasmine)
   setTimeout("sp.remove(s2);", 10000);
 
   // Create interpolator from Sawtooth
-  var i = new Interpolator(new PointTarget("point"),
-                           new Point(0,0,0), new Point(100,200,300));
+  var i = new VectorInterpolator(new VectorTarget("point"),
+                                 new Vector(0,0,0), new Vector(100,200,300));
   Universe.add_ticker(new SawtoothSignal(i, 5000));
 
   // Same, but with position and size binders on a real object
   // Sine waves are 90o out of phase, producing an oval, until y
   // gives up after 5 cycles
-  var d = new DOMThing("bigblob", new Point(100,100), new Point(10,10));
+  var d = new DOMThing("bigblob", new Vector(100,100), new Vector(10,10));
 
   // X axis
   var pbx = new PositionBinder(d);
-  var i2x = new Interpolator(pbx, new Point(800, 0));
+  var i2x = new VectorInterpolator(pbx, new Vector(800, 0));
   Universe.add_ticker(new SineSignal(i2x, 5000));
 
   // Y axis
   var pby = new PositionBinder(d);
-  var i2y = new Interpolator(pby, new Point(0, 400));
+  var i2y = new VectorInterpolator(pby, new Vector(0, 400));
   Universe.add_ticker(new SineSignal(i2y, 5000, Math.PI/2, 5));
 
   // Size
   var sb = new SizeBinder(d);
-  var i3 = new Interpolator(sb, new Point(20, 20));
+  var i3 = new VectorInterpolator(sb, new Vector(20, 20));
   Universe.add_ticker(new TriangleSignal(i3, 1000));
 
   Universe.start();
