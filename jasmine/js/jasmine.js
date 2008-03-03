@@ -211,6 +211,12 @@ Jasmine.DOMThing.prototype.display = function()
   this.element.style.top    = loc.position.y+"px";
   this.element.style.width  = loc.size.x+"px";
   this.element.style.height = loc.size.y+"px";
+
+  // Assume the Z axis has been scaled enough to make sense as integers
+  // Note: In an RH co-ord system with Y downwards, Z is positive behind
+  // which is reverse to CSS order (positive in front)
+  // Also shift baseline outwards to avoid hiding behind zIndex=0 background
+  this.element.style.zIndex = 1000000-Math.floor(loc.position.z);  
 }
 
 //--------------------------------------------------------------------------
