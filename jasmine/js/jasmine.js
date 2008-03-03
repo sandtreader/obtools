@@ -252,6 +252,18 @@ Jasmine.DOMThing.prototype.resize_by = function(delta)
 }
 
 //--------------------------------------------------------------------------
+// Set background colour to the given RGB vector (0..1, 0..1, 0..1)
+// Note: We use US spelling in code for consistency with CSS
+Jasmine.DOMThing.prototype.set_background_color = function(vector)
+{
+  if (!this.element) return;
+  this.element.style.backgroundColor = 
+    "rgb("+Math.floor(vector.x*255)
+      +","+Math.floor(vector.y*255)
+      +","+Math.floor(vector.z*255)+")";
+}
+
+//--------------------------------------------------------------------------
 // Convert to string
 Jasmine.DOMThing.prototype.toString = function()
 {

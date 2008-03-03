@@ -229,3 +229,17 @@ Jasmine.SizeBinder.prototype.set_vector = function(vector)
   this.last = vector;
 }
 
+//============================================================================
+// BackgroundColorBinder - acts as an VectorInterpolator target which sets
+// the background colour of the target Thing 
+// Note: Colour binders are not additive
+Jasmine.BackgroundColorBinder = function(target)
+{
+  this.target = target;
+}
+
+//--------------------------------------------------------------------------
+Jasmine.BackgroundColorBinder.prototype.set_vector = function(vector)
+{
+  this.target.set_background_color(vector);
+}

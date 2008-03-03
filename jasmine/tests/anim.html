@@ -116,6 +116,11 @@ with (Jasmine)
   var i3 = new VectorInterpolator(sb, new Vector(20, 20));
   Universe.add_ticker(new TriangleSignal(i3, 1000));
 
+  // Colour
+  var bcb = new BackgroundColorBinder(d);
+  var i4 = new VectorInterpolator(bcb, new Vector(0,1,1), new Vector(1,0,0));
+  Universe.add_ticker(new TriangleSignal(i4, 1000));
+
   Universe.start();
 }
 </script>
