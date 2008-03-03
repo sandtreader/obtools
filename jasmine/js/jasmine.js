@@ -264,6 +264,29 @@ Jasmine.DOMThing.prototype.set_background_color = function(vector)
 }
 
 //--------------------------------------------------------------------------
+// Set alpha to given value 0 = transparent .. 1 = opaque
+Jasmine.DOMThing.prototype.set_alpha = function(alpha)
+{
+  if (!this.element) return;
+
+  // Firefox/Mozilla
+  this.element.style.opacity = alpha;
+
+  // IE
+  this.element.style.filter = "alpha(opacity="+Math.floor(alpha*100)+")";
+}
+
+//--------------------------------------------------------------------------
+// Set visibility - true or false
+Jasmine.DOMThing.prototype.set_visibility = function(on)
+{
+  if (!this.element) return;
+
+  // Firefox/Mozilla
+  this.element.style.visibility = on?"visible":"hidden";
+}
+
+//--------------------------------------------------------------------------
 // Convert to string
 Jasmine.DOMThing.prototype.toString = function()
 {

@@ -243,3 +243,35 @@ Jasmine.BackgroundColorBinder.prototype.set_vector = function(vector)
 {
   this.target.set_background_color(vector);
 }
+
+//============================================================================
+// AlphaBinder - acts as an ScalarInterpolator target which sets
+// the opacity of the target Thing 
+// Note: Alpha binders are not additive
+Jasmine.AlphaBinder = function(target)
+{
+  this.target = target;
+}
+
+//--------------------------------------------------------------------------
+Jasmine.AlphaBinder.prototype.set_scalar = function(alpha)
+{
+  this.target.set_alpha(alpha);
+}
+
+//============================================================================
+// VisiblityBinder - acts as an ScalarInterpolator target which sets
+// the visibility of the target Thing to visible if value >= threshold
+// Threshold defaults to 0.5
+// Note: Visibility binders are not additive
+Jasmine.VisibilityBinder = function(target, threshold)
+{
+  this.target = target;
+  this.threshold = threshold || 0.5;
+}
+
+//--------------------------------------------------------------------------
+Jasmine.VisibilityBinder.prototype.set_scalar = function(vis)
+{
+  this.target.set_visibility(vis >= this.threshold);
+}

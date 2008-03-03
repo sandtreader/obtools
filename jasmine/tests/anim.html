@@ -121,6 +121,16 @@ with (Jasmine)
   var i4 = new VectorInterpolator(bcb, new Vector(0,1,1), new Vector(1,0,0));
   Universe.add_ticker(new TriangleSignal(i4, 1000));
 
+  // Alpha
+  var ab = new AlphaBinder(d);
+  var i5 = new ScalarInterpolator(ab, 0, 1);
+  Universe.add_ticker(new SineSignal(i5, 5000));
+
+  // Visibility
+  var vb = new VisibilityBinder(d, 0.25);
+  var i6 = new ScalarInterpolator(vb, 0, 1);
+  Universe.add_ticker(new SawtoothSignal(i6, 500));
+
   Universe.start();
 }
 </script>
