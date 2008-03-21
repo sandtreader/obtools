@@ -696,6 +696,14 @@ Element& Element::set_attr_real(const string& attname, double value)
 }
 
 //--------------------------------------------------------------------------
+// Remove an attribute
+Element& Element::remove_attr(const string& attname)
+{
+  attrs.erase(attname);
+  return *this;
+}
+
+//--------------------------------------------------------------------------
 // Get XPath position relative to root (not including the root itself)
 // Returns an XPath string that can be used to identify this element in
 // the same document

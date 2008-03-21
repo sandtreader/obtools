@@ -446,6 +446,10 @@ public:
   Element& set_attr_real(const string& attname, double value);
 
   //--------------------------------------------------------------------------
+  // Remove an attribute
+  Element& remove_attr(const string& attname);
+
+  //--------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements
