@@ -47,7 +47,12 @@ int main(int argc, char **argv)
   Web::URL url(argv[i]);
   log.summary << "Test HTTP client " << (post?"posting":"fetching") 
 	      << " " << url << endl;
-  Web::HTTPClient client(url, "ObTools Test HTTP client");
+
+  // Create SSL Context
+  SSL::Context ctx;
+
+
+  Web::HTTPClient client(url, &ctx, "ObTools Test HTTP client");
   string body;
   int result = post?client.post(url, in, body):client.get(url, body);
   if (result == 200)

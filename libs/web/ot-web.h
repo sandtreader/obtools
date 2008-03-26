@@ -17,11 +17,9 @@
 #include "ot-xml.h"
 #include "ot-misc.h"
 #include "ot-net.h"
-
-#if !defined(_SINGLE)
+#include "ot-ssl.h"
 #include "ot-mt.h"
 #include "ot-log.h"
-#endif
 
 namespace ObTools { namespace Web { 
 
@@ -296,6 +294,7 @@ class HTTPClient
 private:
   string user_agent;    // String to quote in User-Agent: header
   Net::EndPoint last_local_address;  // Address we connected from last, for P2P
+  SSL::Context *ssl_ctx; // Optional SSL context
 
 protected:
   Net::EndPoint server;
@@ -304,11 +303,17 @@ public:
   //--------------------------------------------------------------------------
   // Constructor from server
   HTTPClient(Net::EndPoint _server, const string& _ua=""): 
-    user_agent(_ua), server(_server) {}
+    user_agent(_ua), ssl_ctx(0), server(_server) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor for SSL
+  HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua=""): 
+    user_agent(_ua), ssl_ctx(_ctx), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
-  HTTPClient(URL& url, const string& _ua="");
+  // Handles https if ctx is set
+  HTTPClient(URL& url, SSL::Context *_ctx=0, const string& _ua="");
 
   //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
@@ -331,14 +336,11 @@ public:
   Net::EndPoint get_last_local_address() { return last_local_address; }
 };
 
-#if !defined(_SINGLE)
-// Server requires threads
-
 //==========================================================================
 // HTTP Server abstract class (http-server.cc)
 // Multi-threaded server for HTTP - manages HTTP protocol state, and 
 // passes request messages to subclasses
-class HTTPServer: public Net::TCPServer
+class HTTPServer: public SSL::TCPServer
 {
 private:
   int timeout;    // Socket inactivity timeout
@@ -370,19 +372,37 @@ protected:
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor to bind to any interface
+  // Constructor to bind to any interface (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(int port=80, const string& _version="", int backlog=5, 
 	     int min_spare=1, int max_threads=10, int _timeout=90):
-    Net::TCPServer(port, backlog, min_spare, max_threads),
+    SSL::TCPServer(0, port, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
   //--------------------------------------------------------------------------
-  // Constructor to bind to specific address
+  // Constructor to bind to specific address (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(Net::EndPoint address, const string& _version="", int backlog=5, 
 	     int min_spare=1, int max_threads=10, int _timeout=90):
-    Net::TCPServer(address, backlog, min_spare, max_threads),
+    SSL::TCPServer(0, address, backlog, min_spare, max_threads),
+    timeout(_timeout), version(_version) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor to bind to any interface, with SSL
+  // See ObTools::Net::TCPServer for details of threadpool management
+  HTTPServer(SSL::Context *ctx, 
+	     int port=80, const string& _version="", int backlog=5, 
+	     int min_spare=1, int max_threads=10, int _timeout=90):
+    SSL::TCPServer(ctx, port, backlog, min_spare, max_threads),
+    timeout(_timeout), version(_version) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor to bind to specific address, with SSL
+  // See ObTools::Net::TCPServer for details of threadpool management
+  HTTPServer(SSL::Context *ctx,
+	     Net::EndPoint address, const string& _version="", int backlog=5, 
+	     int min_spare=1, int max_threads=10, int _timeout=90):
+    SSL::TCPServer(ctx, address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
   //--------------------------------------------------------------------------
@@ -430,19 +450,36 @@ class SimpleHTTPServer: public HTTPServer
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor on all interfaces
+  // Constructor on all interfaces, basic TCP
   SimpleHTTPServer(int port=80, const string& _version="", int backlog=5, 
 		   int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(port, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
 
   //--------------------------------------------------------------------------
-  // Constructor for specific address
+  // Constructor for specific address, basic TCP
   SimpleHTTPServer(Net::EndPoint address, const string& _version="", 
 		   int backlog=5, 
 		   int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(address, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
+
+  //--------------------------------------------------------------------------
+  // Constructor on all interfaces, with SSL
+  SimpleHTTPServer(SSL::Context *ctx,
+		   int port=80, const string& _version="", int backlog=5, 
+		   int min_spare=1, int max_threads=10, int _timeout=90):
+    HTTPServer(ctx, port, _version, backlog, min_spare, max_threads, _timeout),
+    mutex() {}
+
+  //--------------------------------------------------------------------------
+  // Constructor for specific address, basic TCP
+  SimpleHTTPServer(SSL::Context *ctx,
+		   Net::EndPoint address, const string& _version="", 
+		   int backlog=5, 
+		   int min_spare=1, int max_threads=10, int _timeout=90):
+    HTTPServer(ctx, address, _version, backlog, min_spare, max_threads, 
+	       _timeout), mutex() {}
 
   //--------------------------------------------------------------------------
   // Add a handler - will be deleted on destruction of server
@@ -458,8 +495,6 @@ public:
   // Destructor
   ~SimpleHTTPServer();
 };
-
-#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces

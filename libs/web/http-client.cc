@@ -16,14 +16,34 @@ namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
 // Constructor from URL - extracts server from host/port parts
-HTTPClient::HTTPClient(URL& url, const string& _ua): user_agent(_ua)
+// Handles https if ctx is set
+HTTPClient::HTTPClient(URL& url, SSL::Context *_ctx, const string& _ua): 
+  user_agent(_ua), ssl_ctx(_ctx)
 {
   XML::Element xml;
   if (url.split(xml))
   {
     XML::XPathProcessor xpath(xml);
     string host = xpath["host"];
-    int port = xpath.get_value_int("port", 80);
+    
+    // Check for HTTPS
+    string scheme = xpath["scheme"];
+    if (scheme == "https")
+    {
+      if (!ssl_ctx)
+      {
+	Log::Streams log;
+	log.error << "HTTPS requested but no SSL context given\n";
+      }
+    }
+    else
+    {
+      // If not HTTPS, drop context so we don't try to use it
+      ssl_ctx = 0;
+    }
+
+    // Default port depends whether we're SSL or not
+    int port = xpath.get_value_int("port", ssl_ctx?443:80);
     server = Net::EndPoint(host, port);
   }
   else
@@ -69,7 +89,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   if (user_agent.size()) request.headers.put("User-Agent", user_agent);
 
   // HTTP1.0 - create TCPClient for each fetch
-  Net::TCPClient client(server);
+  SSL::TCPClient client(ssl_ctx, server);
   if (!client)
   {
     log.error << "HTTP: Can't connect to " << server << endl;
