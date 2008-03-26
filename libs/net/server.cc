@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-net.h"
+#include <memory>
 
 #ifdef __WIN32__
 #include <io.h>
@@ -130,6 +131,14 @@ void TCPServer::take_over(int fd, Net::EndPoint remote_address)
   // Start it off
   thread->kick();
 }
+
+//--------------------------------------------------------------------------
+// Default factory for creating a client socket - just return a standard
+// TCPSocket
+TCPSocket *TCPServer::create_client_socket(int client_fd)
+{
+  return new TCPSocket(client_fd);
+}
     
 //--------------------------------------------------------------------------
 // Shut down server
@@ -148,10 +157,10 @@ void TCPServer::shutdown()
 void TCPWorkerThread::run()
 {
   // Create wrapped socket which will also close on exit
-  TCPSocket s(client_fd);
+  auto_ptr<TCPSocket> s(server->create_client_socket(client_fd));
 
   // Just pass them to the server's process function
-  server->process(s, client_ep);
+  if (s.get()) server->process(*s, client_ep);
 }
 
 }} // namespaces

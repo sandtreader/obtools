@@ -488,12 +488,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Raw stream read wrapper
+  // Overrideable in children - e.g. SSLSocket
   // NOTE:  All wrappers silently handle EINTR
-  ssize_t cread(void *buf, size_t count);
+  virtual ssize_t cread(void *buf, size_t count);
 
   //--------------------------------------------------------------------------
   // Raw stream write wrapper
-  ssize_t cwrite(const void *buf, size_t count);
+  virtual ssize_t cwrite(const void *buf, size_t count);
 
   //--------------------------------------------------------------------------
   // Safe stream read wrapper
@@ -857,6 +858,11 @@ public:
   // Accept an existing socket into the server to be processed
   // Used for P2P where 'server' socket may be initiated at this end
   void take_over(int fd, Net::EndPoint remote_address);
+
+  //--------------------------------------------------------------------------
+  // Factory for creating a client socket - overridable in subclass 
+  // (e.g. SSL::TCPServer)
+  virtual TCPSocket *create_client_socket(int client_fd);
 
   //--------------------------------------------------------------------------
   // Shut down server
