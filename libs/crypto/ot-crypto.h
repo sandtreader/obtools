@@ -19,6 +19,7 @@
 #include <openssl/des.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+#include <openssl/x509.h>
 
 namespace ObTools { namespace Crypto { 
 
@@ -370,6 +371,67 @@ class SHA1
   static string digest(const void *data, size_t length);
 
 };
+
+//==========================================================================
+// X509 support
+class Certificate
+{
+private:
+  X509 *x509;
+
+public:
+  //------------------------------------------------------------------------
+  // Default constructor
+  Certificate(): x509(0) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from existing X509 structure
+  Certificate(X509 *_x509): x509(_x509) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from PEM format string
+  Certificate(const string& text): x509(0) { read(text); }
+
+  //------------------------------------------------------------------------
+  // Read from stream - reads PEM format
+  void read(istream& sin);
+
+  //------------------------------------------------------------------------
+  // Write to stream - writes PEM format
+  void write(ostream& sout) const;
+
+  //------------------------------------------------------------------------
+  // Read from string - reads PEM format
+  void read(const string& text);
+
+  //------------------------------------------------------------------------
+  // Convert to string (PEM format) 
+  string str() const;
+
+  //------------------------------------------------------------------------
+  // Check if it's valid
+  bool operator!() const { return !x509; }
+
+  //------------------------------------------------------------------------
+  // Get raw X509 structure (e.g. for SSL).  Can be 0.
+  X509 *get_x509() const { return x509; }
+
+  //------------------------------------------------------------------------
+  // Get common name
+  string get_cn() const;
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Certificate();
+};
+
+//------------------------------------------------------------------------
+// >> operator to read cert from istream
+istream& operator>>(istream& s, Certificate& c);
+
+//------------------------------------------------------------------------
+// << operator to write certificate to ostream
+ostream& operator<<(ostream& s, const Certificate& c);
 
 //==========================================================================
 }} //namespaces
