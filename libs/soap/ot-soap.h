@@ -302,14 +302,24 @@ class HTTPClient: public Web::HTTPClient
 {
 public:
   //--------------------------------------------------------------------------
-  // Constructor from server
+  // Constructor from server, no SSL
   HTTPClient(Net::EndPoint _server, const string& _ua=""): 
     Web::HTTPClient(_server, _ua) {}
 
   //--------------------------------------------------------------------------
-  // Constructor from URL - extracts server from host/port parts
+  // Constructor from server, with SSL
+  HTTPClient(Net::EndPoint _server, SSL::Context *ctx, const string& _ua=""): 
+    Web::HTTPClient(_server, ctx, _ua) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor from URL, no SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, const string& _ua=""):
-    Web::HTTPClient(url, _ua) {}
+    Web::HTTPClient(url, 0, _ua) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor from URL, with SSL - extracts server from host/port parts
+  HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua=""):
+    Web::HTTPClient(url, ctx, _ua) {}
 
   //--------------------------------------------------------------------------
   // Simple request POST operation on a specified URL and SOAP action
@@ -324,9 +334,6 @@ public:
   { Web::URL url("/"); return post(url, soap_action, request, response); }
 
 };
-
-#if !defined(_SINGLE)
-// HTTP Server requires threads
 
 //==========================================================================
 // SOAP URL handler abstract class (url-handler.cc)
@@ -374,8 +381,6 @@ public:
   // Virtual destructor
   virtual ~URLHandler() {}
 };
-
-#endif // !_SINGLE
 
 //==========================================================================
 }} //namespaces

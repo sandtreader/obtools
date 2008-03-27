@@ -16,6 +16,8 @@ TESTCMD	= ./test-soap < ../tests/soap1-2.xml \
              < ../tests/place.soap.xml
 SOCKET = 1
 
+EXTLIBS = -lssl
+
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 
