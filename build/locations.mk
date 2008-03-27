@@ -34,10 +34,11 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  regen:libs/regen 			\
 	  script:libs/script:log,misc,init	\
 	  soap:libs/soap:web,log,misc,xml	\
+	  ssl:libs/ssl:log,net,crypto           \
 	  text:libs/text   			\
 	  time:libs/time			\
 	  tube:libs/tube:net,log,mt,chan,misc   \
-	  web:libs/web:xml,misc,log,net		\
+	  web:libs/web:xml,misc,log,net,ssl     \
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml:text    			\
 	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
