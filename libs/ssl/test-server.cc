@@ -10,6 +10,7 @@
 #include "ot-ssl.h"
 #include "ot-log.h"
 #include <fstream>
+#include <signal.h>
 
 using namespace std;
 using namespace ObTools;
@@ -120,6 +121,9 @@ int main(int argc, char **argv)
 #if defined(__WIN32__)
   winsock_initialise();
 #endif
+
+  // Force ignore for SIGPIPE
+  signal(SIGPIPE, SIG_IGN);
 
   cout << "Starting server on port " << port << endl;
   TestServer server(&ctx, port);

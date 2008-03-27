@@ -10,6 +10,7 @@
 #include "ot-web.h"
 #include <sstream>
 #include <fstream>
+#include <signal.h>
 
 using namespace std;
 using namespace ObTools;
@@ -132,6 +133,9 @@ int main(int argc, char **argv)
     // Use it
     ctx_p = &ctx;
   }
+
+  // Force ignore for SIGPIPE
+  signal(SIGPIPE, SIG_IGN);
 
   Web::SimpleHTTPServer server(ctx_p, port, SERVER_VERSION);
   server.add(new TestURLHandler());
