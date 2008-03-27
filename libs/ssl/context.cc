@@ -20,13 +20,13 @@ Context::Context()
   static bool initialised = false;
   if (!initialised)
   {
-    OpenSSL::SSL_library_init();
-    OpenSSL::SSL_load_error_strings();
+    SSL_library_init();
+    SSL_load_error_strings();
     initialised = true;
   }
 
   // Provide all the options
-  ctx = OpenSSL::SSL_CTX_new(OpenSSL::SSLv23_method());
+  ctx = SSL_CTX_new(SSLv23_method());
 
   if (!ctx) log_errors("Can't create SSL context");
 }
@@ -47,15 +47,15 @@ void Context::use_private_key(Crypto::RSAKey& rsa)
 
 //--------------------------------------------------------------------------
 // Create a new SSL connection from the context on the given fd
-OpenSSL::SSL *Context::create_connection(int fd)
+OpenSSL *Context::create_connection(int fd)
 {
   if (!ctx) return 0;
 
-  OpenSSL::SSL *ssl = OpenSSL::SSL_new(ctx);
+  OpenSSL *ssl = SSL_new(ctx);
   if (ssl)
   {
     // Attach to fd
-    if (!OpenSSL::SSL_set_fd(ssl, fd))
+    if (!SSL_set_fd(ssl, fd))
     {
       log_errors("Can't attach SSL to fd");
       return 0;
@@ -72,7 +72,7 @@ OpenSSL::SSL *Context::create_connection(int fd)
 // Destructor: Deallocates context
 Context::~Context()
 {
-  if (ctx) OpenSSL::SSL_CTX_free(ctx);
+  if (ctx) SSL_CTX_free(ctx);
 }
 
 //--------------------------------------------------------------------------
@@ -83,10 +83,10 @@ void Context::log_errors(const string& text)
   log.error << "SSL: " << text << endl;
 
   unsigned long err;
-  while (err = OpenSSL::ERR_get_error())
+  while (err = ERR_get_error())
   {
     char buf[120];
-    log.error << OpenSSL::ERR_error_string(err, buf) << endl;
+    log.error << ERR_error_string(err, buf) << endl;
   }
 }
 

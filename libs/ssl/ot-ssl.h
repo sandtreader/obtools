@@ -14,12 +14,14 @@
 #include "ot-net.h"
 #include "ot-crypto.h"
 
-// Wrap SSL library in OpenSSL namespace to avoid clashes
-namespace OpenSSL
-{
+// This is rather ugly...  We want to use SSL as a namespace, but
+// OpenSSL defines it as a struct.  Hence we redefine SSL here to 
+// expand to OpenSSL for the duration of the OpenSSL header
+#define SSL OpenSSL
 #include <openssl/ssl.h>
+#undef SSL
+
 #include <openssl/err.h>
-}
 
 namespace ObTools { namespace SSL { 
 
@@ -30,7 +32,7 @@ using namespace std;
 // SSL application context
 class Context
 {
-  OpenSSL::SSL_CTX *ctx;  // OpenSSL library context
+  SSL_CTX *ctx;  // OpenSSL library context
 
 public:
   //--------------------------------------------------------------------------
@@ -47,7 +49,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd
-  OpenSSL::SSL *create_connection(int fd);
+  OpenSSL *create_connection(int fd);
 
   //--------------------------------------------------------------------------
   // Destructor: Deallocates context
@@ -63,7 +65,7 @@ public:
 class TCPSocket: public Net::TCPSocket
 {
 protected:
-  OpenSSL::SSL *ssl;  // SSL connection, or 0 if basic TCP
+  OpenSSL *ssl;  // SSL connection, or 0 if basic TCP
 
 public:
   //--------------------------------------------------------------------------
@@ -72,7 +74,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Explicit constructor from existing fd and SSL object
-  TCPSocket(int _fd, OpenSSL::SSL *_ssl = 0): Net::TCPSocket(_fd), ssl(_ssl) {}
+  TCPSocket(int _fd, OpenSSL *_ssl = 0): Net::TCPSocket(_fd), ssl(_ssl) {}
 
   //--------------------------------------------------------------------------
   // Raw stream read wrapper override

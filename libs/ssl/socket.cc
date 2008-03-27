@@ -38,7 +38,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 Crypto::Certificate TCPSocket::get_peer_certificate()
 {
   if (!ssl) return Crypto::Certificate();  // Invalid
-  return Crypto::Certificate(OpenSSL::SSL_get_peer_certificate(ssl));
+  return Crypto::Certificate(SSL_get_peer_certificate(ssl));
 }
 
 //--------------------------------------------------------------------------
@@ -48,8 +48,8 @@ TCPSocket::~TCPSocket()
   // Shutdown and free SSL connection
   if (ssl) 
   {
-    OpenSSL::SSL_shutdown(ssl);
-    OpenSSL::SSL_free(ssl);
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
   }
 }
 
