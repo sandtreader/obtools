@@ -203,7 +203,18 @@ void Server::process(Net::TCPSocket& socket,
 // Constructor
 Server::Server(int port, const string& _name, int backlog, 
 	       int min_spare_threads, int max_threads):
-  Net::TCPServer(port, backlog, min_spare_threads, max_threads),
+  SSL::TCPServer(0, port, backlog, min_spare_threads, max_threads),
+  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+{
+
+}
+
+//------------------------------------------------------------------------
+// Constructor with SSL
+Server::Server(SSL::Context *_ctx, int port,  
+	       const string& _name, int backlog, 
+	       int min_spare_threads, int max_threads):
+  SSL::TCPServer(_ctx, port, backlog, min_spare_threads, max_threads),
   alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
@@ -213,7 +224,18 @@ Server::Server(int port, const string& _name, int backlog,
 // Constructor
 Server::Server(Net::EndPoint local, const string& _name, int backlog, 
 	       int min_spare_threads, int max_threads):
-  Net::TCPServer(local, backlog, min_spare_threads, max_threads),
+  SSL::TCPServer(0, local, backlog, min_spare_threads, max_threads),
+  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+{
+
+}
+
+//------------------------------------------------------------------------
+// Constructor with SSL
+Server::Server(SSL::Context *_ctx, Net::EndPoint local, 
+	       const string& _name, int backlog, 
+	       int min_spare_threads, int max_threads):
+  SSL::TCPServer(_ctx, local, backlog, min_spare_threads, max_threads),
   alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 

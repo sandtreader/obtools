@@ -72,6 +72,16 @@ SyncClient::SyncClient(Net::EndPoint _server, int _timeout,
 }
 
 //------------------------------------------------------------------------
+// Constructor with SSL
+SyncClient::SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
+		       int _timeout, const string& _name):
+  Client(_server, _ctx, _name), timeout(_timeout), request_id(0)
+{
+  timeout_thread = new TimeoutThread(*this);
+}
+
+
+//------------------------------------------------------------------------
 // Request/response - blocks waiting for a response, or timeout/failure
 // Returns whether a response was received, fills in response if so
 bool SyncClient::request(Message& request, Message& response)

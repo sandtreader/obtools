@@ -67,6 +67,15 @@ AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout,
 }
 
 //------------------------------------------------------------------------
+// Constructor with SSL
+AutoSyncClient::AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
+			       int _timeout, const string& _name):
+  SyncClient(_server, _ctx, _timeout, _name)
+{
+  dispatch_thread = new DispatchThread(*this);
+}
+
+//------------------------------------------------------------------------
 // Shut down client cleanly
 void AutoSyncClient::shutdown()
 {

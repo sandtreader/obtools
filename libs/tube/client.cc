@@ -74,7 +74,7 @@ bool Client::restart_socket(Log::Streams& log)
   if (socket) delete socket;
 
   // Try and get a new one
-  socket = new Net::TCPClient(server);
+  socket = new SSL::TCPClient(ctx, server);
 
   if (!*socket)
   {
@@ -243,9 +243,9 @@ bool Client::send_messages(Log::Streams& log)
 // Foreground stuff
 
 //------------------------------------------------------------------------
-// Constructors
+// Constructor - no SSL
 Client::Client(Net::EndPoint _server, const string& _name): 
-  server(_server), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
+  server(_server), ctx(0), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
   alive(true), name(_name)
 {
   socket = 0;
@@ -260,6 +260,24 @@ Client::Client(Net::EndPoint _server, const string& _name):
   send_thread    = new ClientSendThread(*this);
 }
 
+//------------------------------------------------------------------------
+// Constructor with SSL
+Client::Client(Net::EndPoint _server, SSL::Context *_ctx, 
+	       const string& _name): 
+  server(_server), ctx(_ctx), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
+  alive(true), name(_name)
+{
+  socket = 0;
+
+  // Try to start socket the first time, to try to ensure it's up before we
+  // start to send messages
+  Log::Streams log;
+  restart_socket(log);
+
+  // Start send and receive threads
+  receive_thread = new ClientReceiveThread(*this);
+  send_thread    = new ClientSendThread(*this);
+}
 
 //------------------------------------------------------------------------
 // Send a message

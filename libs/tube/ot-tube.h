@@ -15,6 +15,7 @@
 #include "ot-mt.h"
 #include "ot-chan.h"
 #include "ot-log.h"
+#include "ot-ssl.h"
 
 namespace ObTools { namespace Tube { 
 
@@ -123,7 +124,8 @@ class Client
 protected:
   // Network stuff
   Net::EndPoint server;
-  Net::TCPClient *socket;
+  SSL::Context *ctx;           // 0 for plain TCP
+  SSL::TCPClient *socket;
 
   // Thread and queue stuff
   MT::Mutex mutex;             // Global client mutex used for socket
@@ -152,6 +154,11 @@ public:
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port) and optional name
   Client(Net::EndPoint _server, const string& _name="Tube");
+
+  //------------------------------------------------------------------------
+  // Constructor with SSL
+  Client(Net::EndPoint _server, SSL::Context *_ctx, 
+	 const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Check it hasn't been killed
@@ -222,6 +229,11 @@ public:
 	     const string& _name="Tube");
 
   //------------------------------------------------------------------------
+  // Constructor with SSL
+  SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
+	     int _timeout=DEFAULT_TIMEOUT, const string& _name="Tube");
+
+  //------------------------------------------------------------------------
   // Handle timeouts - called by background thread - do not call directly
   void do_timeouts(Log::Streams& log);
 
@@ -259,6 +271,12 @@ public:
   // Constructor - takes server endpoint (address+port), request timeout
   // (in seconds) and optional name
   AutoSyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT, 
+		 const string& _name="Tube");
+
+  //------------------------------------------------------------------------
+  // Constructor with SSL
+  AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
+		 int _timeout=DEFAULT_TIMEOUT, 
 		 const string& _name="Tube");
 
   //------------------------------------------------------------------------
@@ -360,7 +378,7 @@ struct ClientMessage
 // a class providing a handle_message method
 // Also, unlike the client, this _is_ a TCPServer, rather than owning
 // one
-class Server: public Net::TCPServer
+class Server: public SSL::TCPServer
 {
 private:
   SessionMap client_sessions;        // Map of sessions
@@ -391,6 +409,16 @@ public:
   //------------------------------------------------------------------------
   // Constructor with defined local interface
   Server(Net::EndPoint local, const string& _name="Tube", int backlog=5, 
+	 int min_spare_threads=1, int max_threads=10);
+
+  //------------------------------------------------------------------------
+  // Constructors with SSL
+  Server(SSL::Context *_ctx, int port, 
+	 const string& _name="Tube", int backlog=5, 
+	 int min_spare_threads=1, int max_threads=10);
+
+  Server(SSL::Context *_ctx, Net::EndPoint local, 
+	 const string& _name="Tube", int backlog=5, 
 	 int min_spare_threads=1, int max_threads=10);
 
   //------------------------------------------------------------------------
@@ -459,10 +487,24 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  // Constructor - as Server
+  // Constructors - as Server
   SyncServer(int port, const string& _name="Tube", int backlog=5, 
 	     int min_spare_threads=1, int max_threads=10):
     Server(port, _name, backlog, min_spare_threads, max_threads) {}
+
+  SyncServer(Net::EndPoint local, const string& _name="Tube", int backlog=5, 
+	     int min_spare_threads=1, int max_threads=10):
+    Server(local, _name, backlog, min_spare_threads, max_threads) {}
+
+  SyncServer(SSL::Context *_ctx, int port, 
+	     const string& _name="Tube", int backlog=5, 
+	     int min_spare_threads=1, int max_threads=10):
+    Server(_ctx, port, _name, backlog, min_spare_threads, max_threads) {}
+
+  SyncServer(SSL::Context *_ctx, Net::EndPoint local, 
+	     const string& _name="Tube", int backlog=5, 
+	     int min_spare_threads=1, int max_threads=10):
+    Server(_ctx, local, _name, backlog, min_spare_threads, max_threads) {}
 };
 
 
@@ -475,10 +517,28 @@ class AutoSyncServer: public SyncServer
 
 public:
   //------------------------------------------------------------------------
- // Constructor - as Server
+  // Constructors - as Server
   AutoSyncServer(int port, const string& _name="Tube", int backlog=5, 
 		 int min_spare_threads=1, int max_threads=10):
     SyncServer(port, _name, backlog, min_spare_threads, max_threads),
+    run_thread(*this) {}
+
+  AutoSyncServer(Net::EndPoint local, const string& _name="Tube", 
+		 int backlog=5, 
+		 int min_spare_threads=1, int max_threads=10):
+    SyncServer(local, _name, backlog, min_spare_threads, max_threads),
+    run_thread(*this) {}
+
+  AutoSyncServer(SSL::Context *_ctx, int port, 
+		 const string& _name="Tube", int backlog=5, 
+		 int min_spare_threads=1, int max_threads=10):
+    SyncServer(_ctx, port, _name, backlog, min_spare_threads, max_threads),
+    run_thread(*this) {}
+
+  AutoSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
+		 const string& _name="Tube", int backlog=5, 
+		 int min_spare_threads=1, int max_threads=10):
+    SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads),
     run_thread(*this) {}
 };
 
