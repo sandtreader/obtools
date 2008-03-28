@@ -13,6 +13,12 @@ DEPENDS = xmlmesh-core xmlmesh-otmp net log xml text soap web misc time \
 	  tube mt
 SOCKET  = 1
 
+ifdef MINGW
+EXTLIBS = -lssl32 -leay32
+else
+EXTLIBS = -lssl -lcrypto
+endif
+
 TESTS 	= test-client test-mclient
 TESTCMD = ./test-client localhost
 

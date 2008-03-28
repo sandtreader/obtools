@@ -12,8 +12,8 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 	  correlator.o publisher.o
 
 DEBIAN-NAME    = ot-xmlmesh
-DEBIAN-VERSION = 2.4.1
-DEBIAN-REVISION = rc3
+DEBIAN-VERSION = 2.4.2
+DEBIAN-REVISION = 1
 
 #Always build statically
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
@@ -29,6 +29,12 @@ CPPFLAGS += -DOT_XMLMESH_VERSION=$(DEBIAN-VERSION)
 
 CONFIGS = xmlmesh.cfg.xml
 SOCKET  = 1
+
+ifdef MINGW
+EXTLIBS = -lssl32 -leay32
+else
+EXTLIBS = -lssl -lcrypto
+endif
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
