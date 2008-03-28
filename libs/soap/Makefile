@@ -16,7 +16,11 @@ TESTCMD	= ./test-soap < ../tests/soap1-2.xml \
              < ../tests/place.soap.xml
 SOCKET = 1
 
-EXTLIBS = -lssl
+ifdef MINGW
+EXTLIBS = -lssl32 -leay32
+else
+EXTLIBS = -lssl -lcrypto
+endif
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
