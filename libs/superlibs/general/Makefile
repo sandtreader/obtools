@@ -13,18 +13,16 @@ endif
 NAME	= ot-general2
 VERSION	= 2.3.3
 CONTAINS = xml misc text net log init chan time web file crypto hash soap \
-	   mt cache cli tube
+	   mt cache cli tube ssl
 SOCKET  = 1
-EXTLIBS = -lcrypto
 
 #Only build release versions - debug is not PIC
 RELEASE-VARIANTS-ONLY = 1
 
 ifdef MINGW
-# Include libeay32 import library
-EXTLIBS = -leay32
+EXTLIBS = -lssl32 -leay32
 else
-EXTLIBS = -lcrypto
+EXTLIBS = -lssl -lcrypto
 endif
 
 DEBIAN-NAME    = libot-general2

@@ -120,10 +120,10 @@ int main(int argc, char **argv)
 
 #if defined(__WIN32__)
   winsock_initialise();
-#endif
-
+#else
   // Force ignore for SIGPIPE
   signal(SIGPIPE, SIG_IGN);
+#endif
 
   cout << "Starting server on port " << port << endl;
   TestServer server(&ctx, port);

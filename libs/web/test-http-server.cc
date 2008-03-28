@@ -68,6 +68,9 @@ int main(int argc, char **argv)
 {
 #ifdef __WIN32__
   winsock_initialise();
+#else
+  // Force ignore for SIGPIPE
+  signal(SIGPIPE, SIG_IGN);
 #endif
 
   Log::StreamChannel chan_out(cout);
@@ -133,9 +136,6 @@ int main(int argc, char **argv)
     // Use it
     ctx_p = &ctx;
   }
-
-  // Force ignore for SIGPIPE
-  signal(SIGPIPE, SIG_IGN);
 
   Web::SimpleHTTPServer server(ctx_p, port, SERVER_VERSION);
   server.add(new TestURLHandler());

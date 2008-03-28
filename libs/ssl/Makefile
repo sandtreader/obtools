@@ -16,7 +16,7 @@ SOCKET = 1
 
 ifdef MINGW
 # Include libeay32 import library ??
-EXTLIBS = -leay32
+EXTLIBS = -lssl32 -leay32
 else
 EXTLIBS = -lssl -lcrypto
 endif
