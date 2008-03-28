@@ -37,7 +37,7 @@ OT-LIBS = cli:libs/cli:text,net,mt		\
 	  ssl:libs/ssl:log,net,crypto           \
 	  text:libs/text   			\
 	  time:libs/time			\
-	  tube:libs/tube:net,log,mt,chan,misc   \
+	  tube:libs/tube:net,log,mt,chan,misc,ssl   \
 	  web:libs/web:xml,misc,log,net,ssl     \
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml:text    			\
