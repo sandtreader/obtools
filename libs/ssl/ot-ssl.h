@@ -44,8 +44,18 @@ public:
   void use_certificate(Crypto::Certificate& cert);
 
   //--------------------------------------------------------------------------
+  // Use a certificate from a PEM-format string
+  // Returns whether valid
+  bool use_certificate(const string& pem);
+
+  //--------------------------------------------------------------------------
   // Use the given RSA private key
   void use_private_key(Crypto::RSAKey& rsa);
+
+  //--------------------------------------------------------------------------
+  // Use a private key from a PEM-format string, with optional pass-phrase
+  // Returns whether valid
+  bool use_private_key(const string& pem, const string& pass_phrase="");
 
   //--------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd

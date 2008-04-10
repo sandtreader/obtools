@@ -39,10 +39,38 @@ void Context::use_certificate(Crypto::Certificate& cert)
 }
 
 //--------------------------------------------------------------------------
+// Use a certificate from a PEM-format string
+// Returns whether valid
+bool Context::use_certificate(const string& pem)
+{
+  if (!ctx) return false;
+
+  Crypto::Certificate cert(pem);
+  if (!cert) return false;
+
+  use_certificate(cert);
+  return true;
+}
+
+//--------------------------------------------------------------------------
 // Use the given RSA private key
 void Context::use_private_key(Crypto::RSAKey& rsa)
 {
   if (ctx) SSL_CTX_use_RSAPrivateKey(ctx, rsa.rsa);
+}
+
+//--------------------------------------------------------------------------
+// Use a private key from a PEM-format string with optional pass-phrase
+// Returns whether valid
+bool Context::use_private_key(const string& pem, const string& pass_phrase)
+{
+  if (!ctx) return false;
+
+  Crypto::RSAKey rsa(pem, true, pass_phrase);
+  if (!rsa.valid) return false;
+
+  use_private_key(rsa);
+  return true;
 }
 
 //--------------------------------------------------------------------------
