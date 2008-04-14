@@ -348,7 +348,7 @@ private:
 
   //--------------------------------------------------------------------------
   // Implementation of worker process method
-  void process(Net::TCPSocket &s, Net::EndPoint client);
+  void process(Net::TCPSocket &s, SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------
@@ -368,7 +368,7 @@ protected:
   // If the cost of generating a body is not too great, handlers may treat
   // HEAD requests just like GET, and the server will suppress the body
   virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
-			      Net::EndPoint client) = 0;
+			      SSL::ClientDetails& client) = 0;
 
 public:
   //--------------------------------------------------------------------------
@@ -428,7 +428,7 @@ public:
   // return false if things are really bad, and we'll return 500
   // response is pre-initialised with 200 OK, no body
   virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
-			      Net::EndPoint client) = 0;
+			      SSL::ClientDetails& client) = 0;
 
   //--------------------------------------------------------------------------
   // Virtual destructor
@@ -446,7 +446,7 @@ class SimpleHTTPServer: public HTTPServer
 
   // Implementation of general request handler
   bool handle_request(HTTPMessage& request, HTTPMessage& response,
-		      Net::EndPoint client);
+		      SSL::ClientDetails& client);
 
 public:
   //--------------------------------------------------------------------------

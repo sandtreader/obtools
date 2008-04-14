@@ -15,7 +15,7 @@ namespace ObTools { namespace SOAP {
 // Implementation of general request handler
 bool URLHandler::handle_request(Web::HTTPMessage& http_request, 
 				Web::HTTPMessage& http_response,
-				Net::EndPoint client)
+				SSL::ClientDetails& client)
 {
   Log::Streams log;
 

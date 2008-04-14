@@ -33,6 +33,23 @@ Net::TCPSocket *TCPServer::create_client_socket(int client_fd)
   return new SSL::TCPSocket(client_fd, ssl);
 }
 
+//--------------------------------------------------------------------------
+// Override of normal process method to call the SSL version 
+void TCPServer::process(TCPSocket &s, Net::EndPoint client)
+{
+  ClientDetails cd(client, "FOO");  // !!! Get real CN
+  process(s, cd);
+}
+
+//------------------------------------------------------------------------
+// << operator to write ClientDetails to ostream
+ostream& operator<<(ostream& s, const ClientDetails& cd)
+{
+  s << cd.address;
+  if (!cd.cert_cn.empty()) s << " (" << cd.cert_cn << ")";
+  return s;
+}
+
 }} // namespaces
 
 

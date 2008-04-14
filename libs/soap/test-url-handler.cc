@@ -23,7 +23,7 @@ class TestURLHandler: public SOAP::URLHandler
   // Implementation of message handler
   bool handle_message(SOAP::Message& request, SOAP::Message& response,
 		      Web::HTTPMessage&, Web::HTTPMessage&,
-		      Net::EndPoint client)
+		      SSL::ClientDetails& client)
   {
     Log::Streams log;
     log.summary << "SOAP request from " << client << endl;

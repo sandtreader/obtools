@@ -19,7 +19,7 @@ namespace ObTools { namespace Web {
 //--------------------------------------------------------------------------
 // Implementation of worker process method
 // Called in its own thread
-void HTTPServer::process(Net::TCPSocket& s, Net::EndPoint client)
+void HTTPServer::process(Net::TCPSocket& s, SSL::ClientDetails&client)
 {
   Log::Streams log;
   OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP: Connection from " 
@@ -112,7 +112,7 @@ void HTTPServer::process(Net::TCPSocket& s, Net::EndPoint client)
 // Implementation of general request handler
 bool SimpleHTTPServer::handle_request(HTTPMessage& request, 
 				      HTTPMessage& response,
-				      Net::EndPoint client)
+				      SSL::ClientDetails& client)
 {
   MT::RWReadLock lock(mutex);
 

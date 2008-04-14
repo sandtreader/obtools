@@ -155,6 +155,21 @@ public:
 };
 
 //==========================================================================
+// SSL client details
+struct ClientDetails
+{
+  Net::EndPoint address;   // IP address/port
+  string cert_cn;          // CN from certificate, or empty if not provided
+
+  ClientDetails(Net::EndPoint _addr, const string& _cn):
+    address(_addr), cert_cn(_cn) {}
+};
+
+//------------------------------------------------------------------------
+// << operator to write ClientDetails to ostream (server.cc)
+ostream& operator<<(ostream& s, const ClientDetails& cd);
+
+//==========================================================================
 // TCP server (multi-threaded, multiple clients at once)
 // Still abstract, but intercepts inbound connections and attaches SSL to
 // them
@@ -163,6 +178,17 @@ class TCPServer: public Net::TCPServer
 {
 private:
   Context *ctx;     // Optional SSL context
+
+  //--------------------------------------------------------------------------
+  // Virtual process method (see ot-net.h), but taking ClientDetails
+  // Note: Not abstract here to allow override of just the non-SSL process(),
+  //       as with a plain Net::TCPServer 
+  virtual void process(TCPSocket &/*s*/, ClientDetails& /* client */) {}
+
+  //--------------------------------------------------------------------------
+  // Override of normal process method to call the above - can be overridden
+  // again if you don't need the SSL parts
+  virtual void process(TCPSocket &s, Net::EndPoint client);
 
 public:
   //--------------------------------------------------------------------------

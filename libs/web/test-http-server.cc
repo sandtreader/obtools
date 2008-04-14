@@ -26,7 +26,7 @@ public:
   TestURLHandler(): URLHandler("/test*") {}
 
   bool handle_request(Web::HTTPMessage& request, Web::HTTPMessage& response,
-		      Net::EndPoint client)
+		      SSL::ClientDetails& client)
   {
     ostringstream oss;
     oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
@@ -49,7 +49,7 @@ public:
 
   bool handle_request(Web::HTTPMessage& /*request*/, 
 		      Web::HTTPMessage& response,
-		      Net::EndPoint /*client*/)
+		      SSL::ClientDetails& /*client*/)
   {
     ostringstream oss;
     oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";

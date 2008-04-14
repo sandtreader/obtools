@@ -349,7 +349,7 @@ private:
   // Implementation of standard HTTP handler
   bool handle_request(Web::HTTPMessage& http_request, 
 		      Web::HTTPMessage& http_response,
-		      Net::EndPoint client);
+		      SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------
@@ -359,7 +359,7 @@ protected:
   virtual bool handle_message(Message& request, Message& response,
 			      Web::HTTPMessage& http_request,
 			      Web::HTTPMessage& http_response,
-			      Net::EndPoint client) = 0;
+			      SSL::ClientDetails& client) = 0;
 
   //--------------------------------------------------------------------------
   // Handy support for generating faults - fills in response with fault
