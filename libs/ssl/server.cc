@@ -35,10 +35,18 @@ Net::TCPSocket *TCPServer::create_client_socket(int client_fd)
 
 //--------------------------------------------------------------------------
 // Override of normal process method to call the SSL version 
-void TCPServer::process(TCPSocket &s, Net::EndPoint client)
+void TCPServer::process(Net::TCPSocket &s, Net::EndPoint client)
 {
-  ClientDetails cd(client, "FOO");  // !!! Get real CN
-  process(s, cd);
+  // Downcast to our TCPSocket - should be safe because we create it above
+  SSL::TCPSocket& ss = static_cast<SSL::TCPSocket&>(s);
+
+  // Get Common Name from client certificate (if any)
+  Crypto::Certificate cert = ss.get_peer_certificate();
+  string cn;
+  if (!!cert) cn = cert.get_cn();
+
+  ClientDetails cd(client, cn);
+  process(ss, cd);
 }
 
 //------------------------------------------------------------------------

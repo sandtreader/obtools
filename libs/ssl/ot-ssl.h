@@ -58,9 +58,25 @@ public:
   bool use_private_key(const string& pem, const string& pass_phrase="");
 
   //--------------------------------------------------------------------------
-  // Enable client certificates
+  // Enable peer certificate verification
   // Set 'force' to require them, otherwise optional
-  void enable_client_certificates(bool force = false);
+  void enable_peer_verification(bool force = false);
+
+  //--------------------------------------------------------------------------
+  // Use given verify locations (list of trusted CAs)
+  // ca_file should refer to a PEM format containing a list of trusted CAs
+  // ca_dir should refer to a directory containing certificate files with 
+  // hashed names (see OpenSSL docs)
+  // Either one or the other is optional, but not both
+  void set_verify_paths(const string& ca_file="", const string& ca_dir="");
+
+  //--------------------------------------------------------------------------
+  // Use default verify paths
+  void set_default_verify_paths();
+
+  //--------------------------------------------------------------------------
+  // Set session ID context
+  void set_session_id_context(const string& s);
 
   //--------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd
@@ -188,12 +204,12 @@ private:
   // Virtual process method (see ot-net.h), but taking ClientDetails
   // Note: Not abstract here to allow override of just the non-SSL process(),
   //       as with a plain Net::TCPServer 
-  virtual void process(TCPSocket &/*s*/, ClientDetails& /* client */) {}
+  virtual void process(SSL::TCPSocket &/*s*/, ClientDetails& /* client */) {}
 
   //--------------------------------------------------------------------------
   // Override of normal process method to call the above - can be overridden
   // again if you don't need the SSL parts
-  virtual void process(TCPSocket &s, Net::EndPoint client);
+  virtual void process(Net::TCPSocket &s, Net::EndPoint client);
 
 public:
   //--------------------------------------------------------------------------

@@ -74,14 +74,45 @@ bool Context::use_private_key(const string& pem, const string& pass_phrase)
 }
 
 //--------------------------------------------------------------------------
-// Enable client certificates
+// Enable peer certificate verification
 // Set 'force' to require them, otherwise optional
-void Context::enable_client_certificates(bool force)
+void Context::enable_peer_verification(bool force)
 {
   if (ctx) 
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER 
 		            | (force?SSL_VERIFY_FAIL_IF_NO_PEER_CERT:0),
 		       0);
+}
+
+//--------------------------------------------------------------------------
+// Use given verify locations (list of trusted CAs)
+// ca_file should refer to a PEM format containing a list of trusted CAs
+// ca_dir should refer to a directory containing certificate files with hashed
+// names (see OpenSSL docs)
+// Either one or the other is optional, but not both
+void Context::set_verify_paths(const string& ca_file, const string& ca_dir)
+{
+  const char *file = ca_file.empty()?0:ca_file.c_str();
+  const char *dir  = ca_dir.empty() ?0:ca_dir.c_str();
+
+  if (ctx && SSL_CTX_load_verify_locations(ctx, file, dir) != 1)
+    log_errors("Can't load verify locations");
+}
+
+//--------------------------------------------------------------------------
+// Use default verify paths
+void Context::set_default_verify_paths()
+{
+  if (ctx && SSL_CTX_set_default_verify_paths(ctx) != 1)
+    log_errors("Can't set default verify paths");
+}
+
+//--------------------------------------------------------------------------
+// Set session ID context
+void Context::set_session_id_context(const string& s)
+{
+  if (ctx) SSL_CTX_set_session_id_context(ctx, (const unsigned char *)s.data(),
+					  s.length());
 }
 
 //--------------------------------------------------------------------------
