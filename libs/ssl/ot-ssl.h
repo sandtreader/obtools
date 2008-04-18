@@ -58,6 +58,11 @@ public:
   bool use_private_key(const string& pem, const string& pass_phrase="");
 
   //--------------------------------------------------------------------------
+  // Enable client certificates
+  // Set 'force' to require them, otherwise optional
+  void enable_client_certificates(bool force = false);
+
+  //--------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd
   OpenSSL *create_connection(int fd);
 

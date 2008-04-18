@@ -74,6 +74,17 @@ bool Context::use_private_key(const string& pem, const string& pass_phrase)
 }
 
 //--------------------------------------------------------------------------
+// Enable client certificates
+// Set 'force' to require them, otherwise optional
+void Context::enable_client_certificates(bool force)
+{
+  if (ctx) 
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER 
+		            | (force?SSL_VERIFY_FAIL_IF_NO_PEER_CERT:0),
+		       0);
+}
+
+//--------------------------------------------------------------------------
 // Create a new SSL connection from the context on the given fd
 OpenSSL *Context::create_connection(int fd)
 {

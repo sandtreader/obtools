@@ -15,7 +15,6 @@ TESTCMD	=
 SOCKET = 1
 
 ifdef MINGW
-# Include libeay32 import library ??
 EXTLIBS = -lssl32 -leay32
 else
 EXTLIBS = -lssl -lcrypto
