@@ -22,6 +22,8 @@ else
 DEPENDS = ot-general2 ot-xmlmesh2
 endif
 
+EXTLIBS = -lssl
+
 ifdef RELEASE
 CPPFLAGS += -DDAEMON
 endif
