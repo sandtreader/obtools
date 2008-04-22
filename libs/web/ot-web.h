@@ -348,7 +348,7 @@ private:
 
   //--------------------------------------------------------------------------
   // Implementation of worker process method
-  void process(Net::TCPSocket &s, SSL::ClientDetails& client);
+  void process(SSL::TCPSocket &s, SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------

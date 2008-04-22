@@ -19,7 +19,7 @@ namespace ObTools { namespace Web {
 //--------------------------------------------------------------------------
 // Implementation of worker process method
 // Called in its own thread
-void HTTPServer::process(Net::TCPSocket& s, SSL::ClientDetails&client)
+void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 {
   Log::Streams log;
   OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP: Connection from " 
