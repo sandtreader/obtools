@@ -57,10 +57,17 @@ void TestServer::process(Net::TCPSocket& s,
 
 int main(int argc, char **argv)
 {
-  if (argc < 4)
+#if defined(__WIN32__)
+  winsock_initialise();
+#else
+  // Force ignore for SIGPIPE
+  signal(SIGPIPE, SIG_IGN);
+#endif
+
+  if (argc < 2)
   {
     cout << "Usage:\n";
-    cout << " test-server <port> <cert file> <private key file>\n";
+    cout << " test-server <port> [<cert file> <private key file>]\n";
     return 0;
   }
 
@@ -70,65 +77,69 @@ int main(int argc, char **argv)
   int port = 11111;
   port = atoi(argv[1]);
 
-  SSL::Context ctx;
-
-  // Read certificate
-  string certfile(argv[2]);
-  ifstream cf(certfile.c_str());
-  if (!cf)
+  if (argc > 2)
   {
-    cerr << "Can't read certificate file: " << certfile << endl;
-    return 2;
+    SSL::Context ctx;
+
+    // Read certificate
+    string certfile(argv[2]);
+    ifstream cf(certfile.c_str());
+    if (!cf)
+    {
+      cerr << "Can't read certificate file: " << certfile << endl;
+      return 2;
+    }
+
+    // Read certificate
+    Crypto::Certificate cert;
+    cf >> cert;
+
+    if (!cert)
+    {
+      cerr << "Bad certificate file: " << certfile << endl;
+      return 2;
+    }
+
+    cout << "Certificate read for CN " << cert.get_cn() << endl;
+
+    // Add certificate to context
+    ctx.use_certificate(cert);
+
+    // Read private key
+    string pkfile(argv[3]);
+    ifstream pkf(pkfile.c_str());
+    if (!pkf)
+    {
+      cerr << "Can't read private key file: " << pkfile << endl;
+      return 2;
+    }
+
+    // Read private key
+    Crypto::RSAKey rsa(true);
+    pkf >> rsa;
+
+    if (!rsa.valid)
+    {
+      cerr << "Bad key file: " << pkfile << endl;
+      return 2;
+    }
+
+    // Add private key to context
+    ctx.use_private_key(rsa);
+
+    cout << "Starting SSL server on port " << port << endl;
+    TestServer server(&ctx, port);
+
+    server.run();
   }
-
-  // Read certificate
-  Crypto::Certificate cert;
-  cf >> cert;
-
-  if (!cert)
+  else
   {
-    cerr << "Bad certificate file: " << certfile << endl;
-    return 2;
+    // Just run normally
+    cout << "Starting plain server on port " << port << endl;
+    TestServer server(0, port);
+
+    server.run();
   }
-
-  cout << "Certificate read for CN " << cert.get_cn() << endl;
-
-  // Add certificate to context
-  ctx.use_certificate(cert);
-
-  // Read private key
-  string pkfile(argv[3]);
-  ifstream pkf(pkfile.c_str());
-  if (!pkf)
-  {
-    cerr << "Can't read private key file: " << pkfile << endl;
-    return 2;
-  }
-
-  // Read private key
-  Crypto::RSAKey rsa(true);
-  pkf >> rsa;
-
-  if (!rsa.valid)
-  {
-    cerr << "Bad key file: " << pkfile << endl;
-    return 2;
-  }
-
-  // Add private key to context
-  ctx.use_private_key(rsa);
-
-#if defined(__WIN32__)
-  winsock_initialise();
-#else
-  // Force ignore for SIGPIPE
-  signal(SIGPIPE, SIG_IGN);
-#endif
-
-  cout << "Starting server on port " << port << endl;
-  TestServer server(&ctx, port);
-
-  server.run();
 
   return 0;
 }
