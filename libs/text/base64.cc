@@ -221,6 +221,7 @@ bool Base64::decode(const string& base64, string& binary)
   if (len > max_length) return false;
 
   binary.append((const char *)buf, len);
+  delete[] buf;
   return true;
 }
 
