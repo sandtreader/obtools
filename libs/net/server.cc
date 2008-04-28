@@ -20,11 +20,14 @@
 namespace ObTools { namespace Net {
 
 //--------------------------------------------------------------------------
-// Run server
-// doesn't return unless it all falls apart.
-void TCPServer::run()
+// Set up sockets for server
+void TCPServer::start()
 {
-  if (fd == INVALID_FD) return;
+  if (fd == INVALID_FD)
+  {
+    alive = false;
+    return;
+  }
 
   // Set REUSEADDR for fast restarts (e.g. during development)
   enable_reuse();
@@ -34,6 +37,7 @@ void TCPServer::run()
   if (!bind(address))
   {
     TCPSocket::close();
+    alive = false;
     return;
   }
 
@@ -41,9 +45,15 @@ void TCPServer::run()
   if (::listen(fd, backlog))
   {
     TCPSocket::close();
-    return;
+    alive = false;
   }
+}
 
+//--------------------------------------------------------------------------
+// Run server
+// doesn't return unless it all falls apart.
+void TCPServer::run()
+{
   // Now loop accepting connections into new threads
   while (alive)
   {
@@ -148,8 +158,9 @@ void TCPServer::shutdown()
   {
     alive = false;
     close();
-    threadpool.shutdown(); 
   }
+
+  threadpool.shutdown(); 
 }
 
 //--------------------------------------------------------------------------

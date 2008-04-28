@@ -812,6 +812,8 @@ private:
   int backlog;
   MT::ThreadPool<TCPWorkerThread> threadpool;
   bool alive;
+  
+  void start();
 
 public:
   //--------------------------------------------------------------------------
@@ -819,14 +821,14 @@ public:
   TCPServer(int _port, int _backlog=5, 
 	    int min_spare=1, int max_threads=10):
     TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog), 
-    threadpool(min_spare, max_threads), alive(true) {}
+    threadpool(min_spare, max_threads), alive(true) { start(); }
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
   TCPServer(EndPoint _address, int _backlog=5, 
 	    int min_spare=1, int max_threads=10):
     TCPSocket(), address(_address), backlog(_backlog), 
-    threadpool(min_spare, max_threads), alive(true) {}
+    threadpool(min_spare, max_threads), alive(true) { start(); }
 
   //--------------------------------------------------------------------------
   // Run server
