@@ -1,0 +1,16 @@
+public anyone@random
+public someone@foo.com
+public boss@foo.com
+public badboy@foo.com
+basic anyone@random
+basic someone@foo.com
+basic boss@foo.com
+basic badboy@foo.com
+private anyone@random
+private someone@foo.com
+private boss@foo.com
+private badboy@foo.com
+unknown anyone@random
+unknown someone@foo.com
+unknown boss@foo.com
+unknown badboy@foo.com
