@@ -16,7 +16,8 @@
 # 2: Directory of source, relative to ROOT
 # 3: Dependencies (comma separated)
 # 4: Optional variant suffix of build directory, OR 'NOLIB' for templates
-OT-LIBS = cli:libs/cli:text,net,mt		\
+OT-LIBS = access:libs/access:text,xml		\
+	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
 	  db:libs/db:log	 		\
 	  db-mysql:libs/db-mysql:log,db		\
