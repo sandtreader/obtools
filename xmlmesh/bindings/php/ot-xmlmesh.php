@@ -155,7 +155,7 @@ function xmlmesh_simple_request($subject, $request)
       $xpath = new DOMXPath( $dom );
       $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
       $xpath->registerNamespace( "x",  "http://obtools.com/ns/xmlmesh");
-      $obj = xpath_elements($xpath,"//x:ok");
+      $obj = $xpath->query("//x:ok");
 
       if ($obj)
       {
@@ -164,7 +164,7 @@ function xmlmesh_simple_request($subject, $request)
       else
       {
         // Look for a Fault response
-        $nodes = xpath_elements($xpath, "//env:Fault/env:Reason/env:Text");
+        $nodes = $xpath->query( "//env:Fault/env:Reason/env:Text");
 
 //   Need to check this!!!!
         if ($nodes) 
