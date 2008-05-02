@@ -1,18 +1,21 @@
-public anyone@random
-public someone@foo.com
-public boss@foo.com
-public badboy@foo.com
-basic anyone@random
-basic someone@foo.com
-basic boss@foo.com
-basic badboy@foo.com
-basic hero@bar.com
-basic evil@foo.com
-private anyone@random
-private someone@foo.com
-private boss@foo.com
-private badboy@foo.com
-unknown anyone@random
-unknown someone@foo.com
-unknown boss@foo.com
-unknown badboy@foo.com
+public anyone@random   10.20.30.40
+public someone@foo.com 192.168.0.33
+public boss@foo.com    192.168.1.1
+public badboy@foo.com  192.168.10.20
+basic anyone@random    10.20.30.40
+basic someone@foo.com  192.168.0.33
+basic someone@foo.com  192.168.0.99
+basic boss@foo.com     192.168.1.1
+basic badboy@foo.com   192.168.10.20
+basic hero@bar.com     50.60.70.80
+basic hero@bar.com     192.168.0.42
+basic evil@foo.com     192.168.0.66
+private anyone@random  10.20.30.40
+private someone@foo.com 192.168.0.33
+private boss@foo.com    192.168.1.1
+private badboy@foo.com  192.168.10.20
+unknown anyone@random   10.20.30.40
+unknown someone@foo.com 192.168.0.33
+unknown boss@foo.com    192.168.1.1
+unknown boss@foo.com    192.168.1.2
+unknown badboy@foo.com  192.168.10.20

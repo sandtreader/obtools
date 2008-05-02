@@ -23,44 +23,19 @@ Resource::Resource(XML::Element& resource_e,
   Log::Streams log;
 
   name = resource_e["name"];
-  default_allow = (resource_e["default"] == "allow");
 
   // Get allows
   for(XML::Element::iterator p(resource_e.get_children(ns+"allow")); p; ++p)
   {
     XML::Element& a_e = *p;
-    if (a_e.has_attr("group"))
-    {
-      string gid = a_e["group"];
-      map<string, Group *>::iterator q = groups.find(gid);
-      if (q == groups.end())
-	log.error << "No such group '" << gid << "' quoted for resource " 
-		  << name << endl;
-      else
-	allowed_groups.push_back(q->second);
-    }
-
-    if (a_e.has_attr("user"))
-      allowed_users.push_back(a_e["user"]);
+    allowed.push_back(Rule(a_e, groups));
   }
 
   // Get denies
   for(XML::Element::iterator p(resource_e.get_children(ns+"deny")); p; ++p)
   {
     XML::Element& d_e = *p;
-    if (d_e.has_attr("group"))
-    {
-      string gid = d_e["group"];
-      map<string, Group *>::iterator q = groups.find(gid);
-      if (q == groups.end())
-	log.error << "No such group '" << gid << "' quoted for resource " 
-		  << name << endl;
-      else
-	denied_groups.push_back(q->second);
-    }
-
-    if (d_e.has_attr("user"))
-      denied_users.push_back(d_e["user"]);
+    denied.push_back(Rule(d_e, groups));
   }
 }
   
@@ -68,59 +43,30 @@ Resource::Resource(XML::Element& resource_e,
 // Check access to a given real resource by a given user
 // Returns whether the resource matches our pattern - if so, writes the
 // access result to result_p
-bool Resource::check(const string& resource, const string& user,
-		     bool& result_p)
+bool Resource::check(const string& resource, Net::IPAddress address,
+		     const string& user, bool& result_p)
 {
   if (!Text::pattern_match(name, resource))  // Note:  Cased
     return false;
 
   // Check denied first - they override anything else
-  for(list<string>::iterator p = denied_users.begin(); 
-      p!=denied_users.end(); ++p)
+  for(list<Rule>::iterator p = denied.begin(); p!=denied.end(); ++p)
   {
-    if (Text::pattern_match(*p, user, false))  // Note:  Uncased
+    Rule& rule = *p;
+    if (rule.matches(address, user))
     {
       result_p = false;   // Denied!
       return true;
     }
   }
 
-  for(list<Group *>::iterator p = denied_groups.begin(); 
-      p!=denied_groups.end(); ++p)
+  // Now check for allowed
+  for(list<Rule>::iterator p = allowed.begin(); p!=allowed.end(); ++p)
   {
-    Group *g = *p;
-    if (g->contains(user))
+    Rule& rule = *p;
+    if (rule.matches(address, user))
     {
-      result_p = false;   // Denied!
-      return true;
-    }
-  }
-
-  // If default is allowed, that's all we have to check
-  if (default_allow)
-  {
-    result_p = true;      // Allowed
-    return true;
-  }
-
-  // Now check for explicitly allowed
-  for(list<string>::iterator p = allowed_users.begin(); 
-      p!=allowed_users.end(); ++p)
-  {
-    if (Text::pattern_match(*p, user, false))  // Note:  Uncased
-    {
-      result_p = true;    // Allowed
-      return true;
-    }
-  }
-
-  for(list<Group *>::iterator p = allowed_groups.begin(); 
-      p!=allowed_groups.end(); ++p)
-  {
-    Group *g = *p;
-    if (g->contains(user))
-    {
-      result_p = true;    // Allowed
+      result_p = true;   // Allowed
       return true;
     }
   }

@@ -39,7 +39,8 @@ Checker::Checker(XML::Element& config, const string& ns)
 
 //--------------------------------------------------------------------------
 // Check access to a given resource by a given user
-bool Checker::check(const string& resource, const string& user)
+bool Checker::check(const string& resource, Net::IPAddress address,
+		    const string& user)
 {
   bool result;  
  
@@ -47,7 +48,7 @@ bool Checker::check(const string& resource, const string& user)
   for(list<Resource *>::iterator p = resources.begin(); p!=resources.end();++p)
   {
     Resource *r = *p;
-    if (r->check(resource, user, result)) return result;
+    if (r->check(resource, address, user, result)) return result;
   }
 
   return false;  // Fail safe if nothing matches

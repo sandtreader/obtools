@@ -39,13 +39,14 @@ int main(int argc, char **argv)
   // Now read lines of resource/user pairs to check
   while (cin)
   {
-    string resource, user;
-    cin >> resource >> user;
+    string resource, user, addr;
+    cin >> resource >> user >> addr;
     if (resource.empty()) break;
 
-    bool result = checker.check(resource, user);
+    Net::IPAddress address(addr);
+    bool result = checker.check(resource, addr, user);
 
-    cout << resource << "\t" << user << "\t" 
+    cout << resource << "\t" << user << "\t" << address << "\t"
 	 << (result?"ALLOW":"DENY") << endl;
   }
 

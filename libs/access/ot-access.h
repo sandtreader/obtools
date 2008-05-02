@@ -12,7 +12,7 @@
 #define __OBTOOLS_ACCESS_H
 
 #include "ot-xml.h"
-#include "ot-ssl.h"
+#include "ot-net.h"
 #include <list>
 #include <map>
 
@@ -45,21 +45,40 @@ class Group
 };
 
 //==========================================================================
-// Resource rule class (resource.cc)
+// Individual rule (AND of all conditions) (rule.cc)
+class Rule
+{
+  Group *group;                 // Group to match, or 0 if unset
+  string user;                  // User glob pattern to match (or * if unset)
+  Net::MaskedAddress address;   // Address mask to match (/0 if unset)
+
+ public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  Rule(Group *_group, const string& _user, Net::MaskedAddress _address):
+    group(_group), user(_user), address(_address) {}
+
+  //--------------------------------------------------------------------------
+  // Constructor from a rule element (e.g. <allow .../> or <deny .../>)
+  // Looks up group in given group list
+  Rule(const XML::Element& r_e, map<string, Group *>& groups);
+
+  //--------------------------------------------------------------------------
+  // Test the rule for match against the given SSL Client details
+  bool Rule::matches(Net::IPAddress attempted_address, 
+		     const string& attempted_user);
+};
+
+//==========================================================================
+// Resource class (resource.cc)
 class Resource 
 {
  private:
   string name;                 // Glob pattern
 
-  // Rules on individual users (by pattern match)
-  list<string> allowed_users;
-  list<string> denied_users;
-
-  // Rules on groups
-  list<Group *> allowed_groups;
-  list<Group *> denied_groups;
-
-  bool default_allow;
+  // Rules - denied are checked first
+  list<Rule> denied;
+  list<Rule> allowed;
 
  public:
   //--------------------------------------------------------------------------
@@ -72,7 +91,8 @@ class Resource
   // Check access to a given real resource by a given user
   // Returns whether the resource matches our pattern - if so, writes the
   // access result to result_p
-  bool check(const string& resource, const string& user, bool& result_p);
+  bool check(const string& resource, Net::IPAddress address,
+	     const string& user, bool& result_p);
 };
 
 //==========================================================================
@@ -92,16 +112,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given user
-  bool check(const string& resource, const string& user);
-
-  //--------------------------------------------------------------------------
-  // Check access to a given resource by a given SSL client
-  // Checks using CN as user, or #anonymous if not identified
-  // !!! Could check IP address here, too
-  bool check(const string& resource, SSL::ClientDetails& client)
-  {
-    return check(resource, client.cert_cn.empty()?"#anonymous":client.cert_cn);
-  }
+  bool check(const string& resource, Net::IPAddress address, 
+	     const string& user);
 
   //--------------------------------------------------------------------------
   // Destructor

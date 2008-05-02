@@ -28,22 +28,25 @@
     <resources>
 
       <!-- Make 'public' public -->
-      <resource name="public" default="allow"/>
+      <resource name="public">
+        <allow/>
+      </resource>
 
       <!-- 'basic' open to all users, except bad ones -->
       <resource name="basic">
         <allow group="users"/>
+	<deny address="192.168.0.99"/>
 	<deny group="bad"/>
-	<allow user="hero*"/>
+	<allow user="hero*" address="192.168.0.0/24"/>
 	<deny user="evil*"/>
       </resource>
 
       <!-- 'private' blocked to everyone -->
       <resource name="private"/>
 
-      <!-- Other than that, managers get everything -->
+      <!-- Other than that, managers in 192.168.1.1 get everything -->
       <resource name="*">
-        <allow group="managers"/>
+        <allow group="managers" address="192.168.1.1"/>
       </resource>
 
       <!-- Note: Absent resources are also blocked -->

@@ -6,10 +6,10 @@
 #==========================================================================
 
 TYPE	= lib
-OBJS 	= checker.o group.o resource.o
+OBJS 	= checker.o group.o resource.o rule.o
 NAME   	= ot-access
 HEADERS = ot-access.h
-DEPENDS = xml log mt ssl 
+DEPENDS = xml log mt net
 
 TESTS 	= test-access
 TESTCMD = ./test-access ../test-access.xml < ../test-access.txt
