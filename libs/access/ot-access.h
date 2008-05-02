@@ -13,6 +13,7 @@
 
 #include "ot-xml.h"
 #include "ot-net.h"
+#include "ot-ssl.h"
 #include <list>
 #include <map>
 
@@ -114,6 +115,15 @@ public:
   // Check access to a given resource by a given user
   bool check(const string& resource, Net::IPAddress address, 
 	     const string& user);
+
+  //--------------------------------------------------------------------------
+  // Check access to a given resource by a given SSL client
+  // Checks using CN as user, or #anonymous if not identified
+  bool check(const string& resource, SSL::ClientDetails& client)
+  {
+    return check(resource, client.address.host, 
+		 client.cert_cn.empty()?"#anonymous":client.cert_cn);
+  }
 
   //--------------------------------------------------------------------------
   // Destructor
