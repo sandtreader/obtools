@@ -34,6 +34,8 @@
       <resource name="basic">
         <allow group="users"/>
 	<deny group="bad"/>
+	<allow user="hero*"/>
+	<deny user="evil*"/>
       </resource>
 
       <!-- 'private' blocked to everyone -->

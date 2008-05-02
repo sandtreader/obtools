@@ -6,6 +6,8 @@ basic anyone@random
 basic someone@foo.com
 basic boss@foo.com
 basic badboy@foo.com
+basic hero@bar.com
+basic evil@foo.com
 private anyone@random
 private someone@foo.com
 private boss@foo.com

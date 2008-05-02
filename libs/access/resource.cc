@@ -29,26 +29,38 @@ Resource::Resource(XML::Element& resource_e,
   for(XML::Element::iterator p(resource_e.get_children(ns+"allow")); p; ++p)
   {
     XML::Element& a_e = *p;
-    string gid = a_e["group"];
-    map<string, Group *>::iterator q = groups.find(gid);
-    if (q == groups.end())
-      log.error << "No such group '" << gid << "' quoted for resource " 
-		<< name << endl;
-    else
-      allowed.push_back(q->second);
+    if (a_e.has_attr("group"))
+    {
+      string gid = a_e["group"];
+      map<string, Group *>::iterator q = groups.find(gid);
+      if (q == groups.end())
+	log.error << "No such group '" << gid << "' quoted for resource " 
+		  << name << endl;
+      else
+	allowed_groups.push_back(q->second);
+    }
+
+    if (a_e.has_attr("user"))
+      allowed_users.push_back(a_e["user"]);
   }
 
   // Get denies
   for(XML::Element::iterator p(resource_e.get_children(ns+"deny")); p; ++p)
   {
-    XML::Element& a_e = *p;
-    string gid = a_e["group"];
-    map<string, Group *>::iterator q = groups.find(gid);
-    if (q == groups.end())
-      log.error << "No such group '" << gid << "' quoted for resource " 
-		<< name << endl;
-    else
-      denied.push_back(q->second);
+    XML::Element& d_e = *p;
+    if (d_e.has_attr("group"))
+    {
+      string gid = d_e["group"];
+      map<string, Group *>::iterator q = groups.find(gid);
+      if (q == groups.end())
+	log.error << "No such group '" << gid << "' quoted for resource " 
+		  << name << endl;
+      else
+	denied_groups.push_back(q->second);
+    }
+
+    if (d_e.has_attr("user"))
+      denied_users.push_back(d_e["user"]);
   }
 }
   
@@ -63,7 +75,18 @@ bool Resource::check(const string& resource, const string& user,
     return false;
 
   // Check denied first - they override anything else
-  for(list<Group *>::iterator p = denied.begin(); p!=denied.end(); ++p)
+  for(list<string>::iterator p = denied_users.begin(); 
+      p!=denied_users.end(); ++p)
+  {
+    if (Text::pattern_match(*p, user, false))  // Note:  Uncased
+    {
+      result_p = false;   // Denied!
+      return true;
+    }
+  }
+
+  for(list<Group *>::iterator p = denied_groups.begin(); 
+      p!=denied_groups.end(); ++p)
   {
     Group *g = *p;
     if (g->contains(user))
@@ -81,7 +104,18 @@ bool Resource::check(const string& resource, const string& user,
   }
 
   // Now check for explicitly allowed
-  for(list<Group *>::iterator p = allowed.begin(); p!=allowed.end(); ++p)
+  for(list<string>::iterator p = allowed_users.begin(); 
+      p!=allowed_users.end(); ++p)
+  {
+    if (Text::pattern_match(*p, user, false))  // Note:  Uncased
+    {
+      result_p = true;    // Allowed
+      return true;
+    }
+  }
+
+  for(list<Group *>::iterator p = allowed_groups.begin(); 
+      p!=allowed_groups.end(); ++p)
   {
     Group *g = *p;
     if (g->contains(user))
@@ -93,7 +127,7 @@ bool Resource::check(const string& resource, const string& user,
 
   // Not explicitly allowed and default is deny, so...
   result_p = false;       // Denied!
-  return true;           // ... but we did match
+  return true;            // ... but we did match
 }
 
 }} // namespaces

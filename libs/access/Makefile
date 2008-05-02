@@ -9,7 +9,7 @@ TYPE	= lib
 OBJS 	= checker.o group.o resource.o
 NAME   	= ot-access
 HEADERS = ot-access.h
-DEPENDS = xml log mt
+DEPENDS = xml log mt ssl 
 
 TESTS 	= test-access
 TESTCMD = ./test-access ../test-access.xml < ../test-access.txt

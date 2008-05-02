@@ -12,6 +12,7 @@
 #define __OBTOOLS_ACCESS_H
 
 #include "ot-xml.h"
+#include "ot-ssl.h"
 #include <list>
 #include <map>
 
@@ -49,8 +50,15 @@ class Resource
 {
  private:
   string name;                 // Glob pattern
-  list<Group *> allowed;
-  list<Group *> denied;
+
+  // Rules on individual users (by pattern match)
+  list<string> allowed_users;
+  list<string> denied_users;
+
+  // Rules on groups
+  list<Group *> allowed_groups;
+  list<Group *> denied_groups;
+
   bool default_allow;
 
  public:
@@ -85,6 +93,15 @@ public:
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given user
   bool check(const string& resource, const string& user);
+
+  //--------------------------------------------------------------------------
+  // Check access to a given resource by a given SSL client
+  // Checks using CN as user, or #anonymous if not identified
+  // !!! Could check IP address here, too
+  bool check(const string& resource, SSL::ClientDetails& client)
+  {
+    return check(resource, client.cert_cn.empty()?"#anonymous":client.cert_cn);
+  }
 
   //--------------------------------------------------------------------------
   // Destructor
