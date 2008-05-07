@@ -13,6 +13,7 @@
 
 #include "ot-net.h"
 #include "ot-crypto.h"
+#include "ot-xml.h"
 
 // This is rather ugly...  We want to use SSL as a namespace, but
 // OpenSSL defines it as a struct.  Hence we redefine SSL here to 
@@ -89,6 +90,11 @@ public:
   //--------------------------------------------------------------------------
   // Static:  Log SSL errors
   static void log_errors(const string& text);
+
+  //--------------------------------------------------------------------------
+  // Static:  Create from an <ssl> configuration element
+  // Returns context, or 0 if disabled or failed
+  static Context *create(XML::Element& ssl_e);
 };
 
 //==========================================================================

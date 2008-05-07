@@ -9,6 +9,7 @@
 
 #include "ot-ssl.h"
 #include "ot-log.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace SSL {
 
@@ -159,6 +160,81 @@ void Context::log_errors(const string& text)
     log.error << ERR_error_string(err, buf) << endl;
   }
 }
+
+//--------------------------------------------------------------------------
+// Static:  Create from an <ssl> configuration element
+// Returns context, or 0 if disabled or failed
+Context *Context::create(XML::Element& ssl_e)
+{
+  if (!ssl_e.get_attr_bool("enabled")) return 0;
+
+  XML::XPathProcessor xpath(ssl_e);
+  Log::Streams log;
+
+  // Get SOAP RSA pass-phrase first, if required
+  string ssl_pass_phrase;
+  if (xpath.get_value_bool("private-key/@encrypted"))
+  {
+    log.summary << "SSL RSA key pass phrase required\n";
+    cout << "\n** Enter pass phrase for RSA private key: ";
+    cin >> ssl_pass_phrase;
+  }
+
+  // Get private key, strip blank lines, indent
+  string key = xpath.get_value("private-key");
+  key = Text::strip_blank_lines(key);
+  key = Text::remove_indent(key, Text::get_common_indent(key));
+
+  // Test the key
+  Crypto::RSAKey rsa(key, true, ssl_pass_phrase);
+  if (!rsa.valid)
+  {
+    log.error << "Invalid RSA private key or pass phrase - giving up\n";
+    return 0;
+  }
+
+  log.summary << "RSA key loaded OK\n";
+
+  SSL::Context *ssl_ctx = new SSL::Context();
+  ssl_ctx->use_private_key(rsa);
+
+  // Get certificate
+  string cert = xpath.get_value("certificate");
+  cert = Text::strip_blank_lines(cert);
+  cert = Text::remove_indent(cert, Text::get_common_indent(cert));
+
+  if (ssl_ctx->use_certificate(cert))
+  {
+    log.summary << "SSL context initialised OK\n";
+  }
+  else
+  {
+    log.error << "Can't use SSL certificate - disabling\n";
+    delete ssl_ctx;
+      return 0;
+  }
+
+  // Enable verification if requested
+  if (xpath.get_value_bool("verify/@enabled"))
+  {
+    bool mandatory = xpath.get_value_bool("verify/@mandatory");
+    ssl_ctx->enable_peer_verification(mandatory);
+
+    // Load CA file/directory
+    ssl_ctx->set_verify_paths(xpath.get_value("verify/root/file"),
+			      xpath.get_value("verify/root/directory"));
+
+    // Optionally load defaults
+    if (xpath.get_value_bool("verify/root/@defaults"))
+      ssl_ctx->set_default_verify_paths();
+  }
+
+  // Set up session ID context
+  ssl_ctx->set_session_id_context(xpath.get_value("session/@context", "pst"));
+
+  return ssl_ctx;
+}
+
 
 }} // namespaces
 

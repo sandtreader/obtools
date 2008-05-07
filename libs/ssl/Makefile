@@ -10,7 +10,7 @@ NAME   	= ot-ssl
 HEADERS = ot-ssl.h
 OBJS  	= context.o socket.o client.o server.o
 TESTS 	= test-client test-server
-DEPENDS = mt net log crypto
+DEPENDS = mt net log crypto xml text
 TESTCMD	= 
 SOCKET = 1
 
