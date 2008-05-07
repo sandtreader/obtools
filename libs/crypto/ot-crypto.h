@@ -370,6 +370,10 @@ class SHA1
   // Ditto, but returning hex string
   static string digest(const void *data, size_t length);
 
+  //------------------------------------------------------------------------
+  // C++-friendly version of the above
+  string digest(const string& text)
+  { return digest(text.data(), text.length()); }
 };
 
 //==========================================================================
