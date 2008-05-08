@@ -171,7 +171,10 @@ void TCPWorkerThread::run()
   auto_ptr<TCPSocket> s(server->create_client_socket(client_fd));
 
   // Just pass them to the server's process function
-  if (s.get()) server->process(*s, client_ep);
+  if (s.get()) 
+    server->process(*s, client_ep);
+  else
+    ::SOCKCLOSE(client_fd);  // Drop it
 }
 
 }} // namespaces
