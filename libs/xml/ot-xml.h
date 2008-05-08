@@ -876,6 +876,11 @@ public:
   Element& get_root() { return parser.get_root(); }
 
   //------------------------------------------------------------------------
+  // Detach the root element to keep after the configuration reader has died
+  // Returns 0 if not valid
+  Element *detach_root() { return parser.detach_root(); }
+
+  //------------------------------------------------------------------------
   // Element list fetch - all elements matching final child step.
   // Only first element of intermediate steps is used - list is not merged!
   list<Element *> get_elements(const string& path);
