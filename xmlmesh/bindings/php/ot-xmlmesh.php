@@ -1,7 +1,7 @@
 <?
 // Native PHP implementation of ot-xmlmesh client
 // Copyright (c) xMill Consulting Limited 2007
-// v0.2
+// v0.3
 
 // Replaces previous C module
 
@@ -155,20 +155,19 @@ function xmlmesh_simple_request($subject, $request)
       $xpath = new DOMXPath( $dom );
       $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
       $xpath->registerNamespace( "x",  "http://obtools.com/ns/xmlmesh");
-      $obj = $xpath->query("//x:ok");
-
-      if ($obj)
+      $nodes = $xpath->query("//x:ok");
+      if ($nodes->length)
       {
         return true;
       }
       else
       {
         // Look for a Fault response
-        $nodes = $xpath->query( "//env:Fault/env:Reason/env:Text");
+        $nodes = $xpath->query("//env:Fault/env:Reason/env:Text");
 
 //   Need to check this!!!!
-        if ($nodes) 
-  	  $xmlmesh_last_error = $nodes[0]->nodeValue;
+        if ($nodes->length) 
+  	  $xmlmesh_last_error = $nodes->item(0)->nodeValue;
         else
   	  $xmlmesh_last_error = "Unknown fault";
       
