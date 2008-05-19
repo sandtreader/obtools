@@ -164,9 +164,11 @@ function xmlmesh_simple_request($subject, $request)
         // Look for a Fault response
         $nodes = $xpath->query("//env:Fault/env:Reason/env:Text");
 
-//   Need to check this!!!!
-        if ($nodes->length) 
-  	  $xmlmesh_last_error = $nodes->item(0)->nodeValue;
+        if ($nodes->length)
+	{
+	  $item = $nodes->item(0);
+  	  $xmlmesh_last_error = $item->nodeValue;
+	}
         else
   	  $xmlmesh_last_error = "Unknown fault";
       
