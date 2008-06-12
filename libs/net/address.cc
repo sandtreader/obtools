@@ -16,9 +16,10 @@
 #include <arpa/inet.h>
 #endif
 
-namespace ObTools { namespace Net {
+// Auxiliary data buffer size for gethostbyname_r
+#define AUX_BUF_SIZE 1024
 
-//!!! Consider MT issues here - may need global resolver lock
+namespace ObTools { namespace Net {
 
 //==========================================================================
 // IP Addresses
@@ -34,6 +35,9 @@ IPAddress::IPAddress(const string& hostname_s)
   }
   else
   {
+#if defined(__WIN32__)
+    // Believed to be threadsafe (using TLS for result), but doesn't
+    // provide gethostbyname_r anyway
     struct hostent *host;
     host = gethostbyname(hostname);               
 
@@ -41,6 +45,18 @@ IPAddress::IPAddress(const string& hostname_s)
       address = (uint32_t)ntohl(*(unsigned long *)(host->h_addr));
     else
       address = BADADDR;
+#else
+    // Make sure we use threadsafe version
+    struct hostent host;
+    struct hostent *result;
+    char buf[AUX_BUF_SIZE];
+    int err;
+    if (!gethostbyname_r(hostname, &host, buf, AUX_BUF_SIZE, &result, &err)
+	&& result)
+      address = (uint32_t)ntohl(*(unsigned long *)(host.h_addr));
+    else
+      address = BADADDR;
+#endif
   }
 }
 
@@ -57,14 +73,32 @@ string IPAddress::get_dotted_quad() const
 // Get hostname (reverse lookup), or dotted quad
 string IPAddress::get_hostname() const
 {
-  struct hostent *host;
   uint32_t nbo_addr = nbo();
+
+#if defined(__WIN32__)
+  // Believed to be threadsafe (using TLS for result), but doesn't
+  // provide gethostbyaddr_r anyway
+  struct hostent *host;
   host = gethostbyaddr((char *)&nbo_addr, 4, AF_INET);
 
   if (host)
     return host->h_name;
   else
     return get_dotted_quad();
+#else
+  // Use thread-safe version
+  struct hostent host;
+  struct hostent *result;
+  char buf[AUX_BUF_SIZE];
+  int err;
+
+  if (!gethostbyaddr_r((char *)&nbo_addr, 4, AF_INET,
+		       &host, buf, AUX_BUF_SIZE, &result, &err)
+	&& result)
+    return host.h_name;
+  else
+    return get_dotted_quad();
+#endif
 }
 
 //--------------------------------------------------------------------------
