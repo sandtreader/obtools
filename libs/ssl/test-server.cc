@@ -74,6 +74,8 @@ int main(int argc, char **argv)
   Log::StreamChannel chan_out(cerr);
   Log::logger.connect(chan_out);
 
+  Crypto::Library crypto;
+
   int port = 11111;
   port = atoi(argv[1]);
 

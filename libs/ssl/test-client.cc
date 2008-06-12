@@ -36,6 +36,8 @@ int main(int argc, char **argv)
   winsock_initialise();
 #endif
 
+  Crypto::Library crypto;
+
   Net::IPAddress addr(host);
   if (!addr)
   {
