@@ -106,8 +106,8 @@ protected:
 
 public:
   //--------------------------------------------------------------------------
-  // Default constructor, invalid
-  TCPSocket(): Net::TCPSocket(), ssl(0) {}
+  // Default constructor, invalid socket
+  TCPSocket(): Net::TCPSocket(Net::Socket::INVALID_FD), ssl(0) {}
 
   //--------------------------------------------------------------------------
   // Explicit constructor from existing fd and SSL object
