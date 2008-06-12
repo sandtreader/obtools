@@ -8,15 +8,89 @@
 //==========================================================================
 
 #include "ot-crypto.h"
+#include "ot-mt.h"
 #include "openssl/evp.h"
 
+// Definition of type for dynamic locks, outside namespaces
+struct CRYPTO_dynlock_value
+{
+  ObTools::MT::Mutex mutex;
+};
+
 namespace ObTools { namespace Crypto {
+
+//------------------------------------------------------------------------
+// OpenSSL locking callbacks - required for multithreaded code
+// See: threads(3)
+
+// Array of static mutexes
+static vector<MT::Mutex> mutexes;
+
+// Force C call standard
+extern "C"
+{
+
+// Locking function 
+static void openssl_locking_function(int mode, int n, const char *, int)
+{
+  if (mode & CRYPTO_LOCK) 
+    mutexes[n].lock();
+  else
+    mutexes[n].unlock();
+}
+
+// Thread id function.
+static unsigned long openssl_id_function(void)
+{
+  // Not sure this is always safe to cast, but doing it otherwise would
+  // be horrendous (TLS unique integer, left as exercise to the reader!)
+  return (unsigned long)pthread_self();
+}
+
+// Dynamic lock creation function
+static struct CRYPTO_dynlock_value *openssl_dyn_create_function(const char *, 
+								int)
+{
+  return new struct CRYPTO_dynlock_value();
+}
+
+// Dynamic locking function.
+static void openssl_dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l,
+				      const char *, int)
+{
+  if (mode & CRYPTO_LOCK)
+    l->mutex.lock();
+  else
+    l->mutex.unlock();
+}
+
+// Destroy dynamic crypto lock function
+static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l, 
+					 const char *, int)
+{
+  delete l;
+}
+
+} // extern "C"
 
 //------------------------------------------------------------------------
 // Constructor
 Library::Library()
 {
-  if (should_initialise()) OpenSSL_add_all_algorithms();
+  if (should_initialise()) 
+  {
+    // Create as many locks as the library requires
+    mutexes.resize(CRYPTO_num_locks());
+
+    // Register callbacks
+    CRYPTO_set_locking_callback(openssl_locking_function);
+    CRYPTO_set_id_callback(openssl_id_function);
+    CRYPTO_set_dynlock_create_callback(openssl_dyn_create_function);
+    CRYPTO_set_dynlock_lock_callback(openssl_dyn_lock_function);
+    CRYPTO_set_dynlock_destroy_callback(openssl_dyn_destroy_function);
+
+    OpenSSL_add_all_algorithms();
+  }
 }
 
 //------------------------------------------------------------------------
@@ -24,7 +98,21 @@ Library::Library()
 Library::~Library()
 {
   // Clean up unless no-one has initialised before 
-  if (!should_initialise()) EVP_cleanup();
+  if (!should_initialise())
+  {
+    // Clear all callbacks
+    CRYPTO_set_dynlock_create_callback(NULL);
+    CRYPTO_set_dynlock_lock_callback(NULL);
+    CRYPTO_set_dynlock_destroy_callback(NULL);
+    CRYPTO_set_locking_callback(NULL);
+    CRYPTO_set_id_callback(NULL);
+
+    // Empty the mutex array
+    mutexes.clear();
+
+    // Tidy up library
+    EVP_cleanup();
+  }
 }
 
 }} // namespaces
