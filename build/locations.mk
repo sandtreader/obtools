@@ -16,7 +16,7 @@
 # 2: Directory of source, relative to ROOT
 # 3: Dependencies (comma separated)
 # 4: Optional variant suffix of build directory, OR 'NOLIB' for templates
-OT-LIBS = access:libs/access:text,xml		\
+OT-LIBS = access:libs/access:text,xml,ssl	\
 	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
 	  db:libs/db:log	 		\
@@ -35,7 +35,7 @@ OT-LIBS = access:libs/access:text,xml		\
 	  regen:libs/regen 			\
 	  script:libs/script:log,misc,init	\
 	  soap:libs/soap:web,log,misc,xml	\
-	  ssl:libs/ssl:log,net,crypto           \
+	  ssl:libs/ssl:log,net,crypto,xml       \
 	  text:libs/text   			\
 	  time:libs/time			\
 	  tube:libs/tube:net,log,mt,chan,misc,ssl   \
