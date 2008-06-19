@@ -190,13 +190,21 @@ public:
     limit(_limit), tidy_policy(_tpol), evictor_policy(_epol), mutex() {}
 
   //--------------------------------------------------------------------------
+  // Set the limit - may evict if more than limit in cache
+  void set_limit(unsigned int _limit)
+  {
+    limit = _limit;
+    evict();
+  }
+
+  //--------------------------------------------------------------------------
   // Add an item of content to the cache
   // item is COPIED
   // Any existing content under this ID is deleted
   // Whether successful - can fail if limit reached and no eviction possible
   bool add(const ID& id, const CONTENT& content)
   { 
-    if (limit && cachemap.size() > limit && !evict()) return false;
+    if (limit && cachemap.size() >= limit && !evict()) return false;
 
     MT::RWWriteLock lock(mutex);  // NB Don't lock around evict
     cachemap[id] = MCType(content); 
