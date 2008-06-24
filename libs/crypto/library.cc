@@ -42,9 +42,15 @@ static void openssl_locking_function(int mode, int n, const char *, int)
 // Thread id function.
 static unsigned long openssl_id_function(void)
 {
+#ifdef __WIN32__
+  // Use pointer value from ptw32_handle_t - this is highly sensitive to
+  // library organisation and pointer sizes, but it's all that's available
+  return (unsigned long)(pthread_self().p);
+#else
   // Not sure this is always safe to cast, but doing it otherwise would
   // be horrendous (TLS unique integer, left as exercise to the reader!)
   return (unsigned long)pthread_self();
+#endif
 }
 
 // Dynamic lock creation function
