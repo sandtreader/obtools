@@ -6,7 +6,9 @@
 #==========================================================================
 
 SUBS = c php cli
-SUBS_CROSS = c cli
+SUBS_MINGW = c cli
+SUBS_MIPS = c cli
+
 RELEASEDIR = ../release
 include ../../build/dir.mk
 

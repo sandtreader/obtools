@@ -8,7 +8,7 @@
 TYPE	= exes
 NAME   	= xmlmesh-send 
 
-ifndef CROSS-COMPILE
+ifndef MINGW
 NAME += xmlmesh-receive
 endif
 

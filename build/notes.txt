@@ -1,8 +1,8 @@
 ObTools build notes
 -------------------
 
-Cross-compilation
------------------
+Cross-compilation to Windows
+----------------------------
 
 Currently uses mingw to cross compile from Linux onto Windows.  Not tested
 compiling natively on Windows under MinGW or commercial IDEs.  There are some 
@@ -15,7 +15,7 @@ To install MinGW under Debian:
 
 To build cross-compiled versions
 
-$ make cross
+$ make mingw
 
 The mingw10.dll needs to be copied into the same location as executables.
 

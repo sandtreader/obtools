@@ -14,9 +14,13 @@ all:
 	$(MAKE) -C obcache
 	$(MAKE) -C angel
 
-cross: 
-	$(MAKE) -C libs cross
-	$(MAKE) -C xmlmesh cross
+mingw: 
+	$(MAKE) -C libs mingw
+	$(MAKE) -C xmlmesh mingw
+
+mips: 
+	$(MAKE) -C libs mips
+	$(MAKE) -C xmlmesh mips
 
 profile: 
 	$(MAKE) -C libs profile

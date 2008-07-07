@@ -42,8 +42,8 @@
 
 # If VARIANTS is undefined, defaults to standard release/debug set
 
-# If CROSS-COMPILE is set (e.g. by 'make cross'), build cross-compiled 
-# versions - currently only MINGW.
+# If CROSS is set (e.g. by 'make mingw' etc.), builds cross-compiled
+# versions, otherwise native
 
 # If PROFILE is set (e.g. by 'make profile'), build profiled versions
 
@@ -63,15 +63,25 @@ endif
 
 
 #Check for cross-compilation
-ifdef CROSS-COMPILE
-# - Future - check for which
+ifdef CROSS
 
+ifeq ($(CROSS), mingw)
 #MinGW versions
 ifndef VARIANTS
 VARIANTS = debug-mingw release-mingw
 endif
 VARIANT-debug-mingw		= MINGW DEBUG
 VARIANT-release-mingw		= MINGW RELEASE
+endif
+
+ifeq ($(CROSS), mips)
+#MIPS (Broadcom) chipset
+#Not much point in building debug versions
+ifndef VARIANTS
+VARIANTS = release-mips
+endif
+VARIANT-release-mips		= MIPS RELEASE
+endif
 
 else #!CROSS-COMPILE
 
@@ -118,10 +128,28 @@ ifdef SOCKET
 EXTRALIBS += -lwsock32
 endif
 else
+#Compiler override for MIPS build
+ifdef MIPS
+
+#!!! Best guess - Fix these!
+CC = mips-linux-uclibc-cc
+CXX = mips-linux-uclibc-g++
+LD = mips-linux-uclibc-ld
+AR = mips-linux-uclibc-ar
+CPPFLAGS += -DMIPS
+PLATFORM = -mips
+EXTRALIBS += -lrt
+#!!!
+
+else
+#Normal native build
 CC = gcc-3.4
 CXX = g++-3.4
 EXTRALIBS += -lrt
 endif
+endif
+
+
 
 # Get locations
 include $(ROOT)/build/locations.mk
@@ -313,9 +341,13 @@ vpath % ..
 # Main target: build all variants
 all:	$(patsubst %,build-%,$(VARIANTS))
 
-# Cross compile: recurse with CROSS-COMPILE set
-cross:
-	$(MAKE) CROSS-COMPILE=1
+# Cross compile for Windows: recurse with CROSS=mingw
+mingw:
+	$(MAKE) CROSS=mingw
+
+# Cross compile for MIPS: recurse with CROSS=mips
+mips:
+	$(MAKE) CROSS=mips
 
 # Profile: recurse with PROFILE set
 profile:

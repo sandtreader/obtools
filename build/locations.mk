@@ -81,12 +81,8 @@ ifneq ($(4), NOLIB)
 VARIANTS-$(1) = $(4)
 LIBS-$(1)-release = $$(DIR-$(1))/build-release$(4)$$(PLATFORM)/ot-$(1).a
 LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-single-release = $$(DIR-$(1))/build-single-release$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-single-debug = $$(DIR-$(1))/build-single-debug$(4)$$(PLATFORM)/ot-$(1).a
 LIBS-$(1)-release-profiled = $$(DIR-$(1))/build-release-profiled$(4)$$(PLATFORM)/ot-$(1).a
 LIBS-$(1)-debug-profiled   = $$(DIR-$(1))/build-debug-profiled$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-single-release-profiled = $$(DIR-$(1))/build-single-release-profiled$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-single-debug-profiled = $$(DIR-$(1))/build-single-debug-profiled$(4)$$(PLATFORM)/ot-$(1).a
 endif
 endef
 
@@ -105,14 +101,10 @@ DIR-$(1) = $$(SDIR-$(1))/build-release$$(PLATFORM)
 ifdef MINGW
 #MinGW is not profiled
 LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/$(1).dll.a
-LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release$$(PLATFORM)/$(1)-single.dll.a
 LIBS-$(1)-debug = $$(SDIR-$(1))/build-debug$$(PLATFORM)/$(1).dll.a
-LIBS-$(1)-single-debug = $$(SDIR-$(1))/build-single-debug$$(PLATFORM)/$(1)-single.dll.a
 else
 LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/lib$(1).so
-LIBS-$(1)-single-release = $$(SDIR-$(1))/build-single-release$$(PLATFORM)/lib$(1)-single.so
 LIBS-$(1)-release-profiled = $$(SDIR-$(1))/build-release-profiled$$(PLATFORM)/lib$(1)-profiled.so
-LIBS-$(1)-single-release-profiled = $$(SDIR-$(1))/build-single-release-profiled$$(PLATFORM)/lib$(1)-single-profiled.so
 endif
 endef
 

@@ -10,11 +10,17 @@
 all:	$(patsubst %,%-all,$(SUBS))
 
 # Use standard SUBS if not overridden
-ifndef SUBS_CROSS
-SUBS_CROSS = $(SUBS)
+ifndef SUBS_MINGW
+SUBS_MINGW = $(SUBS)
 endif
 
-cross:	$(patsubst %,%-cross,$(SUBS_CROSS))
+mingw:	$(patsubst %,%-mingw,$(SUBS_MINGW))
+
+ifndef SUBS_MIPS
+SUBS_MIPS = $(SUBS)
+endif
+
+mips:	$(patsubst %,%-mips,$(SUBS_MIPS))
 
 profile: $(patsubst %,%-profile,$(SUBS))
 
@@ -50,7 +56,8 @@ subdoc:	$(patsubst %,%-docfile,$(SUBS))
 # Submake template to run on every lib
 define sub_template
 $(1)-all: 	; $$(MAKE) -C $(1)
-$(1)-cross: 	; $$(MAKE) -C $(1) cross
+$(1)-mingw: 	; $$(MAKE) -C $(1) mingw
+$(1)-mips: 	; $$(MAKE) -C $(1) mips
 $(1)-profile: 	; $$(MAKE) -C $(1) profile
 $(1)-clean: 	; $$(MAKE) -C $(1) clean
 $(1)-test: 	; $$(MAKE) -C $(1) test
