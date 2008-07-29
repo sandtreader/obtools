@@ -13,6 +13,10 @@
 #include <fstream>
 #include <errno.h>
 
+#if defined(__WIN32__)
+#include <windows.h>
+#endif
+
 using namespace ObTools::XML;
 
 //------------------------------------------------------------------------
@@ -337,10 +341,12 @@ bool Configuration::write()
 
     // Attempt atomic update - but can't do that in Windows
 #if defined(__WIN32__)
-    ::unlink(fn.c_str());  // Doesn't matter if it fails
-#endif
-
+    // Not clear if this is truly atomic in Windows!!!
+    if (MoveFileEx(tfn.c_str(), fn.c_str(), MOVEFILE_REPLACE_EXISTING)) 
+      return true;
+#else
     if (!::rename(tfn.c_str(), fn.c_str())) return true;
+#endif
 
     serr << "Config: Can't rename " << tfn << " to " << fn << ": " 
 	 << strerror(errno) << endl;

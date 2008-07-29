@@ -20,6 +20,7 @@
 #define STRUCT_STAT struct _stati64
 #define STAT _stati64
 #define O_LARGEFILE 0
+#include <windows.h>
 #else
 #define STRUCT_STAT struct stat64
 #define STAT stat64
@@ -291,13 +292,13 @@ bool Path::touch(mode_t mode) const
 //--------------------------------------------------------------------------
 // Rename file to new path
 // Note: You probably can't rename between filing systems
-// In Windows, this deletes the old one first, so is not atomic
 bool Path::rename(const Path& new_path) const
 {
 #if defined(__WIN32__)
-  new_path.erase();  // Don't care if it fails or not
-#endif
+  return MoveFileEx(c_str(), new_path.c_str(), MOVEFILE_REPLACE_EXISTING);
+#else
   return !::rename(c_str(), new_path.c_str());  
+#endif
 }
 
 //--------------------------------------------------------------------------
