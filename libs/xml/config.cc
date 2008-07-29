@@ -339,14 +339,18 @@ bool Configuration::write()
     f << parser.get_root();
     f.close();
 
-    // Attempt atomic update - but can't do that in Windows
+    // Attempt atomic update 
 #if defined(__WIN32__)
-    // Not clear if this is truly atomic in Windows!!!
+    // MoveFileEx in NT+ may be atomic (not clear from docs)
     if (MoveFileEx(tfn.c_str(), fn.c_str(), MOVEFILE_REPLACE_EXISTING)) 
       return true;
-#else
-    if (!::rename(tfn.c_str(), fn.c_str())) return true;
+
+    // Fall back to try non-atomic delete/rename (95/98)
+    ::unlink(fn.c_str());  // Doesn't matter if it fails
 #endif
+
+    if (!::rename(tfn.c_str(), fn.c_str())) return true;
+
 
     serr << "Config: Can't rename " << tfn << " to " << fn << ": " 
 	 << strerror(errno) << endl;

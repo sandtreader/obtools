@@ -295,10 +295,17 @@ bool Path::touch(mode_t mode) const
 bool Path::rename(const Path& new_path) const
 {
 #if defined(__WIN32__)
-  return MoveFileEx(c_str(), new_path.c_str(), MOVEFILE_REPLACE_EXISTING);
-#else
-  return !::rename(c_str(), new_path.c_str());  
+  // Try supposedly atomic MoveFileEx (NT+)
+  if (MoveFileEx(c_str(), new_path.c_str(), MOVEFILE_REPLACE_EXISTING))
+    return true;
+
+  // Fall back to try non-atomic delete/rename (95/98)
+  ::unlink(new_path.c_str());  // Doesn't matter if it fails
+
+  // Fall through to usual rename (which uses MoveFile())
 #endif
+
+  return !::rename(c_str(), new_path.c_str());  
 }
 
 //--------------------------------------------------------------------------
