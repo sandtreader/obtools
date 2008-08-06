@@ -30,6 +30,7 @@
 # CLEANCMD:  Extra clean command on 'make clean'
 # DOCFILE:   File (relative to ROOT) to append documentation to
 # SOCKET:    Set if socket support (e.g. winsock) required
+# WXWIDGETS: Set if WxWidgets required (requires build in external/wx)
 
 # This recurses on itself with target 'targets'
 
@@ -297,6 +298,25 @@ EXTRALIBS += -lhrprof
 #CPPFLAGS += -pg 
 #LDFLAGS += -pg
 
+endif
+
+#WxWidgets stuff
+#(Note: use build.sh in these directories to configure/make the WX libs first)
+ifdef WXWIDGETS
+WX-BASE = $(ROOT)../external/wx/
+WX-BUILD = $(WX-BASE)build$(LIB-DEBUGP)$(PLATFORM)
+WX-CONFIG = $(WX-BUILD)/wx-config
+CPPFLAGS += `$(WX-CONFIG) --cxxflags`
+EXTLIBS += `$(WX-CONFIG) --libs`
+endif
+
+#Crypto stuff
+ifdef CRYPTO
+ifdef MINGW
+EXTLIBS += -lssl32 -leay32
+else
+EXTLIBS += -lssl -lcrypto
+endif
 endif
 
 ifdef DEBIAN-VARIANT
