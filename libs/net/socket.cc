@@ -140,8 +140,8 @@ void Socket::set_timeout(int secs)
 // Set socket priority (0-7)
 void Socket::set_priority(int prio)
 {
-#ifdef __WIN32__
-#warning set_priority not implemented in Windows
+#if defined(__WIN32__) || defined(__APPLE__)
+#warning set_priority not implemented 
 #else
   unsigned long n = (unsigned long)prio;
 
@@ -170,10 +170,15 @@ bool Socket::join_multicast(IPAddress address)
 #warning join_multicast not implemented in Windows
   return false;
 #else
+#ifdef BSDLIKE
+  struct ip_mreq mreq;
+  mreq.imr_interface.s_addr = INADDR_ANY;
+#else
   struct ip_mreqn mreq;
-  mreq.imr_multiaddr.s_addr = address.nbo();
-  mreq.imr_address.s_addr = INADDR_ANY;
   mreq.imr_ifindex = 0; 
+  mreq.imr_address.s_addr = INADDR_ANY;
+#endif
+  mreq.imr_multiaddr.s_addr = address.nbo();
 
   return !setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
 #endif
@@ -187,10 +192,16 @@ bool Socket::leave_multicast(IPAddress address)
 #warning leave_multicast not implemented in Windows
   return false;
 #else
+#ifdef BSDLIKE
+  struct ip_mreq mreq;
+  mreq.imr_interface.s_addr = INADDR_ANY;
+#else
   struct ip_mreqn mreq;
-  mreq.imr_multiaddr.s_addr = address.nbo();
-  mreq.imr_address.s_addr = INADDR_ANY;
   mreq.imr_ifindex = 0; 
+  mreq.imr_address.s_addr = INADDR_ANY;
+#endif
+
+  mreq.imr_multiaddr.s_addr = address.nbo();
 
   return !setsockopt(fd, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq));
 #endif
@@ -292,8 +303,8 @@ EndPoint Socket::remote()
 // Returns empty string if it can't find it
 string Socket::get_mac(IPAddress ip, const string& device_name)
 {
-#ifdef __WIN32__
-#warning get_mac not implemented in Windows
+#if defined(__WIN32__) || defined(__APPLE__)
+#warning get_mac not implemented
   return "";
 #else
   // Check if device specified - if not, lookup all Ethernet interfaces 
@@ -417,7 +428,11 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
   // Silently loop on EINTR
   do
   {
+#ifdef BSDLIKE
+    size = ::send(fd, buf, count, 0); 
+#else
     size = ::send(fd, buf, count, MSG_NOSIGNAL); 
+#endif
   }
   while (fd != INVALID_FD && size<0 && errno == EINTR);
 #endif

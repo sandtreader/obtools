@@ -17,7 +17,11 @@
 #define __LITTLE_ENDIAN 1
 #define __BYTE_ORDER __LITTLE_ENDIAN
 #else
+#if defined(__BSD__)
+#include <machine/endian.h>
+#else
 #include <endian.h>
+#endif
 #endif
 
 #include <sstream>

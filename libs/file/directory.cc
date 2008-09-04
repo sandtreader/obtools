@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #if defined(__WIN32__)
 #include <windows.h>

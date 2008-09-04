@@ -653,6 +653,7 @@ class IPoolReplacer
 {
 public:
   virtual void replace(PoolThread *t)=0;
+  virtual ~IPoolReplacer() {}  // Keeps compiler happy
 };
 
 class PoolThread: public Thread

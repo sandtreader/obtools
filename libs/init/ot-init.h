@@ -101,6 +101,9 @@ public:
   //------------------------------------------------------------------------
   // Create method
   virtual SUPER *create(CP cp) = 0;
+
+  // Virtual destructor to keep compiler happy
+  virtual ~Factory() {}
 };
 
 //==========================================================================

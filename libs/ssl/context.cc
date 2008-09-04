@@ -154,7 +154,7 @@ void Context::log_errors(const string& text)
   log.error << "SSL: " << text << endl;
 
   unsigned long err;
-  while (err = ERR_get_error())
+  while ((err = ERR_get_error()) != 0)
   {
     char buf[120];
     log.error << ERR_error_string(err, buf) << endl;

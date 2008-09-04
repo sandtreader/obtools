@@ -21,6 +21,12 @@ VERSION	= 2.0.0
 CONTAINS = db-pgsql
 
 DEPENDS = ot-general2 ot-db2
+
+ifdef OSX
+EXTINCS = /usr/local/pgsql/include/
+LDFLAGS += -L/usr/local/pgsql/lib
+endif
+
 EXTLIBS = -lpq
 
 #Only build release versions - debug is not PIC

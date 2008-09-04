@@ -68,6 +68,9 @@ public:
   // Also passed the current time for efficiency and consistency
   //  - non-time-based checks are free to ignore it!
   virtual bool keep_entry(const PolicyData& pd, time_t now) = 0;
+
+  // Virtual destructor to keep compiler happy
+  virtual ~TidyPolicy() {}
 };
 
 //==========================================================================
@@ -89,6 +92,9 @@ public:
   // If you never return true, nothing will be evicted
   virtual bool check_worst(const PolicyData& current, 
 			   const PolicyData& worst) = 0;
+
+  // Virtual destructor to keep compiler happy
+  virtual ~EvictorPolicy() {}
 };
 
 //==========================================================================

@@ -37,6 +37,9 @@ public:
   //------------------------------------------------------------------------
   //Command handler function
   virtual void handle(string args, istream& sin, ostream& sout) = 0;
+
+  // Virtual destructor to keep compiler happy
+  virtual ~Handler() {}
 };
 
 //==========================================================================

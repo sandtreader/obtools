@@ -16,6 +16,11 @@ CONTAINS = db-mysql
 
 DEPENDS = ot-general2 ot-db2
 
+ifdef OSX
+EXTINCS = /usr/local/mysql/include/
+LDFLAGS += -L/usr/local/mysql/lib
+endif
+
 EXTLIBS = -lmysqlclient_r -lz
 
 #Only build release versions - debug is not PIC

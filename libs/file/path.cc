@@ -22,6 +22,10 @@
 #define O_LARGEFILE 0
 #include <windows.h>
 #else
+#if defined(__APPLE__)
+// No LARGEFILE, otherwise sensible 
+#define O_LARGEFILE 0
+#endif
 #define STRUCT_STAT struct stat64
 #define STAT stat64
 #include <pwd.h>

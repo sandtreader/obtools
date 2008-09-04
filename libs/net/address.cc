@@ -35,7 +35,7 @@ IPAddress::IPAddress(const string& hostname_s)
   }
   else
   {
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(__APPLE__)
     // Believed to be threadsafe (using TLS for result), but doesn't
     // provide gethostbyname_r anyway
     struct hostent *host;
@@ -75,7 +75,7 @@ string IPAddress::get_hostname() const
 {
   uint32_t nbo_addr = nbo();
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(__APPLE__)
   // Believed to be threadsafe (using TLS for result), but doesn't
   // provide gethostbyaddr_r anyway
   struct hostent *host;

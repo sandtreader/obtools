@@ -10,7 +10,13 @@ TYPE	= lib
 HEADERS = ot-db-mysql.h
 OBJS  	= db-mysql.o
 DEPENDS = log db text mt
+ifdef OSX
+EXTINCS = /usr/local/mysql/include/
+LDFLAGS += -L/usr/local/mysql/lib
+else
 EXTINCS = /usr/include/mysql
+endif
+
 EXTLIBS = -lmysqlclient_r -lz
 TESTS 	= test-mysql
 TESTCMD	= ./test-mysql
