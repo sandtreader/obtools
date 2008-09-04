@@ -62,6 +62,15 @@ ifndef EVALWORKS
 $(error eval is broken - you need GNU make 3.80 or greater)
 endif
 
+#Spot 'cross-compile' on MAC
+OSNAME=$(shell uname -s)
+ifdef OSNAME
+ifeq ($(OSNAME), Darwin)
+ifndef CROSS
+CROSS = osx
+endif
+endif
+endif
 
 #Check for cross-compilation
 ifdef CROSS
@@ -82,6 +91,20 @@ ifndef VARIANTS
 VARIANTS = release-mips
 endif
 VARIANT-release-mips		= MIPS RELEASE
+endif
+
+ifeq ($(CROSS), osx)
+#Mac OS-X
+#Note:  Still called 'cross' even though this is usually built natively
+#on the mac itself
+ifndef VARIANTS
+VARIANTS = release-osx
+ifndef RELEASE-VARIANTS-ONLY
+VARIANTS += debug-osx
+endif
+endif
+VARIANT-debug-osx		= OSX DEBUG
+VARIANT-release-osx		= OSX RELEASE
 endif
 
 else #!CROSS-COMPILE
@@ -143,14 +166,34 @@ EXTRALIBS += -lrt
 #!!!
 
 else
+#Compiler override for OS X build
+ifdef OSX
+CC = i686-apple-darwin9-gcc-4.0.1
+CXX = i686-apple-darwin9-g++-4.0.1
+LD = ld
+AR = ar
+PLATFORM = -osx
+CPPFLAGS += -D__BSD__
+
+else
 #Normal native build
 CC = gcc-3.4
 CXX = g++-3.4
 EXTRALIBS += -lrt
 endif
 endif
+endif
 
-
+#Set suffix of dynamic libraries and linker looping
+ifdef OSX
+DYNLIB=dylib
+LDLOOPSTART=
+LDLOOPEND=
+else
+DYNLIB=so
+LDLOOPSTART=-Wl,-\(
+LDLOOPEND=-Wl,-\)
+endif
 
 # Get locations
 include $(ROOT)/build/locations.mk
@@ -178,8 +221,10 @@ endif
 
 ifdef RELEASE
 ifndef MINGW
+ifndef OSX
 CPPFLAGS += -fpic
 
+endif
 endif
 endif
 endif
@@ -210,9 +255,9 @@ endif
 
 #Targets for dlmod
 ifeq ($(TYPE), dlmod)
-TARGETS = $(NAME).so
-RELEASABLE = $(NAME).so
-RELEASE-NAME = $(NAME).so
+TARGETS = $(NAME).$(DYNLIB)
+RELEASABLE = $(NAME).$(DYNLIB)
+RELEASE-NAME = $(NAME).$(DYNLIB)
 CPPFLAGS += -fpic
 endif
 
@@ -223,12 +268,17 @@ VERSIONM = $(word 1,$(subst ., ,$(VERSION)))
 #Make sure library name is changed to reflect profiledness, 
 #because directory location is lost in dependencies
 ifdef PROFILED
-SOLINK = lib$(NAME)-profiled.so
+SOLINK = lib$(NAME)-profiled.$(DYNLIB)
 else
-SOLINK = lib$(NAME).so
+SOLINK = lib$(NAME).$(DYNLIB)
 endif
 
+ifdef OSX
+SOLIB = $(basename $(SOLINK)).$(VERSION).dylib
+else
 SOLIB = $(SOLINK).$(VERSION)
+endif
+
 SONAME = $(SOLINK).$(VERSIONM)
 TARGETS = $(SOLIB)
 RELEASABLE = $(SOLIB)
@@ -444,7 +494,7 @@ endif
 #Test harnesses:
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ -Wl,-\( $$^ -Wl,-\) $$(EXTRALIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS)
 TESTOBJS += $(1).o
 endef
 
@@ -453,7 +503,7 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 #Executable
 ifeq ($(TYPE), exe)
 $(NAME)$(EXE-SUFFIX): $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -o $@ -Wl,-\( $^ -Wl,-\) $(EXTRALIBS)
+	$(CC) $(LDFLAGS) -o $@ $(LDLOOPSTART) $^ $(LDLOOPEND) $(EXTRALIBS)
 endif
 
 #Multiple executables
@@ -463,7 +513,7 @@ define exe_template
 #complains (wrongly) of missing endifs
 ifeq ($(TYPE), exes)
 $(1)$$(EXE-SUFFIX): $(1).o $$(DEPLIBS)
-	$$(CC) $$(LDFLAGS) -o $$@ -Wl,-\( $$^ -Wl,-\) $$(EXTRALIBS)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS)
 EXEOBJS += $(1).o
 endif
 endef
@@ -478,7 +528,7 @@ endif
 
 #DL Mod
 ifeq ($(TYPE), dlmod)
-$(NAME).so: $(OBJS) $(DEPLIBS)
+$(NAME).$(DYNLIB): $(OBJS) $(DEPLIBS)
 	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ -Wl,-\( $^ -Wl,-\) $(EXTRALIBS)
 endif
 
@@ -486,8 +536,13 @@ endif
 ifeq ($(TYPE), superlib)
 $(SOLIB): $(INCLIBS) $(SOHEADERS)
 	cp $(SOHEADERS) .
+ifdef OSX
+	$(CC) $(LDFLAGS) -shared -nostartfiles -Wl,-dylib -o $@ -Wl,-all_load \
+	$(INCLIBS) $(DEPLIBS) $(EXTRALIBS)
+else
 	$(CC) $(LDFLAGS) -shared -o $@ -Wl,-soname,$(SONAME) -Wl,-whole-archive \
         $(INCLIBS) -Wl,-no-whole-archive -Wl,-\( $(DEPLIBS) -Wl,-\) $(EXTRALIBS) 
+endif
 	ln -fs $@ $(SOLINK)
 endif
 

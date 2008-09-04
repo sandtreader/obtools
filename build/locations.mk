@@ -103,8 +103,8 @@ ifdef MINGW
 LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/$(1).dll.a
 LIBS-$(1)-debug = $$(SDIR-$(1))/build-debug$$(PLATFORM)/$(1).dll.a
 else
-LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/lib$(1).so
-LIBS-$(1)-release-profiled = $$(SDIR-$(1))/build-release-profiled$$(PLATFORM)/lib$(1)-profiled.so
+LIBS-$(1)-release = $$(SDIR-$(1))/build-release$$(PLATFORM)/lib$(1).$(DYNLIB)
+LIBS-$(1)-release-profiled = $$(SDIR-$(1))/build-release-profiled$$(PLATFORM)/lib$(1)-profiled.$(DYNLIB)
 endif
 endef
 
