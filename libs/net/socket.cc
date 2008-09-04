@@ -170,7 +170,7 @@ bool Socket::join_multicast(IPAddress address)
 #warning join_multicast not implemented in Windows
   return false;
 #else
-#ifdef BSDLIKE
+#ifdef __BSD__
   struct ip_mreq mreq;
   mreq.imr_interface.s_addr = INADDR_ANY;
 #else
@@ -192,7 +192,7 @@ bool Socket::leave_multicast(IPAddress address)
 #warning leave_multicast not implemented in Windows
   return false;
 #else
-#ifdef BSDLIKE
+#ifdef __BSD__
   struct ip_mreq mreq;
   mreq.imr_interface.s_addr = INADDR_ANY;
 #else
@@ -428,7 +428,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
   // Silently loop on EINTR
   do
   {
-#ifdef BSDLIKE
+#ifdef __BSD__
     size = ::send(fd, buf, count, 0); 
 #else
     size = ::send(fd, buf, count, MSG_NOSIGNAL); 
