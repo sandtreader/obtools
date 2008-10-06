@@ -66,8 +66,8 @@ class Rule
 
   //--------------------------------------------------------------------------
   // Test the rule for match against the given SSL Client details
-  bool Rule::matches(Net::IPAddress attempted_address, 
-		     const string& attempted_user);
+  bool matches(Net::IPAddress attempted_address,
+     const string& attempted_user);
 };
 
 //==========================================================================

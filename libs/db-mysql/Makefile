@@ -14,7 +14,12 @@ ifdef OSX
 EXTINCS = /usr/local/mysql/include/
 LDFLAGS += -L/usr/local/mysql/lib
 else
+ifdef centos
+LDFLAGS += -L/usr/lib/mysql
 EXTINCS = /usr/include/mysql
+else
+EXTINCS = /usr/include/mysql
+endif
 endif
 
 EXTLIBS = -lmysqlclient_r -lz

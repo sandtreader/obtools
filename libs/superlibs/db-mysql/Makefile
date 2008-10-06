@@ -21,6 +21,11 @@ EXTINCS = /usr/local/mysql/include/
 LDFLAGS += -L/usr/local/mysql/lib
 endif
 
+ifdef CENTOS
+EXTINCS = /usr/include/mysql
+LDFLAGS += -L/usr/lib/mysql
+endif
+
 EXTLIBS = -lmysqlclient_r -lz
 
 #Only build release versions - debug is not PIC

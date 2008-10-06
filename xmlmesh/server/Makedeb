@@ -33,8 +33,15 @@ install -m 0644 $SRC_DIR/xmlmesh.cfg.xml $DEB_DIR/etc/obtools/xmlmesh.cfg.xml
 install -m 0755 $SRC_DIR/ot-xmlmesh.init.d $DEB_DIR/etc/init.d/ot-xmlmesh
 install -m 0644 $SRC_DIR/ot-xmlmesh.logrotate.d $DEB_DIR/etc/logrotate.d/ot-xmlmesh
 
-fakeroot -- dpkg -b $DEB_DIR $PACKAGE
-cp $PACKAGE $SRC_DIR/../release/
+if [ $CENTOS ]; then
+  if [ -f ../Makerpm ]; then
+    . ../Makerpm
+  fi
+else
+  #Build debs
+  fakeroot -- dpkg -b $DEB_DIR $PACKAGE
+  cp $PACKAGE $SRC_DIR/../release/
+fi
 
 # clean up
 rm -rf $DEB_DIR

@@ -22,9 +22,15 @@ install -m 0644 $SRC_DIR/ot-xmlmesh.php $DEB_DIR/usr/share/php
 
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
 
-
-fakeroot -- dpkg -b $DEB_DIR $PACKAGE
-cp $PACKAGE $SRC_DIR/../../release/
+if [ $CENTOS ]; then
+  if [ -f ../Makerpm ]; then
+    . ../Makerpm
+  fi
+else
+  #Build debs
+  fakeroot -- dpkg -b $DEB_DIR $PACKAGE
+  cp $PACKAGE $SRC_DIR/../../release/
+fi
 
 # clean up
 rm -rf $DEB_DIR

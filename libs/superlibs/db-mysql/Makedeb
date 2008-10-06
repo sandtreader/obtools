@@ -73,12 +73,18 @@ pushd $DEB_DEV_DIR/usr/lib/obtools
 ln -s $NAME$VARIANT.so.$VERSION_MAJOR $NAME$VARIANT.so
 popd
 
-#Build debs
-fakeroot -- dpkg -b $DEB_RUN_DIR $PACKAGE_RUN
-cp $PACKAGE_RUN $RELEASE_DIR
+if [ $CENTOS ] ; then
+  if [ -f ../Makerpm ]; then
+    . ../Makerpm
+  fi
+else
+  #Build debs
+  fakeroot -- dpkg -b $DEB_RUN_DIR $PACKAGE_RUN
+  cp $PACKAGE_RUN $RELEASE_DIR
 
-fakeroot -- dpkg -b $DEB_DEV_DIR $PACKAGE_DEV
-cp $PACKAGE_DEV $RELEASE_DIR
+  fakeroot -- dpkg -b $DEB_DEV_DIR $PACKAGE_DEV
+  cp $PACKAGE_DEV $RELEASE_DIR
+fi
 
 # clean up
 rm -rf $DEB_RUN_DIR $DEB_DEV_DIR

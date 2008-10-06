@@ -30,8 +30,15 @@ echo "Architecture: $TARGARCH" >> $DEB_DIR/DEBIAN/control
 install -s -m 0755 angeld $DEB_DIR/usr/sbin/angeld
 install -m 0644 $SRC_DIR/angeld.cfg.xml $DEB_DIR/etc/angel/angeld.cfg.xml
 
-fakeroot -- dpkg -b $DEB_DIR $PACKAGE
-cp $PACKAGE $SRC_DIR/../release/
+if [ $CENTOS ]; then
+  if [ -f ../Makerpm ]; then
+    . ../Makerpm
+  fi
+else
+  #Build debs
+  fakeroot -- dpkg -b $DEB_DIR $PACKAGE
+  cp $PACKAGE $SRC_DIR/../release/
+fi
 
 # clean up
 rm -rf $DEB_DIR

@@ -25,8 +25,15 @@ echo "Architecture: $TARGARCH" >> $DEB_DIR/DEBIAN/control
 install -s -m 0755 xmlmesh-send $DEB_DIR/usr/bin/ot-xmlmesh-send
 install -s -m 0755 xmlmesh-receive $DEB_DIR/usr/bin/ot-xmlmesh-receive
 
-fakeroot -- dpkg -b $DEB_DIR $PACKAGE
-cp $PACKAGE $SRC_DIR/../../release/
+if [ $CENTOS ]; then
+  if [ -f ../Makerpm ]; then
+    . ../Makerpm
+  fi
+else
+  #Build debs
+  fakeroot -- dpkg -b $DEB_DIR $PACKAGE
+  cp $PACKAGE $SRC_DIR/../../release/
+fi
 
 # clean up
 rm -rf $DEB_DIR

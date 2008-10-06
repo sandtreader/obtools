@@ -72,6 +72,19 @@ endif
 endif
 endif
 
+#Spot 'cross-compile' on CentOS, RHEL5
+OSNAME=$(shell uname -r|cut -d\. -f6)
+ifdef OSNAME
+ifeq ($(OSNAME), el5)
+ifndef CROSS
+CROSS = centos
+endif
+endif
+endif
+
+
+
+
 #Check for cross-compilation
 ifdef CROSS
 
@@ -105,6 +118,20 @@ endif
 endif
 VARIANT-debug-osx		= OSX DEBUG
 VARIANT-release-osx		= OSX RELEASE
+endif
+
+ifeq ($(CROSS), centos)
+#CentOS
+#Note:  Still called 'cross' even though this is usually built natively
+#on CentOS
+ifndef VARIANTS
+VARIANTS = release
+ifndef RELEASE-VARIANTS-ONLY
+VARIANTS += debug
+endif
+endif
+VARIANT-debug		= CENTOS DEBUG
+VARIANT-release		= CENTOS RELEASE
 endif
 
 else #!CROSS-COMPILE
@@ -176,10 +203,18 @@ PLATFORM = -osx
 CPPFLAGS += -D__BSD__
 
 else
+#Compiler override for centos X build
+ifdef centos
+CC = gcc
+CXX = g++
+EXTRALIBS += -lrt
+else
+
 #Normal native build
 CC = gcc-3.4
 CXX = g++-3.4
 EXTRALIBS += -lrt
+endif
 endif
 endif
 endif
