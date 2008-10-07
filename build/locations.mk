@@ -22,6 +22,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  db:libs/db:log	 		\
 	  db-mysql:libs/db-mysql:log,db		\
 	  db-pgsql:libs/db-pgsql:log,db		\
+	  dns:libs/dns:log,text,chan 		\
 	  cache:libs/cache:mt:NOLIB  		\
 	  chan:libs/chan:net			\
 	  crypto:libs/crypto:misc,chan		\
@@ -50,7 +51,8 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  xmitoolgen:tools/xmitoolgen		\
 	  xmltoolgen:tools/xmltoolgen           \
 	  obcache-core:obcache/libs/core:cache       \
-	  obcache-sql:obcache/libs/sql:obcache-core,xml,db
+	  obcache-sql:obcache/libs/sql:obcache-core,xml,db \
+	  extra-wx:extra/wx
 
 # List of shared libraries and associated directories
 # Each word split by ':' into
