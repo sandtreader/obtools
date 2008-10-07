@@ -21,7 +21,7 @@
 namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
-// Read from stream - reads PEM format to EOF
+// Read from stream - reads PEM or DER format to EOF
 void Certificate::read(istream& sin)
 {
   string text;
@@ -38,10 +38,22 @@ void Certificate::write(ostream& sout) const
 }
 
 //------------------------------------------------------------------------
-// Read from string - reads PEM format
+// Read from string - reads PEM or DER format
 void Certificate::read(const string& text)
 {
   int length = text.size()+1; // C string
+  const unsigned char *data = (const unsigned char *)text.data();
+
+  // Scan for top-bit set characters indicating DER format
+  bool der = false;
+  for(int i=0; i<length; i++)
+  {
+    if (data[i] & 0x80)
+    {
+      der = true;
+      break;
+    }
+  }
 
   // Create 'BIO'
   BIO *bio = BIO_new(BIO_s_mem());
@@ -51,13 +63,16 @@ void Certificate::read(const string& text)
   BUF_MEM *buf = BUF_MEM_new();
   if (!buf) return;
   BUF_MEM_grow(buf, length);
-  memcpy(buf->data, text.c_str(), length);
+  memcpy(buf->data, data, length);
 
   // Attach to BIO (auto free of buf)
   BIO_set_mem_buf(bio, buf, BIO_CLOSE);
 
   // Read certificate
-  x509 = PEM_read_bio_X509(bio, 0, 0, 0);
+  if (der)
+    x509 = d2i_X509_bio(bio, 0);
+  else
+    x509 = PEM_read_bio_X509(bio, 0, 0, 0);
 
   // Clean up
   BIO_free(bio);

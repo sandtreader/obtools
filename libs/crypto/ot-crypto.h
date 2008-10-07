@@ -393,11 +393,12 @@ public:
   Certificate(X509 *_x509): x509(_x509) {}
 
   //------------------------------------------------------------------------
-  // Constructor from PEM format string
+  // Constructor from PEM or DER format string
   Certificate(const string& text): x509(0) { read(text); }
 
   //------------------------------------------------------------------------
-  // Read from stream - reads PEM format
+  // Read from stream - reads PEM or DER format, depending whether string
+  // contains binary characters
   void read(istream& sin);
 
   //------------------------------------------------------------------------
