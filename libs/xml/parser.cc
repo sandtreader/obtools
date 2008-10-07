@@ -702,9 +702,14 @@ void Parser::substitute_name(string& name, bool usedef)
       string& newprefix=user_ns_map[nsname];
 
       //Rebuild name in place
-      name=newprefix;
-      name += ':';
-      name += rest;
+      if (newprefix.empty())
+	name = rest;
+      else
+      {
+	name=newprefix;
+	name += ':';
+	name += rest;
+      }
     }
   }
 }
