@@ -24,7 +24,6 @@ using namespace std;
 // Values match DNS RR type values (and those in arpa/nameser.h)
 enum Type
 {
-  TYPE_MX = 15,
   TYPE_TXT = 16,
   TYPE_CERT = 37
 };
@@ -33,15 +32,6 @@ enum Type
 // Resolver class
 class Resolver
 {
-protected:
-
-#if defined(__WIN32__)
-
-#else
-
-#endif
-
-
 public:
   //--------------------------------------------------------------------------
   // Default constructor
