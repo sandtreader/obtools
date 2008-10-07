@@ -213,7 +213,7 @@ Jasmine.PositionBinder.prototype.set_vector = function(vector)
 
 //============================================================================
 // SizeBinder - acts as an VectorInterpolator target which sets
-// the size of the target Thing with move_by (note, relative)
+// the size of the target Thing with resize_by (note, relative)
 Jasmine.SizeBinder = function(target)
 {
   this.target = target;
