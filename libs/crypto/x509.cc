@@ -18,6 +18,10 @@
 #include "openssl/buffer.h"
 #include "openssl/pem.h"
 
+// PEM delimiters
+#define PEM_CERT_START "-----BEGIN CERTIFICATE-----\n"
+#define PEM_CERT_END "-----END CERTIFICATE-----\n"
+
 namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
@@ -41,7 +45,7 @@ void Certificate::write(ostream& sout) const
 // Read from string - reads PEM or DER format
 void Certificate::read(const string& text)
 {
-  int length = text.size()+1; // C string
+  int length = text.size();
   const unsigned char *data = (const unsigned char *)text.data();
 
   // Scan for top-bit set characters indicating DER format
@@ -53,6 +57,15 @@ void Certificate::read(const string& text)
       der = true;
       break;
     }
+  }
+
+  // If PEM, fix up text to ensure delimiters are present
+  string fixed;
+  if (!der && text.find(PEM_CERT_START) == string::npos)
+  {
+    fixed = PEM_CERT_START + text + "\n" + PEM_CERT_END;
+    length = fixed.size();
+    data = (const unsigned char *)fixed.data();
   }
 
   // Create 'BIO'
