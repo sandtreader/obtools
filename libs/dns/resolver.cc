@@ -210,6 +210,7 @@ string Resolver::query_txt(const string& domain)
     {
       unsigned char len = sr.read_byte();
       sr.read(result, len);
+      result += "\n";
     }
 
     return result;
