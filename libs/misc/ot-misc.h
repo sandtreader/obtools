@@ -452,7 +452,7 @@ public:
   // Convert to a comma-delimited string
   // e.g. 1-100,110,120,200-1000
   // Total length is not recorded
-  string str();
+  string str() const;
 
   //------------------------------------------------------------------------
   // Read from XML - reads <range start="x" length="y"/> elements

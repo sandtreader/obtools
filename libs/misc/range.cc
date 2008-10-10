@@ -342,7 +342,7 @@ void RangeSet::read(const string& text)
 // Convert to a comma-delimited string
 // e.g. 1-100,110,120,200-1000
 // Total length is not recorded
-string RangeSet::str()
+string RangeSet::str() const
 {
   string s;
   
@@ -442,10 +442,10 @@ void RangeSet::dump(ostream& sout) const
 }
 
 //------------------------------------------------------------------------
-// << operator to write RangeSet to ostream
+// << operator to write RangeSet to ostream, in short text form
 ostream& operator<<(ostream& s, const RangeSet& rs) 
 { 
-  rs.dump(s); 
+  s << rs.str(); 
   return s;
 }
 
