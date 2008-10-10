@@ -262,6 +262,10 @@ public:
   string str(bool force_public = false) const;
 
   //------------------------------------------------------------------------
+  // Check for (in)validity
+  bool operator!() const { return !valid; }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~RSAKey();
 };
