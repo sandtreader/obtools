@@ -426,6 +426,11 @@ public:
   string get_cn() const;
 
   //------------------------------------------------------------------------
+  // Get RSA public key into the given RSAKey
+  // Returns whether successful, also sets key validity
+  bool get_public_key(RSAKey& key) const;
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Certificate();
 };

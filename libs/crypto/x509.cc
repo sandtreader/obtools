@@ -63,7 +63,7 @@ void Certificate::read(const string& text)
   string fixed;
   if (!der && text.find(PEM_CERT_START) == string::npos)
   {
-    fixed = PEM_CERT_START + text + "\n" + PEM_CERT_END;
+    fixed = PEM_CERT_START + text + PEM_CERT_END;
     length = fixed.size();
     data = (const unsigned char *)fixed.data();
   }
@@ -125,6 +125,25 @@ string Certificate::get_cn() const
   X509_NAME *subject = X509_get_subject_name(x509);
   if (subject) X509_NAME_get_text_by_NID(subject, NID_commonName, buf, 256);
   return string(buf);
+}
+
+//------------------------------------------------------------------------
+// Get RSA public key into the given RSAKey
+// Returns whether successful, also sets key validity
+bool Certificate::get_public_key(RSAKey& key) const
+{
+  key.valid = false;  // Be pessimistic
+  if (!x509) return false;
+
+  EVP_PKEY *evp_pkey = X509_get_pubkey(x509);
+  if (!evp_pkey) return false;
+
+  key.rsa = EVP_PKEY_get1_RSA(evp_pkey);
+  if (!key.rsa) return false;
+
+  key.is_private = false;
+  key.valid = true;
+  return true;
 }
 
 //------------------------------------------------------------------------
