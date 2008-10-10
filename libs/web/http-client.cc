@@ -68,8 +68,12 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
     return false;
   }
 
-  // Remove scheme, to suppress host as well
   XML::XPathProcessor xpath(xml);
+
+  // Grab host for Host header (HTTP/1.1 like)
+  request.headers.put("Host", xpath["host"]);
+
+  // Remove scheme, to suppress host as well
   xpath.delete_elements("scheme");
 
   // Check path isn't empty - if so, make it '/'
