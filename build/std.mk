@@ -31,6 +31,7 @@
 # DOCFILE:   File (relative to ROOT) to append documentation to
 # SOCKET:    Set if socket support (e.g. winsock) required
 # WXWIDGETS: Set if WxWidgets required (requires build in external/wx)
+# RESOLVER:  Set if resolver required
 
 # This recurses on itself with target 'targets'
 
@@ -401,6 +402,15 @@ ifdef MINGW
 EXTLIBS += -lssl32 -leay32
 else
 EXTLIBS += -lssl -lcrypto
+endif
+endif
+
+#Resolver libraries
+ifdef RESOLVER
+ifdef MINGW
+EXTLIBS += -ldnsapi
+else
+EXTLIBS += -lresolv
 endif
 endif
 

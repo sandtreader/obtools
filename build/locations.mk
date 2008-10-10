@@ -25,7 +25,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  dns:libs/dns:log,text,chan 		\
 	  cache:libs/cache:mt:NOLIB  		\
 	  chan:libs/chan:net			\
-	  crypto:libs/crypto:misc,chan		\
+	  crypto:libs/crypto:misc,chan,text	\
 	  file:libs/file:text                   \
 	  hash:libs/hash:-:NOLIB  		\
 	  init:libs/init:xml			\
