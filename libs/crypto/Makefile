@@ -8,7 +8,8 @@
 TYPE	= lib
 NAME   	= ot-crypto
 HEADERS = ot-crypto.h
-OBJS  	= pkcs5.o des-key.o des.o rsa-key.o rsa.o sha1.o x509.o library.o
+OBJS  	= pkcs5.o des-key.o des.o rsa-key.o rsa.o sha1.o x509.o store.o \
+          library.o
 TESTS 	= test-pkcs5 test-des-key test-des test-rsa-key test-rsa test-sha1 \
 	  test-x509
 DEPENDS = misc chan net xml mt text

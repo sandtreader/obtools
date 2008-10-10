@@ -20,6 +20,7 @@
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
+#include <openssl/x509_vfy.h>
 
 namespace ObTools { namespace Crypto { 
 
@@ -442,6 +443,30 @@ istream& operator>>(istream& s, Certificate& c);
 //------------------------------------------------------------------------
 // << operator to write certificate to ostream
 ostream& operator<<(ostream& s, const Certificate& c);
+
+//==========================================================================
+// X509 Certificate Store
+class CertificateStore
+{
+  X509_STORE *store;
+
+ public:
+  //------------------------------------------------------------------------
+  // Constructor:
+  // ca_file should refer to a PEM format containing a list of trusted CAs
+  // ca_dir should refer to a directory containing certificate files with 
+  // hashed names (see OpenSSL docs)
+  // Either one or the other is optional, but not both
+  CertificateStore(const string& ca_file, const string& ca_dir="");
+
+  //------------------------------------------------------------------------
+  // Verify a certificate
+  bool verify(const Certificate& cert);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~CertificateStore();
+};
 
 //==========================================================================
 }} //namespaces
