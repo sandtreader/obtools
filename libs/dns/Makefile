@@ -11,12 +11,7 @@ HEADERS = ot-dns.h
 OBJS  	= resolver.o
 
 SOCKET = 1
-
-ifdef MINGW
-EXTLIBS = -ldnsapi
-else
-EXTLIBS = -lresolv
-endif
+RESOLVER = 1
 
 DEPENDS = text log chan misc
 TESTS 	= test-resolver

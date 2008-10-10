@@ -155,22 +155,30 @@ string Resolver::query(const string& domain, Type type,
       br.skip(4);  // QTYPE and QCLASS
     }
 
-    // Now the first answer RR
-    if (!ancount)
+    // Now check each answer RR for the right type
+    for(int i=0; i<ancount; i++)
     {
-      log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-		<< ") failed - no answer sections\n";
-      return "";
+      skip_name(br);  // Name
+      uint16_t atype = br.read_nbo_16();
+      br.skip(6);     // CLASS and TTL
+      uint16_t rdlen = br.read_nbo_16();  // RDLENGTH
+
+      if (atype == type)
+      {
+	string rdata;
+	br.read(rdata, rdlen);  // RDATA
+	return rdata;
+      }
+      else 
+      {
+	br.skip(rdlen);  // Skip it
+      }
     }
 
-    skip_name(br);  // Name
-    br.skip(8);     // TYPE, CLASS and TTL
-
-    uint16_t rdlen = br.read_nbo_16();  // RDLENGTH
-
-    string rdata;
-    br.read(rdata, rdlen);  // RDATA
-    return rdata;
+    // Nothing matched
+    log.error << "DNS resolver: lookup of " << domain << " (" << type_name
+	      << ") failed - no suitable answer sections\n";
+    return "";
   }
   catch (Channel::Error ce)
   {
