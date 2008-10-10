@@ -138,7 +138,9 @@ bool Certificate::get_public_key(RSAKey& key) const
   EVP_PKEY *evp_pkey = X509_get_pubkey(x509);
   if (!evp_pkey) return false;
 
-  key.rsa = EVP_PKEY_get1_RSA(evp_pkey);
+  key.rsa = EVP_PKEY_get1_RSA(evp_pkey);  // "1" indicate returns copy of key
+  EVP_PKEY_free(evp_pkey);                // ... otherwise this would free it
+
   if (!key.rsa) return false;
 
   key.is_private = false;
