@@ -359,9 +359,14 @@ public:
   RangeSet(len_t _total_length=0): total_length(_total_length) {}
 
   //------------------------------------------------------------------------
+  // Constructor from string
+  RangeSet(const string& text, len_t _total_length=0): 
+    total_length(_total_length) { read(text); }
+
+  //------------------------------------------------------------------------
   // Insert a range
   // Optimises against adjacent ranges, overlaps allowed
-  void insert(off_t start, len_t length);
+  void insert(off_t start, len_t length=1);
 
   //------------------------------------------------------------------------
   // Insert a range set (inserts every element = set union)
@@ -436,6 +441,18 @@ public:
   // If length is more than the total length of the range, it is reduced to it
   // (a character can never represent less than 1 unit)
   string gauge(unsigned int length=50) const;
+
+  //------------------------------------------------------------------------
+  // Read from a comma-delimited range string
+  // e.g. 1-100,110,120,200-1000
+  // Total length is not set
+  void read(const string& text);
+
+  //------------------------------------------------------------------------
+  // Convert to a comma-delimited string
+  // e.g. 1-100,110,120,200-1000
+  // Total length is not recorded
+  string str();
 
   //------------------------------------------------------------------------
   // Read from XML - reads <range start="x" length="y"/> elements

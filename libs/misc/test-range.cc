@@ -74,6 +74,14 @@ int main()
     cout << "^{0,10;50,10}:\n";
     cout << (s^so);
 
+    // Test string output/input
+    cout << "Text:\n";
+    string text = s.str();
+    cout << text << endl;
+    Misc::RangeSet s1(text);
+    cout << "Read back from text:\n";
+    cout << s1 << endl;
+
     // Test XML
     cout << "XML:\n";
     XML::Element e("rangeset");

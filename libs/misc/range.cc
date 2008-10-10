@@ -15,6 +15,7 @@
 //   => Set is always optimal
 
 #include "ot-misc.h"
+#include "ot-text.h"
 #include "ot-xml.h"
 #include <sstream>
 #include <fstream>
@@ -305,6 +306,58 @@ string RangeSet::gauge(unsigned int length) const
     }
 
     s += " -="[contained];
+  }
+
+  return s;
+}
+
+//------------------------------------------------------------------------
+// Read from a comma-delimited range string
+// e.g. 1-100,110,120,200-1000
+// Total length is not set
+void RangeSet::read(const string& text)
+{
+  // Split into comma-delimited chunks
+  vector<string> ranges = Text::split(text);
+
+  for(vector<string>::iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  {
+    string range = *p;
+    if (range.empty()) continue;
+
+    // Split again on '-'
+    vector<string> ends = Text::split(range, '-');
+
+    off_t start = Text::stoi(ends[0]);
+    len_t length = 1;
+
+    // Two ends?
+    if (ends.size() >= 2) length = Text::stoi64(ends[1])-start+1;
+
+    insert(start, length);
+  }
+}
+
+//------------------------------------------------------------------------
+// Convert to a comma-delimited string
+// e.g. 1-100,110,120,200-1000
+// Total length is not recorded
+string RangeSet::str()
+{
+  string s;
+  
+  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  {
+    const Range& r = *p;
+    if (!s.empty()) s+=",";
+
+    s+=Text::i64tos(r.start);
+
+    if (r.length>1)
+    {
+      s+='-';
+      s+=Text::i64tos(r.start+r.length-1);
+    }
   }
 
   return s;

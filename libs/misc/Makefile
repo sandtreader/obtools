@@ -8,7 +8,7 @@
 TYPE	= lib
 NAME   	= ot-misc
 HEADERS = ot-misc.h
-DEPENDS = xml chan mt
+DEPENDS = xml chan mt text
 OBJS  	= md5.o crc.o crc32.o proplist.o random.o dumper.o range.o
 TESTS 	= test-md5 test-crc test-crc32 test-prop test-random \
           test-dump test-range 
