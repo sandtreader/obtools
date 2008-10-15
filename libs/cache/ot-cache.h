@@ -204,6 +204,10 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Get the limit
+  int get_limit() { return limit; }
+
+  //--------------------------------------------------------------------------
   // Add an item of content to the cache
   // item is COPIED
   // Any existing content under this ID is deleted
