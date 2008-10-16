@@ -9,7 +9,6 @@ TYPE	= exe
 NAME    = angeld
 HEADERS = angeld.h
 OBJS 	= angeld.o server.o process.o
-CRYPTO  = 1
 RESOLVER = 1
 
 DEBIAN-NAME    = angeld
