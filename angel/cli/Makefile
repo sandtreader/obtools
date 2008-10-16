@@ -8,7 +8,6 @@
 TYPE	= exe
 NAME    = angel
 OBJS 	= angel.o
-CRYPTO  = 1
 RESOLVER = 1
 
 DEBIAN-NAME    = angel
