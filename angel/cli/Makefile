@@ -8,18 +8,15 @@
 TYPE	= exe
 NAME    = angel
 OBJS 	= angel.o
+CRYPTO  = 1
+RESOLVER = 1
 
 DEBIAN-NAME    = angel
 DEBIAN-VERSION = 0.1.0
 DEBIAN-REVISION = 1
 
-#Build from static local libraries in DEBUG, installed .so's in release
-ifdef DEBUG
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
           net log mt xml text init misc
-else
-DEPENDS = ot-general2 ot-xmlmesh2
-endif
 
 ifdef RELEASE
 CPPFLAGS += -DDAEMON
@@ -27,7 +24,6 @@ endif
 
 CONFIGS = angel.cfg.xml
 TESTCMD = ./angel ../angel.cfg.xml
-MULTI   = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
