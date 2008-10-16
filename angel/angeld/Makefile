@@ -9,6 +9,8 @@ TYPE	= exe
 NAME    = angeld
 HEADERS = angeld.h
 OBJS 	= angeld.o server.o process.o
+CRYPTO  = 1
+RESOLVER = 1
 
 DEBIAN-NAME    = angeld
 DEBIAN-VERSION = 0.2.0
@@ -17,14 +19,12 @@ DEBIAN-REVISION = 1
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
           net log mt xml soap web text cache init misc file
 
-EXTLIBS = -lssl
-
 ifdef RELEASE
 CPPFLAGS += -DDAEMON
 endif
 
 CONFIGS = angeld.cfg.xml
-MULTI   = 1
+
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
