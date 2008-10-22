@@ -14,6 +14,8 @@
 #include <unistd.h>
 #include <utime.h>
 #include <sstream>
+#include <fstream>
+#include <errno.h>
 
 #if defined(__WIN32__)
 // Note: stati versions, still 32-bit time_t
@@ -31,6 +33,8 @@
 #include <pwd.h>
 #include <grp.h>
 #endif
+
+#define READ_BUF_SIZE 4096
 
 namespace ObTools { namespace File {
 
@@ -310,6 +314,42 @@ bool Path::rename(const Path& new_path) const
 #endif
 
   return !::rename(c_str(), new_path.c_str());  
+}
+
+//--------------------------------------------------------------------------
+// Read the entire file into a string
+// Returns whether successful.  If not, the string contains the error
+bool Path::read_all(string& s)
+{
+  ifstream f(c_str(), ios::binary);
+  if (!f)
+  {
+    s = strerror(errno);
+    return false;
+  }
+
+  char buf[READ_BUF_SIZE];
+  while (!f.eof())
+  {
+    f.read(buf, READ_BUF_SIZE);
+    s.append(buf, f.gcount());
+  }
+
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Replace the entire file with a string
+// Returns error string, or "" if successful
+string Path::write_all(const string& s)
+{
+  ofstream f(c_str(), ios::out | ios::trunc | ios::binary);
+  if (!f) return strerror(errno);
+
+  f.write(s.data(), s.size());
+  f.close();
+
+  return "";
 }
 
 //--------------------------------------------------------------------------

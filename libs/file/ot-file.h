@@ -185,6 +185,16 @@ public:
   bool rename(const Path& new_path) const;
 
   //--------------------------------------------------------------------------
+  // Read the entire file into a string
+  // Returns whether successful.  If not, the string contains the error
+  bool read_all(string& s);
+
+  //--------------------------------------------------------------------------
+  // Replace the entire file with a string
+  // Returns error string, or "" if successful
+  string write_all(const string& s);
+
+  //--------------------------------------------------------------------------
   //Handy octal conversion functions for file modes
   //Convert integer to octal string
   static string itoo(int mode_i);
