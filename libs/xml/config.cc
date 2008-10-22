@@ -22,7 +22,7 @@ using namespace ObTools::XML;
 //------------------------------------------------------------------------
 // Read configuration file
 // Returns whether successful
-// ename is the expected root element name - fails if wrong
+// If specified, ename is the expected root element name - fails if wrong
 bool Configuration::read(const string& ename)
 {
   // Run through list of filenames to find one that will open
@@ -43,12 +43,15 @@ bool Configuration::read(const string& ename)
 	return false;
       }
 
-      Element& root = parser.get_root();
-      if (root.name != ename)
+      if (!ename.empty())
       {
-	serr << "Bad root in config file - expected <" << ename 
-	     << ">, got <" << root.name << ">\n";
-	return false;
+	Element& root = parser.get_root();
+	if (root.name != ename)
+	{
+	  serr << "Bad root in config file - expected <" << ename 
+	       << ">, got <" << root.name << ">\n";
+	  return false;
+	}
       }
 
       return true;

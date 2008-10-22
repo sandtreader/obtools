@@ -862,8 +862,8 @@ public:
   //------------------------------------------------------------------------
   // Read configuration file
   // Returns whether successful
-  // ename is the expected root element name - fails if wrong
-  bool read(const string& ename);
+  // If specified, ename is the expected root element name - fails if wrong
+  bool read(const string& ename="");
 
   //------------------------------------------------------------------------
   // Reload configuration file as the same element as before
