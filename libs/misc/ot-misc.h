@@ -381,7 +381,7 @@ public:
 
   //------------------------------------------------------------------------
   // Remove a range
-  void remove(off_t start, len_t length);
+  void remove(off_t start, len_t length=1);
 
   //------------------------------------------------------------------------
   // Remove a range set (removes every element = set difference)
@@ -410,7 +410,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check if a given range is all present
-  bool contains(off_t start, len_t length) const;
+  bool contains(off_t start, len_t length=1) const;
 
   //------------------------------------------------------------------------
   // Get total coverage of the set (sum of all range lengths)
