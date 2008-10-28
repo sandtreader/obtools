@@ -65,6 +65,18 @@ void Message::add_namespace(const string& attr, const string& value)
 }
 
 //------------------------------------------------------------------------
+// Add standard namespaces for WSDL-style SOAP
+void Message::add_wsdl_namespaces()
+{
+  add_namespace("xmlns:apachesoap", "http://xml.apache.org/xml-soap");
+  add_namespace("xmlns:soapenc", "http://schemas.xmlsoap.org/soap/encoding/");
+  add_namespace("xmlns:wsdl", "http://schemas.xmlsoap.org/wsdl/");
+  add_namespace("xmlns:wsdlsoap", "http://schemas.xmlsoap.org/wsdl/soap/");
+  add_namespace("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+  add_namespace("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+}
+
+//------------------------------------------------------------------------
 // Add a header element
 // header is taken and will be deleted with message
 // Returns reference to 'header'
@@ -130,6 +142,20 @@ XML::Element& Message::add_body(XML::Element *body)
 {
   if (doc) doc->make_child("env:Body").add(body);
   return *body;
+}
+
+//------------------------------------------------------------------------
+// Add a WSDL-style body element with a given name and namespace, plus
+// a standard SOAP encodingStyle attribute
+// body is taken and will be deleted with message
+XML::Element& Message::add_wsdl_body(const string& name,
+				     const string& ns_prefix,
+				     const string& ns)
+{
+  XML::Element *body = new XML::Element(name, "xmlns:"+ns_prefix, ns);
+  body->set_attr("env:encodingStyle", 
+		 "http://schemas.xmlsoap.org/soap/encoding/");
+  return add_body(body);
 }
 
 //------------------------------------------------------------------------

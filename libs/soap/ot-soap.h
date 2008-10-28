@@ -113,6 +113,10 @@ public:
   void add_namespace(const string& attr, const string& value);
 
   //------------------------------------------------------------------------
+  // Add standard namespaces for WSDL-style SOAP
+  void add_wsdl_namespaces();
+
+  //------------------------------------------------------------------------
   // Add a header element (fully formed)
   // header is taken and will be deleted with message
   // Returns reference to 'header'
@@ -171,6 +175,14 @@ public:
   // Get first (or only) body element of the given name
   // Returns Element::none if none
   XML::Element& get_body(const string& name) const;
+
+  //------------------------------------------------------------------------
+  // Add a WSDL-style body element with a given name and namespace, plus
+  // a standard SOAP encodingStyle attribute
+  // body is taken and will be deleted with message
+  XML::Element& add_wsdl_body(const string& name,
+			      const string& ns_prefix,
+			      const string& ns);
 
   //------------------------------------------------------------------------
   // Get list of body elements
