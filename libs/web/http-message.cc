@@ -79,9 +79,9 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
   // Read start line & headers
   if (!read_headers(in)) return false;
 
-  // Only allow read to eof for POST (ugly HTTP-specific hack, but
-  // the protocol mixes levels here)
-  if (method != "POST") read_to_eof = false;
+  // Only allow read to eof for POST or responses
+  // (ugly HTTP-specific hack, but the protocol mixes levels here)
+  if (method != "POST" && !method.empty()) read_to_eof = false;
 
   // Read body - check for Content-Length header and use to limit 
   // length if present

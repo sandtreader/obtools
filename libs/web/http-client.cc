@@ -92,6 +92,8 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   // Add User-Agent and date
   if (user_agent.size()) request.headers.put("User-Agent", user_agent);
 
+  OBTOOLS_LOG_IF_DUMP(request.write(log.dump);)
+
   // HTTP1.0 - create TCPClient for each fetch
   SSL::TCPClient client(ssl_ctx, server);
   if (!client)
@@ -127,6 +129,9 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
       log.error << "HTTP: Can't fetch response from " << server << endl;
       return false;
     }
+
+    OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
+			response.write(log.dump);)
 
     client.close();
   }
