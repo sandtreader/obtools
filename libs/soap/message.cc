@@ -68,7 +68,6 @@ void Message::add_namespace(const string& attr, const string& value)
 // Add standard namespaces for WSDL-style SOAP
 void Message::add_wsdl_namespaces()
 {
-  add_namespace("xmlns:apachesoap", "http://xml.apache.org/xml-soap");
   add_namespace("xmlns:soapenc", "http://schemas.xmlsoap.org/soap/encoding/");
   add_namespace("xmlns:wsdl", "http://schemas.xmlsoap.org/wsdl/");
   add_namespace("xmlns:wsdlsoap", "http://schemas.xmlsoap.org/wsdl/soap/");
@@ -153,9 +152,15 @@ XML::Element& Message::add_wsdl_body(const string& name,
 				     const string& ns)
 {
   XML::Element *body = new XML::Element(name, "xmlns:"+ns_prefix, ns);
-  body->set_attr("env:encodingStyle", 
-		 "http://schemas.xmlsoap.org/soap/encoding/");
-  return add_body(body);
+  if (doc)
+  {
+    XML::Element& env_body = doc->make_child("env:Body");
+    env_body.add(body);
+    env_body.set_attr("env:encodingStyle", 
+		      "http://schemas.xmlsoap.org/soap/encoding/");
+  }
+
+  return *body;
 }
 
 //------------------------------------------------------------------------
@@ -163,7 +168,7 @@ XML::Element& Message::add_wsdl_body(const string& name,
 void Message::write_to(ostream& s) const 
 { 
   if (doc)
-    doc->write_to(s); 
+    doc->write_to(s, true); 
   else
     s << "INVALID SOAP!\n";
 } 
@@ -173,7 +178,7 @@ void Message::write_to(ostream& s) const
 string Message::to_string() const 
 { 
   if (doc)
-    return doc->to_string(); 
+    return doc->to_string(true); 
   else
     return "INVALID SOAP!\n";
 }
