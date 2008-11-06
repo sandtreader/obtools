@@ -16,6 +16,7 @@ CONTAINS = xml misc text net log init chan time web file crypto hash soap \
 	   mt cache cli tube ssl access dns
 SOCKET  = 1
 CRYPTO  = 1
+RESOLVER = 1
 
 #Only build release versions - debug is not PIC
 RELEASE-VARIANTS-ONLY = 1
