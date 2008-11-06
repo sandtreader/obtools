@@ -32,6 +32,7 @@
 # SOCKET:    Set if socket support (e.g. winsock) required
 # WXWIDGETS: Set if WxWidgets required (requires build in external/wx)
 # RESOLVER:  Set if resolver required
+# EXTRA-TARGETS:  Anything else you want built
 
 # This recurses on itself with target 'targets'
 
@@ -511,7 +512,7 @@ $(foreach variant,$(VARIANTS),$(eval $(call build_template,$(variant))))
 
 # Per-build target - sub-make comes in here
 .PHONY: targets runtests dorelease
-targets: $(TARGETS)
+targets: $(TARGETS) $(EXTRA-TARGETS)
 
 runtests:
 ifdef DEBUG
