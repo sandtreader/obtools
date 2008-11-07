@@ -159,6 +159,7 @@ private:
   ntp_stamp_t t;
   static ntp_stamp_t combine(const Split& split);
   static Split split(ntp_stamp_t ts);
+  void get_tm(struct tm& tm) const;
 
 public:
   //------------------------------------------------------------------------
@@ -213,6 +214,14 @@ public:
   string iso_date() const;
 
   //------------------------------------------------------------------------
+  // Get the locale-specific date format
+  string locale_date() const;
+
+  //------------------------------------------------------------------------
+  // Get the locale-specific time format
+  string locale_time() const;
+
+  //------------------------------------------------------------------------
   // Split the timestamp into individual items
   void split(Split &sp) const { sp = split(t); }
 
@@ -223,6 +232,16 @@ public:
   //------------------------------------------------------------------------
   // Get the day of the week (Monday=1, Sunday=7)
   int weekday() const;
+
+  //------------------------------------------------------------------------
+  // Get a timestamp in local time (according to TZ) from a normal UTC one
+  // Note: Fractional seconds are lost
+  Stamp localise() const; 
+
+  //------------------------------------------------------------------------
+  // Get a timestamp in UTC time from a localised one
+  // Note: Fractional seconds are lost
+  Stamp globalise() const;
 
   //------------------------------------------------------------------------
   // Static constructor-like function from NTP timestamp

@@ -35,8 +35,19 @@ int main()
 
     time_t t = s.time();
     
-    cout << line << " -> " << s.iso() << " (" << days[s.weekday()-1] 
-	 << ") -> " << asctime(gmtime(&t)) << endl;
+
+    cout << "--------------------\n";
+    cout << "        Input: " << line << endl;
+    cout << "          ISO: " << s.iso() << endl;
+    cout << "   check time: " << asctime(gmtime(&t));
+    cout << "      weekday: " << days[s.weekday()-1] << endl;
+
+    Time::Stamp local = s.localise();
+    cout << "    localised: " << local.iso() << endl;
+    cout << "   globalised: " << local.globalise().iso() << endl;
+
+    cout << "  locale date: " << s.locale_date() << endl;
+    cout << "  locale time: " << s.locale_time() << endl;
   }
 
   return 0;

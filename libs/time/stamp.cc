@@ -284,6 +284,28 @@ string Stamp::iso_date() const
 }
 
 //------------------------------------------------------------------------
+// Get the locale-specific date format
+string Stamp::locale_date() const
+{
+  struct tm tm;
+  get_tm(tm);
+  char buf[20];
+  size_t len = strftime(buf, 20, "%x", &tm);  // Locale date
+  return string(buf, len);
+}
+
+//------------------------------------------------------------------------
+// Get the locale-specific time format
+string Stamp::locale_time() const
+{
+  struct tm tm;
+  get_tm(tm);
+  char buf[20];
+  size_t len = strftime(buf, 20, "%X", &tm);  // Locale time
+  return string(buf, len);
+}
+
+//------------------------------------------------------------------------
 // Get the day of the week (Monday=1, Sunday=7)
 int Stamp::weekday() const
 {
@@ -293,6 +315,55 @@ int Stamp::weekday() const
 
   // 1st January 1900 was a Monday, so..
   return 1+(days % 7);
+}
+
+//------------------------------------------------------------------------
+// Get a timestamp in local time (according to TZ) from a normal UTC one
+Stamp Stamp::localise() const
+{
+  // No other way to do this than localtime_r, without understanding the
+  // entire complexity of TZ, DST, databases etc.
+  time_t t = time();
+  struct tm tm;
+  localtime_r(&t, &tm);
+
+  // Rebuild our split from this, pretending it's a GM time
+  Split sp;
+  sp.year  = tm.tm_year+1900;
+  sp.month = tm.tm_mon+1; // We store 1..12, tm_mon is 0..11
+  sp.day   = tm.tm_mday;
+  sp.hour  = tm.tm_hour;
+  sp.min   = tm.tm_min;
+  sp.sec   = tm.tm_sec;
+
+  return Stamp(sp);
+}
+
+//------------------------------------------------------------------------
+// Fill a struct tm 
+void Stamp::get_tm(struct tm& tm) const
+{
+  // Split it
+  Split sp = split(t);
+  
+  // Fill tm
+  tm.tm_year = sp.year-1900;
+  tm.tm_mon  = sp.month-1;  // They want 0.11
+  tm.tm_mday = sp.day;
+  tm.tm_hour = sp.hour;
+  tm.tm_min  = sp.min;
+  tm.tm_sec  = (int)sp.sec;
+}
+
+//------------------------------------------------------------------------
+// Get a timestamp in UTC time from a localised one
+Stamp Stamp::globalise() const
+{
+  struct tm tm;
+  get_tm(tm);
+
+  // Get new time from this (unlocalises it)
+  return Stamp(mktime(&tm));
 }
 
 //------------------------------------------------------------------------
@@ -327,6 +398,5 @@ Stamp Stamp::now()
 
   return s;
 }
-
 
 }} // namespaces
