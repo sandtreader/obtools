@@ -325,7 +325,14 @@ Stamp Stamp::localise() const
   // entire complexity of TZ, DST, databases etc.
   time_t t = time();
   struct tm tm;
+#if defined(__WIN32__)
+  // Windows doesn't have localtime_r, but localtime is supposed to use
+  // a thread-local buffer, so it's OK to use it directly
+  tm = *localtime(&t);
+#else
+  // Use reentrant version
   localtime_r(&t, &tm);
+#endif
 
   // Rebuild our split from this, pretending it's a GM time
   Split sp;
