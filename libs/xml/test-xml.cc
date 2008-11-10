@@ -85,6 +85,13 @@ int main()
   cout << "Here it is translated (wombats renamed, ns1:bing removed):" << endl;
   cout << root;
 
+  // Now merge with another element
+  root.merge_xml("<foo extra='1234'><extra:element/><bar id='extra'/></foo>");
+
+  cout << endl;
+  cout << "Here it is merged with another foo:\n";
+  cout << root;
+
   return 0;  
 }
 
