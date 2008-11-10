@@ -231,6 +231,13 @@ public:
   { parent=0; line=src.line; 
     clear_children(); src.deep_copy_to(*this); return src; }
 
+  //--------------------------------------------------------------------------
+  // Merge with another element
+  // The attributes and content of the source element are copied into this
+  // element, adding to or replacing (attributes only) what was there before
+  // This element's name, content and parent pointer are not changed
+  void merge(const Element& source);
+
   //------------------------------------------------------------------------
   /// Add a child element, taking ownership
   Element& add(Element *child) 
@@ -268,6 +275,15 @@ public:
   /// \return Added child, or 'none' if parse failed
   Element& add_xml(const string& xml, ostream& serr = cerr,
 		   int parse_flags = PARSER_OPTIMISE_CONTENT);
+
+  //------------------------------------------------------------------------
+  // Merge from XML text - reparses text and merges resulting element
+  // with this one (see merge() for details).
+  // Parsed element must be the same name as this one
+  // Parser ostream & flags as Parser() below
+  // Returns whether parse succeeded and element was the same name
+  bool merge_xml(const string& xml, ostream& serr = cerr, 
+		 int parse_flags = PARSER_OPTIMISE_CONTENT);
 
   //------------------------------------------------------------------------
   /// Dump to given output stream.

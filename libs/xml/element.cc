@@ -34,6 +34,25 @@ void Element::deep_copy_to(Element& dest) const
 }
 
 //--------------------------------------------------------------------------
+// Merge with another element
+// The attributes and content of the source element are copied into this
+// element, adding to or replacing (attributes only) what was there before
+// This element's name, content and parent pointer are not changed
+void Element::merge(const Element& source)
+{
+  // Copy over all attributes, replacing any duplicates
+  for(map<string, string>::const_iterator p=source.attrs.begin();
+      p!=source.attrs.end();++p)
+    attrs[p->first] = p->second;
+
+  // Deep copy all children
+  for(list<Element *>::const_iterator p=source.children.begin();
+      p!=source.children.end();
+      p++)
+    add((*p)->deep_copy());
+}
+
+//--------------------------------------------------------------------------
 // Write attributes to given stream
 void Element::write_attrs(ostream &s) const
 {
@@ -245,6 +264,36 @@ Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
   catch (ParseFailed) 
   {
     return none;
+  }
+}
+
+//------------------------------------------------------------------------
+// Merge from XML text - reparses text and merges resulting element
+// with this one (see merge() for details)
+// Parser ostream & flags as Parser() below
+// Returns whether parse succeeded
+bool Element::merge_xml(const string& xml, ostream& serr, int parse_flags)
+{
+  ObTools::XML::Parser parser(serr, parse_flags);
+  try
+  {
+    parser.read_from(xml);
+    Element& root = parser.get_root();
+    if (root.name == name)
+    {
+      merge(root);
+      return true;
+    }
+    else
+    {
+      serr << "Wrong root name in merged XML: expecting " << name
+	   << " but got " << root.name << endl;
+      return false;
+    }
+  }
+  catch (ParseFailed) 
+  {
+    return false;
   }
 }
 
