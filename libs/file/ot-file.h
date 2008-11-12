@@ -25,9 +25,9 @@
 #if defined(__WIN32__)
 
 // Undefine in case someone defined it as (e.g.) int (e.g. wxWindows!)
-#undef uid_t;
+#undef uid_t
 typedef int uid_t;
-#undef gid_t;
+#undef gid_t
 typedef int gid_t;
 #endif
 
