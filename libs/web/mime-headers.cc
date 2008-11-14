@@ -254,13 +254,29 @@ bool MIMEHeaders::write(ostream& out) const
       // Look for a likely breakpoint - try commas first
       string::size_type split = value.rfind(',', MAX_LINE);
       
-      // Failing that, try space
-      if (split == string::npos) split = value.rfind(' ', MAX_LINE);
+      if (split != string::npos)
+      {
+	// Move over it, leaving it on first line
+	split++;
+
+	// This next character must be a space or tab, otherwise we can't split
+	// here safely
+	if (value[split] != ' ' && value[split] != '\t')
+	  split = string::npos;
+      }
+
+      if (split == string::npos)
+      {
+	// Failing that, try space
+	split = value.rfind(' ', MAX_LINE);
+      }
 
       if (split != string::npos)
       {
 	// Split it here
 	string frag(value, 0, split);
+
+	// Erase including the split space
 	value.erase(0, split+1);
 
 	// Output first fragment, with continuation
