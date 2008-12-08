@@ -17,7 +17,7 @@ TESTCMD = ./ot-generate-sql-schema ../ot-generate-sql-schema.cfg.xml < ../../../
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
 
-XMITOOLGEN = $(DIR-xmitoolgen)/build-release/xmitoolgen 
+XMITOOLGEN = $(DIR-xmitoolgen)/build-release$(VARIANT-SUFFIX)/xmitoolgen 
 
 #Turn off -Wall to avoid reams of unused parameter warning
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))

@@ -17,12 +17,18 @@ BUILD-DIR=build
 # Code generation tools
 ifdef DEV
 
+# Spot Mac build and set suffix
+OSNAME=$(shell uname -s)
+ifeq ($(OSNAME), Darwin)
+VARIANT-SUFFIX = -osx
+endif
+
 # Development versions using development config
 # Note this is relative to build directory
 GEN=../../../gen
-OT-GENERATE-CORE-CPP=$(GEN)/core/build-debug/ot-generate-core-cpp $(GEN)/core/ot-generate-core-cpp.cfg.xml
-OT-GENERATE-SQL-SCHEMA=$(GEN)/sql/build-debug/ot-generate-sql-schema $(GEN)/sql/ot-generate-sql-schema.cfg.xml
-OT-GENERATE-SQL-CPP=$(GEN)/sql/build-debug/ot-generate-sql-cpp $(GEN)/sql/ot-generate-sql-cpp.cfg.xml
+OT-GENERATE-CORE-CPP=$(GEN)/core/build-debug$(VARIANT-SUFFIX)/ot-generate-core-cpp $(GEN)/core/ot-generate-core-cpp.cfg.xml
+OT-GENERATE-SQL-SCHEMA=$(GEN)/sql/build-debug$(VARIANT-SUFFIX)/ot-generate-sql-schema $(GEN)/sql/ot-generate-sql-schema.cfg.xml
+OT-GENERATE-SQL-CPP=$(GEN)/sql/build-debug$(VARIANT-SUFFIX)/ot-generate-sql-cpp $(GEN)/sql/ot-generate-sql-cpp.cfg.xml
 
 else
 

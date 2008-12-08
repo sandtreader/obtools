@@ -97,6 +97,7 @@ VARIANTS = debug-mingw release-mingw
 endif
 VARIANT-debug-mingw		= MINGW DEBUG
 VARIANT-release-mingw		= MINGW RELEASE
+VARIANT-SUFFIX = -mingw
 endif
 
 ifeq ($(CROSS), mips)
@@ -106,6 +107,7 @@ ifndef VARIANTS
 VARIANTS = release-mips
 endif
 VARIANT-release-mips		= MIPS RELEASE
+VARIANT-SUFFIX = -mips
 endif
 
 ifeq ($(CROSS), osx)
@@ -120,6 +122,7 @@ endif
 endif
 VARIANT-debug-osx		= OSX DEBUG
 VARIANT-release-osx		= OSX RELEASE
+VARIANT-SUFFIX = -osx
 endif
 
 ifeq ($(CROSS), centos)
