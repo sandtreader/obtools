@@ -43,6 +43,9 @@ int main(int argc, char **argv)
   cout << "Split query:\n";
   props.dump(cout);
 
+  cout << "Re-encoded query:\n";
+  cout << url.encode(props) << endl;
+
   cout << "\n--- Regenerated\n";
   ObTools::Web::URL url2(root);
   cout << url2 << endl;

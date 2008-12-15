@@ -84,6 +84,31 @@ public:
   // Returns whether query was available, fills props if so
   // Note: Handles + for space and % decode in values
   bool get_query(Misc::PropertyList& props);
+
+  //------------------------------------------------------------------------
+  // Static function to URL-encode (percent-encode) a string
+  // Escapes space as '+' if 'space_as_plus' is set (the default)
+  static string encode(const string& s, bool space_as_plus=true);
+
+  //------------------------------------------------------------------------
+  // Static function to URL-encode (percent-encode) a set of variables
+  // (expressed as a PropertyList)
+  // Escapes space as '+' if 'space_as_plus' is set (the default)
+  static string encode(const Misc::PropertyList& props, 
+		       bool space_as_plus=true);
+
+  //------------------------------------------------------------------------
+  // Static function to URL-decode (percent-encode) a string
+  // Decodes '+' as space if 'space_as_plus' is set (the default)
+  static string decode(const string& s, bool space_as_plus=true);
+
+  //------------------------------------------------------------------------
+  // Static function to URL-decode (percent-encode) a multi-valued string
+  // (x-www-form-urlencoded) into a property list
+  // Decodes '+' as space if 'space_as_plus' is set (the default)
+  static void decode(const string& s, Misc::PropertyList& props,
+		     bool space_as_plus=true);
+
 };
 
 //------------------------------------------------------------------------

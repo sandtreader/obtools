@@ -162,45 +162,8 @@ bool URL::get_query(Misc::PropertyList& props)
   string query = get_query();
   if (query.empty()) return false;
 
-  // Split on &
-  vector<string> params = Text::split(query, '&', false);
-  for(vector<string>::iterator p = params.begin(); p!=params.end(); ++p)
-  {
-    string& param = *p;
-    size_t q = param.find('=');
-    if (q && q != string::npos)
-    {
-      string name(param, 0, q);
-      string value;
-
-      // Fix up the value
-      for(++q; q<param.size(); ++q)
-      {
-	char c = param[q];
-	switch (c)
-	{
-	  case '+':
-	    value += ' ';
-	    break;
-
-	  case '%':
-	  {
-	    string hex;
-	    if (++q < param.size()) hex+=param[q];
-	    if (++q < param.size()) hex+=param[q];
-	    value += (char)Text::xtoi(hex);
-	    break;
-	  }
-
-	  default:
-	    value += c;
-	}
-      }
-
-      props.add(name, value);
-    }
-  }
-  
+  // %-decode it, with +
+  decode(query, props, true);
   return true;
 }
 
@@ -211,6 +174,130 @@ ostream& operator<<(ostream& s, const URL& u)
 { 
   s<<u.text; 
   return s; 
+}
+
+//------------------------------------------------------------------------
+// Static function to URL-encode (percent-encode) a string
+// Escapes space as '+' if 'space_as_plus' is set (the default)
+string URL::encode(const string& s, bool space_as_plus)
+{
+  string r;
+  string::size_type l = s.size();
+  
+  for(string::size_type p=0; p<l; ++p)
+  {
+    char c = s[p];
+
+    // Check for controls and 8-bit
+    if (c<32 || c>126)
+    {
+      r+='%';
+      r+=Text::itox((int)c);
+    }
+    else switch (c)
+    {
+      case ' ':
+	if (space_as_plus)
+	  r+='+';
+	else
+	  r+="%20";
+	break;
+	
+      // Reserved characters;
+      case '+': case '%': 
+      case '!': case '*': case '\'': case '(': case ')':
+      case ';': case ':': case '@': case '&': case '=':
+      case '$': case ',': case '/': case '?': case '#':
+      case '[': case ']':
+	r+='%';
+	r+=Text::itox((int)c);
+	break;
+
+      // Normal characters
+      default:
+	r += c;
+    }
+  }
+
+  return r;
+}
+
+//------------------------------------------------------------------------
+// Static function to URL-encode (percent-encode) a set of variables
+// (expressed as a PropertyList)
+// Escapes space as '+' if 'space_as_plus' is set (the default)
+string URL::encode(const Misc::PropertyList& props, bool space_as_plus)
+{
+  string r;
+  for(Misc::PropertyList::const_iterator p=props.begin(); p!=props.end(); ++p)
+  {
+    if (r.size()) r+='&';
+    r+=encode(p->first, space_as_plus);
+    r+='=';
+    r+=encode(p->second, space_as_plus);
+  }
+
+  return r;
+}
+
+//------------------------------------------------------------------------
+// Static function to URL-decode (percent-encode) a string
+// Decodes '+' as space if 'space_as_plus' is set (the default)
+string URL::decode(const string& s, bool space_as_plus)
+{
+  string r;
+  string::size_type l = s.size();
+
+  for(string::size_type p=0; p<l; ++p)
+  {
+    char c = s[p];
+
+    switch (c)
+    {
+      case '+':
+	if (space_as_plus)
+	  r += ' ';
+	else
+	  r += '+';
+	break;
+
+      case '%':
+      {
+	string hex;
+	if (++p < l) hex+=s[p];
+	if (++p < l) hex+=s[p];
+	r += (char)Text::xtoi(hex);
+	break;
+      }
+
+      default:
+	r += c;
+    }
+  }
+
+  return r;
+}
+
+//------------------------------------------------------------------------
+// Static function to URL-decode (percent-encode) a multi-valued string
+// (x-www-form-urlencoded) into a property list
+// Decodes '+' as space if 'space_as_plus' is set (the default)
+void URL::decode(const string& s, Misc::PropertyList& props,
+		 bool space_as_plus)
+{
+  // Split on &
+  vector<string> params = Text::split(s, '&', false);
+  for(vector<string>::iterator p = params.begin(); p!=params.end(); ++p)
+  {
+    string& param = *p;
+    size_t q = param.find('=');
+    if (q && q != string::npos)
+    {
+      string name(param, 0, q);
+      string value(param, q+1);
+      props.add(name, decode(value, space_as_plus)); 
+    }
+  }
 }
 
 }} // namespaces
