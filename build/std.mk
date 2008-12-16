@@ -205,7 +205,7 @@ CXX = i686-apple-darwin9-g++-4.0.1
 LD = ld
 AR = ar
 PLATFORM = -osx
-CPPFLAGS += -D__BSD__
+CPPFLAGS += -D__BSD__ -D__OSX__
 
 else
 #Compiler override for centos X build
