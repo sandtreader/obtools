@@ -16,12 +16,15 @@ namespace ObTools { namespace Text {
 // Split a string into fields using the given delimiter
 // Canonicalises fields (removed leading and trailing whitespace, folds
 // multiple internal whitespace into one) if canonicalise is set
-vector<string> split(const string& text, char delim, bool canonicalise)
+// If max is set, stops after 'max-1' fields have been read, and drops the
+// rest of the string into the last one
+vector<string> split(const string& text, char delim, bool canonicalise,
+		     int max)
 {
   string::size_type p = 0;
   vector<string> fields;
 
-  for(;;)
+  for(int i=0; !max || i<max-1; i++)
   {
     // Find first delimiter
     string::size_type dp = text.find(delim, p);
@@ -33,16 +36,13 @@ vector<string> split(const string& text, char delim, bool canonicalise)
       fields.push_back(field);
       p = dp+1;
     }
-    else
-    {
-      // Rest of the string
-      string field(text, p);
-      if (canonicalise) field = canonicalise_space(field);
-      fields.push_back(field);
-      break;
-    }
+    else break;
   }
 
+  // Rest of the string
+  string field(text, p);
+  if (canonicalise) field = canonicalise_space(field);
+  fields.push_back(field);
   return fields;
 }
 

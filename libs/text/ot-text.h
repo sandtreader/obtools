@@ -75,8 +75,10 @@ vector<string> split_words(const string& text);
 // Split a string into fields using the given delimiter
 // Canonicalises fields (removed leading and trailing whitespace, folds
 // multiple internal whitespace into one) if canonicalise is set
+// If max is set, stops after 'max-1' fields have been read, and drops the
+// rest of the string into the last one
 vector<string> split(const string& text, char delim=',', 
-		     bool canonicalise = true);
+		     bool canonicalise = true, int max=0);
 
 //==========================================================================
 // Pattern matching functions (pattern.cc)

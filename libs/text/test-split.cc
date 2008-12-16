@@ -26,6 +26,11 @@ int main()
   for(vector<string>::iterator p = l.begin(); p!=l.end(); ++p)
     cout << "  [" << *p << "]\n";
 
+  vector<string> l2 = Text::split(text, ',', false, 4);
+  cout << "Split with no canonicalisation, max 4:\n";
+  for(vector<string>::iterator p = l2.begin(); p!=l2.end(); ++p)
+    cout << "  [" << *p << "]\n";
+
   return 0;  
 }
 
