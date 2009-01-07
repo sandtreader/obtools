@@ -101,6 +101,10 @@ private:
   friend class BasicCondVar;
   friend class Condition;   // So they can use my mutex for cond_wait
 
+  // Block copying
+  Mutex(const Mutex&) {}
+  Mutex& operator=(const Mutex&) { return *this; }
+
 public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises mutex 
