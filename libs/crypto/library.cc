@@ -24,7 +24,7 @@ namespace ObTools { namespace Crypto {
 // See: threads(3)
 
 // Array of static mutexes
-static vector<MT::Mutex> mutexes;
+static vector<MT::Mutex *> mutexes;
 
 // Force C call standard
 extern "C"
@@ -34,9 +34,9 @@ extern "C"
 static void openssl_locking_function(int mode, int n, const char *, int)
 {
   if (mode & CRYPTO_LOCK) 
-    mutexes[n].lock();
+    mutexes[n]->lock();
   else
-    mutexes[n].unlock();
+    mutexes[n]->unlock();
 }
 
 // Thread id function.
@@ -86,7 +86,8 @@ Library::Library()
   if (should_initialise()) 
   {
     // Create as many locks as the library requires
-    mutexes.resize(CRYPTO_num_locks());
+    for(int n=CRYPTO_num_locks(); n--;)
+      mutexes.push_back(new MT::Mutex());
 
     // Register callbacks
     CRYPTO_set_locking_callback(openssl_locking_function);
@@ -114,6 +115,8 @@ Library::~Library()
     CRYPTO_set_id_callback(NULL);
 
     // Empty the mutex array
+    for(vector<MT::Mutex *>::iterator p=mutexes.begin(); p!=mutexes.end();++p)
+      delete *p;
     mutexes.clear();
 
     // Tidy up library
