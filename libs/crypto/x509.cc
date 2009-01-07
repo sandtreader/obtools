@@ -30,7 +30,11 @@ void Certificate::read(istream& sin)
 {
   string text;
   // Read all we can into the string
-  while (sin) text+=sin.get();
+  while (sin) 
+  {
+    int c = sin.get();
+    if (c>=0) text+=(char)c;
+  }
   read(text);
 }
 
