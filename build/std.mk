@@ -136,7 +136,7 @@ VARIANTS += debug
 endif
 endif
 VARIANT-debug		= CENTOS DEBUG
-VARIANT-release		= CENTOS RELEASE
+VARIANT-release		= CENTOS RELEASE RPM
 endif
 
 else #!CROSS-COMPILE
@@ -209,7 +209,7 @@ CPPFLAGS += -D__BSD__ -D__OSX__
 
 else
 #Compiler override for centos X build
-ifdef centos
+ifeq ($(CROSS), centos)
 CC = gcc
 CXX = g++
 EXTRALIBS += -lrt

@@ -13,6 +13,7 @@ DEB_VERSION=$2-$3
 PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
+RELEASE_DIR=$SRC_DIR/../../release/
 
 mkdir -p $DEB_DIR/DEBIAN
 mkdir -p $DEB_DIR/usr/bin/
@@ -26,9 +27,7 @@ install -s -m 0755 xmlmesh-send $DEB_DIR/usr/bin/ot-xmlmesh-send
 install -s -m 0755 xmlmesh-receive $DEB_DIR/usr/bin/ot-xmlmesh-receive
 
 if [ $CENTOS ]; then
-  if [ -f ../Makerpm ]; then
-    . ../Makerpm
-  fi
+  . $ROOT/build/Makerpm
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_DIR $PACKAGE

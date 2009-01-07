@@ -78,9 +78,13 @@ ln -s $NAME$VARIANT.so.$VERSION_MAJOR $NAME$VARIANT.so
 popd
 
 if [ $CENTOS ]; then
-  if [ -f ../Makerpm ]; then
-    . ../Makerpm
-  fi
+  DEB_DIR=$DEB_RUN_DIR
+  RPM_LIB=1
+  . $ROOT/build/Makerpm
+  RPM_DEVEL=1
+  RPM_LIB=
+  DEB_DIR=$DEB_DEV_DIR
+  . $ROOT/build/Makerpm
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_RUN_DIR $PACKAGE_RUN

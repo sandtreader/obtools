@@ -12,6 +12,7 @@ DEB_VERSION=$2-$3
 PACKAGE=$1_$2-$3_i386.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
+RELEASE_DIR=$SRC_DIR/../../release/
 
 mkdir -p $DEB_DIR/DEBIAN
 mkdir -p $DEB_DIR/usr/share/php
@@ -23,9 +24,7 @@ install -m 0644 $SRC_DIR/ot-xmlmesh.php $DEB_DIR/usr/share/php
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
 
 if [ $CENTOS ]; then
-  if [ -f ../Makerpm ]; then
-    . ../Makerpm
-  fi
+    . $ROOT/build/Makerpm
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_DIR $PACKAGE

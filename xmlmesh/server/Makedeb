@@ -12,6 +12,7 @@ DEB_VERSION=$2-$3
 PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
+RELEASE_DIR=$SRC_DIR/../release/
 
 mkdir -p $DEB_DIR/DEBIAN
 mkdir -p $DEB_DIR/usr/sbin
@@ -33,10 +34,9 @@ install -m 0644 $SRC_DIR/xmlmesh.cfg.xml $DEB_DIR/etc/obtools/xmlmesh.cfg.xml
 install -m 0755 $SRC_DIR/ot-xmlmesh.init.d $DEB_DIR/etc/init.d/ot-xmlmesh
 install -m 0644 $SRC_DIR/ot-xmlmesh.logrotate.d $DEB_DIR/etc/logrotate.d/ot-xmlmesh
 
-if [ $CENTOS ]; then
-  if [ -f ../Makerpm ]; then
-    . ../Makerpm
-  fi
+if [ $RPM ]; then
+  RPM_SERVICE=1
+  . $ROOT/build/Makerpm
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_DIR $PACKAGE

@@ -1,0 +1,88 @@
+# prepare rpm build
+#  should work unmodified for any Obtools package 
+
+NAME=$1
+VERSION=$2
+REV=$3
+TARGARCH=$4
+VARIANT=$5
+
+RPM_COPYRIGHT=${RPM_COPYRIGHT:-"xMill Consulting Ltd"}
+RPM_NAMETAG=${RPM_NAMETAG:-Obtools}
+RPM_CONFIGDIR=${RPM_CONFIGDIR:-/etc/obtools}
+RPM_LCNAME=${RPM_LCNAME:-obtools}
+
+#  RPM_COPYRIGHT="Packet Ship Technologies Ltd"
+#  RPM_NAMETAG="Packet Ship"
+#  RPM_CONFIGDIR=/etc/packetship
+
+RPM_SPEC=$DEB_DIR/DEBIAN/spec
+
+if [ $RPM_DEVEL ]; then
+  RPM_DEVEL="-devel"
+else
+  RPM_DEVEL=""
+fi
+
+SPEC_SUMMARY=`grep "^Description:" $DEB_DIR/DEBIAN/control|sed -e 's/^Description://'`
+SPEC_PACKAGER=`grep "^Maintainer:" $DEB_DIR/DEBIAN/control |sed -e 's/Maintainer://'`
+
+cat > $RPM_SPEC <<EOF
+Buildroot: ${DEB_DIR}
+Name: ${NAME}${VARIANT}${RPM_DEVEL}
+Version: ${VERSION}
+Release: ${REV}
+Summary: $SPEC_SUMMARY
+Group: optional
+Packager: $SPEC_PACKAGER
+License: ${RPM_COPYRIGHT}
+Distribution: rpm
+%define _rpmdir ../
+%define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%define _unpackaged_files_terminate_build 0
+EOF
+
+if [ $RPM_LIB ]; then
+  mkdir -p ${DEB_DIR}/etc/ld.so.conf.d/
+  echo  "/usr/lib/${RPM_LCNAME}" > ${DEB_DIR}/etc/ld.so.conf.d/${NAME}.conf
+  chmod 644 ${DEB_DIR}/etc/ld.so.conf.d/${NAME}.conf
+  cat >> $RPM_SPEC <<-EOF
+%post 
+/sbin/ldconfig
+%postun
+/sbin/ldconfig
+EOF
+fi
+
+echo "%description" >> $RPM_SPEC
+
+awk '/^Description:/ { founddesc=1;print $0;next }
+{ if ( founddesc == 1 ) { if ( substr($0,1,1) == " " ) { print $0 } else { exit } }}'  $DEB_DIR/DEBIAN/control |sed -e 's/^Description://' -e 's/^ \.$//' -e 's/^ //'  >>  $RPM_SPEC
+
+if [ $RPM_SERVICE ]; then
+  NO_NS_PART=`echo $NAME|cut -d\- -f2`
+  RPM_SERVERNAME=${NO_NS_PART:-$NAME}
+
+  if [ $CENTOS ] ; then
+    . $ROOT/build/Makerpm.centos.service
+  else
+    if [ $SLES ] ; then
+      . $ROOT/build/Makerpm.sles.service
+    fi
+  fi
+fi
+
+echo "%files" >>  $RPM_SPEC
+
+#get length of directory name
+NUMCHAR=`echo ${DEB_DIR}|wc -c `
+
+# all dirs first
+tar cvf /dev/null $DEB_DIR |grep  "/$" |cut -c ${NUMCHAR}- |grep -v "^/DEBIAN/" |sed -e 's/^/%dir \"/' -e 's/$/\"/' >> $RPM_SPEC
+
+#all files
+tar cvf /dev/null $DEB_DIR |grep  -v "/$" |grep -v $DEB_VERSION.spec |cut -c ${NUMCHAR}-| grep -v "^/DEBIAN/"|sed -e 's/^/\"/' -e 's/$/\"/' >> $RPM_SPEC
+
+fakeroot -- rpmbuild -bb  $RPM_SPEC
+
+mv ../${NAME}${VARIANT}${RPM_DEVEL}-$VERSION-${REV}.${TARGARCH}.rpm $RELEASE_DIR

@@ -13,6 +13,7 @@ TARGARCH=$4
 PACKAGE=$1_$2-$3_${TARGARCH}.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
+RELEASE_DIR=$SRC_DIR/../release/
 
 mkdir -p $DEB_DIR/DEBIAN
 mkdir -p $DEB_DIR/usr/sbin
@@ -28,15 +29,12 @@ install -s -m 0755 angel $DEB_DIR/usr/sbin/angel
 install -m 0644 $SRC_DIR/angel.cfg.xml $DEB_DIR/etc/angel/angel.cfg.xml
 
 if [ $CENTOS ]; then
-  if [ -f ../Makerpm ]; then
-    . ../Makerpm
-  fi
+  . $ROOT/build/Makerpm
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_DIR $PACKAGE
   cp $PACKAGE $SRC_DIR/../release/
 fi
-
 
 # clean up
 rm -rf $DEB_DIR

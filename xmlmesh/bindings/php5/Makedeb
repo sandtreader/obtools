@@ -35,9 +35,7 @@ install -s -m 0755 php_xmlmesh.so  $DEB_DIR/usr/lib/php5/20060613+lfs
 # change the API version.
 #install -s -m 0755 php_xmlmesh.so $DEB_DIR/usr/lib/php4/20050606/
 if [ $CENTOS ]; then
-  if [ -f ../Makerpm ]; then
-    . ../Makerpm
-  fi
+    . $ROOT/build/Makerpm
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_DIR $PACKAGE

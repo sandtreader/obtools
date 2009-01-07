@@ -1,0 +1,49 @@
+echo "%post" >> $RPM_SPEC
+echo "insserv ${NAME}" >> $RPM_SPEC
+echo "/etc/init.d/${NAME} start" >> $RPM_SPEC
+
+echo "%preun" >> $RPM_SPEC
+echo "/etc/init.d/${NAME} stop" >> $RPM_SPEC
+echo "insserv -r  ${NAME}" >> $RPM_SPEC
+
+echo "#!/bin/sh" >  $DEB_DIR/etc/init.d/${NAME}
+echo "### BEGIN INIT INFO" >> $DEB_DIR/etc/init.d/${NAME}
+echo "# Provides: ${NAME}" >> $DEB_DIR/etc/init.d/${NAME}
+echo "# Required-Start: \$network \$remote_fs" >> $DEB_DIR/etc/init.d/${NAME}
+echo "# Required-Stop: \$network \$remote_fs" >> $DEB_DIR/etc/init.d/${NAME}
+echo "# Default-Start: 3 5" >> $DEB_DIR/etc/init.d/${NAME}
+echo "# Default-Stop: 0 1 2 6" >> $DEB_DIR/etc/init.d/${NAME}
+echo "# Description: Start/stop the ${NAME} daemon" >> $DEB_DIR/etc/init.d/${NAME}
+echo "### END INIT INFO" >> $DEB_DIR/etc/init.d/${NAME}
+echo ". /etc/rc.status" >> $DEB_DIR/etc/init.d/${NAME}
+echo "rc_reset" >> $DEB_DIR/etc/init.d/${NAME}
+
+NAMETAG="${RPM_NAMETAG} ${RPM_SERVERNAME} server: ${NAME}"
+echo "case \"\$1\" in" >> $DEB_DIR/etc/init.d/${NAME}
+echo "start)  echo -n \"Starting ${NAMETAG}\"" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        start_daemon /usr/sbin/${NAME}" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        rc_status -v" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        ;;" >> $DEB_DIR/etc/init.d/${NAME}
+echo "stop)   echo -n \"Stopping ${NAMETAG}\"" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        killproc /usr/sbin/${NAME}" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        rc_status -v" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        ;;" >> $DEB_DIR/etc/init.d/${NAME}
+#echo "reload)   echo -n \"Reloading ${NAMETAG}\"" >> $DEB_DIR/etc/init.d/${NAME}
+#echo "        killproc -HUP /usr/sbin/${NAME}" >> $DEB_DIR/etc/init.d/${NAME}
+#echo "        rc_status -v" >> $DEB_DIR/etc/init.d/${NAME}
+#echo "        ;;" >> $DEB_DIR/etc/init.d/${NAME}
+echo "restart|force-reload) echo -n \"Restarting ${NAMETAG}\"" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        killproc /usr/sbin/${NAME}" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        rc_status -v" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        sleep 2" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        start_daemon /usr/sbin/${NAME}" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        rc_status -v" >> $DEB_DIR/etc/init.d/${NAME}
+echo "        ;;" >> $DEB_DIR/etc/init.d/${NAME}
+echo "*)      echo \"Usage: /etc/init.d/${NAME} start|stop|restart|force-reload\"" >> $DEB_DIR/etc/init.d/${NAME}
+echo "exit 1" >> $DEB_DIR/etc/init.d/${NAME}
+echo ";;" >> $DEB_DIR/etc/init.d/${NAME}
+echo "esac" >> $DEB_DIR/etc/init.d/${NAME}
+echo "rc_exit" >> $DEB_DIR/etc/init.d/${NAME}
+
+chmod 755 $DEB_DIR/etc/init.d/${NAME}
+
