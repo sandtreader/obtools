@@ -26,7 +26,7 @@ bool SyncServer::handle_message(ClientMessage& msg)
       // Pass to async handler
       return handle_async_message(msg);
       
-    case ClientMessage::MESSAGE:
+    case ClientMessage::MESSAGE_DATA:
     {
       // Check flags
       if (msg.msg.flags & FLAG_RESPONSE_REQUIRED)
@@ -61,7 +61,7 @@ bool SyncServer::handle_message(ClientMessage& msg)
 // Implemented here just to log an error
 bool SyncServer::handle_async_message(ClientMessage& msg)
 {
-  if (msg.action == ClientMessage::MESSAGE)
+  if (msg.action == ClientMessage::MESSAGE_DATA)
   {
     Log::Streams log;
     log.error << "Unwanted asynchronous message " << msg.msg.stag() 

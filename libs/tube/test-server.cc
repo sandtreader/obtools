@@ -20,7 +20,7 @@ private:
   bool handle_message(Tube::ClientMessage& msg)
   {
     // Send it back
-    if (msg.action == Tube::ClientMessage::MESSAGE) send(msg);
+    if (msg.action == Tube::ClientMessage::MESSAGE_DATA) send(msg);
 
     return true;
   }

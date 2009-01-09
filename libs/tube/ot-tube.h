@@ -356,7 +356,7 @@ struct ClientMessage
   enum Action
   {
     STARTED,
-    MESSAGE,
+    MESSAGE_DATA, // Was MESSAGE, but windows.h defines as macro >:-(
     FINISHED
   };
 
@@ -365,7 +365,7 @@ struct ClientMessage
   // Constructor for message
   ClientMessage(Net::EndPoint _client, tag_t _tag, 
 		const string& _data="", flags_t _flags=0):
-    client(_client), msg(_tag, _data,_flags), action(MESSAGE) {}
+    client(_client), msg(_tag, _data,_flags), action(MESSAGE_DATA) {}
 
   // Constructor for other action
   ClientMessage(Net::EndPoint _client, Action _action):
