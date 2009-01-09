@@ -139,7 +139,7 @@ void OTMPServer::dispatch()
       break;
     }
 
-    case OTMP::ClientMessage::MESSAGE:
+    case OTMP::ClientMessage::MESSAGE_DATA:
     {
       // Convert to routing message
       Message msg(otmp_msg.msg.data);
