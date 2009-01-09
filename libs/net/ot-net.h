@@ -30,7 +30,6 @@ extern bool winsock_initialise();
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #endif
 
 #include "ot-mt.h"

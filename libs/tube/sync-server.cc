@@ -11,7 +11,6 @@
 #include "ot-tube.h"
 #include "ot-log.h"
 
-#include <unistd.h>
 #include <sstream>
 
 namespace ObTools { namespace Tube {

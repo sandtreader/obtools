@@ -10,7 +10,6 @@
 #include "ot-file.h"
 #include "ot-text.h"
 #include <dirent.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 

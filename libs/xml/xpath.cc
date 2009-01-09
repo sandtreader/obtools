@@ -10,7 +10,6 @@
 
 #include "ot-xml.h"
 #include "ot-text.h"
-#include "unistd.h"
 #include <sstream>
 
 using namespace ObTools::XML;

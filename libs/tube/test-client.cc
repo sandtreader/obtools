@@ -8,7 +8,6 @@
 //==========================================================================
 
 #include "ot-tube.h"
-#include <unistd.h>
 
 #if defined(__WIN32__)
 #include <windows.h>

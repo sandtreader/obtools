@@ -8,7 +8,6 @@
 //==========================================================================
 
 #include "ot-xml.h"
-#include <unistd.h>
 #include <stdio.h>
 #include <fstream>
 #include <errno.h>
