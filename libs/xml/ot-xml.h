@@ -1031,6 +1031,12 @@ public:
   Element *replace_root(const string& name);
 
   //------------------------------------------------------------------------
+  // Move to a different location - use after renaming the file underneath
+  // it, to ensure write() works on the new location
+  void move_file(const string& fn) 
+  { filenames.clear(); filenames.push_back(fn); }
+
+  //------------------------------------------------------------------------
   // Write back file from changes made to in-memory document
   // Writes back to first (or only) file in filename list
   // Returns whether successful
