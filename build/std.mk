@@ -20,7 +20,9 @@
 # DEPENDS:   List of ObTools libraries we depend on
 # CONTAINS:  List of libraries we contain (superlibs, dlls)
 # EXTINCS:   List of external include directories
-# EXTLIBS:   List of external libraries 
+# EXTLIBS:   List of external libraries
+# RESFILE:   RC file for Windows resources 
+# RESDEPS:   Other dependences for resource file
 # TESTS:     List of test executables to build
 # TESTCMD:   Test command
 # CONFIGS:   Configs and other files copied to release
@@ -176,6 +178,7 @@ CC = i586-mingw32msvc-cc
 CXX = i586-mingw32msvc-g++
 LD = i586-mingw32msvc-ld
 AR = i586-mingw32msvc-ar
+WINDRES = i586-mingw32msvc-windres
 EXE-SUFFIX = .exe
 CPPFLAGS += -DMINGW
 LDFLAGS += -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc 
@@ -183,6 +186,9 @@ PLATFORM = -mingw
 ifdef SOCKET
 EXTRALIBS += -lwsock32
 endif
+ifdef RESFILE
+RESOBJ = $(RESFILE).o
+endif 
 else
 #Compiler override for MIPS build
 ifdef MIPS
@@ -551,8 +557,14 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 
 #Executable
 ifeq ($(TYPE), exe)
-$(NAME)$(EXE-SUFFIX): $(OBJS) $(DEPLIBS)
+$(NAME)$(EXE-SUFFIX): $(OBJS) $(RESOBJ) $(DEPLIBS)
 	$(CC) $(LDFLAGS) -o $@ $(LDLOOPSTART) $^ $(LDLOOPEND) $(EXTRALIBS)
+endif
+
+#Compile resources
+ifdef RESFILE
+$(RESOBJ): $(RESFILE) $(RESDEPS)
+	$(WINDRES) -i$< -o$@ -I.. -I$(WX-BASE)/include
 endif
 
 #Multiple executables
