@@ -176,6 +176,9 @@ int HTTPClient::post(URL url, const string& request_body,
   HTTPMessage request("POST", url);
   request.body = request_body;
 
+  // Set standard form content-type
+  request.headers.put("Content-Type", "application/x-www-form-urlencoded");
+
   HTTPMessage response;
   if (!fetch(request, response))
   {
