@@ -183,16 +183,17 @@ string URL::encode(const string& s, bool space_as_plus)
 {
   string r;
   string::size_type l = s.size();
-  
+  char buf[4];
+
   for(string::size_type p=0; p<l; ++p)
   {
-    char c = s[p];
+    unsigned char c = s[p];
 
     // Check for controls and 8-bit
     if (c<32 || c>126)
     {
-      r+='%';
-      r+=Text::itox((int)c);
+      snprintf(buf, 4, "%%%02X", (unsigned int)c);
+      r+=buf;
     }
     else switch (c)
     {
@@ -209,8 +210,8 @@ string URL::encode(const string& s, bool space_as_plus)
       case ';': case ':': case '@': case '&': case '=':
       case '$': case ',': case '/': case '?': case '#':
       case '[': case ']':
-	r+='%';
-	r+=Text::itox((int)c);
+	snprintf(buf, 4, "%%%02X", (unsigned int)c);
+	r+=buf;
 	break;
 
       // Normal characters
