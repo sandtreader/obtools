@@ -168,7 +168,7 @@ public:
   //--------------------------------------------------------------------------
   // Add a value
   void add(const string& name, const string& value)
-  { insert(make_pair(name,value)); }  //Note, not using []
+  { erase(name); insert(make_pair(name,value)); }  //Note, not using []
 
   //--------------------------------------------------------------------------
   // Add a integer value
@@ -183,7 +183,7 @@ public:
   // Add a boolean value
   void add(const string& name, bool value)
   { // Avoid evil recursion due to bool->string implicit cast
-    insert(make_pair(name, string(value?"true":"false"))); 
+    erase(name); insert(make_pair(name, string(value?"true":"false"))); 
   }
 
   //--------------------------------------------------------------------------
