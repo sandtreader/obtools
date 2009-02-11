@@ -14,7 +14,12 @@
 
 #if defined(__WIN32__)
 #include <windows.h>
+#if defined(MINGW)
+// Avoiding including it in Borland
+#include <unistd.h>
 #endif
+#endif
+
 
 using namespace ObTools::XML;
 
