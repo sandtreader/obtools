@@ -8,6 +8,8 @@
 //==========================================================================
 
 #include "ot-xmi.h"
+#include <stdlib.h>
+
 using namespace ObTools::XMI;
 using namespace ObTools; 
 

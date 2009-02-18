@@ -25,6 +25,5 @@ endif
 
 CONFIGS = angeld.cfg.xml
 
-
 ROOT    = ../..
 include $(ROOT)/build/std.mk

@@ -10,6 +10,7 @@
 
 #include "ot-db.h"
 #include "ot-text.h"
+#include <stdlib.h>
 #include <sstream>
 
 namespace ObTools { namespace DB {

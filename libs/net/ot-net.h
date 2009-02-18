@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <string>
+#include <string.h>
 
 #if defined(__WIN32__)
 

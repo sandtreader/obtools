@@ -10,6 +10,7 @@
 #include "ot-text.h"
 #include <iostream>
 #include <sstream>
+#include <stdlib.h>
 
 using namespace std;
 using namespace ObTools;

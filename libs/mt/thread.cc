@@ -8,6 +8,9 @@
 //==========================================================================
 
 #include "ot-mt.h"
+#if !defined(BORLAND)
+#include <unistd.h>
+#endif
 
 namespace ObTools { namespace MT {
 

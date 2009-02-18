@@ -15,6 +15,7 @@
 #include <map>
 #include <list>
 #include <stdint.h>
+#include <stdlib.h>
 #include <iostream>
 #include <sstream>
 #include "ot-xml.h"

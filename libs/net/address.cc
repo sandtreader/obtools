@@ -10,6 +10,7 @@
 #include "ot-net.h"
 #include <ctype.h>
 #include <sstream>
+#include <stdlib.h>
 
 #if !defined(__WIN32__)
 #include <netdb.h>

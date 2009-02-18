@@ -26,6 +26,7 @@
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <map>
 #include <iomanip>
 #include <sstream>

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <errno.h>
+#include <string.h>
 
 #if defined(__WIN32__)
 #include <windows.h>

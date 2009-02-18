@@ -15,6 +15,7 @@
 
 #include <string>
 #include <map>
+#include <string.h>
 
 #include <openssl/des.h>
 #include <openssl/rsa.h>

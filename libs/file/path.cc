@@ -15,6 +15,8 @@
 #include <sstream>
 #include <fstream>
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if defined(__WIN32__)
 // Note: stati versions, still 32-bit time_t

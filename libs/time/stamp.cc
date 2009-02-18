@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-time.h"
+#include "stdlib.h"
 #include <sstream>
 #include <iomanip>
 #include <iostream>

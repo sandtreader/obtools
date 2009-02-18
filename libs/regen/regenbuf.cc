@@ -14,6 +14,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cerrno>
+#include <string.h>
 
 using namespace ObTools::ReGen;
 
