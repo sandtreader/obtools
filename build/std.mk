@@ -222,8 +222,8 @@ EXTRALIBS += -lrt
 else
 
 #Normal native build
-CC = gcc-4.3
-CXX = g++-4.3
+CC = gcc
+CXX = g++
 EXTRALIBS += -lrt
 endif
 endif
