@@ -307,6 +307,19 @@ string Stamp::locale_time() const
 }
 
 //------------------------------------------------------------------------
+// Get the locale-specific date and time format
+string Stamp::locale_date_time() const
+{
+  struct tm tm;
+  get_tm(tm);
+  char buf[40];
+  // Locale date and time - note should be %c but this reliably segfaults
+  // - no idea why
+  size_t len = strftime(buf, 40, "%x %H:%M", &tm);  
+  return string(buf, len);
+}
+
+//------------------------------------------------------------------------
 // Get the day of the week (Monday=1, Sunday=7)
 int Stamp::weekday() const
 {

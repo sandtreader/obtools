@@ -222,6 +222,10 @@ public:
   string locale_time() const;
 
   //------------------------------------------------------------------------
+  // Get the locale-specific date and time format
+  string locale_date_time() const;
+    
+  //------------------------------------------------------------------------
   // Split the timestamp into individual items
   void split(Split &sp) const { sp = split(t); }
 
