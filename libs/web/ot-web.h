@@ -159,6 +159,16 @@ public:
   void put(const string& name, const string& value)
   { xml.add(name, value); }
 
+  //--------------------------------------------------------------------------
+  // Remove all headers of the given name
+  void remove(const string& name)
+  { xml.remove_children(name); }
+
+  //--------------------------------------------------------------------------
+  // Replace a header
+  void replace(const string& name, const string& value)
+  { remove(name); xml.add(name, value); }
+
   //------------------------------------------------------------------------
   // Add a current date header to RFC 822 standard
   void put_date(const string& header="date");
