@@ -29,8 +29,15 @@ void TCPServer::start()
     return;
   }
 
-  // Set REUSEADDR for fast restarts (e.g. during development)
+  // Set REUSEADDR for fast restarts (e.g. during development, and to avoid
+  // delays/failure in server restarting)
+
+  // Don't use on Windows because it's too powerful - allows double bind
+  // to the same explicit port even if something else is actively listening
+  // to it.
+#ifndef __WIN32__
   enable_reuse();
+#endif
 
   // Bind to local port (this is Socket::bind()), specifying address
   // (which might be INADDR_ANY from our constructor
