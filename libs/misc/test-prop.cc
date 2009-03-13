@@ -23,6 +23,9 @@ int main()
   pl.add("bar", "!!!");
   pl.add("bar", "two");
   pl.add("XXX", "???");
+  pl.add("42", 42);
+  pl.add_bool("true", true);
+
   pl.erase("XXX");
 
   cout << " 'foo' is '" << pl["foo"] << "'\n";

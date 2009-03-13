@@ -14,36 +14,72 @@
 #include <iomanip>
 #include <stdlib.h>
 
+#if defined(__WIN32__)
+#include <windows.h>
+#include <time.h>
+#else
+#include <sys/time.h>
+#define USE_DEV_URANDOM 1
+#endif
+
+#define REINIT_PERIOD 67
+
 namespace ObTools { namespace Misc {
 
 //------------------------------------------------------------------------
 // Constructor
-Random::Random()
-{
-  // Do this even in Unix just in case /dev/urandom fails
-  srand(time(NULL));
-}
+Random::Random(): w(0), z(0), count(0)
+{}
 
 //------------------------------------------------------------------------
 // Get random binary bytes up to N bytes long
 void Random::generate_binary(unsigned char *p, int n)
 {
-#if !defined(__WIN32__)
-  // In Real Operating Systems (tm), /dev/urandom gives us an unlimited 
-  // supply of random bytes from a hardware-assisted entropy pool
-  ifstream f("/dev/urandom", ios_base::binary);  
-
-  if (f)
+  // Reinitialise every REINIT_PERIOD calls, including first time
+  if (!(count++ % REINIT_PERIOD))
   {
-    f.read((char *)p, n);
+#ifdef USE_DEV_URANDOM
+    // In Real Operating Systems (tm), /dev/urandom gives us an unlimited 
+    // supply of random bytes from a hardware-assisted entropy pool
+    // but it's slow, so don't do it every time, just use it to reset the
+    // PRNG now and again
+    ifstream f("/dev/urandom", ios_base::binary);  
 
-    // Check we read it, otherwise drop through to pseudo
-    if (f.gcount() == n) return;
-  }
+    if (f)
+    {
+      // Reseed from entropy bytes
+      f.read((char *)&w, 4);
+      f.read((char *)&z, 4);
+    }
+    else
 #endif
 
+    // Initialise from time
+    {
+#if defined(__WIN32__)
+      FILETIME ft;
+      GetSystemTimeAsFileTime(&ft);
+      w ^= ft.dwHighDateTime^ft.dwLowDateTime;
+      z ^= ft.dwLowDateTime;
+#else
+      struct timeval tv;
+      gettimeofday(&tv, 0);
+      w ^= tv.tv_sec ^ tv.tv_usec;
+      z ^= tv.tv_usec;
+#endif
+    }
+  }
+
   // Generate pseudo-random as a fallback
-  for(int i=0; i<n; i++) p[i] = (unsigned char)(rand() & 0xff);
+  // Marsaglia Multiply-With-Carry (MWC), converted to produce bytes
+  for(int i=0; i<n; i++) 
+  {
+    z = 36969 * (z & 65535) + (z >> 16);
+    w = 18000 * (w & 65535) + (w >> 16);
+
+    // Use all the bits to make a byte
+    p[i] = (unsigned char)(z^w^(z>>8)^(w>>8)^(z>>16)^(w>>16)^(z>>24)^(w>>24));
+  }
 }
 
 //------------------------------------------------------------------------

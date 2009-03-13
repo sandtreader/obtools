@@ -182,10 +182,10 @@ public:
 
   //--------------------------------------------------------------------------
   // Add a boolean value
-  void add(const string& name, bool value)
-  { // Avoid evil recursion due to bool->string implicit cast
-    erase(name); insert(make_pair(name, string(value?"true":"false"))); 
-  }
+  // Note: Explicitly typed to avoid horror where literal strings are cast
+  // to bool rather than std::string
+  void add_bool(const string& name, bool value)
+  { add(name, value?"true":"false"); }
 
   //--------------------------------------------------------------------------
   // Get a value, with default
@@ -267,9 +267,14 @@ ostream& operator<<(ostream& s, const PropertyList& pl);
 
 //==========================================================================
 //Random string generator
-//Uses best available random number source (e.g. /dev/urandom)
+//Uses best available random number source (e.g. /dev/urandom), falls
+//back to a Marsaglia MWC in its absence
 class Random
 {
+private:
+  uint32_t w, z;     // Seed state
+  int count;         // Number of calls to generate_binary
+
 public:
   //------------------------------------------------------------------------
   // Constructor
