@@ -844,6 +844,22 @@ void Element::detach()
 }
 
 //--------------------------------------------------------------------------
+// Remove children of the given name
+// Recursively destroys children
+void Element::remove_children(const string& name)
+{
+  for(list<Element *>::iterator p=children.begin(); p!=children.end();)
+  {
+    list<Element *>::iterator q = p++;  // Protect from deletion
+    if ((*q)->name == name)
+    {
+      delete *q;
+      children.erase(q);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------
 // Replace with the given element at same position in parent
 // Detaches this element and attaches the new one
 void Element::replace_with(Element *e)

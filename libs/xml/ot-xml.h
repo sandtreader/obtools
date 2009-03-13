@@ -510,6 +510,11 @@ public:
   void replace_with(Element *e);
 
   //--------------------------------------------------------------------------
+  // Remove children of the given name
+  // Recursively destroys children
+  void remove_children(const string& name);
+
+  //--------------------------------------------------------------------------
   // Clear children
   // Recursively destroys children
   void clear_children();
