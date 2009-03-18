@@ -278,8 +278,21 @@ bool Path::set_ownership(const string& owner, const string& group) const
 bool Path::erase() const
 {
   if (is_dir())
-#if defined(__WIN32__) // Meaningless in Windows
-    return !system((string("rmdir \"")+path+"\" /s /q").c_str());
+#if defined(__WIN32__) 
+  {
+    // Note: Shelling out to rmdir opens a console window
+
+    // Create string with extra null on the end, plus manual null in case
+    // c_str() does something odd - we use data() instead
+    string double_null = path + '\0' + '\0'; 
+    SHFILEOPSTRUCT op = 
+    {
+      0, FO_DELETE, double_null.data(), 0,
+      FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
+      false, 0, "" 
+    };
+    return !SHFileOperation(&op);
+  }
 #else
     return !system((string("rm -rf \"")+path+"\"").c_str());
 #endif

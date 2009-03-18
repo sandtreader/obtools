@@ -104,7 +104,12 @@ bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
 
   // Now convert each leaf into a Path
   for(list<string>::iterator p=leaves.begin(); p!=leaves.end(); ++p)
-    paths.push_back(Path(*this, *p));
+  {
+    string& leaf = *p;
+    // Block . and .. even when all is set
+    if (!all || (leaf != "." && leaf != ".."))
+      paths.push_back(Path(*this, leaf));
+  }
 
   return true;
 }
