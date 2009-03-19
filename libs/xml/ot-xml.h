@@ -587,12 +587,15 @@ private:
 
   //--------------------------------------------------------------------------
   //Inline character classification functions 
-  //I18N: Somewhat dangerously, we use standard isalnum - which uses the
-  //standard locale.  Behaviour of this outside ASCII is not known!
+  //Note: Only allows strict ascii
   bool is_name_start(xmlchar c)
-  { return (isalnum(c) || c==':' || c=='_'); }
+  { return (isascii(c) && isalnum(c))||c==':'||c=='_'; }
   bool is_name_char(xmlchar c)
-  { return (isalnum(c) || c==':' || c=='-' || c=='_' || c=='.'); }
+  { return (isascii(c) && isalnum(c))||c==':'||c=='-'||c=='_'||c=='.'; }
+
+  // Safe isspace including ASCII test - prevents treating (e.g.) 0xa0 as
+  // space when in Windows ANSI locale
+  bool is_ascii_space(xmlchar c) { return isascii(c) && isspace(c); }
 
   //--------------------------------------------------------------------------
   // Read a character, skipping initial whitespace, and counting lines
@@ -601,7 +604,7 @@ private:
   xmlchar skip_ws(istream &s, xmlchar c=0)
   { if (c=='\n') line++;
     for(;;) { c=0; s.get(c); 
-              if (!isspace(c)) return c; if (c=='\n') line++; } }
+              if (!is_ascii_space(c)) return c; if (c=='\n') line++; } }
 
   //--------------------------------------------------------------------------
   // Other private functions

@@ -146,7 +146,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
   for(;;)
   {
     //Next must be / > or whitespace, or it's an error
-    if (!isspace(c) && c!='/' && c!='>')
+    if (!is_ascii_space(c) && c!='/' && c!='>')
       fatal("Illegal start tag");
 
     //If it's whitespace (not / or >), skip it
@@ -176,7 +176,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       fatal("Duplicate attribute name");
 
     //Skip optional WS, then ensure =
-    if (isspace(c)) c = skip_ws(s, c);
+    if (is_ascii_space(c)) c = skip_ws(s, c);
     if (c!='=') fatal("No = given for attribute");
 
     //Skip optional WS again and get start of value 
@@ -235,7 +235,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
   string name = read_rest_of_name(c, s);
 
   //Skip optional whitespace
-  if (isspace(c)) c=skip_ws(s, c);
+  if (is_ascii_space(c)) c=skip_ws(s, c);
 
   //This must now be a '>' or its an error
   if (c!='>') throw ParseFailed();
@@ -288,7 +288,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
     //space unless we are about to end, then strip to read the rest
     //(If we're preserving whitespace, ignore all this and treat it as
     // any other character)
-    if (!(flags & PARSER_PRESERVE_WHITESPACE) && isspace(c))
+    if (!(flags & PARSER_PRESERVE_WHITESPACE) && is_ascii_space(c))
     {
       c = skip_ws(s, c);
       if (c!='<') content+=' ';  //Compress to single space, suppress at end
