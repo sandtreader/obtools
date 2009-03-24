@@ -351,8 +351,9 @@ void Client::shutdown()
     // Send a bogus message on the queue to force the send thread to wake up
     send_q.send(Message());
 
-    // Wait for threads to exit cleanly
-    for(int i=0; i<50; i++)
+    // Wait for threads to exit cleanly - enough time for a TCP connection
+    // to time out fully, and then some
+    for(int i=0; i<SOCKET_CONNECT_TIMEOUT*100+50; i++)
     {
       if (!*receive_thread && !*send_thread) break;
       MT::Thread::usleep(10000);
