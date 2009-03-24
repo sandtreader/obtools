@@ -11,6 +11,9 @@
 #include "ot-log.h"
 #include "ot-misc.h"
 
+// Timeout on initial connect
+#define SOCKET_CONNECT_TIMEOUT 5
+
 // Time to sleep for if socket dies and won't come back
 #define DEAD_SOCKET_SLEEP_TIME 10
 #define RESTART_SOCKET_SLEEP_TIME 1
@@ -47,7 +50,10 @@ class ClientReceiveThread: public MT::Thread
 	log.error << client.name << " (recv): Socket failed, can't restart\n";
 	log.error << client.name << " (recv): Sleeping for " 
 		  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
-	MT::Thread::sleep(DEAD_SOCKET_SLEEP_TIME);
+	
+	// Sleep, checking for shutdown
+	for(int i=0; client.is_alive() && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
+	  MT::Thread::usleep(10000);
       }
     }
 
@@ -71,10 +77,17 @@ bool Client::restart_socket(Log::Streams& log)
   bool starting = (socket==0);
 
   // Delete old socket, if any
-  if (socket) delete socket;
+  if (socket)
+  {
+    // Ensure we zero the pointer for anyone who's watching before we
+    // delete
+    SSL::TCPSocket *dead_socket = socket;
+    socket = 0;
+    delete dead_socket;
+  }
 
   // Try and get a new one
-  socket = new SSL::TCPClient(ctx, server);
+  socket = new SSL::TCPClient(ctx, server, SOCKET_CONNECT_TIMEOUT);
 
   if (!*socket)
   {
@@ -104,7 +117,7 @@ bool Client::restart_socket(Log::Streams& log)
 bool Client::receive_messages(Log::Streams& log)
 {
   // Check socket exists and is connected - if not, try to reconnect it
-  if ((!socket || !*socket) && !restart_socket(log)) return false;
+  if (!check_socket() && !restart_socket(log)) return false;
 
   // Wait for message to come in and post it up
   try // Handle SocketErrors
@@ -152,11 +165,20 @@ bool Client::receive_messages(Log::Streams& log)
     if (alive)
     {
       log.error << name << " (recv): " << se << endl;
-      MT::Thread::sleep(RESTART_SOCKET_SLEEP_TIME);
-      log.summary << name << " (recv): Attempting to restart socket\n";
-      return restart_socket(log);
+
+      // Sleep, checking for shutdown
+      for(int i=0; alive && i<100*RESTART_SOCKET_SLEEP_TIME; i++)
+	  MT::Thread::usleep(10000);
+
+      // Restart if not shut down
+      if (alive)
+      {
+	log.summary << name << " (recv): Attempting to restart socket\n";
+	return restart_socket(log);
+      }
     }
-    else return false;
+    
+    return false;
   }
 
   return true;
@@ -194,10 +216,12 @@ bool Client::send_messages(Log::Streams& log)
 
   // Check that socket is OK - if not, sleep hoping the receive thread
   // can reanimate it
-  while (!socket || !*socket)
+  while (!check_socket())
   {
     log.detail << name <<" (send): Socket is dead - waiting for improvement\n";
-    MT::Thread::sleep(DEAD_SOCKET_SLEEP_TIME);
+    for(int i=0; alive && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
+      MT::Thread::usleep(10000);
+    if (!alive) return false;
   }
 
   // Deal with it
@@ -227,13 +251,20 @@ bool Client::send_messages(Log::Streams& log)
     if (alive)
     {
       log.error << name << " (send): " << se << endl;
-      MT::Thread::sleep(RESTART_SOCKET_SLEEP_TIME);
-      log.summary << name << " (send): Attempting to restart socket\n";
 
-      //Try to restart socket
-      return restart_socket(log);
+      // Sleep, checking for shutdown
+      for(int i=0; alive && i<100*RESTART_SOCKET_SLEEP_TIME; i++)
+	  MT::Thread::usleep(10000);
+
+      // Try to restart socket if not shut down
+      if (alive)
+      {
+	log.summary << name << " (send): Attempting to restart socket\n";
+	return restart_socket(log);
+      }
     }
-    else return false;
+
+    return false;
   }
 
   return true;
@@ -321,7 +352,7 @@ void Client::shutdown()
     send_q.send(Message());
 
     // Wait for threads to exit cleanly
-    for(int i=0; i<5; i++)
+    for(int i=0; i<50; i++)
     {
       if (!*receive_thread && !*send_thread) break;
       MT::Thread::usleep(10000);

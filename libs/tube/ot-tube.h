@@ -142,6 +142,10 @@ protected:
   // Internal functions
   bool restart_socket(Log::Streams& log);
 
+  // Check socket which uses mutex to ensure no race condition on reading
+  // *socket
+  bool check_socket() { MT::Lock lock(mutex); return !!socket && !!*socket; }
+
   //------------------------------------------------------------------------
   // Overridable function to filter message tags - return true if tag
   // is recognised.  By default, allows any tag
