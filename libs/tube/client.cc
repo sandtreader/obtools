@@ -351,6 +351,9 @@ void Client::shutdown()
     // Send a bogus message on the queue to force the send thread to wake up
     send_q.send(Message());
 
+    // Likewise on the receive queue to tell the user
+    receive_q.send(Message());
+    
     // Wait for threads to exit cleanly - enough time for a TCP connection
     // to time out fully, and then some
     for(int i=0; i<SOCKET_CONNECT_TIMEOUT*100+50; i++)
