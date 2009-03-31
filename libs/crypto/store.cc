@@ -41,6 +41,7 @@ CertificateStore::CertificateStore(const string& ca_file,
 bool CertificateStore::verify(const Certificate& cert)
 {
   X509_STORE_CTX ctx;
+  MT::Lock lock(mutex);
 
   // Verify certificate only, no other chain
   bool result = X509_STORE_CTX_init(&ctx, store, cert.get_x509(), 0)

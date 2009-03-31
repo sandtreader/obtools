@@ -23,6 +23,8 @@
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 
+#include "ot-mt.h"
+
 namespace ObTools { namespace Crypto { 
 
 //Make our lives easier without polluting anyone else
@@ -451,9 +453,11 @@ ostream& operator<<(ostream& s, const Certificate& c);
 
 //==========================================================================
 // X509 Certificate Store
+// Mutexed for multi-thread use
 class CertificateStore
 {
   X509_STORE *store;
+  MT::Mutex mutex;      // Not clear that X509_STORE is re-entrant
 
  public:
   //------------------------------------------------------------------------
