@@ -192,6 +192,82 @@ ostream& operator<<(ostream& s, const Message& m)
 }
 
 //------------------------------------------------------------------------
+// Flatten any href/id (SOAP1.1) reference structure, taking copies of 
+// referenced elements and replacing referencing elements with them, thus
+// creating the inline equivalent document.
+// Leaves any references to ancestors (loops) alone
+// Modifies all bodies in place
+void Message::flatten_bodies()
+{
+  if (!doc) return;
+
+  for(XML::Element::iterator p(doc->get_children("env:Body")); p; ++p)
+  {
+    XML::Element& body = *p;
+
+    // Recursively search for id attributes
+    map<string, XML::Element *> ids;
+    fill_id_map(body, ids);
+
+    // Now fix up all elements with href attributes
+    fix_hrefs(body, ids);
+  }
+}
+
+//------------------------------------------------------------------------
+// Recurse a (sub)-document looking for id attributes and filling in the
+// given map
+void Message::fill_id_map(XML::Element& e, map<string, XML::Element *>& ids)
+{
+  // Does this one have an ID?
+  if (e.has_attr("id")) ids[e["id"]] = &e;
+
+  // Recurse to children
+  for(XML::Element::iterator p(e.children); p; ++p)
+    fill_id_map(*p, ids);
+}
+
+//------------------------------------------------------------------------
+// Fix up a (sub)-document looking for href attributes and replacing the
+// element containing it with a copy of the element referred to
+void Message::fix_hrefs(XML::Element& e, map<string, XML::Element *>& ids)
+{
+  // Does this one have an href?
+  if (e.has_attr("href"))
+  {
+    string frag = e["href"];
+
+    // Lose # at front
+    if (!frag.empty() && frag[0] == '#') frag = string(frag, 1);
+
+    // Get referred element
+    XML::Element *ref = ids[frag];
+    if (!ref) return;
+
+    // Make sure this isn't 'e' or an ancestor of 'e', to prevent loops
+    for(XML::Element *pe = &e; pe; pe=pe->parent)
+      if (pe == ref) return;
+
+    // Replace this element with a copy of the referred one, but with
+    // the name changed to that of the referrer
+    XML::Element *copy = ref->deep_copy();
+    copy->name = e.name;
+
+    // Recurse to this to replace hrefs inside it
+    fix_hrefs(*copy, ids);
+
+    // Replace element with this (e goes invalid here)
+    e.replace_with(copy);
+  }
+  else 
+  {
+    // Recurse to children
+    for(XML::Element::iterator p(e.children); p; ++p)
+      fix_hrefs(*p, ids);
+  }
+}
+
+//------------------------------------------------------------------------
 // Get first (or only) body element
 // Returns Element::none if none
 XML::Element& Message::get_body() const

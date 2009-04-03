@@ -84,6 +84,10 @@ class Message
 private:
   XML::Element *doc;
 
+  // Internals
+  void fill_id_map(XML::Element& e, map<string, XML::Element *>& ids);
+  void fix_hrefs(XML::Element& e, map<string, XML::Element *>& ids);
+
 public:
   //------------------------------------------------------------------------
   // Default constructor - empty header and body
@@ -165,6 +169,14 @@ public:
   //------------------------------------------------------------------------
   // Output to XML text
   string to_string() const;
+
+  //------------------------------------------------------------------------
+  // Flatten any href/id (SOAP1.1) reference structure, taking copies of 
+  // referenced elements and replacing referencing elements with them, thus
+  // creating the inline equivalent document.
+  // Leaves any references to ancestors (loops) alone
+  // Modifies all bodies in place
+  void flatten_bodies();
 
   //------------------------------------------------------------------------
   // Get first (or only) body element
