@@ -330,6 +330,7 @@ private:
   string user_agent;    // String to quote in User-Agent: header
   Net::EndPoint last_local_address;  // Address we connected from last, for P2P
   SSL::Context *ssl_ctx; // Optional SSL context
+  int timeout;           // Optional connection timeout, 0 by default
 
 protected:
   Net::EndPoint server;
@@ -337,18 +338,20 @@ protected:
 public:
   //--------------------------------------------------------------------------
   // Constructor from server
-  HTTPClient(Net::EndPoint _server, const string& _ua=""): 
-    user_agent(_ua), ssl_ctx(0), server(_server) {}
+  HTTPClient(Net::EndPoint _server, const string& _ua="", int _timeout=0): 
+    user_agent(_ua), ssl_ctx(0), timeout(_timeout), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor for SSL
-  HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua=""): 
-    user_agent(_ua), ssl_ctx(_ctx), server(_server) {}
+  HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua="",
+	     int _timeout=0): 
+    user_agent(_ua), ssl_ctx(_ctx), timeout(_timeout), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
   // Handles https if ctx is set
-  HTTPClient(URL& url, SSL::Context *_ctx=0, const string& _ua="");
+  HTTPClient(URL& url, SSL::Context *_ctx=0, const string& _ua="",
+	     int _timeout=0);
 
   //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response

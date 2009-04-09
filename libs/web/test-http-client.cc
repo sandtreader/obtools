@@ -52,7 +52,7 @@ int main(int argc, char **argv)
   SSL::Context ctx;
 
 
-  Web::HTTPClient client(url, &ctx, "ObTools Test HTTP client");
+  Web::HTTPClient client(url, &ctx, "ObTools Test HTTP client", 5);
   string body;
   int result = post?client.post(url, in, body):client.get(url, body);
   if (result == 200)

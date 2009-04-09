@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   string soap_action(argv[2]);
 
   log.summary << "Test SOAP client to " << url << "(" << soap_action << ")\n";
-  SOAP::HTTPClient client(url, "ObTools Test SOAP client");
+  SOAP::HTTPClient client(url, "ObTools Test SOAP client", 5);
 
   // Create SOAP message
   SOAP::Parser parser(log.error);

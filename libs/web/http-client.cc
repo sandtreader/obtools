@@ -17,8 +17,9 @@ namespace ObTools { namespace Web {
 //--------------------------------------------------------------------------
 // Constructor from URL - extracts server from host/port parts
 // Handles https if ctx is set
-HTTPClient::HTTPClient(URL& url, SSL::Context *_ctx, const string& _ua): 
-  user_agent(_ua), ssl_ctx(_ctx)
+HTTPClient::HTTPClient(URL& url, SSL::Context *_ctx, const string& _ua,
+		       int _timeout): 
+  user_agent(_ua), ssl_ctx(_ctx), timeout(_timeout)
 {
   XML::Element xml;
   if (url.split(xml))
@@ -95,7 +96,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   OBTOOLS_LOG_IF_DUMP(request.write(log.dump);)
 
   // HTTP1.0 - create TCPClient for each fetch
-  SSL::TCPClient client(ssl_ctx, server);
+  SSL::TCPClient client(ssl_ctx, server, timeout);
   if (!client)
   {
     log.error << "HTTP: Can't connect to " << server << endl;

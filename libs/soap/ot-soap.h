@@ -327,23 +327,25 @@ class HTTPClient: public Web::HTTPClient
 public:
   //--------------------------------------------------------------------------
   // Constructor from server, no SSL
-  HTTPClient(Net::EndPoint _server, const string& _ua=""): 
-    Web::HTTPClient(_server, _ua) {}
+  HTTPClient(Net::EndPoint _server, const string& _ua="", int _timeout=0): 
+    Web::HTTPClient(_server, _ua, _timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from server, with SSL
-  HTTPClient(Net::EndPoint _server, SSL::Context *ctx, const string& _ua=""): 
-    Web::HTTPClient(_server, ctx, _ua) {}
+  HTTPClient(Net::EndPoint _server, SSL::Context *ctx, const string& _ua="",
+	     int _timeout=0): 
+    Web::HTTPClient(_server, ctx, _ua, _timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL, no SSL - extracts server from host/port parts
-  HTTPClient(Web::URL& url, const string& _ua=""):
-    Web::HTTPClient(url, 0, _ua) {}
+  HTTPClient(Web::URL& url, const string& _ua="", int _timeout=0):
+    Web::HTTPClient(url, 0, _ua, _timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL, with SSL - extracts server from host/port parts
-  HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua=""):
-    Web::HTTPClient(url, ctx, _ua) {}
+  HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua="",
+	     int _timeout=0):
+    Web::HTTPClient(url, ctx, _ua, _timeout) {}
 
   //--------------------------------------------------------------------------
   // Simple request POST operation on a specified URL and SOAP action
