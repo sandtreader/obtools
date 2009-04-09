@@ -18,8 +18,9 @@ namespace ObTools { namespace Web {
 // Constructor from URL - extracts server from host/port parts
 // Handles https if ctx is set
 HTTPClient::HTTPClient(URL& url, SSL::Context *_ctx, const string& _ua,
-		       int _timeout): 
-  user_agent(_ua), ssl_ctx(_ctx), timeout(_timeout)
+		       int _connection_timeout, int _operation_timeout): 
+  user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
+  operation_timeout(_operation_timeout)
 {
   XML::Element xml;
   if (url.split(xml))
@@ -96,7 +97,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   OBTOOLS_LOG_IF_DUMP(request.write(log.dump);)
 
   // HTTP1.0 - create TCPClient for each fetch
-  SSL::TCPClient client(ssl_ctx, server, timeout);
+  SSL::TCPClient client(ssl_ctx, server, connection_timeout);
   if (!client)
   {
     log.error << "HTTP: Can't connect to " << server << endl;
@@ -107,6 +108,9 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   // and offer a server on here immediately;
   client.enable_reuse();
   last_local_address = client.local();
+
+  // Reset timeout for actual operation as well
+  client.set_timeout(operation_timeout);
 
   try
   {
