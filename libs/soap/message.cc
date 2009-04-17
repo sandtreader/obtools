@@ -256,8 +256,11 @@ void Message::fix_hrefs(XML::Element& e, map<string, XML::Element *>& ids)
     // Recurse to this to replace hrefs inside it
     fix_hrefs(*copy, ids);
 
-    // Replace element with this (e goes invalid here)
+    // Replace element with this 
     e.replace_with(copy);
+
+    // Delete old element (e goes invalid here)
+    delete &e;
   }
   else 
   {
