@@ -103,27 +103,46 @@ bool Client::request(Message& req, Message& response)
     return false;
   }
 
+  bool restarted = false;
+
   for(;;)
   {
     // Block waiting for a message (note, don't use wait(), otherwise
     // we end up going in circles!)
     string data;
-    if (!transport.wait(data)) 
+    if (transport.wait(data)) 
     {
-      log.summary << "Transport restarted - resubscribing\n";
-      resubscribe();
-      continue;
+      response = Message(data);
+
+      // Make sure the ref's match
+      // Note:  This is the simplest synchronous send/receive;  assumes
+      // no interleaving of responses
+      if (req.get_id() == response.get_ref())
+      {
+	// Did we restart earlier - now resubscribe after we've got the
+	// result of our original request out of the way
+	if (restarted)
+	{
+	  log.summary << "Resubscribing\n";
+	  resubscribe();
+	}
+
+	return true;
+      }
+
+      // Requeue on the secondary queue so wait() gets it later
+      secondary_q.push(response);
     }
+    else
+    {
+      log.summary << "Transport restarted\n";
 
-    response = Message(data);
-
-    // Make sure the ref's match
-    // Note:  This is the simplest synchronous send/receive;  assumes
-    // no interleaving of responses
-    if (req.get_id() == response.get_ref()) return true;
-
-    // Requeue on the secondary queue so wait() gets it later
-    secondary_q.push(response);
+      // Note resubscribe is required - this will be actioned once we've
+      // got our result
+      // !Note:  If you don't do this you fall in a heap if the message
+      // we're doing is itself a subscription message!
+      restarted = true;
+    }
   }
 }
 
