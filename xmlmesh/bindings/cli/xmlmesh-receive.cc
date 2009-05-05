@@ -173,8 +173,11 @@ int main(int argc, char **argv)
 
     // Get message
     if (!client.wait(msg))
+    {
       log.error << "Message transport restarted: Messages might have been missed\n";
-    
+      continue;
+    }
+
     string subject = msg.get_subject();
     string text;
     bool rsvp = msg.get_rsvp();
