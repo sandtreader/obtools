@@ -23,6 +23,8 @@
 using namespace std;
 using namespace ObTools;
 
+#define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
+
 //--------------------------------------------------------------------------
 // Usage
 void usage(char *pname)
@@ -43,7 +45,8 @@ void usage(char *pname)
   cout << "                   Default is received subject with '.response' appended\n";
   cout << "  -s --soap        Pass in full SOAP message wrapper\n";
   cout << "  -v --verbose     More logging\n";
-  cout << "  -q --quiet       No logging, even on error\n";
+  cout << "  -q --quiet       Less logging\n";
+  cout << "  -l --log <file>  Send logging to a file\n";
   cout << "  -f --foreground  Run in foreground rather than as a daemon\n";
   cout << "  -1 --oneshot     Receive only one message and exit (default, loops forever)\n";
   cout << "  -h --host <host> Set XMLMesh host (default 'localhost')\n";
@@ -73,7 +76,8 @@ int main(int argc, char **argv)
   bool oneshot = false;
   string host("localhost");
   int port = XMLMesh::OTMP::DEFAULT_PORT;
-  Log::Level log_level = Log::LEVEL_SUMMARY;
+  int log_level = Log::LEVEL_SUMMARY;
+  string logfile;
 
   // Parse options
   for(int i=1; i<argc; i++)
@@ -93,12 +97,11 @@ int main(int argc, char **argv)
       else if (opt == "-s" || opt == "--soap")
 	soap = true;
       else if (opt == "-v" || opt == "--verbose")
-      {
-	log_level = Log::LEVEL_DETAIL;
-	OBTOOLS_LOG_IF_DEBUG(log_level = Log::LEVEL_DEBUG;)
-      }
+	log_level++;
       else if (opt == "-q" || opt == "--quiet")
-	log_level = Log::LEVEL_NONE;
+	log_level--;
+      else if ((opt == "-l" || opt == "--log") && i<argc-2)
+	logfile = argv[++i];
       else if (opt == "-f" || opt == "--foreground")
 	foreground = true;
       else if (opt == "-1" || opt == "--oneshot")
@@ -138,8 +141,24 @@ int main(int argc, char **argv)
   }
 
   // Set up logging
-  Log::StreamChannel   chan_out(cout);
-  Log::LevelFilter     level_out(log_level, chan_out);
+  Log::StreamChannel *chan_out;
+  if (logfile.empty())
+  {
+    chan_out = new Log::StreamChannel(cout);
+  }
+  else
+  {
+    ofstream *logstream = new ofstream(logfile.c_str(),ios::app);
+    if (!*logstream)
+    {
+      cerr << "Unable to open logfile " << logfile << endl;
+      return 2;
+    }
+    chan_out = new Log::StreamChannel(*logstream);
+  }
+
+  Log::TimestampFilter tsfilter(DEFAULT_TIMESTAMP, *chan_out);
+  Log::LevelFilter     level_out((Log::Level)log_level, tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
 
@@ -147,7 +166,7 @@ int main(int argc, char **argv)
   Net::IPAddress addr(host);
   if (!addr)
   {
-    cerr << "Can't resolve host: " << host << endl;
+    log.error << "Can't resolve host: " << host << endl;
     return 1;
   }
 
@@ -162,7 +181,7 @@ int main(int argc, char **argv)
   log.summary << "Subscribing for subject: " << subject << endl;
   if (!client.subscribe(subject))
   {
-    cerr << "Can't subscribe to XMLMesh\n";
+    log.error << "Can't subscribe to XMLMesh\n";
     return 2;
   }
 
@@ -197,7 +216,7 @@ int main(int argc, char **argv)
 
     if (pipe(stdin_pipe) || pipe(stdout_pipe))
     {
-      cerr << "Can't create pipes: " << strerror(errno) << endl;
+      log.error << "Can't create pipes: " << strerror(errno) << endl;
       return 2;
     }
 
@@ -206,7 +225,7 @@ int main(int argc, char **argv)
 
     if (child < 0)
     {
-      cerr << "Can't fork: " << strerror(errno) << endl;
+      log.error << "Can't fork: " << strerror(errno) << endl;
       return 2;
     }
 
@@ -323,8 +342,8 @@ int main(int argc, char **argv)
       // Exec the receiver
       if (execl(process.c_str(), process.c_str(), subject.c_str(), 0))
       {
-	cerr << "Can't exec " << process << ": " << strerror(errno) << endl;
-	cout << "Can't start receiving process\n";
+	log.error << "Can't exec " << process << ": " << strerror(errno) << endl;
+	log.summary << "Can't start receiving process\n";
 	return 2;
       }
     }
