@@ -14,6 +14,10 @@
 #include <unistd.h>
 #include <sstream>
 
+#define DEFAULT_BACKLOG 5
+#define DEFAULT_MAX_THREADS 25
+#define DEFAULT_MIN_THREADS 1
+
 namespace ObTools { namespace XMLMesh {
 
 //==========================================================================
@@ -53,6 +57,9 @@ class OTMPServer: public Service
 {
 private:
   int port;
+  int backlog;
+  int min_spare_threads;
+  int max_threads;
 
   OTMP::Server otmp;
   OTMPServerThread  server_thread;
@@ -83,12 +90,18 @@ public:
 OTMPServer::OTMPServer(XML::Element& cfg):
   Service(cfg),
   port(cfg.get_attr_int("port", OTMP::DEFAULT_PORT)),
-  otmp(receive_q, port), 
+  backlog(cfg.get_attr_int("backlog", DEFAULT_BACKLOG)),
+  min_spare_threads(cfg.get_attr_int("min-spare", DEFAULT_MIN_THREADS)),
+  max_threads(cfg.get_attr_int("max-threads", DEFAULT_MAX_THREADS)),
+  otmp(receive_q, port, backlog, min_spare_threads, max_threads), 
   server_thread(otmp), 
   message_thread(*this)
 {
   bool filtered = false;
   log.summary << "OTMP server on port " << port << endl;
+  log.detail << "Listen backlog " << backlog << endl;
+  log.detail << "Minimum spare threads: " << min_spare_threads << endl;
+  log.summary << "Maximum threads: " << max_threads << endl;
 
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(filter, cfg, "filter")
     string addr = filter["address"];

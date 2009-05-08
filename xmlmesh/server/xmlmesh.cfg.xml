@@ -32,8 +32,13 @@
   <!-- Configured service modules - each has an 'id' used in routing below -->
   <services>
 
-    <!-- Main OTMP protocol server.  Binds to given 'port' (default 29167) -->
-    <otmp-server port="29167" id="server">
+    <!-- Main OTMP protocol server.  Binds to given 'port' (default 29167).
+         'backlog' (default 5) gives the accept() backlog for new connections
+         'min-spare' is the minimum spare threads to keep in the pool (1) 
+	 'max-threads' is the maximum threads allowed
+     -->
+    <otmp-server id="server" port="29167" backlog="5"
+                 max-threads="50" min-spare="10">
 
       <!-- Address filters:  Messages will only be
            accepted from clients matching the given 'address'.
