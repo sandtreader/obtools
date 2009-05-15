@@ -69,6 +69,35 @@ bool Configuration::read(const string& ename)
 }
 
 //------------------------------------------------------------------------
+// Read from XML text
+// If specified, ename is the expected root element name - fails if wrong
+bool Configuration::read_text(const string& text, const string& ename)
+{
+  try
+  {
+    parser.read_from(text);
+  }
+  catch (ParseFailed)
+  {
+    serr << "Bad XML in config file\n";
+    return false;
+  }
+
+  if (!ename.empty())
+  {
+    Element& root = parser.get_root();
+    if (root.name != ename)
+    {
+      serr << "Bad root in config text - expected <" << ename 
+	   << ">, got <" << root.name << ">\n";
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//------------------------------------------------------------------------
 // Reload configuration file as the same element as before
 // Returns whether successful
 bool Configuration::reload()

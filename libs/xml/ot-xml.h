@@ -890,6 +890,11 @@ public:
   bool read(const string& ename="");
 
   //------------------------------------------------------------------------
+  // Read from XML text
+  // If specified, ename is the expected root element name - fails if wrong
+  bool read_text(const string& text, const string& ename="");
+
+  //------------------------------------------------------------------------
   // Reload configuration file as the same element as before
   // Returns whether successful
   bool reload();
