@@ -564,6 +564,12 @@ class Cache
   // Fetch a file from the given URL, or from cache
   // Returns whether file was fetched, writes file location to path_p if so
   bool fetch(URL& url, File::Path& path_p);
+
+  //--------------------------------------------------------------------------
+  // Fetch an object from the given URL, or from cache, as a string
+  // Returns whether file was fetched, writes file contents to contents_p if so
+  bool fetch(URL& url, string& contents_p);
+
 };
 
 //==========================================================================

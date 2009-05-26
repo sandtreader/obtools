@@ -134,6 +134,15 @@ bool Cache::fetch(URL& url, File::Path& path_p)
 }
 
 //--------------------------------------------------------------------------
+// Fetch an object from the given URL, or from cache, as a string
+// Returns whether file was fetched, writes file contents to contents_p if so
+bool Cache::fetch(URL& url, string& contents_p)
+{
+  File::Path path;
+  return fetch(url, path) && path.read_all(contents_p);
+}
+
+//--------------------------------------------------------------------------
 // Prune any out-of-date files
 void Cache::prune(File::Directory &dir)
 {
