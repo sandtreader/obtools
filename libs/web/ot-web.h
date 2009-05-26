@@ -57,7 +57,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Get the text of the URL
-  string get_text() { return text; }
+  string get_text() const { return text; }
 
   //--------------------------------------------------------------------------
   // Clear the URL
@@ -68,23 +68,23 @@ public:
   // Pass in an empty element, and this will fill it up as above
   // Name of element is set to 'url'
   // Returns whether successful (valid URL)
-  bool split(XML::Element& xml);
+  bool split(XML::Element& xml) const;
 
   //------------------------------------------------------------------------
   // Quick access to path of URL
   // Returns path or "" if can't read it
-  string get_path();
+  string get_path() const;
 
   //------------------------------------------------------------------------
   // Quick access to query of URL
   // Returns query or "" if can't read it
-  string get_query();
+  string get_query() const;
 
   //------------------------------------------------------------------------
   // Get query as a property list
   // Returns whether query was available, fills props if so
   // Note: Handles + for space and % decode in values
-  bool get_query(Misc::PropertyList& props);
+  bool get_query(Misc::PropertyList& props) const;
 
   //------------------------------------------------------------------------
   // Static function to URL-encode (percent-encode) a string
@@ -355,7 +355,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
   // Handles https if ctx is set
-  HTTPClient(URL& url, SSL::Context *_ctx=0, const string& _ua="",
+  HTTPClient(const URL& url, SSL::Context *_ctx=0, const string& _ua="",
 	     int _connection_timeout=0, int _operation_timeout=0);
 
   //--------------------------------------------------------------------------
@@ -366,13 +366,13 @@ public:
   //--------------------------------------------------------------------------
   // Simple GET operation on a URL
   // Returns result code, fills in body if provided, reason code if not
-  int get(URL url, string& body);
+  int get(const URL& url, string& body);
 
   //--------------------------------------------------------------------------
   // Simple POST operation on a URL
   // Returns result code, fills in response_body if provided, 
   // reason code if not
-  int post(URL url, const string& request_body, string& response_body);
+  int post(const URL& url, const string& request_body, string& response_body);
 
   //--------------------------------------------------------------------------
   // Get the local address we last connected from (for P2P)
@@ -563,12 +563,12 @@ class Cache
   //--------------------------------------------------------------------------
   // Fetch a file from the given URL, or from cache
   // Returns whether file was fetched, writes file location to path_p if so
-  bool fetch(URL& url, File::Path& path_p);
+  bool fetch(const URL& url, File::Path& path_p);
 
   //--------------------------------------------------------------------------
   // Fetch an object from the given URL, or from cache, as a string
   // Returns whether file was fetched, writes file contents to contents_p if so
-  bool fetch(URL& url, string& contents_p);
+  bool fetch(const URL& url, string& contents_p);
 
 };
 

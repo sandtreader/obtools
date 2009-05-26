@@ -17,7 +17,7 @@ namespace ObTools { namespace Web {
 //--------------------------------------------------------------------------
 // Constructor from URL - extracts server from host/port parts
 // Handles https if ctx is set
-HTTPClient::HTTPClient(URL& url, SSL::Context *_ctx, const string& _ua,
+HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
 		       int _connection_timeout, int _operation_timeout): 
   user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
   operation_timeout(_operation_timeout)
@@ -152,7 +152,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
 //--------------------------------------------------------------------------
 // Simple GET operation on a URL
 // Returns result code, fills in body if provided, reason code if not
-int HTTPClient::get(URL url, string& body)
+int HTTPClient::get(const URL& url, string& body)
 {
   HTTPMessage request("GET", url);
   HTTPMessage response;
@@ -175,7 +175,7 @@ int HTTPClient::get(URL url, string& body)
 //--------------------------------------------------------------------------
 // Simple POST operation on a URL
 // Returns result code, fills in response_body if provided, reason code if not
-int HTTPClient::post(URL url, const string& request_body,
+int HTTPClient::post(const URL& url, const string& request_body,
 		     string& response_body)
 {
   HTTPMessage request("POST", url);

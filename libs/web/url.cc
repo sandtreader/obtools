@@ -50,7 +50,7 @@ URL::URL(XML::Element& xml)
 
 //--------------------------------------------------------------------------
 // Split text into XML
-bool URL::split(XML::Element& xml)
+bool URL::split(XML::Element& xml) const
 {
   // Set XML element name so it will print OK
   xml.name = "url";
@@ -136,7 +136,7 @@ bool URL::split(XML::Element& xml)
 //------------------------------------------------------------------------
 // Quick access to path of URL
 // Returns path or "" if can't read it
-string URL::get_path()
+string URL::get_path() const
 {
   XML::Element xml;
   if (!split(xml)) return "";
@@ -146,7 +146,7 @@ string URL::get_path()
 //------------------------------------------------------------------------
 // Quick access to query of URL
 // Returns query or "" if can't read it
-string URL::get_query()
+string URL::get_query() const
 {
   XML::Element xml;
   if (!split(xml)) return "";
@@ -157,7 +157,7 @@ string URL::get_query()
 // Get query as a property list
 // Returns whether query was available, fills props if so
 // Note: Handles + for space and % decode in values
-bool URL::get_query(Misc::PropertyList& props)
+bool URL::get_query(Misc::PropertyList& props) const
 {
   string query = get_query();
   if (query.empty()) return false;

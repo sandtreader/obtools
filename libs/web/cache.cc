@@ -31,7 +31,7 @@ Cache::Cache(const File::Directory& _dir, Time::Duration _time,
 //--------------------------------------------------------------------------
 // Fetch a file from the given URL, or from cache
 // Returns whether file was fetched, writes file location to path_p if so
-bool Cache::fetch(URL& url, File::Path& path_p)
+bool Cache::fetch(const URL& url, File::Path& path_p)
 {
   Log::Streams log;
   log.summary << "Web cache: requesting " << url << endl;
@@ -72,19 +72,21 @@ bool Cache::fetch(URL& url, File::Path& path_p)
     return true;
   }
 
+  URL actual_url = url;
+
   for(int i=0; i<MAX_REDIRECTS; i++)
   {
-    log.detail << "Fetch required from " << url << endl;
+    log.detail << "Fetch required from " << actual_url << endl;
 
     // Need to fetch it
     SSL::Context ctx;    // Only used for https
-    Web::HTTPClient client(url, &ctx, user_agent, 5, 5);
-    HTTPMessage request("GET", url);
+    Web::HTTPClient client(actual_url, &ctx, user_agent, 5, 5);
+    HTTPMessage request("GET", actual_url);
     HTTPMessage response;
 
     if (!client.fetch(request, response))
     {
-      log.error << "Fetch from " << url << " failed\n";
+      log.error << "Fetch from " << actual_url << " failed\n";
       return false;
     }
 
@@ -117,8 +119,8 @@ bool Cache::fetch(URL& url, File::Path& path_p)
       }
 
       case 301: case 302:
-	url = Web::URL(response.headers.get("location"));
-	log.detail << "Redirect to " << url << endl;
+	actual_url = Web::URL(response.headers.get("location"));
+	log.detail << "Redirect to " << actual_url << endl;
 	break;  // Loops to retry fetch
 
       default:
@@ -129,14 +131,15 @@ bool Cache::fetch(URL& url, File::Path& path_p)
   }
 
   // Ran out of redirects
-  log.error << "Too many redirects on url " << url << endl;
+  log.error << "Too many redirects from url " << url << endl;
+  log.detail << "Last one before we gave up was " << actual_url << endl;
   return false;
 }
 
 //--------------------------------------------------------------------------
 // Fetch an object from the given URL, or from cache, as a string
 // Returns whether file was fetched, writes file contents to contents_p if so
-bool Cache::fetch(URL& url, string& contents_p)
+bool Cache::fetch(const URL& url, string& contents_p)
 {
   File::Path path;
   return fetch(url, path) && path.read_all(contents_p);
