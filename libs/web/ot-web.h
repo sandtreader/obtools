@@ -20,6 +20,7 @@
 #include "ot-ssl.h"
 #include "ot-mt.h"
 #include "ot-log.h"
+#include "ot-file.h"
 
 namespace ObTools { namespace Web { 
 
@@ -536,6 +537,33 @@ public:
   //--------------------------------------------------------------------------
   // Destructor
   ~SimpleHTTPServer();
+};
+
+//==========================================================================
+// HTTP cache
+// Maintains a directory with a subdirectory for each domain, then MD5-ed
+// Currently ignores Expires etc. and simply keeps for the cache_time given
+// URLs for filenames
+class Cache
+{
+  File::Directory directory;
+  Time::Duration cache_time;
+  string user_agent;  
+  
+  // Internal
+  void prune(File::Directory &dir);
+
+ public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  // Time and UA are used if specified, otherwise a default is used
+  Cache(const File::Directory& _dir, Time::Duration _time=Time::Duration(), 
+	const string& _ua="");
+
+  //--------------------------------------------------------------------------
+  // Fetch a file from the given URL, or from cache
+  // Returns whether file was fetched, writes file location to path_p if so
+  bool fetch(URL& url, File::Path& path_p);
 };
 
 //==========================================================================
