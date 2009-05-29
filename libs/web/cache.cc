@@ -124,8 +124,8 @@ bool Cache::fetch(const URL& url, File::Path& path_p)
 	break;  // Loops to retry fetch
 
       default:
-	log.error << "HTTP cache fetch failed: code " << response.code << endl;
-	log.detail << response.reason << endl;
+	log.error << "HTTP cache fetch failed: " << response.code 
+		  << " " << response.reason << endl;
 	return false;
     }
   }

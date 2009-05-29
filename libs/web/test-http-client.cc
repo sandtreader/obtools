@@ -51,14 +51,15 @@ int main(int argc, char **argv)
   // Create SSL Context
   SSL::Context ctx;
 
-
   Web::HTTPClient client(url, &ctx, "ObTools Test HTTP client", 5, 5);
   string body;
   int result = post?client.post(url, in, body):client.get(url, body);
   if (result == 200)
   {
+    log.detail << "We connected from " << client.get_last_local_address() 
+	       << endl;
+
     cout << body << endl;
-    cout << "We connected from " << client.get_last_local_address() << endl;
     return 0;
   }
   else
