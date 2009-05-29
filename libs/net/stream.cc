@@ -73,7 +73,7 @@ int TCPStreamBuf::underflow()
   if (n>0)
   {
     setg(in_buf, in_buf, in_buf+n);
-    return *in_buf;
+    return *(unsigned char *)in_buf; // Avoid sign extension generating EOF!
   }
   else return traits_type::eof();
 }
