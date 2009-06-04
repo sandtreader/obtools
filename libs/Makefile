@@ -7,7 +7,7 @@
 
 SUBS = text xml xmi cppt regen mt net chan misc time log cache   \
        db db-pgsql db-mysql                                      \
-       cli init crypto ssl web soap file hash tube access dns    \
+       cli init crypto ssl file web soap hash tube access dns    \
        superlibs
 
 #Different for cross compile
