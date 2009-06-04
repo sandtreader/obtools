@@ -40,7 +40,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  text:libs/text   			\
 	  time:libs/time			\
 	  tube:libs/tube:net,log,mt,chan,misc,ssl   \
-	  web:libs/web:xml,misc,log,net,ssl     \
+	  web:libs/web:xml,misc,log,net,ssl,file     \
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml:text    			\
 	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
