@@ -549,10 +549,7 @@ class Cache
   File::Directory directory;
   Time::Duration cache_time;
   string user_agent;  
-  
-  // Internal
-  void prune(File::Directory &dir);
-
+ 
  public:
   //--------------------------------------------------------------------------
   // Constructor
@@ -561,15 +558,15 @@ class Cache
 	const string& _ua="");
 
   //--------------------------------------------------------------------------
-  // Fetch a file from the given URL, or from cache
-  // Returns whether file was fetched, writes file location to path_p if so
-  bool fetch(const URL& url, File::Path& path_p);
+  // If 'check_updates' is set, checks for updates if not checked more recently
+  // than 'cache_time', otherwise only fetches file if it doesn't exist at all
+  // Returns whether file is available, writes file location to path_p if so
+  bool fetch(const URL& url, File::Path& path_p, bool check_updates=true);
 
   //--------------------------------------------------------------------------
   // Fetch an object from the given URL, or from cache, as a string
   // Returns whether file was fetched, writes file contents to contents_p if so
-  bool fetch(const URL& url, string& contents_p);
-
+  bool fetch(const URL& url, string& contents_p, bool check_updates=true);
 };
 
 //==========================================================================

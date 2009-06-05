@@ -15,6 +15,8 @@
 #define DEFAULT_USER_AGENT "ObTools Web Cache"
 #define DEFAULT_CACHE_TIME "24 hours"
 #define MAX_REDIRECTS 5
+#define STATUS_PREFIX "."
+#define STATUS_SUFFIX ".status.xml"
 
 namespace ObTools { namespace Web {
 
@@ -30,8 +32,10 @@ Cache::Cache(const File::Directory& _dir, Time::Duration _time,
 
 //--------------------------------------------------------------------------
 // Fetch a file from the given URL, or from cache
-// Returns whether file was fetched, writes file location to path_p if so
-bool Cache::fetch(const URL& url, File::Path& path_p)
+// If 'check_updates' is set, checks for updates if not checked more recently
+// than 'cache_time', otherwise only fetches file if it doesn't exist at all
+// Returns whether file is available, writes file location to path_p if so
+bool Cache::fetch(const URL& url, File::Path& path_p, bool check_updates)
 {
   Log::Streams log;
   log.summary << "Web cache: requesting " << url << endl;
@@ -48,10 +52,6 @@ bool Cache::fetch(const URL& url, File::Path& path_p)
   // Construct domain directory from URL domain
   File::Directory domain_dir(directory, xpath["host"]);
 
-  // Now is a good time to prune this directory - both for this file
-  // and also to get rid of any other junk
-  prune(domain_dir);
-
   // Get filename base from the MD5 of the whole URL
   Misc::MD5 md5;
   string base = md5.sum(url.get_text());
@@ -65,8 +65,33 @@ bool Cache::fetch(const URL& url, File::Path& path_p)
   File::Path path(domain_dir, base);
   log.detail << "URL maps to " << path << endl;
 
-  // Does it exist?
-  if (path.exists())
+  // Construct the status filename
+  File::Path status_path(domain_dir, STATUS_PREFIX+base+STATUS_SUFFIX);
+  XML::Configuration status_cfg(status_path.str(), log.error);
+  if (status_path.exists())
+    status_cfg.read("status");  // Read it
+  else
+    status_cfg.replace_root("status"); // Create root
+
+  // Get last check time
+  if (check_updates)
+  {
+    Time::Stamp last_check = Time::Stamp(status_cfg["check/@time"]);
+    if (!!last_check)
+      log.detail << "Last checked at " << last_check.iso() << endl;
+    else
+      log.detail << "This is the first check\n";
+
+    // Does it need checking again?
+    if (Time::Stamp::now() - last_check < cache_time)
+    {
+      log.detail << "Doesn't need checking again\n";
+      check_updates = false;
+    }
+  }
+
+  // If no update check required, and it exists, that's enough
+  if (!check_updates && path.exists())
   {
     path_p = path;
     return true;
@@ -84,6 +109,14 @@ bool Cache::fetch(const URL& url, File::Path& path_p)
     HTTPMessage request("GET", actual_url);
     HTTPMessage response;
 
+    // If we have existing last-modified and/or etag, make it conditional
+    string lm = status_cfg["server/last-modified"];
+    if (!lm.empty()) request.headers.put("If-Modified-Since", lm);
+
+    string etag = status_cfg["server/etag"];
+    if (!etag.empty()) request.headers.put("If-None-Match", etag);
+
+    // Do it
     if (!client.fetch(request, response))
     {
       log.error << "Fetch from " << actual_url << " failed\n";
@@ -114,14 +147,36 @@ bool Cache::fetch(const URL& url, File::Path& path_p)
 	  return false;
 	}
 
+	// Capture last-modified and E-tag for the config
+	status_cfg.ensure_path("server/last-modified");
+	status_cfg.set_value("server/last-modified", 
+			     response.headers.get("last-modified"));
+
+	status_cfg.ensure_path("server/etag");
+	status_cfg.set_value("server/etag", response.headers.get("etag"));
+
+	// Update last check time
+	status_cfg.ensure_path("check");
+	status_cfg.set_value("check/@time", Time::Stamp::now().iso()); 
+
+	status_cfg.write();
+
 	path_p = path;
 	return true;
       }
 
-      case 301: case 302:
+      case 301: case 302:  // Moved
 	actual_url = Web::URL(response.headers.get("location"));
 	log.detail << "Redirect to " << actual_url << endl;
 	break;  // Loops to retry fetch
+
+      case 304:  // Not modified
+	// Update last check time only
+	status_cfg.ensure_path("check");
+	status_cfg.set_value("check/@time", Time::Stamp::now().iso()); 
+	status_cfg.write();
+	path_p = path;
+	return true;
 
       default:
 	log.error << "HTTP cache fetch failed: " << response.code 
@@ -138,32 +193,13 @@ bool Cache::fetch(const URL& url, File::Path& path_p)
 
 //--------------------------------------------------------------------------
 // Fetch an object from the given URL, or from cache, as a string
-// Returns whether file was fetched, writes file contents to contents_p if so
-bool Cache::fetch(const URL& url, string& contents_p)
+// Returns whether file is available, writes file contents to contents_p if so
+bool Cache::fetch(const URL& url, string& contents_p, bool check_updates)
 {
   File::Path path;
-  return fetch(url, path) && path.read_all(contents_p);
+  return fetch(url, path, check_updates) && path.read_all(contents_p);
 }
 
-//--------------------------------------------------------------------------
-// Prune any out-of-date files
-void Cache::prune(File::Directory &dir)
-{
-  Time::Stamp now = Time::Stamp::now();
-  list<File::Path> paths;
-  dir.inspect(paths);
-  for(list<File::Path>::iterator p=paths.begin(); p!=paths.end(); ++p)
-  {
-    File::Path& path = *p;
-    Time::Stamp last(path.last_modified());
-    if (now>last && now-last>cache_time)
-    {
-      Log::Streams log;
-      log.detail << path << " is out of date - deleting\n";
-      path.erase();
-    }
-  }
-}
 
 }} // namespaces
 

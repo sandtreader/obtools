@@ -54,7 +54,7 @@ int main(int argc, char **argv)
       return 2;
     }
 
-    cout << contents;
+    log.summary << "Read data: " << contents.size() << " bytes\n";
     return 0;
   }
   else
