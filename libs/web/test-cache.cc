@@ -14,17 +14,16 @@ using namespace ObTools;
 
 #define CACHE_DIR "/tmp/ot-web-cache"
 
+// Usage:
+//   test-cache [url [update interval]]
+
+// If no URL given, does an update
+
 //--------------------------------------------------------------------------
 // Main
 
 int main(int argc, char **argv)
 {
-  if (argc < 2)
-  {
-    cout << "Usage: " << argv[0] << " <url>\n";
-    return 2;
-  }
-
 #ifdef __WIN32__
   winsock_initialise();
 #endif
@@ -33,8 +32,6 @@ int main(int argc, char **argv)
   Log::logger.connect(chan_out);
   Log::Streams log;
 
-  Web::URL url(argv[1]);
-
   // Create directory
   File::Directory dir(CACHE_DIR);
   dir.ensure();
@@ -42,23 +39,37 @@ int main(int argc, char **argv)
   // Create cache
   Web::Cache cache(dir);
 
-  // Fetch URL
-  File::Path path;
-  if (cache.fetch(url, path, Time::Duration("1 min")))
+  if (argc > 1)
   {
-    string contents;
-    if (!path.read_all(contents))
-    {
-      log.error << "Can't read back " << path << ": " << strerror(errno) 
-		<< endl;
-      return 2;
-    }
+    Web::URL url(argv[1]);
 
-    log.summary << "Read data: " << contents.size() << " bytes\n";
-    return 0;
+    // Fetch URL
+    File::Path path;
+    if (cache.fetch(url, path, true))
+    {
+      string contents;
+      if (!path.read_all(contents))
+      {
+	log.error << "Can't read back " << path << ": " << strerror(errno) 
+		  << endl;
+	return 2;
+      }
+      
+      log.summary << "Read data: " << contents.size() << " bytes\n";
+
+      // If second argument set, use it as interval
+      if (argc>2) cache.set_update_interval(url, argv[2]);
+
+      return 0;
+    }
+    else
+      return 2;
   }
   else
-    return 2;
+  {
+    // Just update it
+    cache.update();
+  }
 }
 
 

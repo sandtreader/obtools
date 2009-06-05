@@ -58,6 +58,7 @@ public:
   //--------------------------------------------------------------------------
   // Get the text of the URL
   string get_text() const { return text; }
+  string str() const { return text; }
 
   //--------------------------------------------------------------------------
   // Clear the URL
@@ -548,26 +549,42 @@ class Cache
 {
   File::Directory directory;
   string user_agent;  
- 
+
+  // Internal
+  bool get_paths(const URL& url, File::Directory& domain_dir_p,
+		 File::Path& file_path_p, File::Path& status_path_p);
+
  public:
   //--------------------------------------------------------------------------
   // Constructor
   // UA is used if specified, otherwise a default is used
   Cache(const File::Directory& _dir, const string& _ua="");
 
+
   //--------------------------------------------------------------------------
   // Fetch a file from the given URL, or from cache
-  // max_age gives maximum time since last update check before doing another
-  // If zero (the default) no updates are done
+  // If check_for_updates is set, uses conditional GET to check whether a
+  // new version exists, if the item's update-time has passed since last check
   // Returns whether file is available, writes file location to path_p if so
-  bool fetch(const URL& url, File::Path& path_p,
-	     Time::Duration max_age = Time::Duration());
+  bool fetch(const URL& url, File::Path& path_p, bool check_for_updates=false);
 
   //--------------------------------------------------------------------------
   // Fetch an object from the given URL, or from cache, as a string
   // Returns whether file was fetched, writes file contents to contents_p if so
-  bool fetch(const URL& url, string& contents_p,
-	     Time::Duration max_age = Time::Duration());
+  bool fetch(const URL& url, string& contents_p, bool check_for_updates=false);
+
+  //--------------------------------------------------------------------------
+  // Set the update check interval for a given URL
+  // interval is in Time::Duration constructor format
+  // (URL must already have been fetched)
+  bool set_update_interval(const URL& url, const string& interval);
+
+  //--------------------------------------------------------------------------
+  // Update the cache in background
+  // Runs a single time through the entire cache, checking for updates on files
+  // with update intervals set
+  void update();
+
 };
 
 //==========================================================================

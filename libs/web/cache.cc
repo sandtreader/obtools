@@ -21,7 +21,7 @@ namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
 // Constructor
-  Cache::Cache(const File::Directory& _dir, const string& _ua): 
+Cache::Cache(const File::Directory& _dir, const string& _ua): 
   directory(_dir), user_agent(_ua) 
 {
   if (user_agent.empty()) user_agent = DEFAULT_USER_AGENT;
@@ -29,69 +29,67 @@ namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
 // Fetch a file from the given URL, or from cache
-// max_age gives maximum time since last update check before doing another
-// If zero (the default) no updates are done
+// If check_for_updates is set, uses conditional GET to check whether a
+// new version exists, if the item's update-time has passed since last check
 // Returns whether file is available, writes file location to path_p if so
-bool Cache::fetch(const URL& url, File::Path& path_p, Time::Duration max_age)
+bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
 {
   Log::Streams log;
   log.summary << "Web cache: requesting " << url << endl;
 
-  XML::Element url_xml;
-  if (!url.split(url_xml))
+  File::Directory domain_dir;
+  File::Path file_path, status_path;
+  if (!get_paths(url, domain_dir, file_path, status_path))
   {
-    log.error << "Invalid URL: " << url << endl;
+    log.error << "Bad URL: " << url << endl;
     return false;
   }
 
-  XML::XPathProcessor xpath(url_xml);
+  log.detail << "URL maps to " << file_path << endl;
 
-  // Construct domain directory from URL domain
-  File::Directory domain_dir(directory, xpath["host"]);
-
-  // Get filename base from the MD5 of the whole URL
-  Misc::MD5 md5;
-  string base = md5.sum(url.get_text());
-
-  // Get the extension of the path
-  string upath = xpath["path"];
-  string::size_type p = upath.rfind('.');
-  if (p != string::npos) base += string(upath, p);
-
-  // Construct the filename
-  File::Path path(domain_dir, base);
-  log.detail << "URL maps to " << path << endl;
-
-  // Construct the status filename
-  File::Path status_path(domain_dir, STATUS_PREFIX+base+STATUS_SUFFIX);
   XML::Configuration status_cfg(status_path.str(), log.error);
+
   if (status_path.exists())
     status_cfg.read("status");  // Read it
   else
     status_cfg.replace_root("status"); // Create root
 
-  // Get last check time
-  if (!!max_age)
-  {
-    Time::Stamp last_check = Time::Stamp(status_cfg["check/@time"]);
-    if (!!last_check)
-      log.detail << "Last checked at " << last_check.iso() << endl;
-    else
-      log.detail << "This is the first check\n";
+  // Set URL
+  status_cfg.ensure_path("source");
+  status_cfg.set_value("source/@url", url.str());
 
-    // Does it need checking again?
-    if (Time::Stamp::now() - last_check < max_age)
+  // Get last check time
+  if (check_for_updates)
+  {
+    Time::Duration check_interval(status_cfg["update/check/@interval"]);
+    if (!check_interval)
     {
-      log.detail << "Doesn't need checking again until " 
-		 << (last_check+max_age).iso() << endl;
-      max_age = Time::Duration();
+      // Don't do any updates
+      check_for_updates = false;
+    }
+    else
+    {
+      // Check if within the interval
+      Time::Stamp last_check(status_cfg["update/check/@time"]);
+      if (!!last_check)
+	log.detail << "Last checked at " << last_check.iso() << endl;
+      else
+	log.detail << "This is the first check\n";
+
+      // Does it need checking again?
+      if (Time::Stamp::now() - last_check < check_interval)
+      {
+	log.detail << "Doesn't need checking again until " 
+		   << (last_check+check_interval).iso() << endl;
+	check_for_updates = false;
+      }
     }
   }
 
   // If no update check required, and it exists, that's enough
-  if (!max_age && path.exists())
+  if (!check_for_updates && file_path.exists())
   {
-    path_p = path;
+    path_p = file_path;
     return true;
   }
 
@@ -137,10 +135,10 @@ bool Cache::fetch(const URL& url, File::Path& path_p, Time::Duration max_age)
 	}
 
 	// Write the file
-	string err = path.write_all(response.body);
+	string err = file_path.write_all(response.body);
 	if (!err.empty())
 	{
-	  log.error << "Can't write cache file '" << path 
+	  log.error << "Can't write cache file '" << file_path 
 		    << "': " << err << endl;
 	  return false;
 	}
@@ -154,12 +152,12 @@ bool Cache::fetch(const URL& url, File::Path& path_p, Time::Duration max_age)
 	status_cfg.set_value("server/etag", response.headers.get("etag"));
 
 	// Update last check time
-	status_cfg.ensure_path("check");
-	status_cfg.set_value("check/@time", Time::Stamp::now().iso()); 
+	status_cfg.ensure_path("update/check");
+	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso()); 
 
 	status_cfg.write();
 
-	path_p = path;
+	path_p = file_path;
 	return true;
       }
 
@@ -170,10 +168,10 @@ bool Cache::fetch(const URL& url, File::Path& path_p, Time::Duration max_age)
 
       case 304:  // Not modified
 	// Update last check time only
-	status_cfg.ensure_path("check");
-	status_cfg.set_value("check/@time", Time::Stamp::now().iso()); 
+	status_cfg.ensure_path("update/check");
+	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso()); 
 	status_cfg.write();
-	path_p = path;
+	path_p = file_path;
 	return true;
 
       default:
@@ -192,11 +190,113 @@ bool Cache::fetch(const URL& url, File::Path& path_p, Time::Duration max_age)
 //--------------------------------------------------------------------------
 // Fetch an object from the given URL, or from cache, as a string
 // Returns whether file is available, writes file contents to contents_p if so
-bool Cache::fetch(const URL& url, string& contents_p, Time::Duration max_age)
+bool Cache::fetch(const URL& url, string& contents_p, bool check_for_updates)
 {
   File::Path path;
-  return fetch(url, path, max_age) && path.read_all(contents_p);
+  return fetch(url, path, check_for_updates) && path.read_all(contents_p);
 }
+
+//--------------------------------------------------------------------------
+// Set the update check interval for a given URL
+// interval is in Time::Duration constructor format
+// (URL must already have been fetched)
+bool Cache::set_update_interval(const URL& url, const string& interval)
+{
+  Log::Streams log;
+  log.detail << "Setting update interval for " << url << " to " 
+	     << interval << endl;
+
+  File::Directory domain_dir;
+  File::Path file_path, status_path;
+  if (!get_paths(url, domain_dir, file_path, status_path)) return false;
+
+  XML::Configuration status_cfg(status_path.str(), log.error);
+  if (!status_cfg.read("status")) return false;
+
+  // Set the interval
+  status_cfg.ensure_path("update/check");
+  status_cfg.set_value("update/check/@interval", interval);
+  return status_cfg.write();
+}
+
+//--------------------------------------------------------------------------
+// Get the cache paths for a given URL
+bool Cache::get_paths(const URL& url,
+		      File::Directory& domain_dir_p,
+		      File::Path& file_path_p,
+		      File::Path& status_path_p)
+{
+  XML::Element url_xml;
+  if (!url.split(url_xml)) return false;
+  XML::XPathProcessor xpath(url_xml);
+
+  // Construct domain directory from URL domain
+  domain_dir_p = File::Directory(directory, xpath["host"]);
+
+  // Get filename base from the MD5 of the whole URL
+  Misc::MD5 md5;
+  string base = md5.sum(url.get_text());
+
+  // Get the extension of the path
+  string upath = xpath["path"];
+  string::size_type p = upath.rfind('.');
+  if (p != string::npos) base += string(upath, p);
+
+  // Construct the filename
+  file_path_p = File::Path(domain_dir_p, base);
+
+  // Construct the status filename
+  status_path_p = File::Path(domain_dir_p, STATUS_PREFIX+base+STATUS_SUFFIX);
+
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Update the cache in background
+// Runs a single time through the entire cache, checking for updates on files
+// with update intervals set
+void Cache::update()
+{
+  Log::Streams log;
+
+  // Scan all domain directories
+  list<File::Path> dirs;
+  if (!directory.inspect(dirs)) return;
+
+  for(list<File::Path>::iterator p = dirs.begin(); p!=dirs.end(); ++p)
+  {
+    File::Directory dir(*p);
+    log.detail << "Updating cache directory " << dir << endl;
+
+    // Find all status files
+    list<File::Path> files;
+    if (!dir.inspect(files, string(STATUS_PREFIX)+"*"+STATUS_SUFFIX, true))
+      continue;
+
+    for(list<File::Path>::iterator q = files.begin(); q!=files.end(); ++q)
+    {
+      File::Path& file = *q;
+      log.detail << "Checking file " << file << endl;
+
+      XML::Configuration status_cfg(file.str(), log.error);
+      if (!status_cfg.read("status")) continue;
+
+      string url = status_cfg["source/@url"];
+      log.detail << "Source URL " << url << endl;
+
+      string interval = status_cfg["update/check/@interval"];
+      if (!interval.empty())
+      {
+	log.detail << "Update interval is " << interval << endl;
+
+	// Try to fetch it, with update check
+	File::Path path;
+	fetch(Web::URL(url), path, true);
+      }
+    }
+  }
+}
+
 
 
 }} // namespaces
