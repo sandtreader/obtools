@@ -40,11 +40,11 @@ int main(int argc, char **argv)
   dir.ensure();
 
   // Create cache
-  Web::Cache cache(dir, Time::Duration("1 min"));
+  Web::Cache cache(dir);
 
   // Fetch URL
   File::Path path;
-  if (cache.fetch(url, path))
+  if (cache.fetch(url, path, Time::Duration("1 min")))
   {
     string contents;
     if (!path.read_all(contents))

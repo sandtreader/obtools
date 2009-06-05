@@ -13,7 +13,6 @@
 #include <errno.h>
 
 #define DEFAULT_USER_AGENT "ObTools Web Cache"
-#define DEFAULT_CACHE_TIME "24 hours"
 #define MAX_REDIRECTS 5
 #define STATUS_PREFIX "."
 #define STATUS_SUFFIX ".status.xml"
@@ -22,20 +21,18 @@ namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
 // Constructor
-Cache::Cache(const File::Directory& _dir, Time::Duration _time,
-	     const string& _ua): 
-  directory(_dir), cache_time(_time), user_agent(_ua) 
+  Cache::Cache(const File::Directory& _dir, const string& _ua): 
+  directory(_dir), user_agent(_ua) 
 {
-  if (!cache_time) cache_time = Time::Duration(DEFAULT_CACHE_TIME);
   if (user_agent.empty()) user_agent = DEFAULT_USER_AGENT;
 }
 
 //--------------------------------------------------------------------------
 // Fetch a file from the given URL, or from cache
-// If 'check_updates' is set, checks for updates if not checked more recently
-// than 'cache_time', otherwise only fetches file if it doesn't exist at all
+// max_age gives maximum time since last update check before doing another
+// If zero (the default) no updates are done
 // Returns whether file is available, writes file location to path_p if so
-bool Cache::fetch(const URL& url, File::Path& path_p, bool check_updates)
+bool Cache::fetch(const URL& url, File::Path& path_p, Time::Duration max_age)
 {
   Log::Streams log;
   log.summary << "Web cache: requesting " << url << endl;
@@ -74,7 +71,7 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_updates)
     status_cfg.replace_root("status"); // Create root
 
   // Get last check time
-  if (check_updates)
+  if (!!max_age)
   {
     Time::Stamp last_check = Time::Stamp(status_cfg["check/@time"]);
     if (!!last_check)
@@ -83,16 +80,16 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_updates)
       log.detail << "This is the first check\n";
 
     // Does it need checking again?
-    if (Time::Stamp::now() - last_check < cache_time)
+    if (Time::Stamp::now() - last_check < max_age)
     {
       log.detail << "Doesn't need checking again until " 
-		 << (last_check+cache_time).iso() << endl;
-      check_updates = false;
+		 << (last_check+max_age).iso() << endl;
+      max_age = Time::Duration();
     }
   }
 
   // If no update check required, and it exists, that's enough
-  if (!check_updates && path.exists())
+  if (!max_age && path.exists())
   {
     path_p = path;
     return true;
@@ -195,10 +192,10 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_updates)
 //--------------------------------------------------------------------------
 // Fetch an object from the given URL, or from cache, as a string
 // Returns whether file is available, writes file contents to contents_p if so
-bool Cache::fetch(const URL& url, string& contents_p, bool check_updates)
+bool Cache::fetch(const URL& url, string& contents_p, Time::Duration max_age)
 {
   File::Path path;
-  return fetch(url, path, check_updates) && path.read_all(contents_p);
+  return fetch(url, path, max_age) && path.read_all(contents_p);
 }
 
 

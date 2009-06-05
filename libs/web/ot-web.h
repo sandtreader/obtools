@@ -547,26 +547,27 @@ public:
 class Cache
 {
   File::Directory directory;
-  Time::Duration cache_time;
   string user_agent;  
  
  public:
   //--------------------------------------------------------------------------
   // Constructor
-  // Time and UA are used if specified, otherwise a default is used
-  Cache(const File::Directory& _dir, Time::Duration _time=Time::Duration(), 
-	const string& _ua="");
+  // UA is used if specified, otherwise a default is used
+  Cache(const File::Directory& _dir, const string& _ua="");
 
   //--------------------------------------------------------------------------
-  // If 'check_updates' is set, checks for updates if not checked more recently
-  // than 'cache_time', otherwise only fetches file if it doesn't exist at all
+  // Fetch a file from the given URL, or from cache
+  // max_age gives maximum time since last update check before doing another
+  // If zero (the default) no updates are done
   // Returns whether file is available, writes file location to path_p if so
-  bool fetch(const URL& url, File::Path& path_p, bool check_updates=true);
+  bool fetch(const URL& url, File::Path& path_p,
+	     Time::Duration max_age = Time::Duration());
 
   //--------------------------------------------------------------------------
   // Fetch an object from the given URL, or from cache, as a string
   // Returns whether file was fetched, writes file contents to contents_p if so
-  bool fetch(const URL& url, string& contents_p, bool check_updates=true);
+  bool fetch(const URL& url, string& contents_p,
+	     Time::Duration max_age = Time::Duration());
 };
 
 //==========================================================================
