@@ -235,6 +235,7 @@ class Directory: public Path
 public:
   //--------------------------------------------------------------------------
   // Constructors, as Path (q.v.) 
+  Directory(): Path() {}
   Directory(const Path& _o): Path(_o) {}
   Directory(const string& _path): Path(_path) {}
   Directory(const string& dir, const string& leaf): Path(dir, leaf) {}
