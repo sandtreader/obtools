@@ -85,7 +85,8 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_updates)
     // Does it need checking again?
     if (Time::Stamp::now() - last_check < cache_time)
     {
-      log.detail << "Doesn't need checking again\n";
+      log.detail << "Doesn't need checking again until " 
+		 << (last_check+cache_time).iso() << endl;
       check_updates = false;
     }
   }
