@@ -73,6 +73,10 @@ public:
   // Constructor from existing path and leaf (combines as above)
   Path(const Path& _path, const string& leaf);
 
+  //--------------------------------------------------------------------------
+  // Validity check 
+  bool operator!() { return path.empty(); }
+
   // Accessors ---------------------------------------------------------------
   //--------------------------------------------------------------------------
   // Get path as string
