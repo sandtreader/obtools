@@ -10,15 +10,13 @@ var Jasmine = {};
 //============================================================================
 // Object support functions
 // Inheritance creator - inserts an intermediate prototype to
-// avoid derived methods moving into the base.  Also defines
-// 'parent' as the base prototype for super calls (super is reserved)
+// avoid derived methods moving into the base.  
 Function.prototype.inherits = function(base)
 {
-  function Intermediate() {}
-  Intermediate.prototype = base.prototype;  
-  this.prototype = new Intermediate();
-  this.prototype.constructor = this;
-  this.prototype.parent = base.prototype;
+  var intermediate = new Function();
+  intermediate.marker = "intermediate";
+  intermediate.prototype = base.prototype;  
+  this.prototype = new intermediate();
 }
 
 //============================================================================
@@ -187,7 +185,7 @@ Jasmine.DOMThing = function(id, position, size)
   this.element = document.getElementById(id);
   if (!this.element) return;  // Leave pos/size undefined
 
-  this.parent.constructor.call(this, position, size);
+  Jasmine.Thing.call(this, position, size);
 }
 
 Jasmine.DOMThing.inherits(Jasmine.Thing);
@@ -223,7 +221,7 @@ Jasmine.DOMThing.prototype.display = function()
 // Move permanently to a new position - also moves DOM element
 Jasmine.DOMThing.prototype.move_to = function(position)
 {
-  this.parent.move_to.call(this, position);
+  Jasmine.Thing.prototype.move_to.call(this, position);
   this.display();
 }
 
@@ -231,7 +229,7 @@ Jasmine.DOMThing.prototype.move_to = function(position)
 // Move relatively - also moves DOM element
 Jasmine.DOMThing.prototype.move_by = function(delta)
 {
-  this.parent.move_by.call(this, delta);
+  Jasmine.Thing.prototype.move_by.call(this, delta);
   this.display();
 }
 
@@ -239,7 +237,7 @@ Jasmine.DOMThing.prototype.move_by = function(delta)
 // Change to a new size - also resizes DOM element
 Jasmine.DOMThing.prototype.resize_to = function(size)
 {
-  this.parent.resize_to.call(this, size);
+  Jasmine.Thing.prototype.resize_to.call(this, size);
   this.display();
 }
 
@@ -247,7 +245,7 @@ Jasmine.DOMThing.prototype.resize_to = function(size)
 // Resize relatively - also resizes DOM element
 Jasmine.DOMThing.prototype.resize_by = function(delta)
 {
-  this.parent.resize_by.call(this, delta);
+  Jasmine.Thing.prototype.resize_by.call(this, delta);
   this.display();
 }
 
@@ -290,5 +288,5 @@ Jasmine.DOMThing.prototype.set_visibility = function(on)
 // Convert to string
 Jasmine.DOMThing.prototype.toString = function()
 {
-  return "DOM["+this.id+"]@"+this.parent.toString.call(this);
+  return "DOM["+this.id+"]@"+Jasmine.Thing.prototype.toString.call(this);
 }

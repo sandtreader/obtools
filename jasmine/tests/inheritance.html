@@ -1,0 +1,64 @@
+<html>
+<head>
+<title>Jasmine Inheritance test</title>
+<script src="../js/jasmine.js"></script>
+
+</head>
+<body>
+<h1>Jasmine Inheritance test</h1>
+
+<script>
+
+var ClassA = function(x)
+{
+  console.log("ClassA constructor");
+  this.x = x;
+}
+
+ClassA.marker = "class A";
+ClassA.prototype.method_a = function()
+{
+  console.log("In method_a()");
+}
+
+var ClassB = function(x, y)
+{
+  console.log("ClassB constructor");
+  this.y = y;
+  ClassA.call(this, x);
+}
+
+ClassB.marker = "class B";
+ClassB.inherits(ClassA);
+
+ClassB.prototype.method_b = function()
+{
+  console.log("In method_b()");
+}
+
+var ClassC = function(x, y, z)
+{
+  console.log("ClassC constructor");
+  this.z = z;
+  ClassB.call(this, x, y);
+}
+
+ClassC.marker = "class C";
+ClassC.inherits(ClassB);
+
+ClassC.prototype.method_c = function()
+{
+  console.log("In method_c()");
+}
+
+
+var c = new ClassC(1,2,3);
+console.log("x="+c.x);
+console.log("y="+c.y);
+console.log("z="+c.z);
+c.method_a();
+c.method_b();
+c.method_c();
+
+</script>
+</html>

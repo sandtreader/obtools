@@ -50,9 +50,9 @@ Jasmine.Signal.prototype.tick = function(now)
 // Simple linear signal, 0..1 over period and stop
 Jasmine.LinearSignal = function(target, period)
 {
-  this.parent.constructor.call(this, target, 
-			       function(v) { return v; },
-			       period, 1);
+  Jasmine.Signal.call(this, target, 
+		      function(v) { return v; },
+		      period, 1);
 }
 
 Jasmine.LinearSignal.inherits(Jasmine.Signal);
@@ -61,9 +61,9 @@ Jasmine.LinearSignal.inherits(Jasmine.Signal);
 // Sawtooth signal, repeatedly 0..1
 Jasmine.SawtoothSignal = function(target, period, cycles)
 {
-  this.parent.constructor.call(this, target, 
-			       function(v) { return v; },
-			       period, cycles);
+  Jasmine.Signal.call(this, target, 
+		      function(v) { return v; },
+		      period, cycles);
 }
 
 Jasmine.SawtoothSignal.inherits(Jasmine.Signal);
@@ -72,9 +72,9 @@ Jasmine.SawtoothSignal.inherits(Jasmine.Signal);
 // Triangle signal, repeatedly 0..1..0
 Jasmine.TriangleSignal = function(target, period, cycles)
 {
-  this.parent.constructor.call(this, target, 
-			       function(v) { return v<0.5?2*v:2-2*v; },
-			       period, cycles);
+  Jasmine.Signal.call(this, target, 
+		      function(v) { return v<0.5?2*v:2-2*v; },
+		      period, cycles);
 }
 
 Jasmine.TriangleSignal.inherits(Jasmine.Signal);
@@ -89,7 +89,7 @@ Jasmine.SineSignal = function(target, period, phase, cycles)
   { return Math.sin(2*Math.PI*(v-0.25)+this.phase)/2+0.5; };
 
   // Sin function phase shifted to start at 0
-  this.parent.constructor.call(this, target, f, period, cycles);
+  Jasmine.Signal.call(this, target, f, period, cycles);
 }
 
 Jasmine.SineSignal.inherits(Jasmine.Signal);
@@ -101,13 +101,13 @@ Jasmine.RandomSignal = function(target, period, cycles)
 {
   this.current = 0;
   this.last = 1.0;
-  this.parent.constructor.call(this, target, 
-			       function(v) 
-			       { if (v < this.last)
-				   this.current = Math.random();
-                                 this.last = v;
-                                 return this.current; },
-			       period, cycles);
+  Jasmine.Signal.call(this, target, 
+		      function(v) 
+		      { if (v < this.last)
+			this.current = Math.random();
+                        this.last = v;
+                        return this.current; },
+		      period, cycles);
 }
 
 Jasmine.RandomSignal.inherits(Jasmine.Signal);
