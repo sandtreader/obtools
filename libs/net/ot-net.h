@@ -395,6 +395,10 @@ public:
   void set_ttl(int hops);
 
   //--------------------------------------------------------------------------
+  // Set socket multicast TTL
+  void set_multicast_ttl(int hops);
+
+  //--------------------------------------------------------------------------
   // Set timeout (receive and send) in seconds
   void set_timeout(int secs);
 
