@@ -30,7 +30,7 @@ int main()
 
   cout << "Float string:   " << sf 
        << " -> " << Text::stof(sf) 
-       << " -> " << Text::ftos(Text::stof(sf), 16, 6, true) << endl;
+       << " -> " << Text::ftos(Text::stof(sf)) << endl;
 
   cout << "Hex string:     " << sx 
        << " -> " << hex << Text::xtoi(sx) << dec
@@ -50,6 +50,14 @@ int main()
        << " -> " << l << " bytes binary ["
        << hex << (int)buf[0] << (int)buf[1] << (int)buf[2] << (int)buf[3] 
        << dec << "] -> " << Text::btox(buf, 4) << endl;
+
+  cout << "\nFloat formats for 1.0, 0.999999:\n";
+  cout << "Default: " << Text::ftos(1.0) 
+       << " " << Text::ftos(0.999999) << endl;
+  cout << "(0,3): " << Text::ftos(1.0, 0, 3) 
+       << " " << Text::ftos(0.999999, 0, 3) << endl;
+  cout << "(16,6,true): " << Text::ftos(1.0, 16, 6, true) 
+       << " " << Text::ftos(0.999999, 16, 6, true) << endl;
 
   return 0;  
 }

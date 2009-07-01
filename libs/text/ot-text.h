@@ -141,7 +141,7 @@ uint64_t stoi64(const string& s);
 
 //--------------------------------------------------------------------------
 // Float to string, with zero padding
-string ftos(double f, int width=0, int prec=10, bool zero_pad=false);
+string ftos(double f, int width=0, int prec=0, bool zero_pad=false);
 
 //--------------------------------------------------------------------------
 // String to float (0.0 default)

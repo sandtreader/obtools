@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sstream>
+#include <iomanip>
 #include <stdio.h>
 
 // MinGW specials
@@ -67,10 +68,13 @@ uint64_t stoi64(const string& s)
 // Float to string, with zero padding
 string ftos(double f, int width, int prec, bool zero_pad)
 {
-  // Use sprintf for speed
-  char buf[41];  // Enough for %f format
-  snprintf(buf, 41, zero_pad?"%#0*.*f":"%#*.*f", width, prec, f);
-  return string(buf);
+  ostringstream oss;
+  if (width) oss << setw(width);
+  if (prec) oss << setprecision(prec) 
+		<< setiosflags(ios::fixed | ios::showpoint);
+  if (zero_pad) oss << setfill('0');
+  oss << f;
+  return oss.str();
 }
 
 //--------------------------------------------------------------------------
