@@ -39,7 +39,9 @@ using namespace std;
 //   path      URL path (including '/' if absolute) (as specified)
 //   fragment  Fragment following #
 //   query     Query following ?
-
+//
+// Constructor and split do *not* encode/decode % and + - this must be
+// done separately for each element beforehand, if required
 class URL
 {
 public:
