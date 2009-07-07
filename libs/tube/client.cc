@@ -42,7 +42,7 @@ class ClientReceiveThread: public MT::Thread
     while (client.is_alive())
     {
       // Loop while socket is happy
-      while (client.receive_messages(log));
+      while (client.receive_messages(log)) {}
 
       if (client.is_alive())
       {
