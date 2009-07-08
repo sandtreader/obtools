@@ -240,7 +240,14 @@ bool Cache::get_paths(const URL& url,
   // Get the extension of the path
   string upath = xpath["path"];
   string::size_type p = upath.rfind('.');
-  if (p != string::npos) base += string(upath, p);
+  if (p != string::npos) 
+  {
+    string ext(upath, p);
+
+    // This must not contain any slashes, otherwise the dot was in some
+    // earlier part of the filename
+    if (ext.find('/') == string::npos) base+=ext;
+  }
 
   // Construct the filename
   file_path_p = File::Path(domain_dir_p, base);
