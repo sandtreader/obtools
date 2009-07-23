@@ -1,6 +1,16 @@
 #!/bin/sh
 # Start/stop the ObTools XMLMesh server.
 
+### BEGIN INIT INFO
+# Provides: ot-xmlmesh 
+# Required-Start: \$remote_fs
+# Required-Stop: \$remote_fs
+# Default-Start: 3 4 5
+# Default-Stop: 0 1 2 6
+# Description: ObTools XMLMesh server
+### END INIT INFO
+
+
 test -f /usr/sbin/ot-xmlmesh || exit 0
 
 case "$1" in
