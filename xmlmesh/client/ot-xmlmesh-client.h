@@ -237,11 +237,14 @@ private:
   MT::RMutex mutex;                            // Global state lock
 
 public:
+  static const int DEFAULT_MIN_SPARE_WORKERS = 1;
+  static const int DEFAULT_MAX_WORKERS = 10;
+
   //------------------------------------------------------------------------
   // Constructor - attach transport
   MultiClient(ClientTransport& _transport,
-	      int _min_spare_workers=1,
-	      int _max_workers=10);
+	      int _min_spare_workers=DEFAULT_MIN_SPARE_WORKERS,
+	      int _max_workers=DEFAULT_MAX_WORKERS);
 
   //------------------------------------------------------------------------
   // Start - allows transport-specific child class to ensure transport

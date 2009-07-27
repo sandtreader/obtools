@@ -64,8 +64,14 @@ public:
   // port=0 means use default port for protocol
   // NB: MultiClient is constructed before transport whatever we say
   // - therefore leave starting it to constructor body
-  OTMPMultiClient(Net::EndPoint server): 
+  OTMPMultiClient(Net::EndPoint server):
     MultiClient(transport), transport(server) { start(); }
+
+  // Constructor specifying workers
+  OTMPMultiClient(Net::EndPoint server, 
+		  int min_spare_workers, int max_workers): 
+    MultiClient(transport, min_spare_workers, max_workers), 
+    transport(server) { start(); }
 };
 #endif // !_SINGLE
 
