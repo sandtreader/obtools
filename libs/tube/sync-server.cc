@@ -36,6 +36,7 @@ bool SyncServer::handle_message(ClientMessage& msg)
 	if (handle_request(msg, response.msg))
 	{
 	  // Fix up the response flags
+	  response.msg.flags &=~ MASK_SYNC_FLAGS;
 	  response.msg.flags |= FLAG_RESPONSE_PROVIDED;
 	  response.msg.flags |= msg.msg.flags & MASK_REQUEST_ID;
 

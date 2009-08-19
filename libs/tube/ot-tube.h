@@ -56,7 +56,7 @@ using namespace std;
 //    Bit 31:     Response required  (message ID is valid)
 //    Bit 30:     Response provided  (message ID gives reference)
 //
-//    Bits 16-23: 8-bit message ID
+//    Bits 16-29: 14-bit message ID
 //
 // Error behaviour:  
 //   If a stream ends cleanly before the first chunk, or between chunks, this 
@@ -73,17 +73,20 @@ using namespace std;
 
 typedef uint32_t tag_t;
 typedef uint32_t flags_t;
-typedef unsigned char id_t;
+typedef unsigned short id_t;
 
 //==========================================================================
 // Flags
 enum 
 {
+  MASK_SYNC_FLAGS         = 0xFFFF0000UL,
+
   FLAG_RESPONSE_REQUIRED  = 0x80000000UL,
   FLAG_RESPONSE_PROVIDED  = 0x40000000UL,
 
-  MASK_REQUEST_ID        = 0x00FF0000UL,
-  SHIFT_REQUEST_ID       = 16
+  MASK_REQUEST_ID        = 0x3FFF0000UL,
+  SHIFT_REQUEST_ID       = 16,
+  MAX_REQUEST_ID         = 0x3FFF
 };
 
 //==========================================================================
@@ -98,13 +101,13 @@ struct Message
 {
   tag_t tag;               // tag=0 indicates invalid
   // Length is implicit in data.size()
-  tag_t flags;
+  flags_t flags;
   string data;  
 
   //------------------------------------------------------------------------
   // Constructors
   Message(): tag(0), flags(0) {}
-  Message(tag_t _tag, const string& _data="", int _flags=0): 
+  Message(tag_t _tag, const string& _data="", flags_t _flags=0): 
     tag(_tag), flags(_flags), data(_data) {}
 
   //------------------------------------------------------------------------

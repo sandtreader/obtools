@@ -23,7 +23,7 @@ private:
     response = msg.msg;
 
     // Also send it back as an async message
-    send(msg);
+    //    send(msg);
 
     return true;
   }

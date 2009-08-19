@@ -88,20 +88,32 @@ bool SyncClient::request(Message& request, Message& response)
 {
   Log::Streams log;
 
-  // Fix the flags on the request
-  request.flags |= FLAG_RESPONSE_REQUIRED;
-  request.flags |= request_id << SHIFT_REQUEST_ID;
-
   // Lock mutex from here in, but cv.wait() unlocks it during wait
   MT::Lock lock(request_mutex); 
 
-  // Add a request record
-  id_t id = request_id++;
+  // Get a new ID and increment counter
+retry:
+  id_t id = request_id;
+  request_id = (request_id+1) & MAX_REQUEST_ID;
+
+  // Check if it already exists - this shouldn't happen unless the counter
+  // has wrapped round because requests are being held up for ages at the
+  // server.  Note if all possible IDs are used and blocked, this will
+  // lock up!
+  if (requests.find(id) != requests.end())
+  {
+    log.error << name << ": Warning - duplicate ID " << id << " skipped\n";
+    goto retry;
+  }
 
   OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Sending request ID " << (int)id 
 		       << " - " << request.stag() << endl;)
 
   Request& req = requests[id] = Request();
+
+  // Fix the flags on the request
+  request.flags |= FLAG_RESPONSE_REQUIRED;
+  request.flags |= id << SHIFT_REQUEST_ID;
 
   // Send it
   send(request);
