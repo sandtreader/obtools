@@ -34,7 +34,7 @@ RELEASE-VARIANTS-ONLY = 1
 
 DEBIAN-NAME    = libot-db-pgsql2
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 1
+DEBIAN-REVISION = 2
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
