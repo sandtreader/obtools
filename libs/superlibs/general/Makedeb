@@ -67,8 +67,10 @@ install -m 0644 $RELEASE_DIR/ot-init$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-log$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-misc$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-net$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-ssl$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-text$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-time$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-tube$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-web$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-xml$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
 
@@ -79,18 +81,20 @@ install -m 0644 $RELEASE_DIR/ot-cli.a $DEB_DEV_DIR/usr/lib/obtools/
 
 #Only install common header files in base - Depends on variants reflects this
 install -m 0644 $RELEASE_DIR/ot-cache.h $DEB_DEV_DIR/usr/include/obtools/
-install -m 0644 $RELEASE_DIR/ot-chan.h $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-chan.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli-telnet.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli.h $DEB_DEV_DIR/usr/include/obtools/
-install -m 0644 $RELEASE_DIR/ot-crypto.h $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-crypto.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-file.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-init.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-log.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-misc.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-mt.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-net.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-ssl.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-text.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-time.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-tube.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-web.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-xml.h $DEB_DEV_DIR/usr/include/obtools/
 
