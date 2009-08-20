@@ -31,72 +31,112 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
   // Also set timeout on the socket, in case the client unexpectedly disappears
   s.set_timeout(timeout);
 
+  bool persistent = false;
+
   try
   {
     ObTools::Net::TCPStream ss(s);
-    ObTools::Web::HTTPMessage request, response;
 
-    // Try to read a message, stop if not (probably connection dropped)
-    // Allow EOF to mark end of body in absence of Content-Length
-    if (!request.read(ss, true))
+    // Possible loop in persistent connections
+    do
     {
-      log.error << "Can't read HTTP request from socket\n";
-      return;
-    }
+      ObTools::Web::HTTPMessage request, response;
 
-    // Log request
-    log.detail << request.version << " request: " << request.method 
-	       << " from " << client << " for " 
-	       << request.url << endl;
-    OBTOOLS_LOG_IF_DEBUG(
-      log.debug << request.headers.xml;
-      if (request.body.size()) 
-	log.debug << "Body:\n" << request.body << endl;
-    )
-
-    // Set version and sequence (if any)
-    response.version = "HTTP/1.0";
-
-    // Add our own advert
-    if (version.size()) response.headers.put("server", version);
-    
-    // Add date
-    response.headers.put_date();
-
-    // Check version
-    if (request.version == "HTTP/1.0" || request.version == "HTTP/1.1")
-    {
-      // Be optimistic - saves handler doing it for simple cases
-      response.code = 200;
-      response.reason = "OK";
-      
-      // Call down to subclass implementation
-      if (!handle_request(request, response, client))
+      // Try to read a message, stop if not (probably connection dropped)
+      // Allow EOF to mark end of body in absence of Content-Length
+      if (!request.read(ss, true))
       {
-	log.error << "Handler failed - sending 500\n";
-	error(response, 500, "Server Failure");
+	if (persistent)
+	  log.detail << "Persistent connection from " << client 
+		     << " now closed\n";
+	else
+	  log.error << "Can't read HTTP request from socket\n";
+	return;
       }
 
-      // Suppress body if a HEAD request - saves simple handlers having to
-      // worry about it
-      if (request.method == "HEAD") response.body.clear();
+      // Log request
+      log.detail << request.version << " request: " << request.method 
+		 << " from " << client << " for " 
+		 << request.url << endl;
+      OBTOOLS_LOG_IF_DEBUG(
+        log.debug << request.headers.xml;
+        if (request.body.size()) 
+	  log.debug << "Body:\n" << request.body << endl;
+      )
+
+      // Set version to reflect client
+      response.version = request.version;
+      
+      // Add our own advert
+      if (version.size()) response.headers.put("server", version);
+    
+      // Add date
+      response.headers.put_date();
+
+      // Check version
+      if (request.version == "HTTP/1.0" || request.version == "HTTP/1.1")
+      {
+	// Check for HTTP/1.1
+	if (request.version == "HTTP/1.1")
+	{
+	  // Check for Connection: close - otherwise, assume persistent
+	  if (request.headers.get("connection") == "close")
+	  {
+	    if (persistent) 
+	      log.detail << "HTTP/1.1 persistent connection from " 
+			 << client << " closed\n";
+	    else
+	      log.detail << "HTTP/1.1 non-persistent connection\n";
+	    persistent = false;
+	  }
+	  else
+	  {
+	    if (persistent)
+	      log.detail << "HTTP/1.1 persistent connection from "
+			 << client << " continues\n";
+	    else
+	      log.detail << "HTTP/1.1 persistent connection started\n";
+	    persistent = true;
+	  }
+	}
+
+	// Be optimistic - saves handler doing it for simple cases
+	response.code = 200;
+	response.reason = "OK";
+      
+	// Call down to subclass implementation
+	if (!handle_request(request, response, client))
+	{
+	  log.error << "Handler failed - sending 500\n";
+	  error(response, 500, "Server Failure");
+	}
+
+	// Suppress body if a HEAD request - saves simple handlers having to
+	// worry about it
+	if (request.method == "HEAD") response.body.clear();
+      }
+      else
+      {
+	response.version = "HTTP/1.1";
+	error(response, 505, "HTTP Version not supported");
+      }
+
+      // Log response
+      log.detail << "Response: " << response.code << " " 
+		 << response.reason << endl;
+      OBTOOLS_LOG_IF_DEBUG(
+        log.debug << response.headers.xml;
+        if (response.body.size()) 
+	  log.debug << "Body:\n" << response.body << endl;
+	)
+
+      // Send out response
+      if (!response.write(ss)) log.error << "HTTP response failed\n";
+      ss.flush();
     }
-    else error(response, 505, "HTTP Version not supported");
-
-    // Log response
-    log.detail << "Response: " << response.code << " " 
-	       << response.reason << endl;
-    OBTOOLS_LOG_IF_DEBUG(
-      log.debug << response.headers.xml;
-      if (response.body.size()) 
-	log.debug << "Body:\n" << response.body << endl;
-    )
-
-    // Send out response
-    if (!response.write(ss)) log.error << "HTTP response failed\n";
+    while (persistent);
 
     // Shut down socket
-    ss.flush();
     s.shutdown();
   }
   catch (ObTools::Net::SocketError se)

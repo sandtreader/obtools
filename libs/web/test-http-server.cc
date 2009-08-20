@@ -18,6 +18,10 @@ using namespace ObTools;
 #define SERVER_PORT 33333
 #define SERVER_VERSION "ObTools Test HTTP Server"
 
+#define BACKLOG 5
+#define MIN_SPARE 10
+#define MAX_THREADS 100
+
 //--------------------------------------------------------------------------
 // Handler for /test*
 class TestURLHandler: public Web::URLHandler
@@ -137,7 +141,8 @@ int main(int argc, char **argv)
     ctx_p = &ctx;
   }
 
-  Web::SimpleHTTPServer server(ctx_p, port, SERVER_VERSION);
+  Web::SimpleHTTPServer server(ctx_p, port, SERVER_VERSION,
+			       BACKLOG, MIN_SPARE, MAX_THREADS);
   server.add(new TestURLHandler());
   server.add(new DefaultURLHandler());
 
