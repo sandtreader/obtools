@@ -99,6 +99,33 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	    persistent = true;
 	  }
 	}
+	else
+	{
+	  // Check for old-style HTTP/1.0 Keep-Alive
+	  if (request.headers.get("connection") == "Keep-Alive")
+	  {
+	    if (persistent)
+	      log.detail << "HTTP/1.0 persistent connection from "
+			 << client << " continues\n";
+	    else
+	      log.detail << "HTTP/1.0 persistent connection started\n";
+
+	    // Reflect it back in response
+	    response.headers.put("connection", "Keep-Alive");
+
+	    persistent = true;
+	  }
+	  else
+	  {
+	    // We stop
+	    if (persistent) 
+	      log.detail << "HTTP/1.0 persistent connection from " 
+			 << client << " closed\n";
+	    else
+	      log.detail << "HTTP/1.0 non-persistent connection\n";
+	    persistent = false;
+	  }
+	}
 
 	// Be optimistic - saves handler doing it for simple cases
 	response.code = 200;
