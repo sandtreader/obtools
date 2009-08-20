@@ -336,6 +336,10 @@ private:
   SSL::Context *ssl_ctx; // Optional SSL context
   int connection_timeout;   // Connection timeout (s), disabled (0) by default
   int operation_timeout;    // Ditto, for operation
+  SSL::TCPClient *socket;   // Our socket, created on first use, may persist
+                            // if HTTP/1.1
+  bool http_1_1;            // Whether HTTP/1.1 is used (persistent conn's)
+  bool http_1_1_close;      // Whether this the last request on persistent conn
 
 protected:
   Net::EndPoint server;
@@ -346,14 +350,16 @@ public:
   HTTPClient(Net::EndPoint _server, const string& _ua="", 
 	     int _connection_timeout=0, int _operation_timeout=0): 
     user_agent(_ua), ssl_ctx(0), connection_timeout(_connection_timeout), 
-    operation_timeout(_operation_timeout), server(_server) {}
+    operation_timeout(_operation_timeout), socket(0), http_1_1(false),
+    http_1_1_close(false), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor for SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua="",
 	     int _connection_timeout=0, int _operation_timeout=0): 
     user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
-    operation_timeout(_operation_timeout), server(_server) {}
+    operation_timeout(_operation_timeout), socket(0), http_1_1(false),
+    http_1_1_close(false), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
@@ -362,8 +368,16 @@ public:
 	     int _connection_timeout=0, int _operation_timeout=0);
 
   //--------------------------------------------------------------------------
+  // Enable HTTP/1.1 persistent connections
+  void enable_persistence() { http_1_1 = true; }
+
+  //--------------------------------------------------------------------------
+  // Force close on next request on persistent connections
+  void close_persistence() { http_1_1_close = true; }
+
+  //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
-  // Whether successfully sent (even if error received)
+  // Returns whether successfully sent (even if error received)
   bool fetch(HTTPMessage& request, HTTPMessage& response);
 
   //--------------------------------------------------------------------------
@@ -380,6 +394,10 @@ public:
   //--------------------------------------------------------------------------
   // Get the local address we last connected from (for P2P)
   Net::EndPoint get_last_local_address() { return last_local_address; }
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  ~HTTPClient();
 };
 
 //==========================================================================

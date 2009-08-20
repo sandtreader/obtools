@@ -20,7 +20,8 @@ namespace ObTools { namespace Web {
 HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
 		       int _connection_timeout, int _operation_timeout): 
   user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
-  operation_timeout(_operation_timeout)
+  operation_timeout(_operation_timeout), socket(0), http_1_1(false),
+  http_1_1_close(false)
 {
   XML::Element xml;
   if (url.split(xml))
@@ -88,61 +89,86 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP " << request.method << " for " 
 		       << request.url << " from " << server << endl;)
 
-  // Force protocol
-  request.version = "HTTP/1.0";
+  // Set protocol
+  request.version = http_1_1?"HTTP/1.1":"HTTP/1.0";
+
+  // Set connection close if this is the last
+  if (http_1_1 && http_1_1_close)
+    request.headers.put("Connection", "close");
 
   // Add User-Agent and date
   if (user_agent.size()) request.headers.put("User-Agent", user_agent);
 
   OBTOOLS_LOG_IF_DUMP(request.write(log.dump);)
 
-  // HTTP1.0 - create TCPClient for each fetch
-  SSL::TCPClient client(ssl_ctx, server, connection_timeout);
-  if (!client)
+  // Get a socket if we don't already have one
+  if (!socket)
   {
-    log.error << "HTTP: Can't connect to " << server << endl;
-    return false;
-  }
+    socket = new SSL::TCPClient(ssl_ctx, server, connection_timeout);
 
-  // Enable reuse and capture local address used, so P2P can turn around
-  // and offer a server on here immediately;
-  client.enable_reuse();
-  last_local_address = client.local();
-
-  // Reset timeout for actual operation as well
-  client.set_timeout(operation_timeout);
-
-  try
-  {
-    Net::TCPStream ss(client);
-    if (!request.write(ss))
+    if (!*socket)
     {
-      log.error << "HTTP: Can't send request to " << server << endl;
+      log.error << "HTTP: Can't connect to " << server << endl;
+      delete socket;
+      socket = 0;
       return false;
     }
 
-    // Finish sending so server gets EOF
+    // Enable reuse and capture local address used, so P2P can turn around
+    // and offer a server on here immediately;
+    socket->enable_reuse();
+    last_local_address = socket->local();
+
+    // Reset timeout for actual operation as well
+    socket->set_timeout(operation_timeout);
+  }
+
+  try
+  {
+    Net::TCPStream ss(*socket);
+    if (!request.write(ss))
+    {
+      log.error << "HTTP: Can't send request to " << server << endl;
+      delete socket;
+      socket = 0;
+      return false;
+    }
+
     ss.flush();
+
+    // Finish sending so server gets EOF
+    if (!http_1_1 || http_1_1_close)
+    {
 #if !defined(__WIN32__)
-    client.finish();  // !!! Seems to cause loss of received data in Vista
-                      // !!! and doesn't send FIN anyway
+      socket->finish();  // !!! Seems to cause loss of received data in Vista
+                         // !!! and doesn't send FIN anyway
 #endif
+    }
 
     // Read, allowing for EOF marker for end of body
     if (!response.read(ss, true))
     {
       log.error << "HTTP: Can't fetch response from " << server << endl;
+      delete socket;
+      socket = 0;
       return false;
     }
 
     OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
 			response.write(log.dump);)
 
-    client.close();
+    if (!http_1_1 || http_1_1_close)
+    {
+      socket->close();
+      delete socket;
+      socket = 0;
+    }
   }
   catch (ObTools::Net::SocketError se)
   {
     log.error << "HTTP: " << se << endl;
+    delete socket;
+    socket = 0;
     return false;
   }
 
@@ -198,6 +224,14 @@ int HTTPClient::post(const URL& url, const string& request_body,
     response_body = response.reason;
 
   return response.code;
+}
+
+//--------------------------------------------------------------------------
+// Destructor
+HTTPClient::~HTTPClient()
+{
+  // Kill any persistent socket left over
+  if (socket) delete socket;
 }
 
 }} // namespaces
