@@ -43,7 +43,11 @@ int main(int argc, char **argv)
     i++;
 
     // Read stdin
-    while (cin) in += cin.get();
+    while (cin)
+    {
+      int c = cin.get();
+      if (c>=0) in += c;
+    }
   }
 
   // Create SSL Context
