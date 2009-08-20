@@ -19,10 +19,9 @@ int main(int argc, char **argv)
 {
   if (argc < 2)
   {
-    cout << "Usage: " << argv[0] << " [-p] <url> [<url>]*\n";
+    cout << "Usage: " << argv[0] << " [-p] [-1] <url> [<url>]*\n";
     cout << "       -p indicates POST using input from stdin\n";
-    cout << "If more than one URL is given, HTTP/1.1 persistent connections are used\n";
-    cout << "(must be to same host)\n";
+    cout << "       -1 Use HTTP/1.1\n";
     return 2;
   }
 
@@ -37,6 +36,7 @@ int main(int argc, char **argv)
   int i=1;
   string in;
   bool post = false;
+  bool http_1_1 = false;
   if (string(argv[i]) == "-p")
   {
     post = true;
@@ -50,10 +50,14 @@ int main(int argc, char **argv)
     }
   }
 
+  if (string(argv[i]) == "-1")
+  {
+    http_1_1 = true;
+    i++;
+  }
+
   // Create SSL Context
   SSL::Context ctx;
-  
-  bool http_1_1 = (argc > i+1);  // Multiple URLs?
   Web::HTTPClient *client = 0;
 
   for(;i<argc;i++)

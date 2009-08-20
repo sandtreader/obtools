@@ -76,11 +76,13 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       // Check version
       if (request.version == "HTTP/1.0" || request.version == "HTTP/1.1")
       {
+	string conn_hdr = Text::tolower(request.headers.get("connection"));
+
 	// Check for HTTP/1.1
 	if (request.version == "HTTP/1.1")
 	{
 	  // Check for Connection: close - otherwise, assume persistent
-	  if (request.headers.get("connection") == "close")
+	  if (conn_hdr == "close")
 	  {
 	    if (persistent) 
 	      log.detail << "HTTP/1.1 persistent connection from " 
@@ -102,7 +104,7 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	else
 	{
 	  // Check for old-style HTTP/1.0 Keep-Alive
-	  if (request.headers.get("connection") == "Keep-Alive")
+	  if (conn_hdr == "keep-alive")
 	  {
 	    if (persistent)
 	      log.detail << "HTTP/1.0 persistent connection from "

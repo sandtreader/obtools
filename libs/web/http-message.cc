@@ -87,6 +87,9 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
   // length if present
   int length = Text::stoi(headers.get("content-length"));
 
+  // Check for chunked encoding
+  bool chunked = Text::tolower(headers.get("transfer-encoding")) == "chunked";
+
   // If no content-length, there are two possibilities:
   //  1) In RTSP, this genuinely has no body and stops here
   //  2) In HTTP, it may have a body up to the end of stream
@@ -95,24 +98,48 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
   // we will break body-less RTSP messages
 
   body.clear();
-  if (length || read_to_eof)
+
+  do // Multiple chunks
   {
-    // Try to read this much or up to end of stream
-    int count = 0;
-    while (!in.fail() && (!length || count<length))
+    if (chunked)
     {
-      char buf[READ_SIZE];
-      int wanted = READ_SIZE;
-      if (length && length-count < wanted) wanted = length-count;
+      // Read chunk length (overriding content-length)
+      string line;
+      if (!MIMEHeaders::getline(in, line)) return false;
 
-      in.read(buf, wanted);
-      int got = in.gcount();
+      // First line might effectively be blank because it's actually the
+      // end of the previous chunk
+      if (line.empty() && !MIMEHeaders::getline(in, line)) return false;
 
-      // Add to body content
-      body.append(buf, got);
-      count += got;
+      // Split at ;
+      vector<string> bits = Text::split(line, ';');
+      length = Text::xtoi(bits[0]);
+      if (!length) break;  // Last chunk
     }
-  }
+    
+    if (length || read_to_eof)
+    {
+      // Try to read this much or up to end of stream
+      int count = 0;
+      while (!in.fail() && (!length || count<length))
+      {
+	char buf[READ_SIZE];
+	int wanted = READ_SIZE;
+	if (length && length-count < wanted) wanted = length-count;
+
+	in.read(buf, wanted);
+	int got = in.gcount();
+
+	// Add to body content
+	body.append(buf, got);
+	count += got;
+      }
+    }
+  } while (chunked);
+
+  // If chunked, read optional trailer headers again, including blank line
+  // We allow this to fail, because (although unlikely) stream could end here
+  if (chunked) headers.read(in);
 
   return true;
 }
@@ -161,7 +188,7 @@ bool HTTPMessage::write(ostream &out) const
 
 //------------------------------------------------------------------------
 // >> operator to read HTTPMessage from istream
-// e.g. cin >> url;
+// e.g. cin >> msg;
 istream& operator>>(istream& s, HTTPMessage& msg)
 {
   msg.read(s);  // !!! Check for failure?
@@ -170,7 +197,7 @@ istream& operator>>(istream& s, HTTPMessage& msg)
 
 //------------------------------------------------------------------------
 // << operator to write HTTPMessage to ostream
-// e.g. cout << url;
+// e.g. cout << msg;
 ostream& operator<<(ostream& s, const HTTPMessage& msg)
 {
   msg.write(s);
