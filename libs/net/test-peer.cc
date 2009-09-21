@@ -70,8 +70,10 @@ int main(int argc, char **argv)
   winsock_initialise();
 #endif
 
-  Net::EndPoint local_ep(Net::IPAddress(local), port);
-  Net::EndPoint peer_ep(Net::IPAddress(peer), port);
+  Net::IPAddress local_ip(local);
+  Net::EndPoint local_ep(local_ip, port);
+  Net::IPAddress peer_ip(peer);
+  Net::EndPoint peer_ep(peer_ip, port);
 
 
   // !!! Start client to see if we can bind _before_ listen
