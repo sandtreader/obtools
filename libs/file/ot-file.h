@@ -45,10 +45,16 @@ protected:
 
 #if defined(__WIN32__)
   static const char SEPCHAR = '\\';
+  static const char ALTSEPCHAR = '/';
 #else
   static const char SEPCHAR = '/';
+  static const char ALTSEPCHAR = 0;
 #endif
   static const char EXTCHAR = '.';
+
+  // Check if a character is a separator, allowing for both \ and / in Win32
+  static bool is_sep_char(char c) 
+  { return c==SEPCHAR || (ALTSEPCHAR && c==ALTSEPCHAR); }
 
 public:
   // Constructors-------------------------------------------------------------

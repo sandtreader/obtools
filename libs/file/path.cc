@@ -44,7 +44,7 @@ namespace ObTools { namespace File {
 // If directory is empty or ends with slash already, doesn't add a slash
 Path::Path(const string& dir, const string& leaf)
 {
-  if (dir.empty() || dir[dir.size()-1] == SEPCHAR)
+  if (dir.empty() || is_sep_char(dir[dir.size()-1]))
     path = dir + leaf;
   else
     path = dir + SEPCHAR + leaf;
@@ -55,7 +55,7 @@ Path::Path(const string& dir, const string& leaf)
 Path::Path(const Path& _path, const string& leaf) 
 {
   string dir = _path.str();
-  if (dir.empty() || dir[dir.size()-1] == SEPCHAR)
+  if (dir.empty() || is_sep_char(dir[dir.size()-1]))
     path = dir + leaf;
   else
     path = dir + SEPCHAR + leaf;
@@ -67,13 +67,13 @@ bool Path::is_absolute() const
 {
 #if defined(__WIN32__)
   // Allow for c:\xxx form
-  return !path.empty() && (path[0] == SEPCHAR
+  return !path.empty() && (is_sep_char(path[0])
 			   ||(path.size()>=3 
 			      && isalpha(path[0])
 			      && path[1]==':'
-			      && path[2]==SEPCHAR));
+			      && is_sep_char(path[2])));
 #else
-  return !path.empty() && path[0] == SEPCHAR; 
+  return !path.empty() && is_sep_char(path[0]);
 #endif
 }
 
@@ -83,7 +83,20 @@ bool Path::is_absolute() const
 string Path::dirname() const
 {
   string::size_type slash = path.rfind(SEPCHAR);
-  if (slash == string::npos) return "";
+  if (slash == string::npos) 
+  {
+    // No normal separator - check for ALTSEPCHAR (/ in Windows) instead
+    if (ALTSEPCHAR) slash = path.rfind(ALTSEPCHAR);
+    if (slash == string::npos) return "";
+  }
+  else
+  {
+    // If ALTSEPCHAR exists (/ in Windows) make sure it doesn't happen
+    // after the normal one
+    string::size_type alt_slash = path.rfind(ALTSEPCHAR);
+    if (alt_slash != string::npos && alt_slash > slash) slash = alt_slash;
+  }
+
   return string(path, 0, slash);
 }
 
@@ -92,7 +105,20 @@ string Path::dirname() const
 string Path::leafname() const
 {
   string::size_type slash = path.rfind(SEPCHAR);
-  if (slash == string::npos) return path;
+  if (slash == string::npos) 
+  {
+    // No normal separator - check for ALTSEPCHAR (/ in Windows) instead
+    if (ALTSEPCHAR) slash = path.rfind(ALTSEPCHAR);
+    if (slash == string::npos) return path;
+  }
+  else
+  {
+    // If ALTSEPCHAR exists (/ in Windows) make sure it doesn't happen
+    // after the normal one
+    string::size_type alt_slash = path.rfind(ALTSEPCHAR);
+    if (alt_slash != string::npos && alt_slash > slash) slash = alt_slash;
+  }
+
   return string(path, slash+1);
 }
 
@@ -127,7 +153,7 @@ Path Path::resolve(const Path& new_path) const
   string nn = new_path.str();
 
   // Strip ../ from new path and move up
-  while (nn.size() > 3 && nn[0] == '.' && nn[1] == '.' && nn[2] == SEPCHAR)
+  while (nn.size() > 3 && nn[0] == '.' && nn[1] == '.' && is_sep_char(nn[2]))
   {
     nn = string(nn, 3);
     dn = Path(dn).dirname();
