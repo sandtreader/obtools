@@ -11,10 +11,7 @@
 #ifndef __OBTOOLS_LOG_H
 #define __OBTOOLS_LOG_H
 
-#if !defined(_SINGLE)
 #include "ot-mt.h"
-#endif
-
 #include "ot-time.h"
 #include <list>
 #include <string>
@@ -80,9 +77,7 @@ public:
 class Channel
 {
 public:
-#if !defined(_SINGLE)
   MT::Mutex mutex;  // Assume multi-threaded use
-#endif
 
   //--------------------------------------------------------------------------
   // Constructor
@@ -247,85 +242,92 @@ public:
 extern Distributor logger;
 
 //==========================================================================
-// Simple log streams
-// e.g.
-//   ObTools::Log::Error << "The end of the world is nigh!" << endl;
-//
-// *** NOTE *** 
-// *** Since ostreams are not thread-sharable, and I have made no attempt
-// *** to make Log::StreamBuf be so, these global streams must NOT be used
-// *** in multithreaded code by more than one thread, otherwise you WILL
-// *** get weird unpredictable crashes when two threads log at the same time
-// *** This is potentially such a Bad Thing that I have disabled these 
-// *** globals for all multi-threaded code - subvert at your peril!
-// *** Use a thread-local Log::Streams structure (see below) instead,
-// *** or make your own temporary Stream
-#if defined(_SINGLE)
-extern Stream Error;
-extern Stream Summary;
-extern Stream Detail;
-
-// Only provide debug streams if allowed - this forces people to use the
-// LOG_IF_DEBUG/DUMP macros to optimise out code which would otherwise
-// still generate the logging, but get thrown away at the LevelFilter
-#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
-extern Stream Debug;
-#endif
-#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
-extern Stream Dump;
-#endif
-#endif
-
-//==========================================================================
-// Log streams structure - use in multi-threaded code to get yourself a
-// thread-local stream group
-// e.g.
-//   ObTools::Log::Streams log;  // On stack or thread-local object
-//
-//   log.error << "Oops\n";
-
-struct Streams
-{
-  Stream error;
-  Stream summary;
-  Stream detail;
-#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
-  Stream debug;
-#endif
-#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
-  Stream dump;
-#endif
-
-  Streams():
-    error  (logger, LEVEL_ERROR),
-    summary(logger, LEVEL_SUMMARY),
-    detail (logger, LEVEL_DETAIL)
-#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
-    , debug  (logger, LEVEL_DEBUG)
-#endif
-#if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
-    , dump   (logger, LEVEL_DUMP) 
-#endif
-    {}
-};
-
-//==========================================================================
 // Useful macros for optimising out high log levels
 //
 // e.g.
 //  OBTOOLS_LOG_IF_DUMP(ObTools::Log::Dump << "Packet: " << packet;)
+// 
+// Also simple macros for #if - e.g.
+// #if OBTOOLS_LOG_DEBUG
+//  ...
 
 #if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DEBUG
 #define OBTOOLS_LOG_IF_DEBUG(_s) _s
+#define OBTOOLS_LOG_DEBUG 1
 #else
 #define OBTOOLS_LOG_IF_DEBUG(_s)
+#define OBTOOLS_LOG_DEBUG 0
 #endif
 
 #if OBTOOLS_LOG_MAX_LEVEL >= OBTOOLS_LOG_LEVEL_DUMP
 #define OBTOOLS_LOG_IF_DUMP(_s) _s
+#define OBTOOLS_LOG_DUMP 1
 #else
 #define OBTOOLS_LOG_IF_DUMP(_s)
+#define OBTOOLS_LOG_DUMP 0
 #endif
+
+//==========================================================================
+// Single logging streams - use in multi-threaded code to get a local logging
+// stream.  If you need more than two of these, use a Streams object instead
+// e.g. 
+//   ObTools::Log::Error elog;
+//   elog << "Oops\n";
+
+class Error: public Stream
+{
+public: 
+  Error(): Stream(logger, LEVEL_ERROR) {}
+};
+
+class Summary: public Stream
+{
+public:   
+  Summary(): Stream(logger, LEVEL_SUMMARY) {}
+};
+
+class Detail: public Stream
+{
+public:   
+  Detail(): Stream(logger, LEVEL_DETAIL) {}
+};
+
+#if OBTOOLS_LOG_DEBUG
+class Debug: public Stream
+{
+public:   
+  Debug(): Stream(logger, LEVEL_DEBUG) {}
+};
+#endif
+
+#if OBTOOLS_LOG_DUMP
+class Dump: public Stream
+{
+public:   
+  Dump(): Stream(logger, LEVEL_DUMP) {}
+};
+#endif
+
+//==========================================================================
+// Log streams structure - lazy way to get all the different levels of stream
+// e.g.
+//   ObTools::Log::Streams log;  // On stack or thread-local object
+//
+//   log.error << "Oops\n";
+//   log.detail << "Something really bad happened\n";
+
+struct Streams
+{
+  Error error;
+  Summary summary;
+  Detail detail;
+#if OBTOOLS_LOG_DEBUG
+  Debug debug;
+#endif
+#if OBTOOLS_LOG_DUMP
+  Dump dump;
+#endif
+};
 
 //==========================================================================
 }} //namespaces
