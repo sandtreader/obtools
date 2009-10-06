@@ -10,6 +10,7 @@
 #include "ot-file.h"
 #include <iostream>
 #include <errno.h>
+#include <string.h>
 
 using namespace std;
 using namespace ObTools;
