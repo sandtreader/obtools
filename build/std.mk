@@ -350,7 +350,9 @@ LIB = $(IMPLIB-NAME)
 endif
 
 #Set standard flags
+ifndef SUPPRESS_WARNINGS
 CPPFLAGS += -W -Wall
+endif
 
 # Always reentrant
 CPPFLAGS += -D_REENTRANT
@@ -413,6 +415,13 @@ EXTLIBS += -lssl32 -leay32
 else
 EXTLIBS += -lssl -lcrypto
 endif
+endif
+
+#CryptoPP alternative
+ifdef CRYPTOPP
+CRYPTOPP_DIR = $(ROOT)/../external/cryptopp
+EXTINCS += $(CRYPTOPP_DIR)
+EXTLIBS += $(CRYPTOPP_DIR)/libcryptopp.a
 endif
 
 #Resolver libraries
