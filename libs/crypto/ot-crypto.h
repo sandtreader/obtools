@@ -293,8 +293,11 @@ public:
   RSA(bool is_private=false): key(is_private) {}
 
   //------------------------------------------------------------------------
-  // Get cyphertext size
-  int cypher_size();
+  // Get ciphertext size
+  int cipher_size();
+
+  // Backwards compatibility for mis-spelling
+  int cypher_size() { return cipher_size(); }
 
   //------------------------------------------------------------------------
   // Get maximum plaintext size
@@ -304,14 +307,14 @@ public:
   // Encrypt a block 
   // Length may be up to max_plaintext() bytes
   // Returns whether successful (key set up correctly)
-  // 'to' must be writable to cypher_size() bytes
+  // 'to' must be writable to cipher_size() bytes
   bool encrypt(const unsigned char *from, int length, unsigned char *to);
 
   //------------------------------------------------------------------------
   // Decrypt a block 
   // Returns decrypted length of block
   // Assumes 'from' data is always cypher_size() bytes
-  // 'to' must be writable to cypher_size() bytes 
+  // 'to' must be writable to cipher_size() bytes 
   // (unless you _really_ understand padding!)
   int decrypt(const unsigned char *from, unsigned char *to);
 };

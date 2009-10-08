@@ -13,8 +13,8 @@
 namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
-// Get cyphertext size
-int RSA::cypher_size()
+// Get ciphertext size
+int RSA::cipher_size()
 {
   return key.valid?RSA_size(key.rsa):0;
 }
@@ -31,7 +31,7 @@ int RSA::max_plaintext()
 // Encrypt a block 
 // Length may be up to max_plaintext() bytes
 // Returns whether successful (key set up correctly)
-// 'to' must be writable to cypher_size() bytes
+// 'to' must be writable to cipher_size() bytes
 bool RSA::encrypt(const unsigned char *from, int length, 
 		  unsigned char *to)
 {
@@ -49,15 +49,15 @@ bool RSA::encrypt(const unsigned char *from, int length,
 //------------------------------------------------------------------------
 // Decrypt a block 
 // Returns decrypted length of block
-// Assumes 'from' data is always cypher_size() bytes
-// 'to' must be writable to cypher_size() bytes 
+// Assumes 'from' data is always cipher_size() bytes
+// 'to' must be writable to cipher_size() bytes 
 // (unless you _really_ understand padding!)
 int RSA::decrypt(const unsigned char *from, unsigned char *to)
 {
   if (!key.valid) return false;
 
   int res;
-  int length = cypher_size();
+  int length = cipher_size();
   if (key.is_private)
     res = RSA_private_decrypt(length, from, to, key.rsa, RSA_PKCS1_PADDING);
   else
