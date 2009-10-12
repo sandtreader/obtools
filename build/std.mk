@@ -417,11 +417,11 @@ EXTLIBS += -lssl -lcrypto
 endif
 endif
 
-#CryptoPP alternative
-ifdef CRYPTOPP
-CRYPTOPP_DIR = $(ROOT)/../external/cryptopp
-EXTINCS += $(CRYPTOPP_DIR)
-EXTLIBS += $(CRYPTOPP_DIR)/libcryptopp.a
+#Botan alternative
+ifdef BOTAN
+BOTAN_DIR = $(ROOT)/../external/botan
+EXTINCS += $(BOTAN_DIR)/build/include
+EXTLIBS += $(BOTAN_DIR)/libbotan.a
 endif
 
 #Resolver libraries
