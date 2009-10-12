@@ -19,14 +19,9 @@ TESTCMD += && ./test-url "http://foo.com:81/x/y/z?x=1&z=2\#frag"
 TESTCMD += && ./test-url "/x/y/z?x=1&z=2&space=foo+bar&percent=%25\#frag"
 TESTCMD += && ./test-http-client "http://www.packetship.com"
 TESTCMD += && ./test-http-client "https://www.packetship.com"
-DEPENDS = xml text misc net log mt ssl file xml
+DEPENDS = xml text misc net log mt ssl ssl-openssl file xml
 SOCKET  = 1
-
-ifdef MINGW
-EXTLIBS = -lssl32 -leay32
-else
-EXTLIBS = -lssl -lcrypto
-endif
+CRYPTO  = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

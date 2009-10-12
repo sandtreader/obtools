@@ -2,9 +2,10 @@
 // ObTools::SSL: ot-ssl.h
 //
 // Public definitions for ObTools::SSL
-// SSL/TLS Socket functions - wrapper around libssl
+// Abstract SSL interface - does nothing here.  Subclass Context to 
+// implement particularly SSL providers
 // 
-// Copyright (c) 2008 xMill Consulting Limited.  All rights reserved
+// Copyright (c) 2009 xMill Consulting Limited.  All rights reserved
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
@@ -12,17 +13,7 @@
 #define __OBTOOLS_SSL_H
 
 #include "ot-net.h"
-#include "ot-crypto.h"
 #include "ot-xml.h"
-
-// This is rather ugly...  We want to use SSL as a namespace, but
-// OpenSSL defines it as a struct.  Hence we redefine SSL here to 
-// expand to OpenSSL for the duration of the OpenSSL header
-#define SSL OpenSSL
-#include <openssl/ssl.h>
-#undef SSL
-
-#include <openssl/err.h>
 
 namespace ObTools { namespace SSL { 
 
@@ -30,71 +21,58 @@ namespace ObTools { namespace SSL {
 using namespace std;
 
 //==========================================================================
-// SSL application context
-class Context
+// Abstract SSL connection
+class Connection
 {
-  SSL_CTX *ctx;  // OpenSSL library context
-
 public:
   //--------------------------------------------------------------------------
-  // Constructor: Allocates context
-  Context();
+  // Constructor
+  Connection() {}
 
   //--------------------------------------------------------------------------
-  // Use the given certificate
-  void use_certificate(Crypto::Certificate& cert);
+  // Raw stream read wrapper
+  virtual ssize_t cread(void *buf, size_t count)=0;
 
   //--------------------------------------------------------------------------
-  // Use a certificate from a PEM-format string
-  // Returns whether valid
-  bool use_certificate(const string& pem);
+  // Raw stream write wrapper
+  virtual ssize_t cwrite(const void *buf, size_t count)=0;
 
   //--------------------------------------------------------------------------
-  // Use the given RSA private key
-  void use_private_key(Crypto::RSAKey& rsa);
+  // Get peer's X509 common name
+  virtual string get_peer_cn()=0;
 
   //--------------------------------------------------------------------------
-  // Use a private key from a PEM-format string, with optional pass-phrase
-  // Returns whether valid
-  bool use_private_key(const string& pem, const string& pass_phrase="");
+  // Virtual destructor
+  virtual ~Connection() {}
+};
 
+//==========================================================================
+// SSL application context
+// Abstract superclass containing all basic SSL operations
+class Context
+{
+public:
   //--------------------------------------------------------------------------
-  // Enable peer certificate verification
-  // Set 'force' to require them, otherwise optional
-  void enable_peer_verification(bool force = false);
-
-  //--------------------------------------------------------------------------
-  // Use given verify locations (list of trusted CAs)
-  // ca_file should refer to a PEM format containing a list of trusted CAs
-  // ca_dir should refer to a directory containing certificate files with 
-  // hashed names (see OpenSSL docs)
-  // Either one or the other is optional, but not both
-  void set_verify_paths(const string& ca_file="", const string& ca_dir="");
-
-  //--------------------------------------------------------------------------
-  // Use default verify paths
-  void set_default_verify_paths();
-
-  //--------------------------------------------------------------------------
-  // Set session ID context
-  void set_session_id_context(const string& s);
+  // Constructor
+  Context() {}
 
   //--------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd
-  OpenSSL *create_connection(int fd);
+  // and accept() it
+  virtual Connection *accept_connection(int fd) = 0;
 
   //--------------------------------------------------------------------------
-  // Destructor: Deallocates context
-  ~Context();
+  // Create a new SSL connection from the context and bind it to the given fd
+  // and connect() it
+  virtual Connection *connect_connection(int fd) = 0;
 
   //--------------------------------------------------------------------------
-  // Static:  Log SSL errors
+  // Virtual destructor
+  virtual ~Context() {}
+
+  //--------------------------------------------------------------------------
+  // Static:  Log SSL errors - only logs 'text' here
   static void log_errors(const string& text);
-
-  //--------------------------------------------------------------------------
-  // Static:  Create from an <ssl> configuration element
-  // Returns context, or 0 if disabled or failed
-  static Context *create(XML::Element& ssl_e);
 };
 
 //==========================================================================
@@ -102,7 +80,7 @@ public:
 class TCPSocket: public Net::TCPSocket
 {
 protected:
-  OpenSSL *ssl;  // SSL connection, or 0 if basic TCP
+   Connection *ssl;  // SSL connection, or 0 if basic TCP
 
 public:
   //--------------------------------------------------------------------------
@@ -111,7 +89,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Explicit constructor from existing fd and SSL object
-  TCPSocket(int _fd, OpenSSL *_ssl = 0): Net::TCPSocket(_fd), ssl(_ssl) {}
+  TCPSocket(int _fd, Connection *_ssl = 0): Net::TCPSocket(_fd), ssl(_ssl) {}
 
   //--------------------------------------------------------------------------
   // Raw stream read wrapper override
@@ -122,9 +100,8 @@ public:
   ssize_t cwrite(const void *buf, size_t count);
 
   //--------------------------------------------------------------------------
-  // Get peer's X509 certificate
-  // Note, returned by value, will X509_free when done
-  Crypto::Certificate get_peer_certificate();
+  // Get peer's X509 common name
+  string get_peer_cn();
 
   //--------------------------------------------------------------------------
   // Destructor

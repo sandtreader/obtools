@@ -7,13 +7,13 @@
 
 SUBS = text xml xmi cppt regen mt net chan misc time log cache   \
        db db-pgsql db-mysql                                      \
-       cli init crypto ssl file web soap hash tube access dns    \
-       superlibs
+       cli init crypto ssl ssl-openssl file web soap hash tube   \
+       access dns superlibs
 
 #Different for cross compile
 SUBS_MINGW = text xml xmi cppt regen mt net chan misc time log cache \
-             cli init crypto ssl file web soap hash tube ssl access dns \
-             superlibs
+             cli init crypto ssl ssl-openssl file web soap hash tube \
+             access dns superlibs
 SUBS_MIPS = $(SUBS_MINGW)
 
 ROOT = ..

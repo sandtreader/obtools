@@ -10,6 +10,7 @@
 #include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
 #include <unistd.h>
+#include <stdlib.h>
 
 #if defined(__WIN32__)
 #include <windows.h>

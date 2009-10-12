@@ -15,12 +15,6 @@ TESTCMD	=
 DEPENDS = misc net log mt chan text ssl
 SOCKET  = 1
 
-ifdef MINGW
-EXTLIBS = -lssl32 -leay32
-else
-EXTLIBS = -lssl -lcrypto
-endif
-
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 

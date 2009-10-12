@@ -15,12 +15,6 @@ SOCKET  = 1
 TESTS 	= test-client test-server
 TESTCMD = ./test-client localhost
 
-ifdef MINGW
-EXTLIBS = -lssl32 -leay32
-else
-EXTLIBS = -lssl -lcrypto
-endif
-
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 

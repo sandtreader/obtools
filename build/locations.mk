@@ -36,7 +36,8 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  regen:libs/regen 			\
 	  script:libs/script:log,misc,init	\
 	  soap:libs/soap:web,log,misc,xml	\
-	  ssl:libs/ssl:log,net,crypto,xml       \
+	  ssl:libs/ssl:log,net,xml              \
+	  ssl-openssl:libs/ssl-openssl:log,net,ssl,crypto,xml       \
 	  text:libs/text   			\
 	  time:libs/time			\
 	  tube:libs/tube:net,log,mt,chan,misc,ssl   \

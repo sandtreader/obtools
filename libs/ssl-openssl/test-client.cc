@@ -8,8 +8,9 @@
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-#include "ot-ssl.h"
+#include "ot-ssl-openssl.h"
 #include "ot-log.h"
+#include <stdlib.h>
 
 using namespace std;
 using namespace ObTools;
@@ -48,7 +49,7 @@ int main(int argc, char **argv)
   cout << "Host: " << addr << " (" << addr.get_hostname() << ")" << endl;
 
   // Create SSL Context
-  SSL::Context ctx;
+  SSL_OpenSSL::Context ctx;
 
   Net::EndPoint ep(addr, port);
   SSL::TCPClient client(&ctx, ep);
@@ -60,7 +61,7 @@ int main(int argc, char **argv)
   }
 
   // Get server's CN
-  cout << "Server's CN is " << client.get_peer_certificate().get_cn() << endl;
+  cout << "Server's CN is " << client.get_peer_cn() << endl;
 
   try
   {

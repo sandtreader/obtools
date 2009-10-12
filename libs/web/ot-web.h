@@ -568,6 +568,7 @@ public:
 class Cache
 {
   File::Directory directory;
+  SSL::Context *ssl_ctx;
   string user_agent;  
 
   // Internal
@@ -578,8 +579,8 @@ class Cache
   //--------------------------------------------------------------------------
   // Constructor
   // UA is used if specified, otherwise a default is used
-  Cache(const File::Directory& _dir, const string& _ua="");
-
+  Cache(const File::Directory& _dir, SSL::Context *_ssl_ctx = 0,
+	const string& _ua="");
 
   //--------------------------------------------------------------------------
   // Fetch a file from the given URL, or from cache

@@ -8,7 +8,9 @@
 //==========================================================================
 
 #include "ot-web.h"
+#include "ot-ssl-openssl.h"
 #include "ot-log.h"
+
 using namespace std;
 using namespace ObTools;
 
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
   }
 
   // Create SSL Context
-  SSL::Context ctx;
+  SSL_OpenSSL::Context ctx;
   Web::HTTPClient *client = 0;
 
   for(;i<argc;i++)

@@ -13,6 +13,7 @@ all:
 	$(MAKE) -C tools
 	$(MAKE) -C obcache
 	$(MAKE) -C angel
+	$(MAKE) -C extra
 
 mingw: 
 	$(MAKE) -C libs mingw
@@ -34,6 +35,7 @@ clean:
 	$(MAKE) -C tools clean
 	$(MAKE) -C obcache clean
 	$(MAKE) -C angel clean
+	$(MAKE) -C extra clean
 
 test: 
 	$(MAKE) -C libs test

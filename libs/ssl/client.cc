@@ -90,18 +90,8 @@ void TCPClient::attach_ssl(Context *ctx)
 {
   if (ctx && connected)
   {
-    ssl = ctx->create_connection(fd);
-    if (ssl)
-    {
-      int ret = SSL_connect(ssl);
-      if (ret < 1)
-      {
-	Context::log_errors("Failed to connect SSL");
-	SSL_free(ssl);
-	ssl = 0;
-	close();
-      }
-    }
+    ssl = ctx->connect_connection(fd);
+    if (!ssl) close();
   }
   else ssl = 0;
 }

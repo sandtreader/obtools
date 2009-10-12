@@ -9,6 +9,8 @@
 
 #include "ot-web.h"
 #include "ot-log.h"
+#include "errno.h"
+
 using namespace std;
 using namespace ObTools;
 

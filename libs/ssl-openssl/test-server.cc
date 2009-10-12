@@ -7,7 +7,7 @@
 // @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
 //==========================================================================
 
-#include "ot-ssl.h"
+#include "ot-ssl-openssl.h"
 #include "ot-log.h"
 #include <fstream>
 #include <signal.h>
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
   if (argc > 2)
   {
-    SSL::Context ctx;
+    SSL_OpenSSL::Context ctx;
 
     // Read certificate
     string certfile(argv[2]);

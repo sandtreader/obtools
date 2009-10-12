@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-web.h"
+#include "ot-ssl-openssl.h"
 #include <sstream>
 #include <fstream>
 #include <signal.h>
@@ -87,7 +88,7 @@ int main(int argc, char **argv)
 
   // Use SSL
   SSL::Context *ctx_p = 0;
-  SSL::Context ctx;
+  SSL_OpenSSL::Context ctx;
 
   if (argc > 3)
   {

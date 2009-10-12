@@ -21,8 +21,9 @@ namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
 // Constructor
-Cache::Cache(const File::Directory& _dir, const string& _ua): 
-  directory(_dir), user_agent(_ua) 
+Cache::Cache(const File::Directory& _dir, SSL::Context *_ssl_ctx,
+	     const string& _ua): 
+  directory(_dir), ssl_ctx(_ssl_ctx), user_agent(_ua) 
 {
   if (user_agent.empty()) user_agent = DEFAULT_USER_AGENT;
 }
@@ -100,8 +101,7 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
     log.detail << "Fetch required from " << actual_url << endl;
 
     // Need to fetch it
-    SSL::Context ctx;    // Only used for https
-    Web::HTTPClient client(actual_url, &ctx, user_agent, 5, 5);
+    Web::HTTPClient client(actual_url, ssl_ctx, user_agent, 5, 5);
     HTTPMessage request("GET", actual_url);
     HTTPMessage response;
 

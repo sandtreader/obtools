@@ -9,6 +9,7 @@
 
 #include "ot-xmlmesh-otmp.h"
 #include "ot-log.h"
+#include <stdlib.h>
 
 using namespace std;
 using namespace ObTools;

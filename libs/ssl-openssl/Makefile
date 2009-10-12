@@ -6,13 +6,14 @@
 #==========================================================================
 
 TYPE	= lib
-NAME   	= ot-ssl
-HEADERS = ot-ssl.h
-OBJS  	= context.o socket.o client.o server.o
-TESTS 	= 
-DEPENDS = mt net log xml text
+NAME   	= ot-ssl-openssl
+HEADERS = ot-ssl-openssl.h
+OBJS  	= context.o connection.o
+TESTS 	= test-client test-server
+DEPENDS = mt net log crypto xml text ssl
 TESTCMD	= 
 SOCKET = 1
+CRYPTO = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

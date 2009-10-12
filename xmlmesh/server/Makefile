@@ -30,11 +30,5 @@ CPPFLAGS += -DOT_XMLMESH_VERSION=$(DEBIAN-VERSION)
 CONFIGS = xmlmesh.cfg.xml
 SOCKET  = 1
 
-ifdef MINGW
-EXTLIBS = -lssl32 -leay32
-else
-EXTLIBS = -lssl -lcrypto
-endif
-
 ROOT    = ../..
 include $(ROOT)/build/std.mk

@@ -19,7 +19,7 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
   // If not SSL, revert to basic
   if (!ssl) return Net::TCPSocket::cread(buf, count);
 
-  return ssl->cread(buf, count);
+  return SSL_read(ssl, buf, count);
 }
 
 //--------------------------------------------------------------------------
@@ -29,15 +29,16 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
   // If not SSL, revert to basic
   if (!ssl) return Net::TCPSocket::cwrite(buf, count);
 
-  return ssl->cwrite(buf, count);
+  return SSL_write(ssl, buf, count);
 }
 
 //--------------------------------------------------------------------------
-// Get peer's X509 common name
-string TCPSocket::get_peer_cn()
+// Get peer's X509 certificate
+// Note, returned by value, will X509_free when done
+Crypto::Certificate TCPSocket::get_peer_certificate()
 {
-  if (!ssl) return "";  // Invalid
-  return ssl->get_peer_cn();
+  if (!ssl) return Crypto::Certificate();  // Invalid
+  return Crypto::Certificate(SSL_get_peer_certificate(ssl));
 }
 
 //--------------------------------------------------------------------------
@@ -45,7 +46,11 @@ string TCPSocket::get_peer_cn()
 TCPSocket::~TCPSocket()
 {
   // Shutdown and free SSL connection
-  if (ssl) delete ssl;
+  if (ssl) 
+  {
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+  }
 }
 
 }} // namespaces

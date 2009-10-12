@@ -17,17 +17,12 @@ namespace ObTools { namespace SSL {
 // and runs SSL accept on it
 Net::TCPSocket *TCPServer::create_client_socket(int client_fd)
 {
-  OpenSSL *ssl = ctx?ctx->create_connection(client_fd):0;
-  // Accept connection on SSL
-  if (ssl)
+  Connection *ssl = 0;
+
+  if (ctx)
   {
-    int ret = SSL_accept(ssl);
-    if (ret < 1)
-    {
-      Context::log_errors("Failed to accept SSL");
-      SSL_free(ssl);
-      return 0;
-    }
+    ssl = ctx->accept_connection(client_fd);
+    if (!ssl) return 0;
   }
 
   return new SSL::TCPSocket(client_fd, ssl);
@@ -41,10 +36,7 @@ void TCPServer::process(Net::TCPSocket &s, Net::EndPoint client)
   SSL::TCPSocket& ss = static_cast<SSL::TCPSocket&>(s);
 
   // Get Common Name from client certificate (if any)
-  Crypto::Certificate cert = ss.get_peer_certificate();
-  string cn;
-  if (!!cert) cn = cert.get_cn();
-
+  string cn = ss.get_peer_cn();
   ClientDetails cd(client, cn);
   process(ss, cd);
 }

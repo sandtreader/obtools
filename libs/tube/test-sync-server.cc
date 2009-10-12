@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-tube.h"
+#include <stdlib.h>
 
 using namespace std;
 using namespace ObTools;
