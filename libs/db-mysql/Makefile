@@ -14,7 +14,7 @@ ifdef OSX
 EXTINCS = /usr/local/mysql/include/
 LDFLAGS += -L/usr/local/mysql/lib
 else
-ifdef centos
+ifdef CENTOS
 LDFLAGS += -L/usr/lib/mysql
 EXTINCS = /usr/include/mysql
 else
