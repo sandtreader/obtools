@@ -165,7 +165,7 @@ bool HTTPMessage::write_headers(ostream &out) const
   }
 
   // Check for a content-length header, and if not present, add one
-  if (!body.empty() && !headers.has("content-length"))
+  if (!headers.has("content-length"))
     out << "Content-Length: " << body.size() << "\r\n";
 
   // Output headers
