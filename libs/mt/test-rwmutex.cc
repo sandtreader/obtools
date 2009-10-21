@@ -82,12 +82,14 @@ void WriterThread::run()
 
       // Set to 'inconsistent' value
       n = 1;
-      for(volatile int i=0; i<1000; i++);
+      for(volatile int i=0; i<1000; i++)
+	;
       n = 0;
     }
 
     n_writes++;
-    for(volatile int i=0; i<1000; i++);
+    for(volatile int i=0; i<1000; i++)
+      ;
   }
 }
 

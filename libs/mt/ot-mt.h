@@ -677,8 +677,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Request it to die.  If 'wait' is set, waits for thread to exit
-  void die(bool wait=false);
-
+  virtual void die(bool wait=false);
 };
 
 //==========================================================================

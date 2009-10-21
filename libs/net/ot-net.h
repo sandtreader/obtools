@@ -805,8 +805,9 @@ public:
   EndPoint client_ep;
 
   TCPWorkerThread(MT::PoolReplacer<TCPWorkerThread>& _rep):
-    MT::PoolThread(_rep) {}
+    MT::PoolThread(_rep), server(0), client_fd(-1) {}
   virtual void run();
+  virtual void die(bool wait=false);
 };
 
 class TCPServer: public TCPSocket

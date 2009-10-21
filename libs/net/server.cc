@@ -156,7 +156,7 @@ TCPSocket *TCPServer::create_client_socket(int client_fd)
 {
   return new TCPSocket(client_fd);
 }
-    
+
 //--------------------------------------------------------------------------
 // Shut down server
 void TCPServer::shutdown()
@@ -164,9 +164,10 @@ void TCPServer::shutdown()
   if (alive)
   {
     alive = false;
-    close();
+    close();  // Close listen socket
   }
 
+  // Note: Client sockets will be closed by TCPWorkerThread::die()
   threadpool.shutdown(); 
 }
 
@@ -182,6 +183,17 @@ void TCPWorkerThread::run()
     server->process(*s, client_ep);
   else
     ::SOCKCLOSE(client_fd);  // Drop it
+
+  // Clear it so we don't try to close it again on die()
+  client_fd = -1;
+}
+
+//--------------------------------------------------------------------------
+// Force socket to close on being asked to die
+void TCPWorkerThread::die(bool wait)
+{
+  if (client_fd >= 0) ::SOCKCLOSE(client_fd); 
+  MT::PoolThread::die(wait); 
 }
 
 }} // namespaces
