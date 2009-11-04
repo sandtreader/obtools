@@ -21,17 +21,25 @@ class TestDaemon: public Daemon::Process
 private:
   //--------------------------------------------------------------------------
   // Prerun function for child process
-  virtual int run_priv()
+  int run_priv()
   {
     Log::Streams log;
-    log.summary << "Hi, this is the priviledged prerun\n";
+    log.summary << "Hi, this is the privileged prerun\n";
     return 0;
+  }
+
+  //--------------------------------------------------------------------------
+  // Reconfigure process
+  void reconfigure()
+  {
+    Log::Streams log;
+    log.summary << "This is the reconfigure function\n";
   }
 
   //--------------------------------------------------------------------------
   // Main run function for child process
   // Return child exit code
-  virtual int run()
+  int run()
   {
     Log::Streams log;
     log.summary << "Hello, this is the daemon run() method\n";
@@ -47,7 +55,8 @@ private:
   }
 
 public:
-  TestDaemon(): Daemon::Process("test.cfg", "test", 
+  TestDaemon(): Daemon::Process("Daemon library test", "0.1",
+				"test.cfg", "test", 
 				"/tmp/test.log", "/var/run/test.pid") 
   {
     // Force watchdog enabled, even in debug, for testing

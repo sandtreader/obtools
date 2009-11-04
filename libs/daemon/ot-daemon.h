@@ -27,6 +27,8 @@ using namespace std;
 // Abstract: Implement run() in daemon-specific subclass
 class Process
 {
+  string name;                 // Long name of process
+  string version;              // Version number
   string default_config_file;  // Path to default config if not specified 
   string config_element;       // Top-level element to expect in config
   string default_log_file;     // Default log file path
@@ -35,13 +37,20 @@ class Process
 protected:
   bool enable_watchdog;        // Flag to enable watchdog
   bool shut_down;              // Shut down requested
-  int slave_pid;               // PID of slave
+  int slave_pid;               // PID of slave or 0 if we are the slave
 
   //--------------------------------------------------------------------------
   // Prerun function for child process
-  // Called before priviledges dropped
+  // Called before privileges dropped
+  // Does nothing by default - override to implement
   // Return exit code or 0 to continue
-  virtual int run_priv()=0;
+  virtual int run_priv() { return 0; }
+
+  //--------------------------------------------------------------------------
+  // Reconfigure function for child process
+  // Does nothing by default - override to implement
+  // Called on reception of SIGHUP by master or child
+  virtual void reconfigure() {}
 
   //--------------------------------------------------------------------------
   // Main run function for child process
@@ -53,8 +62,10 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructor
-  Process(const string& _default_config_file, const string& _config_element,
-	  const string& _default_log_file, const string& _pid_file): 
+ Process(const string& _name, const string& _version,
+	 const string& _default_config_file, const string& _config_element,
+	 const string& _default_log_file, const string& _pid_file): 
+    name(_name), version(_version),
     default_config_file(_default_config_file), 
     config_element(_config_element),
     default_log_file(_default_log_file),
@@ -75,6 +86,10 @@ public:
   //--------------------------------------------------------------------------
   // Signal to shut down 
   void shutdown();
+
+  //--------------------------------------------------------------------------
+  // Signal to reload config
+  void reload();
 
   //--------------------------------------------------------------------------
   // Handle a failure signal

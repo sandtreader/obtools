@@ -34,6 +34,13 @@ void sigterm(int)
   signal(SIGTERM, SIG_IGN);
 }
 
+// SIGHUP:  Reload config
+void sighup(int)
+{
+  if (the_process) the_process->reload();
+  signal(SIGHUP, sighup);
+}
+
 // Various bad things!
 void sigevil(int sig)
 {
@@ -81,6 +88,7 @@ int Process::start(int argc, char **argv)
   Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
+  log.summary << name << " version " << version << " starting\n";
 
 #if !defined(DEBUG)
   // Full background daemon 
@@ -96,6 +104,7 @@ int Process::start(int argc, char **argv)
   // Register signal handlers - same for both master and slave
   the_process = this;
   signal(SIGTERM, sigterm);
+  signal(SIGHUP,  sighup);
   signal(SIGSEGV, sigevil);
   signal(SIGILL,  sigevil);
   signal(SIGFPE,  sigevil);
@@ -138,7 +147,7 @@ int Process::start(int argc, char **argv)
 	{
 	  int rc = WEXITSTATUS(status);
 	  if (shut_down && !rc)
-	    log.summary << "Slave process existed OK\n";  // Expected
+	    log.summary << "Slave process exited OK\n";  // Expected
 	  else
 	    log.error << "*** Slave process " << slave_pid 
 		      << " exited with code " << rc << " ***\n";
@@ -237,6 +246,26 @@ void Process::shutdown()
   else
   {
     log.summary << "SIGTERM received in slave process\n";
+  }
+}
+
+//--------------------------------------------------------------------------
+// Signal to reload config - called from SIGHUP handler first in master and then
+// (because this passes it down) in slave
+void Process::reload() 
+{
+  Log::Streams log;
+
+  // Tell the slave to reload, if we're the master
+  if (slave_pid)
+  {
+    log.summary << "SIGHUP received in master process\n";
+    kill(slave_pid, SIGHUP);
+  }
+  else
+  {
+    log.summary << "SIGHUP received in slave process\n";
+    reconfigure();
   }
 }
 
