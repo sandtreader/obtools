@@ -19,6 +19,7 @@
 OT-LIBS = access:libs/access:text,xml,ssl	\
 	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
+	  daemon:libs/daemon:log,xml		\
 	  db:libs/db:log	 		\
 	  db-mysql:libs/db-mysql:log,db		\
 	  db-pgsql:libs/db-pgsql:log,db		\
