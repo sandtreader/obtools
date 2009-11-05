@@ -6,7 +6,7 @@
 #==========================================================================
 
 SUBS = text xml xmi cppt regen mt net chan misc time log cache   \
-       db db-pgsql db-mysql                                      \
+       daemon db db-pgsql db-mysql                               \
        cli init crypto ssl ssl-openssl file web soap hash tube   \
        access dns superlibs
 
