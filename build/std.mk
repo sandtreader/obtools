@@ -280,7 +280,11 @@ HOSTTYPE=$(shell uname -m)
 TARGARCH  = i386
 ifdef HOSTTYPE
 ifeq ($(HOSTTYPE), x86_64)
+ifeq ($(CROSS), centos)
+TARGARCH = x86_64
+else
 TARGARCH  = amd64
+endif
 endif
 endif
 
