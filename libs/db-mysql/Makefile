@@ -15,7 +15,14 @@ EXTINCS = /usr/local/mysql/include/
 LDFLAGS += -L/usr/local/mysql/lib
 else
 ifdef CENTOS
+HOSTTYPE=$(shell uname -m)
+ifdef HOSTTYPE
+ifeq ($(HOSTTYPE), x86_64)
+LDFLAGS += -L/usr/lib64/mysql
+else
 LDFLAGS += -L/usr/lib/mysql
+endif
+endif
 EXTINCS = /usr/include/mysql
 else
 EXTINCS = /usr/include/mysql

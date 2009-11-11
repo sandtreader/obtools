@@ -22,7 +22,14 @@ LDFLAGS += -L/usr/local/mysql/lib
 endif
 
 ifdef CENTOS
-EXTINCS = /usr/include/mysql
+HOSTTYPE=$(shell uname -m)
+ifdef HOSTTYPE
+ifeq ($(HOSTTYPE), x86_64)
+LDFLAGS += -L/usr/lib64/mysql
+else
+LDFLAGS += -L/usr/lib/mysql
+endif
+endif
 LDFLAGS += -L/usr/lib/mysql
 endif
 
