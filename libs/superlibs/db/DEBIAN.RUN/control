@@ -1,7 +1,7 @@
 Package: libot-db2
 Priority: optional
 Section: libs
-Maintainer: Paul Clark <paul@xmill.com>
+Maintainer: Paul Clark <debian@obtools.com>
 Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3), libot-general2 (>= 2.1.0)
 Description: ObTools generic database library
  The ObTools database library provides a generic database interface in C++.

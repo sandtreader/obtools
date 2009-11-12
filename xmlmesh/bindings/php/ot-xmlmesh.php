@@ -1,6 +1,7 @@
 <?
 // Native PHP implementation of ot-xmlmesh client
-// Copyright (c) xMill Consulting Limited 2007
+// Cpoyright (c) Paul Clark 2008.  All rights reserved.
+// This code comes with NO WARRANTY and is subject to licence agreement
 
 // Replaces previous C module
 

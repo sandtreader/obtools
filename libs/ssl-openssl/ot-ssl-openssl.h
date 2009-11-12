@@ -4,8 +4,8 @@
 // Public definitions for ObTools::SSL
 // SSL/TLS Socket functions - wrapper around libssl
 // 
-// Copyright (c) 2009 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2009 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #ifndef __OBTOOLS_SSL_OPENSSL_H

@@ -1,7 +1,7 @@
 # Hand-carved Makefile for libraries under Borland make
 # Include from library directory with LIB, OBJS and TESTS set
 
-# Copyright (c) xMill Consulting Limited 2005
+# Copyright (c) Paul Clark 2005
 
 AR = tlib
 CC = bcc32

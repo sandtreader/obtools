@@ -1,6 +1,6 @@
 Package: angel-daemon
 Priority: optional
-Maintainer: Paul Clark <paul@xmill.com>
+Maintainer: Paul Clark <debian@obtools.com>
 Depends: libot-general2 (>= 2.1.0), libot-xmlmesh2 (>= 2.0.0)
 Description: Angel process manager daemon
  Angel is a process manager designed for managing and monitoring complex

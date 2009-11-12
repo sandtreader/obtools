@@ -1,8 +1,8 @@
 #==========================================================================
 # Standard Makefile for any libary, executable etc.
 #
-# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
-# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+# Copyright (c) 2003 Paul Clark.  All rights reserved
+# This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
 # Define the following before including this:

@@ -14,8 +14,8 @@
 //   Lookup:   O(1) usually, O(N) when full and hashing is perverse
 //   Removal:  as lookup
 //
-// Copyright (c) 2006 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2006 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #ifndef __OBTOOLS_HASH_H

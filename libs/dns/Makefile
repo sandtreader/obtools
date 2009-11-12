@@ -2,7 +2,7 @@
 # Makefile for ObTools::DNS
 #
 # Copyright (c) 2008 ObTools Limited.  All rights reserved
-# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+# This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
 TYPE	= lib

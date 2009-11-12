@@ -1,7 +1,7 @@
 #==========================================================================
 # Makefile for ObTools <project>
 #
-# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
-# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+# Copyright (c) Paul Clark 2008.  All rights reserved.
+# This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 

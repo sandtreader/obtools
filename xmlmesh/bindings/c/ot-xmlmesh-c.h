@@ -4,8 +4,8 @@
 // Basic C interface to XMLMesh client
 // To be included from a C file, compiled with cc
 //
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2003 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #if !defined(__OBTOOLS_XMLMESH_C_H)

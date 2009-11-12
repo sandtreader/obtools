@@ -4,8 +4,8 @@
 // Public definitions for ObTools::Daemon
 // Common infrastructure for Unix daemons/background servers
 // 
-// Copyright (c) 2009 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2009 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #ifndef __OBTOOLS_DAEMON_H

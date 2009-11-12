@@ -3,8 +3,8 @@
 //
 // Test harness for directory creation
 //
-// Copyright (c) 2009 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2009 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-file.h"

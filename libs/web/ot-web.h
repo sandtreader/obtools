@@ -4,8 +4,8 @@
 // Public definitions for ObTools::Web
 // Web protocols parsers, helpers and client/server
 // 
-// Copyright (c) 2005-2006 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2005-2006 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #ifndef __OBTOOLS_WEB_H

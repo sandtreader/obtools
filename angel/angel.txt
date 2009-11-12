@@ -1,5 +1,5 @@
 Ideas for 'angel' process monitor
-Copyright (c) xMill Consulting 2005
+Copyright (c) Paul Clark 2005
 
 
 

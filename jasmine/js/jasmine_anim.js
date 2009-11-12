@@ -1,6 +1,7 @@
 // Jasmine animation library for Javascript
 // Animation support
-// (c) xMill Consulting Limited 2008.  All rights reserved.
+// Copyright (c) Paul Clark 2008.  All rights reserved.
+// This code comes with NO WARRANTY and is subject to licence agreement
 
 //============================================================================
 // Signal class - generates a 0-1 function over time

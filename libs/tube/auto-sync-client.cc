@@ -4,8 +4,8 @@
 // Implementation of synchronous request tube client with internal message
 // dispatch thread - can only be used for synchronous requests
 //
-// Copyright (c) 2007 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2007 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-tube.h"

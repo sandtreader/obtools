@@ -3,8 +3,8 @@
 # Work without the ObTools build environment
 # Include from test directory, defining XMI to source XMI file
 # 
-# Copyright (c) 2008 xMill Consulting Limited.  All rights reserved
-# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+# Copyright (c) 2008 Paul Clark.  All rights reserved
+# This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
 # Set DEV for development within the ObCache world, otherwise

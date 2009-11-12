@@ -1,14 +1,14 @@
 #==========================================================================
 # Makefile for all ObTools libraries
 #
-# Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
-# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+# Copyright (c) 2003 Paul Clark.  All rights reserved
+# This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
 SUBS = text xml xmi cppt regen mt net chan misc time log cache   \
-       daemon db db-pgsql db-mysql                               \
+       db db-pgsql db-mysql                                      \
        cli init crypto ssl ssl-openssl file web soap hash tube   \
-       access dns superlibs
+       access dns daemon superlibs
 
 #Different for cross compile
 SUBS_MINGW = text xml xmi cppt regen mt net chan misc time log cache \

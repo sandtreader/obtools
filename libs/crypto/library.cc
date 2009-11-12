@@ -3,8 +3,8 @@
 //
 // Overall library initialisation/shutdown
 //
-// Copyright (c) 2006 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2006 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-crypto.h"

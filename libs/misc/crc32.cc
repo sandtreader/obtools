@@ -4,8 +4,8 @@
 // CRC32 implementation using byte-at-a-time combination table
 // Algorithms adapted from example in PNG specification
 //
-// Copyright (c) 2007 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2007 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-misc.h"

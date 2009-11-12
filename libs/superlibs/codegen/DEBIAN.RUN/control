@@ -1,7 +1,7 @@
 Package: libot-codegen2
 Priority: optional
 Section: libs
-Maintainer: Paul Clark <paul@xmill.com>
+Maintainer: Paul Clark <debian@obtools.com>
 Depends: libot-general2 (>= 2.1.0)
 Description: ObTools codegen libraries 
  The ObTools code generation libraries provide useful facilities for UML/XMI

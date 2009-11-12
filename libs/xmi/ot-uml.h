@@ -7,8 +7,8 @@
 // Foundation.Data-Type and Foundation.Model-Management bits needed
 // for simple Class Diagrams
 // 
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2003 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #ifndef __OBTOOLS_UML_H

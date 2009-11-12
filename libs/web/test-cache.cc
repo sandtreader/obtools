@@ -4,7 +4,7 @@
 // Test harness for HTTP cache functions
 //
 // Copyright (c) 2009 ObTools Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-web.h"

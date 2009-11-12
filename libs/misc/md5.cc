@@ -5,8 +5,8 @@
 // MD5 message-digest code taken from Colin Plumb's 1993 public domain
 // version, heavily modified into C++.
 //
-// Copyright (c) 2003 xMill Consulting Limited.  All rights reserved
-// @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+// Copyright (c) 2003 Paul Clark.  All rights reserved
+// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-misc.h"

@@ -1,8 +1,8 @@
 #==========================================================================
 # Makefile for ObTools::Tube
 #
-# Copyright (c) 2007 xMill Consulting Limited.  All rights reserved
-# @@@ MASTER SOURCE - PROPRIETARY AND CONFIDENTIAL - NO LICENCE GRANTED
+# Copyright (c) 2007 Paul Clark.  All rights reserved
+# This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
 TYPE	= lib

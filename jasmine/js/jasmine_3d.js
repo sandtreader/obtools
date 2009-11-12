@@ -1,6 +1,7 @@
 // Jasmine animation library for Javascript
 // 3D support (really 2.5D, since we're only displaying 2D objects)
-// (c) xMill Consulting Limited 2008.  All rights reserved.
+// Copyright (c) Paul Clark 2008.  All rights reserved.
+// This code comes with NO WARRANTY and is subject to licence agreement
 
 //============================================================================
 // 3D world - holds multiple Things (including sub-worlds)
