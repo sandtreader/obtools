@@ -220,6 +220,22 @@ bool Cache::set_update_interval(const URL& url, const string& interval)
 }
 
 //--------------------------------------------------------------------------
+// Clear any cached file for a given URL
+void Cache::forget(const URL& url)
+{
+  Log::Streams log;
+  log.detail << "Web cache: removing data for " << url << endl;
+
+  File::Directory domain_dir;
+  File::Path file_path, status_path;
+  if (get_paths(url, domain_dir, file_path, status_path))
+  {
+    file_path.erase();
+    status_path.erase();
+  }
+}
+
+//--------------------------------------------------------------------------
 // Get the cache paths for a given URL
 bool Cache::get_paths(const URL& url,
 		      File::Directory& domain_dir_p,

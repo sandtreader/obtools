@@ -601,6 +601,10 @@ class Cache
   bool set_update_interval(const URL& url, const string& interval);
 
   //--------------------------------------------------------------------------
+  // Clear any cached file for a given URL
+  void forget(const URL& url);
+
+  //--------------------------------------------------------------------------
   // Update the cache in background
   // Runs a single time through the entire cache, checking for updates on files
   // with update intervals set
