@@ -89,7 +89,7 @@ bool Server::verify(Net::EndPoint ep)
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
 void Server::process(Net::TCPSocket& socket, 
-		     Net::EndPoint client)
+		     SSL::ClientDetails& client)
 {
   Log::Streams log;  // Our private log
 
@@ -98,7 +98,7 @@ void Server::process(Net::TCPSocket& socket,
   log.summary << name << ": Got connection from " << client << endl;
 
   // Create client session and map it (autoremoved on destruction)
-  ClientSession session(socket, client, client_sessions);
+  ClientSession session(socket, client.address, client_sessions);
 
   // Start send thread and detach it
   ServerSendThread send_thread(*this, session);
@@ -250,7 +250,7 @@ bool Server::send(ClientMessage& msg)
   // Look up client in map, and queue it on there
   MT::RWReadLock lock(client_sessions.mutex);
   map<Net::EndPoint, ClientSession *>::iterator p 
-    = client_sessions.sessions.find(msg.client);
+    = client_sessions.sessions.find(msg.client.address);
   if (p != client_sessions.sessions.end())
   {
     ClientSession *cs = p->second;

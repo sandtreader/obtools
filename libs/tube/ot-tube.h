@@ -357,7 +357,7 @@ struct ClientSession
 // message;  it's safer to re-lookup the endpoint each time.
 struct ClientMessage
 {
-  Net::EndPoint client;
+  SSL::ClientDetails client;
   Message msg;
 
   enum Action
@@ -370,12 +370,12 @@ struct ClientMessage
   Action action;
 
   // Constructor for message
-  ClientMessage(Net::EndPoint _client, tag_t _tag, 
+  ClientMessage(SSL::ClientDetails& _client, tag_t _tag, 
 		const string& _data="", flags_t _flags=0):
     client(_client), msg(_tag, _data,_flags), action(MESSAGE_DATA) {}
 
   // Constructor for other action
-  ClientMessage(Net::EndPoint _client, Action _action):
+  ClientMessage(SSL::ClientDetails& _client, Action _action):
     client(_client), msg(), action(_action) {}
 };
 
@@ -451,7 +451,7 @@ public:
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
   void process(ObTools::Net::TCPSocket& s, 
-	       ObTools::Net::EndPoint client);
+	       SSL::ClientDetails& client);
 
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
