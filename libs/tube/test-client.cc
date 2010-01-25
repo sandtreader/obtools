@@ -8,6 +8,8 @@
 //==========================================================================
 
 #include "ot-tube.h"
+#include "ot-file.h"
+#include "ot-ssl-openssl.h"
 #include <stdlib.h>
 
 #if defined(__WIN32__)
@@ -24,12 +26,72 @@ int main(int argc, char **argv)
 {
   if (argc < 3)
   {
-    cerr << "Give a hostname and port\n" << endl;
+    cout << "Usage: " << argv[0] << " [options] hostname port\n\n";
+    cout << "Options:\n";
+    cout << "   -n <num>           Repeat N times\n";
+    cout << "   -ssl               Use SSL context\n";
+    cout << "   -cert <cert> <key> Use given certificate and key files\n";
+    cout << "   -pass <phrase>     Pass phrase for key\n";
+    cout << "   -tag <tag>         Use given message tag\n";
+    cout << "   -r                 Request result\n";
+    cout << "   -stdin             Read data from stdin\n";
     return 2;
   }
 
-  char *host = argv[1];
-  int port = atoi(argv[2]);
+  Tube::tag_t tag = 0x12345678;
+  int n = 1;
+  bool ssl = false;
+  string ssl_cert;
+  string ssl_key;
+  string ssl_pass;
+  bool result = false;
+  string data = "Hello, world!\n";
+
+  int i;
+  for(i=1; i<argc-2; i++)
+  {
+    string arg = argv[i];
+    if (arg == "-n" && i<argc-3)
+      n = atoi(argv[++i]);
+    else if (arg == "-ssl")
+      ssl = true;
+    else if (arg == "-cert" && i<argc-4)
+    {
+      ssl_cert = argv[++i];
+      ssl_key  = argv[++i];
+    }
+    else if (arg == "-pass" && i<argc-3)
+    {
+      ssl_pass = argv[++i];
+    }
+    else if (arg == "-tag" && i<argc-3)
+    {
+      char *s = argv[++i];
+      tag = ((uint32_t)s[0]<<24) | ((uint32_t)s[1]<<16) 
+  	  | ((uint32_t)s[2]<< 8) | ((uint32_t)s[3]);
+    }
+    else if (arg == "-r")
+      result = true;
+    else if (arg == "-stdin")
+    {
+      data.clear();
+
+      // Read stdin
+      while (cin)
+      {
+	int c = cin.get();
+	if (c>=0) data += c;
+      }
+    }
+    else
+    {
+      cerr << "Unrecognised option " << arg << endl;
+      return 2;
+    }
+  }
+
+  char *host = argv[i++];
+  int port = atoi(argv[i]);
 
   // Set up logging
   Log::StreamChannel   chan_out(cout);
@@ -53,32 +115,71 @@ int main(int argc, char **argv)
   log.summary << "Host: " << addr 
 	      << " (" << addr.get_hostname() << ")" << endl;
 
-  // Start client
-  Net::EndPoint server(addr, port);
-  Tube::Client client(server);
+  // Get SSL context
+  SSL_OpenSSL::Context ssl_ctx;
 
-  // Loop for a while sending and receiving
-  for(int i=0; i<10; i++)
+  if (ssl)
   {
-    MT::Thread::sleep(1);
-    Tube::Message msg(0x12345678, "This is a test message");
-
-    client.send(msg);
-
-#if !defined(_SINGLE)
-    if (client.poll())
-#endif
+    File::Path key_file(ssl_key);
+    string key_pem;
+    if (!key_file.read_all(key_pem))
     {
-      if (client.wait(msg))
-	cout << msg.data << endl;
-      else
-	cout << "RESTART\n";
+      log.error << "Can't read key file " << key_file 
+		<< ": " << key_pem << endl;
+      return 4;
+    }
+
+    // Get private key
+    Crypto::RSAKey rsa(key_pem, true, ssl_pass);
+    if (!rsa.valid)
+    {
+      log.error << "Invalid RSA private key or pass phrase - giving up\n";
+      return 4;
+    }
+
+    ssl_ctx.use_private_key(rsa);
+
+    File::Path cert_file(ssl_cert);
+    string cert_pem;
+    if (!cert_file.read_all(cert_pem))
+    {
+      log.error << "Can't read certificate file " << cert_file 
+		<< ": " << cert_pem << endl;
+      return 4;
+    }
+
+    if (!ssl_ctx.use_certificate(cert_pem))
+    {
+      log.error << "Bad certificate file " << cert_file << endl;
+      return 4;
     }
   }
 
-  cout << "Shutting down\n";
+  // Start client
+  Net::EndPoint server(addr, port);
+  Tube::Client client(server, ssl?&ssl_ctx:0);
+
+  // Loop for a while sending and receiving
+  for(int i=0; i<n; i++)
+  {
+    if (i) MT::Thread::sleep(1);
+    Tube::Message msg(tag, data);
+
+    client.send(msg);
+
+    if (result)
+    {
+      if (client.wait(msg))
+	cout << "# MSG(" << hex << msg.tag << dec << "):\n" 
+	     << msg.data << endl;
+      else
+	cout << "# RESTART\n";
+    }
+  }
+
+  log.summary << "Shutting down\n";
   client.shutdown();
-  cout << "Done\n";
+  log.summary << "Done\n";
 
   return 0;  
 }

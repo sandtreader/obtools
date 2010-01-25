@@ -12,8 +12,9 @@ OBJS  	= server.o sync-server.o client.o sync-client.o auto-sync-client.o \
 	  message.o
 TESTS 	= test-server test-sync-server test-client test-sync-client
 TESTCMD	= 
-DEPENDS = misc net log mt chan text ssl
+DEPENDS = misc net log mt chan text ssl ssl-openssl file
 SOCKET  = 1
+CRYPTO  = 1
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
