@@ -141,7 +141,7 @@ void OTMPServer::dispatch()
   OTMP::ClientMessage otmp_msg = receive_q.wait();
 
   // Create our reference for the client. 
-  ServiceClient client(this, otmp_msg.client);
+  ServiceClient client(this, otmp_msg.client.address);
 
   switch (otmp_msg.action)
   {
@@ -159,8 +159,8 @@ void OTMPServer::dispatch()
       RoutingMessage rmsg(client, msg);
 
       // Push our client info onto the path
-      rmsg.path.push(otmp_msg.client.host.get_dotted_quad());
-      rmsg.path.push(otmp_msg.client.port);
+      rmsg.path.push(otmp_msg.client.address.host.get_dotted_quad());
+      rmsg.path.push(otmp_msg.client.address.port);
 
       // Send it into the system
       originate(rmsg);
@@ -207,7 +207,8 @@ bool OTMPServer::handle(RoutingMessage& msg)
     return false;
   }
 
-  Net::EndPoint client(host, port); 
+  Net::EndPoint address(host, port); 
+  SSL::ClientDetails client(address, "");
 
   OBTOOLS_LOG_IF_DEBUG(tlog.debug << "OTMP Server: responding to " 
 		       << client << endl;)

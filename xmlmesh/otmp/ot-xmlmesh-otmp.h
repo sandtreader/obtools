@@ -42,7 +42,7 @@ struct Message: public Tube::Message
 struct ClientMessage: public Tube::ClientMessage
 {
   // Constructor for message
-  ClientMessage(Net::EndPoint _client, 
+  ClientMessage(SSL::ClientDetails& _client, 
 		const string& _data="", Tube::flags_t _flags=0):
     Tube::ClientMessage(_client, TAG_MESSAGE, _data, _flags) {}
 };
