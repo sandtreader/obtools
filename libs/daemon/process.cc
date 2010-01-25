@@ -90,6 +90,14 @@ int Process::start(int argc, char **argv)
   Log::Streams log;
   log.summary << name << " version " << version << " starting\n";
 
+  // Call preconfigure before we go daemon - e.g. asking for SSL passphrase
+  int rc = preconfigure();
+  if (rc)
+  {
+    log.error << "Preconfigure failed: " << rc << endl;
+    return rc;
+  }
+
 #if !defined(DEBUG)
   // Full background daemon 
   if (daemon(0, 0))

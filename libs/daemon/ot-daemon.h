@@ -40,6 +40,12 @@ protected:
   int slave_pid;               // PID of slave or 0 if we are the slave
 
   //--------------------------------------------------------------------------
+  // Preconfigure function for child process, called before daemon()
+  // Does nothing by default - override to implement
+  // Return exit code or 0 to continue
+  virtual int preconfigure() { return 0; }
+
+  //--------------------------------------------------------------------------
   // Prerun function for child process
   // Called before privileges dropped
   // Does nothing by default - override to implement

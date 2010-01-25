@@ -20,6 +20,15 @@ class TestDaemon: public Daemon::Process
 {
 private:
   //--------------------------------------------------------------------------
+  // Preconfigure function for child process
+  int preconfigure()
+  {
+    Log::Streams log;
+    log.summary << "Hi, this is the pre-daemon() preconfigure\n";
+    return 0;
+  }
+
+  //--------------------------------------------------------------------------
   // Prerun function for child process
   int run_priv()
   {
