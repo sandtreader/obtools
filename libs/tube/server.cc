@@ -88,7 +88,7 @@ bool Server::verify(Net::EndPoint ep)
 
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
-void Server::process(Net::TCPSocket& socket, 
+void Server::process(SSL::TCPSocket& socket, 
 		     SSL::ClientDetails& client)
 {
   Log::Streams log;  // Our private log

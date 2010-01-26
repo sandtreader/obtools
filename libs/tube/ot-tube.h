@@ -329,7 +329,7 @@ public:
 // Client Session structure - record of a single connection held by server
 struct ClientSession
 {
-  Net::TCPSocket& socket;
+  SSL::TCPSocket& socket;
   Net::EndPoint client;
   SessionMap& map;
   bool alive;
@@ -339,7 +339,7 @@ struct ClientSession
 
   // Constructor
   // Adds this session to the given map - destructor removes it again
-  ClientSession(Net::TCPSocket& _socket, Net::EndPoint _client,
+  ClientSession(SSL::TCPSocket& _socket, Net::EndPoint _client,
 		SessionMap& _map):
     socket(_socket), client(_client), map(_map), alive(true)
   { map.add(_client, this); }
@@ -450,7 +450,7 @@ public:
 
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
-  void process(ObTools::Net::TCPSocket& s, 
+  void process(SSL::TCPSocket& s, 
 	       SSL::ClientDetails& client);
 
   //------------------------------------------------------------------------

@@ -177,6 +177,7 @@ int main(int argc, char **argv)
     }
   }
 
+  MT::Thread::sleep(3);
   log.summary << "Shutting down\n";
   client.shutdown();
   log.summary << "Done\n";
