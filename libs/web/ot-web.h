@@ -537,7 +537,7 @@ public:
     mutex() {}
 
   //--------------------------------------------------------------------------
-  // Constructor for specific address, basic TCP
+  // Constructor for specific address, with SSL
   SimpleHTTPServer(SSL::Context *ctx,
 		   Net::EndPoint address, const string& _version="", 
 		   int backlog=5, 
