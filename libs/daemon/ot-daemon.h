@@ -81,7 +81,9 @@ public:
 #else
     enable_watchdog(true),
 #endif
-    shut_down(false), slave_pid(0)
+    shut_down(false), slave_pid(0),
+    config(cerr, XML::PARSER_OPTIMISE_CONTENT 
+	       | XML::PARSER_PRESERVE_WHITESPACE)
   {}
 
   //--------------------------------------------------------------------------
