@@ -27,10 +27,33 @@ bool Configuration::read(const string& ename)
       p!=filenames.end();
       p++)
   {
-    File::Path path(*p);
-    string text;
-    if (!path.read_all(text)) continue;         // Skip if unreadable
-    return read_text(text, ename);              // but fail if corrupt
+    File::InStream f(*p);
+
+    if (f)
+    {
+      try
+      {
+	f >> parser;
+      }
+      catch (ParseFailed)
+      {
+	serr << "Bad XML in config file\n";
+	return false;
+      }
+
+      if (!ename.empty())
+      {
+	Element& root = parser.get_root();
+	if (root.name != ename)
+	{
+	  serr << "Bad root in config file - expected <" << ename 
+	       << ">, got <" << root.name << ">\n";
+	  return false;
+        }
+      }
+
+      return true;
+    }
   }
 
   // Nothing will open - but don't complain, they might be expecting
@@ -338,16 +361,20 @@ bool Configuration::write()
   }
 
   // Create and write temporary file
-  File::Path tempfile(fn+"~new");
-  string error = tempfile.write_all(parser.get_root().to_string());
-  if (!error.empty())
+  string tfn(fn+"~new");
+  File::OutStream f(tfn);
+  if (!f)
   {
-    serr << "Config: can't create " << tempfile << " for update: "
+    serr << "Config: can't create " << tfn << " for update: "
 	 << strerror(errno) << endl;
     return false;
   }
 
+  f << parser.get_root();
+  f.close();
+
   // Do atomic update 
+  File::Path tempfile(tfn);
   File::Path destfile(fn);
   if (!tempfile.rename(destfile))
   {
