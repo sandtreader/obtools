@@ -31,7 +31,7 @@ typedef int uid_t;
 #undef gid_t
 typedef int gid_t;
 
-// Note: stati versions, still 32-bit time_t
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <ext/stdio_filebuf.h>
 #endif
@@ -314,7 +314,8 @@ class InStream: public istream
 	      O_RDONLY | ((mode & ios::binary)?O_BINARY:0))),
     filebuf(fd, mode) { istream::init(&filebuf); }
 
-  // Extra close method
+  //--------------------------------------------------------------------------
+  // Extra close method to make it look like an ifstream
   void close() { ::close(fd); }
 };
 
@@ -329,12 +330,14 @@ class OutStream: public ostream
   OutStream(const string& fn, 
 	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
     fd(_wopen(Path::utf8_to_wide(fn).c_str(), 
-	                       O_RDWR | O_CREAT
-	                      |((mode & ios::binary)?O_BINARY:0)
- 	                      |((mode & ios::trunc)?O_TRUNC:0))),
+	      O_RDWR | O_CREAT |((mode & ios::binary)?O_BINARY:0)
+	                       |((mode & ios::trunc)?O_TRUNC:0)
+                               |((mode & ios::app)?O_APPEND:0),
+	      S_IWRITE | S_IREAD)),
     buf(fd, mode) { ostream::init(&buf); }
 
-  // Extra close method
+  //--------------------------------------------------------------------------
+  // Extra close method to make it look like an ifstream
   void close() { ::close(fd); }
 };
 
