@@ -39,8 +39,8 @@ bool Directory::ensure(bool parents, int mode) const
   }
 
 #if defined(__WIN32__)
-  if (::mkdir(c_str())) return false;
-  return !::chmod(c_str(), mode);
+  if (_wmkdir(wide_path().c_str())) return false;
+  return !_wchmod(wide_path().c_str(), mode);
 #else
   return !::mkdir(c_str(), mode);
 #endif
@@ -59,17 +59,17 @@ bool Directory::inspect(list<string>& leaves, const string& pattern,
   // Use full '*' search, so we can use full pattern format without
   // worrying whether Windows implements it natively
   Path pat_path(*this, "*");
-  WIN32_FIND_DATA data;
-  HANDLE h = FindFirstFile(pat_path.c_str(), &data);
+  WIN32_FIND_DATAW data;
+  HANDLE h = FindFirstFileW(pat_path.wide_path().c_str(), &data);
   if (h != INVALID_HANDLE_VALUE)
   {
     for(;;)
     {
-      if ((all || data.cFileName[0] != '.')
-       && Text::pattern_match(pattern, data.cFileName))
-	leaves.push_back(string(data.cFileName));
+      string fn = wide_to_utf8(data.cFileName);
+      if ((all || fn[0] != '.') && Text::pattern_match(pattern, fn))
+	leaves.push_back(fn);
 
-      if (!FindNextFile(h, &data)) break;
+      if (!FindNextFileW(h, &data)) break;
     }
 
     FindClose(h);

@@ -231,6 +231,22 @@ public:
   // Get group id from name
   // Returns -1 if failed
   static int group_name_to_id(const string& gname);
+
+#if defined(__WIN32__)
+  //------------------------------------------------------------------------
+  // Windows only - helper function to convert a UTF8 filename into a 
+  // wide character one
+  static wstring utf8_to_wide(const string& utf8);
+
+  //------------------------------------------------------------------------
+  // Get wide path
+  wstring wide_path() const { return utf8_to_wide(path); }
+
+  //------------------------------------------------------------------------
+  // Windows only - helper function to convert a wide character filename
+  // (e.g. returned from FindNextFileW) to a UTF8 one
+  string wide_to_utf8(const wstring& wide);
+#endif
 };
 
 //------------------------------------------------------------------------

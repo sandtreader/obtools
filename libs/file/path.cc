@@ -21,9 +21,16 @@
 #if defined(__WIN32__)
 // Note: stati versions, still 32-bit time_t
 #define STRUCT_STAT struct _stati64
-#define STAT _stati64
+#define STAT _wstati64
+#define CPATH wide_path().c_str()
+#define OPEN _wopen
+#define UTIME _wutime
+#define CHMOD _wchmod
+#define UNLINK _wunlink
 #define O_LARGEFILE 0
 #include <windows.h>
+#include <fcntl.h>
+#include <ext/stdio_filebuf.h>
 #else
 #if defined(__APPLE__)
 // No LARGEFILE, otherwise sensible 
@@ -31,6 +38,11 @@
 #endif
 #define STRUCT_STAT struct stat64
 #define STAT stat64
+#define CPATH c_str()
+#define OPEN open
+#define UTIME utime
+#define CHMOD chmod
+#define UNLINK unlink
 #include <pwd.h>
 #include <grp.h>
 #endif
@@ -178,7 +190,7 @@ void Path::fix_slashes()
 bool Path::exists() const
 {
   STRUCT_STAT sb;  // Don't fail on large files
-  return !STAT(c_str(), &sb);
+  return !STAT(CPATH, &sb);
 }
 
 //--------------------------------------------------------------------------
@@ -186,7 +198,7 @@ bool Path::exists() const
 bool Path::is_dir() const
 {
   STRUCT_STAT sb;
-  if (STAT(c_str(), &sb)) return false;
+  if (STAT(CPATH, &sb)) return false;
   return S_ISDIR(sb.st_mode); 
 }
 
@@ -194,7 +206,7 @@ bool Path::is_dir() const
 // Is the file readable (by me)?
 bool Path::readable() const
 {
-  int fd = open(c_str(), O_RDONLY | O_LARGEFILE);
+  int fd = OPEN(CPATH, O_RDONLY | O_LARGEFILE);
   if (fd < 0) return false;
   close(fd);
   return true;
@@ -204,7 +216,7 @@ bool Path::readable() const
 // Is the file writable (by me)?
 bool Path::writeable() const
 {
-  int fd = open(c_str(), O_RDWR | O_LARGEFILE);
+  int fd = OPEN(CPATH, O_RDWR | O_LARGEFILE);
   if (fd < 0) return false;
   close(fd);
   return true;
@@ -215,7 +227,7 @@ bool Path::writeable() const
 uint64_t Path::length() const
 {
   STRUCT_STAT sb;
-  return STAT(c_str(), &sb)?0:sb.st_size;
+  return STAT(CPATH, &sb)?0:sb.st_size;
 }
 
 //--------------------------------------------------------------------------
@@ -223,7 +235,7 @@ uint64_t Path::length() const
 time_t Path::last_modified() const
 {
   STRUCT_STAT sb;
-  return STAT(c_str(), &sb)?0:sb.st_mtime;
+  return STAT(CPATH, &sb)?0:sb.st_mtime;
 }
 
 //--------------------------------------------------------------------------
@@ -232,10 +244,14 @@ time_t Path::last_modified() const
 // Returns whether successful
 bool Path::set_last_modified(time_t t) const
 {
+#if defined(__WIN32__)
+  struct _utimbuf utb;
+#else
   struct utimbuf utb;
+#endif
   utb.actime = time(NULL);  // Now
   utb.modtime = t;
-  return !utime(c_str(), &utb); 
+  return !UTIME(CPATH, &utb); 
 }
 
 //--------------------------------------------------------------------------
@@ -243,14 +259,14 @@ bool Path::set_last_modified(time_t t) const
 mode_t Path::mode() const
 {
   STRUCT_STAT sb;
-  return STAT(c_str(), &sb)?0:sb.st_mode;
+  return STAT(CPATH, &sb)?0:sb.st_mode;
 }
 
 //--------------------------------------------------------------------------
 // Set file permissions mode (chmod)
 bool Path::set_mode(mode_t mode) const
 {
-  return !chmod(c_str(), mode);
+  return !CHMOD(CPATH, mode);
 }
 
 //--------------------------------------------------------------------------
@@ -261,7 +277,7 @@ uid_t Path::owner() const
   return 0;
 #else
   STRUCT_STAT sb;
-  return STAT(c_str(), &sb)?0:sb.st_uid;
+  return STAT(CPATH, &sb)?0:sb.st_uid;
 #endif
 }
 
@@ -273,7 +289,7 @@ gid_t Path::group() const
   return 0;
 #else
   STRUCT_STAT sb;
-  return STAT(c_str(), &sb)?0:sb.st_gid;
+  return STAT(CPATH, &sb)?0:sb.st_gid;
 #endif
 }
 
@@ -284,7 +300,7 @@ bool Path::set_ownership(uid_t owner, uid_t group) const
 #if defined(__WIN32__) // Meaningless in Windows
   return true;
 #else
-  return !chown(c_str(), owner, group);
+  return !chown(CPATH, owner, group);
 #endif
 }
 
@@ -310,20 +326,20 @@ bool Path::erase() const
 
     // Create string with extra null on the end, plus manual null in case
     // c_str() does something odd - we use data() instead
-    string double_null = path + '\0' + '\0'; 
-    SHFILEOPSTRUCT op = 
+    wstring double_null = wide_path() + (wchar_t)0 + (wchar_t)0; 
+    SHFILEOPSTRUCTW op = 
     {
       0, FO_DELETE, double_null.data(), 0,
       FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
-      false, 0, "" 
+      false, 0, L"" 
     };
-    return !SHFileOperation(&op);
+    return !SHFileOperationW(&op);
   }
 #else
     return !system((string("rm -rf \"")+path+"\"").c_str());
 #endif
   else
-    return !unlink(c_str());
+    return !UNLINK(CPATH);
 }
 
 //--------------------------------------------------------------------------
@@ -331,7 +347,7 @@ bool Path::erase() const
 // Returns whether successful
 bool Path::touch(mode_t mode) const
 {
-  int fd = creat(c_str(), mode);
+  int fd = OPEN(CPATH, O_CREAT|O_WRONLY|O_TRUNC, mode);
   if (fd < 0) return false;
   close(fd);
   return true;
@@ -344,10 +360,13 @@ bool Path::rename(const Path& new_path) const
 {
 #if defined(__WIN32__)
   // Try supposedly atomic MoveFileEx (NT+)
-  if (MoveFileEx(c_str(), new_path.c_str(), MOVEFILE_REPLACE_EXISTING))
+  if (MoveFileExW(CPATH, new_path.wide_path().c_str(), 
+		  MOVEFILE_REPLACE_EXISTING))
     return true;
 
   // Fall back to try non-atomic delete/rename (95/98)
+  // Note:  Don't worry about wide characters, they wouldn't work in 95/98
+  // anyway
   ::unlink(new_path.c_str());  // Doesn't matter if it fails
 
   // Fall through to usual rename (which uses MoveFile())
@@ -361,7 +380,20 @@ bool Path::rename(const Path& new_path) const
 // Returns whether successful.  If not, the string contains the error
 bool Path::read_all(string& s)
 {
-  ifstream f(c_str(), ios::binary);
+#if defined(__WIN32__)
+  // Filename could be UTF8, so we have to convert to wide characters
+  // and use _wopen
+  int fd = _wopen(CPATH, O_RDONLY | O_BINARY);
+  if (fd < 0)
+  {
+    s = strerror(errno);
+    return false;
+  }
+  __gnu_cxx::stdio_filebuf<char> ibuf(fd, ios::in | ios::binary);
+  istream f(&ibuf);
+#else
+  ifstream f(CPATH, ios::binary);
+#endif
   if (!f)
   {
     s = strerror(errno);
@@ -383,12 +415,17 @@ bool Path::read_all(string& s)
 // Returns error string, or "" if successful
 string Path::write_all(const string& s)
 {
-  ofstream f(c_str(), ios::out | ios::trunc | ios::binary);
+#if defined(__WIN32__)
+  int fd = _wopen(CPATH, O_RDWR | O_CREAT | O_TRUNC | O_BINARY);
+  if (fd < 0) return strerror(errno);
+  __gnu_cxx::stdio_filebuf<char> obuf(fd, ios::out | ios::trunc | ios::binary);
+  ostream f(&obuf);
+#else
+  ofstream f(CPATH, ios::out | ios::trunc | ios::binary);
+#endif
   if (!f) return strerror(errno);
 
   f.write(s.data(), s.size());
-  f.close();
-
   return "";
 }
 
@@ -512,6 +549,60 @@ int Path::group_name_to_id(const string& gname)
   return gptr->gr_gid;
 #endif
 }
+
+#if defined(__WIN32__)
+//------------------------------------------------------------------------
+// Windows only - helper function to convert a UTF8 filename into a 
+// wide character one
+wstring Path::utf8_to_wide(const string& utf8)
+{
+  const char *ufn = utf8.c_str();
+  int ulen = utf8.size();
+
+  // Just get size of output first
+  unsigned wlen=MultiByteToWideChar(CP_UTF8,0,ufn,ulen,0,0);
+  if (!wlen) return wstring();
+
+  // Then do it properly
+  wchar_t *wfn=new wchar_t[wlen];
+  wlen=MultiByteToWideChar(CP_UTF8,0,ufn,ulen,wfn,wlen);
+  if (!wlen)
+  {
+    delete[] wfn;
+    return wstring();
+  }
+
+  wstring wide(wfn, wlen);
+  delete[] wfn;
+  return wide;
+}
+
+//------------------------------------------------------------------------
+// Windows only - helper function to convert a wide character filename
+// (e.g. returned from FindNextFileW) to a UTF8 one
+string Path::wide_to_utf8(const wstring& wide)
+{
+  const wchar_t *wfn = wide.c_str();
+  int wlen = wide.size();
+
+  // Just get size of output first
+  unsigned ulen=WideCharToMultiByte(CP_UTF8,0,wfn,wlen,0,0,0,0);
+  if (!ulen) return string();
+
+  // Then do it properly
+  char *ufn=new char[ulen];
+  ulen=WideCharToMultiByte(CP_UTF8,0,wfn,wlen,ufn,ulen,0,0);
+  if (!ulen)
+  {
+    delete[] ufn;
+    return string();
+  }
+
+  string utf8(ufn, ulen);
+  delete[] ufn;
+  return utf8;
+}
+#endif
 
 //------------------------------------------------------------------------
 // << operator to write Path to ostream

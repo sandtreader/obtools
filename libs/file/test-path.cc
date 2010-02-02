@@ -18,13 +18,10 @@ using namespace ObTools;
 
 int main(int argc, char **argv)
 {
-  if (argc < 2)
-  {
-    cout << "Give a path name\n";
-    return 2;
-  }
+  string p = "D:\\\350\257\267\350\276\223\345\205\245\345\205\263\351\224\256\345\255\227\\CarrotPurse/purse.cfg.xml";
 
-  File::Path path(argv[1]);
+  if (argc >= 2) p = argv[1];
+  File::Path path(p);
   cout << "Path: " << path << endl;
   cout << "  is_absolute: " << (path.is_absolute()?"Yes":"No") << endl;
   cout << "      dirname: " << path.dirname() << endl;
