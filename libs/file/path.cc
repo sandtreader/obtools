@@ -380,20 +380,7 @@ bool Path::rename(const Path& new_path) const
 // Returns whether successful.  If not, the string contains the error
 bool Path::read_all(string& s)
 {
-#if defined(__WIN32__)
-  // Filename could be UTF8, so we have to convert to wide characters
-  // and use _wopen
-  int fd = _wopen(CPATH, O_RDONLY | O_BINARY);
-  if (fd < 0)
-  {
-    s = strerror(errno);
-    return false;
-  }
-  __gnu_cxx::stdio_filebuf<char> ibuf(fd, ios::in | ios::binary);
-  istream f(&ibuf);
-#else
-  ifstream f(CPATH, ios::binary);
-#endif
+  InStream f(path);
   if (!f)
   {
     s = strerror(errno);
@@ -415,14 +402,7 @@ bool Path::read_all(string& s)
 // Returns error string, or "" if successful
 string Path::write_all(const string& s)
 {
-#if defined(__WIN32__)
-  int fd = _wopen(CPATH, O_RDWR | O_CREAT | O_TRUNC | O_BINARY);
-  if (fd < 0) return strerror(errno);
-  __gnu_cxx::stdio_filebuf<char> obuf(fd, ios::out | ios::trunc | ios::binary);
-  ostream f(&obuf);
-#else
-  ofstream f(CPATH, ios::out | ios::trunc | ios::binary);
-#endif
+  OutStream f(path);
   if (!f) return strerror(errno);
 
   f.write(s.data(), s.size());

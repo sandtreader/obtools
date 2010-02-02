@@ -20,6 +20,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <list>
+#include <fstream>
 
 // Define uid_t and gid_t in Windows to make build easier
 #if defined(__WIN32__)
@@ -29,6 +30,10 @@
 typedef int uid_t;
 #undef gid_t
 typedef int gid_t;
+
+// Note: stati versions, still 32-bit time_t
+#include <fcntl.h>
+#include <ext/stdio_filebuf.h>
 #endif
 
 namespace ObTools { namespace File { 
@@ -289,6 +294,73 @@ public:
   // Fills in paths if so
   bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
 };
+
+//==========================================================================
+// Stream classes - provides unified view of file streams which still works
+// with Windows wide-character filenames
+#if defined(__WIN32__)
+// Windows version - they are streams created from underlying _wopen FD
+class InStream: public istream
+{
+  int fd;
+  __gnu_cxx::stdio_filebuf<char> filebuf;
+  
+ public: 
+  //--------------------------------------------------------------------------
+  // Constructor
+  InStream(const string& fn, 
+	   ios::openmode mode = ios::in | ios::binary):
+    fd(_wopen(Path::utf8_to_wide(fn).c_str(), 
+	      O_RDONLY | ((mode & ios::binary)?O_BINARY:0))),
+    filebuf(fd, mode) { istream::init(&filebuf); }
+
+  // Extra close method
+  void close() { ::close(fd); }
+};
+
+class OutStream: public ostream
+{
+  int fd;
+  __gnu_cxx::stdio_filebuf<char> buf;
+  
+ public: 
+  //--------------------------------------------------------------------------
+  // Constructor
+  OutStream(const string& fn, 
+	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
+    fd(_wopen(Path::utf8_to_wide(fn).c_str(), 
+	                       O_RDWR | O_CREAT
+	                      |((mode & ios::binary)?O_BINARY:0)
+ 	                      |((mode & ios::trunc)?O_TRUNC:0))),
+    buf(fd, mode) { ostream::init(&buf); }
+
+  // Extra close method
+  void close() { ::close(fd); }
+};
+
+#else
+// Unix/OSX versions - they are normal fstreams
+class InStream: public ifstream
+{
+ public: 
+  //--------------------------------------------------------------------------
+  // Constructor
+  InStream(const string& fn, 
+	   ios::openmode mode = ios::in | ios::binary):
+    ifstream(fn.c_str(), mode) {}
+};
+
+class OutStream: public ofstream
+{
+ public: 
+  //--------------------------------------------------------------------------
+  // Constructor
+  OutStream(const string& fn, 
+	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
+    ofstream(fn.c_str(), mode) {}
+};
+
+#endif
 
 //==========================================================================
 }} //namespaces
