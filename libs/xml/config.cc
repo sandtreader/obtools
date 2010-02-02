@@ -381,6 +381,7 @@ bool Configuration::write()
     serr << "Config: Can't rename " << tempfile << " to " << destfile << ": " 
 	 << strerror(errno) << endl;
     tempfile.erase();
+    return false;
   }
    
   return true;
