@@ -8,19 +8,11 @@
 //==========================================================================
 
 #include "ot-xml.h"
+#include "ot-file.h"
 #include <stdio.h>
 #include <fstream>
 #include <errno.h>
 #include <string.h>
-
-#if defined(__WIN32__)
-#include <windows.h>
-#if defined(MINGW)
-// Avoiding including it in Borland
-#include <unistd.h>
-#endif
-#endif
-
 
 using namespace ObTools::XML;
 
@@ -35,32 +27,10 @@ bool Configuration::read(const string& ename)
       p!=filenames.end();
       p++)
   {
-    ifstream f(p->c_str());
-    if (f)
-    {
-      try
-      {
-	f >> parser;
-      }
-      catch (ParseFailed)
-      {
-	serr << "Bad XML in config file\n";
-	return false;
-      }
-
-      if (!ename.empty())
-      {
-	Element& root = parser.get_root();
-	if (root.name != ename)
-	{
-	  serr << "Bad root in config file - expected <" << ename 
-	       << ">, got <" << root.name << ">\n";
-	  return false;
-	}
-      }
-
-      return true;
-    }
+    File::Path path(*p);
+    string text;
+    if (!path.read_all(text)) continue;         // Skip if unreadable
+    return read_text(text, ename);              // but fail if corrupt
   }
 
   // Nothing will open - but don't complain, they might be expecting
@@ -367,36 +337,25 @@ bool Configuration::write()
     return false;
   }
 
-  // Create and open temporary file
-  string tfn = fn+"~new";
-
-  ofstream f(tfn.c_str());
-  if (f)
+  // Create and write temporary file
+  File::Path tempfile(fn+"~new");
+  string error = tempfile.write_all(parser.get_root().to_string());
+  if (!error.empty())
   {
-    f << parser.get_root();
-    f.close();
-
-    // Attempt atomic update 
-#if defined(__WIN32__)
-    // MoveFileEx in NT+ may be atomic (not clear from docs)
-    if (MoveFileEx(tfn.c_str(), fn.c_str(), MOVEFILE_REPLACE_EXISTING)) 
-      return true;
-
-    // Fall back to try non-atomic delete/rename (95/98)
-    ::unlink(fn.c_str());  // Doesn't matter if it fails
-#endif
-
-    if (!::rename(tfn.c_str(), fn.c_str())) return true;
-
-
-    serr << "Config: Can't rename " << tfn << " to " << fn << ": " 
+    serr << "Config: can't create " << tempfile << " for update: "
 	 << strerror(errno) << endl;
-
-    unlink(tfn.c_str());
+    return false;
   }
-  else serr << "Config: can't open " << tfn << " for update: "
-	    << strerror(errno) << endl;
+
+  // Do atomic update 
+  File::Path destfile(fn);
+  if (!tempfile.rename(destfile))
+  {
+    serr << "Config: Can't rename " << tempfile << " to " << destfile << ": " 
+	 << strerror(errno) << endl;
+    tempfile.erase();
+  }
    
-  return false;
+  return true;
 }
 
