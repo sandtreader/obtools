@@ -312,7 +312,8 @@ class InStream: public istream
 	   ios::openmode mode = ios::in | ios::binary):
     fd(_wopen(Path::utf8_to_wide(fn).c_str(), 
 	      O_RDONLY | ((mode & ios::binary)?O_BINARY:0))),
-    filebuf(fd, mode) { istream::init(&filebuf); }
+    filebuf(fd, mode) 
+  { if (fd>=0) istream::init(&filebuf); else setstate(failbit); }
 
   //--------------------------------------------------------------------------
   // Extra close method to make it look like an ifstream
@@ -322,7 +323,7 @@ class InStream: public istream
 class OutStream: public ostream
 {
   int fd;
-  __gnu_cxx::stdio_filebuf<char> buf;
+  __gnu_cxx::stdio_filebuf<char> filebuf;
   
  public: 
   //--------------------------------------------------------------------------
@@ -334,7 +335,8 @@ class OutStream: public ostream
 	                       |((mode & ios::trunc)?O_TRUNC:0)
                                |((mode & ios::app)?O_APPEND:0),
 	      S_IWRITE | S_IREAD)),
-    buf(fd, mode) { ostream::init(&buf); }
+    filebuf(fd, mode) 
+  { if (fd>=0) ostream::init(&filebuf); else setstate(failbit); }
 
   //--------------------------------------------------------------------------
   // Extra close method to make it look like an ifstream

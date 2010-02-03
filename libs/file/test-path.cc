@@ -39,6 +39,13 @@ int main(int argc, char **argv)
   cout << "        group: " << File::Path::group_id_to_name(path.group()) << endl;
 #endif
 
+  // Try to read it
+  File::InStream f(p);
+  if (f)
+    cout << "File opens OK\n";
+  else
+    cout << "File won't open\n";
+  
   // Check for resolve request
   if (argc >= 3)
   {
