@@ -22,6 +22,8 @@
 #define PEM_CERT_START "-----BEGIN CERTIFICATE-----\n"
 #define PEM_CERT_END "-----END CERTIFICATE-----\n"
 
+#define PEM_TRUSTED_CERT_START "-----BEGIN TRUSTED CERTIFICATE-----\n"
+
 namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
@@ -63,9 +65,12 @@ void Certificate::read(const string& text)
     }
   }
 
+  // Check for TRUSTED CERTIFICATE (reads using _AUX below)
+  bool trusted = !der && text.find(PEM_TRUSTED_CERT_START) != string::npos;
+
   // If PEM, fix up text to ensure delimiters are present
   string fixed;
-  if (!der && text.find(PEM_CERT_START) == string::npos)
+  if (!der && !trusted && text.find(PEM_CERT_START) == string::npos)
   {
     fixed = PEM_CERT_START + text + PEM_CERT_END;
     length = fixed.size();
@@ -88,6 +93,8 @@ void Certificate::read(const string& text)
   // Read certificate
   if (der)
     x509 = d2i_X509_bio(bio, 0);
+  else if (trusted)
+    x509 = PEM_read_bio_X509_AUX(bio, 0, 0, 0);
   else
     x509 = PEM_read_bio_X509(bio, 0, 0, 0);
 

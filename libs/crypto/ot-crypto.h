@@ -468,8 +468,12 @@ class CertificateStore
   // ca_file should refer to a PEM format containing a list of trusted CAs
   // ca_dir should refer to a directory containing certificate files with 
   // hashed names (see OpenSSL docs)
-  // Either one or the other is optional, but not both
-  CertificateStore(const string& ca_file, const string& ca_dir="");
+  CertificateStore(const string& ca_file="", const string& ca_dir="");
+
+  //------------------------------------------------------------------------
+  // Add a pre-loaded certificate
+  // Note: certicate must remain alive during lifetime of store
+  bool add(Certificate *cert);
 
   //------------------------------------------------------------------------
   // Verify a certificate

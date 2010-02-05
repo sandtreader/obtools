@@ -21,7 +21,6 @@ namespace ObTools { namespace Crypto {
 // ca_file should refer to a PEM format containing a list of trusted CAs
 // ca_dir should refer to a directory containing certificate files with 
 // hashed names (see OpenSSL docs)
-// Either one or the other is optional, but not both
 CertificateStore::CertificateStore(const string& ca_file, 
 				   const string& ca_dir)
 {
@@ -33,7 +32,16 @@ CertificateStore::CertificateStore(const string& ca_file,
   const char *dir = ca_dir.c_str();
   if (!*dir) dir = 0;
 
-  X509_STORE_load_locations(store, file, dir);
+  if (file || dir) X509_STORE_load_locations(store, file, dir);
+}
+
+//------------------------------------------------------------------------
+// Add a pre-loaded certificateb
+// Note: certicate must remain alive during lifetime of store
+bool CertificateStore::add(Certificate *cert)
+{
+  MT::Lock lock(mutex);
+  return X509_STORE_add_cert(store, cert->get_x509())?true:false;
 }
 
 //------------------------------------------------------------------------
