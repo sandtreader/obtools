@@ -11,6 +11,7 @@
 #include "ot-file.h"
 #include "ot-ssl-openssl.h"
 #include <stdlib.h>
+#include <signal.h>
 
 #if defined(__WIN32__)
 #include <windows.h>
@@ -104,6 +105,9 @@ int main(int argc, char **argv)
   winsock_initialise();
 #endif
 
+  // Ignore SIGPIPE (not quite why we're getting them!)
+  signal(SIGPIPE, SIG_IGN);
+
   // Resolve name
   Net::IPAddress addr(host);
   if (!addr)
@@ -177,7 +181,7 @@ int main(int argc, char **argv)
     }
   }
 
-  MT::Thread::sleep(3);
+  MT::Thread::sleep(1);
   log.summary << "Shutting down\n";
   client.shutdown();
   log.summary << "Done\n";
