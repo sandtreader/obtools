@@ -161,29 +161,43 @@ int main(int argc, char **argv)
 
   // Start client
   Net::EndPoint server(addr, port);
-  Tube::Client client(server, ssl?&ssl_ctx:0);
 
-  // Loop for a while sending and receiving
-  for(int i=0; i<n; i++)
+  // Use different clients depending whether we need a result or not
+  if (result)
   {
-    if (i) MT::Thread::sleep(1);
-    Tube::Message msg(tag, data);
+    Tube::AutoSyncClient client(server, ssl?&ssl_ctx:0);
 
-    client.send(msg);
-
-    if (result)
+    // Loop for a while sending and receiving
+    for(int i=0; i<n ; i++)
     {
-      if (client.wait(msg))
-	cout << "# MSG(" << hex << msg.tag << dec << "):\n" 
-	     << msg.data << endl;
-      else
-	cout << "# RESTART\n";
+      if (i) MT::Thread::sleep(1);
+      Tube::Message msg(tag, data);
+      Tube::Message response;
+
+      if (client.request(msg, response))
+	cout << response.data;
     }
+
+    log.summary << "Shutting down\n";
+    client.shutdown();
+  }
+  else
+  {
+    Tube::Client client(server, ssl?&ssl_ctx:0);
+
+    // Loop for a while just sending 
+    for(int i=0; i<n; i++)
+    {
+      if (i) MT::Thread::sleep(1);
+      Tube::Message msg(tag, data);
+
+      client.send(msg);
+    }
+
+    log.summary << "Shutting down\n";
+    client.shutdown();
   }
 
-  MT::Thread::sleep(1);
-  log.summary << "Shutting down\n";
-  client.shutdown();
   log.summary << "Done\n";
 
   return 0;  

@@ -10,7 +10,7 @@ NAME   	= ot-tube
 HEADERS = ot-tube.h
 OBJS  	= server.o sync-server.o client.o sync-client.o auto-sync-client.o \
 	  message.o
-TESTS 	= test-server test-sync-server test-client test-sync-client
+TESTS 	= test-server test-sync-server test-client
 TESTCMD	= 
 DEPENDS = misc net log mt chan text ssl ssl-openssl file
 SOCKET  = 1
