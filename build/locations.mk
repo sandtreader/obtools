@@ -44,7 +44,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  tube:libs/tube:net,log,mt,chan,misc,ssl   \
 	  web:libs/web:xml,misc,log,net,ssl,file     \
 	  xmi:libs/xmi:xml     			\
-	  xml:libs/xml:text    			\
+	  xml:libs/xml:text,file		\
 	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
 	  xmlmesh-otmp:xmlmesh/otmp:net,log,text,tube			\
 	  xmlmesh-client:xmlmesh/client:xmlmesh-otmp,xmlmesh-core	\
