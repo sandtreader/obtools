@@ -5,9 +5,9 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-SUBS = text xml xmi cppt regen mt net chan misc time log cache   \
-       db db-pgsql db-mysql                                      \
-       cli init crypto ssl ssl-openssl file web soap hash tube   \
+SUBS = text file xml xmi cppt regen mt net chan misc time log cache \
+       db db-pgsql db-mysql                                         \
+       cli init crypto ssl ssl-openssl web soap hash tube           \
        access dns daemon superlibs
 
 #Different for cross compile
