@@ -103,10 +103,10 @@ int main(int argc, char **argv)
 
 #ifdef __WIN32__
   winsock_initialise();
-#endif
-
+#else
   // Ignore SIGPIPE (not quite why we're getting them!)
   signal(SIGPIPE, SIG_IGN);
+#endif
 
   // Resolve name
   Net::IPAddress addr(host);
