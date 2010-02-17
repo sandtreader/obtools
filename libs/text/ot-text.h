@@ -140,6 +140,14 @@ string i64tos(uint64_t i);
 uint64_t stoi64(const string& s);
 
 //--------------------------------------------------------------------------
+// Integer representing a fixed point to string
+string ifixtos(int i, int decimal_places = 0);
+
+//--------------------------------------------------------------------------
+// String to integer representing a fixed point (assumes correctness)
+int stoifix(const string& s, int decimal_places = 0);
+
+//--------------------------------------------------------------------------
 // Float to string, with zero padding
 string ftos(double f, int width=0, int prec=0, bool zero_pad=false);
 

@@ -65,6 +65,42 @@ uint64_t stoi64(const string& s)
 }
 
 //--------------------------------------------------------------------------
+// Integer representing a fixed point to string
+string ifixtos(int i, int decimal_places)
+{
+  string s = itos(i);
+
+  if (!decimal_places)
+    return s;
+
+  if (decimal_places < 0)
+  {
+    // Pad end with zeroes
+    for (;decimal_places < 0; ++decimal_places) s+= '0';
+    return s;
+  }
+
+  int negmod = (i < 0) ? 1 : 0; // Take account of minus sign if present
+  // Pad front with zeroes if string is shorter than desired dp
+  while (s.size() < static_cast<unsigned int>(decimal_places) + 1 + negmod)
+    s.insert(negmod, "0");
+  // Insert decimal point
+  s.insert(s.size() - decimal_places, ".");
+  return s;
+}
+
+//--------------------------------------------------------------------------
+// String to integer representing a fixed point (assumes correctness)
+int stoifix(const string& s, int decimal_places)
+{
+  if (decimal_places <= 0)
+    return stoi(s.substr(0, s.size() + decimal_places));
+  string sfix = s;
+  sfix.erase(s.size() - decimal_places - 1, 1);
+  return stoi(sfix);
+}
+
+//--------------------------------------------------------------------------
 // Float to string, with zero padding
 string ftos(double f, int width, int prec, bool zero_pad)
 {

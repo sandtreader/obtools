@@ -23,6 +23,8 @@ int main()
   string sx = "deadbeef";
   string si64 = "12345678901234567890";
   string sx64 = "fedcba9876543210";
+  string sifix2 = "-0.89";
+  string sifix2neg = "-12345678900";
 
   cout << "Integer string: " << si 
        << " -> " << Text::stoi(si) 
@@ -43,6 +45,14 @@ int main()
   cout << "64-bit hex string:     " << sx64 
        << " -> " << hex << Text::xtoi64(sx64) << dec 
        << " -> " << Text::i64tox(Text::xtoi64(sx64)) << endl;
+
+  cout << "Integer representing fixed point to 2 d.p. string:  " << sifix2
+       << " -> " << Text::stoifix(sifix2, 2)
+       << " -> " << Text::ifixtos(Text::stoifix(sifix2, 2), 2) << endl;
+
+  cout << "Integer representing fixed point to -2 d.p. string: " << sifix2neg
+       << " -> " << Text::stoifix(sifix2neg, -2)
+       << " -> " << Text::ifixtos(Text::stoifix(sifix2neg, -2), -2) << endl;
 
   unsigned char buf[4];
   int l = Text::xtob(sx, buf, 4);
