@@ -54,7 +54,7 @@ bool ResultSet::fetch(string& value)
   PGresult *res = (PGresult *)pgres;
   if (row_cursor < PQntuples(res) && PQnfields(res) > 0)
   {
-    value = Row::unescape(PQgetvalue(res, row_cursor++, 0));
+    value = FieldValue::unescape(PQgetvalue(res, row_cursor++, 0));
     return true;
   }
   else return false;

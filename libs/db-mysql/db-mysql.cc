@@ -72,7 +72,7 @@ bool ResultSet::fetch(string& value)
 
   if (myrow && mynum_fields > 0)
   {
-    value = Row::unescape(myrow[0]?myrow[0]:"");
+    value = FieldValue::unescape(myrow[0]?myrow[0]:"");
     return true;
   }
   else return false;
