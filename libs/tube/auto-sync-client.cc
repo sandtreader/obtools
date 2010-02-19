@@ -45,12 +45,21 @@ public:
 
 //------------------------------------------------------------------------
 // Overrideable function to handle an asynchronous message - by default
-// just errors
+// just errors and (if response required), sends back WHAT
 void AutoSyncClient::handle_async_message(Message& msg)
 {
   Log::Streams log;
   log.error << name << ": Non-response message " 
 	    << msg.stag() << " ignored\n";
+
+  if (msg.flags & FLAG_RESPONSE_REQUIRED)
+  {
+    log.detail << "But response requested, so we'll oblige\n";
+    Message response(0x57484154, 
+		     "Unknown request",
+		     FLAG_RESPONSE_PROVIDED | (msg.flags & MASK_REQUEST_ID));
+    send(response);
+  }
 }
 
 //==========================================================================

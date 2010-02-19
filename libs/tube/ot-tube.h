@@ -14,6 +14,7 @@
 #include "ot-net.h"
 #include "ot-mt.h"
 #include "ot-chan.h"
+#include "ot-cache.h"
 #include "ot-log.h"
 #include "ot-ssl.h"
 
@@ -204,13 +205,11 @@ public:
 };
 
 //==========================================================================
-// Synchronous request-response client, but still providing a wait() 
-// interface for asynchronous messaging
-class SyncClient: public Client
+// Generic cache for synchronous request-responses, identified by ID
+// (sync-request.cc)
+class SyncRequestCache
 {
 private:
-  int timeout;      // Request timeout in seconds
-
   // Request record 
   struct Request
   {
@@ -225,8 +224,48 @@ private:
   id_t request_id;
   map<id_t, Request> requests; 
 
-  // Thread to run timeouts
-  MT::Thread *timeout_thread;
+ public:
+  //------------------------------------------------------------------------
+  // Constructor 
+  SyncRequestCache(): request_id(0) {}
+
+  //------------------------------------------------------------------------
+  // Handle timeouts 
+  void do_timeouts(Log::Streams& log, int timeout, const string& name);
+
+  //------------------------------------------------------------------------
+  // Set up a request entry to wait for a response
+  // (call before actually sending message, in case response is instant)
+  void start_request(Message& request, const string& name);
+
+  //------------------------------------------------------------------------
+  // Block waiting for a response to the given request
+  // (call after sending message)
+  // Returns whether valid response received
+  bool wait_response(Message& request, Message& response);
+
+  //------------------------------------------------------------------------
+  // Handle a response - returns true if it was recognised as a response
+  // to one of our requests, false if it is a new message from the other side
+  bool handle_response(Message& response, const string& name);
+
+  //------------------------------------------------------------------------
+  // Shut down cleanly
+  void shutdown();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~SyncRequestCache();
+};
+
+//==========================================================================
+// Synchronous request-response client, but still providing a wait() 
+// interface for asynchronous messaging
+class SyncClient: public Client
+{
+  SyncRequestCache requests;     // Cache of requests
+  int timeout;                   // Request timeout (secs)
+  MT::Thread *timeout_thread;    // Thread to run timeouts
 
 public:
   //------------------------------------------------------------------------
@@ -337,6 +376,12 @@ struct ClientSession
   // Thread and queue stuff
   MT::MQueue<Message> send_q;  
 
+  // Request cache - only used in BiSyncServer, but saves it reimplementing
+  // all the rest of this
+  // Note there is a cache per client, so that IDs are issued per client
+  // otherwise (a) we could run out, (b) leaks activity issue between clients
+  SyncRequestCache requests;
+
   // Constructor
   // Adds this session to the given map - destructor removes it again
   ClientSession(SSL::TCPSocket& _socket, Net::EndPoint _client,
@@ -388,10 +433,8 @@ struct ClientMessage
 class Server: public SSL::TCPServer
 {
 private:
-  SessionMap client_sessions;        // Map of sessions
   list<Net::MaskedAddress> filters;  // List of allowed client masks
   bool alive;                        // Not being killed
-  int max_send_queue;          // Maximum send queue before we block send()
 
   //------------------------------------------------------------------------
   // Overridable function to filter message tags - return true if tag
@@ -402,6 +445,10 @@ private:
   // Abstract function to handle an incoming client message
   // Whether connection should be allowed to continue
   virtual bool handle_message(ClientMessage& msg)=0;
+
+protected:
+  SessionMap client_sessions;        // Map of sessions (used by BiSyncServer)
+  int max_send_queue;          // Maximum send queue before we block send()
 
 public:
   // Name for logging
@@ -484,6 +531,7 @@ private:
   // Return whether request handled OK, and fill in response
   virtual bool handle_request(ClientMessage& request, Message& response) = 0;
 
+protected:
   //------------------------------------------------------------------------
   // Function to handle asynchronous messages (not requiring a response)
   // Implemented here just to log an error, but can be overridden if you
@@ -547,6 +595,68 @@ public:
 		 int min_spare_threads=1, int max_threads=10):
     SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads),
     run_thread(*this) {}
+};
+
+//==========================================================================
+// Tube server for bidirectional synchronous requests/responses
+// Like a SyncServer, but providing downgoing request/response handling
+// like a SyncClient as well
+// (bi-sync-server.cc)
+class BiSyncServer: public SyncServer
+{
+  int timeout;                   // Request timeout (secs)
+  MT::Thread *timeout_thread;    // Thread to run timeouts
+
+  // Handle asynchronous messages, which includes responses
+  bool handle_async_message(ClientMessage& msg);
+
+ public:
+  //------------------------------------------------------------------------
+  // Constructors - as Server but with timeout
+  BiSyncServer(int port, int _timeout = DEFAULT_TIMEOUT,
+	       const string& _name="Tube", int backlog=5, 
+	       int min_spare_threads=1, int max_threads=10);
+
+  BiSyncServer(Net::EndPoint local, int _timeout = DEFAULT_TIMEOUT,
+	       const string& _name="Tube", int backlog=5, 
+	       int min_spare_threads=1, int max_threads=10);
+
+  BiSyncServer(SSL::Context *_ctx, int port, int _timeout = DEFAULT_TIMEOUT, 
+	       const string& _name="Tube", int backlog=5, 
+	       int min_spare_threads=1, int max_threads=10);
+
+  BiSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
+	       int _timeout = DEFAULT_TIMEOUT,
+	       const string& _name="Tube", int backlog=5, 
+	       int min_spare_threads=1, int max_threads=10);
+
+  //------------------------------------------------------------------------
+  // Handle timeouts - called by background thread - do not call directly
+  void do_timeouts(Log::Streams& log);
+
+  //------------------------------------------------------------------------
+  // Request/response - blocks waiting for a response, or timeout/failure
+  // Returns whether a response was received, fills in response if so
+  // NOTE: You must *not* call this while handling an incoming message
+  bool request(ClientMessage& request, Message& response);
+
+  //------------------------------------------------------------------------
+  // Handle asynchronous messages which aren't responses
+  // Implemented here just to log an error, but can be overridden if you
+  // still need to receive async messages
+  // NOTE change of name from SyncServer version - we override 
+  // handle_async_message and only call this if it's not a response
+  // Also called for STARTED and FINISHED psuedo-messages
+  // Return whether connection should be allowed to continue
+  virtual bool handle_client_async_message(ClientMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Shut down server cleanly
+  void shutdown();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~BiSyncServer();
 };
 
 //==========================================================================
