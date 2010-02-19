@@ -660,6 +660,48 @@ class BiSyncServer: public SyncServer
 };
 
 //==========================================================================
+// Tube server for bidirectional synchronous requests/responses with its own 
+// run() thread 
+class AutoBiSyncServer: public BiSyncServer
+{
+  Net::TCPServerThread run_thread;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors - as Server
+  AutoBiSyncServer(int port, int _timeout = DEFAULT_TIMEOUT,
+		   const string& _name="Tube", int backlog=5, 
+		   int min_spare_threads=1, int max_threads=10):
+    BiSyncServer(port, _timeout, _name, backlog, 
+		 min_spare_threads, max_threads),
+    run_thread(*this) {}
+
+  AutoBiSyncServer(Net::EndPoint local, int _timeout = DEFAULT_TIMEOUT,
+		   const string& _name="Tube", 
+		   int backlog=5, 
+		   int min_spare_threads=1, int max_threads=10):
+    BiSyncServer(local, _timeout, _name, backlog, 
+		 min_spare_threads, max_threads),
+    run_thread(*this) {}
+
+  AutoBiSyncServer(SSL::Context *_ctx, int port, 
+		   int _timeout = DEFAULT_TIMEOUT, 
+		   const string& _name="Tube", int backlog=5, 
+		   int min_spare_threads=1, int max_threads=10):
+    BiSyncServer(_ctx, port, _timeout, _name, backlog, 
+		 min_spare_threads, max_threads),
+    run_thread(*this) {}
+
+  AutoBiSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
+		   int _timeout = DEFAULT_TIMEOUT,
+		   const string& _name="Tube", int backlog=5, 
+		   int min_spare_threads=1, int max_threads=10):
+    BiSyncServer(_ctx, local, _timeout, _name, backlog, 
+		 min_spare_threads, max_threads),
+    run_thread(*this) {}
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TUBE_H
 

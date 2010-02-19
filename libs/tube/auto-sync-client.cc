@@ -55,7 +55,7 @@ void AutoSyncClient::handle_async_message(Message& msg)
   if (msg.flags & FLAG_RESPONSE_REQUIRED)
   {
     log.detail << "But response requested, so we'll oblige\n";
-    Message response(0x57484154, 
+    Message response(0x4641494C,
 		     "Unknown request",
 		     FLAG_RESPONSE_PROVIDED | (msg.flags & MASK_REQUEST_ID));
     send(response);
