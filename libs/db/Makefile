@@ -8,7 +8,7 @@
 TYPE	= lib
 NAME    = ot-db
 HEADERS = ot-db.h
-OBJS  	= connection.o row.o transaction.o pool.o
+OBJS  	= connection.o field-value.o row.o transaction.o pool.o
 DEPENDS = log text time mt
 
 ROOT    = ../..

@@ -37,11 +37,139 @@ using namespace std;
 //     library constructs its own SQL all values are escaped automatically
 
 //==========================================================================
-// Database row (same for all drivers)
-struct Row
+// Field type
+enum FieldType
 {
-  map<string, string> fields;
+  NULLTYPE,
+  STRING,
+  INT,
+  INT64,
+  BOOL,
+  REAL
+};
 
+//==========================================================================
+// Field value
+class FieldValue
+{
+private:
+  // Value and type information
+  string str_val;
+  union
+  {
+    int int_val;
+    uint64_t int64_val;
+    bool bool_val;
+    double real_val;
+  };
+  FieldType type;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  FieldValue():
+    type(NULLTYPE) {}
+
+  FieldValue(const string& value):
+    str_val(value), real_val(0), type(STRING) {}
+
+  FieldValue(int value):
+    int_val(value), type(INT) {}
+
+  FieldValue(uint64_t value):
+    int64_val(value), type(INT64) {}
+
+  FieldValue(bool value):
+    bool_val(value), type(BOOL) {}
+
+  FieldValue(double value):
+    real_val(value), type(REAL) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from string but convert to specified type
+  FieldValue(const string& value, FieldType _type);
+
+  //------------------------------------------------------------------------
+  // Get the type we think we are
+  FieldType get_type() const
+  {
+    return type;
+  }
+
+  //------------------------------------------------------------------------
+  // Get value as string
+  string as_string() const;
+
+  //------------------------------------------------------------------------
+  // Get value as escaped string
+  string as_escaped_string() const
+  {
+    if (type == STRING)
+      return escape(as_string());
+    else
+      return as_string();
+  }
+
+  //------------------------------------------------------------------------
+  // Get value as quoted escaped string
+  string as_quoted_string() const
+  {
+    if (type == STRING)
+      return quote(as_string());
+    else
+      return as_string();
+  }
+
+  //------------------------------------------------------------------------
+  // Get value as int
+  int as_int() const;
+
+  //------------------------------------------------------------------------
+  // Get value as int64
+  uint64_t as_int64() const;
+
+  //------------------------------------------------------------------------
+  // Get value as bool
+  bool as_bool() const;
+
+  //------------------------------------------------------------------------
+  // Get value as real
+  double as_real() const;
+
+  //------------------------------------------------------------------------
+  // Is value/type null?
+  bool is_null() const
+  {
+    return type == NULLTYPE;
+  }
+
+  //==========================================================================
+  // Static helper functions
+
+  //------------------------------------------------------------------------
+  // Escape and quote a string
+  static string quote(const string& s)
+  {
+    return "'" + escape(s) + "'";
+  }
+
+  //------------------------------------------------------------------------
+  // Escape a string, doubling single quotes and backslashes
+  static string escape(const string& s);
+
+  //------------------------------------------------------------------------
+  // Unescape a string, singling double quotes and backslashes
+  static string unescape(const string& s);
+};
+
+//==========================================================================
+// Database row (same for all drivers)
+class Row
+{
+private:
+  map<string, FieldValue> fields;
+
+public:
   //------------------------------------------------------------------------
   //Clear the row
   void clear() 
@@ -50,12 +178,28 @@ struct Row
   //------------------------------------------------------------------------
   //Add name/value pair
   Row& add(const string& fieldname, const string& value)
-  { fields[fieldname] = value; return *this; }
+  { fields[fieldname] = FieldValue(value); return *this; }
+
+  //------------------------------------------------------------------------
+  //Add name/value pair (NULL if empty)
+  Row& add_or_null(const string& fieldname, const string& value)
+  {
+    if (value.size())
+      fields[fieldname] = FieldValue(value);
+    else
+      fields[fieldname] = FieldValue(value);
+    return *this;
+  }
 
   //------------------------------------------------------------------------
   //Add a null entry (used for select() to identify desired fields)
   Row& add(const string& fieldname)
   { fields[fieldname] = ""; return *this; }
+
+  //------------------------------------------------------------------------
+  // Add a true NULL entry
+  Row& add_null(const string& fieldname)
+  { fields[fieldname] = FieldValue(); return *this; }
 
   //------------------------------------------------------------------------
   // Handy operator to add null values to a row, for select()
@@ -64,19 +208,57 @@ struct Row
   //------------------------------------------------------------------------
   //Add name/value pair, unescaping value (for use by drivers only)
   void add_unescaped(const string& fieldname, const string& value)
-  { fields[fieldname] = unescape(value); }
+  { fields[fieldname] = FieldValue(FieldValue::unescape(value)); }
 
   //------------------------------------------------------------------------
   // Add integer value to row
-  void add(string fieldname, int value);
+  void add(string fieldname, int value)
+  { fields[fieldname] = FieldValue(value); }
+
+  //------------------------------------------------------------------------
+  // Add integer value to row (NULL if zero)
+  void add_or_null(string fieldname, int value)
+  {
+    if (value)
+      fields[fieldname] = FieldValue(value);
+    else
+      fields[fieldname] = FieldValue();
+  }
 
   //------------------------------------------------------------------------
   // Add a 64-bit integer value to row
-  void add_int64(string fieldname, uint64_t value);
+  void add_int64(string fieldname, uint64_t value)
+  { fields[fieldname] = FieldValue(value); }
+
+  //------------------------------------------------------------------------
+  // Add a 64-bit integer value to row (NULL if zero)
+  void add_int64_or_null(string fieldname, uint64_t value)
+  {
+    if (value)
+      fields[fieldname] = FieldValue(value);
+    else
+      fields[fieldname] = FieldValue();
+  }
 
   //------------------------------------------------------------------------
   // Add boolean value to row
-  void add(string fieldname, bool value);
+  void add(string fieldname, bool value)
+  { fields[fieldname] = FieldValue(value); }
+
+  //------------------------------------------------------------------------
+  // Add real value to row
+  void add(string fieldname, double value)
+  { fields[fieldname] = FieldValue(value); }
+
+  //------------------------------------------------------------------------
+  // Add real value to row (NULL if zero)
+  void add_or_null(string fieldname, double value)
+  {
+    if (value)
+      fields[fieldname] = FieldValue(value);
+    else
+      fields[fieldname] = FieldValue();
+  }
 
   //------------------------------------------------------------------------
   //Finds whether the row contains a value for the given fieldname
@@ -92,7 +274,7 @@ struct Row
   // e.g. foo = row["id"];
   string operator[](string fieldname) const
   { return get(fieldname); }
-  
+
   //------------------------------------------------------------------------
   //Get integer value of field of given name, or default if not found
   int get_int(string fieldname, int def=0) const;
@@ -106,8 +288,12 @@ struct Row
   bool get_bool(string fieldname, bool def=false) const;
 
   //------------------------------------------------------------------------
+  //Get real value of field of given name, or default if not found
+  double get_real(string fieldname, double def=0) const;
+
+  //------------------------------------------------------------------------
   // Get string with field names in order, separated by commas and spaces
-  string get_fields() const; 
+  string get_fields() const;
 
   //------------------------------------------------------------------------
   // Get string with field values in order, separated by commas and spaces,
@@ -119,17 +305,6 @@ struct Row
   // separated by commas and spaces, values delimited with single quotes 
   // (e.g. for UPDATE)
   string get_escaped_assignments() const;
-
-  //==========================================================================
-  // Static helper functions
-
-  //------------------------------------------------------------------------
-  // Escape a string, doubling single quotes and backslashes
-  static string escape(const string& s);
-
-  //------------------------------------------------------------------------
-  // Unescape a string, singling double quotes and backslashes
-  static string unescape(const string& s);
 };
 
 //==========================================================================
@@ -757,8 +932,8 @@ struct AutoConnection
 		   const string& field2, uint64_t id2)
   { return conn?conn->delete_join64(table, field1, id1, field2, id2):false; }
 
-  static string escape(const string& s) { return Row::escape(s); }
-  static string unescape(const string& s) { return Row::unescape(s); }
+  static string escape(const string& s) { return FieldValue::escape(s); }
+  static string unescape(const string& s) { return FieldValue::unescape(s); }
 
   //------------------------------------------------------------------------
   // Destructor

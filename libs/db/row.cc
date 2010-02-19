@@ -15,34 +15,12 @@
 namespace ObTools { namespace DB {
 
 //------------------------------------------------------------------------
-// Add integer value to row
-void Row::add(string fieldname, int value)
-{
-  fields[fieldname] = Text::itos(value);
-}
-
-//------------------------------------------------------------------------
-// Add 64-bit integer value to row
-void Row::add_int64(string fieldname, uint64_t value)
-{
-  fields[fieldname] = Text::i64tos(value);
-}
-
-//------------------------------------------------------------------------
-// Add boolean value to row
-void Row::add(string fieldname, bool value)
-{
-  // Make compatible with both Postgres and MySql
-  fields[fieldname] = value?"1":"0";  
-}
-
-//------------------------------------------------------------------------
 //Get value of field of given name, or default if not found
 string Row::get(string fieldname, const string& def) const
 {
-  map<string,string>::const_iterator p=fields.find(fieldname);
+  map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())
-    return p->second;
+    return p->second.as_string();
   else
     return def;
 }
@@ -51,47 +29,44 @@ string Row::get(string fieldname, const string& def) const
 //Get integer value of field of given name, or default if not found
 int Row::get_int(string fieldname, int def) const
 {
-  map<string,string>::const_iterator p=fields.find(fieldname);
-  if (p!=fields.end()) return atoi(p->second.c_str());
-
-  return def;
+  map<string, FieldValue>::const_iterator p=fields.find(fieldname);
+  if (p!=fields.end())
+    return p->second.as_int();
+  else
+    return def;
 }
 
 //------------------------------------------------------------------------
 //Get 64-bit value of field of given name, or default if not found
 uint64_t Row::get_int64(string fieldname, uint64_t def) const
 {
-  map<string,string>::const_iterator p=fields.find(fieldname);
-
-  // Use sscanf instead of atoll which is signed
-  if (p!=fields.end()) def = Text::stoi64(p->second);
-
-  return def;
+  map<string, FieldValue>::const_iterator p=fields.find(fieldname);
+  if (p!=fields.end())
+    return p->second.as_int64();
+  else
+    return def;
 }
 
 //------------------------------------------------------------------------
 //Get boolean value of field of given name, or default if not found
 bool Row::get_bool(string fieldname, bool def) const
 {
-  map<string,string>::const_iterator p=fields.find(fieldname);
+  map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())
-  {
-    char c=0;
-    if (!p->second.empty()) c=p->second[0];
-      
-    switch(c)
-    {
-      case 'T': case 't':
-      case 'Y': case 'y':
-      case '1':
-	return true;
+    return p->second.as_bool();
+  else
+    return def;
+}
 
-      default:
-	return false;
-    }
-  }
-
-  return def;
+//------------------------------------------------------------------------
+//Get real value of field of given name, or default if not found
+double Row::get_real(string fieldname, double def) const
+{
+  map<string, FieldValue>::const_iterator p=fields.find(fieldname);
+  if (p!=fields.end())
+    return p->second.as_real();
+  else
+    return def;
 }
 
 //------------------------------------------------------------------------
@@ -99,7 +74,7 @@ bool Row::get_bool(string fieldname, bool def) const
 string Row::get_fields() const
 {
   string result;
-  for(map<string, string>::const_iterator p = fields.begin(); 
+  for(map<string, FieldValue>::const_iterator p = fields.begin(); 
       p!=fields.end(); ++p)
   {
     if (!result.empty()) result += ", ";
@@ -115,11 +90,11 @@ string Row::get_fields() const
 string Row::get_escaped_values() const
 {
   string result;
-  for(map<string, string>::const_iterator p = fields.begin(); 
+  for(map<string, FieldValue>::const_iterator p = fields.begin();
       p!=fields.end(); ++p)
   {
     if (!result.empty()) result += ", ";
-    result += "'" + escape(p->second) + "'";
+    result += p->second.as_quoted_string();
   }
 
   return result;
@@ -132,30 +107,14 @@ string Row::get_escaped_values() const
 string Row::get_escaped_assignments() const
 {
   string result;
-  for(map<string, string>::const_iterator p = fields.begin(); 
+  for(map<string, FieldValue>::const_iterator p = fields.begin();
       p!=fields.end(); ++p)
   {
     if (!result.empty()) result += ", ";
-    result += p->first + " = '" + escape(p->second) + "'";
+    result += p->first + " = " + p->second.as_quoted_string();
   }
 
   return result;
-}
-
-//------------------------------------------------------------------------
-// Escape a string, doubling single quotes and backslashes
-string Row::escape(const string& s)
-{
-  string s2 = Text::subst(s, "\\", "\\\\");
-  return Text::subst(s2, "'", "''");
-}
-
-//------------------------------------------------------------------------
-// Unescape a string, singling double quotes and backslashes
-string Row::unescape(const string& s)
-{
-  string s2 = Text::subst(s, "\\\\", "\\");
-  return Text::subst(s2, "''", "'");
 }
 
 }} // namespaces

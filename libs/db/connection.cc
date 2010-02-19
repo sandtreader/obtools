@@ -254,7 +254,7 @@ Result Connection::select_by_id(const string& table, const Row& row,
 				const string& id, const string& id_field)
 {
   ostringstream oss;
-  oss << id_field << " = '" << row.escape(id) << "'";
+  oss << id_field << " = " << FieldValue::quote(id);
   return select(table, row, oss.str());
 }
 
@@ -306,7 +306,7 @@ bool Connection::select_row_by_id(const string& table, Row& row,
 				  const string& id, const string& id_field)
 {
   ostringstream oss;
-  oss << id_field << " = '" << row.escape(id) << "'";
+  oss << id_field << " = " << FieldValue::quote(id);
   return select_row(table, row, oss.str());
 }
 
@@ -358,7 +358,7 @@ string Connection::select_value_by_id(const string& table,
 				      const string& id, const string& id_field)
 {
   ostringstream oss;
-  oss << id_field << " = '" << Row::escape(id) << "'";
+  oss << id_field << " = " << FieldValue::quote(id);
   return select_value(table, field, oss.str());
 }
 
@@ -432,7 +432,7 @@ bool Connection::update_id(const string& table, const Row& row,
 			   const string& id, const string& id_field)
 {
   ostringstream oss;
-  oss << id_field << " = '" << row.escape(id) << "'";
+  oss << id_field << " = " << FieldValue::quote(id);
   return update(table, row,  oss.str());
 }
 
@@ -476,7 +476,7 @@ bool Connection::delete_id(const string& table,
 			   const string& id, const string& id_field)
 {
   ostringstream oss;
-  oss << id_field << " = '" << Row::escape(id) << "'";
+  oss << id_field << " = " << FieldValue::quote(id);
   return delete_all(table, oss.str());
 }
 
