@@ -41,7 +41,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  ssl-openssl:libs/ssl-openssl:log,net,ssl,crypto,xml       \
 	  text:libs/text   			\
 	  time:libs/time			\
-	  tube:libs/tube:net,log,mt,chan,misc,ssl   \
+	  tube:libs/tube:net,log,mt,chan,misc,ssl,cache   \
 	  web:libs/web:xml,misc,log,net,ssl,file     \
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml:text,file		\
