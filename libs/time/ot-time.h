@@ -271,6 +271,9 @@ public:
   Stamp operator+(const Duration& d) const
   { return Stamp::from_ntp(t+d.ntp()); }
 
+  Stamp& operator+=(const Duration& d)
+  { t += d.ntp(); return *this; }
+
   //------------------------------------------------------------------------
   // Comparison operators
   // Think very hard before you use exact inequality/equality - two
