@@ -51,6 +51,9 @@ struct Split
   int hour;   // 0-23
   int min;    // 0-59
   double sec; // 0-59.999999
+
+  Split():
+    year(1900), month(1), day(1), hour(0), min(0), sec(0) {}
 };
 
 //==========================================================================
@@ -155,7 +158,7 @@ public:
 //Internal format 64-bit NTP timestamp
 class Stamp
 {
-private:
+protected:
   ntp_stamp_t t;
   static ntp_stamp_t combine(const Split& split);
   static Split split(ntp_stamp_t ts);
@@ -205,7 +208,7 @@ public:
   // Convert to ISO timestamp string
   // Generates YYYY-MM-DDTHH:MM:SS.sssZ form or empty if invalid
   // This format is also compatible with XML
-  string iso() const;
+  virtual string iso() const;
 
   //------------------------------------------------------------------------
   // Convert to ISO date
@@ -281,8 +284,55 @@ public:
   bool operator>(const Stamp& o) const { return t>o.t; }
   bool operator<=(const Stamp& o) const { return t<=o.t; }
   bool operator>=(const Stamp& o) const { return t>=o.t; }
+
+  // Virtual destructor
+  virtual ~Stamp() {}
 };
 
+//==========================================================================
+//DateStamp - fixed date in absolute time
+//As per Stamp, but can be constructed from just a date
+class DateStamp: public Stamp
+{
+public:
+  // Default constructor
+  DateStamp() {}
+
+  //------------------------------------------------------------------------
+  // Constructor from time_t
+  DateStamp(time_t _t): Stamp(_t) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from split time
+  DateStamp(const Split& split): Stamp(split) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from Stamp
+  DateStamp(const Stamp& stamp): Stamp(stamp) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from string
+  // Reads the following formats:
+  //   ISO8601:  YYYY[-]MM[-]DD (UTC always assumed)
+  DateStamp(const string& text);
+
+  //------------------------------------------------------------------------
+  // Convert to ISO date string
+  virtual string iso() const
+  {
+    return Stamp::iso_date();
+  }
+
+  //------------------------------------------------------------------------
+  // Convert to ISO datetime string
+  string iso_datetime() const
+  {
+    return Stamp::iso();
+  }
+
+  // Virtual destructor
+  virtual ~DateStamp() {}
+};
 
 //==========================================================================
 }} //namespaces
