@@ -112,7 +112,7 @@ public:
 
   //------------------------------------------------------------------------
   // Validity checks - 0 time is not valid
-  bool valid() { return t!=0; }
+  bool valid() const { return t!=0; }
   bool operator!() { return !t; }
 
   //------------------------------------------------------------------------
@@ -187,7 +187,7 @@ public:
 
   //------------------------------------------------------------------------
   // Validity checks - NTP 0 is not valid
-  bool valid() { return t!=0; }
+  bool valid() const { return t!=0; }
   bool operator!() { return !t; }
 
   //------------------------------------------------------------------------
