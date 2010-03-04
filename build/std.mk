@@ -35,6 +35,7 @@
 # WXWIDGETS: Set if WxWidgets required (requires build in external/wx)
 # RESOLVER:  Set if resolver required
 # EXTRA-TARGETS:  Anything else you want built
+# BUILD-SUBDIRS:  Subdirectories to be created of build-xxx directories
 
 # This recurses on itself with target 'targets'
 
@@ -518,6 +519,7 @@ define build_template
 .PHONY: build-$(1) test-$(1) release-$(1)
 build-$(1):
 	-@mkdir -p build-$(1)
+	-@mkdir $(patsubst %,build-$(1)/%,$(BUILD-SUBDIRS))
 	$$(MAKE) -C build-$(1) -f ../Makefile \
                  $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) targets
 
