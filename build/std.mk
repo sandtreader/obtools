@@ -36,6 +36,7 @@
 # RESOLVER:  Set if resolver required
 # EXTRA-TARGETS:  Anything else you want built
 # BUILD-SUBDIRS:  Subdirectories to be created of build-xxx directories
+# CLEAN-SUBDIRS:  Subdirectories of source to be cleaned (defaults to above)
 
 # This recurses on itself with target 'targets'
 
@@ -493,8 +494,14 @@ profile:
 	$(MAKE) PROFILE=1
 
 # Top-level clean target
+# Default clean subdirs to same as build 
+ifndef CLEAN-SUBDIRS
+CLEAN-SUBDIRS = $(BUILD-SUBDIRS)
+endif
+
 clean:
 	-@rm -rf build-* *~ $(DIRTY)
+	$(patsubst %,$(MAKE) -C % clean;,$(CLEAN-SUBDIRS))
 	$(CLEANCMD)
 
 # Top-level test target - run tests on all variants
