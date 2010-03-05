@@ -76,6 +76,34 @@ bool Resource::check(const string& resource, Net::IPAddress address,
   return true;            // ... but we did match
 }
 
+//--------------------------------------------------------------------------
+// Dump the resource to the given ostream
+void Resource::dump(ostream& sout) const
+{
+  sout << "Resource " << name << ":\n";
+
+  for(list<Rule>::const_iterator p = denied.begin(); p!=denied.end(); ++p)
+  {
+    const Rule& rule = *p;
+    sout << "  - deny" << rule << endl;
+  }
+
+  for(list<Rule>::const_iterator p = allowed.begin(); p!=allowed.end(); ++p)
+  {
+    const Rule& rule = *p;
+    sout << "  - allow" << rule << endl;
+  }
+}
+
+//--------------------------------------------------------------------------
+// Write rule to ostream
+ostream& operator<<(ostream& sout, const Resource& r)
+{ 
+  r.dump(sout); 
+  return sout; 
+}
+
+
 }} // namespaces
 
 

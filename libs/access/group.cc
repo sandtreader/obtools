@@ -42,6 +42,24 @@ bool Group::contains(const string& user)
   return false;
 }
 
+//--------------------------------------------------------------------------
+// Dump the group to the given ostream
+void Group::dump(ostream& sout) const
+{
+  sout << "Group " << id << ":\n";
+
+  for(list<string>::const_iterator p = users.begin(); p!=users.end(); ++p)
+    sout << "    user " << *p << endl;
+}
+
+//--------------------------------------------------------------------------
+// Write group to ostream
+ostream& operator<<(ostream& sout, const Group& g)
+{ 
+  g.dump(sout); 
+  return sout; 
+}
+
 
 }} // namespaces
 

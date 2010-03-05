@@ -43,7 +43,15 @@ class Group
   //--------------------------------------------------------------------------
   // Check if a given user name is in the group
   bool contains(const string& user);
+
+  //--------------------------------------------------------------------------
+  // Dump the group to the given ostream
+  void dump(ostream& sout) const;
 };
+
+//--------------------------------------------------------------------------
+// Write group to ostream
+ostream& operator<<(ostream& sout, const Group& g);
 
 //==========================================================================
 // Individual rule (AND of all conditions) (rule.cc)
@@ -68,7 +76,15 @@ class Rule
   // Test the rule for match against the given SSL Client details
   bool matches(Net::IPAddress attempted_address,
      const string& attempted_user);
+
+  //--------------------------------------------------------------------------
+  // Dump the rule to the given ostream
+  void dump(ostream& sout) const;
 };
+
+//--------------------------------------------------------------------------
+// Write rule to ostream
+ostream& operator<<(ostream& sout, const Rule& r);
 
 //==========================================================================
 // Resource class (resource.cc)
@@ -94,7 +110,15 @@ class Resource
   // access result to result_p
   bool check(const string& resource, Net::IPAddress address,
 	     const string& user, bool& result_p);
+
+  //--------------------------------------------------------------------------
+  // Dump the rule to the given ostream
+  void dump(ostream& sout) const;
 };
+
+//--------------------------------------------------------------------------
+// Write resource to ostream
+ostream& operator<<(ostream& sout, const Resource& r);
 
 //==========================================================================
 // Access checker class (checker.cc)
@@ -124,6 +148,10 @@ public:
     return check(resource, client.address.host, 
 		 client.cert_cn.empty()?"#anonymous":client.cert_cn);
   }
+
+  //--------------------------------------------------------------------------
+  // Dump the checker rules to the given ostream
+  void dump(ostream& sout) const;
 
   //--------------------------------------------------------------------------
   // Destructor

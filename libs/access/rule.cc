@@ -60,6 +60,27 @@ bool Rule::matches(Net::IPAddress attempted_address,
   return address == attempted_address;  // MaskedAddress compare
 }
 
+//--------------------------------------------------------------------------
+// Dump the rule to the given ostream
+void Rule::dump(ostream& sout) const
+{
+  if (group) sout << " group " << group->get_id();
+  if (user != "*") sout << " user " << user;
+  if (address.get_network_bits()) 
+    sout << " address " << address;
+  else if (!group && user=="*")
+    sout << " all";
+}
+
+//--------------------------------------------------------------------------
+// Write rule to ostream
+ostream& operator<<(ostream& sout, const Rule& r)
+{ 
+  r.dump(sout); 
+  return sout; 
+}
+
+
 }} // namespaces
 
 

@@ -65,6 +65,31 @@ Checker::~Checker()
     delete p->second;
 }
 
+//--------------------------------------------------------------------------
+// Dump the checker rules to the given ostream
+void Checker::dump(ostream& sout) const
+{
+  if (groups.size())
+  {
+    sout << "Groups:\n";
+    for(map<string, Group *>::const_iterator p = groups.begin();
+	p!=groups.end(); ++p)
+    {
+      const Group *g = p->second;
+      sout << "  " << *g;
+    }
+
+    // Note: only delimit resource if groups as well
+    sout << "Resources:\n";
+  }
+
+  for(list<Resource *>::const_iterator p = resources.begin(); 
+      p!=resources.end();++p)
+  {
+    const Resource *r = *p;
+    sout << "  " << *r;
+  }
+}
 
 }} // namespaces
 

@@ -36,6 +36,9 @@ int main(int argc, char **argv)
 
   Access::Checker checker(*access_e);
 
+  // Dump it out
+  checker.dump(cerr);
+
   // Now read lines of resource/user pairs to check
   while (cin)
   {
