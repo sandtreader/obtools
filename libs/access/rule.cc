@@ -64,8 +64,8 @@ bool Rule::matches(Net::IPAddress attempted_address,
 // Dump the rule to the given ostream
 void Rule::dump(ostream& sout) const
 {
-  if (group) sout << " group " << group->get_id();
-  if (user != "*") sout << " user " << user;
+  if (group) sout << " group '" << group->get_id() << "'";
+  if (user != "*") sout << " user '" << user << "'";
   if (address.get_network_bits()) 
     sout << " address " << address;
   else if (!group && user=="*")
