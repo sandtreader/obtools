@@ -80,7 +80,7 @@ bool Resource::check(const string& resource, Net::IPAddress address,
 // Dump the resource to the given ostream
 void Resource::dump(ostream& sout) const
 {
-  sout << "Resource " << name << ":\n";
+  sout << "Resource '" << name << "':\n";
 
   for(list<Rule>::const_iterator p = denied.begin(); p!=denied.end(); ++p)
   {
