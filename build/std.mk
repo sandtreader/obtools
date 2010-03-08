@@ -526,7 +526,9 @@ define build_template
 .PHONY: build-$(1) test-$(1) release-$(1)
 build-$(1):
 	-@mkdir -p build-$(1)
-	-@mkdir $(patsubst %,build-$(1)/%,$(BUILD-SUBDIRS))
+ifdef BUILD-SUBDIRS
+	-@mkdir -p $(patsubst %,build-$(1)/%,$(BUILD-SUBDIRS))
+endif
 	$$(MAKE) -C build-$(1) -f ../Makefile \
                  $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) targets
 
