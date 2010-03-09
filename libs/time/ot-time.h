@@ -275,6 +275,14 @@ public:
   { t += d.ntp(); return *this; }
 
   //------------------------------------------------------------------------
+  // Subtract a Duration from a stamp
+  Stamp operator-(const Duration& d) const
+  { return Stamp::from_ntp(t-d.ntp()); }
+
+  Stamp& operator-=(const Duration& d)
+  { t -= d.ntp(); return *this; }
+
+  //------------------------------------------------------------------------
   // Comparison operators
   // Think very hard before you use exact inequality/equality - two
   // different timestamps are very unlikely to be the same...  Provided
