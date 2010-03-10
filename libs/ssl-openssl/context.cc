@@ -207,7 +207,7 @@ void Context::log_errors(const string& text)
 //--------------------------------------------------------------------------
 // Static:  Create from an <ssl> configuration element
 // Returns context, or 0 if disabled or failed
-Context *Context::create(XML::Element& ssl_e)
+Context *Context::create(XML::Element& ssl_e, string pass_phrase)
 {
   if (!ssl_e.get_attr_bool("enabled")) return 0;
 
@@ -215,12 +215,11 @@ Context *Context::create(XML::Element& ssl_e)
   Log::Streams log;
 
   // Get SOAP RSA pass-phrase first, if required
-  string ssl_pass_phrase;
-  if (xpath.get_value_bool("private-key/@encrypted"))
+  if (xpath.get_value_bool("private-key/@encrypted") && pass_phrase.empty())
   {
     log.summary << "SSL RSA key pass phrase required\n";
     cout << "\n** Enter pass phrase for RSA private key: ";
-    cin >> ssl_pass_phrase;
+    cin >> pass_phrase;
   }
 
   // Get private key, strip blank lines, indent
@@ -229,7 +228,7 @@ Context *Context::create(XML::Element& ssl_e)
   key = Text::remove_indent(key, Text::get_common_indent(key));
 
   // Test the key
-  Crypto::RSAKey rsa(key, true, ssl_pass_phrase);
+  Crypto::RSAKey rsa(key, true, pass_phrase);
   if (!rsa.valid)
   {
     log.error << "Invalid RSA private key or pass phrase - giving up\n";

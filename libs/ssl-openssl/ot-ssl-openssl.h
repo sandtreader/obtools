@@ -128,7 +128,7 @@ public:
   //--------------------------------------------------------------------------
   // Static:  Create from an <ssl> configuration element
   // Returns context, or 0 if disabled or failed
-  static Context *create(XML::Element& ssl_e);
+  static Context *create(XML::Element& ssl_e, string pass_phrase = "");
 };
 
 
