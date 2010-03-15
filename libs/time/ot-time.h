@@ -28,6 +28,7 @@ using namespace std;
 const unsigned int MINUTE = 60;
 const unsigned int HOUR   = 3600;
 const unsigned int DAY    = 24*HOUR;
+const unsigned int WEEK   = 7*DAY;
 
 // Fractions of seconds
 const unsigned int MILLI = 1000;
@@ -99,6 +100,7 @@ public:
   //               min(ute)(s)   - minutes
   //               h(our(s))     - hours
   //               d(ay(s))      - calendar days
+  //               w(eek(s))     - weeks
   //
   //             Note:  months and years are NOT accepted, because their
   //             duration depends on when you ask
@@ -208,7 +210,7 @@ public:
   // Convert to ISO timestamp string
   // Generates YYYY-MM-DDTHH:MM:SS.sssZ form or empty if invalid
   // This format is also compatible with XML
-  virtual string iso() const;
+  string iso() const;
 
   //------------------------------------------------------------------------
   // Convert to ISO date
@@ -295,9 +297,6 @@ public:
   bool operator>(const Stamp& o) const { return t>o.t; }
   bool operator<=(const Stamp& o) const { return t<=o.t; }
   bool operator>=(const Stamp& o) const { return t>=o.t; }
-
-  // Virtual destructor
-  virtual ~Stamp() {}
 };
 
 //==========================================================================
@@ -329,7 +328,7 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to ISO date string
-  virtual string iso() const
+  string iso() const
   {
     return Stamp::iso_date();
   }
@@ -340,9 +339,6 @@ public:
   {
     return Stamp::iso();
   }
-
-  // Virtual destructor
-  virtual ~DateStamp() {}
 };
 
 //==========================================================================

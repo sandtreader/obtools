@@ -39,6 +39,10 @@ Duration::UnitDictionary::UnitDictionary()
   multiples["day"]     = DAY;
   multiples["days"]    = DAY;
 
+  multiples["w"]       = WEEK;
+  multiples["week"]    = WEEK;
+  multiples["weeks"]   = WEEK;
+
   fractions["ns"]      = NANO;
   fractions["us"]      = MICRO;
   fractions["ms"]      = MILLI;
