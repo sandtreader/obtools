@@ -226,6 +226,16 @@ Result Connection::select(const string& table, const Row& row,
 
 //------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table 
+// matching the list of values in where_row
+// Returns query result as query()
+Result Connection::select(const string& table, const Row& row, 
+			  const Row& where_row)
+{
+  return select(table, row, where_row.get_where_clause());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
 // matching the given integer ID
 // Returns query result as query()
 Result Connection::select_by_id(const string& table, const Row& row, 
@@ -272,6 +282,17 @@ bool Connection::select_row(const string& table, Row& row,
   if (!result) return false;
   row.clear();
   return result.fetch(row);
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for all fields in the given row in the given table 
+// with a WHERE clause constructed from where_row, and return the single 
+// (first) row as the values in the row
+// Returns whether row fetched
+bool Connection::select_row(const string& table, Row& row, 
+			    const Row& where_row)
+{
+  return select_row(table, row, where_row.get_where_clause());
 }
 
 //------------------------------------------------------------------------
@@ -323,6 +344,17 @@ string Connection::select_value(const string& table, const string& field,
   if (!where.empty()) oss << " WHERE " << where;
   oss << " LIMIT 1";
   return query_string(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a SELECT for a single field in the given table 
+// with a WHERE clause constructed from where_row, and return the 
+// (unescaped) value
+// Returns value or empty string if not found
+string Connection::select_value(const string& table, const string& field,
+				const Row& where_row)
+{
+  return select_value(table, field, where_row.get_where_clause());
 }
 
 //------------------------------------------------------------------------
@@ -404,6 +436,17 @@ bool Connection::update(const string& table, const Row& row,
 
 //------------------------------------------------------------------------
 // Do an UPDATE for all fields in the given row in the given table 
+// with a WHERE clause created from where_row.  
+// Values are escaped automatically
+// Returns whether successful
+bool Connection::update(const string& table, const Row& row, 
+			const Row& where_row)
+{
+  return update(table, row, where_row.get_where_clause());
+}
+
+//------------------------------------------------------------------------
+// Do an UPDATE for all fields in the given row in the given table 
 // matching the given integer ID
 // Returns whether successful
 bool Connection::update_id(const string& table, const Row& row, 
@@ -446,6 +489,14 @@ bool Connection::delete_all(const string& table, const string& where)
   oss << "DELETE FROM " << table;
   if (!where.empty()) oss << " WHERE " << where;
   return exec(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Do a DELETE in the given table with a WHERE clause created from where_row
+// Returns whether successful
+bool Connection::delete_all(const string& table, const Row& where_row)
+{
+  return delete_all(table, where_row.get_where_clause());
 }
 
 //------------------------------------------------------------------------

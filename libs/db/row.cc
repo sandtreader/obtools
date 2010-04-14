@@ -117,4 +117,21 @@ string Row::get_escaped_assignments() const
   return result;
 }
 
+//------------------------------------------------------------------------
+// Get string with field names and values in order with '=', separated
+// by AND, values delimited with single quotes
+// (e.g. for WHERE)
+string Row::get_where_clause() const
+{
+  string result;
+  for(map<string, FieldValue>::const_iterator p = fields.begin();
+      p!=fields.end(); ++p)
+  {
+    if (!result.empty()) result += " AND ";
+    result += p->first + " = " + p->second.as_quoted_string();
+  }
+
+  return result;
+}
+
 }} // namespaces

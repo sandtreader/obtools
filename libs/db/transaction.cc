@@ -12,25 +12,34 @@
 namespace ObTools { namespace DB {
 
 //------------------------------------------------------------------------
-//Constructor 
-Transaction::Transaction(Connection& _conn): conn(_conn), committed(false)
+// Constructor from plain connection
+Transaction::Transaction(Connection& _conn): conn(&_conn), committed(false)
 {
-  if (!conn.exec("START TRANSACTION")) committed = true;  // Make commit fail
+  if (!conn->exec("START TRANSACTION")) committed = true;  // Make commit fail
+}
+
+//------------------------------------------------------------------------
+// Constructor from AutoConnection
+Transaction::Transaction(AutoConnection& _autoconn): 
+  conn(_autoconn.conn), committed(false)
+{
+  if (!conn || !conn->exec("START TRANSACTION")) 
+    committed = true;  // Make commit fail
 }
 
 //------------------------------------------------------------------------
 //Commit - returns whether commit command ran OK
 bool Transaction::commit()
 {
-  if (committed) return false;
-  return (committed = conn.exec("COMMIT"));
+  if (!conn || committed) return false;
+  return (committed = conn->exec("COMMIT"));
 }
 
 //------------------------------------------------------------------------
 //Destructor
 Transaction::~Transaction()
 {
-  if (!committed) conn.exec("ROLLBACK");
+  if (conn && !committed) conn->exec("ROLLBACK");
 }
 
 

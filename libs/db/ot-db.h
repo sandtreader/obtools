@@ -176,34 +176,29 @@ public:
   { fields.clear(); }
 
   //------------------------------------------------------------------------
+  // Handy operator to add null values to a row, for select()
+  Row& operator<<(const string& fieldname) 
+  { fields[fieldname] = FieldValue(); return *this; }
+
+  //------------------------------------------------------------------------
   //Add name/value pair
-  Row& add(const string& fieldname, const string& value)
-  { fields[fieldname] = FieldValue(value); return *this; }
+  void add(const string& fieldname, const string& value)
+  { fields[fieldname] = FieldValue(value); }
 
   //------------------------------------------------------------------------
   //Add name/value pair (NULL if empty)
-  Row& add_or_null(const string& fieldname, const string& value)
+  void add_or_null(const string& fieldname, const string& value)
   {
     if (value.size())
       fields[fieldname] = FieldValue(value);
     else
-      fields[fieldname] = FieldValue(value);
-    return *this;
+      fields[fieldname] = FieldValue();
   }
 
   //------------------------------------------------------------------------
-  //Add a null entry (used for select() to identify desired fields)
-  Row& add(const string& fieldname)
-  { fields[fieldname] = ""; return *this; }
-
-  //------------------------------------------------------------------------
-  // Add a true NULL entry
-  Row& add_null(const string& fieldname)
-  { fields[fieldname] = FieldValue(); return *this; }
-
-  //------------------------------------------------------------------------
-  // Handy operator to add null values to a row, for select()
-  Row& operator<<(const string& fieldname) { return add(fieldname); }
+  // Add a NULL entry
+  void add_null(const string& fieldname)
+  { fields[fieldname] = FieldValue(); }
 
   //------------------------------------------------------------------------
   //Add name/value pair, unescaping value (for use by drivers only)
@@ -305,6 +300,12 @@ public:
   // separated by commas and spaces, values delimited with single quotes 
   // (e.g. for UPDATE)
   string get_escaped_assignments() const;
+
+  //------------------------------------------------------------------------
+  // Get string with field names and values in order with '=', separated
+  // by AND, values delimited with single quotes
+  // (e.g. for WHERE)
+  string get_where_clause() const;
 };
 
 //==========================================================================
@@ -518,6 +519,12 @@ public:
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
+  // matching the list of values in where_row
+  // Returns query result as query()
+  Result select(const string& table, const Row& row, const Row& where_row);
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
   // matching the given integer ID
   // Returns query result as query()
   Result select_by_id(const string& table, const Row& row,  
@@ -542,6 +549,13 @@ public:
   // If where is empty, doesn't add a WHERE at all
   // Returns whether row fetched
   bool select_row(const string& table, Row& row, const string& where="");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for all fields in the given row in the given table 
+  // with a WHERE clause constructed from where_row, and return the single 
+  // (first) row as the values in the row
+  // Returns whether row fetched
+  bool select_row(const string& table, Row& row, const Row& where_row);
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
@@ -571,6 +585,14 @@ public:
   // Returns value or empty string if not found
   string select_value(const string& table, const string& field,
 		      const string& where = "");
+
+  //------------------------------------------------------------------------
+  // Do a SELECT for a single field in the given table 
+  // with a WHERE clause constructed from where_row, and return the 
+  // (unescaped) value
+  // Returns value or empty string if not found
+  string select_value(const string& table, const string& field,
+		      const Row& where_row);
 
   //------------------------------------------------------------------------
   // Do a SELECT for a single field in the given table 
@@ -618,6 +640,13 @@ public:
 
   //------------------------------------------------------------------------
   // Do an UPDATE for all fields in the given row in the given table 
+  // with a WHERE clause created from where_row.  
+  // Values are escaped automatically
+  // Returns whether successful
+  bool update(const string& table, const Row& row, const Row& where_row);
+
+  //------------------------------------------------------------------------
+  // Do an UPDATE for all fields in the given row in the given table 
   // matching the given integer ID
   // Returns whether successful
   bool update_id(const string& table, const Row& row, 
@@ -640,6 +669,11 @@ public:
   // If where is empty, doesn't add a WHERE at all
   // Returns whether successful
   bool delete_all(const string& table, const string& where = "");
+
+  //------------------------------------------------------------------------
+  // Do a DELETE in the given table with a WHERE clause created from where_row
+  // Returns whether successful
+  bool delete_all(const string& table, const Row& where_row);
 
   //------------------------------------------------------------------------
   // Do an DELETE in the given table matching the given integer ID
@@ -673,29 +707,6 @@ public:
 };
 
 //==========================================================================
-// Transaction - provide transaction on given connection while it exists,
-// rolls back if killed without commit
-class Transaction
-{
-private:
-  Connection& conn;
-  bool committed;
-
-public:
-  //------------------------------------------------------------------------
-  //Constructor 
-  Transaction(Connection& _conn);
-
-  //------------------------------------------------------------------------
-  //Commit - returns whether commit command ran OK
-  bool commit();
-
-  //------------------------------------------------------------------------
-  //Destructor
-  ~Transaction();
-};
-
-//==========================================================================
 // Database connection factory - abstract interface implemented in driver
 // subclasses.  Factories will store the connection details and create
 // a new connection with them on demand
@@ -714,10 +725,6 @@ public:
   // Virtual destructor
   virtual ~ConnectionFactory() {}
 };
-
-#if !defined(_SINGLE)
-// Connection pooling makes no sense in single threaded mode - you should
-// hold a single global connection open for the lifetime of the application
 
 //==========================================================================
 // Database connection pool - maintains list of database connections which
@@ -838,6 +845,9 @@ struct AutoConnection
   Result select(const string& table, const Row& row, const string& where="")
   { return conn?conn->select(table, row, where):Result(); }
 
+  Result select(const string& table, const Row& row, const Row& where_row)
+  { return conn?conn->select(table, row, where_row):Result(); }
+
   Result select_by_id(const string& table, const Row& row,  
 		      int id, const string& id_field = "id")
   { return conn?conn->select_by_id(table, row, id, id_field):Result(); }
@@ -852,6 +862,9 @@ struct AutoConnection
 
   bool select_row(const string& table, Row& row, const string& where="")
   { return conn?conn->select_row(table, row, where):false; }
+
+  bool select_row(const string& table, Row& row, const Row& where_row)
+  { return conn?conn->select_row(table, row, where_row):false; }
 
   bool select_row_by_id(const string& table, Row& row, 
 			int id, const string& id_field = "id")
@@ -868,6 +881,10 @@ struct AutoConnection
   string select_value(const string& table, const string& field,
 		      const string& where = "")
   { return conn?conn->select_value(table, field, where):""; }
+
+  string select_value(const string& table, const string& field,
+		      const Row& where_row)
+  { return conn?conn->select_value(table, field, where_row):""; }
 
   string select_value_by_id(const string& table, 
 			    const string& field,
@@ -897,6 +914,9 @@ struct AutoConnection
   bool update(const string& table, const Row& row, const string& where="")
   { return conn?conn->update(table, row, where):false; }
 
+  bool update(const string& table, const Row& row, const Row& where_row)
+  { return conn?conn->update(table, row, where_row):false; }
+
   bool update_id(const string& table, const Row& row, 
 		 int id, const string& id_field = "id")
   { return conn?conn->update_id(table, row, id, id_field):false; }
@@ -911,6 +931,9 @@ struct AutoConnection
 
   bool delete_all(const string& table, const string& where = "")
   { return conn?conn->delete_all(table, where):false; }
+
+  bool delete_all(const string& table, const Row& where_row)
+  { return conn?conn->delete_all(table, where_row):false; }
 
   bool delete_id(const string& table, 
 		 int id, const string& id_field = "id")
@@ -940,7 +963,33 @@ struct AutoConnection
   ~AutoConnection() { if (conn) pool.release(conn); }
 };
 
-#endif // !_SINGLE
+//==========================================================================
+// Transaction - provide transaction on given connection while it exists,
+// rolls back if killed without commit
+class Transaction
+{
+private:
+  Connection *conn;
+  bool committed;
+
+public:
+  //------------------------------------------------------------------------
+  //Constructor from plain connection
+  Transaction(Connection& _conn);
+
+  //------------------------------------------------------------------------
+  //Constructor from AutoConnection
+  Transaction(AutoConnection& _conn);
+
+  //------------------------------------------------------------------------
+  //Commit - returns whether commit command ran OK
+  bool commit();
+
+  //------------------------------------------------------------------------
+  //Destructor
+  ~Transaction();
+};
+
 
 //==========================================================================
 }} //namespaces
