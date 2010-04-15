@@ -36,6 +36,12 @@ typedef int gid_t;
 #include <ext/stdio_filebuf.h>
 #endif
 
+// Fix lseek64 and off64_t in BSD (e.g. OS-X)
+#if defined(__BSD__)
+typedef off_t off64_t;
+#define lseek64 lseek
+#endif
+
 namespace ObTools { namespace File { 
 
 //Make our lives easier without polluting anyone else
