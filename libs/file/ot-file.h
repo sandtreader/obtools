@@ -40,6 +40,8 @@ typedef int gid_t;
 #if defined(__BSD__)
 typedef off_t off64_t;
 #define lseek64 lseek
+#define open64 open
+#define O_LARGEFILE 0
 #endif
 
 namespace ObTools { namespace File { 
