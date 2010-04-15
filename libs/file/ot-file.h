@@ -36,7 +36,8 @@ typedef int gid_t;
 #include <ext/stdio_filebuf.h>
 #endif
 
-// Fix lseek64 and off64_t in BSD (e.g. OS-X)
+// Fix 64-bit file operations in BSD (e.g. OS-X) - it does them natively
+// and doesn't provide '64' variants
 #if defined(__BSD__)
 typedef off_t off64_t;
 #define lseek64 lseek
