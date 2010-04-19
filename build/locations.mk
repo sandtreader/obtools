@@ -30,14 +30,15 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  file:libs/file:text                   \
 	  hash:libs/hash:-:NOLIB  		\
 	  init:libs/init:xml			\
-	  log:libs/log:text,time 		\
+	  log:libs/log:text,time,mt 		\
 	  misc:libs/misc:xml,chan		\
+	  msg:libs/msg:xml,init			\
 	  mt:libs/mt       			\
 	  net:libs/net:mt     			\
 	  regen:libs/regen 			\
 	  ring:libs/ring:-:NOLIB                \
 	  script:libs/script:log,misc,init	\
-	  soap:libs/soap:web,log,misc,xml	\
+	  soap:libs/soap:web,log,misc,xml,msg	\
 	  ssl:libs/ssl:log,net,xml              \
 	  ssl-openssl:libs/ssl-openssl:log,net,ssl,crypto,xml       \
 	  text:libs/text   			\
@@ -48,7 +49,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  xml:libs/xml:text,file		\
 	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
 	  xmlmesh-otmp:xmlmesh/otmp:net,log,text,tube			\
-	  xmlmesh-client:xmlmesh/client:xmlmesh-otmp,xmlmesh-core	\
+	  xmlmesh-client:xmlmesh/client:xmlmesh-otmp,xmlmesh-core,msg	\
 	  xmlmesh-c:xmlmesh/bindings/c  	\
 	  toolgen:tools/toolgen			\
 	  xmitoolgen:tools/xmitoolgen		\
