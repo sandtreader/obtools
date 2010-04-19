@@ -8,9 +8,9 @@
 TYPE	= lib
 NAME   	= ot-xmlmesh-client
 HEADERS = ot-xmlmesh-client.h ot-xmlmesh-client-otmp.h
-OBJS    = client.o mclient.o transport-otmp.o
+OBJS    = client.o mclient.o transport-otmp.o message-transport.o
 DEPENDS = xmlmesh-core xmlmesh-otmp net log xml text soap web misc time \
-	  tube mt
+	  tube mt msg
 SOCKET  = 1
 
 TESTS 	= test-client test-mclient

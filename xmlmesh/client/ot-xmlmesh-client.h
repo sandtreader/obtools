@@ -14,9 +14,8 @@
 #include <queue>
 #include "ot-net.h"
 #include "ot-log.h"
-#if !defined(_SINGLE)
 #include "ot-mt.h"
-#endif
+#include "ot-msg.h"
 #include "ot-xmlmesh.h"
 
 namespace ObTools { namespace XMLMesh {
@@ -139,7 +138,6 @@ public:
   ~Subscription() { client.unsubscribe(subject); }
 };
 
-#if !defined(_SINGLE)
 class MultiClient;  // forward
 //==========================================================================
 // Subscriber objects - abstract functors to handle callback from MultiClient
@@ -303,7 +301,47 @@ public:
   ~MultiClient();
 };
 
-#endif // !_SINGLE
+//==========================================================================
+// Mesh Transport subscriber for use with message Transport below
+class MessageTransportSubscriber: public Subscriber
+{
+  // Message handler to send message to
+  ObTools::Message::Handler& message_handler;
+
+ public:
+
+  //--------------------------------------------------------------------------
+  // Constructor - takes URL pattern
+  MessageTransportSubscriber(const string& _subject, 
+			     MultiClient& client,
+			     ObTools::Message::Handler& _handler);
+
+  //--------------------------------------------------------------------------
+  // Handle a message
+  void handle(Message& msg);
+};
+
+//==========================================================================
+// Mesh Transport class for use with Message::Broker
+class MessageTransport: public ObTools::Message::Transport
+{
+  MultiClient& client;
+  list<XMLMesh::Subscriber *> subscribers;  
+
+ public:
+  //--------------------------------------------------------------------------
+  MessageTransport(MultiClient& _client): 
+    ObTools::Message::Transport("mesh"), client(_client) {}
+
+  //--------------------------------------------------------------------------
+  // Register a handler with the given config element
+  void register_handler(ObTools::Message::Handler& handler, 
+			XML::Element& config);
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  ~MessageTransport();
+};
 
 //==========================================================================
 }} //namespaces
