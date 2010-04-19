@@ -16,6 +16,7 @@
 #include <map>
 #include "ot-xml.h"
 #include "ot-web.h"
+#include "ot-msg.h"
 
 namespace ObTools { namespace SOAP { 
 
@@ -409,6 +410,48 @@ public:
   //--------------------------------------------------------------------------
   // Virtual destructor
   virtual ~URLHandler() {}
+};
+
+//==========================================================================
+// SOAP Transport URL handler 
+class MessageTransportURLHandler: public URLHandler
+{
+  // Message handler to send message to
+  ObTools::Message::Handler& message_handler;
+
+ public:
+
+  //--------------------------------------------------------------------------
+  // Constructor - takes URL pattern
+  MessageTransportURLHandler(const string& _url, 
+			     ObTools::Message::Handler& _handler);
+
+  //--------------------------------------------------------------------------
+  // Handle a SOAP message
+  bool handle_message(Message& request, Message& response,
+		      Web::HTTPMessage&, Web::HTTPMessage&,
+		      SSL::ClientDetails&);
+};
+
+//==========================================================================
+// SOAP Transport class for use with Message::Broker
+class MessageTransport: public ObTools::Message::Transport
+{
+  Web::SimpleHTTPServer& server;
+
+ public:
+  //--------------------------------------------------------------------------
+  MessageTransport(Web::SimpleHTTPServer& _server): 
+    ObTools::Message::Transport("soap"), server(_server) {}
+
+  //--------------------------------------------------------------------------
+  // Register a handler with the given config element
+  void register_handler(ObTools::Message::Handler& handler, 
+			XML::Element& config);
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  ~MessageTransport() {}
 };
 
 //==========================================================================
