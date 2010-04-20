@@ -616,6 +616,15 @@ public:
 			    const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
+  // Count rows in the given table with the given WHERE clause
+  // If where is empty, doesn't add a WHERE at all
+  int count(const string& table, const string& where="");
+
+  //------------------------------------------------------------------------
+  // Count rows in the given table matching the list of values in where_row
+  int count(const string& table, const Row& where_row);
+
+  //------------------------------------------------------------------------
   // Check if a row exists with the given integer ID
   // Returns whether the row exists
   bool exists_id(const string& table, int id, const string& id_field = "id");
@@ -899,6 +908,12 @@ struct AutoConnection
   string select_value_by_id(const string& table, const string& field,
 			    const string& id, const string& id_field = "id")
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
+
+  int count(const string& table, const string& where="")
+  { return conn?conn->count(table, where):0; }
+
+  int count(const string& table, const Row& where_row)
+  { return conn?conn->count(table, where_row):0; }
 
   bool exists_id(const string& table, int id, const string& id_field = "id")
   { return conn?conn->exists_id(table, id, id_field):false; }

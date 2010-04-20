@@ -395,6 +395,24 @@ string Connection::select_value_by_id(const string& table,
 }
 
 //------------------------------------------------------------------------
+// Count rows in the given table with the given WHERE clause
+// If where is empty, doesn't add a WHERE at all
+int Connection::count(const string& table, const string& where)
+{
+  ostringstream oss;
+  oss << "SELECT COUNT(*) FROM " << table;
+  if (!where.empty()) oss << " WHERE " << where;
+  return query_int(oss.str());
+}
+
+//------------------------------------------------------------------------
+// Count rows in the given table matching the list of values in where_row
+int Connection::count(const string& table, const Row& where_row)
+{
+  return count(table, where_row.get_where_clause());
+}
+
+//------------------------------------------------------------------------
 // Check if a row exists with the given integer ID
 // Returns whether the row exists
 bool Connection::exists_id(const string& table, 
