@@ -50,7 +50,6 @@ public:
   OTMPClient(Net::EndPoint server): Client(transport), transport(server) {}
 };
 
-#if !defined(_SINGLE)
 //==========================================================================
 // OTMP-based XMLMesh MultiClient
 class OTMPMultiClient: public MultiClient
@@ -73,7 +72,24 @@ public:
     MultiClient(transport, min_spare_workers, max_workers), 
     transport(server) { start(); }
 };
-#endif // !_SINGLE
+
+//==========================================================================
+// Mesh message interface configured from standard config file <xmlmesh>
+class OTMPMessageInterface
+{
+  OTMPMultiClient *client;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor, taking 'xmlmesh' element
+  OTMPMessageInterface(XML::Element& config, 
+		       ObTools::Message::Broker& broker);
+
+  //--------------------------------------------------------------------------
+  // Destructor - destroys message interface
+  ~OTMPMessageInterface();
+};
+
 
 //==========================================================================
 }} //namespaces

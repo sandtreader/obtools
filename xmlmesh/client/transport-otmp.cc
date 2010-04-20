@@ -49,6 +49,50 @@ bool OTMPClientTransport::wait(string &data)
   return true;
 }
 
+//==========================================================================
+// MessageInterface class
+
+//--------------------------------------------------------------------------
+// Constructor
+OTMPMessageInterface::OTMPMessageInterface(XML::Element& config,
+					   ObTools::Message::Broker& broker): 
+  client(0)
+{
+  Log::Streams log;
+  XML::XPathProcessor xpath(config);
+
+  // Set up mesh connection - note, no default here, so if not present,
+  // we disable it
+  string host = xpath.get_value("server/@host");
+  if (host.empty()) return;
+
+  int port = xpath.get_value_int("server/@port", OTMP::DEFAULT_PORT);
+
+  Net::IPAddress addr(host);
+  if (!addr)
+  {
+    log.error << "Can't resolve XMLMesh host: " << host << endl;
+    return;
+  }
+
+  Net::EndPoint ep(addr, port);
+  log.summary << "Connecting to XMLMesh at " << ep << endl;
+
+  // Start mesh client
+  client = new OTMPMultiClient(ep);
+
+  // Register our transport into server message broker
+  broker.add_transport(new MessageTransport(*client));
+}
+
+//--------------------------------------------------------------------------
+// Destructor - destroys message interface
+OTMPMessageInterface::~OTMPMessageInterface()
+{
+  if (client) delete client;
+}
+
+
 
 }} // namespaces
 

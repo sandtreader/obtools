@@ -331,7 +331,7 @@ class MessageTransport: public ObTools::Message::Transport
  public:
   //--------------------------------------------------------------------------
   MessageTransport(MultiClient& _client): 
-    ObTools::Message::Transport("mesh"), client(_client) {}
+    ObTools::Message::Transport("xmlmesh"), client(_client) {}
 
   //--------------------------------------------------------------------------
   // Register a handler with the given config element
