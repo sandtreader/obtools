@@ -455,6 +455,24 @@ class MessageTransport: public ObTools::Message::Transport
 };
 
 //==========================================================================
+// SOAP Message Interface, configured from standard <soap> element
+class MessageInterface
+{
+  Web::SimpleHTTPServer *http_server;
+  Net::TCPServerThread *http_server_thread;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  MessageInterface(XML::Element& config, ObTools::Message::Broker& broker,
+		   const string& server_name);
+
+  //--------------------------------------------------------------------------
+  // Destructor 
+  ~MessageInterface();
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_SOAP_H
 

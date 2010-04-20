@@ -75,4 +75,40 @@ void MessageTransport::register_handler(ObTools::Message::Handler& handler,
   server.add(th);
 }
 
+//==========================================================================
+// Message interface
+
+//--------------------------------------------------------------------------
+// Constructor
+MessageInterface::MessageInterface(XML::Element& config,
+				   ObTools::Message::Broker& broker,
+				   const string& server_name): 
+  http_server(0), http_server_thread(0)
+{
+  XML::XPathProcessor xpath(config);
+
+  // Start HTTP server
+  int hport = xpath.get_value_int("http/@port", 0);
+  if (hport)
+  {
+    Log::Streams log;
+    log.summary << "Starting HTTP SOAP server at port " << hport << endl;
+    http_server = new Web::SimpleHTTPServer(hport, server_name);
+
+    // Add a message transport to message broker
+    broker.add_transport(new MessageTransport(*http_server));
+
+    // Start thread
+    http_server_thread = new Net::TCPServerThread(*http_server);
+  }
+}
+
+//--------------------------------------------------------------------------
+// Destructor - destroys SOAP interface
+MessageInterface::~MessageInterface()
+{
+  if (http_server_thread) delete http_server_thread;
+  if (http_server) delete http_server;
+}
+
 }} // namespaces
