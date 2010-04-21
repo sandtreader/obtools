@@ -33,7 +33,13 @@ void MessageTransportSubscriber::handle(Message& msg)
   Log::Streams log;
   const XML::Element& request = msg.get_body();
 
-  // !!! Check request document is correct!
+  // Check body document name
+  if (request.name != message_handler.ns_prefix + ":" 
+                    + message_handler.document_name+"-request")
+  {
+    client.respond(SOAP::Fault::CODE_SENDER, "Bad document name", msg);
+    return;
+  }
 
   // Prepare response body, even if not used
   XML::Element response(message_handler.ns_prefix+":"
