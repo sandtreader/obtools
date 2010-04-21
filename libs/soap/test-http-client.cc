@@ -34,7 +34,22 @@ int main(int argc, char **argv)
 
   // Read stdin
   string in;
-  while (cin) in += cin.get();
+  while (cin)
+  {
+    char c = cin.get();
+    if (c > 0) in+=c;
+  }
+
+  // If it doesn't look like SOAP already, wrap it up
+  if (in.find("env:Envelope") == string::npos)
+  {
+    in = "<?xml version='1.0' encoding='UTF-8'?>\n" 
+         "<env:Envelope xmlns:env='http://schemas.xmlsoap.org/soap/envelope/'>\n" 
+         "  <env:Body>\n"
+         +in+
+         "  </env:Body>\n"
+         "</env:Envelope>\n";
+  }
 
   Web::URL url(argv[1]);
   string soap_action(argv[2]);
