@@ -176,6 +176,11 @@ public:
   { fields.clear(); }
 
   //------------------------------------------------------------------------
+  //Add name/value pair (from a FieldValue)
+  Row& add(const string& fieldname, const FieldValue& value)
+  { fields[fieldname] = value; return *this; }
+
+  //------------------------------------------------------------------------
   // Handy operator to add null values to a row, for select()
   Row& operator<<(const string& fieldname) 
   { fields[fieldname] = FieldValue(); return *this; }
