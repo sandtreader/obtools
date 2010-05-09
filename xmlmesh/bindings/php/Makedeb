@@ -9,7 +9,7 @@
 set -e
 
 DEB_VERSION=$2-$3
-PACKAGE=$1_$2-$3_i386.deb
+PACKAGE=$1_$2-$3_all.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 RELEASE_DIR=$SRC_DIR/../../release/
