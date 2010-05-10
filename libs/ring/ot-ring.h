@@ -41,7 +41,7 @@ private:
 
   //--------------------------------------------------------------------------
   // Modular increment - increments the value given, mod length
-  bool inc(int n) { return (++n>=length)?0:n; }
+  int inc(int n) { return (++n>=length)?0:n; }
   
 public:
   //--------------------------------------------------------------------------
