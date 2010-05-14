@@ -17,6 +17,7 @@
 #include <map>
 #include <string.h>
 
+#include <openssl/aes.h>
 #include <openssl/des.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
@@ -48,6 +49,148 @@ public:
   //------------------------------------------------------------------------
   // Destructor
   ~Library();
+};
+
+//==========================================================================
+// AES key (aes-key.cc)
+// 16, 24 or 32 byte key, also used for IV
+class AESKey
+{
+public:
+  unsigned char key[32];          // Key
+  enum Size
+  {
+    BITS_128 = 128,
+    BITS_192 = 192,
+    BITS_256 = 256,
+  } size;
+  bool is_key;                    // True if a key, false if an IV
+  bool valid;                     // Whether key/schedule is valid
+
+  //------------------------------------------------------------------------
+  // Default constructor
+  AESKey(Size _size = BITS_128, bool _is_key = true):
+    size(_size), is_key(_is_key), valid(false)
+  {
+    memset(&key, 0, sizeof(key));
+  }
+
+  //------------------------------------------------------------------------
+  // Constructor from data block
+  AESKey(const unsigned char *data, Size _size):
+    size(_size), is_key(true)
+  {
+    read(data);
+  }
+
+  //------------------------------------------------------------------------
+  // Constructor from string - requires hex characters
+  AESKey(const string& text, Size _size):
+    size(_size), is_key(true)
+  {
+    read(text);
+  }
+
+  //------------------------------------------------------------------------
+  // Create a new key from random data
+  // Must seed PRNG first
+  void create();
+
+  //------------------------------------------------------------------------
+  // Read from data block
+  void read(const unsigned char *data);
+
+  //------------------------------------------------------------------------
+  // Write to data block
+  void write(unsigned char *data) const;
+
+  //------------------------------------------------------------------------
+  // Read from stream - reads hex characters
+  void read(istream& sin);
+
+  //------------------------------------------------------------------------
+  // Write to stream - writes hex characters
+  void write(ostream& sout) const;
+
+  //------------------------------------------------------------------------
+  // Read from string - reads hex characters
+  void read(const string& text);
+
+  //------------------------------------------------------------------------
+  // Convert to string
+  string str() const;
+
+#if defined(__OBTOOLS_CHAN_H)
+  // Provide channel versions without forcing use of ot-chan.h
+
+  //------------------------------------------------------------------------
+  // Read from channel (8 binary bytes)
+  void read(Channel::Reader& reader) throw (Channel::Error);
+
+  //------------------------------------------------------------------------
+  // Write to channel (8 binary bytes)
+  void write(Channel::Writer& writer) const throw (Channel::Error);
+#endif
+};
+
+//------------------------------------------------------------------------
+// >> operator to read key from istream
+istream& operator>>(istream& s, AESKey& k);
+
+//------------------------------------------------------------------------
+// << operator to write key to ostream
+ostream& operator<<(ostream& s, const AESKey& k);
+
+//==========================================================================
+// AES crypto object
+// Uses ECB (no IV), CBC (with IV) or CTR (set on object) according to
+// whether IV set
+class AES
+{
+public:
+  // Key
+  AESKey key;
+
+  // IV
+  AESKey iv;  // Remains invalid if not used
+
+  // Use CTR mode
+  bool ctr;
+
+  //------------------------------------------------------------------------
+  // Default constructor
+  AES(): iv(AESKey::BITS_128, false), ctr(false) {}
+
+#undef set_key // Annoyingly defined by des headers
+  //------------------------------------------------------------------------
+  // Set key
+  void set_key(const AESKey& _key) { key = _key; }
+
+  //------------------------------------------------------------------------
+  // Set an IV
+  void set_iv(const AESKey& _iv) { iv = _iv; }
+
+  //------------------------------------------------------------------------
+  // Set key
+  void set_ctr(bool _ctr) { ctr = _ctr; }
+
+  //------------------------------------------------------------------------
+  // Get current IV (in case it needs to be snapshotted for (e.g.) test
+  AESKey& get_iv() { return iv; }
+
+  //------------------------------------------------------------------------
+  // Encrypt/decrypt a block in place
+  // If block is not padded to 8 bytes, the remainder (up to 7) bytes
+  // WILL NOT BE ENCRYPTED
+  // Encrypts if 'encryption' is set (default), otherwise decrypts
+  // IV is modified if set
+  // Returns whether successful (keys set up correctly)
+  bool encrypt(unsigned char *data, int length, bool encryption = true);
+
+  //------------------------------------------------------------------------
+  // Decrypt a block in place - shorthand for above
+  bool decrypt(unsigned char *data, int length)
+  { return encrypt(data, length, false); }
 };
 
 //==========================================================================
