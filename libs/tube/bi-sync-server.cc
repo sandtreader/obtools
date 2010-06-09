@@ -48,15 +48,7 @@ public:
 // Handle timeouts
 void BiSyncServer::do_timeouts(Log::Streams& log)
 {
-  // Scan all client sessions for requests, do timeout on each
-  MT::RWReadLock lock(client_sessions.mutex);
-  for(map<Net::EndPoint, ClientSession *>::iterator p 
-	= client_sessions.sessions.begin();
-      p != client_sessions.sessions.end(); ++p)
-  {
-    ClientSession *cs = p->second;
-    cs->requests.do_timeouts(log, timeout, name);
-  }
+  requests.do_timeouts(log, timeout, name);
 }
 
 //==========================================================================
@@ -116,8 +108,6 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
     {
       cs = p->second;
 
-      cs->requests.start_request(request.msg, name);
-
       // Send it (this duplicates code in Server::send but we've got the
       // session already so this saves looking it up again)
       while (cs->send_q.waiting() > max_send_queue) // Zero must work
@@ -127,14 +117,11 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
     }
   }
 
-  // !!! NOTE: cs is at risk if session ends now
-  // !!! but we can't hold the lock while waiting, otherwise we block
-  // !!! our own response and any further connections!
+  // Start request in our request cache
+  requests.start_request(request.msg, request.client.address, name);
 
   // Wait for response
-  if (cs) return cs->requests.wait_response(request.msg, response);
-
-  return false;
+  return requests.wait_response(request.msg, response);
 }
 
 //------------------------------------------------------------------------
@@ -146,29 +133,13 @@ bool BiSyncServer::handle_async_message(ClientMessage& msg)
   if (msg.action == ClientMessage::MESSAGE_DATA
       && (msg.msg.flags & FLAG_RESPONSE_PROVIDED))
   {
-    // Lookup session by client address
-    MT::RWReadLock lock(client_sessions.mutex);
-    map<Net::EndPoint, ClientSession *>::iterator p 
-      = client_sessions.sessions.find(msg.client.address);
-    if (p != client_sessions.sessions.end())
-    {
-      ClientSession *cs = p->second;
-      cs->requests.handle_response(msg.msg, name);  // Must handle it
-    }
-
+    requests.handle_response(msg.msg, name);  // Must handle it
     return true;  // Snaffle it
   }
   else if (msg.action == ClientMessage::FINISHED)
   {
     // Shut down and fail all waiting requests for this client
-    MT::RWReadLock lock(client_sessions.mutex);
-    map<Net::EndPoint, ClientSession *>::iterator p 
-      = client_sessions.sessions.find(msg.client.address);
-    if (p != client_sessions.sessions.end())
-    {
-      ClientSession *cs = p->second;
-      cs->requests.shutdown();
-    }
+    requests.shutdown(msg.client.address);
   }
 
   // Not a response - pass down another level
@@ -192,14 +163,7 @@ void BiSyncServer::shutdown()
     Server::shutdown();
 
     // Shut down requests in all sessions
-    MT::RWReadLock lock(client_sessions.mutex);
-    for(map<Net::EndPoint, ClientSession *>::iterator p 
-	  = client_sessions.sessions.begin();
-	p != client_sessions.sessions.end(); ++p)
-    {
-      ClientSession *cs = p->second;
-      cs->requests.shutdown();
-    }
+    requests.shutdown();
 
     // Wait for timeout thread to exit cleanly
     for(int i=0; i<5; i++)

@@ -35,7 +35,9 @@ void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
 //------------------------------------------------------------------------
 // Set up a request entry to wait for a response
 // (call before actually sending message, in case response is instant)
-void SyncRequestCache::start_request(Message& request, const string& name)
+void SyncRequestCache::start_request(Message& request, 
+				     Net::EndPoint client,
+				     const string& name)
 {
   Log::Streams log;
 
@@ -60,7 +62,7 @@ retry:
 		       << " - " << request.stag() << endl;)
 
   // Start the clock
-  requests[id] = Request();
+  requests[id] = Request(client);
 
   // Fix the flags on the request
   request.flags |= FLAG_RESPONSE_REQUIRED;
@@ -131,8 +133,8 @@ bool SyncRequestCache::handle_response(Message& response, const string& name)
 }
 
 //------------------------------------------------------------------------
-// Shut down cleanly
-void SyncRequestCache::shutdown()
+// Shut down cleanly for a specific client
+void SyncRequestCache::shutdown(Net::EndPoint client)
 {
   // Signal all request conditions to free up requesting threads
   MT::Lock lock(request_mutex); 
@@ -140,9 +142,28 @@ void SyncRequestCache::shutdown()
       p!=requests.end(); ++p)
   {
     Request& req = p->second;
-    req.ready.signal();  // Leaving empty response
+    if (req.client == client) req.ready.signal();  // Leaving empty response
+
+    // The waiting thread will delete the request
   }
-  requests.clear();
+}
+
+//------------------------------------------------------------------------
+// Shut down cleanly for all clients
+void SyncRequestCache::shutdown()
+{
+  // Signal all request conditions to free up requesting threads
+  {
+    MT::Lock lock(request_mutex); 
+    for(map<id_t, Request>::iterator p = requests.begin(); 
+	p!=requests.end(); ++p)
+    {
+      Request& req = p->second;
+      req.ready.signal();  // Leaving empty response
+      
+      // The waiting thread will delete the request
+    }
+  }
 }
 
 //------------------------------------------------------------------------
@@ -150,6 +171,10 @@ void SyncRequestCache::shutdown()
 SyncRequestCache::~SyncRequestCache()
 {
   shutdown();
+
+  // Now wait for all requests to be deleted before finally deleting myself,
+  // to ensure nothing is waiting for the shutdown
+  while (requests.size()) MT::Thread::usleep(10000);
 }
 
 }} // namespaces

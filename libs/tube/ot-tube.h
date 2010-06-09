@@ -214,9 +214,16 @@ private:
   struct Request
   {
     Time::Stamp started;
+    Net::EndPoint client;
     Message response;
     MT::BasicCondVar ready;
-    Request(): started(Time::Stamp::now()) {}
+
+    // Normal constructor
+    Request(Net::EndPoint _client): 
+      started(Time::Stamp::now()), client(_client) {}
+
+    // Default constructor for map
+    Request() {}
   };
 
   // Request map, by ID
@@ -236,7 +243,8 @@ private:
   //------------------------------------------------------------------------
   // Set up a request entry to wait for a response
   // (call before actually sending message, in case response is instant)
-  void start_request(Message& request, const string& name);
+  void start_request(Message& request, Net::EndPoint client,
+		     const string& name);
 
   //------------------------------------------------------------------------
   // Block waiting for a response to the given request
@@ -250,7 +258,11 @@ private:
   bool handle_response(Message& response, const string& name);
 
   //------------------------------------------------------------------------
-  // Shut down cleanly
+  // Shut down cleanly for a specific client
+  void shutdown(Net::EndPoint client);
+
+  //------------------------------------------------------------------------
+  // Shut down cleanly for all clients
   void shutdown();
 
   //------------------------------------------------------------------------
@@ -375,12 +387,6 @@ struct ClientSession
 
   // Thread and queue stuff
   MT::MQueue<Message> send_q;  
-
-  // Request cache - only used in BiSyncServer, but saves it reimplementing
-  // all the rest of this
-  // Note there is a cache per client, so that IDs are issued per client
-  // otherwise (a) we could run out, (b) leaks activity issue between clients
-  SyncRequestCache requests;
 
   // Constructor
   // Adds this session to the given map - destructor removes it again
@@ -606,6 +612,11 @@ class BiSyncServer: public SyncServer
 {
   int timeout;                   // Request timeout (secs)
   MT::Thread *timeout_thread;    // Thread to run timeouts
+
+  // Request cache - note, global to the server;  this means the ID space
+  // is shared between all clients.  However putting it on a per-connection
+  // basis creates race-condition nightmares.
+  SyncRequestCache requests;
 
   // Handle asynchronous messages, which includes responses
   bool handle_async_message(ClientMessage& msg);

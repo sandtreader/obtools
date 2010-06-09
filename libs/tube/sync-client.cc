@@ -75,7 +75,7 @@ SyncClient::SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
 bool SyncClient::request(Message& request, Message& response)
 {
   // Set up request in cache
-  requests.start_request(request, name);
+  requests.start_request(request, server, name);
 
   // Send it
   send(request);
