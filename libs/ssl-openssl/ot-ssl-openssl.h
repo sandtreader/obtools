@@ -12,14 +12,13 @@
 #define __OBTOOLS_SSL_OPENSSL_H
 
 #include "ot-ssl.h"
+#include "ot-crypto.h"
 
 // This is rather ugly...  We want to use SSL as a namespace, but
 // OpenSSL defines it as a struct.  Hence we redefine SSL here to 
-// expand to OpenSSL for the duration of the OpenSSL header and
-// our crypto header which pulls in some other OpenSSL stuff
+// expand to OpenSSL for the duration of the OpenSSL header 
 #define SSL OpenSSL
 #include <openssl/ssl.h>
-#include "ot-crypto.h"
 #undef SSL
 
 #include <openssl/err.h>

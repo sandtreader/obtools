@@ -17,12 +17,17 @@
 #include <map>
 #include <string.h>
 
+// This is rather ugly...  We want to use SSL as a namespace, but
+// OpenSSL defines it as a struct.  Hence we redefine SSL here to 
+// expand to OpenSSL for the duration of the OpenSSL headers 
+#define SSL OpenSSL
 #include <openssl/aes.h>
 #include <openssl/des.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
+#undef SSL
 
 #include "ot-mt.h"
 
