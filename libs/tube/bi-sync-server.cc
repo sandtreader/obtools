@@ -98,6 +98,10 @@ BiSyncServer::BiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
 // Returns whether a response was received, fills in response if so
 bool BiSyncServer::request(ClientMessage& request, Message& response)
 {
+  // Start request in our request cache, to establish ID and set state
+  // for response
+  requests.start_request(request.msg, request.client.address, name);
+
   // Lookup session by client address
   ClientSession *cs = 0;
   {
@@ -116,9 +120,6 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
       cs->send_q.send(request.msg);
     }
   }
-
-  // Start request in our request cache
-  requests.start_request(request.msg, request.client.address, name);
 
   // Wait for response
   return requests.wait_response(request.msg, response);
