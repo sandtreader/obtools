@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include <ostream>
+#include "sys/uio.h"
 
 namespace ObTools { namespace Gather { 
 
@@ -62,11 +63,6 @@ private:
   unsigned int count;     // Number of segments used
   Segment *segments;      // Allocated array of segments
 
-  // Internals
-  void extend();
-  Segment& add(const Segment& seg);
-  Segment& insert(const Segment& seg, unsigned int pos=0);
-
 public:
   static const int DEFAULT_SIZE = 4;
 
@@ -74,6 +70,31 @@ public:
   // Constructor
   Buffer(unsigned int _size = DEFAULT_SIZE): 
     size(_size), count(0), segments(new Segment[_size]) {}
+
+  //--------------------------------------------------------------------------
+  // Get count of used segments
+  unsigned int get_count() { return count; }
+
+  //--------------------------------------------------------------------------
+  // Get total number of segments allocated
+  unsigned int get_size() { return size; }
+
+  //--------------------------------------------------------------------------
+  // Get total length of data in buffer
+  length_t get_length();
+
+  //--------------------------------------------------------------------------
+  // Resize the buffer to the given number of segments
+  void resize(unsigned int new_size);
+
+  //--------------------------------------------------------------------------
+  // Reset the buffer to be empty
+  void reset();
+
+  //--------------------------------------------------------------------------
+  // Add a segment at the end, extending if required
+  // Returns the added segment
+  Segment& add(const Segment& seg);
 
   //--------------------------------------------------------------------------
   // Add a segment from external data to the end of the buffer
@@ -88,6 +109,12 @@ public:
   { return add(Segment(length)); }
 
   //--------------------------------------------------------------------------
+  // Insert a segment at the given index (default 0, the beginning), 
+  // extending if required
+  // Returns the added segment
+  Segment& insert(const Segment& seg, unsigned int pos);
+
+  //--------------------------------------------------------------------------
   // Insert a segment from external data at a given position (default 0, start)
   // Returns the inserted segment
   Segment& insert(data_t *data, length_t length, unsigned int pos=0)
@@ -98,6 +125,12 @@ public:
   // Returns the inserted segment
   Segment& insert(length_t length, unsigned int pos=0)
   { return insert(Segment(length), pos); }
+
+  //--------------------------------------------------------------------------
+  // Fill an iovec array with the data
+  // iovec must be pre-allocated to the maximum segments of the buffer
+  // Returns the number of segments filled in
+  unsigned int fill(struct iovec *iovec);
 
   //--------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well

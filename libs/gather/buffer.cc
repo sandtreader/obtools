@@ -14,12 +14,22 @@
 namespace ObTools { namespace Gather {
 
 //--------------------------------------------------------------------------
-// Extend the buffer by doubling its segment array size
-// Guarantees to extend buffer by at least 1 entry
-void Buffer::extend()
+// Get total length of data in buffer
+length_t Buffer::get_length()
 {
-  // Create new segment array with double the size
-  Segment *new_segments = new Segment[size*2];
+  length_t total = 0;
+  for(unsigned int i=0; i<count; i++) total += segments[i].length;
+  return total;
+}
+
+//--------------------------------------------------------------------------
+// Resize the buffer to the given number of segments
+void Buffer::resize(unsigned int new_size)
+{
+  if (new_size < count) abort();
+
+  // Create new segment array with new size
+  Segment *new_segments = new Segment[new_size];
 
   // Copy over existing
   for(unsigned int i=0; i<count; i++) new_segments[i]=segments[i];
@@ -27,7 +37,7 @@ void Buffer::extend()
   // Replace
   delete[] segments;
   segments = new_segments;
-  size *= 2;
+  size = new_size;
 }
 
 //--------------------------------------------------------------------------
@@ -35,7 +45,7 @@ void Buffer::extend()
 // Returns the added segment
 Segment& Buffer::add(const Segment& seg)
 {
-  if (count >= size) extend();
+  if (count >= size) resize(size*2);
   return segments[count++] = seg;
 }
 
@@ -45,12 +55,28 @@ Segment& Buffer::add(const Segment& seg)
 // Returns the added segment
 Segment& Buffer::insert(const Segment& seg, unsigned int pos)
 {
-  if (count >= size) extend();
+  if (count >= size) resize(size*2);
   if (pos >= count) abort();
 
   // Shift up one
   for(unsigned int i=count++; i>pos; i--) segments[i]=segments[i-1];
   return segments[pos] = seg;
+}
+
+//--------------------------------------------------------------------------
+// Fill an iovec array with the data
+// iovec must be pre-allocated to the maximum segments of the buffer
+// Returns the number of segments filled in
+unsigned int Buffer::fill(struct iovec *iovec)
+{
+  for(unsigned int i=0; i<count; i++, iovec++)
+  {
+    Segment &seg = segments[i];
+    iovec->iov_base = (void *)seg.data;
+    iovec->iov_len  = seg.length;
+  }
+
+  return count;
 }
 
 //--------------------------------------------------------------------------
@@ -72,10 +98,18 @@ void Buffer::dump(ostream& sout, bool show_data)
 }
 
 //--------------------------------------------------------------------------
+// Reset the buffer to be empty
+void Buffer::reset() 
+{
+  for(unsigned int i=0; i<count; i++) segments[i].destroy();
+  count = 0; 
+}
+
+//--------------------------------------------------------------------------
 // Destructor
 Buffer::~Buffer()
 {
-  for(unsigned int i=0; i<count; i++) segments[i].destroy();
+  reset();
   delete[] segments;
 }
 

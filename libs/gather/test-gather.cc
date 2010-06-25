@@ -34,8 +34,16 @@ int main(int argc, char **argv)
   uint32_t n = 0xDEADBEEF;
   buffer.insert((Gather::data_t *)&n, 4);
 
+  // Insert some more, one from the end
+  uint32_t n2 = 0x01234567;
+  buffer.insert((Gather::data_t *)&n2, 4, 2);
+
   // Dump it
   buffer.dump(cout, true);
+
+  // Output it to stdout via writev
+  struct iovec io[4];
+  writev(1, io, buffer.fill(io));
 
   return 0;  
 }
