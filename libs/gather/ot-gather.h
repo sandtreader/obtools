@@ -15,6 +15,7 @@
 #define __OBTOOLS_GATHER_H
 
 #include <stdint.h>
+#include <ostream>
 
 namespace ObTools { namespace Gather { 
 
@@ -57,31 +58,50 @@ struct Segment
 class Buffer
 {
 private:
-  int size;               // Size allocated
-  int count;              // Number of segments used
+  unsigned int size;      // Size allocated
+  unsigned int count;     // Number of segments used
   Segment *segments;      // Allocated array of segments
 
   // Internals
   void extend();
-  Segment& add_segment(const Segment& seg);
+  Segment& add(const Segment& seg);
+  Segment& insert(const Segment& seg, unsigned int pos=0);
 
 public:
+  static const int DEFAULT_SIZE = 4;
+
   //--------------------------------------------------------------------------
   // Constructor
-  Buffer(int _size): 
+  Buffer(unsigned int _size = DEFAULT_SIZE): 
     size(_size), count(0), segments(new Segment[_size]) {}
 
   //--------------------------------------------------------------------------
-  // Add a segment from external data
+  // Add a segment from external data to the end of the buffer
   // Returns the added segment
-  Segment& add_segment(data_t *data, length_t length)
-  { return add_segment(Segment(data, length)); }
+  Segment& add(data_t *data, length_t length)
+  { return add(Segment(data, length)); }
 
   //--------------------------------------------------------------------------
-  // Add a segment with allocated data
+  // Add a segment with allocated data to the end of the buffer
   // Returns the added segment
-  Segment& add_segment(length_t length)
-  { return add_segment(Segment(length)); }
+  Segment& add(length_t length)
+  { return add(Segment(length)); }
+
+  //--------------------------------------------------------------------------
+  // Insert a segment from external data at a given position (default 0, start)
+  // Returns the inserted segment
+  Segment& insert(data_t *data, length_t length, unsigned int pos=0)
+  { return insert(Segment(data, length), pos); }
+
+  //--------------------------------------------------------------------------
+  // Insert a segment with allocated data at a given position (default 0,start)
+  // Returns the inserted segment
+  Segment& insert(length_t length, unsigned int pos=0)
+  { return insert(Segment(length), pos); }
+
+  //--------------------------------------------------------------------------
+  // Dump the buffer to the given stream, optionally with data as well
+  void dump(ostream& sout, bool show_data=false);
 
   //--------------------------------------------------------------------------
   // Destructor
