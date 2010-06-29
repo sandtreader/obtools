@@ -26,13 +26,14 @@ void DataQueue::write(const DataBlock::data_t *data, DataBlock::size_t length)
 //--------------------------------------------------------------------------
 // Read data from the queue - blocking
 // Reads data to the amount requested, or to EOF
+// If data is 0, just skips it
 // Returns amount of data read
 DataBlock::size_t DataQueue::read(DataBlock::data_t *data, 
 				  DataBlock::size_t length)
 {
   DataBlock::size_t n = 0;
 
-  while (n<length)
+  while (n<length && !eof)
   {
     // If we have a working block, see how much we can satisfy with it
     if (working_block.length)
@@ -40,7 +41,7 @@ DataBlock::size_t DataQueue::read(DataBlock::data_t *data,
       DataBlock::size_t to_copy = length-n;
       DataBlock::size_t wb_avail = working_block.length - working_block_used;
       if (wb_avail < to_copy) to_copy = wb_avail;
-      memcpy(data+n, working_block.data+working_block_used, to_copy);
+      if (data) memcpy(data+n, working_block.data+working_block_used, to_copy);
       working_block_used += to_copy;
       n += to_copy;
 
@@ -57,9 +58,8 @@ DataBlock::size_t DataQueue::read(DataBlock::data_t *data,
     {
       working_block = wait();
 
-      // Is this EOF?
-      if (!working_block.data) break;
-
+      // Note EOF if we see an empty marker
+      if (!working_block.data) eof=true;
       working_block_used = 0;
     }
   }

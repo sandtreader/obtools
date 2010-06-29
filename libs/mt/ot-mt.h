@@ -665,11 +665,12 @@ class DataQueue: private MQueue<DataBlock>
 {
   DataBlock working_block;
   DataBlock::size_t working_block_used;
+  bool eof;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor 
-  DataQueue(): MQueue<DataBlock>(), working_block_used(0) {}
+  DataQueue(): MQueue<DataBlock>(), working_block_used(0), eof(false) {}
 
   //--------------------------------------------------------------------------
   // Write a block to the queue
