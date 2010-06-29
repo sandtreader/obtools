@@ -162,6 +162,10 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       // Send out response
       if (!response.write(ss)) log.error << "HTTP response failed\n";
       ss.flush();
+
+      // Allow subclasses to generate progressive data following on, if
+      // required
+      generate_progressive(request, client, s, ss);
     }
     while (persistent);
 

@@ -165,7 +165,9 @@ bool HTTPMessage::write_headers(ostream &out) const
   }
 
   // Check for a content-length header, and if not present, add one
-  if (!headers.has("content-length"))
+  // Except if chunked transfer encoding set which indicated progressive
+  if (!headers.has("content-length")
+   && headers.get("transfer-encoding") != "chunked")
     out << "Content-Length: " << body.size() << "\r\n";
 
   // Output headers

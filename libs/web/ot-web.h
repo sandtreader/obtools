@@ -409,7 +409,7 @@ public:
   //--------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
   // Returns the actual amount read
-  unsigned int read(unsigned char *data, unsigned int length);
+  unsigned long read(unsigned char *data, unsigned long length);
 
   //--------------------------------------------------------------------------
   // Get the local address we last connected from (for P2P)
@@ -453,6 +453,16 @@ protected:
   // HEAD requests just like GET, and the server will suppress the body
   virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
 			      SSL::ClientDetails& client) = 0;
+
+  //--------------------------------------------------------------------------
+  // Interface to generate progressive data after initial response headers
+  // and initial body (if any)
+  // Simply continue sending data to the socket or stream until done
+  // Does nothing by default
+  virtual void generate_progressive(HTTPMessage & /*request*/,
+				    SSL::ClientDetails& /*client*/,
+				    SSL::TCPSocket& /*socket*/,
+        		            Net::TCPStream& /*stream*/) {}
 
 public:
   //--------------------------------------------------------------------------

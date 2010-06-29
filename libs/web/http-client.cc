@@ -260,10 +260,10 @@ int HTTPClient::post(const URL& url, const string& request_body,
 //--------------------------------------------------------------------------
 // Read a block of data from a progressive fetch
 // Returns the actual amount read
-unsigned int HTTPClient::read(unsigned char *data, unsigned int length)
+unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
 {
   if (!socket || !*socket || !stream) return 0;
-  unsigned int n = 0;
+  unsigned long n = 0;
 
   try
   {
