@@ -27,7 +27,19 @@ URL::URL(XML::Element& xml)
     string host = xpath["host"];
     if (host.size())
     {
-      urls << "//" << host;
+      urls << "//";
+
+      // Add username, password if set
+      string user = xpath["user"];
+      if (user.size())
+      {
+	urls << user;
+	string password = xpath["password"];
+	if (password.size()) urls << ":" << password;
+	urls << '@';
+      }
+
+      urls << host;
       
       string port = xpath["port"];
       if (port.size()) urls << ":" << port;
@@ -76,6 +88,28 @@ bool URL::split(XML::Element& xml) const
 	host = string(text, p+3);
       else
 	host = string(text, p+3, slash-p-3);
+
+      // Check for @ prefix - username and password
+      p = host.find('@');
+      if (p != string::npos)
+      {
+	// We have user:pass@host
+	string::size_type r = host.find(':');
+	if (r<p)  // Note, don't trip over later : for port number
+	{
+	  // Have password
+	  xml.add("user", string(host, 0, r));
+	  xml.add("password", string(host, r+1, p-r-1));
+	}
+	else
+	{
+	  // Just user
+	  xml.add("user", string(host, 0, p));
+	}
+
+	// Remove from host
+	host = string(host, p+1);
+      }
 
       p = host.find(':');
       if (p == string::npos)

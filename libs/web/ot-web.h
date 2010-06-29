@@ -338,8 +338,14 @@ private:
   int operation_timeout;    // Ditto, for operation
   SSL::TCPClient *socket;   // Our socket, created on first use, may persist
                             // if HTTP/1.1
+  Net::TCPStream *stream;   // TCP stream on the socket
   bool http_1_1;            // Whether HTTP/1.1 is used (persistent conn's)
   bool http_1_1_close;      // Whether this the last request on persistent conn
+
+  // Progressive download: caller fetches blocks at a time
+  bool progressive;               
+  bool chunked;                   // Chunked read (progressive only)
+  uint64_t current_chunk_length;  // Current length remaining of chunk 
 
 protected:
   Net::EndPoint server;
@@ -350,16 +356,20 @@ public:
   HTTPClient(Net::EndPoint _server, const string& _ua="", 
 	     int _connection_timeout=0, int _operation_timeout=0): 
     user_agent(_ua), ssl_ctx(0), connection_timeout(_connection_timeout), 
-    operation_timeout(_operation_timeout), socket(0), http_1_1(false),
-    http_1_1_close(false), server(_server) {}
+    operation_timeout(_operation_timeout), socket(0), stream(0), 
+    http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
+    current_chunk_length(-1),
+    server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor for SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua="",
 	     int _connection_timeout=0, int _operation_timeout=0): 
     user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
-    operation_timeout(_operation_timeout), socket(0), http_1_1(false),
-    http_1_1_close(false), server(_server) {}
+    operation_timeout(_operation_timeout), socket(0), stream(0), 
+    http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
+    current_chunk_length(-1),
+    server(_server) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
@@ -376,6 +386,11 @@ public:
   void close_persistence() { http_1_1_close = true; }
 
   //--------------------------------------------------------------------------
+  // Enable progressive download - initial fetch is just for headers, then
+  // call read() to get data
+  void enable_progressive() { progressive=true; }
+
+  //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
   // Returns whether successfully sent (even if error received)
   bool fetch(HTTPMessage& request, HTTPMessage& response);
@@ -390,6 +405,11 @@ public:
   // Returns result code, fills in response_body if provided, 
   // reason code if not
   int post(const URL& url, const string& request_body, string& response_body);
+
+  //--------------------------------------------------------------------------
+  // Read a block of data from a progressive fetch
+  // Returns the actual amount read
+  unsigned int read(unsigned char *data, unsigned int length);
 
   //--------------------------------------------------------------------------
   // Get the local address we last connected from (for P2P)

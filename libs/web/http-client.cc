@@ -20,8 +20,9 @@ namespace ObTools { namespace Web {
 HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
 		       int _connection_timeout, int _operation_timeout): 
   user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
-  operation_timeout(_operation_timeout), socket(0), http_1_1(false),
-  http_1_1_close(false)
+  operation_timeout(_operation_timeout), socket(0), stream(0), 
+  http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
+  current_chunk_length(-1)
 {
   XML::Element xml;
   if (url.split(xml))
@@ -99,6 +100,18 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   // Add User-Agent and date
   if (user_agent.size()) request.headers.put("User-Agent", user_agent);
 
+  // Add Authorization header if user set
+  string auth_user = xpath["user"];
+  if (auth_user.size())
+  {
+    // Basic auth = user:pass in base64
+    string auth_password = xpath["password"];
+    if (auth_password.size()) auth_user += ":" + auth_password;
+    Text::Base64 base64;
+    request.headers.put("Authorization",
+			"Basic "+base64.encode(auth_user,0));
+  }
+
   OBTOOLS_LOG_IF_DUMP(request.write(log.dump);)
 
   // Get a socket if we don't already have one
@@ -125,16 +138,16 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
 
   try
   {
-    Net::TCPStream ss(*socket);
-    if (!request.write(ss))
+    stream = new Net::TCPStream(*socket);
+    if (!request.write(*stream))
     {
       log.error << "HTTP: Can't send request to " << server << endl;
-      delete socket;
-      socket = 0;
+      delete stream; stream = 0;
+      delete socket; socket = 0;
       return false;
     }
 
-    ss.flush();
+    stream->flush();
 
     // Finish sending so server gets EOF
     if (!http_1_1 || http_1_1_close)
@@ -145,30 +158,48 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
 #endif
     }
 
-    // Read, allowing for EOF marker for end of body
-    if (!response.read(ss, true))
+    // If progressive, just read the headers
+    // otherwise, read all, allowing for EOF marker for end of body
+    if (progressive?!response.read_headers(*stream)
+                   :!response.read(*stream, true))
     {
       log.error << "HTTP: Can't fetch response from " << server << endl;
-      delete socket;
-      socket = 0;
+      delete stream; stream = 0;
+      delete socket; socket = 0;
       return false;
     }
 
     OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
 			response.write(log.dump);)
 
-    if (!http_1_1 || http_1_1_close)
+    if (progressive)
+    {
+      // Check for chunked encoding
+      chunked = Text::tolower(response.headers.get("transfer-encoding"))
+	          == "chunked";
+
+      if (chunked)
+	current_chunk_length = 0;  // Trigger chunk header read on first fetch
+      else            // Capture the file length, if given
+	current_chunk_length = 
+	  Text::stoi(response.headers.get("content-length"));
+
+      OBTOOLS_LOG_IF_DEBUG(log.debug << "Progressive download: "
+			   << (chunked?"chunked":"continuous")
+			   << " length " << current_chunk_length << endl;)
+    }
+    else if (!http_1_1 || http_1_1_close)
     {
       socket->close();
-      delete socket;
-      socket = 0;
+      delete stream; stream = 0;
+      delete socket; socket = 0;
     }
   }
   catch (ObTools::Net::SocketError se)
   {
     log.error << "HTTP: " << se << endl;
-    delete socket;
-    socket = 0;
+    delete stream; stream = 0;
+    delete socket; socket = 0;
     return false;
   }
 
@@ -227,10 +258,76 @@ int HTTPClient::post(const URL& url, const string& request_body,
 }
 
 //--------------------------------------------------------------------------
+// Read a block of data from a progressive fetch
+// Returns the actual amount read
+unsigned int HTTPClient::read(unsigned char *data, unsigned int length)
+{
+  if (!socket || !*socket || !stream) return 0;
+  unsigned int n = 0;
+
+  try
+  {
+    while (n<length) // Could split over multiple chunks
+    {
+      // Need to read a chunk header?
+      if (chunked && !current_chunk_length)
+      {
+	string line;
+	// First line might effectively be blank because it's actually the
+	// end of the previous chunk
+	if (!MIMEHeaders::getline(*stream, line)
+	    || (line.empty() && !MIMEHeaders::getline(*stream, line)))
+	  throw Net::SocketError(EOF);
+
+	// Split at ;
+	vector<string> bits = Text::split(line, ';');
+	current_chunk_length = Text::xtoi(bits[0]);
+
+	// Last chunk?
+	if (!current_chunk_length) throw Net::SocketError(EOF);
+      }
+
+      // Read up to requested length, limited to that available
+      uint64_t wanted = length-n;
+      if (current_chunk_length && wanted > current_chunk_length) 
+	wanted = current_chunk_length;
+
+      // Try to read this much or up to end of stream
+      stream->read((char *)data+n, wanted);
+      ssize_t count = stream->gcount();
+      n += count;
+
+      // Count down length only if specified to begin with
+      if (current_chunk_length)
+      {
+	current_chunk_length -= count;
+	if (!current_chunk_length) throw Net::SocketError(EOF);
+      }
+    }
+
+    // Read what was needed
+    return n;
+  }
+  catch (Net::SocketError se)
+  {
+    // End of file - optionally close socket
+    if (!http_1_1 || http_1_1_close)
+    {
+      socket->close();
+      delete stream; stream = 0;
+      delete socket; socket = 0;
+    }
+
+    return n;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Destructor
 HTTPClient::~HTTPClient()
 {
   // Kill any persistent socket left over
+  if (stream) delete stream;
   if (socket) delete socket;
 }
 
