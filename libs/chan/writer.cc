@@ -82,6 +82,43 @@ void Writer::write_nbo_64(uint64_t i) throw (Error)
 }
 
 //--------------------------------------------------------------------------
+// Write little-endian (LSB-first) 2-byte integer to the channel
+// Throws Error on failure
+void Writer::write_le_16(uint16_t i) throw (Error)
+{
+  basic_write(&i, 2);
+}
+
+//--------------------------------------------------------------------------
+// Write a little-endian (LSB-first) 3-byte integer to the channel
+// Throws Error on failure
+void Writer::write_le_24(uint32_t i) throw (Error)
+{
+  unsigned char buf[3];
+  buf[0] = (unsigned char)(i);
+  buf[1] = (unsigned char)(i>>8);
+  buf[2] = (unsigned char)(i>>16);
+  basic_write(buf, 3);
+}
+
+//--------------------------------------------------------------------------
+// Write a little-endian (LSB-first) 4-byte integer to the channel
+// Throws Error on failure
+void Writer::write_le_32(uint32_t i) throw (Error)
+{
+  basic_write(&i, 4);
+}
+
+//--------------------------------------------------------------------------
+// Write a little-endian (LSB-first) 8-byte integer to the channel
+// Throws Error on failure
+void Writer::write_le_64(uint64_t i) throw (Error)
+{
+  write_nbo_32((uint32_t)(i & 0xFFFFFFFF));
+  write_nbo_32((uint32_t)(i >> 32));
+}
+
+//--------------------------------------------------------------------------
 // Skip N bytes, writing zero
 void Writer::skip(size_t n) throw (Error)
 {

@@ -104,6 +104,15 @@ public:
   uint64_t read_nbo_64() throw (Error);
 
   //--------------------------------------------------------------------------
+  // Little-endian equivalents of the above
+  // Used only for external protocols specified that way
+  uint16_t read_le_16() throw (Error);
+  uint32_t read_le_24() throw (Error);
+  uint32_t read_le_32() throw (Error);
+  bool read_le_32(uint32_t& n) throw (Error);
+  uint64_t read_le_64() throw (Error);
+
+  //--------------------------------------------------------------------------
   // Get current offset
   uint64_t get_offset() { return offset; }
 
@@ -187,6 +196,16 @@ public:
   // Write a network byte order (MSB-first) 8-byte integer to the channel
   // Throws Error on failure
   void write_nbo_64(uint64_t i) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Little-endian (LSB first) versions of the above
+  // Not recommended for new protocols - only for compatibility with existing
+  // little-endian (often by default through using C structures on x86) 
+  // protocols
+  void write_le_16(uint16_t i) throw (Error);
+  void write_le_24(uint32_t i) throw (Error);
+  void write_le_32(uint32_t i) throw (Error);
+  void write_le_64(uint64_t i) throw (Error);
 
   //--------------------------------------------------------------------------
   // Get current offset
@@ -323,6 +342,36 @@ public:
 
   // Get length remaining in block
   size_t get_remaining() { return length-offset; }
+};
+
+//==========================================================================
+// Data Queue Reader - see MT::DataQueue
+class DataQueueReader: public Reader
+{
+private:
+  MT::DataQueue& dq;
+
+public:
+  // Constructor
+  DataQueueReader(MT::DataQueue& _dq): dq(_dq) {}
+
+  // Read implementations
+  virtual size_t basic_read(void *buf, size_t count) throw (Error);
+};
+
+//==========================================================================
+// Data Queue Writer
+class DataQueueWriter: public Writer
+{
+private:
+  MT::DataQueue& dq;
+
+public:
+  // Constructor
+  DataQueueWriter(MT::DataQueue& _dq): dq(_dq) {}
+
+  // Write implementation
+  virtual void basic_write(const void *buf, size_t count) throw (Error);
 };
 
 //==========================================================================

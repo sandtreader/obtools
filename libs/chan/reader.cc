@@ -152,6 +152,55 @@ uint64_t Reader::read_nbo_64() throw (Error)
 }
 
 //--------------------------------------------------------------------------
+// Read a little-endian (LSB-first) 2-byte integer from the channel
+// Used only for external protocols specified that way
+// Throws SocketError on failure or EOF
+uint16_t Reader::read_le_16() throw (Error)
+{
+  uint16_t n;
+  read(&n, 2);
+  return n;
+}
+
+//--------------------------------------------------------------------------
+// Read a little-endian (LSB-first) 3-byte integer from the channel
+// Throws SocketError on failure or EOF
+uint32_t Reader::read_le_24() throw (Error)
+{
+  unsigned char buf[3];
+  read(buf, 3);
+  return ((uint32_t)buf[2] << 16) + ((uint32_t)buf[1] << 8) + buf[0];
+}
+
+//--------------------------------------------------------------------------
+// Read a little-endian (LSB-first) 4-byte integer from the socket
+// Throws SocketError on failure or EOF
+uint32_t Reader::read_le_32() throw (Error)
+{
+  uint32_t n;
+  read(&n, 4);
+  return n;
+}
+
+//--------------------------------------------------------------------------
+// Ditto, but allowing the possibility of failure at EOF
+// Throws Error on non-EOF failure
+bool Reader::read_le_32(uint32_t& n) throw (Error)
+{
+  if (!try_read(&n, 4)) return false;
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Read a little-endian (LSB-first) 8-byte integer from the socket
+// Throws SocketError on failure or EOF
+uint64_t Reader::read_le_64() throw (Error)
+{
+  uint64_t n = read_le_32();
+  return n + ((uint64_t)read_le_32()<<32);
+}
+
+//--------------------------------------------------------------------------
 // Skip N bytes
 void Reader::skip(size_t n) throw (Error)
 {
