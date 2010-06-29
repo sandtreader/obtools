@@ -609,7 +609,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Send a message (never blocks)
-  void send(T msg)
+  void send(const T msg)
   {
     Lock lock(mutex);
     q.push(msg);
@@ -643,6 +643,48 @@ public:
     }
   }
 }; 
+
+//==========================================================================
+// Data queue class (dqueue.cc)
+// Specific MQueue for data blocks, with read/write support
+// Provides a generic cross-thread data buffer with blocking on the read
+// side - see also Channel::DataQueueReader/Writer
+struct DataBlock
+{
+  typedef unsigned char data_t;
+  typedef unsigned long size_t;
+
+  const data_t *data;        // 0 = EOF marker
+  size_t length;
+  DataBlock(): data(0), length(0) {}
+  DataBlock(const data_t *_data, size_t _length): 
+    data(_data), length(_length) {}
+};
+
+class DataQueue: private MQueue<DataBlock>
+{
+  DataBlock working_block;
+  DataBlock::size_t working_block_used;
+
+public:
+  //--------------------------------------------------------------------------
+  // Constructor 
+  DataQueue(): MQueue<DataBlock>(), working_block_used(0) {}
+
+  //--------------------------------------------------------------------------
+  // Write a block to the queue
+  void write(const DataBlock::data_t *data, DataBlock::size_t length);
+
+  //--------------------------------------------------------------------------
+  // Set EOF
+  void close() { send(DataBlock()); }
+
+  //--------------------------------------------------------------------------
+  // Read data from the queue - blocking
+  // Reads data to the amount requested, or to EOF
+  // Returns amount of data read
+  DataBlock::size_t read(DataBlock::data_t *data, DataBlock::size_t length);
+};
 
 //==========================================================================
 // Poolable thread class - use in Thread Pool below

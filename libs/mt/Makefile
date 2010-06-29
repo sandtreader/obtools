@@ -8,10 +8,10 @@
 TYPE	= lib
 NAME   	= ot-mt
 HEADERS = ot-mt.h
-OBJS  	= thread.o pool.o
+OBJS  	= thread.o pool.o dqueue.o
 TESTS 	= test-thread test-pool test-queue test-mutex test-rmutex \
-	  test-rwmutex test-mqueue
-TESTCMD	= ./test-thread 10 && ./test-queue && ./test-mqueue
+	  test-rwmutex test-mqueue test-dqueue
+TESTCMD	= ./test-thread 10 && ./test-queue && ./test-mqueue && ./test-dqueue
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
