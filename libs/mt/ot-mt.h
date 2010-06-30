@@ -661,7 +661,7 @@ struct DataBlock
     data(_data), length(_length) {}
 };
 
-class DataQueue: private MQueue<DataBlock>
+class DataQueue: public MQueue<DataBlock>
 {
   DataBlock working_block;
   DataBlock::size_t working_block_used;
@@ -672,7 +672,7 @@ public:
   // Constructor 
   DataQueue(): MQueue<DataBlock>(), working_block_used(0), eof(false) {}
 
-  //--------------------------------------------------------------------------
+  //-------------------------------------------------------------------------
   // Write a block to the queue
   void write(const DataBlock::data_t *data, DataBlock::size_t length);
 
