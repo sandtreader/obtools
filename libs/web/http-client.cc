@@ -273,6 +273,7 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
       if (chunked && !current_chunk_length)
       {
 	string line;
+
 	// First line might effectively be blank because it's actually the
 	// end of the previous chunk
 	if (!MIMEHeaders::getline(*stream, line)
@@ -301,7 +302,9 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
       if (current_chunk_length)
       {
 	current_chunk_length -= count;
-	if (!current_chunk_length) throw Net::SocketError(EOF);
+
+	// If not chunked, and now done, that's it
+	if (!chunked && !current_chunk_length) throw Net::SocketError(EOF);
       }
     }
 

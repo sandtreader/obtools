@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 
 	log.detail << "Read total of " << total << " bytes\n";
       }
-      cout << body << endl;
+      else cout << body << endl;
     }
     else
     {
