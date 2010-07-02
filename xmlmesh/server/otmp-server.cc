@@ -17,6 +17,7 @@
 #define DEFAULT_BACKLOG 5
 #define DEFAULT_MAX_THREADS 25
 #define DEFAULT_MIN_THREADS 1
+#define DEFAULT_TIMEOUT 0
 
 namespace ObTools { namespace XMLMesh {
 
@@ -60,6 +61,7 @@ private:
   int backlog;
   int min_spare_threads;
   int max_threads;
+  int timeout;
 
   OTMP::Server otmp;
   OTMPServerThread  server_thread;
@@ -93,7 +95,8 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   backlog(cfg.get_attr_int("backlog", DEFAULT_BACKLOG)),
   min_spare_threads(cfg.get_attr_int("min-spare", DEFAULT_MIN_THREADS)),
   max_threads(cfg.get_attr_int("max-threads", DEFAULT_MAX_THREADS)),
-  otmp(receive_q, port, backlog, min_spare_threads, max_threads), 
+  timeout(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT)),
+  otmp(receive_q, port, backlog, min_spare_threads, max_threads, timeout), 
   server_thread(otmp), 
   message_thread(*this)
 {
@@ -102,6 +105,8 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   log.detail << "Listen backlog " << backlog << endl;
   log.detail << "Minimum spare threads: " << min_spare_threads << endl;
   log.summary << "Maximum threads: " << max_threads << endl;
+  if (timeout)
+    log.summary << "Timeout: " << timeout << endl;
 
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(filter, cfg, "filter")
     string addr = filter["address"];

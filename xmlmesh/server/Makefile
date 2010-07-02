@@ -12,7 +12,7 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 	  correlator.o publisher.o
 
 DEBIAN-NAME    = ot-xmlmesh
-DEBIAN-VERSION = 2.4.2
+DEBIAN-VERSION = 2.4.3
 DEBIAN-REVISION = 1
 
 #Always build statically
