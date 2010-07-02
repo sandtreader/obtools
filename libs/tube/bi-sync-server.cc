@@ -48,7 +48,7 @@ public:
 // Handle timeouts
 void BiSyncServer::do_timeouts(Log::Streams& log)
 {
-  requests.do_timeouts(log, timeout, name);
+  requests.do_timeouts(log, request_timeout, name);
 }
 
 //==========================================================================
@@ -56,39 +56,47 @@ void BiSyncServer::do_timeouts(Log::Streams& log)
 
 //------------------------------------------------------------------------
 // Constructors - as Server but with timeout
-BiSyncServer::BiSyncServer(int port, int _timeout, const string& _name, 
+BiSyncServer::BiSyncServer(int port, int _request_timeout, 
+			   const string& _name, 
 			   int backlog, int min_spare_threads, 
-			   int max_threads):
-  SyncServer(port, _name, backlog, min_spare_threads, max_threads),
-  timeout(_timeout)
+			   int max_threads, int _client_timeout):
+  SyncServer(port, _name, backlog, min_spare_threads, max_threads, 
+	     _client_timeout),
+  request_timeout(_request_timeout)
 {
   timeout_thread = new TimeoutThread(*this);
 }
 
-BiSyncServer::BiSyncServer(Net::EndPoint local, int _timeout,
+BiSyncServer::BiSyncServer(Net::EndPoint local, int _request_timeout,
 			   const string& _name, int backlog, 
-			   int min_spare_threads, int max_threads):
-  SyncServer(local, _name, backlog, min_spare_threads, max_threads),
-  timeout(_timeout)
+			   int min_spare_threads, int max_threads,
+			   int _client_timeout):
+  SyncServer(local, _name, backlog, min_spare_threads, max_threads,
+	     _client_timeout),
+  request_timeout(_request_timeout)
 {
   timeout_thread = new TimeoutThread(*this);
 }
 
-BiSyncServer::BiSyncServer(SSL::Context *_ctx, int port, int _timeout, 
+BiSyncServer::BiSyncServer(SSL::Context *_ctx, int port, 
+			   int _request_timeout, 
 			   const string& _name, int backlog, 
-			   int min_spare_threads, int max_threads):
-  SyncServer(_ctx, port, _name, backlog, min_spare_threads, max_threads),
-  timeout(_timeout)
+			   int min_spare_threads, int max_threads,
+			   int _client_timeout):
+  SyncServer(_ctx, port, _name, backlog, min_spare_threads, max_threads,
+	     _client_timeout),
+  request_timeout(_request_timeout)
 {
   timeout_thread = new TimeoutThread(*this);
 }
 
 BiSyncServer::BiSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
-			   int _timeout, const string& _name, 
+			   int _request_timeout, const string& _name, 
 			   int backlog, int min_spare_threads, 
-			   int max_threads):
-  SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads),
-  timeout(_timeout)
+			   int max_threads, int _client_timeout):
+  SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads,
+	     _client_timeout),
+  request_timeout(_request_timeout)
 {
   timeout_thread = new TimeoutThread(*this);
 }

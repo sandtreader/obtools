@@ -97,6 +97,12 @@ void Server::process(SSL::TCPSocket& socket,
 
   log.summary << name << ": Got connection from " << client << endl;
 
+  // Enable keepalives
+  socket.enable_keepalive();
+
+  // Also set timeout on the socket, in case the client unexpectedly disappears
+  if (client_timeout) socket.set_timeout(client_timeout);
+
   // Create client session and map it (autoremoved on destruction)
   ClientSession session(socket, client.address, client_sessions);
 
@@ -202,9 +208,10 @@ void Server::process(SSL::TCPSocket& socket,
 //------------------------------------------------------------------------
 // Constructor
 Server::Server(int port, const string& _name, int backlog, 
-	       int min_spare_threads, int max_threads):
+	       int min_spare_threads, int max_threads, int _client_timeout):
   SSL::TCPServer(0, port, backlog, min_spare_threads, max_threads),
-  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+  alive(true), client_timeout(_client_timeout),
+  max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
 }
@@ -213,9 +220,11 @@ Server::Server(int port, const string& _name, int backlog,
 // Constructor with SSL
 Server::Server(SSL::Context *_ctx, int port,  
 	       const string& _name, int backlog, 
-	       int min_spare_threads, int max_threads):
+	       int min_spare_threads, int max_threads,
+	       int _client_timeout):
   SSL::TCPServer(_ctx, port, backlog, min_spare_threads, max_threads),
-  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+  alive(true), client_timeout(_client_timeout),
+  max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
 }
@@ -223,9 +232,11 @@ Server::Server(SSL::Context *_ctx, int port,
 //------------------------------------------------------------------------
 // Constructor
 Server::Server(Net::EndPoint local, const string& _name, int backlog, 
-	       int min_spare_threads, int max_threads):
+	       int min_spare_threads, int max_threads,
+	       int _client_timeout):
   SSL::TCPServer(0, local, backlog, min_spare_threads, max_threads),
-  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+  alive(true), client_timeout(_client_timeout),
+  max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
 }
@@ -234,9 +245,11 @@ Server::Server(Net::EndPoint local, const string& _name, int backlog,
 // Constructor with SSL
 Server::Server(SSL::Context *_ctx, Net::EndPoint local, 
 	       const string& _name, int backlog, 
-	       int min_spare_threads, int max_threads):
+	       int min_spare_threads, int max_threads,
+	       int _client_timeout):
   SSL::TCPServer(_ctx, local, backlog, min_spare_threads, max_threads),
-  alive(true), max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
+  alive(true), client_timeout(_client_timeout),
+  max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
 {
 
 }
