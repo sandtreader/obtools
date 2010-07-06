@@ -135,9 +135,20 @@ private:
 public:
   typedef uint32_t crc_t;
 
+  enum Algorithm
+  {
+    ALGORITHM_CRC32 = 0,       // 0x04c11db7, init 0xFFFFFFFF
+    ALGORITHM_CRC32C = 1,      // 0x1edc6f41, init 0xFFFFFFFF
+  } algorithm;
+
+  bool reflected;  // If clear, software-like with top bit first,
+                   // If set, network-like with low bit first
+  bool flip;       // If set, flips (^0xFFFFFFFF) the result
+
   //------------------------------------------------------------------------
   // Constructor (creates internal combination table, relatively expensive)
-  CRC32();
+  CRC32(Algorithm _alg = ALGORITHM_CRC32, bool _reflected = true,
+        bool _flip = true);
 
   //------------------------------------------------------------------------
   // Calculate new CRC for a block

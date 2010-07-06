@@ -17,27 +17,27 @@ using namespace ObTools;
 #define TEST_SIZE 256
 
 //--------------------------------------------------------------------------
-// CRC test
-void test(unsigned char *data, int size, Misc::CRC::Algorithm algorithm,
+// CRC32 test
+void test(unsigned char *data, int size, Misc::CRC32::Algorithm algorithm,
 	  char *name)
 {
   cout << name << '\t';
 
-  Misc::CRC crcer(algorithm);
-  Misc::CRC::crc_t crc = crcer.calculate(data, size);
-  cout << '\t' << hex << setw(4) << setfill('0') << crc;
+  Misc::CRC32 crcer(algorithm, false, false);
+  Misc::CRC32::crc_t crc = crcer.calculate(data, size);
+  cout << '\t' << hex << setw(8) << setfill('0') << crc;
 
-  Misc::CRC crcer_r(algorithm, true);
-  Misc::CRC::crc_t crc_r = crcer_r.calculate(data, size);
-  cout << '\t' << hex << setw(4) << setfill('0') << crc_r;
+  Misc::CRC32 crcer_r(algorithm, true, false);
+  Misc::CRC32::crc_t crc_r = crcer_r.calculate(data, size);
+  cout << '\t' << hex << setw(8) << setfill('0') << crc_r;
 
-  Misc::CRC crcer_f(algorithm, false, true);
-  Misc::CRC::crc_t crc_f = crcer_f.calculate(data, size);
-  cout << '\t' << hex << setw(4) << setfill('0') << crc_f;
+  Misc::CRC32 crcer_f(algorithm, false, true);
+  Misc::CRC32::crc_t crc_f = crcer_f.calculate(data, size);
+  cout << '\t' << hex << setw(8) << setfill('0') << crc_f;
 
-  Misc::CRC crcer_rf(algorithm, true, true);
-  Misc::CRC::crc_t crc_rf = crcer_rf.calculate(data, size);
-  cout << '\t' << hex << setw(4) << setfill('0') << crc_rf << endl;
+  Misc::CRC32 crcer_rf(algorithm, true, true);
+  Misc::CRC32::crc_t crc_rf = crcer_rf.calculate(data, size);
+  cout << '\t' << hex << setw(8) << setfill('0') << crc_rf << endl;
 }
 
 //--------------------------------------------------------------------------
@@ -67,12 +67,14 @@ int main(int argc, char **argv)
   Misc::Dumper dumper(cout);
   dumper.dump(data, size);
 
-  Misc::CRC32 crcer;
-  Misc::CRC32::crc_t crc = crcer.calculate(data, size);
+  cout << endl;
+  cout << "Algorithm\t\tBase\t\tRev\t\tFlip\t\tFlip+Rev\n";
+  cout << "---------\t\t----\t\t---\t\t----\t\t--------\n";
 
-  cout << hex << setw(8) << setfill('0') << crc << endl;
+  test(data, size, Misc::CRC32::ALGORITHM_CRC32, "CRC32     ");
+  test(data, size, Misc::CRC32::ALGORITHM_CRC32C, "CRC32C    ");
 
-  return 0;  
+  return 0;
 }
 
 
