@@ -16,11 +16,6 @@ DEPENDS = misc net log mt chan text ssl ssl-openssl file cache
 SOCKET  = 1
 CRYPTO  = 1
 
-ifdef RELEASE
-# !!! Temp: force debug logging on release as well
-CPPFLAGS += -DDEBUG
-endif
-
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 
