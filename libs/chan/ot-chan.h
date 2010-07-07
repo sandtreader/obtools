@@ -75,22 +75,22 @@ public:
 
   //--------------------------------------------------------------------------
   // Read a single byte from the channel
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   unsigned char read_byte() throw (Error);
 
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 2-byte integer from the channel
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   uint16_t read_nbo_16() throw (Error);
 
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 3-byte integer from the channel
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   uint32_t read_nbo_24() throw (Error);
 
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the channel
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   uint32_t read_nbo_32() throw (Error);
 
   //--------------------------------------------------------------------------
@@ -100,8 +100,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 8-byte integer from the channel
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   uint64_t read_nbo_64() throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Read a network byte order 8-byte double from the socket
+  // Throws Error on failure or EOF
+  double read_nbo_double() throw (Error);
 
   //--------------------------------------------------------------------------
   // Little-endian equivalents of the above
@@ -111,6 +116,7 @@ public:
   uint32_t read_le_32() throw (Error);
   bool read_le_32(uint32_t& n) throw (Error);
   uint64_t read_le_64() throw (Error);
+  double read_le_double() throw (Error);
 
   //--------------------------------------------------------------------------
   // Get current offset
@@ -198,6 +204,11 @@ public:
   void write_nbo_64(uint64_t i) throw (Error);
 
   //--------------------------------------------------------------------------
+  // Write a network byte order 8-byte double to the channel
+  // Throws Error on failure or EOF
+  void write_nbo_double(double f) throw (Error);
+
+  //--------------------------------------------------------------------------
   // Little-endian (LSB first) versions of the above
   // Not recommended for new protocols - only for compatibility with existing
   // little-endian (often by default through using C structures on x86) 
@@ -206,6 +217,7 @@ public:
   void write_le_24(uint32_t i) throw (Error);
   void write_le_32(uint32_t i) throw (Error);
   void write_le_64(uint64_t i) throw (Error);
+  void write_le_double(double f) throw (Error);
 
   //--------------------------------------------------------------------------
   // Get current offset
@@ -430,18 +442,18 @@ public:
 
   //--------------------------------------------------------------------------
   // Read a single bit from the channel, returning an integer
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   int read_bit() throw (Error);
 
   //--------------------------------------------------------------------------
   // Read a single bit from the channel, returning a boolean
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   bool read_bool() throw (Error) { return read_bit()?true:false; }
 
   //--------------------------------------------------------------------------
   // Read up to 32 bits from the channel
   // Returns bits in LSB of integer returned
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   uint32_t read_bits(int n) throw (Error);
 };
 
@@ -463,23 +475,23 @@ public:
 
   //--------------------------------------------------------------------------
   // Write a single bit to the channel
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   void write_bit(int bit) throw (Error);
 
   //--------------------------------------------------------------------------
   // Write a single bit to the channel as a boolean
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   void write_bool(bool bit) throw (Error) { write_bit(bit?1:0); }
 
   //--------------------------------------------------------------------------
   // Write up to 32 bits to the channel
   // Writes bits from LSB of integer given
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   void write_bits(int n, uint32_t bits) throw (Error);
 
   //--------------------------------------------------------------------------
   // Flush remaining bits (if any) as a final byte, padding with zeros
-  // Throws SocketError on failure or EOF
+  // Throws Error on failure or EOF
   void flush() throw (Error);
 };
 

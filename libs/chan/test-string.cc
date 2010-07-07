@@ -28,6 +28,7 @@ int main()
   bw.rewind(4);
   bw.write_nbo_32(0x5041554C);
   bw.write_nbo_64(0x0102030405060708LL);
+  bw.write_nbo_double(3.1415926);
   bw.write("end");
 
   cout << "Bytes written: " << bw.get_offset() << endl;
@@ -42,6 +43,7 @@ int main()
   br.rewind(4);
   cout << hex << br.read_nbo_32() << endl;
   cout << hex << br.read_nbo_64() << endl;
+  cout << br.read_nbo_double() << endl;
   string s;
   br.read(s, 3);
   cout << s << endl;

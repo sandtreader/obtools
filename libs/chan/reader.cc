@@ -152,34 +152,48 @@ uint64_t Reader::read_nbo_64() throw (Error)
 }
 
 //--------------------------------------------------------------------------
+// Read a network byte order 8-byte double from the channel
+// Throws Error on failure or EOF
+double Reader::read_nbo_double() throw (Error)
+{
+  if (sizeof(double) != 8) throw Error(8, "Double is not 8 bytes here");
+  union { uint64_t n; double f; } u;  // Union type hack
+  u.n = read_nbo_64();
+  return u.f;
+}
+
+//--------------------------------------------------------------------------
 // Read a little-endian (LSB-first) 2-byte integer from the channel
 // Used only for external protocols specified that way
-// Throws SocketError on failure or EOF
+// Throws Error on failure or EOF
 uint16_t Reader::read_le_16() throw (Error)
 {
-  uint16_t n;
-  read(&n, 2);
-  return n;
+  // No easy way to do this with htonl, since if we're big-endian it's 
+  // a NOOP anyway - so do it manually
+  unsigned char buf[2];
+  read(buf, 2);
+  return buf[0] + ((uint16_t)buf[1] << 8);
 }
 
 //--------------------------------------------------------------------------
 // Read a little-endian (LSB-first) 3-byte integer from the channel
-// Throws SocketError on failure or EOF
+// Throws Error on failure or EOF
 uint32_t Reader::read_le_24() throw (Error)
 {
   unsigned char buf[3];
   read(buf, 3);
-  return ((uint32_t)buf[2] << 16) + ((uint32_t)buf[1] << 8) + buf[0];
+  return buf[0] + ((uint32_t)buf[1] << 8) + ((uint32_t)buf[2] << 16);
 }
 
 //--------------------------------------------------------------------------
-// Read a little-endian (LSB-first) 4-byte integer from the socket
-// Throws SocketError on failure or EOF
+// Read a little-endian (LSB-first) 4-byte integer from the channel
+// Throws Error on failure or EOF
 uint32_t Reader::read_le_32() throw (Error)
 {
-  uint32_t n;
-  read(&n, 4);
-  return n;
+  unsigned char buf[4];
+  read(buf, 4);
+  return buf[0] + ((uint32_t)buf[1] << 8) + ((uint32_t)buf[2] << 16)
+                + ((uint32_t)buf[3] << 24);
 }
 
 //--------------------------------------------------------------------------
@@ -187,17 +201,31 @@ uint32_t Reader::read_le_32() throw (Error)
 // Throws Error on non-EOF failure
 bool Reader::read_le_32(uint32_t& n) throw (Error)
 {
-  if (!try_read(&n, 4)) return false;
+  unsigned char buf[4];
+  if (!try_read(&buf, 4)) return false;
+  n = buf[0] + ((uint32_t)buf[1] << 8) + ((uint32_t)buf[2] << 16)
+             + ((uint32_t)buf[3] << 24);
   return true;
 }
 
 //--------------------------------------------------------------------------
-// Read a little-endian (LSB-first) 8-byte integer from the socket
-// Throws SocketError on failure or EOF
+// Read a little-endian (LSB-first) 8-byte integer from the channel
+// Throws Error on failure or EOF
 uint64_t Reader::read_le_64() throw (Error)
 {
   uint64_t n = read_le_32();
   return n + ((uint64_t)read_le_32()<<32);
+}
+
+//--------------------------------------------------------------------------
+// Read a little-endian 8-byte double from the channel
+// Throws Error on failure or EOF
+double Reader::read_le_double() throw (Error)
+{
+  if (sizeof(double) != 8) throw Error(8, "Double is not 8 bytes here");
+  union { uint64_t n; double f; } u;  // Union type hack
+  u.n = read_le_64();
+  return u.f;
 }
 
 //--------------------------------------------------------------------------
