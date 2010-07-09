@@ -10,6 +10,8 @@
 #include "ot-ssl.h"
 #include "ot-log.h"
 
+#define SSL_ACCEPT_TIMEOUT 30
+
 namespace ObTools { namespace SSL {
 
 //--------------------------------------------------------------------------
@@ -21,7 +23,17 @@ Net::TCPSocket *TCPServer::create_client_socket(int client_fd)
 
   if (ctx)
   {
+    // Ensure a reasonable timeout is set while accepting
+    Net::TCPSocket socket(client_fd);
+    socket.set_timeout(SSL_ACCEPT_TIMEOUT);
+
+    // Accept in SSL
     ssl = ctx->accept_connection(client_fd);
+
+    // Reset to default timeout in case server doesn't want it
+    socket.set_timeout(0);
+    socket.detach_fd();  // Avoid close when socket goes out of scope!
+
     if (!ssl) return 0;
   }
 
