@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #==========================================================================
 # Build Debian package for angeld process manager
 #
