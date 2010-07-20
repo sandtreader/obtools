@@ -11,6 +11,7 @@
 #include "ot-xml.h"
 #include "ot-text.h"
 #include <sstream>
+#include <cstdio>
 #include <stdlib.h>
 
 using namespace ObTools::XML;

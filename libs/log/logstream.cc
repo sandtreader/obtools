@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-log.h"
+#include <cstdio>
 
 namespace ObTools { namespace Log {
 

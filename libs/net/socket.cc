@@ -28,6 +28,7 @@ typedef const void *sockopt_t;
 
 #include <errno.h>
 #include <stdint.h>
+#include <cstdio>
 
 #define SOCKET_BUFFER_SIZE 1024
 

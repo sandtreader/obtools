@@ -12,6 +12,7 @@
 
 #include "ot-mt.h"
 #include "ot-cache.h"
+#include <stdint.h>
 
 namespace ObTools { namespace ObCache {
 
