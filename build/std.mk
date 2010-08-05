@@ -79,9 +79,9 @@ endif
 endif
 
 #Spot 'cross-compile' on CentOS, RHEL5
-OSNAME=$(shell uname -r|cut -d\. -f6)
+OSNAME=$(shell uname -r|sed 's/\(.*\)\.//'|cut -c1-2)
 ifdef OSNAME
-ifeq ($(OSNAME), el5)
+ifeq ($(OSNAME), el)
 ifndef CROSS
 CROSS = centos
 endif
