@@ -13,6 +13,7 @@ PACKAGE=$1_$2-$3_all.deb
 SRC_DIR=`dirname $0`
 DEB_DIR=/tmp/${PACKAGE}.$$
 RELEASE_DIR=$SRC_DIR/../../release/
+TARGARCH=all
 
 mkdir -p $DEB_DIR/DEBIAN
 mkdir -p $DEB_DIR/usr/share/php
