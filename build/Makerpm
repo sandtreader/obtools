@@ -4,7 +4,7 @@
 NAME=$1
 VERSION=$2
 REV=$3
-TARGARCH=$4
+TARGARCH=${TARGARCH:-4}
 VARIANT=$5
 
 RPM_COPYRIGHT=${RPM_COPYRIGHT:-"xMill Consulting Ltd"}
@@ -12,11 +12,12 @@ RPM_NAMETAG=${RPM_NAMETAG:-Obtools}
 RPM_CONFIGDIR=${RPM_CONFIGDIR:-/etc/obtools}
 RPM_LCNAME=${RPM_LCNAME:-obtools}
 
-#  RPM_COPYRIGHT="Packet Ship Technologies Ltd"
-#  RPM_NAMETAG="Packet Ship"
-#  RPM_CONFIGDIR=/etc/packetship
-
 RPM_SPEC=$DEB_DIR/DEBIAN/spec
+
+if [ "$TARGARCH" = "all" ];
+then
+  TARGARCH=noarch
+fi
 
 if [ $RPM_DEVEL ]; then
   RPM_DEVEL="-devel"
@@ -34,11 +35,12 @@ Version: ${VERSION}
 Release: ${REV}
 Summary: $SPEC_SUMMARY
 Group: optional
+BuildArchitectures: ${TARGARCH}
 Packager: $SPEC_PACKAGER
 License: ${RPM_COPYRIGHT}
 Distribution: rpm
 %define _rpmdir ../
-%define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.${TARGARCH}.rpm
 %define _unpackaged_files_terminate_build 0
 EOF
 
@@ -83,6 +85,6 @@ tar cvf /dev/null $DEB_DIR |grep  "/$" |cut -c ${NUMCHAR}- |grep -v "^/DEBIAN/" 
 #all files
 tar cvf /dev/null $DEB_DIR |grep  -v "/$" |grep -v $DEB_VERSION.spec |cut -c ${NUMCHAR}-| grep -v "^/DEBIAN/"|sed -e 's/^/\"/' -e 's/$/\"/' >> $RPM_SPEC
 
-fakeroot -- rpmbuild -bb  $RPM_SPEC
+/opt/bin/fakeroot -- rpmbuild -bb  $RPM_SPEC
 
 mv ../${NAME}${VARIANT}${RPM_DEVEL}-$VERSION-${REV}.${TARGARCH}.rpm $RELEASE_DIR
