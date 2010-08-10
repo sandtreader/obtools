@@ -215,8 +215,15 @@ public:
   //------------------------------------------------------------------------
   // Convert to ISO date
   // Generates YYYY-MM-DD form or empty if invalid
+  // sep can be specified, defaults to '-' - set to 0 to leave out
   // This format is also compatible with XML
-  string iso_date() const;
+  string iso_date(char sep='-') const;
+
+  //------------------------------------------------------------------------
+  // Convert to HH:MM with optional (:SS)
+  // sep can be specified, defaults to ':' - set to 0 to leave out
+  // Generates HH:MM:SS form or empty if invalid
+  string iso_time(char sep=':', bool with_secs=false) const;
 
   //------------------------------------------------------------------------
   // Get the locale-specific date format

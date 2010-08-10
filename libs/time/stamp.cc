@@ -269,17 +269,41 @@ string Stamp::iso() const
 //------------------------------------------------------------------------
 // Convert to ISO date
 // Generates YYYY-MM-DD form or empty if invalid
+// sep can be specified, defaults to '-' - set to 0 to leave out
 // This format is also compatible with XML
-string Stamp::iso_date() const
+string Stamp::iso_date(char sep) const
 {
   if (!t) return "";  // Empty if invalid
 
   ostringstream oss;
   Split sp = split(t);  
 
-  oss << setw(2) << setfill('0') << sp.year  << '-'
-      << setw(2) << setfill('0') << sp.month << '-'
-      << setw(2) << setfill('0') << sp.day;
+  oss << setw(2) << setfill('0') << sp.year;
+  if (sep) oss << sep;
+  oss << setw(2) << setfill('0') << sp.month;
+  if (sep) oss << sep;
+  oss << setw(2) << setfill('0') << sp.day;
+
+  return oss.str();
+}
+
+//------------------------------------------------------------------------
+// Convert to HH:MM with optional (:SS)
+// sep can be specified, defaults to ':' - set to 0 to leave out
+// Generates HH:MM:SS form or empty if invalid
+string Stamp::iso_time(char sep, bool with_secs) const
+{
+  if (!t) return "";  // Empty if invalid
+
+  ostringstream oss;
+  Split sp = split(t);  
+
+  oss << setw(2) << setfill('0') << sp.hour;
+  if (sep) oss << sep;
+  oss << setw(2) << setfill('0') << sp.min;
+
+  if (with_secs && sep) oss << sep;
+  if (with_secs) oss << setw(2) << setfill('0') << (int)sp.sec;
 
   return oss.str();
 }

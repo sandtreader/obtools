@@ -41,6 +41,8 @@ int main()
     cout << "          ISO: " << s.iso() << endl;
     cout << "   check time: " << asctime(gmtime(&t));
     cout << "      weekday: " << days[s.weekday()-1] << endl;
+    cout << "     ISO date: " << s.iso_date() << endl;
+    cout << "     ISO time: " << s.iso_time(':', true) << endl;
 
     Time::Stamp local = s.localise();
     cout << "    localised: " << local.iso() << endl;
