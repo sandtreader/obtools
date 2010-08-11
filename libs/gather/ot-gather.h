@@ -26,7 +26,7 @@ using namespace std;
 //==========================================================================
 // Types
 typedef unsigned char data_t;
-typedef uint32_t length_t;
+typedef unsigned long length_t;
 
 //==========================================================================
 // Individual segment of a buffer
@@ -90,6 +90,10 @@ public:
   //--------------------------------------------------------------------------
   // Reset the buffer to be empty
   void reset();
+
+  //--------------------------------------------------------------------------
+  // Limit the buffer to hold at most a particular length of data
+  length_t limit(length_t length);
 
   //--------------------------------------------------------------------------
   // Add a segment at the end, extending if required

@@ -106,6 +106,33 @@ void Buffer::reset()
 }
 
 //--------------------------------------------------------------------------
+// Limit the buffer to hold at most a particular length of data
+// Returns the actual length remaining (which may be less than limit)
+length_t Buffer::limit(length_t length)
+{
+  length_t total = 0;
+  unsigned int i;
+
+  // Skip over segments that are needed
+  for(i=0; i<count; i++)
+  {
+    total += segments[i].length;
+    if (total >= length) // This one passes it?
+    {
+      segments[i].length -= total-length;  // Reduce this one
+      total = length;
+      break;  // Stop here
+    }
+  }
+
+  // Destroy any remaining segments
+  for(unsigned int j=++i; j<count; j++) segments[j].destroy();
+  if (i<count) count = i;
+
+  return total;
+}
+
+//--------------------------------------------------------------------------
 // Destructor
 Buffer::~Buffer()
 {

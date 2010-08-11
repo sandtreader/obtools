@@ -38,6 +38,9 @@ int main(int argc, char **argv)
   uint32_t n2 = 0x01234567;
   buffer.insert((Gather::data_t *)&n2, 4, 2);
 
+  // Chop 8 bytes off the end
+  cout << "After limit: " << buffer.limit(buffer.get_length()-8) << endl;
+
   // Dump it
   buffer.dump(cout, true);
 
