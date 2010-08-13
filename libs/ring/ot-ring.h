@@ -46,7 +46,7 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  Buffer(int _length): items(new ITEM_T[length+1]), length(_length+1),
+  Buffer(int _length): items(new ITEM_T[_length+1]), length(_length+1),
     in_index(0), out_index(0) {}
 
   //--------------------------------------------------------------------------
@@ -55,7 +55,7 @@ public:
   {
     int next_in_index = inc(in_index);
     if (next_in_index == out_index) return false;
-    items[next_in_index] = item;
+    items[in_index] = item;
     in_index = next_in_index;
     return true;
   }
