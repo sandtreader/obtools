@@ -69,14 +69,19 @@ Segment& Buffer::insert(const Segment& seg, unsigned int pos)
 // Returns the number of segments filled in
 unsigned int Buffer::fill(struct iovec *iovec)
 {
-  for(unsigned int i=0; i<count; i++, iovec++)
+  unsigned int n=0;
+  for(unsigned int i=0; i<count; i++)
   {
     Segment &seg = segments[i];
-    iovec->iov_base = (void *)seg.data;
-    iovec->iov_len  = seg.length;
+    if (seg.length)
+    {
+      iovec->iov_base = (void *)seg.data;
+      iovec->iov_len  = seg.length;
+      iovec++; n++;
+    }
   }
 
-  return count;
+  return n;
 }
 
 //--------------------------------------------------------------------------
@@ -90,7 +95,7 @@ void Buffer::dump(ostream& sout, bool show_data)
   for(unsigned int i=0; i<count; i++)
   {
     Segment &seg = segments[i];
-    sout << (seg.owned?"* ":"  ") << seg.length << endl;
+    sout << (seg.owned_data?"* ":"  ") << seg.length << endl;
     if (show_data) dumper.dump(seg.data, seg.length);
     total += seg.length;
   }
@@ -130,6 +135,39 @@ length_t Buffer::limit(length_t length)
   if (i<count) count = i;
 
   return total;
+}
+
+//--------------------------------------------------------------------------
+// Consume N bytes of data from the front of the buffer
+void Buffer::consume(length_t n)
+{
+  // Skip over segments that are needed
+  for(unsigned int i=0; i<count; i++)
+  {
+    Segment& seg = segments[i];
+    if (!seg.length) continue;  // Fast skip for empty ones
+
+    if (seg.length > n)
+    {
+      // Just consume off this one, and stop
+      seg.consume(n);
+      break;
+    }
+    else
+    {
+      // Clear this one and continue to next
+      n -= seg.length;
+      seg.reset();
+    }
+  }
+}
+
+//--------------------------------------------------------------------------
+// Add another buffer to the end of this one
+void Buffer::add(const Buffer& buffer)
+{
+  for(unsigned int i=0; i<buffer.count; i++)
+    add(buffer.segments[i]);
 }
 
 //--------------------------------------------------------------------------

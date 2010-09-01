@@ -41,6 +41,9 @@ int main(int argc, char **argv)
   // Chop 8 bytes off the end
   cout << "After limit: " << buffer.limit(buffer.get_length()-8) << endl;
 
+  // Consume 5 bytes from the start
+  buffer.consume(5);
+
   // Dump it
   buffer.dump(cout, true);
 

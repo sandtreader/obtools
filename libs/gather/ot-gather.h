@@ -32,26 +32,34 @@ typedef unsigned long length_t;
 // Individual segment of a buffer
 struct Segment
 {
-  data_t *data;
-  length_t length;
-  bool owned;         // If set, we allocated it and can deallocate
+  data_t *owned_data;      // Original allocated block, if we allocated it
+  data_t *data;            // Unconsumed data start
+  length_t length;         // Unconsumed data length
 
   //--------------------------------------------------------------------------
   // Constructors
   // Default
-  Segment(): data(0), length(0), owned(false) {}
+  Segment(): owned_data(0), data(0), length(0) {}
 
   // Reference to external data
   Segment(data_t *_data, length_t _length): 
-    data(_data), length(_length), owned(false) {}
+    owned_data(0), data(_data), length(_length) {}
 
   // Reference to data allocated here
   Segment(length_t _length): 
-    data(new data_t[_length]), length(_length), owned(true) {}
+    owned_data(new data_t[_length]), data(owned_data), length(_length) {}
+
+  //--------------------------------------------------------------------------
+  // Consume N bytes from the beginning
+  void consume(length_t n) { data+=n; length-=n; }
+
+  //--------------------------------------------------------------------------
+  // Reset to new length
+  void reset(length_t n=0) { length=n; }
 
   //--------------------------------------------------------------------------
   // Destroy - note, explicit call, not destructor
-  void destroy() { if (owned) delete[] data; }
+  void destroy() { if (owned_data) delete[] owned_data; }
 };
 
 //==========================================================================
@@ -113,6 +121,10 @@ public:
   { return add(Segment(length)); }
 
   //--------------------------------------------------------------------------
+  // Add another buffer to the end of this one
+  void add(const Buffer& buffer);
+
+  //--------------------------------------------------------------------------
   // Insert a segment at the given index (default 0, the beginning), 
   // extending if required
   // Returns the added segment
@@ -129,6 +141,10 @@ public:
   // Returns the inserted segment
   Segment& insert(length_t length, unsigned int pos=0)
   { return insert(Segment(length), pos); }
+
+  //--------------------------------------------------------------------------
+  // Consume N bytes of data from the front of the buffer
+  void consume(length_t n);
 
   //--------------------------------------------------------------------------
   // Fill an iovec array with the data
