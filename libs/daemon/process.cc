@@ -104,6 +104,7 @@ int Process::start(int argc, char **argv)
     log.error << "Can't become daemon: " << strerror(errno) << endl;
 
   // Create pid file
+  string pid_file = config.get_value("daemon/pid/@file", default_pid_file);
   ofstream pidfile(pid_file.c_str());
   pidfile << getpid() << endl;
   pidfile.close();

@@ -32,7 +32,7 @@ class Process
   string default_config_file;  // Path to default config if not specified 
   string config_element;       // Top-level element to expect in config
   string default_log_file;     // Default log file path
-  string pid_file;             // PID file path
+  string default_pid_file;     // Default PID file path
 
 protected:
   bool enable_watchdog;        // Flag to enable watchdog
@@ -70,12 +70,12 @@ public:
   // Constructor
  Process(const string& _name, const string& _version,
 	 const string& _default_config_file, const string& _config_element,
-	 const string& _default_log_file, const string& _pid_file): 
+	 const string& _default_log_file, const string& _default_pid_file): 
     name(_name), version(_version),
     default_config_file(_default_config_file), 
     config_element(_config_element),
     default_log_file(_default_log_file),
-    pid_file(_pid_file), 
+    default_pid_file(_default_pid_file), 
 #ifdef DEBUG
     enable_watchdog(false),
 #else
