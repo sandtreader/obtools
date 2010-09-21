@@ -1087,6 +1087,10 @@ public:
 //   <expand:index [from="1"]/>
 //     Expands to loop index value, optionally from a given base (default 1)
 
+//   <expand:set var="xxx"> 
+//     Sets variable 'xxx' to the content of the element (expanded)
+//     Variables have scope within the local 'each' context
+
 // All other child elements are output verbatim
 
 class Expander
