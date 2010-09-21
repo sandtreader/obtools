@@ -51,6 +51,7 @@ int main()
     cout << "  locale date: " << s.locale_date() << endl;
     cout << "  locale time: " << s.locale_time() << endl;
     cout << "  locale both: " << s.locale_date_time() << endl;
+    cout << "    formatted: " << s.format("%H:%M %A, %-e %B") << endl;
   }
 
   return 0;

@@ -395,6 +395,7 @@ void Stamp::get_tm(struct tm& tm) const
   tm.tm_hour = sp.hour;
   tm.tm_min  = sp.min;
   tm.tm_sec  = (int)sp.sec;
+  tm.tm_wday = weekday() % 7;  // Move Sunday=7 back to Sunday=0
 }
 
 //------------------------------------------------------------------------
