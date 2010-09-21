@@ -6,6 +6,8 @@
   <expand:set var="test"><expand:replace value="test/@true"/></expand:set>
   <expand:if var="test">This should be included</expand:if>
   <expand:unless var="test">This should <b>not</b> be included</expand:unless>
+  <expand:ifeq var="test" to="Yes">This should also be included</expand:ifeq>
+  <expand:ifne var="test" to="Yes">But this shouldn't</expand:ifne>
 
   <expand:each element="wombat">
     <expand:index/>: <expand:replace var="test"/>, look children, here's <expand:replace/>!

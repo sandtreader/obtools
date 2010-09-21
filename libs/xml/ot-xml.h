@@ -1074,6 +1074,12 @@ public:
 //     Expands children unless XPath or variable 'xxx' is present and begins 
 //     with [YyTt1]
 
+//   <expand:ifeq value|var="xxx" to="yyy">  
+//     Expands children if XPath or variable 'xxx' is equal (cased) to 'yyy'
+
+//   <expand:ifne value|var="xxx" to="yyy">  
+//     Expands children if XPath or variable 'xxx' is !equal (cased) to 'yyy'
+
 //   <expand:each element="xxx">
 //     Expands children for every XPath 'xxx', making the element the new 
 //     context

@@ -34,7 +34,7 @@ string Expander::expand_recursive(const XML::Element& templ,
 				  map<string, string>& vars)
 {
   string text = templ.content;  // In case it is optimised (in which case it
-                                   // won't have any children)
+                                // won't have any children)
 
   // Get an XPath reader on the values
   XPathProcessor xpath(values);
@@ -50,8 +50,10 @@ string Expander::expand_recursive(const XML::Element& templ,
       text += te.content;
     }
     else if (te.name == "expand:replace"
-	     || te.name == "expand:if"
-	     || te.name == "expand:unless")
+          || te.name == "expand:if"
+	  || te.name == "expand:unless"
+	  || te.name == "expand:ifeq"
+	  || te.name == "expand:ifne")
     {
       // All take a value or var attribute
       string value;
@@ -86,6 +88,18 @@ string Expander::expand_recursive(const XML::Element& templ,
 	char c = value.empty()?0:value[0];
 	if (c!='T' && c!='t' && c!='Y' && c!='y' && c!='1')
 	  text += expand_recursive(te, values, index, vars);
+      }
+      else if (te.name == "expand:ifeq")
+      {
+	// Expand this recursively if value is equal to 'to'
+	string to = te["to"];
+	if (value == to) text += expand_recursive(te, values, index, vars);
+      }
+      else if (te.name == "expand:ifne")
+      {
+	// Expand this recursively if value is not equal to 'to'
+	string to = te["to"];
+	if (value != to) text += expand_recursive(te, values, index, vars);
       }
     }
     else if (te.name == "expand:each")
