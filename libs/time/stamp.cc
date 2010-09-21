@@ -312,34 +312,31 @@ string Stamp::iso_time(char sep, bool with_secs) const
 // Get the locale-specific date format
 string Stamp::locale_date() const
 {
-  struct tm tm;
-  get_tm(tm);
-  char buf[20];
-  size_t len = strftime(buf, 20, "%x", &tm);  // Locale date
-  return string(buf, len);
+  return format("%x");
 }
 
 //------------------------------------------------------------------------
 // Get the locale-specific time format
 string Stamp::locale_time() const
 {
-  struct tm tm;
-  get_tm(tm);
-  char buf[20];
-  size_t len = strftime(buf, 20, "%X", &tm);  // Locale time
-  return string(buf, len);
+  return format("%X");
 }
 
 //------------------------------------------------------------------------
 // Get the locale-specific date and time format
 string Stamp::locale_date_time() const
 {
+  return format("%x %H:%M");
+}
+
+//------------------------------------------------------------------------
+// Format according to strftime format (max 40 chars)
+string Stamp::format(const char *format) const
+{
   struct tm tm;
   get_tm(tm);
   char buf[40];
-  // Locale date and time - note should be %c but this reliably segfaults
-  // - no idea why
-  size_t len = strftime(buf, 40, "%x %H:%M", &tm);  
+  size_t len = strftime(buf, 40, format, &tm);  
   return string(buf, len);
 }
 

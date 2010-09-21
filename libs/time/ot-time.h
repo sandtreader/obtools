@@ -226,6 +226,10 @@ public:
   string iso_time(char sep=':', bool with_secs=false) const;
 
   //------------------------------------------------------------------------
+  // Format according to strftime format (max 40 chars)
+  string format(const char *format) const;
+
+  //------------------------------------------------------------------------
   // Get the locale-specific date format
   string locale_date() const;
 
