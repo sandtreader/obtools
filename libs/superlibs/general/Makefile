@@ -13,7 +13,7 @@ endif
 NAME	= ot-general2
 VERSION	= 2.4.0
 CONTAINS = xml misc text net log init chan time web file crypto hash soap \
-	   mt cache cli tube ssl access dns
+	   mt cache cli tube ssl access dns msg gather ring
 SOCKET  = 1
 CRYPTO  = 1
 RESOLVER = 1
