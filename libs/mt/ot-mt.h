@@ -754,8 +754,8 @@ private:
   Mutex mutex;
   unsigned int min_spares;
   unsigned int max_threads;
-  list<T *> threads;  // All of them
-  list<T *> spares;   // Just the spare ones
+  list<T *> spares;   // Spare waiting threads
+  list<T *> actives;  // Active threads
   PoolReplacer<T> replacer;
   bool shutting_down;
 
@@ -763,14 +763,16 @@ private:
   void add_spare()
   {
     T *t = new T(replacer);
-    threads.push_back(t);
     spares.push_back(t);
   }
 
   // Fill pool to provide 'min' spares, but not more than 'max' in all
+  // unless max is 0
+  // Always creates at least one spare
   void fill() 
   { 
-    while (spares.size() < min_spares && threads.size() < max_threads) 
+    while (spares.size() < (min_spares?min_spares:1) 
+	   && (!max_threads || spares.size()+actives.size() < max_threads)) 
       add_spare(); 
   }
 
@@ -778,7 +780,6 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   // min-max is range of number of threads the pool will keep alive
-  // min must be at least 1
   ThreadPool(unsigned int min=1, unsigned int max=10): 
     min_spares(min), max_threads(max), replacer(*this), shutting_down(false)
   { fill(); }
@@ -796,8 +797,12 @@ public:
   bool active()
   {
     Lock lock(mutex);
-    return spares.size() < threads.size();
+    return !actives.empty();
   }
+
+  //--------------------------------------------------------------------------
+  // Get active threads
+  list<T *>& get_actives() { return actives; }
 
   //--------------------------------------------------------------------------
   // Remove a thread from the pool
@@ -811,6 +816,7 @@ public:
 
     T *t = spares.front();
     spares.pop_front();
+    actives.push_back(t);
     return t;
   }
 
@@ -836,13 +842,15 @@ public:
     if (shutting_down) return;  // Just lose it
     Lock lock(mutex);
 
+    // Remove from actives
+    actives.remove(t);
+
     // Empty spares above minimum amount, allowing for the one we're about
     // to replace
     while (spares.size() && spares.size() > min_spares-1)
     {
       T *ts = spares.back();  // Kill last one entered
       spares.pop_back();
-      threads.remove(ts);
       ts->die(true);  // Wait for it to die before deletion
       delete ts;
     }
@@ -861,7 +869,9 @@ public:
     {
       shutting_down = true;
       Lock lock(mutex);
-      for(typename list<T *>::iterator p=threads.begin(); p!=threads.end();p++)
+
+      // Kill actives
+      for(typename list<T *>::iterator p=actives.begin(); p!=actives.end();p++)
       {
 	T* t = *p;
 	// Ask it nicely
@@ -875,9 +885,23 @@ public:
 	}
 
 	// Then kill it with cancel if it hasn't already died
-	delete *p;
+	delete t;
       }
-      threads.clear();
+      actives.clear();
+
+      // Kill spares - same again
+      for(typename list<T *>::iterator p=spares.begin(); p!=spares.end();p++)
+      {
+	T* t = *p;
+	t->die();
+	for(int i=0; i<5; i++)
+	{
+	  if (!*t) break;
+	  Thread::usleep(10000);
+	}
+	delete t;
+      }
+
       spares.clear();
     }
   }
