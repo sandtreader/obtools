@@ -546,6 +546,16 @@ public:
   void write(const char *p) throw(SocketError);
 
   //--------------------------------------------------------------------------
+  // Raw stream sendmsg wrapper
+  int csendmsg(struct iovec *gathers, int ngathers, int flags=0);
+
+  //--------------------------------------------------------------------------
+  // Safe stream sendmsg wrapper
+  // Throws SocketError on failure
+  ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags=0)
+    throw (SocketError);
+
+  //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the socket
   // Throws SocketError on failure or EOF
   uint32_t read_nbo_int() throw (SocketError);

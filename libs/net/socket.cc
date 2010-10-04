@@ -560,6 +560,46 @@ void TCPSocket::write(const char *p) throw(SocketError)
 }
 
 //--------------------------------------------------------------------------
+// Raw stream sendmsg wrapper
+int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
+{
+  int res;
+
+#ifdef __WIN32__
+#warning No idea if this works in Windows
+  return -99;
+#else
+  struct msghdr mh;
+  mh.msg_name = 0;
+  mh.msg_namelen = 0;
+  mh.msg_iov = gathers;
+  mh.msg_iovlen = ngathers;
+  mh.msg_control = 0;
+  mh.msg_controllen = 0;
+  mh.msg_flags = 0;
+
+  do
+  {
+    res = ::sendmsg(fd, &mh, flags); 
+  }
+  while (res<0 && errno == EINTR);
+#endif
+
+  return res;
+};
+
+//--------------------------------------------------------------------------
+// Safe stream sendmsg wrapper
+// Throws SocketError on failure
+ssize_t TCPSocket::sendmsg(struct iovec *gathers, int ngathers, int flags)
+  throw (SocketError)
+{
+  int res = csendmsg(gathers, ngathers, flags);
+  if (res < 0) throw SocketError(errno);
+  return res;
+}
+
+//--------------------------------------------------------------------------
 // << operator to write strings to TCPSockets
 // NOTE: Not a general stream operator!
 // e.g. s << "HELO\n";
