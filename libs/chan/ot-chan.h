@@ -311,6 +311,36 @@ public:
 };
 
 //==========================================================================
+// Raw file descriptor reader
+class FDReader: public Reader
+{
+private:
+  int fd;
+
+public:
+  // Constructor
+  FDReader(int _fd): fd(_fd) {}
+
+  // Read implementations
+  virtual size_t basic_read(void *buf, size_t count) throw (Error);
+};
+
+//==========================================================================
+// Raw file description writer
+class FDWriter: public Writer
+{
+private:
+  int fd;
+
+public:
+  // Constructor
+  FDWriter(int _fd): fd(_fd) {}
+
+  // Write implementation
+  virtual void basic_write(const void *buf, size_t count) throw (Error);
+};
+
+//==========================================================================
 // Binary block reader
 // e.g. Wrap around a UDP datagram that has already been read
 class BlockReader: public Reader
