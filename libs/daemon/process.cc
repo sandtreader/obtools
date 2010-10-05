@@ -119,6 +119,9 @@ int Process::start(int argc, char **argv)
   signal(SIGFPE,  sigevil);
   signal(SIGABRT, sigevil);
 
+  // Ignore SIGPIPE from closed sockets etc.
+  signal(SIGPIPE, SIG_IGN);
+
   // Watchdog? Master/slave processes...
   if (enable_watchdog)
   {
