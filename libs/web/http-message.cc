@@ -14,6 +14,51 @@
 namespace ObTools { namespace Web {
 
 //--------------------------------------------------------------------------
+// Get a line, or a $ block
+// Returns true if read OK - even if blank
+bool HTTPMessage::get_first_line(istream& in, string& s)
+{
+  unsigned int count = 0;
+
+  while (!in.fail())
+  {
+    int c = in.get();
+
+    switch (c)
+    {
+      case EOF:  // Error - should end cleanly with blank line
+	return false;
+
+      case '\r':
+	// Skip remaining LF if present
+	c = in.get();
+	if (c!=EOF && c!='\n') in.putback(c);
+	return true;
+
+      case '\n': // Shouldn't happen, but being liberal for Unix files
+	return true;
+
+      case '$':
+	if (!count) // first character
+	{
+	  s+=c;  // Just use this as string
+	  return true;
+	}
+	// Otherwise falling to default...
+
+      default:
+	if (++count < MAX_FIRST_LINE)  // DOS protection
+	  s+=c;
+	else
+	  return false;            // Bomb out 
+    }
+  }
+
+  return false;
+}
+
+
+//--------------------------------------------------------------------------
 // Read request/response and headers from a stream
 // Leave stream ready to read body (if any)
 // Returns whether successful
@@ -23,9 +68,46 @@ bool HTTPMessage::read_headers(istream &in)
   string line;
   do
   {
-    if (!MIMEHeaders::getline(in, line)) return false;
+    if (!get_first_line(in, line)) return false;
   } while (line.empty());
   
+  // If it's an interleave, read it as a '$' message with code = channel,
+  // body = data
+  if (line == "$")
+  {
+    method = "$";
+    code = in.get(); // Interleave channel
+    if (code==EOF) return false;
+
+    int c1 = in.get();
+    int c2 = in.get();
+    if (c1==EOF || c2==EOF) return false;
+
+    uint16_t length = (c1 << 8) + c2;
+
+    // Read this many bytes
+    body.clear();
+    if (length)
+    {
+      int count = 0;
+      while (!in.fail() && count<length)
+      {
+	char buf[READ_SIZE];
+	int wanted = READ_SIZE;
+	if (length-count < wanted) wanted = length-count;
+	in.read(buf, wanted);
+	int got = in.gcount();
+	body.append(buf, got);
+	count += got;
+      }
+    }
+
+    url.clear();
+    version.clear();
+    reason.clear();
+    return true;
+  }
+
   // Split line into method, URI and version, and set in root
   string::size_type sp1 = line.find(' ');
   if (sp1 == string::npos) return false;
@@ -78,6 +160,9 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
 {
   // Read start line & headers
   if (!read_headers(in)) return false;
+
+  // Stop now if we just read an interleave packet
+  if (method == "$") return true;
 
   // Only allow read to eof for POST or responses
   // (ugly HTTP-specific hack, but the protocol mixes levels here)

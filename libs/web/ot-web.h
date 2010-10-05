@@ -249,6 +249,9 @@ class HTTPMessage
 {
 private:
   static const unsigned int READ_SIZE = 4096;  
+  static const unsigned int MAX_FIRST_LINE = 8000;  // Input DoS protection
+
+  bool get_first_line(istream& in, string& s);
 
 public:
   // Request fields
