@@ -24,6 +24,13 @@ int main()
   bitw.write_bool(true);
   bitw.write_bool(false);
   bitw.write_bits(8, 0x1F);
+  bitw.write_bit(0);
+  bitw.write_bit(0);
+  bitw.write_bit(0);
+  bitw.write_bit(1);
+  bitw.write_bit(0);
+  bitw.write_bit(1);
+  bitw.write_bit(0);
   bitw.flush();
 
 
@@ -32,14 +39,15 @@ int main()
        << hex << br.read_nbo_16() << endl;
   br.rewind();
 
-  ObTools::Channel::BitReader bitr(br);
+  ObTools::Channel::BitEGReader bitr(br);
 
   cout << "One: "  << bitr.read_bit() << endl;
   cout << "Zero: " << bitr.read_bit() << endl;
   cout << "True: "  << (bitr.read_bool()?"true":"false") << endl;
   cout << "False: "  << (bitr.read_bool()?"true":"false") << endl;
   cout << "8 bits, 0x1F: " << bitr.read_bits(8) << endl;
-  cout << "Padding bits: " << bitr.read_bits(4) << endl;
+  cout << "Exp-Golomb 9: " << bitr.read_exp_golomb() << endl;
+  cout << "Padding bits: " << bitr.read_bits(5) << endl;
 
   try
   {

@@ -111,6 +111,24 @@ void BitWriter::flush() throw (Error)
   }
 }
 
+//==========================================================================
+// Bitstream Reader with Exp-Golomb support
+
+//--------------------------------------------------------------------------
+// Read an Exp-Golomb coded value from the channel
+// Throws Error on failure or EOF
+uint32_t BitEGReader::read_exp_golomb() throw (Error)
+{
+  uint32_t value = 0;
+  int len = 0;
+  while (!read_bit())
+    len++;
+  for (int i = len; i > 0; --i)
+    value += read_bit() << (i - 1);
+  value += (1 << len) - 1;
+  return value;
+}
+
 }} // namespaces
 
 

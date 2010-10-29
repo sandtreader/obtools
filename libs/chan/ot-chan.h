@@ -526,6 +526,23 @@ public:
 };
 
 //==========================================================================
+// Bitstream reader with Exp-Golomb support
+// Note: Bits read MSB first
+class BitEGReader: public BitReader
+{
+public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  BitEGReader(Reader& _reader):
+    BitReader(_reader) {}
+
+  //--------------------------------------------------------------------------
+  // Read an Exp-Golomb coded value from the channel
+  // Throws Error on failure or EOF
+  uint32_t read_exp_golomb() throw (Error);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_CHAN_H
 
