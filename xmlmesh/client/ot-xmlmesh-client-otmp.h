@@ -85,6 +85,14 @@ public:
   OTMPMessageInterface(XML::Element& config, 
 		       ObTools::Message::Broker& broker);
 
+  //------------------------------------------------------------------------
+  // MultiClient methods exposed for outgoing messages
+  bool request(Message& req, Message& response)
+  { return client->request(req, response); }
+
+  bool request(Message& req) 
+  { return client->request(req); }
+
   //--------------------------------------------------------------------------
   // Destructor - destroys message interface
   ~OTMPMessageInterface();
