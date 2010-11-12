@@ -2,8 +2,6 @@ Package: libot-db2-dev
 Priority: optional
 Section: libs
 Maintainer: Paul Clark <debian@obtools.com>
-Depends: libot-general2-dev (>= 2.1.0)
-Conflicts: libot-db-pgsql-dev
 Description: ObTools generic database libraries (development files)
  The ObTools database library provides a generic database interface in C++.
  This is the generic support library, which requires a specific driver

@@ -2,7 +2,6 @@ Package: libot-db-mysql2-dev
 Priority: optional
 Section: libs
 Maintainer: Paul Clark <debian@obtools.com>
-Depends: libmysqlclient15-dev (>=5.0) | libmysqlclient14, libot-general2-dev (>= 2.1.0), libot-db2-dev (>= 2.0.0)
 Description: ObTools MySQL database driver library (development files)
  The ObTools database library provides a generic database interface in C++.
  This is the MySQL interface driver

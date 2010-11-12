@@ -1,6 +1,5 @@
 Package: ot-xmlmesh
 Priority: optional
-Architecture: i386
 Maintainer: Paul Clark <debian@obtools.com>
 Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3)
 Description: ObTools XMLMesh message bus server
