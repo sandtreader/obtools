@@ -22,6 +22,12 @@ endif
 
 mips:	$(patsubst %,%-mips,$(SUBS_MIPS))
 
+ifndef SUBS_SH4
+SUBS_SH4 = $(SUBS)
+endif
+
+sh4:	$(patsubst %,%-sh4,$(SUBS_SH4))
+
 profile: $(patsubst %,%-profile,$(SUBS))
 
 test: 	$(patsubst %,%-test,$(SUBS))
@@ -58,6 +64,7 @@ define sub_template
 $(1)-all: 	; $$(MAKE) -C $(1)
 $(1)-mingw: 	; $$(MAKE) -C $(1) mingw
 $(1)-mips: 	; $$(MAKE) -C $(1) mips
+$(1)-sh4: 	; $$(MAKE) -C $(1) sh4
 $(1)-profile: 	; $$(MAKE) -C $(1) profile
 $(1)-clean: 	; $$(MAKE) -C $(1) clean
 $(1)-test: 	; $$(MAKE) -C $(1) test

@@ -114,6 +114,16 @@ VARIANT-release-mips		= MIPS RELEASE
 VARIANT-SUFFIX = -mips
 endif
 
+ifeq ($(CROSS), sh4)
+#SH4 chipset
+#Not much point in building debug versions
+ifndef VARIANTS
+VARIANTS = release-sh4
+endif
+VARIANT-release-sh4		= SH4 RELEASE
+VARIANT-SUFFIX = -sh4
+endif
+
 ifeq ($(CROSS), osx)
 #Mac OS-X
 #Note:  Still called 'cross' even though this is usually built natively
@@ -206,6 +216,18 @@ EXTRALIBS += -lrt
 #!!!
 
 else
+#Compiler override for SH4 build
+ifdef SH4
+
+CC = sh4-linux-gcc
+CXX = sh4-linux-g++
+LD = sh4-linux-ld
+AR = sh4-linux-ar
+CPPFLAGS += -DSH4
+PLATFORM = -sh4
+EXTRALIBS += -lrt
+
+else
 #Compiler override for OS X build
 ifdef OSX
 CC = i686-apple-darwin9-gcc-4.0.1
@@ -227,6 +249,7 @@ else
 CC = gcc
 CXX = g++
 EXTRALIBS += -lrt
+endif
 endif
 endif
 endif
@@ -488,6 +511,10 @@ mingw:
 # Cross compile for MIPS: recurse with CROSS=mips
 mips:
 	$(MAKE) CROSS=mips
+
+# Cross compile for SH4: recurse with CROSS=sh4
+sh4:
+	$(MAKE) CROSS=sh4
 
 # Profile: recurse with PROFILE set
 profile:

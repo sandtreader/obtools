@@ -15,6 +15,7 @@ SUBS_MINGW = text file xml xmi cppt regen mt net chan misc time log cache \
              cli init crypto ssl ssl-openssl web msg soap hash tube ring \
              access dns gather superlibs
 SUBS_MIPS = $(SUBS_MINGW)
+SUBS_SH4 = $(SUBS_MINGW)
 
 ROOT = ..
 include ../build/dir.mk
