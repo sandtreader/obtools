@@ -21,9 +21,6 @@ namespace ObTools { namespace Crypto {
 // Returns whether successful (keys set up correctly)
 bool AES::encrypt(unsigned char *data, int length, bool encryption)
 {
-  // Round length down to block size multiple
-  length = AES_BLOCK_SIZE * (length / AES_BLOCK_SIZE);
-
   AES_KEY aes_key;
   int enc;
 
@@ -46,15 +43,22 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption)
 
     unsigned char counter[AES_BLOCK_SIZE];
     memset(counter, 0, sizeof(counter));
-    AES_ctr128_encrypt(data, data, length, &aes_key, iv.key, counter, 0);
+    unsigned int num = 0;
+    AES_ctr128_encrypt(data, data, length, &aes_key, iv.key, counter, &num);
   }
   else if (iv.valid) // Check for CBC - IV is valid
   {
+    // Round length down to block size multiple
+    length = AES_BLOCK_SIZE * (length / AES_BLOCK_SIZE);
+
     // CBC
     AES_cbc_encrypt(data, data, length, &aes_key, &iv.key[0], enc);
   }
   else
   {
+    // Round length down to block size multiple
+    length = AES_BLOCK_SIZE * (length / AES_BLOCK_SIZE);
+
     // ECB
     for (int i = 0; i < length; i += AES_BLOCK_SIZE, data += AES_BLOCK_SIZE)
     {

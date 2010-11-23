@@ -120,6 +120,7 @@ int main()
   Crypto::AES ctr128;
   ctr128.set_key(k128);
   ctr128.set_iv(iv);
+  ctr128.set_ctr(true);
   test(ctr128, "CTR 128", true);
 
   return 0;
