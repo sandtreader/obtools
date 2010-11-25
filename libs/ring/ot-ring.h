@@ -71,6 +71,18 @@ public:
     return true;
   }
 
+  // Ways to flush the queue:  Both end up with in_index=out_index, but
+  // you must call the right one depending whether you are the putter or 
+  // getter, otherwise there is a race condition
+
+  //--------------------------------------------------------------------------
+  // Flush the queue, called from putter side
+  void flush_from_put() { in_index = out_index; }
+
+  //--------------------------------------------------------------------------
+  // Flush the queue, called from getter side
+  void flush_from_get() { out_index = in_index; }
+
   //--------------------------------------------------------------------------
   // Destructor
   ~Buffer()
