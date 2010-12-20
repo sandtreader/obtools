@@ -26,13 +26,14 @@ class Handler
 public:
   string name;                  // Handler name
   string document_name;         // Message document name prefix
+                                // (leave empty to check/generate manually)
   bool complex_result;          // Is there a complex result, or just 'ok'?
   string ns_prefix;             // Namespace prefix
   string ns_url;                // Namespace URL
 
   //--------------------------------------------------------------------------
   // Default constructor - the above filled in in subclass constructors
-  Handler(XML::Element& cfg, const string& _doc_name,
+  Handler(XML::Element& cfg, const string& _doc_name="",
 	  const string& _ns_prefix="", const string& _ns_url="",
 	  bool _complex_result = false):
     name(cfg.name),
@@ -45,7 +46,7 @@ public:
   //--------------------------------------------------------------------------
   // Call to handle message and respond
   // Returns error string or "" if OK, in which case response is filled in
-  // Response document will be pre-created with response_document_name
+  // Response document will be pre-created with document_name-response, if set
   virtual string handle_message(const XML::Element& request, 
 				XML::Element& response) = 0;
 
