@@ -59,7 +59,11 @@ bool MessageTransportURLHandler::handle_message(
     response.add_body(re);
     return true;
   }
-  else return fault(response, SOAP::Fault::CODE_SENDER, error);
+  else
+  {
+    delete re;
+    return fault(response, SOAP::Fault::CODE_SENDER, error);
+  }
 }
 
 //==========================================================================
