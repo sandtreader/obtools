@@ -33,8 +33,9 @@ bool MessageTransportURLHandler::handle_message(
   Log::Streams log;
   const XML::Element& body = request.get_body();
 
-  // Check body document name
-  if (body.name != message_handler.ns_prefix + ":" 
+  // Check body document name, if specified
+  if (!message_handler.document_name.empty() 
+    && body.name != message_handler.ns_prefix + ":" 
                    + message_handler.document_name+"-request")
     return fault(response, SOAP::Fault::CODE_SENDER, "Bad document name");
 
