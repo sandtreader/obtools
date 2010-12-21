@@ -56,10 +56,11 @@ Segment& Buffer::add(const Segment& seg)
 Segment& Buffer::insert(const Segment& seg, unsigned int pos)
 {
   if (count >= size) resize(size*2);
-  if (pos >= count) abort();
+  if (pos > count) abort();
 
   // Shift up one
   for(unsigned int i=count++; i>pos; i--) segments[i]=segments[i-1];
+
   return segments[pos] = seg;
 }
 
