@@ -138,6 +138,13 @@ public:
   Duration operator/(double n) const { return Duration(t/n); }
 
   //------------------------------------------------------------------------
+  // Arithmetic assignments
+  Duration operator+=(const Duration& o) { t+=o.t; return *this; }
+  Duration operator-=(const Duration& o) { t-=o.t; return *this; }
+  Duration operator*=(double n) { t*=n; return *this; }
+  Duration operator/=(double n) { t/=n; return *this; }
+
+  //------------------------------------------------------------------------
   // Comparison operators
   bool operator==(const Duration& o) const { return t==o.t; }
   bool operator!=(const Duration& o) const { return t!=o.t; }
