@@ -624,6 +624,11 @@ class CertificateStore
   bool add(Certificate *cert);
 
   //------------------------------------------------------------------------
+  // Add a CRL file and enable CRL checking in the store
+  // If 'all' is set, the entire chain is checked against the CRL
+  bool add_crl(const string& crl_file, bool all=false);
+
+  //------------------------------------------------------------------------
   // Verify a certificate
   bool verify(const Certificate& cert);
 

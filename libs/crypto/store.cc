@@ -45,6 +45,22 @@ bool CertificateStore::add(Certificate *cert)
 }
 
 //------------------------------------------------------------------------
+// Add a CRL file and enable CRL checking in the store
+// If 'all' is set, the entire chain is checked against the CRL
+bool CertificateStore::add_crl(const string& crl_file, bool all)
+{
+  X509_LOOKUP *lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
+  if (!lookup) return false;
+
+  if (X509_load_crl_file(lookup, crl_file.c_str(), X509_FILETYPE_PEM) != 1)
+    return false;
+
+  X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK
+		            | (all?X509_V_FLAG_CRL_CHECK_ALL:0));
+  return true;
+}
+
+//------------------------------------------------------------------------
 // Verify a certificate
 bool CertificateStore::verify(const Certificate& cert)
 {
