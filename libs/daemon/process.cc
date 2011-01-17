@@ -70,18 +70,25 @@ int Process::start(int argc, char **argv)
   }
 
 #if defined(DEBUG)
-  Log::StreamChannel chan_out(cout);
+  bool go_daemon = false;
 #else
-  string logfile = config.get_value("log/@file", default_log_file);
-  ofstream logstream(logfile.c_str(),ios::app);
-  if (!logstream)
-  {
-    cerr << argv[0] << ": Unable to open logfile " << logfile << endl;
-    return 2;
-  }
-  Log::StreamChannel chan_out(logstream);
+  bool go_daemon = config.get_value_bool("background/@daemon", true);
 #endif
 
+  // Create log stream if daemon
+  ostream *sout = &cout;
+  if (go_daemon)
+  {
+    string logfile = config.get_value("log/@file", default_log_file);
+    sout = new ofstream(logfile.c_str(), ios::app);
+    if (!*sout)
+    {
+      cerr << argv[0] << ": Unable to open logfile " << logfile << endl;
+      return 2;
+    }
+  }
+
+  Log::StreamChannel chan_out(*sout);
   Log::TimestampFilter tsfilter(config.get_value("log/@timestamp", 
 						 DEFAULT_TIMESTAMP), chan_out);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
@@ -98,17 +105,19 @@ int Process::start(int argc, char **argv)
     return rc;
   }
 
-#if !defined(DEBUG)
-  // Full background daemon 
-  if (daemon(0, 0))
-    log.error << "Can't become daemon: " << strerror(errno) << endl;
 
-  // Create pid file
-  string pid_file = config.get_value("daemon/pid/@file", default_pid_file);
-  ofstream pidfile(pid_file.c_str());
-  pidfile << getpid() << endl;
-  pidfile.close();
-#endif
+  // Full background daemon 
+  if (go_daemon)
+  {
+    if (daemon(0, 0))
+      log.error << "Can't become daemon: " << strerror(errno) << endl;
+
+    // Create pid file
+    string pid_file = config.get_value("daemon/pid/@file", default_pid_file);
+    ofstream pidfile(pid_file.c_str());
+    pidfile << getpid() << endl;
+    pidfile.close();
+  }
 
   // Register signal handlers - same for both master and slave
   the_process = this;
