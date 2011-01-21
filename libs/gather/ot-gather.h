@@ -88,6 +88,10 @@ public:
   unsigned int get_size() { return size; }
 
   //--------------------------------------------------------------------------
+  // Get segment list
+  const Segment *get_segments() { return segments; }
+
+  //--------------------------------------------------------------------------
   // Get total length of data in buffer
   length_t get_length();
 
