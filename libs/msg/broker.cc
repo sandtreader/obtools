@@ -70,17 +70,26 @@ bool Broker::create_handler(XML::Element& xml)
 
 
 //--------------------------------------------------------------------------
-// Destructor
-Broker::~Broker()
+// Shutdown cleanly
+void Broker::shutdown()
 {
   // Delete all transports first since they depend on the handlers
   for(map<string, Transport *>::iterator p = transports.begin();
       p != transports.end(); ++p)
     delete p->second;
+  transports.clear();
 
   // Then the handlers
   for(list<Handler *>::iterator p = handlers.begin(); p!=handlers.end(); ++p)
     delete *p;
+  handlers.clear();
+}
+
+//--------------------------------------------------------------------------
+// Destructor
+Broker::~Broker()
+{
+  shutdown();
 }
 
 
