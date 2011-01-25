@@ -232,7 +232,9 @@ int Process::start(int argc, char **argv)
 	}
 
 	// Run subclass full startup
-	return run();
+	rc = run();
+	cleanup();
+	return rc;
       }
     }
 
@@ -242,9 +244,11 @@ int Process::start(int argc, char **argv)
   else
   {
     // Just run directly
-    int rc = run_priv();
+    rc = run_priv();
     if (rc) return rc;
-    return run();
+    rc = run();
+    cleanup();
+    return rc;
   }
 }
 

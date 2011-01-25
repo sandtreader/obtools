@@ -63,6 +63,10 @@ protected:
   // Return child exit code
   virtual int run()=0;
 
+  //--------------------------------------------------------------------------
+  // Optional cleanup function, called after run() exits
+  virtual void cleanup() {};
+
 public:
   XML::Configuration config;  // Daemon-wide configuration
 
