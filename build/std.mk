@@ -223,6 +223,7 @@ CC = sh4-linux-gcc
 CXX = sh4-linux-g++
 LD = sh4-linux-ld
 AR = sh4-linux-ar
+STRIP = sh4-linux-strip
 CPPFLAGS += -DSH4
 PLATFORM = -sh4
 EXTRALIBS += -lrt
@@ -249,6 +250,7 @@ else
 CC = gcc
 CXX = g++
 EXTRALIBS += -lrt
+STRIP = strip
 endif
 endif
 endif
@@ -584,6 +586,11 @@ ifdef RELEASE
 ifdef RELEASEDIR
 ifdef RELEASABLE
 	cp $(RELEASABLE) ../$(RELEASEDIR)/$(RELEASE-NAME)
+ifdef RELEASE-STRIP
+ifdef STRIP
+	$(STRIP) ../$(RELEASEDIR)/$(RELEASE-NAME)
+endif
+endif
 endif
 ifeq ($(TYPE), lib)
 	cp $(patsubst %,../%,$(HEADERS)) ../$(RELEASEDIR)
