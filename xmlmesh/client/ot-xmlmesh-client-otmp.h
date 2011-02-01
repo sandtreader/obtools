@@ -93,6 +93,9 @@ public:
   bool request(Message& req) 
   { return client->request(req); }
 
+  bool send(Message& req) 
+  { return client->send(req); }
+
   //--------------------------------------------------------------------------
   // Destructor - destroys message interface
   ~OTMPMessageInterface();
