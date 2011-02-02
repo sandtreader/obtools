@@ -20,6 +20,8 @@
 #include <fstream>
 
 #define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
+#define FIRST_WATCHDOG_SLEEP_TIME 1
+#define MAX_WATCHDOG_SLEEP_TIME 60
 
 namespace ObTools { namespace Daemon {
 
@@ -132,13 +134,26 @@ int Process::start(int argc, char **argv)
   signal(SIGPIPE, SIG_IGN);
 
   // Watchdog? Master/slave processes...
-  if (enable_watchdog)
+  bool enable_watchdog = config.get_value_bool("watchdog/@restart", true);
+  int sleep_time = FIRST_WATCHDOG_SLEEP_TIME;
+  if (go_daemon && enable_watchdog)
   {
     // Now loop forever restarting a child process, in case it fails
     bool first = true;
     while (!shut_down)
     {
-      if (!first) log.error << "*** RESTARTING SLAVE ***\n";
+      if (!first)
+      {
+	log.detail << "Waiting for " << sleep_time << "s\n";
+	MT::Thread::sleep(sleep_time);
+
+	// Exponential backoff, up to a max
+	sleep_time *= 2;
+	if (sleep_time > MAX_WATCHDOG_SLEEP_TIME) 
+	  sleep_time = MAX_WATCHDOG_SLEEP_TIME;
+
+	log.error << "*** RESTARTING SLAVE ***\n";
+      }
       first = false;
 
       log.summary << "Forking slave process\n";

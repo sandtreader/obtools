@@ -68,8 +68,6 @@ public:
 				"test.cfg", "test", 
 				"/tmp/test.log", "/var/run/test.pid") 
   {
-    // Force watchdog enabled, even in debug, for testing
-    enable_watchdog = true;
   }
 };
 

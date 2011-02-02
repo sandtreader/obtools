@@ -35,7 +35,6 @@ class Process
   string default_pid_file;     // Default PID file path
 
 protected:
-  bool enable_watchdog;        // Flag to enable watchdog
   bool shut_down;              // Shut down requested
   int slave_pid;               // PID of slave or 0 if we are the slave
 
@@ -80,11 +79,6 @@ public:
     config_element(_config_element),
     default_log_file(_default_log_file),
     default_pid_file(_default_pid_file), 
-#ifdef DEBUG
-    enable_watchdog(false),
-#else
-    enable_watchdog(true),
-#endif
     shut_down(false), slave_pid(0),
     config(cerr, XML::PARSER_OPTIMISE_CONTENT 
 	       | XML::PARSER_PRESERVE_WHITESPACE)
