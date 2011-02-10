@@ -134,7 +134,7 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	response.reason = "OK";
       
 	// Call down to subclass implementation
-	if (!handle_request(request, response, client))
+	if (!handle_request(request, response, client, s, ss))
 	{
 	  log.error << "Handler failed - sending 500\n";
 	  error(response, 500, "Server Failure");
@@ -185,7 +185,8 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 // Implementation of general request handler
 bool SimpleHTTPServer::handle_request(HTTPMessage& request, 
 				      HTTPMessage& response,
-				      SSL::ClientDetails& client)
+				      SSL::ClientDetails& client,
+				      SSL::TCPSocket&, Net::TCPStream&)
 {
   MT::RWReadLock lock(mutex);
 

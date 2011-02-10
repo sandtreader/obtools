@@ -455,7 +455,9 @@ protected:
   // If the cost of generating a body is not too great, handlers may treat
   // HEAD requests just like GET, and the server will suppress the body
   virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
-			      SSL::ClientDetails& client) = 0;
+			      SSL::ClientDetails& client,
+			      SSL::TCPSocket& socket,
+			      Net::TCPStream& stream) = 0;
 
   //--------------------------------------------------------------------------
   // Interface to generate progressive data after initial response headers
@@ -543,7 +545,8 @@ class SimpleHTTPServer: public HTTPServer
 
   // Implementation of general request handler
   bool handle_request(HTTPMessage& request, HTTPMessage& response,
-		      SSL::ClientDetails& client);
+		      SSL::ClientDetails& client, SSL::TCPSocket& socket,
+		      Net::TCPStream& stream);
 
 public:
   //--------------------------------------------------------------------------
