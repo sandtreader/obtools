@@ -20,7 +20,7 @@ MessageTransportURLHandler::MessageTransportURLHandler(
           const string& _url, ObTools::Message::Handler& _handler): 
   URLHandler(_url), message_handler(_handler)
 {
-  fix_namespace(_handler.ns_prefix, _handler.ns_url);
+  fix_namespace(_handler.ns_url, _handler.ns_prefix);
 }
 
 //--------------------------------------------------------------------------
