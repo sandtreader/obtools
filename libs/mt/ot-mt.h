@@ -754,6 +754,7 @@ private:
   Mutex mutex;
   unsigned int min_spares;
   unsigned int max_threads;
+  bool realtime;
   list<T *> spares;   // Spare waiting threads
   list<T *> actives;  // Active threads
   PoolReplacer<T> replacer;
@@ -763,6 +764,8 @@ private:
   void add_spare()
   {
     T *t = new T(replacer);
+    // Set realtime if requested
+    if (realtime) t->set_priority(10, true);
     spares.push_back(t);
   }
 
@@ -780,8 +783,9 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   // min-max is range of number of threads the pool will keep alive
-  ThreadPool(unsigned int min=1, unsigned int max=10): 
-    min_spares(min), max_threads(max), replacer(*this), shutting_down(false)
+  ThreadPool(unsigned int min=1, unsigned int max=10, bool _realtime=false): 
+    min_spares(min), max_threads(max), realtime(_realtime),
+    replacer(*this), shutting_down(false)
   { fill(); }
 
   //--------------------------------------------------------------------------
