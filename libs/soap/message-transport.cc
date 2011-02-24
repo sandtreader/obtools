@@ -99,9 +99,13 @@ MessageInterface::MessageInterface(XML::Element& config,
   int hport = xpath.get_value_int("http/@port", 0);
   if (hport)
   {
+    // Default to localhost only
+    Net::EndPoint addr(Net::IPAddress(xpath.get_value("http/@address",
+						      "localhost")), hport);
     Log::Streams log;
-    log.summary << "Starting HTTP SOAP server at port " << hport << endl;
-    http_server = new Web::SimpleHTTPServer(hport, server_name);
+
+    log.summary << "Starting HTTP SOAP server at " << addr << endl;
+    http_server = new Web::SimpleHTTPServer(addr, server_name);
 
     // Add a message transport to message broker
     broker.add_transport(new MessageTransport(*http_server));
