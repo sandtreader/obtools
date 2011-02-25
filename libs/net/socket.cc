@@ -331,7 +331,11 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
 
       // Recurse with this interface, return if it succeeds
       string mac = get_mac(ip, ifname);
-      if (!mac.empty()) return mac;
+      if (!mac.empty())
+      {
+	if_freenameindex(ifs);
+	return mac;
+      }
     }
 
     if_freenameindex(ifs);
@@ -350,7 +354,7 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
 
   if (SOCKIOCTL(fd, SIOCGARP, &arp)<0) return "";
 
-  // Check its complete
+  // Check it's complete
   if (!(arp.arp_flags & ATF_COM)) return "";
 
   // Create upper-case hex string
