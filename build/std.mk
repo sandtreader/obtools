@@ -13,6 +13,7 @@
 #              exes   Final multiple executable, each with equivalent .o
 #              lib    Library
 #              dlmod  Dynamically loaded module (with static libraries inside)
+#              reloc  Relocatable (partially linked) object file
 # NAME:      Name of the executable(s)/library/module
 # VERSION:   Version number of the shared superlibrary
 # OBJS:      List of local objects to build in the exe/lib/dlmod
@@ -330,6 +331,14 @@ RELEASABLE = $(NAME)
 RELEASE-NAME = 
 endif
 
+#Targets for reloc
+ifeq ($(TYPE), reloc)
+TARGETS = $(NAME)-reloc.o
+RELEASABLE = $(NAME)-reloc.o
+RELEASE-NAME = $(NAME)-reloc.o
+CPPFLAGS += -fpic
+endif
+
 #Targets for dlmod
 ifeq ($(TYPE), dlmod)
 TARGETS = $(NAME).$(DYNLIB)
@@ -643,6 +652,12 @@ $(foreach exe,$(NAME),$(eval $(call exe_template,$(exe))))
 ifeq ($(TYPE), lib)
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)
+endif
+
+#Relocatable (partially linked) library
+ifeq ($(TYPE), reloc)
+$(NAME)-reloc.o: $(OBJS)
+	$(CXX) $(LDFLAGS) -nostdlib -o $@ -Wl,-Ur -Wl,-\( $(DEPLIBS) $^ -Wl,-\)
 endif
 
 #DL Mod
