@@ -52,8 +52,11 @@ void MessageTransportSubscriber::handle(Message& msg)
   {
     if (message_handler.complex_result)
     {
+      // Change .request to .response
+      string orig_subject(subject, 0, subject.size()-8);
+
       // Send correlated response
-      XMLMesh::Message resp(subject+".response", response, 
+      XMLMesh::Message resp(orig_subject+".response", response, 
 			    false, msg.get_id());
       client.send(resp); 
     }
