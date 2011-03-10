@@ -66,9 +66,9 @@ Segment& Buffer::insert(const Segment& seg, unsigned int pos)
 
 //--------------------------------------------------------------------------
 // Fill an iovec array with the data
-// iovec must be pre-allocated to the maximum segments of the buffer
-// Returns the number of segments filled in
-unsigned int Buffer::fill(struct iovec *iovec)
+// iovec must be pre-allocated to the maximum segments of the buffer (size)
+// Returns the number of segments filled in, or size+1 if it overflowed
+unsigned int Buffer::fill(struct iovec *iovec, unsigned int size)
 {
   unsigned int n=0;
   for(unsigned int i=0; i<count; i++)
@@ -76,6 +76,9 @@ unsigned int Buffer::fill(struct iovec *iovec)
     Segment &seg = segments[i];
     if (seg.length)
     {
+      // Check we haven't overflowed
+      if (n >= size) return size+1;
+
       iovec->iov_base = (void *)seg.data;
       iovec->iov_len  = seg.length;
       iovec++; n++;

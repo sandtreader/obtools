@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
   // Output it to stdout via writev
   struct iovec io[4];
-  writev(1, io, buffer.fill(io));
+  writev(1, io, buffer.fill(io, 4));
 
   return 0;  
 }

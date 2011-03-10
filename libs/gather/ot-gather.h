@@ -152,9 +152,9 @@ public:
 
   //--------------------------------------------------------------------------
   // Fill an iovec array with the data
-  // iovec must be pre-allocated to the maximum segments of the buffer
-  // Returns the number of segments filled in
-  unsigned int fill(struct iovec *iovec);
+  // iovec must be pre-allocated to the maximum segments of the buffer (size)
+  // Returns the number of segments filled in, or size+1 if it overflowed
+  unsigned int fill(struct iovec *iovec, unsigned int size);
 
   //--------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well
