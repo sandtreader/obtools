@@ -1,8 +1,0 @@
-
-help
-?
-burble
-foo
-foo BAR    34
-fred
-jim

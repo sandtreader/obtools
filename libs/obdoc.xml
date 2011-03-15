@@ -1,9 +1,0 @@
-<project name="libs">
-<title>ObTools Libraries</title>
-<desc>
-<p>The ObTools Libraries contain code which is (in theory at least) reusable between projects.  Every other ObTools project depends on these.</p>
-<p>If you're new to this code, the libraries are listed below in the approximate order we suggest you browse them - the simple and easy ones come first, and the hard stuff is at the end!</p>
-</desc>
-
-
-

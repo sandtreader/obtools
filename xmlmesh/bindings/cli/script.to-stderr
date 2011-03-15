@@ -1,4 +1,0 @@
-#!/bin/sh
-#Echo input to stderr for debugging
-echo Subject: $1 >&2
-cat >&2

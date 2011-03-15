@@ -1,4 +1,0 @@
-#!/bin/sh
-#Ignore input and fail
-echo "Oh dear!"
-exit 1
