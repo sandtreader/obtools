@@ -88,13 +88,13 @@ public:
   //------------------------------------------------------------------------
   // MultiClient methods exposed for outgoing messages
   bool request(Message& req, Message& response)
-  { return client->request(req, response); }
+  { return client?client->request(req, response):false; }
 
   bool request(Message& req) 
-  { return client->request(req); }
+  { return client?client->request(req):false; }
 
   bool send(Message& req) 
-  { return client->send(req); }
+  { return client?client->send(req):false; }
 
   //--------------------------------------------------------------------------
   // Destructor - destroys message interface
