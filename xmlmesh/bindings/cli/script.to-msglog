@@ -1,4 +1,0 @@
-#!/bin/sh
-#Echo input to /tmp/msglog for debugging
-echo Subject: $1 >> /tmp/msglog
-cat >> /tmp/msglog

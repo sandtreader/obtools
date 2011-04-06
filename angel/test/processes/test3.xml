@@ -1,5 +1,0 @@
-<!-- Angel test process 'test3' -->
-<process id="test3">
-  <name>Test Process 3</name>
-  <command>../test/test-process/build-debug/test-process "Test3"</command>
-</process>
