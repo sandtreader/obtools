@@ -5,15 +5,15 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-SUBS = text file xml xmi cppt regen mt net chan misc time log cache \
-       db db-pgsql db-mysql                                         \
-       cli init crypto ssl ssl-openssl web msg soap hash tube ring  \
-       access dns daemon gather superlibs
+SUBS = text file xml mt net chan misc time log cache \
+       db db-mysql                                         \
+       init crypto ssl ssl-openssl web msg soap hash tube  \
+       access dns daemon  
 
 #Different for cross compile
-SUBS_MINGW = text file xml xmi cppt regen mt net chan misc time log cache \
-             cli init crypto ssl ssl-openssl web msg soap hash tube ring \
-             access dns gather superlibs
+SUBS_MINGW = text file xml mt net chan misc time log cache \
+             init crypto ssl ssl-openssl web msg soap hash tube \
+             access dns  
 SUBS_MIPS = $(SUBS_MINGW)
 SUBS_SH4 = $(SUBS_MINGW)
 
