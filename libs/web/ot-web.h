@@ -395,6 +395,11 @@ public:
 
   //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
+  // Returns detailed status code
+  int do_fetch(HTTPMessage& request, HTTPMessage& response);
+
+  //--------------------------------------------------------------------------
+  // Basic operation - send HTTP message and receive HTTP response
   // Returns whether successfully sent (even if error received)
   bool fetch(HTTPMessage& request, HTTPMessage& response);
 

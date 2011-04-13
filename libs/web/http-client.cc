@@ -59,8 +59,8 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
 
 //--------------------------------------------------------------------------
 // Basic operation - send HTTP message and receive HTTP response
-// Whether successfully sent (even if error received)
-bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
+// Returns detailed status code
+int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 {
   Log::Streams log;
 
@@ -69,7 +69,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
   if(!request.url.split(xml))
   {
     log.error << "HTTP: Bad URL " << request.url << endl;
-    return false;
+    return 1;
   }
 
   XML::XPathProcessor xpath(xml);
@@ -124,7 +124,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
       log.error << "HTTP: Can't connect to " << server << endl;
       delete socket;
       socket = 0;
-      return false;
+      return 100;
     }
 
     // Enable reuse and capture local address used, so P2P can turn around
@@ -144,7 +144,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
       log.error << "HTTP: Can't send request to " << server << endl;
       delete stream; stream = 0;
       delete socket; socket = 0;
-      return false;
+      return 201;
     }
 
     stream->flush();
@@ -166,7 +166,7 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
       log.error << "HTTP: Can't fetch response from " << server << endl;
       delete stream; stream = 0;
       delete socket; socket = 0;
-      return false;
+      return 202;
     }
 
     OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
@@ -200,10 +200,18 @@ bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
     log.error << "HTTP: " << se << endl;
     delete stream; stream = 0;
     delete socket; socket = 0;
-    return false;
+    return 203;
   }
 
-  return true;
+  return 0;
+}
+
+//--------------------------------------------------------------------------
+// Basic operation - send HTTP message and receive HTTP response
+// Whether successfully sent (even if error received)
+bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
+{
+  return !do_fetch(request, response);
 }
 
 //--------------------------------------------------------------------------
@@ -214,10 +222,11 @@ int HTTPClient::get(const URL& url, string& body)
   HTTPMessage request("GET", url);
   HTTPMessage response;
 
-  if (!fetch(request, response))
+  int result(0);
+  if ((result = do_fetch(request, response)))
   {
     body = "Connection failed";
-    return 400;
+    return -result;
   }
 
   // Now extract body, if any
@@ -242,10 +251,11 @@ int HTTPClient::post(const URL& url, const string& request_body,
   request.headers.put("Content-Type", "application/x-www-form-urlencoded");
 
   HTTPMessage response;
-  if (!fetch(request, response))
+  int result(0);
+  if ((result = do_fetch(request, response)))
   {
     response_body = "Connection failed";
-    return 400;
+    return -result;
   }
 
   // Now extract body, if any
