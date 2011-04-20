@@ -75,14 +75,61 @@ bool Context::use_private_key(const string& pem, const string& pass_phrase)
 }
 
 //--------------------------------------------------------------------------
+// Get the index for picking the Context* from an SSL context
+static int get_ssl_ctx_index()
+{
+  static int index = SSL_CTX_get_ex_new_index(0, 0, 0, 0, 0);
+  return index;
+}
+
+//--------------------------------------------------------------------------
+// Verify callback function to check common name
+static int verify_common_name_callback(int preverify_ok,
+                                       X509_STORE_CTX *x509_ctx)
+{
+  if (!preverify_ok)
+    return 0;
+
+  // If we're somewhere on the chain that isn't the peer, we aren't interested
+  int depth = X509_STORE_CTX_get_error_depth(x509_ctx);
+  if (depth)
+    return 1;
+
+  if (x509_ctx)
+  {
+    OpenSSL *ssl = reinterpret_cast<OpenSSL *>(X509_STORE_CTX_get_ex_data(
+          x509_ctx, SSL_get_ex_data_X509_STORE_CTX_idx()));
+    SSL_CTX *ssl_ctx = ssl->ctx;
+    Context *ctx = reinterpret_cast<Context *>(SSL_CTX_get_ex_data(ssl_ctx,
+                                                 get_ssl_ctx_index()));
+    if (ctx)
+    {
+      X509 *current_cert = X509_STORE_CTX_get_current_cert(x509_ctx);
+      char buff[256];
+      X509_NAME_get_text_by_NID(X509_get_subject_name(current_cert),
+                                NID_commonName, buff, sizeof(buff));
+      buff[sizeof(buff) - 1] = '\0';
+      return (ctx->verify_common_name == buff);
+    }
+  }
+  return 0;
+}
+
+//--------------------------------------------------------------------------
 // Enable peer certificate verification
 // Set 'force' to require them, otherwise optional
-void Context::enable_peer_verification(bool force)
+void Context::enable_peer_verification(bool force, bool common_name)
 {
-  if (ctx) 
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER 
-		            | (force?SSL_VERIFY_FAIL_IF_NO_PEER_CERT:0),
-		       0);
+  if (ctx)
+  {
+    if (common_name)
+    {
+      SSL_CTX_set_ex_data(ctx, get_ssl_ctx_index(), this);
+    }
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER
+                            | (force?SSL_VERIFY_FAIL_IF_NO_PEER_CERT:0),
+                       (common_name?verify_common_name_callback:0));
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -205,6 +252,31 @@ void Context::log_errors(const string& text)
 }
 
 //--------------------------------------------------------------------------
+// Static:  Configure verification from an <ssl> configuration element
+void Context::configure_verification(Context *ssl_ctx, XML::Element& ssl_e)
+{
+  XML::XPathProcessor xpath(ssl_e);
+
+  // Enable verification if requested
+  if (xpath.get_value_bool("verify/@enabled"))
+  {
+    bool mandatory = xpath.get_value_bool("verify/@mandatory");
+    ssl_ctx->verify_common_name = xpath.get_value("verify/@common-name");
+
+    ssl_ctx->enable_peer_verification(mandatory,
+                                      !ssl_ctx->verify_common_name.empty());
+
+    // Load CA file/directory
+    ssl_ctx->set_verify_paths(xpath.get_value("verify/root/file"),
+                              xpath.get_value("verify/root/directory"));
+
+    // Optionally load defaults
+    if (xpath.get_value_bool("verify/root/@defaults"))
+      ssl_ctx->set_default_verify_paths();
+  }
+}
+
+//--------------------------------------------------------------------------
 // Static:  Create from an <ssl> configuration element
 // Returns context, or 0 if disabled or failed
 Context *Context::create(XML::Element& ssl_e, string pass_phrase)
@@ -256,20 +328,27 @@ Context *Context::create(XML::Element& ssl_e, string pass_phrase)
       return 0;
   }
 
-  // Enable verification if requested
-  if (xpath.get_value_bool("verify/@enabled"))
-  {
-    bool mandatory = xpath.get_value_bool("verify/@mandatory");
-    ssl_ctx->enable_peer_verification(mandatory);
+  configure_verification(ssl_ctx, ssl_e);
 
-    // Load CA file/directory
-    ssl_ctx->set_verify_paths(xpath.get_value("verify/root/file"),
-			      xpath.get_value("verify/root/directory"));
+  // Set up session ID context
+  ssl_ctx->set_session_id_context(xpath.get_value("session/@context", "pst"));
 
-    // Optionally load defaults
-    if (xpath.get_value_bool("verify/root/@defaults"))
-      ssl_ctx->set_default_verify_paths();
-  }
+  return ssl_ctx;
+}
+
+//--------------------------------------------------------------------------
+// Static:  Create from an <ssl> configuration element with no key or cert
+// Returns context, or 0 if disabled or failed
+Context *Context::create_anonymous(XML::Element& ssl_e)
+{
+  if (!ssl_e.get_attr_bool("enabled")) return 0;
+
+  XML::XPathProcessor xpath(ssl_e);
+  Log::Streams log;
+
+  Context *ssl_ctx = new Context();
+
+  configure_verification(ssl_ctx, ssl_e);
 
   // Set up session ID context
   ssl_ctx->set_session_id_context(xpath.get_value("session/@context", "pst"));

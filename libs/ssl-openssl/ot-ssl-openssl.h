@@ -64,6 +64,8 @@ class Context: public SSL::Context
   SSL_CTX *ctx;  // OpenSSL library context
 
 public:
+  string verify_common_name;
+
   //--------------------------------------------------------------------------
   // Constructor: Allocates context
   Context();
@@ -89,7 +91,8 @@ public:
   //--------------------------------------------------------------------------
   // Enable peer certificate verification
   // Set 'force' to require them, otherwise optional
-  void enable_peer_verification(bool force = false);
+  // Set 'common_name' to require the CN to match verify_common_name
+  void enable_peer_verification(bool force = false, bool common_name = false);
 
   //--------------------------------------------------------------------------
   // Use given verify locations (list of trusted CAs)
@@ -126,9 +129,18 @@ public:
   static void log_errors(const string& text);
 
   //--------------------------------------------------------------------------
+  // Static:  Set verification options from an <ssl> configuration element
+  static void configure_verification(Context *ssl_ctx, XML::Element& ssl_e);
+
+  //--------------------------------------------------------------------------
   // Static:  Create from an <ssl> configuration element
   // Returns context, or 0 if disabled or failed
   static Context *create(XML::Element& ssl_e, string pass_phrase = "");
+
+  //--------------------------------------------------------------------------
+  // Static:  Create from an <ssl> configuration element with no key or cert
+  // Returns context, or 0 if disabled or failed
+  static Context *create_anonymous(XML::Element& ssl_e);
 };
 
 
