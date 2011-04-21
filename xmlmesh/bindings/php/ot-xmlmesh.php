@@ -11,6 +11,7 @@ $xmlmesh_host = "localhost";
 $xmlmesh_port = 29167;
 $xmlmesh_timeout = 5;
 $xmlmesh_last_error = "";
+$xmlmesh_socket = null;  // Persistent socket within page only
 
 //------------------------------------------------------------------------
 //Internal - send/receive XML message, return (optional) result in response
@@ -18,10 +19,13 @@ $xmlmesh_last_error = "";
 function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
 {
   global $xmlmesh_host, $xmlmesh_port, $xmlmesh_timeout, $xmlmesh_last_error;
+  global $xmlmesh_socket;
 
-  // Open TCP socket to server
-  $fp = fsockopen($xmlmesh_host, $xmlmesh_port, $errno, $errstr, 
-		  $xmlmesh_timeout);
+  // Open TCP socket to server if not already open
+  if (!$xmlmesh_socket)
+    $xmlmesh_socket = fsockopen($xmlmesh_host, $xmlmesh_port, $errno, $errstr, 
+				$xmlmesh_timeout);
+  $fp = $xmlmesh_socket;
   if ($fp) 
   {
     // Set timeout for response
@@ -53,11 +57,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     fwrite($fp, $soap);                      // Message
 
     // If not requiring a response, that's it
-    if (!$rsvp)
-    {
-      fclose($fp);
-      return true;
-    }
+    if (!$rsvp) return true;
 
     // Read OTMP header back
     $header = "";
@@ -72,6 +72,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     {
       $xmlmesh_last_error = "Truncated header in response";
       fclose($fp);
+      $xmlmesh_socket = null;
       return false;
     }
 
@@ -81,6 +82,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     {
       $xmlmesh_last_error = "Bad tag in response";
       fclose($fp);
+      $xmlmesh_socket = null;
       return false;
     }
 
@@ -94,11 +96,11 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
       $len = strlen($response);
     }
 
-    fclose($fp);
-
     if ($len < $length) 
     {
       $xmlmesh_last_error = "Truncated message in response";
+      fclose($fp);
+      $xmlmesh_socket = null;
       return false;
     }
 
