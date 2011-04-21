@@ -26,6 +26,9 @@
 # RESDEPS:   Other dependences for resource file
 # TESTS:     List of test executables to build
 # TESTCMD:   Test command
+# TESTLIB:   Test libraries to link for TESTS (e.g. -lgtest)
+# MAINOBJ:   Use to specify main object for exclusion in exe TESTS
+#            (default: main.o)
 # CONFIGS:   Configs and other files copied to release
 # VARIANTS:  List of build variants (see below)
 # VARIANT-xx: Flags for each variant
@@ -321,6 +324,15 @@ ifeq ($(TYPE), exe)
 TARGETS = $(NAME)$(EXE-SUFFIX)
 RELEASABLE = $(NAME)
 RELEASE-NAME = $(NAME)
+
+ifdef DEBUG         # Only build tests in DEBUG & PROFILED versions
+#Expand tests to include suffix, if set
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+endif
+ifdef PROFILED
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+endif
+
 endif
 
 #Targets for multiple executables
@@ -614,11 +626,23 @@ endif
 endif
 
 #Test harnesses:
+ifeq ($(TYPE), exe)
+ifndef MAINOBJ
+MAINOBJ = main.o
+endif
+NOTMAINS = $(filter-out $(MAINOBJ),$(OBJS))
 define test_template
-$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS)
+$(1)$$(EXE-SUFFIX): $(1).o $$(NOTMAINS) $$(DEPLIBS) 
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
 TESTOBJS += $(1).o
 endef
+else
+define test_template
+$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+TESTOBJS += $(1).o
+endef
+endif
 
 $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 
