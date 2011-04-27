@@ -24,6 +24,7 @@ static Init::NewFactory<Action, LogAction,      Action::CP> log_factory;
 static Init::NewFactory<Action, DelayAction,    Action::CP> delay_factory;
 static Init::NewFactory<Action, ScopeAction,    Action::CP> scope_factory;
 static Init::NewFactory<Action, SetAction,      Action::CP> set_factory;
+static Init::NewFactory<Action, ThreadAction,   Action::CP> thread_factory;
 
 //------------------------------------------------------------------------
 //Constructor
@@ -38,6 +39,7 @@ BaseLanguage::BaseLanguage(): Language()
   register_action("delay",  delay_factory);
   register_action("scope",  scope_factory);
   register_action("set",    set_factory);
+  register_action("thread", thread_factory);
 }
 
 

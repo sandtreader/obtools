@@ -243,6 +243,47 @@ public:
 };
 
 //==========================================================================
+// Thread action
+// Action which runs the sequence within it in a separate processor thread
+// - use for blocking sub-actions such as network connections etc.
+// Note:  Creates its own context
+class ThreadAction: public SequenceAction
+{
+private:
+  class ActionThread: public MT::Thread
+  {
+    ThreadAction& action;
+    Context context;
+    virtual void run() { action.run_thread(context); }
+
+  public:
+    ActionThread(ThreadAction& a, Context& c): action(a), context(c) 
+      { start(); }
+  };
+
+  ActionThread *thread;
+  int sleep_time;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ThreadAction(CP cp);
+
+  //------------------------------------------------------------------------
+  // Tick action
+  // Returns whether still active
+  bool tick(Context& con);
+
+  //------------------------------------------------------------------------
+  // Run thread - called from ActionThread
+  void run_thread(Context& con);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  virtual ~ThreadAction();
+};
+
+//==========================================================================
 //Log action
 // e.g. <log level="1">Something happened</log>
 class LogAction: public SingleAction

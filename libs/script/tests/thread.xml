@@ -1,0 +1,19 @@
+<!-- Example ObTools::Script script demonstrating <thread> -->
+<script>
+  <group>
+    <thread sleep="1000000">
+      <repeat times="10">
+        <log>Thread 1 iteration $index</log>
+      </repeat>
+      <log>Thread 1 finished</log>
+    </thread>
+
+    <thread sleep="100000">
+      <repeat times="100">
+        <log>Thread 2 iteration $index</log>
+      </repeat>
+      <log>Thread 2 finished</log>
+    </thread>
+  </group>
+  <log>All done!</log>
+</script>
