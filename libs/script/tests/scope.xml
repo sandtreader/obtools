@@ -1,0 +1,14 @@
+<!-- Example ObTools::Script script demonstrating <scope> -->
+<script>
+  <group>
+    <set var="foo">FOO!</set>
+    <log>Outer scope 1, 'foo' = $foo</log>
+    <scope>
+      <group>
+        <set var="foo">BAR!</set>
+        <log>Inner scope, 'foo' = $foo</log>
+      </group>
+    </scope>
+    <log>Outer scope 2, 'foo' = $foo</log>
+  </group>
+</script>

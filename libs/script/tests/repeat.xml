@@ -1,0 +1,6 @@
+<!-- Example ObTools::Script script demonstrating <repeat> -->
+<script>
+  <repeat times="10">
+    <log>Iteration $index</log>
+  </repeat>
+</script>

@@ -15,10 +15,15 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Run action
-void LogAction::run()
+void LogAction::run(Context& con)
 {
   int level = xml.get_attr_int("level", Log::LEVEL_SUMMARY);
-  Log::Message msg((Log::Level)level, xml.get_content());
+  string text = xml.get_content();
+
+  // Interpolate with context vars
+  text = con.vars.interpolate(text);
+
+  Log::Message msg((Log::Level)level, text);
   Log::logger.log(msg);
 }
 

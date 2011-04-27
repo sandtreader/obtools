@@ -32,7 +32,7 @@ DelayAction::DelayAction(Action::CP cp): Action(cp)
 //------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
-bool DelayAction::tick()
+bool DelayAction::tick(Context&)
 {
   return script.now<=start || script.now-start < time;
 }

@@ -23,10 +23,13 @@ RepeatAction::RepeatAction(Action::CP cp):
 //------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
-bool RepeatAction::tick()
+bool RepeatAction::tick(Context& con)
 {
+  // Set scope variable
+  con.vars.add("index", index);
+
   // Try to tick sequence - if still running, that's fine
-  if (SequenceAction::tick()) return true;
+  if (SequenceAction::tick(con)) return true;
 
   // Check for number of times exceeded
   if (times && ++index >= times) return false;

@@ -25,7 +25,7 @@ ReplicatedAction::ReplicatedAction(Action::CP cp): Action(cp), started(0)
 //------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
-bool ReplicatedAction::tick()
+bool ReplicatedAction::tick(Context& con)
 {
   // If less started than wanted, start some
   while (started < copies)
@@ -35,8 +35,7 @@ bool ReplicatedAction::tick()
      || (script.now >= last_start && script.now-last_start >= spread))
     {
       // Create SequenceAction child using our own XML as the model 
-      actions.push_back(new SequenceAction(Action::CP(script, xml)));
-      started++;
+      actions[started++] = new SequenceAction(Action::CP(script, xml));
       last_start = script.now;
     }
 
@@ -45,11 +44,15 @@ bool ReplicatedAction::tick()
   }
 
   // Tick all actions, deleting any that have finished
-  for(list<Action *>::iterator p = actions.begin(); p!=actions.end();)
+  for(map<int, Action *>::iterator p = actions.begin(); p!=actions.end();)
   {
-    list<Action *>::iterator q = p++;  // Protect from deletion
-    Action *a = *q;
-    if (!a->tick())
+    map<int, Action *>::iterator q = p++;  // Protect from deletion
+    Action *a = q->second;
+
+    // Set copy variable
+    con.vars.add("copy", q->first);
+
+    if (!a->tick(con))
     {
       actions.erase(q);
       delete a;
@@ -64,8 +67,8 @@ bool ReplicatedAction::tick()
 // Destructor
 ReplicatedAction::~ReplicatedAction()
 {
-  for(list<Action *>::iterator p = actions.begin(); p!=actions.end();++p)
-    delete *p;
+  for(map<int, Action *>::iterator p = actions.begin(); p!=actions.end();++p)
+    delete p->second;
 }
 
 

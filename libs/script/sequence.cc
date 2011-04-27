@@ -37,7 +37,7 @@ bool SequenceAction::create_current()
 //------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
-bool SequenceAction::tick()
+bool SequenceAction::tick(Context& con)
 {
   if (!current)
   {
@@ -47,7 +47,7 @@ bool SequenceAction::tick()
   }
 
   // Tick current
-  if (current->tick()) return true;
+  if (current->tick(con)) return true;
 
   // If it's finished, delete it and mark for next time
   delete current;

@@ -21,7 +21,7 @@ ParallelAction::ParallelAction(Action::CP cp, bool _race):
 //------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
-bool ParallelAction::tick()
+bool ParallelAction::tick(Context& con)
 {
   // If not started, start all children actions simultaneously
   if (!started)
@@ -42,7 +42,7 @@ bool ParallelAction::tick()
   {
     list<Action *>::iterator q = p++;  // Protect from deletion
     Action *a = *q;
-    if (!a->tick())
+    if (!a->tick(con))
     {
       actions.erase(q);
       delete a;

@@ -24,6 +24,20 @@ using namespace std;
 class Script;
 
 //==========================================================================
+// Script context
+// Represents a scope level
+struct Context
+{
+  Misc::PropertyList vars;
+
+  // Default constructor - empty vars
+  Context() {}
+
+  // Copy constructor
+  Context(const Context& o): vars(o.vars) {}
+};
+
+//==========================================================================
 // Script action (abstract)
 // Dynamically created during run - only active actions on the stack will
 // be instantiated at any one time 
@@ -48,7 +62,7 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  virtual bool tick() = 0;
+  virtual bool tick(Context&) = 0;
 
   //------------------------------------------------------------------------
   // Virtual destructor
@@ -68,11 +82,11 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Does 'run()', then always returns false
-  bool tick() { run(); return false; }
+  bool tick(Context& con) { run(con); return false; }
 
   //------------------------------------------------------------------------
   // Run action
-  virtual void run()=0;
+  virtual void run(Context& con)=0;
 };
 
 //==========================================================================
@@ -96,7 +110,7 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  virtual bool tick();
+  virtual bool tick(Context& con);
 
   //------------------------------------------------------------------------
   // Restart sequence
@@ -126,7 +140,7 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  bool tick();
+  bool tick(Context& con);
 };
 
 //==========================================================================
@@ -149,7 +163,7 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  bool tick();
+  bool tick(Context& con);
 
   //------------------------------------------------------------------------
   // Destructor
@@ -189,7 +203,7 @@ private:
   Time::Duration spread;
   int started;
   Time::Stamp last_start;
-  list<Action *> actions;
+  map<int, Action *> actions;
 
 public:
   //------------------------------------------------------------------------
@@ -199,11 +213,33 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  bool tick();
+  bool tick(Context& con);
 
   //------------------------------------------------------------------------
   // Destructor
   virtual ~ReplicatedAction();
+};
+
+//==========================================================================
+// Scope action
+// Action which provides a new scope level.  Note variables from outer levels
+// are copied into the new scope, not referred - therefore updates are not
+// passed out
+class ScopeAction: public SequenceAction
+{
+private:
+  Context context;  // Our new context
+  bool ticked;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ScopeAction(CP cp);
+
+  //------------------------------------------------------------------------
+  // Tick action
+  // Returns whether still active
+  bool tick(Context& con);
 };
 
 //==========================================================================
@@ -218,7 +254,7 @@ public:
 
   //------------------------------------------------------------------------
   // Run action
-  void run();
+  void run(Context& con);
 };
 
 //==========================================================================
@@ -237,7 +273,22 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  bool tick();
+  bool tick(Context& con);
+};
+
+//==========================================================================
+//Set action
+// e.g. <set var="foo">content</set>
+class SetAction: public SingleAction
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  SetAction(Action::CP cp): SingleAction(cp) {}
+
+  //------------------------------------------------------------------------
+  // Run action
+  void run(Context& con);
 };
 
 //==========================================================================

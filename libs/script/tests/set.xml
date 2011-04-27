@@ -1,0 +1,8 @@
+<!-- Example ObTools::Script script demonstrating <set> -->
+<script>
+  <group>
+    <set var="foo">FOO!</set>
+    <set var="bar">$foo BAR!</set>
+    <log>$bar</log>
+  </group>
+</script>

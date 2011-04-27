@@ -24,7 +24,8 @@ Script::Script(Language& _language, XML::Element& _xml):
 bool Script::tick()
 {
   now = Time::Stamp::now();
-  return SequenceAction::tick();
+  Context con;
+  return SequenceAction::tick(con);
 }
 
 //------------------------------------------------------------------------
