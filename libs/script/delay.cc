@@ -18,7 +18,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-DelayAction::DelayAction(Action::CP cp): Action(cp)
+DelayAction::DelayAction(const CP& cp): Action(cp)
 {
   start = script.now;
   time = Time::Duration(xml.get_attr("time","0"));

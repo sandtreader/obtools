@@ -57,7 +57,7 @@ public:
     XML::Element& xml;
     CP(Script& _script, XML::Element& _xml): script(_script), xml(_xml) {}
   };
-  Action(CP cp): script(cp.script), xml(cp.xml) {}
+  Action(const CP& cp): script(cp.script), xml(cp.xml) {}
 
   //------------------------------------------------------------------------
   // Tick action
@@ -77,7 +77,7 @@ class SingleAction: public Action
 public:
   //------------------------------------------------------------------------
   // Constructor
-  SingleAction(CP cp): Action(cp) {}
+  SingleAction(const CP& cp): Action(cp) {}
 
   //------------------------------------------------------------------------
   // Tick action
@@ -105,7 +105,7 @@ protected:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  SequenceAction(CP cp);
+  SequenceAction(const CP& cp);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -135,7 +135,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  RepeatAction(CP cp);
+  RepeatAction(const CP& cp);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -158,7 +158,7 @@ public:
   // Constructor
   // If 'race' is set, the entire group is stopped when the first one 
   // finishes; otherwise, the group continues until the last finishes
-  ParallelAction(CP cp, bool race);
+  ParallelAction(const CP& cp, bool race);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -178,7 +178,7 @@ class GroupAction: public ParallelAction
 public:
   //------------------------------------------------------------------------
   // Constructor
-  GroupAction(CP cp): ParallelAction(cp, false) {}
+  GroupAction(const CP& cp): ParallelAction(cp, false) {}
 };
 
 //==========================================================================
@@ -189,7 +189,7 @@ class RaceAction: public ParallelAction
 public:
   //------------------------------------------------------------------------
   // Constructor
-  RaceAction(CP cp): ParallelAction(cp, true) {}
+  RaceAction(const CP& cp): ParallelAction(cp, true) {}
 };
 
 //==========================================================================
@@ -208,7 +208,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  ReplicatedAction(CP cp);
+  ReplicatedAction(const CP& cp);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -234,7 +234,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  ScopeAction(CP cp);
+  ScopeAction(const CP& cp);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -267,7 +267,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  ThreadAction(CP cp);
+  ThreadAction(const CP& cp);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -291,7 +291,7 @@ class LogAction: public SingleAction
 public:
   //------------------------------------------------------------------------
   // Constructor
-  LogAction(Action::CP cp): SingleAction(cp) {}
+  LogAction(const CP& cp): SingleAction(cp) {}
 
   //------------------------------------------------------------------------
   // Run action
@@ -309,7 +309,7 @@ class DelayAction: public Action
 public:
   //------------------------------------------------------------------------
   // Constructor
-  DelayAction(Action::CP cp);
+  DelayAction(const CP& cp);
 
   //------------------------------------------------------------------------
   // Tick action
@@ -325,7 +325,7 @@ class SetAction: public SingleAction
 public:
   //------------------------------------------------------------------------
   // Constructor
-  SetAction(Action::CP cp): SingleAction(cp) {}
+  SetAction(const CP& cp): SingleAction(cp) {}
 
   //------------------------------------------------------------------------
   // Run action

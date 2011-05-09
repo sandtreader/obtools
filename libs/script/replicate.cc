@@ -16,7 +16,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-ReplicatedAction::ReplicatedAction(Action::CP cp): Action(cp), started(0)
+ReplicatedAction::ReplicatedAction(const CP& cp): Action(cp), started(0)
 {
   copies = xml.get_attr_int("copies", 1);
   spread = Time::Duration(xml.get_attr("spread","0"));

@@ -14,7 +14,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-RepeatAction::RepeatAction(Action::CP cp): 
+RepeatAction::RepeatAction(const CP& cp): 
   SequenceAction(cp), index(0)
 {
   times = xml.get_attr_int("times");

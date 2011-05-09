@@ -19,7 +19,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-ThreadAction::ThreadAction(Action::CP cp): SequenceAction(cp), thread(0)
+ThreadAction::ThreadAction(const CP& cp): SequenceAction(cp), thread(0)
 {
   sleep_time = xml.get_attr_int("sleep", DEFAULT_SLEEP_TIME);
 }
