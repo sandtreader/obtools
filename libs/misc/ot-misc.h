@@ -454,9 +454,9 @@ public:
   int count() const { return ranges.size(); }
 
   //------------------------------------------------------------------------
-  // Check if the set is complete up to total_length
-  bool is_complete() const { return contains(0, total_length); } 
-
+  // Check if the set is complete up to total_length, or there was nothing
+  // to fetch
+  bool is_complete() const { return !total_length||contains(0, total_length); } 
   //------------------------------------------------------------------------
   // Get percentage coverage
   int percentage_complete() 
