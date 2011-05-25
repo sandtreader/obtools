@@ -27,6 +27,7 @@
 # TESTS:     List of test executables to build
 # TESTCMD:   Test command
 # TESTLIB:   Test libraries to link for TESTS (e.g. -lgtest)
+# RELOCEXTRA: Extra archives to pull in when creating relocatable
 # MAINOBJ:   Use to specify main object for exclusion in exe TESTS
 #            (default: main.o)
 # CONFIGS:   Configs and other files copied to release
@@ -681,7 +682,7 @@ endif
 #Relocatable (partially linked) library
 ifeq ($(TYPE), reloc)
 $(NAME)-reloc.o: $(OBJS)
-	$(CXX) $(LDFLAGS) -nostdlib -o $@ -Wl,-Ur -Wl,-\( $(DEPLIBS) $^ -Wl,-\)
+	$(CXX) $(LDFLAGS) -nostdlib -o $@ -Wl,-Ur -Wl,-\( $(DEPLIBS) $(RELOCEXTRA) $^ -Wl,-\)
 endif
 
 #DL Mod
