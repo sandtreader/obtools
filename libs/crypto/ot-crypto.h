@@ -401,6 +401,11 @@ public:
   void read(const string& text, const string& pass_phrase,
 	    bool force_private = false);
 
+  //------------------------------------------------------------------------
+  // Read from DER
+  // If force_private is set, reads a private key even if public (see above)
+  void read_der(const string& der, bool force_private = false);
+
   // Backwards compatibility stub
   void read(const string& text, bool force_private = false);
     

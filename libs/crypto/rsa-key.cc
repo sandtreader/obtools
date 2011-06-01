@@ -98,6 +98,38 @@ void RSAKey::read(const string& text,
   if (rsa) valid = true;
 }
 
+//------------------------------------------------------------------------
+// Read from DER
+// If force_private is set, reads a private key even if public (see above)
+void RSAKey::read_der(const string& der, bool force_private)
+{
+  int length = der.size() + 1; // C string
+
+  // Create 'BIO'
+  BIO *bio = BIO_new(BIO_s_mem());
+  if (!bio) return;
+
+  // Create memory buffer
+  BUF_MEM *buf = BUF_MEM_new();
+  if (!buf) return;
+  BUF_MEM_grow(buf, length);
+  memcpy(buf->data, der.c_str(), length);
+
+  // Attach to BIO (auto free of buf)
+  BIO_set_mem_buf(bio, buf, BIO_CLOSE);
+
+  // Read key
+  if (is_private || force_private)
+    rsa = d2i_RSAPrivateKey_bio(bio, 0);
+  else
+    rsa = d2i_RSAPublicKey_bio(bio, 0);
+
+  // Clean up
+  BIO_free(bio);
+
+  if (rsa) valid = true;
+}
+
 // Backwards compatibility stub
 void RSAKey::read(const string& text, bool force_private)
 { read(text, "", force_private); }
