@@ -97,6 +97,11 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Destructor
+  // Trashes the key!
+  ~AESKey();
+
+  //------------------------------------------------------------------------
   // Create a new key from random data
   // Must seed PRNG first
   void create();

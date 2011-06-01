@@ -18,6 +18,19 @@
 namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
+// Destructor
+// Trashes the key!
+AESKey::~AESKey()
+{
+  // Manual trashing in case memset in compromised
+  for (unsigned int i = 0; i < sizeof(key); ++i)
+  {
+    key[i] = 0xff;
+    key[i] = 0;
+  }
+}
+
+//------------------------------------------------------------------------
 // Create a new key from random data
 // Must seed PRNG first
 void AESKey::create()
