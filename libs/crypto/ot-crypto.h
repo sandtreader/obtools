@@ -409,7 +409,8 @@ public:
   //------------------------------------------------------------------------
   // Read from DER
   // If force_private is set, reads a private key even if public (see above)
-  void read_der(const string& der, bool force_private = false);
+  void read_der(const unsigned char* der, int length,
+                bool force_private = false);
 
   // Backwards compatibility stub
   void read(const string& text, bool force_private = false);

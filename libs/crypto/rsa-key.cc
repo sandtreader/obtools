@@ -101,10 +101,8 @@ void RSAKey::read(const string& text,
 //------------------------------------------------------------------------
 // Read from DER
 // If force_private is set, reads a private key even if public (see above)
-void RSAKey::read_der(const string& der, bool force_private)
+void RSAKey::read_der(const unsigned char *der, int length, bool force_private)
 {
-  int length = der.size() + 1; // C string
-
   // Create 'BIO'
   BIO *bio = BIO_new(BIO_s_mem());
   if (!bio) return;
@@ -113,7 +111,7 @@ void RSAKey::read_der(const string& der, bool force_private)
   BUF_MEM *buf = BUF_MEM_new();
   if (!buf) return;
   BUF_MEM_grow(buf, length);
-  memcpy(buf->data, der.c_str(), length);
+  memcpy(buf->data, der, length);
 
   // Attach to BIO (auto free of buf)
   BIO_set_mem_buf(bio, buf, BIO_CLOSE);
