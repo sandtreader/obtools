@@ -647,11 +647,19 @@ $(1)$$(EXE-SUFFIX): $(1).o $$(NOTMAINS) $$(DEPLIBS)
 TESTOBJS += $(1).o
 endef
 else
+ifeq ($(TYPE), reloc)
+define test_template
+$(1)$$(EXE-SUFFIX): $(1).o -ldl $$(RELEASABLE) $$(DEPLIBS) 
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+TESTOBJS += $(1).o
+endef
+else
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
 	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
 TESTOBJS += $(1).o
 endef
+endif
 endif
 
 $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
