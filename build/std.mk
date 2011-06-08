@@ -350,6 +350,15 @@ TARGETS = $(NAME)-reloc.o
 RELEASABLE = $(NAME)-reloc.o
 RELEASE-NAME = $(NAME)-reloc.o
 CPPFLAGS += -fpic
+
+ifdef DEBUG         # Only build tests in DEBUG & PROFILED versions
+#Expand tests to include suffix, if set
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+endif
+ifdef PROFILED 
+TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
+endif
+
 endif
 
 #Targets for dlmod
