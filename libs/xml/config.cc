@@ -102,7 +102,7 @@ bool Configuration::reload()
 //------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
 // Only first element of intermediate steps is used - list is not merged!
-list<Element *> Configuration::get_elements(const string& path)
+list<Element *> Configuration::get_elements(const string& path) const
 {
   XPathProcessor xpath(get_root());
   return xpath.get_elements(path);
@@ -110,7 +110,7 @@ list<Element *> Configuration::get_elements(const string& path)
 
 //------------------------------------------------------------------------
 // Single element fetch - first of list, if any, or 0
-Element *Configuration::get_element(const string& path)
+Element *Configuration::get_element(const string& path) const
 {
   XPathProcessor xpath(get_root());
   return xpath.get_element(path);
@@ -120,7 +120,7 @@ Element *Configuration::get_element(const string& path)
 // XPath value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
 // Note all get_value methods still work, and return def, if file read fails
-string Configuration::get_value(const string& path, const string& def)
+string Configuration::get_value(const string& path, const string& def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value(path, def); 
@@ -130,7 +130,7 @@ string Configuration::get_value(const string& path, const string& def)
 // XPath Boolean value fetch
 // Defaults to default value given (or false) if not present
 // Recognises words beginning [TtYy] as true, everything else is false
-bool Configuration::get_value_bool(const string& path, bool def)
+bool Configuration::get_value_bool(const string& path, bool def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_bool(path, def); 
@@ -140,7 +140,7 @@ bool Configuration::get_value_bool(const string& path, bool def)
 // Integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Configuration::get_value_int(const string& path, int def)
+int Configuration::get_value_int(const string& path, int def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_int(path, def); 
@@ -150,7 +150,7 @@ int Configuration::get_value_int(const string& path, int def)
 // Integer hex value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Configuration::get_value_hex(const string& path, int def)
+int Configuration::get_value_hex(const string& path, int def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_hex(path, def); 
@@ -160,7 +160,7 @@ int Configuration::get_value_hex(const string& path, int def)
 // 64-bit integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-uint64_t Configuration::get_value_int64(const string& path, uint64_t def)
+uint64_t Configuration::get_value_int64(const string& path, uint64_t def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_int64(path, def); 
@@ -170,7 +170,7 @@ uint64_t Configuration::get_value_int64(const string& path, uint64_t def)
 // 64-bit integer hex value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-uint64_t Configuration::get_value_hex64(const string& path, uint64_t def)
+uint64_t Configuration::get_value_hex64(const string& path, uint64_t def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_hex64(path, def); 
@@ -180,7 +180,7 @@ uint64_t Configuration::get_value_hex64(const string& path, uint64_t def)
 // Real value fetch
 // Defaults to default value given (or 0.0) if not present
 // Returns 0.0 if present but bogus
-double Configuration::get_value_real(const string& path, double def)
+double Configuration::get_value_real(const string& path, double def) const
 { 
   XPathProcessor xpath(get_root());
   return xpath.get_value_real(path, def); 
@@ -189,7 +189,7 @@ double Configuration::get_value_real(const string& path, double def)
 //------------------------------------------------------------------------
 // XPath list-of-values fetch
 // Returns contents of all elements matching XPath
-list<string> Configuration::get_values(const string& path)
+list<string> Configuration::get_values(const string& path) const
 { 
   XPathProcessor xpath(get_root());
   list<Element *> elems = xpath.get_elements(path);

@@ -545,7 +545,7 @@ void Parser::fatal(const string& s) throw (ParseFailed)
 //------------------------------------------------------------------------
 // Get root element
 // Returns Element::none if not valid
-Element& Parser::get_root() 
+Element& Parser::get_root() const
 {
   if (root) 
     return *root;

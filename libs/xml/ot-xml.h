@@ -674,7 +674,7 @@ public:
   //------------------------------------------------------------------------
   // Get root element
   // Returns Element::none if not valid
-  Element& get_root(); 
+  Element& get_root() const;
 
   //------------------------------------------------------------------------
   // Get root element detached from parser, so you can keep it after the
@@ -902,7 +902,7 @@ public:
   //------------------------------------------------------------------------
   // Get root element
   // Returns Element::none if not valid
-  Element& get_root() { return parser.get_root(); }
+  Element& get_root() const { return parser.get_root(); }
 
   //------------------------------------------------------------------------
   // Detach the root element to keep after the configuration reader has died
@@ -912,17 +912,17 @@ public:
   //------------------------------------------------------------------------
   // Element list fetch - all elements matching final child step.
   // Only first element of intermediate steps is used - list is not merged!
-  list<Element *> get_elements(const string& path);
+  list<Element *> get_elements(const string& path) const;
 
   //------------------------------------------------------------------------
   // Single element fetch - first of list, if any, or 0
-  Element *get_element(const string& path);
+  Element *get_element(const string& path) const;
 
   //------------------------------------------------------------------------
   // XPath value fetch - either attribute or content of single (first) element
   // Returns def if anything not found
   // Note all get_value methods still work, and return def, if file read fails
-  string get_value(const string& path, const string& def="");
+  string get_value(const string& path, const string& def="") const;
 
   //------------------------------------------------------------------------
   // [] operator to make things easy
@@ -933,42 +933,42 @@ public:
   // XPath Boolean value fetch
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy] as true, everything else is false
-  bool get_value_bool(const string& path, bool def=false);
+  bool get_value_bool(const string& path, bool def=false) const;
 
   //--------------------------------------------------------------------------
   // XPath Integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_int(const string& path, int def=0);
+  int get_value_int(const string& path, int def=0) const;
 
   //--------------------------------------------------------------------------
   // Integer hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_hex(const string& path, int def=0);
+  int get_value_hex(const string& path, int def=0) const;
 
   //--------------------------------------------------------------------------
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  uint64_t get_value_int64(const string& path, uint64_t def=0);
+  uint64_t get_value_int64(const string& path, uint64_t def=0) const;
 
   //--------------------------------------------------------------------------
   // 64-bit integer hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  uint64_t get_value_hex64(const string& path, uint64_t def=0);
+  uint64_t get_value_hex64(const string& path, uint64_t def=0) const;
 
   //--------------------------------------------------------------------------
   // XPath Real value fetch
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
-  double get_value_real(const string& path, double def=0.0);
+  double get_value_real(const string& path, double def=0.0) const;
 
   //------------------------------------------------------------------------
   // XPath list-of-values fetch
   // Returns contents of all elements matching XPath
-  list<string> get_values(const string& path);
+  list<string> get_values(const string& path) const;
 
   //------------------------------------------------------------------------
   // XPath map fetch
