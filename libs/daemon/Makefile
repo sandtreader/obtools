@@ -8,7 +8,7 @@
 TYPE	= lib
 NAME   	= ot-daemon
 HEADERS = ot-daemon.h
-OBJS  	= process.o
+OBJS  	= shell.o
 TESTS 	= test-daemon
 TESTCMD	= ./test-daemon
 DEPENDS = misc net log mt text xml init file

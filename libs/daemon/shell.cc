@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::Daemon: process.cc
+// ObTools::Daemon: shell.cc
 //
-// Implementation of daemon process
+// Implementation of daemon shell
 //
 // Copyright (c) 2009 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
@@ -27,34 +27,53 @@ namespace ObTools { namespace Daemon {
 
 //--------------------------------------------------------------------------
 // Signal handlers for both processes
-static Process *the_process = 0;
+static Shell *the_shell = 0;
 
 // SIGTERM:  Clean shutdown
 void sigterm(int)
 {
-  if (the_process) the_process->shutdown();
+  if (the_shell) the_shell->shutdown();
   signal(SIGTERM, SIG_IGN);
 }
 
 // SIGHUP:  Reload config
 void sighup(int)
 {
-  if (the_process) the_process->reload();
+  if (the_shell) the_shell->reload();
   signal(SIGHUP, sighup);
 }
 
 // Various bad things!
 void sigevil(int sig)
 {
-  if (the_process) the_process->log_evil(sig);
+  if (the_shell) the_shell->log_evil(sig);
   signal(sig, SIG_DFL);
   raise(sig);
 }
 
 //--------------------------------------------------------------------------
+// Main run function
+// Delegate entirely to the application
+int Shell::run()
+{
+  int result = application.pre_run();
+  if (result)
+    return result;
+
+  while (!shut_down)
+  {
+    result = application.tick();
+    if (result)
+      return result;
+    MT::Thread::usleep(1);
+  }
+  return 0;
+}
+
+//--------------------------------------------------------------------------
 // Start process, with arguments
 // Returns process exit code
-int Process::start(int argc, char **argv)
+int Shell::start(int argc, char **argv)
 {
   // Run initialisation sequence (auto-registration of modules etc.)
   Init::Sequence::run();
@@ -100,12 +119,14 @@ int Process::start(int argc, char **argv)
   log.summary << name << " version " << version << " starting\n";
 
   // Call preconfigure before we go daemon - e.g. asking for SSL passphrase
-  int rc = preconfigure();
+  int rc = application.preconfigure();
   if (rc)
   {
     log.error << "Preconfigure failed: " << rc << endl;
     return rc;
   }
+  // Tell application to read config settings
+  application.read_config(config);
 
 
   // Full background daemon 
@@ -122,7 +143,7 @@ int Process::start(int argc, char **argv)
   }
 
   // Register signal handlers - same for both master and slave
-  the_process = this;
+  the_shell = this;
   signal(SIGTERM, sigterm);
   signal(SIGHUP,  sighup);
   signal(SIGSEGV, sigevil);
@@ -193,7 +214,7 @@ int Process::start(int argc, char **argv)
       {
 	// SLAVE PROCESS
 	// Run subclass prerun before dropping priviledges
-	int rc = run_priv();
+	int rc = application.run_priv();
 	if (rc) return rc;
 
 	// Drop privileges if root
@@ -248,7 +269,7 @@ int Process::start(int argc, char **argv)
 
 	// Run subclass full startup
 	rc = run();
-	cleanup();
+	application.cleanup();
 	return rc;
       }
     }
@@ -259,10 +280,10 @@ int Process::start(int argc, char **argv)
   else
   {
     // Just run directly
-    rc = run_priv();
+    rc = application.run_priv();
     if (rc) return rc;
     rc = run();
-    cleanup();
+    application.cleanup();
     return rc;
   }
 }
@@ -270,7 +291,7 @@ int Process::start(int argc, char **argv)
 //--------------------------------------------------------------------------
 // Signal to shut down - called from SIGTERM handler first in master and then
 // (because this passes it down) in slave
-void Process::shutdown() 
+void Shell::shutdown() 
 {
   // Stop our restart loop (master) and any loop in the slave
   shut_down=true; 
@@ -292,7 +313,7 @@ void Process::shutdown()
 //--------------------------------------------------------------------------
 // Signal to reload config - called from SIGHUP handler first in master and then
 // (because this passes it down) in slave
-void Process::reload() 
+void Shell::reload() 
 {
   Log::Streams log;
 
@@ -305,13 +326,17 @@ void Process::reload()
   else
   {
     log.summary << "SIGHUP received in slave process\n";
-    reconfigure();
+    if (config.read(config_element))
+      application.read_config(config);
+    else
+      log.error << "Failed to re-read config, using existing" << endl;
+    application.reconfigure();
   }
 }
 
 //--------------------------------------------------------------------------
 // Handle a failure signal
-void Process::log_evil(int sig)
+void Shell::log_evil(int sig)
 {
   string what;
   switch (sig)
