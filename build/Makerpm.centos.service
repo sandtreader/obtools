@@ -14,7 +14,9 @@ Requires(post): chkconfig
 Requires(preun): chkconfig
 Requires(preun): initscripts
 Requires(postun): initscripts
+
 %post
+`. ../RPM/post || true`
 /sbin/chkconfig --add  ${NAME}
 if [ "\$1" -gt "1" ] ; then
   /sbin/service ${NAME} restart > /dev/null 2>&1 || :
@@ -27,6 +29,9 @@ if [ \$1 = 0 ] ; then
   /sbin/service ${NAME} stop > /dev/null 2>&1
   /sbin/chkconfig --del  ${NAME}
 fi
+
+%postun
+`. ../RPM/postun || true`
 
 EOF
 
