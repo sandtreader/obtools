@@ -10,6 +10,7 @@
 #include "ot-misc.h"
 #include "ot-text.h"
 #include <ctype.h>
+#include <sstream>
 
 namespace ObTools { namespace Misc {
 
@@ -97,6 +98,24 @@ ostream& operator<<(ostream& s, const PropertyList& pl)
 { 
   pl.dump(s); 
   return s;
+}
+
+//--------------------------------------------------------------------------
+// Convert to delimited string
+string PropertyList::str(char sep, char quote)
+{
+  ostringstream oss;
+  for(const_iterator p = begin(); p!=end(); ++p)
+  {
+    if (p!=begin()) oss << sep;
+    oss << p->first << "=";
+    if (p->second.find(sep) != string::npos)
+      oss << quote << p->second << quote;
+    else
+      oss << p->second;
+  }
+
+  return oss.str();
 }
 
 //------------------------------------------------------------------------

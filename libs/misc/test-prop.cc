@@ -16,7 +16,7 @@ using namespace ObTools;
 
 TEST(PropertyListTests, TestCommaDelimited)
 {
-  Misc::PropertyList pl("a1=99, a2 =   no   spaces   , a3=, a4, a5=\"quoted, see! \"  , a6=\"got=equals\", a7=\"unclosed, a8=xxx");
+  Misc::PropertyList pl("a1=99, a2 =   no   spaces   , a3=, a4, a5=\"quoted, see! \"  , a6=got=equals, a7=\"unclosed, a8=xxx");
 
   EXPECT_EQ(pl.size(), 7);
   EXPECT_EQ(pl["a1"], "99");
@@ -27,6 +27,8 @@ TEST(PropertyListTests, TestCommaDelimited)
   EXPECT_EQ(pl["a6"], "got=equals");
   EXPECT_EQ(pl["a7"], "unclosed");
   EXPECT_EQ(pl["a8"], "xxx");
+
+  EXPECT_EQ(pl.str(), "a1=99,a2=no spaces,a3=,a5=\"quoted, see! \",a6=got=equals,a7=unclosed,a8=xxx");
 }
 
 TEST(PropertyListTests, TestValues)

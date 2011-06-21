@@ -281,6 +281,11 @@ public:
   // Dump contents
   void dump(ostream& s, const string& prefix="    ", 
 	    const string& separator=" = ") const;
+
+  //--------------------------------------------------------------------------
+  // Convert to delimited string
+  string str(char sep=',', char quote='"');
+
 };
 
 //------------------------------------------------------------------------
