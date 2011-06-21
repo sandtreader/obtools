@@ -172,7 +172,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from delimited string - e.g. foo=1,bar=2
-  PropertyList(const string& str, char sep=',');
+  PropertyList(const string& str, char sep=',', char quote='"');
 
   //------------------------------------------------------------------------
   // Copy constructor and assignment operator from map<string, string>
@@ -201,6 +201,13 @@ public:
   // to bool rather than std::string
   void add_bool(const string& name, bool value)
   { add(name, value?"true":"false"); }
+
+  //--------------------------------------------------------------------------
+  // Check if a named property exists
+  bool has(const string& name) const
+  {
+    return find(name) != end();
+  }
 
   //--------------------------------------------------------------------------
   // Get a value, with default
