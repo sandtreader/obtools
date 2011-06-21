@@ -18,7 +18,7 @@ using namespace ObTools;
 
 int main()
 {
-  Misc::PropertyList pl;
+  Misc::PropertyList pl("a1=99, a2 = 43  , a3=,a4");
   pl.add("foo", "one");
   pl.add("bar", "!!!");
   pl.add("bar", "two");

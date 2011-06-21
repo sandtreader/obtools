@@ -8,9 +8,24 @@
 //==========================================================================
 
 #include "ot-misc.h"
+#include "ot-text.h"
 #include <ctype.h>
 
 namespace ObTools { namespace Misc {
+
+//------------------------------------------------------------------------
+// Constructor from delimited string - e.g. foo=1,bar=2
+PropertyList::PropertyList(const string& str, char sep)
+{
+  // Split on seperator, with canonicalisation of values
+  vector<string> bits = Text::split(str, sep, true);
+  for(vector<string>::iterator p = bits.begin(); p!=bits.end(); ++p)
+  {
+    // Split individual bit on = and trim
+    vector<string> bobs = Text::split(*p, '=', true, 2);
+    if (bobs.size() == 2) add(bobs[0], bobs[1]);
+  }
+}
 
 //--------------------------------------------------------------------------
 // Dump contents

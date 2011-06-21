@@ -171,6 +171,10 @@ public:
   PropertyList() {}
 
   //------------------------------------------------------------------------
+  // Constructor from delimited string - e.g. foo=1,bar=2
+  PropertyList(const string& str, char sep=',');
+
+  //------------------------------------------------------------------------
   // Copy constructor and assignment operator from map<string, string>
   PropertyList(const map<string, string>& o) 
   { *(map<string, string> *)this = o; }
