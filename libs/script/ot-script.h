@@ -89,13 +89,18 @@ public:
   SingleAction(const CP& cp): Action(cp) {}
 
   //------------------------------------------------------------------------
-  // Tick action
-  // Does 'run()', then always returns false
-  bool tick(Context& con) { run(con); return false; }
+  // Start action
+  // Does 'run()'
+  bool start(Context& con) { return run(con); }
 
   //------------------------------------------------------------------------
-  // Run action
-  virtual void run(Context& con)=0;
+  // Tick action
+  // Always returns false
+  bool tick(Context&) { return false; }
+
+  //------------------------------------------------------------------------
+  // Run action - return false if you don't want the script to continue
+  virtual bool run(Context& con)=0;
 };
 
 //==========================================================================
@@ -321,7 +326,7 @@ public:
 
   //------------------------------------------------------------------------
   // Run action
-  void run(Context& con);
+  bool run(Context& con);
 };
 
 //==========================================================================
@@ -355,7 +360,7 @@ public:
 
   //------------------------------------------------------------------------
   // Run action
-  void run(Context& con);
+  bool run(Context& con);
 };
 
 //==========================================================================

@@ -15,7 +15,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Run action
-void LogAction::run(Context& con)
+bool LogAction::run(Context& con)
 {
   int level = xml.get_attr_int("level", Log::LEVEL_SUMMARY);
   string text = xml.get_content();
@@ -25,6 +25,8 @@ void LogAction::run(Context& con)
 
   Log::Message msg((Log::Level)level, text);
   Log::logger.log(msg);
+
+  return true;
 }
 
 

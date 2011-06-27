@@ -14,7 +14,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Run action
-void SetAction::run(Context& con)
+bool SetAction::run(Context& con)
 {
   string var = xml["var"];
   if (!var.empty())
@@ -26,6 +26,8 @@ void SetAction::run(Context& con)
 
     con.vars.add(var, text);
   }
+
+  return true;
 }
 
 
