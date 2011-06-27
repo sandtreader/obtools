@@ -43,11 +43,15 @@ bool SequenceAction::tick(Context& con)
   {
     // Try to create it, and move iterator to next
     if (!create_current()) return false;
+    if (!current->start(con)) return false;
     ++it;
   }
 
   // Tick current
   if (current->tick(con)) return true;
+
+  // Stop it
+  current->stop(con);
 
   // If it's finished, delete it and mark for next time
   delete current;
@@ -67,6 +71,13 @@ void SequenceAction::restart()
     delete current;
     current = 0;
   }
+}
+
+//------------------------------------------------------------------------
+// Stop - stop any already running
+void SequenceAction::stop(Context& con)
+{
+  if (current) current->stop(con);
 }
 
 //------------------------------------------------------------------------

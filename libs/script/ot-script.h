@@ -60,9 +60,18 @@ public:
   Action(const CP& cp): script(cp.script), xml(cp.xml) {}
 
   //------------------------------------------------------------------------
+  // Start action - when first created.  Does nothing by default.
+  // Returns whether runnable
+  virtual bool start(Context&) { return true; }
+
+  //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
   virtual bool tick(Context&) = 0;
+
+  //------------------------------------------------------------------------
+  // Stop action - when finished or being killed.  Does nothing by default.
+  virtual void stop(Context&) {}
 
   //------------------------------------------------------------------------
   // Virtual destructor
@@ -113,6 +122,10 @@ public:
   virtual bool tick(Context& con);
 
   //------------------------------------------------------------------------
+  // Stop action - when finished or being killed
+  virtual void stop(Context&);
+
+  //------------------------------------------------------------------------
   // Restart sequence
   void restart();
 
@@ -150,7 +163,6 @@ class ParallelAction: public Action
 {
 private:
   bool race;
-  bool started;
   list<Action *> actions;
 
 public:
@@ -161,9 +173,18 @@ public:
   ParallelAction(const CP& cp, bool race);
 
   //------------------------------------------------------------------------
+  // Start action
+  bool start(Context& con);
+
+  //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
   bool tick(Context& con);
+
+  //------------------------------------------------------------------------
+  // Stop action
+  // Stop any still active
+  void stop(Context& con);
 
   //------------------------------------------------------------------------
   // Destructor
@@ -172,7 +193,7 @@ public:
 
 //==========================================================================
 // Group action
-// Sugar for ParallelAction with race semantics
+// Sugar for ParallelAction with non-race semantics
 class GroupAction: public ParallelAction
 {
 public:
@@ -214,6 +235,11 @@ public:
   // Tick action
   // Returns whether still active
   bool tick(Context& con);
+
+  //------------------------------------------------------------------------
+  // Stop action
+  // Stop any still active
+  void stop(Context& con);
 
   //------------------------------------------------------------------------
   // Destructor
