@@ -394,6 +394,10 @@ public:
   void enable_progressive() { progressive=true; }
 
   //--------------------------------------------------------------------------
+  // Disable progressive download
+  void disable_progressive() { progressive=false; }
+
+  //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
   // Returns detailed status code
   int do_fetch(HTTPMessage& request, HTTPMessage& response);

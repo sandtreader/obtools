@@ -138,7 +138,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 
   try
   {
-    stream = new Net::TCPStream(*socket);
+    if (!stream) stream = new Net::TCPStream(*socket);
     if (!request.write(*stream))
     {
       log.error << "HTTP: Can't send request to " << server << endl;
