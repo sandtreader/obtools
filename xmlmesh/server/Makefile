@@ -13,7 +13,7 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 
 DEBIAN-NAME    = ot-xmlmesh
 DEBIAN-VERSION = 2.4.3
-DEBIAN-REVISION = 1
+DEBIAN-REVISION = 2
 
 #Always build statically
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
