@@ -3,8 +3,8 @@
 
 ### BEGIN INIT INFO
 # Provides: ot-xmlmesh 
-# Required-Start: $remote_fs
-# Required-Stop: $remote_fs
+# Required-Start: $remote_fs $syslog
+# Required-Stop: $remote_fs $syslog
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
 # Description: ObTools XMLMesh server
