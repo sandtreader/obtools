@@ -11,7 +11,8 @@ HEADERS = ot-file.h
 OBJS  	= path.o directory.o
 DEPENDS = text
 TESTS 	= test-path test-dir test-mkdir
-TESTCMD	= ./test-path /foo/bar/wombat/fred.exe && \
+TESTCMD	= ./test-path ~/.emacs &&                 \
+	  ./test-path /foo/bar/wombat/fred.exe && \
           ./test-path /usr/include/linux/ ../../foo && \
 	  ./test-dir /usr/bin/
 

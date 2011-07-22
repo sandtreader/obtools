@@ -472,10 +472,15 @@ int Path::user_name_to_id(const string& uname)
   struct passwd user;
   struct passwd *uptr;
   int rc = getpwnam_r(uname.c_str(), &user, buf, buflen, &uptr);
-  free(buf);  // We don't use it
+  if (rc || !uptr)
+  {
+    free(buf);
+    return -1;
+  }
 
-  if (rc || !uptr) return -1;
-  return uptr->pw_uid;
+  int uid = uptr->pw_uid;
+  free(buf);
+  return uid;
 #endif
 }
 
@@ -523,10 +528,15 @@ int Path::group_name_to_id(const string& gname)
   struct group group;
   struct group *gptr;
   int rc = getgrnam_r(gname.c_str(), &group, buf, buflen, &gptr);
-  free(buf);  // We don't use it
+  if (rc || !gptr)
+  {  
+    free(buf);
+    return -1;
+  }
 
-  if (rc || !gptr) return -1;
-  return gptr->gr_gid;
+  int gid = gptr->gr_gid;
+  free(buf);
+  return gid;
 #endif
 }
 

@@ -35,8 +35,12 @@ int main(int argc, char **argv)
   cout << "       length: " << path.length() << endl;
   cout << "         mode: " << File::Path::itoo(path.mode()) << endl;
 #if !defined(__WIN32__)
-  cout << "        owner: " << File::Path::user_id_to_name(path.owner()) << endl;
-  cout << "        group: " << File::Path::group_id_to_name(path.group()) << endl;
+  string owner = File::Path::user_id_to_name(path.owner());
+  cout << "        owner: " << owner 
+       << " (" << File::Path::user_name_to_id(owner) << ")\n";
+  string group = File::Path::group_id_to_name(path.group());
+  cout << "        group: " << group 
+       << " (" << File::Path::group_name_to_id(group) << ")\n";
 #endif
 
   // Try to read it
