@@ -175,11 +175,15 @@ VARIANT-release-profiled	= PROFILED RELEASE
 else #!PROFILE
 # Default native build
 ifndef VARIANTS
-VARIANTS = release
- ifndef RELEASE-VARIANTS-ONLY
-VARIANTS += debug
- endif
+ifndef RELEASE-VARIANTS-ONLY
+VARIANTS = debug
 endif
+endif
+
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release
+endif
+
 VARIANT-debug		= DEBUG
 VARIANT-release		= RELEASE
 
@@ -569,7 +573,7 @@ test:	$(patsubst %,test-%,$(VARIANTS))
 
 # Release target - get all variants to release (optionally)
 # and copy configs - assumed to be invariant
-release: $(patsubst %,release-%,$(VARIANTS))
+release: $(patsubst %,release-%,$(RELEASE-VARIANTS))
 ifdef CONFIGS
 	cp $(CONFIGS) $(RELEASEDIR)
 endif
@@ -583,7 +587,7 @@ docfile:
 define build_template
 #Expand VARIANT-xxx for each build directory, and recurse to self to build,
 #test and release
-.PHONY: build-$(1) test-$(1) release-$(1)
+.PHONY: build-$(1) test-$(1)
 build-$(1):
 	-@mkdir -p build-$(1)
 ifdef BUILD-SUBDIRS
@@ -595,13 +599,31 @@ endif
 test-$(1): build-$(1)
 	$$(MAKE) -C build-$(1) -f ../Makefile \
                  $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) runtests
+endef
 
-release-$(1): build-$(1)
+$(foreach variant,$(VARIANTS),$(eval $(call build_template,$(variant))))
+
+# Per-build target - sub-make comes in here
+.PHONY: targets runtests dorelease
+targets: $(TARGETS) $(EXTRA-TARGETS)
+
+# Release targets
+define release_template
+#Expand RELEASE-VARIANT-xxx for each build directory, and recurse to self 
+# to release
+.PHONY: release-$(1)
+release-$(1):
+	-@mkdir -p build-$(1)
+ifdef BUILD-SUBDIRS
+	-@mkdir -p $(patsubst %,build-$(1)/%,$(BUILD-SUBDIRS))
+endif
+	$$(MAKE) -C build-$(1) -f ../Makefile \
+                 $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) targets
 	$$(MAKE) -C build-$(1) -f ../Makefile \
                  $(patsubst %,%=1,$(VARIANT-$(1))) ROOT=../$(ROOT) dorelease
 endef
 
-$(foreach variant,$(VARIANTS),$(eval $(call build_template,$(variant))))
+$(foreach variant,$(RELEASE-VARIANTS),$(eval $(call release_template,$(variant))))
 
 # Per-build target - sub-make comes in here
 .PHONY: targets runtests dorelease
