@@ -70,7 +70,7 @@ bool HTTPMessage::read_headers(istream &in)
   {
     if (!get_first_line(in, line)) return false;
   } while (line.empty());
-  
+
   // If it's an interleave, read it as a '$' message with code = channel,
   // body = data
   if (line == "$")
@@ -267,8 +267,11 @@ bool HTTPMessage::write(ostream &out) const
   // Output headers
   if (!write_headers(out)) return false;
 
-  // Output body (if any)
-  out << body;
+  // Output body (if any), or size if it's interleaved data
+  if (method == "$")
+    out << "[Binary data, " << body.size() << " bytes]\n";
+  else
+    out << body;
 
   return !out.fail();
 }
