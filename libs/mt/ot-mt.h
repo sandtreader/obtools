@@ -696,6 +696,10 @@ public:
   // Returns amount of data read
   DataBlock::size_t read(DataBlock::data_t *data, DataBlock::size_t length,
 			 bool block = true);
+
+  //--------------------------------------------------------------------------
+  // Destructor
+  ~DataQueue();
 };
 
 //==========================================================================

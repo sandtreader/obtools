@@ -70,6 +70,22 @@ DataBlock::size_t DataQueue::read(DataBlock::data_t *data,
   return n;
 }
 
+//--------------------------------------------------------------------------
+// Destructor
+DataQueue::~DataQueue()
+{
+  if (working_block.length && working_block.data) 
+    free((void *)working_block.data);
+
+  // Pull out all remaining blocks
+  while (poll())
+  {
+    DataBlock block = wait();
+    if (block.length && block.data) 
+      free((void *)block.data);
+  }
+}
+
 }} // namespaces
 
 

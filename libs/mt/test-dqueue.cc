@@ -58,6 +58,9 @@ int main()
   dq.close();
   ObTools::MT::Thread::sleep(1);
 
+  // Send one more to make sure destructor cleans up
+  dq.write((const unsigned char *)"Goodbye, world!", 15);
+
   return 0;  
 }
 
