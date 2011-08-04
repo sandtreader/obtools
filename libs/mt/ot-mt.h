@@ -689,10 +689,13 @@ public:
   void close() { send(DataBlock()); }
 
   //--------------------------------------------------------------------------
-  // Read data from the queue - blocking
-  // Reads data to the amount requested, or to EOF
+  // Read data from the queue - blocking, or non-blocking
+  // Reads data to the amount requested, or to EOF (blocking) or whatever
+  // is available (non-blocking)
+  // If data is 0, just skips it
   // Returns amount of data read
-  DataBlock::size_t read(DataBlock::data_t *data, DataBlock::size_t length);
+  DataBlock::size_t read(DataBlock::data_t *data, DataBlock::size_t length,
+			 bool block = true);
 };
 
 //==========================================================================

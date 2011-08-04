@@ -24,12 +24,14 @@ void DataQueue::write(const DataBlock::data_t *data, DataBlock::size_t length)
 }
 
 //--------------------------------------------------------------------------
-// Read data from the queue - blocking
-// Reads data to the amount requested, or to EOF
+// Read data from the queue - default blocking, or non-blocking
+// Reads data up to the amount requested, or to EOF (blocking) or whatever
+// is available (non-blocking)
 // If data is 0, just skips it
 // Returns amount of data read
 DataBlock::size_t DataQueue::read(DataBlock::data_t *data, 
-				  DataBlock::size_t length)
+				  DataBlock::size_t length,
+				  bool block)
 {
   DataBlock::size_t n = 0;
 
@@ -56,6 +58,7 @@ DataBlock::size_t DataQueue::read(DataBlock::data_t *data,
     // If not, or we just used it up, get another one
     if (!working_block.length)
     {
+      if (!block && !poll()) return n;
       working_block = wait();
 
       // Note EOF if we see an empty marker
