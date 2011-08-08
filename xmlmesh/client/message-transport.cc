@@ -44,7 +44,9 @@ void MessageTransportSubscriber::handle(Message& msg)
 
   // Prepare response body, even if not used
   XML::Element response(message_handler.ns_prefix+":"
-			+message_handler.document_name+"-response");
+			+message_handler.document_name+"-response",
+			"xmlns:" + message_handler.ns_prefix, 
+			message_handler.ns_url);
 
   // Get handler to deal with message
   string error = message_handler.handle_message(request, response);
