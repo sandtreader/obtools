@@ -96,11 +96,11 @@ MessageInterface::MessageInterface(XML::Element& config,
   XML::XPathProcessor xpath(config);
 
   // Start HTTP server
-  int hport = xpath.get_value_int("http/@port", 0);
+  int hport = xpath.get_value_int("server/@port", 0);
   if (hport)
   {
     // Default to localhost only
-    Net::EndPoint addr(Net::IPAddress(xpath.get_value("http/@address",
+    Net::EndPoint addr(Net::IPAddress(xpath.get_value("server/@address",
 						      "localhost")), hport);
     Log::Streams log;
 
