@@ -675,9 +675,13 @@ UDPSocket::UDPSocket(int port)
 //--------------------------------------------------------------------------
 // Constructor - allocates socket and binds to local specific interface
 // (UDP server) - note 'bool' not used, just to disambiguate with client
-UDPSocket::UDPSocket(EndPoint local, bool)
+// enable reuse - allow the socket to be re-used (e.g. for multicast
+//                listeners)
+UDPSocket::UDPSocket(EndPoint local, bool, bool reuse)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  fd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (reuse)
+    enable_reuse();
   if (!Socket::bind(local)) close();
 }
 

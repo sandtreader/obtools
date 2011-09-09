@@ -653,7 +653,9 @@ public:
   //--------------------------------------------------------------------------
   // Constructor - allocates socket and binds to local specific interface
   // (UDP server) - note 'bool' not used, just to disambiguate with client
-  UDPSocket(EndPoint local, bool);
+  // enable reuse - allow the socket to be re-used (e.g. for multicast
+  //                listeners)
+  UDPSocket(EndPoint local, bool, bool reuse = false);
 
   //--------------------------------------------------------------------------
   // Constructor - allocates socket and connects to remote port (UDP client)
