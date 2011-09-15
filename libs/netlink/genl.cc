@@ -17,11 +17,12 @@ namespace ObTools { namespace Netlink {
 //------------------------------------------------------------------------
 // Constructor
 GenericRequest::GenericRequest(const GenericNetlink& netlink,
-                               uint8_t command, uint8_t version):
+                               uint8_t command, uint8_t version,
+                               int flags):
   msg(0)
 {
   msg = nlmsg_alloc();
-  genlmsg_put(msg, NL_AUTO_PID, NL_AUTO_SEQ, netlink.get_family(), 0, 0,
+  genlmsg_put(msg, NL_AUTO_PID, NL_AUTO_SEQ, netlink.get_family(), 0, flags,
               command, version);
 }
 
@@ -31,6 +32,24 @@ void GenericRequest::set_string(int attr, const string& s)
 {
   if (msg)
     nla_put_string(msg, attr, s.c_str());
+}
+
+void GenericRequest::set_uint32(int attr, const uint32_t u)
+{
+  if (msg)
+    nla_put_u32(msg, attr, u);
+}
+
+void GenericRequest::set_uint16(int attr, const uint16_t u)
+{
+  if (msg)
+    nla_put_u16(msg, attr, u);
+}
+
+void GenericRequest::set_buffer(int attr, void *buff, ssize_t len)
+{
+  if (msg)
+    nla_put(msg, attr, len, buff);
 }
 
 bool GenericRequest::begin_nest(int attr)
@@ -91,22 +110,41 @@ GenericResponse::GenericResponse(struct nl_msg *_msg, int attr_max,
 
 //------------------------------------------------------------------------
 // Fetch attributes
+uint16_t GenericResponse::get_uint16(int attr,
+                                     const vector<struct nlattr *>& attrs)
+{
+  if (!attrs[attr])
+    return 0;
+
+  return nla_get_u16(attrs[attr]);
+}
+
 uint32_t GenericResponse::get_uint32(int attr,
                                      const vector<struct nlattr *>& attrs)
 {
-  if (attrs[attr])
-    return nla_get_u32(attrs[attr]);
-  else
+  if (!attrs[attr])
     return 0;
+
+  return nla_get_u32(attrs[attr]);
 }
 
 string GenericResponse::get_string(int attr,
                                    const vector<struct nlattr *>& attrs)
 {
-  if (attrs[attr])
-    return nla_get_string(attrs[attr]);
-  else
+  if (!attrs[attr])
     return "";
+
+  return nla_get_string(attrs[attr]);
+}
+
+bool GenericResponse::get_data(int attr, void *buffer, ssize_t len,
+                               const vector<struct nlattr *>& attrs)
+{
+  if (!attrs[attr])
+    return false;
+
+  memcpy(buffer, nla_data(attrs[attr]), len);
+  return true;
 }
 
 bool GenericResponse::get_nested_attrs(int attr,
@@ -115,10 +153,10 @@ bool GenericResponse::get_nested_attrs(int attr,
                                        int attrs_max,
                                        struct nla_policy *policy)
 {
-  nested_attrs.resize(attrs_max);
-  if (nla_parse_nested(&nested_attrs[0], nested_attrs.size(),
-                       attrs[attr], policy))
+  nested_attrs.resize(attrs_max + 1);
+  if (nla_parse_nested(&nested_attrs[0], attrs_max, attrs[attr], policy))
     return false;
+
   return true;
 }
 
@@ -163,6 +201,13 @@ bool GenericNetlink::send(GenericRequest &request)
   if (result)
     return false;
   return true;
+}
+
+//------------------------------------------------------------------------
+// Get last netlink error
+const char* GenericNetlink::get_last_error()
+{
+  return nl_geterror();
 }
 
 //------------------------------------------------------------------------

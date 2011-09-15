@@ -39,7 +39,8 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   GenericRequest(const GenericNetlink& netlink,
-                 uint8_t command, uint8_t version);
+                 uint8_t command, uint8_t version,
+                 int flags = 0);
 
   //------------------------------------------------------------------------
   // Callback for handling response
@@ -56,6 +57,9 @@ public:
   //------------------------------------------------------------------------
   // Set attributes
   void set_string(int attr, const string& s);
+  void set_uint32(int attr, const uint32_t u);
+  void set_uint16(int attr, const uint16_t u);
+  void set_buffer(int attr, void *buff, ssize_t len);
   bool begin_nest(int attr);
   void end_nest();
 
@@ -83,10 +87,18 @@ public:
 
   //------------------------------------------------------------------------
   // Fetch attributes
+  uint16_t get_uint16(int attr, const vector<struct nlattr *>& attrs);
+  uint16_t get_uint16(int attr) { return get_uint16(attr, default_attrs); }
   uint32_t get_uint32(int attr, const vector<struct nlattr *>& attrs);
   uint32_t get_uint32(int attr) { return get_uint32(attr, default_attrs); }
   string get_string(int attr, const vector<struct nlattr *>& attrs);
   string get_string(int attr) { return get_string(attr, default_attrs); }
+  bool get_data(int attr, void *buffer, ssize_t len,
+                const vector<struct nlattr *>& attrs);
+  bool get_data(int attr, void *buffer, ssize_t len)
+  {
+    return get_data(attr, buffer, len, default_attrs);
+  }
 
   // Nested attributes
   bool get_nested_attrs(int attr, const vector<struct nlattr *>& attrs,
@@ -135,6 +147,10 @@ public:
   //------------------------------------------------------------------------
   // Get the family (e.g. for message construction)
   int get_family() const { return family; }
+
+  //------------------------------------------------------------------------
+  // Get last netlink error
+  const char* get_last_error();
 
   //------------------------------------------------------------------------
   // Make request

@@ -98,16 +98,16 @@ public:
 TEST_F(GenericNetlinkTest, TestGettingAFamilyLink)
 {
   GenericNetlink genl(family);
-  ASSERT_TRUE(genl.valid()) << nl_geterror();
+  ASSERT_TRUE(genl.valid()) << genl.get_last_error();
 }
 
 TEST_F(GenericNetlinkTest, TestGettingABasicResponse)
 {
   GenericNetlink genl(family);
-  ASSERT_TRUE(genl.valid()) << nl_geterror();
+  ASSERT_TRUE(genl.valid()) << genl.get_last_error();
   const string name("nlctrl");
   GenericTestRequest request(genl, name);
-  ASSERT_TRUE(genl.send(request)) << nl_geterror();
+  ASSERT_TRUE(genl.send(request)) << genl.get_last_error();
   ASSERT_EQ(name, request.name);
   ASSERT_EQ(CTRL_ATTR_MAX, request.max_attr);
 }
@@ -115,10 +115,10 @@ TEST_F(GenericNetlinkTest, TestGettingABasicResponse)
 TEST_F(GenericNetlinkTest, TestGettingANestedResponse)
 {
   GenericNetlink genl(family);
-  ASSERT_TRUE(genl.valid()) << nl_geterror();
+  ASSERT_TRUE(genl.valid()) << genl.get_last_error();
   const string name("nlctrl");
   GenericNestedTestRequest request(genl, name);
-  ASSERT_TRUE(genl.send(request)) << nl_geterror();
+  ASSERT_TRUE(genl.send(request)) << genl.get_last_error();
   ASSERT_EQ(name, request.name);
   ASSERT_EQ(CTRL_ATTR_MAX, request.max_attr);
   ASSERT_EQ(65544, request.op_id);
