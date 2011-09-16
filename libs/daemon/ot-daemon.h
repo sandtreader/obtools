@@ -52,6 +52,11 @@ public:
   virtual int pre_run() { return 0; }
 
   //--------------------------------------------------------------------------
+  // Time to sleep until next tick
+  // Return value in microseconds
+  virtual int tick_wait() { return 10000; }
+
+  //--------------------------------------------------------------------------
   // Main function iteration
   // Return exit code or 0 to continue
   virtual int tick() { return 0; }

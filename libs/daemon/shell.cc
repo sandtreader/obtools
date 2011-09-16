@@ -65,7 +65,7 @@ int Shell::run()
     result = application.tick();
     if (result)
       return result;
-    MT::Thread::usleep(10000);
+    MT::Thread::usleep(application.tick_wait());
   }
   return 0;
 }
