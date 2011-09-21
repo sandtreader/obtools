@@ -399,8 +399,8 @@ public:
   void set_multicast_ttl(int hops);
 
   //--------------------------------------------------------------------------
-  // Set timeout (receive and send) in seconds
-  void set_timeout(int secs);
+  // Set timeout (receive and send) in seconds and optional microseconds
+  void set_timeout(int secs, int usecs = 0);
 
   //--------------------------------------------------------------------------
   // Set socket priority (0-7)

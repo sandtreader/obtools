@@ -124,18 +124,18 @@ void Socket::set_multicast_ttl(int hops)
 }
 
 //--------------------------------------------------------------------------
-// Set timeout (receive and send) in seconds
-void Socket::set_timeout(int secs)
+// Set timeout (receive and send) in seconds and optional microseconds
+void Socket::set_timeout(int secs, int usecs)
 {
 #ifdef __WIN32__
   // Windows has it as an integer milliseconds (!)
-  int ms = secs*1000;
+  int ms = secs*1000 + usecs/1000;
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&ms, sizeof(ms));
   setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&ms, sizeof(ms));
 #else
   struct timeval tv;
   tv.tv_sec = secs;
-  tv.tv_usec = 0;
+  tv.tv_usec = usecs;
 
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (sockopt_t)&tv, 
 	     sizeof(struct timeval));
