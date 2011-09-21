@@ -94,17 +94,16 @@ endif
 endif
 
 
-
-
 #Check for cross-compilation
 ifdef CROSS
 
 ifeq ($(CROSS), mingw)
 #MinGW versions
+#Don't build debug versions - debugging is difficult anyway and
+#gtest etc. isn't available
 ifndef VARIANTS
-VARIANTS = debug-mingw release-mingw
+VARIANTS = release-mingw
 endif
-VARIANT-debug-mingw		= MINGW DEBUG
 VARIANT-release-mingw		= MINGW RELEASE
 VARIANT-SUFFIX = -mingw
 endif

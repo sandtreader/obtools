@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-script.h"
+#include "ot-mt.h"
 
 namespace ObTools { namespace Script {
 
@@ -32,7 +33,7 @@ bool Script::tick()
 //Run the script to the end
 void Script::run()
 {
-  while (tick()) usleep(10000);
+  while (tick()) MT::Thread::usleep(10000);
 }
 
 

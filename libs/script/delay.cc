@@ -25,7 +25,7 @@ DelayAction::DelayAction(const CP& cp): Action(cp)
   
   // Check for randomisation
   if (xml.get_attr_bool("random") && !!time)
-    time = Time::Duration((double)(random() % (int)time.seconds())); 
+    time = Time::Duration((double)(rand() % (int)time.seconds())); 
 }
 
 

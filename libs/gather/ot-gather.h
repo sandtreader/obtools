@@ -16,7 +16,10 @@
 
 #include <stdint.h>
 #include <ostream>
+
+#if !defined(__WIN32__)
 #include "sys/uio.h"
+#endif
 
 namespace ObTools { namespace Gather { 
 
@@ -150,11 +153,13 @@ public:
   // Consume N bytes of data from the front of the buffer
   void consume(length_t n);
 
+#if !defined(__WIN32__)
   //--------------------------------------------------------------------------
   // Fill an iovec array with the data
   // iovec must be pre-allocated to the maximum segments of the buffer (size)
   // Returns the number of segments filled in, or size+1 if it overflowed
   unsigned int fill(struct iovec *iovec, unsigned int size);
+#endif
 
   //--------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well

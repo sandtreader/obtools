@@ -48,8 +48,10 @@ int main(int argc, char **argv)
   buffer.dump(cout, true);
 
   // Output it to stdout via writev
+#if !defined(__WIN32__)
   struct iovec io[4];
   writev(1, io, buffer.fill(io, 4));
+#endif
 
   return 0;  
 }

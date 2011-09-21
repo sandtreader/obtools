@@ -64,6 +64,7 @@ Segment& Buffer::insert(const Segment& seg, unsigned int pos)
   return segments[pos] = seg;
 }
 
+#if !defined(__WIN32__)
 //--------------------------------------------------------------------------
 // Fill an iovec array with the data
 // iovec must be pre-allocated to the maximum segments of the buffer (size)
@@ -87,6 +88,7 @@ unsigned int Buffer::fill(struct iovec *iovec, unsigned int size)
 
   return n;
 }
+#endif
 
 //--------------------------------------------------------------------------
 // Dump the buffer to the given stream, optionally with data as well
