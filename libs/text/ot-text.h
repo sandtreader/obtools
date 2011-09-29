@@ -280,6 +280,24 @@ public:
 };
 
 //==========================================================================
+// UTF8 encoder
+class UTF8
+{
+public:
+  //------------------------------------------------------------------------
+  // Default constructor
+  UTF8() {}
+
+  //------------------------------------------------------------------------
+  // Encode a single unicode character and append to a string
+  static void append(string& utf8, wchar_t unicode);
+
+  //------------------------------------------------------------------------
+  // Encode a vector of unicode characters to a UTF8 string
+  static string encode(const vector<wchar_t>& unicode);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
 

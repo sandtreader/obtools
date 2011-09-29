@@ -9,7 +9,7 @@ TYPE	= lib
 NAME   	= ot-text
 HEADERS = ot-text.h 
 OBJS  	= ws.o pattern.o case.o subst.o convert.o base64.o base36.o \
-	  base16alpha.o split.o
+	  base16alpha.o split.o utf8.o
 TESTS 	= test-ws test-pattern test-case test-subst test-convert     \
           test-base64 test-base36 test-base16alpha test-split
 TESTCMD	= ./test-ws && ./test-pattern && ./test-case && ./test-subst \
