@@ -54,6 +54,11 @@ TEST(SplitTests, TestDayBeforeLeapDay)
   test_split("2012-02-28", 2012, 2, 28);
 }
 
+TEST(SplitTests, TestFirstDayOfLeapYear)
+{
+  test_split("2012-01-01", 2012, 1, 1);
+}
+
 TEST(SplitTests, Test1900NotLeapYear)
 {
   test_split("1900-03-01", 1900, 3, 1);

@@ -91,13 +91,8 @@ Split Stamp::split(ntp_stamp_t ts)
   // back the fractional part later.  
   unsigned long seconds = (unsigned long)(ts>>NTP_SHIFT); 
 
-  // To handle the chicken-and-egg problem of knowing how many
-  // leapyears to count, we work out the number of leapdays first, then
-  // delete them and recalculate with fixed-size years.  We can ignore
-  // the leapdays when calculating the leapdays (yes, it's horrible), because
-  // there can never be enough leapdays to trip the number of years involved
-  // unless we're very near a leapday - but we deal with that later.
-  int years = seconds/(365*DAY);   // Assuming no leapdays
+  // Get estimate of years - near enough for NTP validity timeframe
+  int years = seconds/(365.24*DAY); 
   int leapdays = years/4;
   leapdays-=years/100;             // Chop off centuries
   leapdays+=(years+300)/400;       // Add back 400's, allowing for 1900 start

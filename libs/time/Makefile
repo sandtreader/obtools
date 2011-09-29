@@ -9,9 +9,11 @@ TYPE	= lib
 NAME   	= ot-time
 HEADERS = ot-time.h 
 OBJS  	= duration.o stamp.o date-stamp.o
-TESTS 	= test-split test-duration test-stamp test-date-stamp
+TESTS 	= test-split test-exhaustive-dates \
+          test-duration test-stamp test-date-stamp
 TESTLIB = -lgtest
-TESTCMD	= ./test-split \
+TESTCMD	=  ./test-split \
+       && ./test-exhaustive-dates \
        && ./test-stamp < ../test.stamps.txt \
        && ./test-date-stamp < ../test.stamps.txt \
        && ./test-duration < ../test.durations.txt  
