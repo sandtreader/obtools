@@ -14,7 +14,11 @@ TESTCMD =
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
 
+ifdef RELEASE
 XMITOOLGEN = $(DIR-xmitoolgen)/build-release$(VARIANT-SUFFIX)/xmitoolgen 
+else
+XMITOOLGEN = $(DIR-xmitoolgen)/build-debug$(VARIANT-SUFFIX)/xmitoolgen 
+endif
 
 #Turn off -Wall to avoid reams of unused parameter warning
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))

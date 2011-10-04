@@ -16,6 +16,7 @@
 # 2: Directory of source, relative to ROOT
 # 3: Dependencies (comma separated)
 # 4: Optional variant suffix of build directory, OR 'NOLIB' for templates
+# 5: Optional header file (otherwise constructed from library name)
 OT-LIBS = access:libs/access:text,xml,ssl	\
 	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
@@ -49,14 +50,14 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  web:libs/web:xml,misc,log,net,ssl,file     \
 	  xmi:libs/xmi:xml     			\
 	  xml:libs/xml:text,file		\
-	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc   		\
+	  xmlmesh-core:xmlmesh/core:net,log,soap,web,misc:-:ot-xmlmesh.h \
 	  xmlmesh-otmp:xmlmesh/otmp:net,log,text,tube			\
 	  xmlmesh-client:xmlmesh/client:xmlmesh-otmp,xmlmesh-core,msg	\
 	  xmlmesh-c:xmlmesh/bindings/c  	\
 	  toolgen:tools/toolgen			\
 	  xmitoolgen:tools/xmitoolgen		\
 	  xmltoolgen:tools/xmltoolgen           \
-	  obcache-core:obcache/libs/core:cache       \
+	  obcache-core:obcache/libs/core:cache:-:ot-obcache.h    \
 	  obcache-sql:obcache/libs/sql:obcache-core,xml,db \
 	  extra-wx:extra/wx
 
@@ -77,26 +78,35 @@ OT-SHLIBS = ot-general2:libs/superlibs/general			\
 # $(2): Directory, relative to root
 # $(3): (optional) dependencies, separated by comma
 # $(4): (optional) variant suffix for build directories
-#     or NOLIB if no library required
+#       or NOLIB if no library required
+# $(5): (optional) overriding header name
 
 COMMA:= ,
 
 define lib_template
 DIR-$(1) = $$(ROOT)/$(2)
+ifeq ($(5),)
+HEADER-$(1) = $$(DIR-$(1))/ot-$(1).h
+else
+HEADER-$(1) = $$(DIR-$(1))/$(5)
+endif
+
 DEPENDS-$(1) = $(subst $(COMMA), ,$(strip $(3)))
 
 ifneq ($(4), NOLIB)
+ifneq ($(4), -)
 VARIANTS-$(1) = $(4)
-LIBS-$(1)-release = $$(DIR-$(1))/build-release$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-release-profiled = $$(DIR-$(1))/build-release-profiled$(4)$$(PLATFORM)/ot-$(1).a
-LIBS-$(1)-debug-profiled   = $$(DIR-$(1))/build-debug-profiled$(4)$$(PLATFORM)/ot-$(1).a
+endif
+LIBS-$(1)-release = $$(DIR-$(1))/build-release$$(VARIANTS-$(1))$$(PLATFORM)/ot-$(1).a
+LIBS-$(1)-debug   = $$(DIR-$(1))/build-debug$$(VARIANTS-$(1))$$(PLATFORM)/ot-$(1).a
+LIBS-$(1)-release-profiled = $$(DIR-$(1))/build-release-profiled$$(VARIANTS-$(1))$$(PLATFORM)/ot-$(1).a
+LIBS-$(1)-debug-profiled   = $$(DIR-$(1))/build-debug-profiled$$(VARIANTS-$(1))$$(PLATFORM)/ot-$(1).a
 endif
 endef
 
 # Split at spaces and pass on to lib_template as words
 define split_template
-$(call lib_template,$(word 1,$(1)),$(word 2,$(1)),$(word 3,$(1)),$(word 4,$(1)))
+$(call lib_template,$(word 1,$(1)),$(word 2,$(1)),$(word 3,$(1)),$(word 4,$(1)),$(word 5,$(1)))
 endef
 
 # Run template for each library, splitting on : to match template args (q.v.)

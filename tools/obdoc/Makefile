@@ -18,8 +18,16 @@ include $(ROOT)/build/std.mk
 CPPFLAGS := $(subst -Wall,,$(CPPFLAGS))
 
 #Template code
+ifdef DEBUG
+_obdoc-html.cc: ../obdoc-html.cfg.xml  \
+                $(DIR-xmltoolgen)/build-debug$(VARIANT-SUFFIX)/xmltoolgen Makefile
+	$(DIR-xmltoolgen)/build-debug$(VARIANT-SUFFIX)/xmltoolgen ../obdoc-html.cfg.xml > _obdoc-html.cc
+endif
+
+ifdef RELEASE
 _obdoc-html.cc: ../obdoc-html.cfg.xml  \
                 $(DIR-xmltoolgen)/build-release$(VARIANT-SUFFIX)/xmltoolgen Makefile
 	$(DIR-xmltoolgen)/build-release$(VARIANT-SUFFIX)/xmltoolgen ../obdoc-html.cfg.xml > _obdoc-html.cc
+endif
 
 

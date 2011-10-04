@@ -508,13 +508,21 @@ define dep_template
 INCS += $(DIR-$(1))
 
 #Add external dependency (not --whole-archive) for superlib/DLL
-DEPLIBS += $(LIBS-$(1)$(LIB-DEBUGP)$(LIB-PROFILEDP))
+#(U = unsorted, with duplicates)
+UDEPLIBS += $(LIBS-$(1)$(LIB-DEBUGP)$(LIB-PROFILEDP))
+
+#Add header dependency
+UDEPHEADERS += $(HEADER-$(1))
 
 #Recurse to any child dependencies held by this dependency
 $(foreach dep2,$(DEPENDS-$(1)),$(eval $(call dep_template,$(dep2))))
 endef
 
 $(foreach dep,$(DEPENDS),$(eval $(call dep_template,$(dep))))
+
+# Sort deplibs and headers to avoid duplicates
+DEPLIBS = $(sort $(UDEPLIBS))
+DEPHEADERS = $(sort $(UDEPHEADERS))
 
 # Additional dependencies for contained libraries
 define contain_template
@@ -663,21 +671,21 @@ MAINOBJ = main.o
 endif
 NOTMAINS = $(filter-out $(MAINOBJ),$(OBJS))
 define test_template
-$(1)$$(EXE-SUFFIX): $(1).o $$(NOTMAINS) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+$(1)$$(EXE-SUFFIX): $(1).o $$(NOTMAINS) $$(DEPLIBS) $$(DEPHEADERS) 
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o  $$(NOTMAINS) $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
 TESTOBJS += $(1).o
 endef
 else
 ifeq ($(TYPE), reloc)
 define test_template
-$(1)$$(EXE-SUFFIX): $(1).o -ldl $$(RELEASABLE) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+$(1)$$(EXE-SUFFIX): $(1).o $$(RELEASABLE) $$(DEPLIBS) $$(DEPHEADERS)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o -ldl $$(RELEASABLE) $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
 TESTOBJS += $(1).o
 endef
 else
 define test_template
-$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+$(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) $$(DEPHEADERS)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o $$(LIB) $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
 TESTOBJS += $(1).o
 endef
 endif
@@ -687,8 +695,8 @@ $(foreach test,$(TESTS),$(eval $(call test_template,$(test))))
 
 #Executable
 ifeq ($(TYPE), exe)
-$(NAME)$(EXE-SUFFIX): $(OBJS) $(RESOBJ) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -o $@ $(LDLOOPSTART) $^ $(LDLOOPEND) $(EXTRALIBS)
+$(NAME)$(EXE-SUFFIX): $(OBJS) $(RESOBJ) $(DEPLIBS) $(DEPHEADERS)
+	$(CC) $(LDFLAGS) -o $@ $(LDLOOPSTART)  $(OBJS) $(RESOBJ) $(DEPLIBS) $(LDLOOPEND) $(EXTRALIBS)
 endif
 
 #Compile resources
@@ -703,8 +711,8 @@ define exe_template
 #limitation of make - you can't call templates inside an ifeq, or it
 #complains (wrongly) of missing endifs
 ifeq ($(TYPE), exes)
-$(1)$$(EXE-SUFFIX): $(1).o $$(DEPLIBS)
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $$^ $(LDLOOPEND) $$(EXTRALIBS)
+$(1)$$(EXE-SUFFIX): $(1).o $$(DEPLIBS) $$(DEPHEADERS)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS)
 EXEOBJS += $(1).o
 endif
 endef
@@ -725,8 +733,8 @@ endif
 
 #DL Mod
 ifeq ($(TYPE), dlmod)
-$(NAME).$(DYNLIB): $(OBJS) $(DEPLIBS)
-	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ -Wl,-\( $^ -Wl,-\) $(EXTRALIBS)
+$(NAME).$(DYNLIB): $(OBJS) $(DEPLIBS) $(DEPHEADERS)
+	$(CC) $(LDFLAGS) -shared -rdynamic -o $@ -Wl,-\( $(OBJS) $(DEPLIBS) -Wl,-\) $(EXTRALIBS)
 endif
 
 #Superlib
@@ -762,12 +770,12 @@ endif
 endif
 
 #Dependencies
-$(OBJS): $(patsubst %,../%,$(HEADERS)) Makefile
+$(OBJS): $(patsubst %,../%,$(HEADERS)) Makefile $(DEPHEADERS)
 ifdef TESTOBJS
-$(TESTOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
+$(TESTOBJS): $(patsubst %,../%,$(HEADERS)) Makefile $(DEPHEADERS)
 endif
 ifdef EXEOBJS
-$(EXEOBJS): $(patsubst %,../%,$(HEADERS)) Makefile
+$(EXEOBJS): $(patsubst %,../%,$(HEADERS)) Makefile $(DEPHEADERS)
 endif
 
 
