@@ -261,6 +261,26 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Add a timestamp to a row, NULL if invalid
+  void add_time_or_null(const string& fieldname, Time::Stamp value)
+  {
+    if (value.valid())
+      fields[fieldname] = FieldValue(value.iso());
+    else
+      fields[fieldname] = FieldValue();
+  }
+
+  //------------------------------------------------------------------------
+  // Add a date to a row, NULL if invalid
+  void add_date_or_null(const string& fieldname, Time::DateStamp value)
+  {
+    if (value.valid())
+      fields[fieldname] = FieldValue(value.iso());
+    else
+      fields[fieldname] = FieldValue();
+  }
+
+  //------------------------------------------------------------------------
   //Finds whether the row contains a value for the given fieldname
   bool has(string fieldname) const
   { return fields.find(fieldname) != fields.end(); }
