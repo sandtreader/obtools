@@ -262,7 +262,8 @@ public:
 
   //------------------------------------------------------------------------
   // Add a timestamp to a row, NULL if invalid
-  void add_time_or_null(const string& fieldname, Time::Stamp value)
+  void add_time_or_null(const string& fieldname, 
+			const Time::Stamp& value)
   {
     if (value.valid())
       fields[fieldname] = FieldValue(value.iso());
@@ -272,7 +273,8 @@ public:
 
   //------------------------------------------------------------------------
   // Add a date to a row, NULL if invalid
-  void add_date_or_null(const string& fieldname, Time::DateStamp value)
+  void add_date_or_null(const string& fieldname, 
+			const Time::DateStamp& value)
   {
     if (value.valid())
       fields[fieldname] = FieldValue(value.iso());
