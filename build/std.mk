@@ -101,8 +101,8 @@ ifeq ($(CROSS), mingw)
 #MinGW versions
 #Don't build debug versions - debugging is difficult anyway and
 #gtest etc. isn't available
-ifndef VARIANTS
-VARIANTS = release-mingw
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release-mingw
 endif
 VARIANT-release-mingw		= MINGW RELEASE
 VARIANT-SUFFIX = -mingw
@@ -111,8 +111,8 @@ endif
 ifeq ($(CROSS), mips)
 #MIPS (Broadcom) chipset
 #Not much point in building debug versions
-ifndef VARIANTS
-VARIANTS = release-mips
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release-mips
 endif
 VARIANT-release-mips		= MIPS RELEASE
 VARIANT-SUFFIX = -mips
@@ -121,8 +121,8 @@ endif
 ifeq ($(CROSS), sh4)
 #SH4 chipset
 #Not much point in building debug versions
-ifndef VARIANTS
-VARIANTS = release-sh4
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release-sh4
 endif
 VARIANT-release-sh4		= SH4 RELEASE
 VARIANT-SUFFIX = -sh4
@@ -133,10 +133,12 @@ ifeq ($(CROSS), osx)
 #Note:  Still called 'cross' even though this is usually built natively
 #on the mac itself
 ifndef VARIANTS
-VARIANTS = release-osx
 ifndef RELEASE-VARIANTS-ONLY
 VARIANTS += debug-osx
 endif
+endif
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release-osx
 endif
 VARIANT-debug-osx		= OSX DEBUG
 VARIANT-release-osx		= OSX RELEASE
@@ -148,10 +150,12 @@ ifeq ($(CROSS), centos)
 #Note:  Still called 'cross' even though this is usually built natively
 #on CentOS
 ifndef VARIANTS
-VARIANTS = release
 ifndef RELEASE-VARIANTS-ONLY
 VARIANTS += debug
 endif
+endif
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release
 endif
 VARIANT-debug		= CENTOS DEBUG
 VARIANT-release		= CENTOS RELEASE RPM
@@ -163,10 +167,12 @@ else #!CROSS-COMPILE
 ifdef PROFILE
 # Profiled native build
 ifndef VARIANTS
-VARIANTS = release-profiled 
  ifndef RELEASE-VARIANTS-ONLY
 VARIANTS += debug-profiled 
  endif
+endif
+ifndef RELEASE-VARIANTS
+RELEASE-VARIANTS = release-profiled
 endif
 VARIANT-debug-profiled		= PROFILED DEBUG
 VARIANT-release-profiled	= PROFILED RELEASE
