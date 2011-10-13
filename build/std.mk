@@ -101,8 +101,8 @@ ifeq ($(CROSS), mingw)
 #MinGW versions
 #Don't build debug versions - debugging is difficult anyway and
 #gtest etc. isn't available
-ifndef RELEASE-VARIANTS
-RELEASE-VARIANTS = release-mingw
+ifndef VARIANTS
+VARIANTS = release-mingw
 endif
 VARIANT-release-mingw		= MINGW RELEASE
 VARIANT-SUFFIX = -mingw
@@ -111,8 +111,8 @@ endif
 ifeq ($(CROSS), mips)
 #MIPS (Broadcom) chipset
 #Not much point in building debug versions
-ifndef RELEASE-VARIANTS
-RELEASE-VARIANTS = release-mips
+ifndef VARIANTS
+VARIANTS = release-mips
 endif
 VARIANT-release-mips		= MIPS RELEASE
 VARIANT-SUFFIX = -mips
@@ -121,8 +121,8 @@ endif
 ifeq ($(CROSS), sh4)
 #SH4 chipset
 #Not much point in building debug versions
-ifndef RELEASE-VARIANTS
-RELEASE-VARIANTS = release-sh4
+ifndef VARIANTS
+VARIANTS = release-sh4
 endif
 VARIANT-release-sh4		= SH4 RELEASE
 VARIANT-SUFFIX = -sh4
