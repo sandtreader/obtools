@@ -202,6 +202,16 @@ bool URL::get_query(Misc::PropertyList& props) const
 }
 
 //------------------------------------------------------------------------
+// Quick access to fragment of URL
+// Returns fragment or "" if can't read it
+string URL::get_fragment() const
+{
+  XML::Element xml;
+  if (!split(xml)) return "";
+  return xml.get_child("fragment").content;
+}
+
+//------------------------------------------------------------------------
 // << operator to write URL to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const URL& u) 

@@ -84,6 +84,11 @@ public:
   string get_query() const;
 
   //------------------------------------------------------------------------
+  // Quick access to fragment of URL
+  // Returns fragment or "" if can't read it
+  string get_fragment() const;
+
+  //------------------------------------------------------------------------
   // Get query as a property list
   // Returns whether query was available, fills props if so
   // Note: Handles + for space and % decode in values

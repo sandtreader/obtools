@@ -38,6 +38,7 @@ int main(int argc, char **argv)
 
   cout << "Path: " << url.get_path() << endl;
   cout << "Query: " << url.get_query() << endl;
+  cout << "Fragment: " << url.get_fragment() << endl;
   ObTools::Misc::PropertyList props;
   url.get_query(props);
   cout << "Split query:\n";
