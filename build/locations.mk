@@ -34,7 +34,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  init:libs/init:xml			\
 	  log:libs/log:text,time,mt 		\
 	  misc:libs/misc:xml,chan		\
-	  msg:libs/msg:xml,init			\
+	  msg:libs/msg:xml,init,ssl		\
 	  mt:libs/mt       			\
 	  net:libs/net:mt     			\
           netlink:libs/netlink                  \

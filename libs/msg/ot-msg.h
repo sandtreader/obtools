@@ -13,6 +13,7 @@
 
 #include "ot-xml.h"
 #include "ot-init.h"
+#include "ot-ssl.h"
 
 namespace ObTools { namespace Message { 
 
@@ -47,7 +48,8 @@ public:
   // Call to handle message and respond
   // Returns error string or "" if OK, in which case response is filled in
   // Response document will be pre-created with document_name-response, if set
-  virtual string handle_message(const XML::Element& request, 
+  virtual string handle_message(const XML::Element& request,
+				SSL::ClientDetails& client,
 				XML::Element& response) = 0;
 
   //--------------------------------------------------------------------------

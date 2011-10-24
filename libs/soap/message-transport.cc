@@ -28,7 +28,7 @@ MessageTransportURLHandler::MessageTransportURLHandler(
 bool MessageTransportURLHandler::handle_message(
                                          Message& request, Message& response,
 					 Web::HTTPMessage&, Web::HTTPMessage&,
-					 SSL::ClientDetails&)
+					 SSL::ClientDetails& client)
 {
   Log::Streams log;
   const XML::Element& body = request.get_body();
@@ -53,7 +53,7 @@ bool MessageTransportURLHandler::handle_message(
 			  message_handler.ns_url);
 
   // Get handler to deal with message
-  string error = message_handler.handle_message(body, *re);
+  string error = message_handler.handle_message(body, client, *re);
   if (error.empty())
   {
     response.add_body(re);

@@ -48,8 +48,12 @@ void MessageTransportSubscriber::handle(Message& msg)
 			"xmlns:" + message_handler.ns_prefix, 
 			message_handler.ns_url);
 
+  // Create fake SSL client details
+  Net::EndPoint ep;
+  SSL::ClientDetails ssl(ep, "#xmlmesh");  // Fake
+
   // Get handler to deal with message
-  string error = message_handler.handle_message(request, response);
+  string error = message_handler.handle_message(request, ssl, response);
   if (error.empty())
   {
     if (message_handler.complex_result)
