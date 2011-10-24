@@ -127,6 +127,10 @@ public:
   void read(const string& text);
 
   //------------------------------------------------------------------------
+  // Set from passphrase 
+  void set_from_passphrase(const string& text);
+
+  //------------------------------------------------------------------------
   // Convert to string
   string str() const;
 
@@ -201,6 +205,14 @@ public:
   // Decrypt a block in place - shorthand for above
   bool decrypt(unsigned char *data, int length)
   { return encrypt(data, length, false); }
+
+  //------------------------------------------------------------------------
+  // Sugared versions with binary strings and PKCS5 padding
+  bool encrypt(const string& plaintext, string& ciphertext_p);
+
+  //------------------------------------------------------------------------
+  // Sugared version of decrypt with binary strings and PKCS5 unpadding
+  bool decrypt(const string& ciphertext, string& plaintext_p);
 };
 
 //==========================================================================

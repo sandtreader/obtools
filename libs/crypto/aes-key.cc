@@ -96,6 +96,24 @@ void AESKey::read(const string& text)
 }
 
 //------------------------------------------------------------------------
+// Set from passphrase 
+void AESKey::set_from_passphrase(const string& text)
+{
+  // Make sure we generate enough for the longest key 
+  // 20*2 = 40 > 32 bytes (256 bits)
+  unsigned char sha1[SHA1::DIGEST_LENGTH*2];
+
+  // SHA1 the text into the first half
+  SHA1::digest(text.data(), text.size(), sha1);
+
+  // SHA1 the first half into the second
+  SHA1::digest(sha1, SHA1::DIGEST_LENGTH, sha1+SHA1::DIGEST_LENGTH);
+
+  // Read from the hash
+  read(sha1);
+}
+
+//------------------------------------------------------------------------
 // Convert to string
 string AESKey::str() const
 {

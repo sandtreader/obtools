@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include "ot-crypto.h"
+#include <memory>
 
 namespace ObTools { namespace Crypto {
 
@@ -65,6 +66,49 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption)
       AES_ecb_encrypt(data, data, &aes_key, enc);
     }
   }
+
+  return true;
+}
+
+//------------------------------------------------------------------------
+// Sugared version of encrypt with binary strings and PKCS5 padding
+bool AES::encrypt(const string& plaintext, string& ciphertext_p)
+{
+  // Pad token to AES_BLOCK_SIZE
+  int length = plaintext.size();
+  auto_ptr<unsigned char> padded(PKCS5::pad(
+	     reinterpret_cast<const unsigned char *>(plaintext.data()), 
+	     length, AES_BLOCK_SIZE));
+
+  // Encrypt
+  if (!encrypt(padded.get(), length)) return false;
+
+  // Convert back to string
+  ciphertext_p = string(reinterpret_cast<const char *>(padded.get()), length);
+
+  return true;
+}
+
+//------------------------------------------------------------------------
+// Sugared version of decrypt with binary  strings and PKCS5 unpadding
+bool AES::decrypt(const string& ciphertext, string& plaintext_p)
+{
+  int length = ciphertext.size();
+
+  // Copy to safe buffer
+  auto_ptr<unsigned char> 
+    ct(reinterpret_cast<unsigned char *>(malloc(length)));
+  if (!ct.get()) return false;
+  memcpy(ct.get(), ciphertext.data(), length);
+
+  // Decrypt
+  if (!decrypt(ct.get(), length)) return false;
+
+  // Unpad
+  length = PKCS5::original_length(ct.get(), length);
+
+  // Convert back to string
+  plaintext_p = string(reinterpret_cast<const char *>(ct.get()), length);
 
   return true;
 }

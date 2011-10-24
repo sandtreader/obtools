@@ -10,10 +10,12 @@ NAME   	= ot-crypto
 HEADERS = ot-crypto.h
 OBJS  	= pkcs5.o aes-key.o aes.o des-key.o des.o rsa-key.o rsa.o sha1.o \
           x509.o store.o library.o
-TESTS 	= test-pkcs5 test-aes-key test-aes test-des-key test-des \
+TESTS 	= test-pkcs5 test-aes-key test-aes test-aes-string \
+          test-des-key test-des \
           test-rsa-key test-rsa test-sha1 test-x509
 DEPENDS = misc chan net xml mt text
-TESTCMD	= ./test-pkcs5 && ./test-aes-key && ./test-aes \
+TESTLIB = -lgtest
+TESTCMD	= ./test-pkcs5 && ./test-aes-key && ./test-aes && ./test-aes-string \
        && ./test-des-key && ./test-des \
        && ./test-rsa-key && ./test-rsa && ./test-sha1 \
        && ./test-x509 < test.x509.pem
