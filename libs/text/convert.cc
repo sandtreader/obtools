@@ -174,6 +174,21 @@ string btox(const unsigned char *data, unsigned int length)
 }
 
 //--------------------------------------------------------------------------
+// Binary to hex (simple, use Misc::Dumper for long blocks)
+string btox(const string& data)
+{
+  string s;
+  for(string::const_iterator p=data.begin();p!=data.end();++p)
+  {
+    char buf[3];
+    snprintf(buf, 3, "%02x", *p);
+    s += buf;
+  }
+
+  return s;
+}
+
+//--------------------------------------------------------------------------
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
 unsigned int xtob(const string& hex, unsigned char *data, 
