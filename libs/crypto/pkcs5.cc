@@ -34,6 +34,22 @@ unsigned char *PKCS5::pad(const unsigned char *data, int& length,
 }
 
 //------------------------------------------------------------------------
+// Pad a block of data to given length multiple, in place
+// Data must be at least multiple bytes longer than length
+// Returns length of padded data
+int PKCS5::pad_in_place(unsigned char *data, int length, int multiple)
+{
+  // Always adds padding, even if not really needed
+  int new_length = (length+multiple)/multiple*multiple;
+  int extra = new_length-length;
+
+  // Add padding
+  memset(data+length, extra, extra);
+
+  return new_length;
+}
+
+//------------------------------------------------------------------------
 // Unpad a block of data 
 // Returns original length of block - data is not copied or modified
 int PKCS5::original_length(const unsigned char *data, int length)

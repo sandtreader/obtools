@@ -503,6 +503,12 @@ class PKCS5
 			    int multiple);
 
   //------------------------------------------------------------------------
+  // Pad a block of data to given length multiple, in place
+  // Data must be at least multiple bytes longer than length
+  // Returns length of padded data
+  static int pad_in_place(unsigned char *data, int length, int multiple);
+
+  //------------------------------------------------------------------------
   // Unpad a block of data 
   // Returns original length of block - data is not copied or modified
   static int original_length(const unsigned char *data, int length);
