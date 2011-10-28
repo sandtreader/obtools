@@ -91,6 +91,17 @@ enum
 };
 
 //==========================================================================
+// Tag conversions
+
+//------------------------------------------------------------------------
+// Get a friendly string version of a tag
+string tag_to_string(tag_t tag);
+
+//------------------------------------------------------------------------
+// Get a tag from a string
+tag_t string_to_tag(const string& str);
+
+//==========================================================================
 // Internal struct for carrying messages (message.cc)
 // This is NOT used for directly encoding the stream!
 struct Message
@@ -113,7 +124,7 @@ struct Message
 
   //------------------------------------------------------------------------
   // Get a friendly string version of the tag
-  string stag();
+  string stag() { return "'"+tag_to_string(tag)+"'"; }
 };
 
 //==========================================================================
