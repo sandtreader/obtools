@@ -79,12 +79,37 @@ void AESKey::read(istream& sin)
 }
 
 //------------------------------------------------------------------------
+// Read from stream as binary
+void AESKey::read_binary(istream& sin)
+{
+  int i;
+
+  for (i = 0; i < size/8; ++i)
+  {
+    int n = sin.get();
+    if (n<0) break;
+    key[i] = (unsigned char)n;
+  }
+
+  valid = true;
+}
+
+
+//------------------------------------------------------------------------
 // Write to stream - write hex characters
 void AESKey::write(ostream& sout) const
 {
   for (int i = 0; i < size / 8; ++i)
     sout << hex << setw(2) << setfill('0') << (int)key[i];
   sout << dec << setw(0) << setfill(' ');
+}
+
+//------------------------------------------------------------------------
+// Write to stream as binary
+void AESKey::write_binary(ostream& sout) const
+{
+  for (int i = 0; i < size / 8; ++i)
+    sout << key[i];
 }
 
 //------------------------------------------------------------------------

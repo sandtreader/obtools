@@ -119,8 +119,16 @@ public:
   void read(istream& sin);
 
   //------------------------------------------------------------------------
+  // Read from stream as binary
+  void read_binary(istream& sin);
+
+  //------------------------------------------------------------------------
   // Write to stream - writes hex characters
   void write(ostream& sout) const;
+
+  //------------------------------------------------------------------------
+  // Write to stream as binary
+  void write_binary(ostream& sout) const;
 
   //------------------------------------------------------------------------
   // Read from string - reads hex characters
