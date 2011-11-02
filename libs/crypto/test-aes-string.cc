@@ -18,6 +18,14 @@
 using namespace std;
 using namespace ObTools;
 
+TEST(AESKeyTests, TestSetAESKeyFromInteger)
+{
+  Crypto::AESKey key(Crypto::AESKey::BITS_128);
+  key.set_from_int(42);
+  ASSERT_TRUE(key.valid);
+  ASSERT_EQ(key.str(), "0000000000000000000000000000002a");
+}
+
 TEST(AESStringTests, TestEncryptDecryptCycleMatches)
 {
   // Create a key from a known passphrase

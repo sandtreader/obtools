@@ -13,6 +13,7 @@
 #ifndef __OBTOOLS_CRYPTO_H
 #define __OBTOOLS_CRYPTO_H
 
+#include <stdint.h>
 #include <string>
 #include <map>
 #include <string.h>
@@ -137,6 +138,10 @@ public:
   //------------------------------------------------------------------------
   // Set from passphrase 
   void set_from_passphrase(const string& text);
+
+  //------------------------------------------------------------------------
+  // Set from integer - big-endian, zero padded
+  void set_from_int(uint64_t n);
 
   //------------------------------------------------------------------------
   // Convert to string

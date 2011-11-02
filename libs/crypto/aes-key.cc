@@ -130,6 +130,22 @@ void AESKey::set_from_passphrase(const string& text)
 }
 
 //------------------------------------------------------------------------
+// Set from integer - big-endian, zero padded
+void AESKey::set_from_int(uint64_t n)
+{
+  Channel::BlockWriter writer(key, size/8);
+  try
+  {
+    writer.skip(size/8-8);
+    writer.write_nbo_64(n);
+    valid = true;
+  }
+  catch (Channel::Error)
+  {}
+}
+
+
+//------------------------------------------------------------------------
 // Convert to string
 string AESKey::str() const
 {
