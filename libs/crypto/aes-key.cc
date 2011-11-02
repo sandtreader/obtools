@@ -82,16 +82,8 @@ void AESKey::read(istream& sin)
 // Read from stream as binary
 void AESKey::read_binary(istream& sin)
 {
-  int i;
-
-  for (i = 0; i < size/8; ++i)
-  {
-    int n = sin.get();
-    if (n<0) break;
-    key[i] = (unsigned char)n;
-  }
-
-  valid = true;
+  sin.read((char *)key, size/8);
+  valid = sin.gcount() == size/8;
 }
 
 
@@ -108,8 +100,7 @@ void AESKey::write(ostream& sout) const
 // Write to stream as binary
 void AESKey::write_binary(ostream& sout) const
 {
-  for (int i = 0; i < size / 8; ++i)
-    sout << key[i];
+  sout.write((char *)key, size/8);
 }
 
 //------------------------------------------------------------------------
