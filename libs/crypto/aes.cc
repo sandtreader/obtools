@@ -96,19 +96,18 @@ bool AES::decrypt(const string& ciphertext, string& plaintext_p)
   int length = ciphertext.size();
 
   // Copy to safe buffer
-  auto_ptr<unsigned char> 
-    ct(reinterpret_cast<unsigned char *>(malloc(length)));
-  if (!ct.get()) return false;
-  memcpy(ct.get(), ciphertext.data(), length);
+  vector<unsigned char> ct(length);
+  unsigned char *data = &ct[0];
+  memcpy(data, ciphertext.data(), length);
 
   // Decrypt
-  if (!decrypt(ct.get(), length)) return false;
+  if (!decrypt(data, length)) return false;
 
   // Unpad
-  length = PKCS5::original_length(ct.get(), length);
+  length = PKCS5::original_length(data, length);
 
   // Convert back to string
-  plaintext_p = string(reinterpret_cast<const char *>(ct.get()), length);
+  plaintext_p = string(reinterpret_cast<const char *>(data), length);
 
   return true;
 }
