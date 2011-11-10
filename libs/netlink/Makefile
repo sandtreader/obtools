@@ -14,5 +14,12 @@ TESTS   = test-genl
 TESTLIB = -lgtest
 TESTCMD = ./test-genl
 
+# netlink won't build on CentOS
+ifndef CENTOS
 ROOT    = ../..
 include $(ROOT)/build/std.mk
+else
+targets:
+dorelease:
+endif
+
