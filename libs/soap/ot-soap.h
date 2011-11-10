@@ -29,6 +29,7 @@ using namespace std;
 // Namespaces
 const char NS_ENVELOPE_1_1[] = "http://schemas.xmlsoap.org/soap/envelope/";
 const char NS_ENVELOPE_1_2[] = "http://www.w3.org/2003/05/soap-envelope";
+const char NS_ENVELOPE_1_3[] = "http://www.w3.org/2002/12/soap-envelope";
 
 // Role names
 const char RN_NONE[] = "http://www.w3.org/2003/05/soap-envelope/role/none";
