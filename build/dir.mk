@@ -9,6 +9,14 @@
 
 all:	$(patsubst %,%-all,$(SUBS))
 
+#Spot CentOS, RHEL5
+OSNAME=$(shell uname -r|sed 's/\(.*\)\.//'|cut -c1-2)
+ifdef OSNAME
+ifeq ($(OSNAME), el)
+CENTOS = 1
+endif
+endif
+
 # Use standard SUBS if not overridden
 ifndef SUBS_MINGW
 SUBS_MINGW = $(SUBS)
