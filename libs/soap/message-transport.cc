@@ -90,10 +90,13 @@ void MessageTransport::register_handler(ObTools::Message::Handler& handler,
 // Constructor
 MessageInterface::MessageInterface(XML::Element& config,
 				   ObTools::Message::Broker& broker,
-				   const string& server_name): 
-  http_server(0), http_server_thread(0)
+				   const string& server_name,
+                                   SSL::Context *ssl_ctx): 
+  http_server(0), http_server_thread(0),
+  https_server(0), https_server_thread(0)
 {
   XML::XPathProcessor xpath(config);
+  Log::Streams log;
 
   // Start HTTP server
   int hport = xpath.get_value_int("server/@port", 0);
@@ -102,8 +105,6 @@ MessageInterface::MessageInterface(XML::Element& config,
     // Default to localhost only
     Net::EndPoint addr(Net::IPAddress(xpath.get_value("server/@address",
 						      "localhost")), hport);
-    Log::Streams log;
-
     log.summary << "Starting HTTP SOAP server at " << addr << endl;
     http_server = new Web::SimpleHTTPServer(addr, server_name);
 
@@ -113,6 +114,27 @@ MessageInterface::MessageInterface(XML::Element& config,
     // Start thread
     http_server_thread = new Net::TCPServerThread(*http_server);
   }
+
+  // Start HTTPS server
+  hport = xpath.get_value_int("ssl-server/@port", 0);
+  if (hport)
+  {
+    if (ssl_ctx)
+    {
+      // Default to localhost only
+      Net::EndPoint addr(Net::IPAddress(xpath.get_value("ssl-server/@address",
+                                                        "localhost")), hport);
+      log.summary << "Starting HTTPS SOAP server at " << addr << endl;
+      https_server = new Web::SimpleHTTPServer(ssl_ctx, addr, server_name);
+
+      // Add a message transport to message broker
+      broker.add_transport(new MessageTransport(*https_server));
+
+      // Start thread
+      https_server_thread = new Net::TCPServerThread(*https_server);
+    }
+    else log.error << "SSL server requested but no SSL context established\n";
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -121,6 +143,8 @@ MessageInterface::~MessageInterface()
 {
   if (http_server_thread) delete http_server_thread;
   if (http_server) delete http_server;
+  if (https_server_thread) delete https_server_thread;
+  if (https_server) delete https_server;
 }
 
 }} // namespaces

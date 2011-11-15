@@ -3,8 +3,8 @@
 //
 // Public definitions for ObTools::SOAP
 // Support for SOAP messages
-// 
-// Copyright (c) 2003-2006 Paul Clark.  All rights reserved
+//
+// Copyright (c) 2003-2011 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -18,7 +18,7 @@
 #include "ot-web.h"
 #include "ot-msg.h"
 
-namespace ObTools { namespace SOAP { 
+namespace ObTools { namespace SOAP {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -34,7 +34,7 @@ const char NS_ENVELOPE_1_3[] = "http://www.w3.org/2002/12/soap-envelope";
 // Role names
 const char RN_NONE[] = "http://www.w3.org/2003/05/soap-envelope/role/none";
 const char RN_NEXT[] = "http://www.w3.org/2003/05/soap-envelope/role/next";
-const char RN_ULTIMATE_RECEIVER[] = 
+const char RN_ULTIMATE_RECEIVER[] =
   "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver";
 
 //==========================================================================
@@ -173,7 +173,7 @@ public:
   string to_string() const;
 
   //------------------------------------------------------------------------
-  // Flatten any href/id (SOAP1.1) reference structure, taking copies of 
+  // Flatten any href/id (SOAP1.1) reference structure, taking copies of
   // referenced elements and replacing referencing elements with them, thus
   // creating the inline equivalent document.
   // Leaves any references to ancestors (loops) alone
@@ -236,9 +236,9 @@ public:
     CODE_RECEIVER,
     CODE_UNKNOWN
   };
-  
+
   //------------------------------------------------------------------------
-  // Constructor for outgoing faults 
+  // Constructor for outgoing faults
   // Reason is the English (xml:lang="en") version - use add_reason for more
   Fault(Code code, const string& reason);
 
@@ -247,7 +247,7 @@ public:
   Fault(const string& text, Parser& p): Message(text, p) {}
 
   //------------------------------------------------------------------------
-  // Set a subcode 
+  // Set a subcode
   // According to SOAP 1.2: 5.4.1.3, the value should be a qualified name
   // We only allow one level here!
   void set_subcode(const string& value);
@@ -329,27 +329,27 @@ class HTTPClient: public Web::HTTPClient
 public:
   //--------------------------------------------------------------------------
   // Constructor from server, no SSL
-  HTTPClient(Net::EndPoint _server, const string& _ua="", 
-	     int _connection_timeout=0, int _operation_timeout=0): 
+  HTTPClient(Net::EndPoint _server, const string& _ua="",
+	     int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(_server, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from server, with SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *ctx, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0): 
+	     int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(_server, ctx, _ua, _connection_timeout, _operation_timeout)
     {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL, no SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0): 
+	     int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, 0, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL, with SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0): 
+	     int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, ctx, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
@@ -378,14 +378,14 @@ private:
 
   //--------------------------------------------------------------------------
   // Implementation of standard HTTP handler
-  bool handle_request(Web::HTTPMessage& http_request, 
+  bool handle_request(Web::HTTPMessage& http_request,
 		      Web::HTTPMessage& http_response,
 		      SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------
   // Abstract interface to handle SOAP messages
-  // http_request, http_response and client are made available for complex 
+  // http_request, http_response and client are made available for complex
   // use, but can be ignored
   virtual bool handle_message(Message& request, Message& response,
 			      Web::HTTPMessage& http_request,
@@ -414,7 +414,7 @@ public:
 };
 
 //==========================================================================
-// SOAP Transport URL handler 
+// SOAP Transport URL handler
 class MessageTransportURLHandler: public URLHandler
 {
   // Message handler to send message to
@@ -424,7 +424,7 @@ class MessageTransportURLHandler: public URLHandler
 
   //--------------------------------------------------------------------------
   // Constructor - takes URL pattern
-  MessageTransportURLHandler(const string& _url, 
+  MessageTransportURLHandler(const string& _url,
 			     ObTools::Message::Handler& _handler);
 
   //--------------------------------------------------------------------------
@@ -442,12 +442,12 @@ class MessageTransport: public ObTools::Message::Transport
 
  public:
   //--------------------------------------------------------------------------
-  MessageTransport(Web::SimpleHTTPServer& _server): 
+  MessageTransport(Web::SimpleHTTPServer& _server):
     ObTools::Message::Transport("soap"), server(_server) {}
 
   //--------------------------------------------------------------------------
   // Register a handler with the given config element
-  void register_handler(ObTools::Message::Handler& handler, 
+  void register_handler(ObTools::Message::Handler& handler,
 			XML::Element& config);
 
   //--------------------------------------------------------------------------
@@ -461,15 +461,17 @@ class MessageInterface
 {
   Web::SimpleHTTPServer *http_server;
   Net::TCPServerThread *http_server_thread;
+  Web::SimpleHTTPServer *https_server;
+  Net::TCPServerThread *https_server_thread;
 
 public:
   //--------------------------------------------------------------------------
   // Constructor
   MessageInterface(XML::Element& config, ObTools::Message::Broker& broker,
-		   const string& server_name);
+		   const string& server_name, SSL::Context *ssl_ctx=0);
 
   //--------------------------------------------------------------------------
-  // Destructor 
+  // Destructor
   ~MessageInterface();
 };
 
