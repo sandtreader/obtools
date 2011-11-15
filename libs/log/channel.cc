@@ -23,6 +23,10 @@ void StreamChannel::log(Message& msg)
   MT::Lock lock(mutex);    // ostreams are NOT thread-safe
 #endif
 
+  // If stream is in bad/failed state, attempt to clear
+  // This can be useful if e.g. the disk was full but now has some free space
+  if (!stream.good())
+    stream.clear();
   stream << msg.text << endl;
 }
 
