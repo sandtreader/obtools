@@ -371,6 +371,18 @@ bool Configuration::write()
   }
 
   f << parser.get_root();
+
+  if (!f.good())
+  {
+    // Writing to the stream failed. Log error and clean up
+    serr << "Config: Failed writing new content to temporary file "
+         << tfn << ": " << strerror(errno) << endl;
+    f.close();
+    File::Path tempfile(tfn);
+    tempfile.erase();
+    return false;
+  }
+
   f.close();
 
   // Do atomic update 
