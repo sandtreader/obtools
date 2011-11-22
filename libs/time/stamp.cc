@@ -169,7 +169,10 @@ namespace {
     {
       string s(text, pos, length);
       pos += length;
-      return atoi(s.c_str());
+      char *c = 0;
+      int result = strtol(s.c_str(), &c, 10);
+      if (!*c)
+        return result;
     }
     return -1;
   }
