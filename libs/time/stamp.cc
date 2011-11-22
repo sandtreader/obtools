@@ -174,6 +174,17 @@ namespace {
     return -1;
   }
 
+  double read_part_f(const string& text, string::size_type& pos, int length)
+  {
+    if (text.size() >= pos + length)
+    {
+      string s(text, pos, length);
+      pos += length;
+      return atof(s.c_str());
+    }
+    return -1;
+  }
+
   bool read_filler(const string& text, string::size_type& pos, char c)
   {
     if (text.size() > pos + 1)
@@ -240,7 +251,7 @@ Stamp::Stamp(const string& text, bool lenient)
   read_filler(text, pos, ':');
 
   // Read seconds as float for all the rest
-  int s = read_part(text, pos, text.size() - pos);
+  double s = read_part_f(text, pos, text.size() - pos);
   if (s < 0 && !lenient) return;
   if (s >= 0) split.sec = s;
 
