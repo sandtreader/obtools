@@ -162,7 +162,32 @@ Split Stamp::split(ntp_stamp_t ts)
 //------------------------------------------------------------------------
 // Constructor from string
 // See ot-time.h for details
-Stamp::Stamp(const string& text)
+namespace {
+  int read_part(const string& text, string::size_type& pos, int length)
+  {
+    if (text.size() >= pos + length)
+    {
+      string s(text, pos, length);
+      pos += length;
+      return atoi(s.c_str());
+    }
+    return -1;
+  }
+
+  bool read_filler(const string& text, string::size_type& pos, char c)
+  {
+    if (text.size() > pos + 1)
+    {
+      if (text[pos] == c)
+      {
+        pos++;
+        return true;
+      }
+    }
+    return false;
+  }
+}
+Stamp::Stamp(const string& text, bool lenient)
 {
   string::size_type pos=0;
 
@@ -172,60 +197,52 @@ Stamp::Stamp(const string& text)
   // Accumulate a Split structure to convert later
   Split split;
 
-  // If length is not at least 15, bomb out now
-  string::size_type l = text.size();
-  if (l < 15) return;
-
   // Read year
-  string sy(text, pos, 4);
-  split.year = atoi(sy.c_str());
-  pos+=4;
+  int y = read_part(text, pos, 4);
+  if (y < 0) return;
+  split.year = y;
 
   // Check for dash
-  if (text[pos] == '-') pos++;
+  read_filler(text, pos, '-');
 
   // Read month
-  string sm(text, pos, 2);
-  split.month = atoi(sm.c_str());
-  pos+=2;
+  int m = read_part(text, pos, 2);
+  if (m < 0) return;
+  split.month = m;
 
   // Check for dash
-  if (text[pos] == '-') pos++;
+  read_filler(text, pos, '-');
 
   // Read day
-  string sd(text, pos, 2);
-  split.day = atoi(sd.c_str());
-  pos+=2;
+  int d = read_part(text, pos, 2);
+  if (d < 0) return;
+  split.day = d;
 
-  // Check for space or 'T', otherwise fail
-  if (text[pos] != ' ' && text[pos] != 'T') return;
-  pos++;
-
-  // Check size - could be close to original 15
-  if (pos > l-6) return;
+  // Check for space or 'T', otherwise fail if not lenient
+  if (!read_filler(text, pos, ' ') && !read_filler(text, pos, 'T') &&
+      !lenient)
+    return;
 
   // Read hour
-  string sh(text, pos, 2);
-  split.hour = atoi(sh.c_str());
-  pos+=2;
+  int h = read_part(text, pos, 2);
+  if (h < 0 && !lenient) return;
+  if (h >= 0) split.hour = h;
 
   // Check for colon
-  if (text[pos] == ':') pos++;
+  read_filler(text, pos, ':');
 
   // Read minute
-  string smi(text, pos, 2);
-  split.min = atoi(smi.c_str());
-  pos+=2;
+  int mi = read_part(text, pos, 2);
+  if (mi < 0 && !lenient) return;
+  if (mi >= 0) split.min = mi;
 
   // Check for colon
-  if (text[pos] == ':') pos++;
-
-  // Check size - could be close to end if dashes used
-  if (pos > l-2) return;
+  read_filler(text, pos, ':');
 
   // Read seconds as float for all the rest
-  string ss(text, pos);
-  split.sec = atof(ss.c_str());
+  int s = read_part(text, pos, text.size() - pos);
+  if (s < 0 && !lenient) return;
+  if (s >= 0) split.sec = s;
 
   // Set timestamp
   t = combine(split);

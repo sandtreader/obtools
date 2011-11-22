@@ -192,7 +192,9 @@ public:
   //   ISO8601:  YYYY[-]MM[-]DD(T| )HH[:]MM[:]SS.ss(Z|+00) (UTC always assumed)
   //   HTTP:     to come!
   //   RFC822:   to come!
-  Stamp(const string& text);
+  // The lenient flag allows the time parts to be omitted from the string
+  // and zero value assumed for those parts
+  Stamp(const string& text, bool lenient = false);
 
   //------------------------------------------------------------------------
   // Validity checks - NTP 0 is not valid
