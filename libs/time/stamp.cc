@@ -163,13 +163,16 @@ Split Stamp::split(ntp_stamp_t ts)
 // Constructor from string
 // See ot-time.h for details
 namespace {
-  const int TOO_SHORT = -1;
+  const int NO_DATA = -1;
   const int BAD_DATA = -2;
 
   int read_part(const string& text, string::size_type& pos, int length)
   {
+    if (text.size() == pos)
+      return NO_DATA;
+
     if (text.size() < pos + length)
-      return TOO_SHORT;
+      return BAD_DATA;
 
     string s(text, pos, length);
     for (string::const_iterator it = s.begin(); it != s.end(); ++it)
@@ -183,11 +186,14 @@ namespace {
   // not general - specific for float seconds with optional Z at end
   double read_part_f(const string& text, string::size_type& pos, int length)
   {
+    if (text.size() == pos)
+      return NO_DATA;
+
     if (length < 2)
-      return TOO_SHORT;
+      return BAD_DATA;
 
     if (text.size() < pos + length)
-      return TOO_SHORT;
+      return BAD_DATA;
 
     string s(text, pos, length);
 
@@ -197,12 +203,10 @@ namespace {
     int dp_count = 0;
     for (string::const_iterator it = s.begin(); it != s.end(); ++it)
     {
-      if ((*it < '0' || *it > '9') && *it != '.')
-      {
-        return BAD_DATA;
-      }
       if (*it == '.')
         dp_count++;
+      else if (*it < '0' || *it > '9')
+        return BAD_DATA;
     }
 
     if (dp_count > 1)
@@ -214,7 +218,7 @@ namespace {
 
   bool read_filler(const string& text, string::size_type& pos, char c)
   {
-    if (text.size() > pos + 1)
+    if (text.size() > pos)
     {
       if (text[pos] == c)
       {
@@ -263,7 +267,7 @@ Stamp::Stamp(const string& text, bool lenient)
 
   // Read hour
   int h = read_part(text, pos, 2);
-  if (h == BAD_DATA || (h == TOO_SHORT && !lenient)) return;
+  if (h == BAD_DATA || (h == NO_DATA && !lenient)) return;
   if (h >= 0)
   {
     split.hour = h;
@@ -273,7 +277,7 @@ Stamp::Stamp(const string& text, bool lenient)
 
     // Read minute
     int mi = read_part(text, pos, 2);
-    if (mi == BAD_DATA || (h == TOO_SHORT && !lenient)) return;
+    if (mi == BAD_DATA || (h == NO_DATA && !lenient)) return;
     if (mi >= 0)
     {
       split.min = mi;
@@ -283,7 +287,7 @@ Stamp::Stamp(const string& text, bool lenient)
 
       // Read seconds as float for all the rest
       double s = read_part_f(text, pos, text.size() - pos);
-      if (s == BAD_DATA || (s == TOO_SHORT && !lenient)) return;
+      if (s == BAD_DATA || (s == NO_DATA && !lenient)) return;
       if (s >= 0) split.sec = s;
     }
   }

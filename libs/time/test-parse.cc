@@ -64,7 +64,7 @@ TEST(StampTests, TestParseISO8601Lenient)
   ASSERT_EQ("2011-11-23T00:00:00Z", stamp.iso());
 }
 
-TEST(StampTests, TestParseISO8601LenientWithHour)
+TEST(StampTests, TestParseISO8601LenientWithHourOnly)
 {
   const string iso8601 = "2011-11-23T13";
   Time::Stamp stamp(iso8601, true);
@@ -82,7 +82,7 @@ TEST(StampTests, TestParseISO8601LenientCutShort)
 {
   const string iso8601 = "2011-11-23T103";
   Time::Stamp stamp(iso8601, true);
-  ASSERT_EQ("2011-11-23T10:00:00Z", stamp.iso());
+  ASSERT_TRUE(!stamp);
 }
 
 TEST(StampTests, TestParseISO8601LenientBadSeconds)
