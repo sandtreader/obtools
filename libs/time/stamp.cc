@@ -163,29 +163,53 @@ Split Stamp::split(ntp_stamp_t ts)
 // Constructor from string
 // See ot-time.h for details
 namespace {
+  const int TOO_SHORT = -1;
+  const int BAD_DATA = -2;
+
   int read_part(const string& text, string::size_type& pos, int length)
   {
-    if (text.size() >= pos + length)
-    {
-      string s(text, pos, length);
-      pos += length;
-      char *c = 0;
-      int result = strtol(s.c_str(), &c, 10);
-      if (!*c)
-        return result;
-    }
-    return -1;
+    if (text.size() < pos + length)
+      return TOO_SHORT;
+
+    string s(text, pos, length);
+    for (string::const_iterator it = s.begin(); it != s.end(); ++it)
+      if (*it < '0' || *it > '9')
+        return BAD_DATA;
+
+    pos += length;
+    return atoi(s.c_str());
   }
 
+  // not general - specific for float seconds with optional Z at end
   double read_part_f(const string& text, string::size_type& pos, int length)
   {
-    if (text.size() >= pos + length)
+    if (length < 2)
+      return TOO_SHORT;
+
+    if (text.size() < pos + length)
+      return TOO_SHORT;
+
+    string s(text, pos, length);
+
+    if (s.size() > 2 && *s.rbegin() == 'Z')
+      s.erase(s.size() - 1, 1);
+
+    int dp_count = 0;
+    for (string::const_iterator it = s.begin(); it != s.end(); ++it)
     {
-      string s(text, pos, length);
-      pos += length;
-      return atof(s.c_str());
+      if ((*it < '0' || *it > '9') && *it != '.')
+      {
+        return BAD_DATA;
+      }
+      if (*it == '.')
+        dp_count++;
     }
-    return -1;
+
+    if (dp_count > 1)
+      return BAD_DATA;
+
+    pos += length;
+    return atof(s.c_str());
   }
 
   bool read_filler(const string& text, string::size_type& pos, char c)
@@ -239,24 +263,30 @@ Stamp::Stamp(const string& text, bool lenient)
 
   // Read hour
   int h = read_part(text, pos, 2);
-  if (h < 0 && !lenient) return;
-  if (h >= 0) split.hour = h;
+  if (h == BAD_DATA || (h == TOO_SHORT && !lenient)) return;
+  if (h >= 0)
+  {
+    split.hour = h;
 
-  // Check for colon
-  read_filler(text, pos, ':');
+    // Check for colon
+    read_filler(text, pos, ':');
 
-  // Read minute
-  int mi = read_part(text, pos, 2);
-  if (mi < 0 && !lenient) return;
-  if (mi >= 0) split.min = mi;
+    // Read minute
+    int mi = read_part(text, pos, 2);
+    if (mi == BAD_DATA || (h == TOO_SHORT && !lenient)) return;
+    if (mi >= 0)
+    {
+      split.min = mi;
 
-  // Check for colon
-  read_filler(text, pos, ':');
+      // Check for colon
+      read_filler(text, pos, ':');
 
-  // Read seconds as float for all the rest
-  double s = read_part_f(text, pos, text.size() - pos);
-  if (s < 0 && !lenient) return;
-  if (s >= 0) split.sec = s;
+      // Read seconds as float for all the rest
+      double s = read_part_f(text, pos, text.size() - pos);
+      if (s == BAD_DATA || (s == TOO_SHORT && !lenient)) return;
+      if (s >= 0) split.sec = s;
+    }
+  }
 
   // Set timestamp
   t = combine(split);
