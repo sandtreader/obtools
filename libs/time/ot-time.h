@@ -319,6 +319,10 @@ public:
   bool operator>=(const Stamp& o) const { return t>=o.t; }
 };
 
+//------------------------------------------------------------------------
+// << operator to write Stamp to ostream
+ostream& operator<<(ostream& s, const Stamp& st);
+
 //==========================================================================
 //DateStamp - fixed date in absolute time
 //As per Stamp, but can be constructed from just a date
@@ -360,6 +364,10 @@ public:
     return Stamp::iso();
   }
 };
+
+//------------------------------------------------------------------------
+// << operator to write DateStamp to ostream
+ostream& operator<<(ostream& s, const DateStamp& dst);
 
 //==========================================================================
 }} //namespaces

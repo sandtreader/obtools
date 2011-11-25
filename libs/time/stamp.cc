@@ -502,4 +502,12 @@ Stamp Stamp::now()
   return s;
 }
 
+//------------------------------------------------------------------------
+// << operator to write Stamp to ostream
+ostream& operator<<(ostream& s, const Stamp& st)
+{
+  s << st.iso();
+  return s;
+}
+
 }} // namespaces
