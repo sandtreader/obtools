@@ -26,6 +26,18 @@ TEST(AESKeyTests, TestSetAESKeyFromInteger)
   ASSERT_EQ(key.str(), "0000000000000000000000000000002a");
 }
 
+TEST(AESKeyTests, TestBase64ReadWrite)
+{
+  Crypto::AESKey key(Crypto::AESKey::BITS_128);
+  key.create();
+  string b64 = key.str_base64();
+
+  Crypto::AESKey key2(Crypto::AESKey::BITS_128);
+  ASSERT_TRUE(key2.set_from_base64(b64));
+  ASSERT_TRUE(key.valid);
+  ASSERT_EQ(key.str(), key2.str());
+}
+
 TEST(AESStringTests, TestEncryptDecryptCycleMatches)
 {
   // Create a key from a known passphrase

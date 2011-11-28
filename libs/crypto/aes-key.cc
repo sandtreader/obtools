@@ -14,6 +14,7 @@
 #include <openssl/rand.h>
 #include "ot-chan.h"
 #include "ot-crypto.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace Crypto {
 
@@ -112,10 +113,10 @@ void AESKey::read(const string& text)
 }
 
 //------------------------------------------------------------------------
-// Set from passphrase 
+// Set from passphrase
 void AESKey::set_from_passphrase(const string& text)
 {
-  // Make sure we generate enough for the longest key 
+  // Make sure we generate enough for the longest key
   // 20*2 = 40 > 32 bytes (256 bits)
   unsigned char sha1[SHA1::DIGEST_LENGTH*2];
 
@@ -166,6 +167,25 @@ void AESKey::read(Channel::Reader& reader) throw (Channel::Error)
 void AESKey::write(Channel::Writer& writer) const throw (Channel::Error)
 {
   writer.write(key, size / 8);
+}
+
+//------------------------------------------------------------------------
+// Read from string as base64
+// Returns whether successful
+bool AESKey::set_from_base64(const string& s)
+{
+  Text::Base64 base64;
+  if ((int)base64.decode(s, key, size/8) != size/8) return false;
+  valid = true;
+  return true;
+}
+
+//------------------------------------------------------------------------
+// Convert to a base64 string
+string AESKey::str_base64()
+{
+  Text::Base64 base64;
+  return base64.encode(key, size/8);
 }
 
 //------------------------------------------------------------------------

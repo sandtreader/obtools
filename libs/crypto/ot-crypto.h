@@ -136,7 +136,7 @@ public:
   void read(const string& text);
 
   //------------------------------------------------------------------------
-  // Set from passphrase 
+  // Set from passphrase
   void set_from_passphrase(const string& text);
 
   //------------------------------------------------------------------------
@@ -144,8 +144,17 @@ public:
   void set_from_int(uint64_t n);
 
   //------------------------------------------------------------------------
-  // Convert to string
+  // Read from string as base64
+  // Returns whether successful
+  bool set_from_base64(const string& s);
+
+  //------------------------------------------------------------------------
+  // Convert to string (hex characters)
   string str() const;
+
+  //------------------------------------------------------------------------
+  // Convert to a base64 string
+  string str_base64();
 
 #if defined(__OBTOOLS_CHAN_H)
   // Provide channel versions without forcing use of ot-chan.h
