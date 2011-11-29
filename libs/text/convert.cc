@@ -181,7 +181,7 @@ string btox(const string& data)
   for(string::const_iterator p=data.begin();p!=data.end();++p)
   {
     char buf[3];
-    snprintf(buf, 3, "%02x", *p);
+    snprintf(buf, 3, "%02x", (unsigned char)*p);
     s += buf;
   }
 
