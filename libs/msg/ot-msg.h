@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Message
 // Support for generic message/RPC broker
-// 
+//
 // Copyright (c) 2010 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -15,7 +15,7 @@
 #include "ot-init.h"
 #include "ot-ssl.h"
 
-namespace ObTools { namespace Message { 
+namespace ObTools { namespace Message {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -83,8 +83,8 @@ class Transport
 // into multiple message transports
 class Broker
 {
-  map<string, Transport *> transports;  // Transports mapped by name
-  list<Handler *> handlers;             // All registered handlers
+  map<string, list<Transport *> > transports;  // Transports mapped by name
+  list<Handler *> handlers;                    // All registered handlers
 
   // Internals
   bool create_handler(XML::Element& xml);

@@ -16,7 +16,7 @@ namespace ObTools { namespace Message {
 // Add a transport
 void Broker::add_transport(Transport *trans)
 {
-  transports[trans->name] = trans;
+  transports[trans->name].push_back(trans);
 }
 
 //--------------------------------------------------------------------------
@@ -41,7 +41,7 @@ bool Broker::create_handler(XML::Element& xml)
 {
   Handler *mh = handler_registry.create(xml.name, xml);
   if (!mh) return false;
-  
+
   // Store it
   handlers.push_back(mh);
 
@@ -51,16 +51,28 @@ bool Broker::create_handler(XML::Element& xml)
     XML::Element& te = *p;
     if (!te.name.empty())
     {
-      map<string, Transport *>::iterator q = transports.find(te.name);
-      if (q != transports.end())
+      bool matched = false;
+
+      // Look for all matching transports
+      for(map<string, list<Transport *> >::iterator p = transports.begin();
+          p!=transports.end(); ++p)
       {
-	Transport *trans = q->second;
-	trans->register_handler(*mh, te);
+        if (p->first == te.name)
+        {
+          list<Transport *> l = p->second;
+          for(list<Transport *>::iterator q = l.begin(); q!=l.end(); ++q)
+          {
+            Transport *trans = *q;
+            trans->register_handler(*mh, te);
+            matched = true;
+          }
+        }
       }
-      else
+
+      if (!matched)
       {
 	Log::Error log;
-	log << "No such message transport: " << te.name << endl;
+	log << "No matching message transport: " << te.name << endl;
       }
     }
   }
@@ -74,9 +86,13 @@ bool Broker::create_handler(XML::Element& xml)
 void Broker::shutdown()
 {
   // Delete all transports first since they depend on the handlers
-  for(map<string, Transport *>::iterator p = transports.begin();
+  for(map<string, list<Transport *> >::iterator p = transports.begin();
       p != transports.end(); ++p)
-    delete p->second;
+  {
+    list<Transport *> l = p->second;
+    for(list<Transport *>::iterator q = l.begin(); q!=l.end(); ++q)
+      delete *q;
+  }
   transports.clear();
 
   // Then the handlers
