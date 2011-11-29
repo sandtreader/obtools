@@ -112,13 +112,16 @@ int Shell::start(int argc, char **argv)
   }
 
   Log::StreamChannel chan_out(*sout);
-  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp", 
-						 DEFAULT_TIMESTAMP), chan_out);
+  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp",
+                                                 DEFAULT_TIMESTAMP), chan_out);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
   log.summary << name << " version " << version << " starting\n";
+
+  // Tell application to read config settings
+  application.read_config(config);
 
   // Call preconfigure before we go daemon - e.g. asking for SSL passphrase
   int rc = application.preconfigure();
@@ -127,11 +130,8 @@ int Shell::start(int argc, char **argv)
     log.error << "Preconfigure failed: " << rc << endl;
     return rc;
   }
-  // Tell application to read config settings
-  application.read_config(config);
 
-
-  // Full background daemon 
+  // Full background daemon
   if (go_daemon)
   {
     if (daemon(0, 0))
@@ -172,7 +172,7 @@ int Shell::start(int argc, char **argv)
 
 	// Exponential backoff, up to a max
 	sleep_time *= 2;
-	if (sleep_time > MAX_WATCHDOG_SLEEP_TIME) 
+	if (sleep_time > MAX_WATCHDOG_SLEEP_TIME)
 	  sleep_time = MAX_WATCHDOG_SLEEP_TIME;
 
 	log.error << "*** RESTARTING SLAVE ***\n";
@@ -200,7 +200,7 @@ int Shell::start(int argc, char **argv)
 	// Check for fatal failure
 	if (died && !WIFEXITED(status))
 	{
-	  log.error << "*** Slave process " << slave_pid << " died ***\n"; 
+	  log.error << "*** Slave process " << slave_pid << " died ***\n";
 	}
 	else
 	{
@@ -208,7 +208,7 @@ int Shell::start(int argc, char **argv)
 	  if (shut_down && !rc)
 	    log.summary << "Slave process exited OK\n";  // Expected
 	  else
-	    log.error << "*** Slave process " << slave_pid 
+	    log.error << "*** Slave process " << slave_pid
 		      << " exited with code " << rc << " ***\n";
 	}
       }
@@ -232,7 +232,7 @@ int Shell::start(int argc, char **argv)
 
 	    if (gid >= 0)
 	    {
-	      log.summary << "Changing to group " << groupname 
+	      log.summary << "Changing to group " << groupname
 			  << " (" << gid << ")\n";
 	      if (setgid((gid_t)gid))
 	      {
@@ -240,7 +240,7 @@ int Shell::start(int argc, char **argv)
 		exit(2);
 	      }
 	    }
-	    else 
+	    else
 	    {
 	      log.error << "Can't find group " << groupname << "\n";
 	      exit(2);
@@ -253,7 +253,7 @@ int Shell::start(int argc, char **argv)
 
 	    if (uid >= 0)
 	    {
-	      log.summary << "Changing to user " << username 
+	      log.summary << "Changing to user " << username
 			  << " (" << uid << ")\n";
 	      if (setuid((uid_t)uid))
 	      {
@@ -261,7 +261,7 @@ int Shell::start(int argc, char **argv)
 		exit(2);
 	      }
 	    }
-	    else 
+	    else
 	    {
 	      log.error << "Can't find user " << username << "\n";
 	      exit(2);
@@ -293,10 +293,10 @@ int Shell::start(int argc, char **argv)
 //--------------------------------------------------------------------------
 // Signal to shut down - called from SIGTERM handler first in master and then
 // (because this passes it down) in slave
-void Shell::shutdown() 
+void Shell::shutdown()
 {
   // Stop our restart loop (master) and any loop in the slave
-  shut_down=true; 
+  shut_down=true;
 
   Log::Streams log;
 
@@ -315,7 +315,7 @@ void Shell::shutdown()
 //--------------------------------------------------------------------------
 // Signal to reload config - called from SIGHUP handler first in master and then
 // (because this passes it down) in slave
-void Shell::reload() 
+void Shell::reload()
 {
   Log::Streams log;
 
