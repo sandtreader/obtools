@@ -214,9 +214,10 @@ bool Path::readable() const
 
 //--------------------------------------------------------------------------
 // Is the file writable (by me)?
+// Warning: may create if file doesn't exist
 bool Path::writeable() const
 {
-  int fd = OPEN(CPATH, O_RDWR | O_LARGEFILE);
+  int fd = OPEN(CPATH, O_CREAT | O_RDWR | O_LARGEFILE);
   if (fd < 0) return false;
   close(fd);
   return true;
