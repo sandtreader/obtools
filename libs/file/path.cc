@@ -214,12 +214,15 @@ bool Path::readable() const
 
 //--------------------------------------------------------------------------
 // Is the file writable (by me)?
-// Warning: may create if file doesn't exist
+// Warning: potential race condition
 bool Path::writeable() const
 {
+  bool existed = exists();
   int fd = OPEN(CPATH, O_CREAT | O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR);
   if (fd < 0) return false;
   close(fd);
+  if (!existed)
+    erase();
   return true;
 }
 
