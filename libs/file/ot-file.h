@@ -155,7 +155,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Is the file writable (by me)?
-  // Warning: may create if file doesn't exist
+  // Warning: potential race condition
   bool writeable() const;
 
   //--------------------------------------------------------------------------
