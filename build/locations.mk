@@ -31,6 +31,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  file:libs/file:text                   \
 	  gather:libs/gather:misc               \
 	  hash:libs/hash:-:NOLIB  		\
+          huffman:libs/huffman:chan             \
 	  init:libs/init:xml			\
 	  log:libs/log:text,time,mt 		\
 	  misc:libs/misc:xml,chan		\
