@@ -8,11 +8,11 @@
 TYPE    = lib
 NAME    = ot-huffman
 HEADERS = ot-huffman.h
-DEPENDS = chan
-OBJS    = tree.o
-TESTS   = test-tree
+DEPENDS = chan text
+OBJS    = node.o reader.o tree.o value.o
+TESTS   = test-reader test-tree test-value
 TESTLIB = -lgtest
-TESTCMD = ./test-tree
+TESTCMD = ./test-reader && ./test-tree && ./test-value
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
