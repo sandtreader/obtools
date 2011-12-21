@@ -25,6 +25,8 @@ namespace
       return Value(Value::STOP);
     else if (str == "ESCAPE")
       return Value(Value::ESCAPE);
+    else if (str.size() == 4 && str.substr(0, 2) == "0x")
+      return Value(static_cast<unsigned char>(Text::xtoi(str.substr(2, 2))));
     else
       return Value(str[0]);
   }
