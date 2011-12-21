@@ -226,6 +226,23 @@ public:
 //==========================================================================
 // Multi Reader
 // Use for populating a MultiTree from a file
+//
+// Format of a mapping file is as follows:
+// Any line starting with a # will be ignored, as will blank lines
+// Every other line should contain a mapping consisting of 3 parts:
+// - previous value read
+// - a bit sequence
+// - a value
+// These parts should be separated by colons (:) with an optional end of
+// line colon.
+// e.g.:
+// b:00110:c:
+// Values are usually ASCII characters, but some special characters exist:
+// START - used for previous value where no data has yet been read
+// STOP - indicates end of data
+// ESCAPE - indicates escaping from Huffman encoding
+// Values can also be specified in 0x hex format, e.g. 0x3a (primarily used
+// for specifying colons in the mapping)
 class MultiReader
 {
 private:
