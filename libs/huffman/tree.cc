@@ -107,6 +107,22 @@ bool MultiTree::populate_from(MultiReader& reader)
 }
 
 //------------------------------------------------------------------------
+// Read an escaped character from a BitReader
+bool MultiTree::read_escaped_char(Channel::BitReader& reader,
+                                  unsigned char& c) const
+{
+  try
+  {
+    c = reader.read_bits(8);
+    return true;
+  }
+  catch (Channel::Error e)
+  {
+    return false;
+  }
+}
+
+//------------------------------------------------------------------------
 // Read a string from a BitReader
 bool MultiTree::read_string(Channel::BitReader& reader, string& s) const
 {
@@ -117,6 +133,22 @@ bool MultiTree::read_string(Channel::BitReader& reader, string& s) const
       s.push_back(value.get_value());
     else if (value.get_special_value() == Huffman::Value::STOP)
       break;
+    else if (value.get_special_value() == Huffman::Value::ESCAPE)
+    {
+      // Escaped data is read 8 bits at a time until an ASCII (0-127)
+      // character is read, then huffman decoding begins again
+      unsigned char c;
+      bool more(true);
+      while ((more = read_escaped_char(reader, c)) && (c & 0x80))
+        s.push_back(c);
+
+      // Check we haven't run out of data
+      if (!more)
+        return true;
+
+      s.push_back(c);
+      value = Value(c);
+    }
   }
   return true;
 }

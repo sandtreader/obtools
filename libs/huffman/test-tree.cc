@@ -103,13 +103,37 @@ TEST(TestMultiTree, TestReadString)
 
   // Testing begins
   vector<unsigned char> data;
-  data.push_back(0x5A); // 01011010
-  data.push_back(0xC0); // 1100 0000
+  data.push_back(0x5A); // 01-a 0110-b 10..
+  data.push_back(0xC0); // 11-c 00-STOP 0000
   Channel::BlockReader blr(&data[0], data.size());
   Channel::BitReader br(blr);
   string s;
   ASSERT_TRUE(tree.read_string(br, s));
   ASSERT_EQ("abc", s);
+}
+
+TEST(TestMultiTree, TestReadStringWithEscaping)
+{
+  // Set up tree
+  ifstream ifs("../tests/mapping.txt");
+  ASSERT_TRUE(ifs.is_open()) << "Failed to open test mapping file" << endl;
+  Huffman::MultiReader mr(ifs);
+  Huffman::MultiTree tree;
+  tree.populate_from(mr);
+
+  // Testing begins
+  vector<unsigned char> data;
+  data.push_back(0x5A); // 01-a 0110-b 10..
+  data.push_back(0xDE); // 11-c 01-d 1-ESCAPE 110..
+  data.push_back(0x1D); // 00011-101...
+  data.push_back(0x4B); // 01001-é(UTF-8) 011..
+  data.push_back(0x33); // 00110-f 011-g
+  data.push_back(0x00); // 0-STOP 0000000
+  Channel::BlockReader blr(&data[0], data.size());
+  Channel::BitReader br(blr);
+  string s;
+  ASSERT_TRUE(tree.read_string(br, s));
+  ASSERT_EQ("abcdéfg", s);
 }
 
 int main(int argc, char **argv)

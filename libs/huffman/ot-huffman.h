@@ -248,6 +248,10 @@ class MultiTree
 private:
   map<Value, Tree> trees;
 
+  //------------------------------------------------------------------------
+  // Read an escaped character from a BitReader
+  bool read_escaped_char(Channel::BitReader& reader, unsigned char& c) const;
+
 public:
 
   //------------------------------------------------------------------------
