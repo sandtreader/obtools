@@ -240,7 +240,9 @@ public:
 // Values are usually ASCII characters, but some special characters exist:
 // START - used for previous value where no data has yet been read
 // STOP - indicates end of data
-// ESCAPE - indicates escaping from Huffman encoding
+// ESCAPE - indicates escaping from Huffman encoding - the data is then
+//   literally in 8-bit chunks, terminated by a non-top-bit-set character
+//   which is then used as the new previous value
 // Values can also be specified in 0x hex format, e.g. 0x3a (primarily used
 // for specifying colons in the mapping)
 class MultiReader
