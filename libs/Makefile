@@ -8,12 +8,12 @@
 SUBS = text file xml xmi cppt regen mt net chan misc time log cache \
        db db-pgsql db-mysql                                         \
        cli init crypto ssl ssl-openssl web msg soap hash tube ring  \
-       access dns daemon gather script superlibs netlink
+       access dns daemon gather script netlink huffman superlibs
 
 #Different for cross compile
 SUBS_MINGW = text file xml xmi cppt regen mt net chan misc time log cache \
              cli init crypto ssl ssl-openssl web msg soap hash tube ring \
-             access dns gather script superlibs
+             access dns gather script huffman superlibs
 SUBS_MIPS = $(SUBS_MINGW)
 SUBS_SH4 = $(SUBS_MINGW)
 
