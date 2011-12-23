@@ -228,8 +228,8 @@ public:
 // Use for populating a MultiTree from a file
 //
 // Format of a mapping file is as follows:
-// Any line starting with a # will be ignored, as will blank lines
-// Every other line should contain a mapping consisting of 3 parts:
+// Blank lines will be ignored
+// All other lines should contain a mapping consisting of 3 parts:
 // - previous value read
 // - a bit sequence
 // - a value
