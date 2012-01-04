@@ -56,9 +56,6 @@ bool MultiReader::read_mapping(MultiMapping& mapping)
     if (sin.gcount() < 1)
       continue;
 
-    if (line[0] == '#')
-      continue;
-
     line.resize(sin.gcount() - 1);
     got_line = true;
   }
