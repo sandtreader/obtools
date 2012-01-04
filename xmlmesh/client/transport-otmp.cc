@@ -49,6 +49,13 @@ bool OTMPClientTransport::wait(string &data)
   return true;
 }
 
+//------------------------------------------------------------------------
+// Shutdown cleanly
+void OTMPClientTransport::shutdown()
+{
+  otmp.shutdown();
+}
+
 //==========================================================================
 // MessageInterface class
 

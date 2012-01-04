@@ -48,6 +48,9 @@ class DispatchThread: public MT::Thread
       }
       else
       {
+        // Stop on shutdown
+        if (!client.is_alive()) break;
+
 	log.summary << "Transport restarted - resubscribing\n";
 	client.resubscribe(log);
       }
@@ -266,8 +269,9 @@ void MultiClientWorker::run()
 //------------------------------------------------------------------------
 // Constructor - attach transport
 MultiClient::MultiClient(ClientTransport& _transport,
-			 int _min_spare_workers, int _max_workers): 
-  transport(_transport), workers(_min_spare_workers, _max_workers)
+			 int _min_spare_workers, int _max_workers):
+  transport(_transport), workers(_min_spare_workers, _max_workers),
+  alive(true)
 {
   dispatch_thread = new DispatchThread(*this, transport);
 }
@@ -419,10 +423,23 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
 }
 
 //------------------------------------------------------------------------
+// Clean shutdown
+void MultiClient::shutdown()
+{
+  if (alive)
+  {
+    alive = false;
+    transport.shutdown();
+    if (dispatch_thread) delete dispatch_thread;
+    dispatch_thread = 0;
+  }
+}
+
+//------------------------------------------------------------------------
 // Destructor
 MultiClient::~MultiClient()
 {
-  delete dispatch_thread;
+  shutdown();
 }
 
 //==========================================================================
