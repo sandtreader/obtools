@@ -34,6 +34,7 @@ public:
   bool send(const string& data);
   bool poll();
   bool wait(string& data);
+  void shutdown();
 };
 
 //==========================================================================
@@ -71,6 +72,11 @@ public:
 		  int min_spare_workers, int max_workers): 
     MultiClient(transport, min_spare_workers, max_workers), 
     transport(server) { start(); }
+
+  //------------------------------------------------------------------------
+  // Destructor - force shutdown early so we can shutdown MultiClient dispatch
+  // thread before transport is destroyed
+  ~OTMPMultiClient() { shutdown(); }
 };
 
 //==========================================================================

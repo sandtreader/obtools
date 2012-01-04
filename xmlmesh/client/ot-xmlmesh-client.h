@@ -44,6 +44,10 @@ public:
   virtual bool wait(string& data) = 0;
 
   //------------------------------------------------------------------------
+  // Clean shutdown (optional)
+  virtual void shutdown() {};
+
+  //------------------------------------------------------------------------
   // Virtual destructor - does nothing here
   virtual ~ClientTransport() {}
 };
@@ -233,6 +237,7 @@ private:
   MT::ThreadPool<MultiClientWorker> workers;   // Worker thread pool 
   MT::Queue<Message *> pending_queue;          // Queued messages
   MT::RMutex mutex;                            // Global state lock
+  bool alive;
 
 public:
   static const int DEFAULT_MIN_SPARE_WORKERS = 1;
@@ -243,6 +248,10 @@ public:
   MultiClient(ClientTransport& _transport,
 	      int _min_spare_workers=DEFAULT_MIN_SPARE_WORKERS,
 	      int _max_workers=DEFAULT_MAX_WORKERS);
+
+  //------------------------------------------------------------------------
+  // Check if not shutting down
+  bool is_alive() { return alive; }
 
   //------------------------------------------------------------------------
   // Start - allows transport-specific child class to ensure transport
@@ -295,6 +304,10 @@ public:
   //------------------------------------------------------------------------
   // Resubscribe for all subjects we should be subscribed to (background)
   void resubscribe(Log::Streams& log);
+
+  //------------------------------------------------------------------------
+  // Clean shutdown
+  void shutdown();
 
   //------------------------------------------------------------------------
   // Destructor
