@@ -567,8 +567,6 @@ void TCPSocket::write(const char *p) throw(SocketError)
 // Raw stream sendmsg wrapper
 int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
 {
-  int res;
-
 #ifdef __WIN32__
 #warning No idea if this works in Windows
   return -99;
@@ -582,14 +580,40 @@ int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
   mh.msg_controllen = 0;
   mh.msg_flags = 0;
 
-  do
+  for(;;) // retry if not completed
   {
-    res = ::sendmsg(fd, &mh, flags); 
-  }
-  while (res<0 && errno == EINTR);
-#endif
+    int wanted = 0;
+    for(int i=0; i<ngathers; i++)
+      wanted += gathers[i].iov_len;
 
-  return res;
+    int sent = ::sendmsg(fd, &mh, flags);
+
+    // If it sent what we expected, that's good
+    if (sent == wanted) return sent;
+
+    // If it errored other than EINTR, fail
+    if (sent<0 && errno != EINTR) return sent;
+
+    // If it did send some, but not all of it, fix it up and try again
+    if (sent>0)
+    {
+      // Adjust the iov to take account of the amount fetched
+      for(int i=0; sent && i<ngathers; i++)
+      {
+        struct iovec& v = gathers[i];
+        int used = v.iov_len;
+        if (sent < used) used = sent;
+
+        // Update length and pointer - if all used, this just leaves 
+        // a zero length with pointer still in place
+        v.iov_len -= used;
+        v.iov_base = (unsigned char *)v.iov_base+used;
+
+        sent -= used;
+      }
+    }
+  }
+#endif
 };
 
 //--------------------------------------------------------------------------
