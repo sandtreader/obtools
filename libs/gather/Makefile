@@ -7,7 +7,7 @@
 
 TYPE	= lib
 NAME   	= ot-gather
-OBJS    = buffer.o
+OBJS    = buffer.o reader.o
 HEADERS = ot-gather.h
 DEPENDS = misc chan
 
