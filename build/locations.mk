@@ -18,6 +18,7 @@
 # 4: Optional variant suffix of build directory, OR 'NOLIB' for templates
 # 5: Optional header file (otherwise constructed from library name)
 OT-LIBS = access:libs/access:text,xml,ssl	\
+	  amf:libs/amf:text,misc,time		\
 	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
 	  daemon:libs/daemon:log,xml		\
