@@ -10,7 +10,9 @@ NAME   	= ot-gather
 OBJS    = buffer.o
 HEADERS = ot-gather.h
 DEPENDS = misc
+
 TESTS 	= test-gather
+TESTLIB = -lgtest
 TESTCMD	= ./test-gather
 
 ROOT    = ../..

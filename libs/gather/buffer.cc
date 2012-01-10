@@ -15,7 +15,7 @@ namespace ObTools { namespace Gather {
 
 //--------------------------------------------------------------------------
 // Get total length of data in buffer
-length_t Buffer::get_length()
+length_t Buffer::get_length() const
 {
   length_t total = 0;
   for(unsigned int i=0; i<count; i++) total += segments[i].length;
@@ -45,7 +45,7 @@ void Buffer::resize(unsigned int new_size)
 // Returns the added segment
 Segment& Buffer::add(const Segment& seg)
 {
-  if (count >= size) resize(size*2);
+  if (count >= size) resize(size ? size*2 : 1);
   return segments[count++] = seg;
 }
 
@@ -55,7 +55,7 @@ Segment& Buffer::add(const Segment& seg)
 // Returns the added segment
 Segment& Buffer::insert(const Segment& seg, unsigned int pos)
 {
-  if (count >= size) resize(size*2);
+  if (count >= size) resize(size ? size*2 : 1);
   if (pos > count) abort();
 
   // Shift up one
@@ -92,7 +92,7 @@ unsigned int Buffer::fill(struct iovec *iovec, unsigned int size)
 
 //--------------------------------------------------------------------------
 // Dump the buffer to the given stream, optionally with data as well
-void Buffer::dump(ostream& sout, bool show_data)
+void Buffer::dump(ostream& sout, bool show_data) const
 {
   Misc::Dumper dumper(sout);
 

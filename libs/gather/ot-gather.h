@@ -84,19 +84,19 @@ public:
 
   //--------------------------------------------------------------------------
   // Get count of used segments
-  unsigned int get_count() { return count; }
+  unsigned int get_count() const { return count; }
 
   //--------------------------------------------------------------------------
   // Get total number of segments allocated
-  unsigned int get_size() { return size; }
+  unsigned int get_size() const { return size; }
 
   //--------------------------------------------------------------------------
   // Get segment list
-  const Segment *get_segments() { return segments; }
+  const Segment *get_segments() const { return segments; }
 
   //--------------------------------------------------------------------------
   // Get total length of data in buffer
-  length_t get_length();
+  length_t get_length() const;
 
   //--------------------------------------------------------------------------
   // Resize the buffer to the given number of segments
@@ -163,7 +163,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well
-  void dump(ostream& sout, bool show_data=false);
+  void dump(ostream& sout, bool show_data=false) const;
 
   //--------------------------------------------------------------------------
   // Destructor
