@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::Gather: test-gather.cc
+// ObTools::Gather: test-buffer.cc
 //
 // Test harness for gather buffer library
 //
@@ -110,6 +110,27 @@ TEST(GatherTest, TestSimpleConsume)
   ASSERT_EQ(1, buffer.get_count());
   ASSERT_EQ(data.substr(chop, data.size() - chop),
             string(reinterpret_cast<char *>(seg.data), seg.length));
+}
+
+TEST(GatherTest, TestCopy)
+{
+  Gather::Buffer buffer(0);
+  const string one("xHell");
+  const string two("o, wo");
+  const string three("rld!x");
+  buffer.add((Gather::data_t *)one.c_str(), one.size());
+  buffer.add((Gather::data_t *)two.c_str(), two.size());
+  buffer.add((Gather::data_t *)three.c_str(), three.size());
+
+  const string expect = one.substr(1) + two + three.substr(0, 4);
+  string actual;
+  actual.resize(expect.size());
+  unsigned int copied = buffer.copy(
+      reinterpret_cast<Gather::data_t *>(const_cast<char *>(actual.c_str())),
+      1, expect.size());
+
+  ASSERT_EQ(expect.size(), copied);
+  ASSERT_EQ(expect, actual);
 }
 
 TEST(GatherTest, TestDump)

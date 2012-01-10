@@ -9,7 +9,7 @@ TYPE	= lib
 NAME   	= ot-gather
 OBJS    = buffer.o
 HEADERS = ot-gather.h
-DEPENDS = misc
+DEPENDS = misc chan
 
 TESTS 	= test-gather
 TESTLIB = -lgtest

@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include <ostream>
+#include "ot-chan.h"
 
 #if !defined(__WIN32__)
 #include "sys/uio.h"
@@ -153,6 +154,10 @@ public:
   // Consume N bytes of data from the front of the buffer
   void consume(length_t n);
 
+  //--------------------------------------------------------------------------
+  // Copy some data to a contiguous buffer
+  length_t copy(data_t *data, length_t offset, length_t count) const;
+
 #if !defined(__WIN32__)
   //--------------------------------------------------------------------------
   // Fill an iovec array with the data
@@ -170,6 +175,31 @@ public:
   ~Buffer();
 };
 
+//==========================================================================
+// Gather reader
+class Reader: public Channel::Reader
+{
+private:
+  const Buffer& buffer;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Reader(const Buffer& _buffer):
+    buffer(_buffer)
+  {}
+
+  //--------------------------------------------------------------------------
+  // Read implementations - see ot-chan.h for details
+  virtual size_t basic_read(void *buf, size_t count) throw (Channel::Error);
+  virtual void skip(size_t n) throw (Channel::Error);
+  virtual bool rewindable() { return true; }
+  virtual void rewind(size_t n) throw (Channel::Error);
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Reader() {}
+};
 
 //==========================================================================
 }} //namespaces

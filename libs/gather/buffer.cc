@@ -64,6 +64,33 @@ Segment& Buffer::insert(const Segment& seg, unsigned int pos)
   return segments[pos] = seg;
 }
 
+//--------------------------------------------------------------------------
+// Copy some data to a contiguous buffer
+length_t Buffer::copy(data_t *data, length_t offset, length_t count) const
+{
+  length_t gather_offset = 0;
+  length_t data_read = 0;
+
+  for (unsigned i = 0; i < count; ++i)
+  {
+    const Segment &segment = segments[i];
+    if (offset < gather_offset + segment.length)
+    {
+      length_t start = (gather_offset > offset ? 0 : offset - gather_offset);
+      length_t to_read = count - data_read;
+      if (to_read > segment.length - start)
+        to_read = segment.length - start;
+      memcpy(data, &segment.data[start], to_read);
+      data += to_read;
+      data_read += to_read;
+      if (data_read >= count)
+        break;
+    }
+    gather_offset += segment.length;
+  }
+  return data_read;
+}
+
 #if !defined(__WIN32__)
 //--------------------------------------------------------------------------
 // Fill an iovec array with the data
