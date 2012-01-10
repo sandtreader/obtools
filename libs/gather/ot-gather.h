@@ -195,6 +195,7 @@ public:
   virtual void skip(size_t n) throw (Channel::Error);
   virtual bool rewindable() { return true; }
   virtual void rewind(size_t n) throw (Channel::Error);
+  virtual void rewind() throw (Channel::Error) { Channel::Reader::rewind(); }
 
   //------------------------------------------------------------------------
   // Virtual destructor
