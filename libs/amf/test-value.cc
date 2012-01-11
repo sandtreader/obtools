@@ -14,6 +14,9 @@
 using namespace std;
 using namespace ObTools;
 
+//==========================================================================
+// Logging output tests
+
 TEST(AMFValueTest, TestScalarValueLogging)
 {
   AMF::Value value(AMF::Value::ARRAY);
@@ -89,6 +92,9 @@ TEST(AMFValueTest, TestObjectLogging)
 
   ASSERT_EQ(expected, result);
 }
+
+//==========================================================================
+// Channel reading tests
 
 TEST(AMFValueTest, TestReadingAMF0Number)
 {
@@ -228,7 +234,7 @@ TEST(AMFValueTest, TestReadingAMF0ECMAArray)
 
 TEST(AMFValueTest, TestReadingAMF0StrictArray)
 {
-  unsigned char buf[16];
+  unsigned char buf[8];
   buf[0] = 0x0A;
   buf[1] = 0x00;
   buf[2] = 0x00;
@@ -239,7 +245,7 @@ TEST(AMFValueTest, TestReadingAMF0StrictArray)
   buf[6] = 0x01;
   buf[7] = 0xFF;  // true
 
-  Channel::BlockReader chan(buf, 16);
+  Channel::BlockReader chan(buf, 8);
   AMF::Value value;
   ASSERT_NO_THROW(value.read(chan, AMF::FORMAT_AMF0));
   ASSERT_EQ(chan.get_offset(), 8);
@@ -284,19 +290,24 @@ TEST(AMFValueTest, TestReadingAMF0LongString)
 
 TEST(AMFValueTest, TestReadingAMF0XMLDoc)
 {
-  unsigned char buf[9];
+  unsigned char buf[11];
   buf[0] = 0x0F;
   buf[1] = 0x00;
-  buf[2] = 0x06;
-  memcpy(buf+3, "<doc/>", 6);
+  buf[2] = 0x00;
+  buf[3] = 0x00;
+  buf[4] = 0x06;
+  memcpy(buf+5, "<doc/>", 6);
 
-  Channel::BlockReader chan(buf, 9);
+  Channel::BlockReader chan(buf, 11);
   AMF::Value value;
   ASSERT_NO_THROW(value.read(chan, AMF::FORMAT_AMF0));
-  ASSERT_EQ(chan.get_offset(), 9);
+  ASSERT_EQ(chan.get_offset(), 11);
   EXPECT_EQ(value.type, AMF::Value::XML_DOC);
   EXPECT_EQ(value.text, "<doc/>");
 }
+
+//==========================================================================
+// Value getting tests
 
 TEST(AMFValueTest, TestArrayGets)
 {
@@ -330,19 +341,270 @@ TEST(AMFValueTest, TestArrayGets)
   EXPECT_EQ(b, false);
 
   // Missing
-  ASSERT_THROW(value.get("not-there"), AMF::TypeException);
+  ASSERT_THROW(value.get("not-there"), AMF::Exception);
 
   // Wrong type
-  ASSERT_THROW(value.get_integer("pi"), AMF::TypeException);
-  ASSERT_THROW(value.get_double("bar"), AMF::TypeException);
-  ASSERT_THROW(value.get_string("foo"), AMF::TypeException);
-  ASSERT_THROW(value.get_boolean("foo"), AMF::TypeException);
+  ASSERT_THROW(value.get_integer("pi"), AMF::Exception);
+  ASSERT_THROW(value.get_double("bar"), AMF::Exception);
+  ASSERT_THROW(value.get_string("foo"), AMF::Exception);
+  ASSERT_THROW(value.get_boolean("foo"), AMF::Exception);
 }
 
 TEST(AMFValueTest, TestSillyGetsThrow)
 {
   AMF::Value value(AMF::Value::FALSE);
-  ASSERT_THROW(value.get("foo"), AMF::TypeException);
+  ASSERT_THROW(value.get("foo"), AMF::Exception);
+}
+
+//==========================================================================
+// Channel writing tests
+
+TEST(AMFValueTest, TestWritingAMF0Number)
+{
+  AMF::Value value(AMF::Value::DOUBLE, 2.0);
+
+  unsigned char buf[9];
+  Channel::BlockWriter chan(buf, 9);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 9);
+
+  EXPECT_EQ(buf[0], 0x00);
+  EXPECT_EQ(buf[1], 0x40);
+  for(int i=2; i<9; i++)
+    EXPECT_EQ(buf[i], 0x00);
+}
+
+TEST(AMFValueTest, TestWritingAMF0True)
+{
+  AMF::Value value(AMF::Value::TRUE);
+
+  unsigned char buf[2];
+  Channel::BlockWriter chan(buf, 2);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 2);
+
+  EXPECT_EQ(buf[0], 0x01);
+  EXPECT_NE(buf[1], 0);
+}
+
+TEST(AMFValueTest, TestWritingAMF0False)
+{
+  AMF::Value value(AMF::Value::FALSE);
+
+  unsigned char buf[2];
+  Channel::BlockWriter chan(buf, 2);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 2);
+
+  EXPECT_EQ(buf[0], 0x01);
+  EXPECT_EQ(buf[1], 0);
+}
+
+TEST(AMFValueTest, TestWritingAMF0String)
+{
+  AMF::Value value(AMF::Value::STRING, "Hello");
+
+  unsigned char buf[8];
+  Channel::BlockWriter chan(buf, 8);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 8);
+
+  EXPECT_EQ(buf[0], 0x02);
+  EXPECT_EQ(buf[1], 0x00);
+  EXPECT_EQ(buf[2], 0x05);
+  string hello((char *)buf+3, 5);
+  EXPECT_EQ(hello, "Hello");
+}
+
+TEST(AMFValueTest, TestWritingAMF0Object)
+{
+  AMF::Value value(AMF::Value::OBJECT);
+  value.set("foo", AMF::Value(AMF::Value::UNDEFINED));
+  value.set("bar", AMF::Value(AMF::Value::TRUE));
+
+  unsigned char buf[17];
+  Channel::BlockWriter chan(buf, 17);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 17);
+
+  EXPECT_EQ(buf[0], 0x03);
+
+  // bar (note alphabetical - not required but test is too complex otherwise!)
+  EXPECT_EQ(buf[1], 0x00);
+  EXPECT_EQ(buf[2], 0x03);
+  string bar((char *)buf+3, 3);
+  EXPECT_EQ(bar, "bar");
+  EXPECT_EQ(buf[6], 0x01);
+  EXPECT_NE(buf[7], 0);  // true
+
+  // foo
+  EXPECT_EQ(buf[8], 0x00);
+  EXPECT_EQ(buf[9], 0x03);
+  string foo((char *)buf+10, 3);
+  EXPECT_EQ(foo, "foo");
+  EXPECT_EQ(buf[13], 0x06); // undefined
+
+  // end marker
+  EXPECT_EQ(buf[14], 0x00);
+  EXPECT_EQ(buf[15], 0x00);
+  EXPECT_EQ(buf[16], 0x09);
+}
+
+TEST(AMFValueTest, TestWritingAMF0Null)
+{
+  AMF::Value value(AMF::Value::NULLV);
+
+  unsigned char buf[1];
+  Channel::BlockWriter chan(buf, 1);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 1);
+
+  EXPECT_EQ(buf[0], 0x05);
+}
+
+TEST(AMFValueTest, TestWritingAMF0Undefined)
+{
+  AMF::Value value(AMF::Value::UNDEFINED);
+
+  unsigned char buf[1];
+  Channel::BlockWriter chan(buf, 1);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 1);
+
+  EXPECT_EQ(buf[0], 0x06);
+}
+
+TEST(AMFValueTest, TestWritingAMF0ECMAArray)
+{
+  AMF::Value value(AMF::Value::ARRAY);
+  value.set("foo", AMF::Value(AMF::Value::UNDEFINED));
+  value.set("bar", AMF::Value(AMF::Value::TRUE));
+
+  unsigned char buf[18];
+  Channel::BlockWriter chan(buf, 18);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 18);
+
+  EXPECT_EQ(buf[0], 0x08);
+  EXPECT_EQ(buf[1], 0x00);
+  EXPECT_EQ(buf[2], 0x00);
+  EXPECT_EQ(buf[3], 0x00);
+  EXPECT_EQ(buf[4], 0x02);
+
+  // bar (note alphabetical - not required but test is too complex otherwise!)
+  EXPECT_EQ(buf[5], 0x00);
+  EXPECT_EQ(buf[6], 0x03);
+  string bar((char *)buf+7, 3);
+  EXPECT_EQ(bar, "bar");
+  EXPECT_EQ(buf[10], 0x01);
+  EXPECT_NE(buf[11], 0);  // true
+
+  // foo
+  EXPECT_EQ(buf[12], 0x00);
+  EXPECT_EQ(buf[13], 0x03);
+  string foo((char *)buf+14, 3);
+  EXPECT_EQ(foo, "foo");
+  EXPECT_EQ(buf[17], 0x06); // undefined
+}
+
+TEST(AMFValueTest, TestWritingAMF0StrictArray)
+{
+  AMF::Value value(AMF::Value::ARRAY);
+  value.add(AMF::Value(AMF::Value::UNDEFINED));
+  value.add(AMF::Value(AMF::Value::TRUE));
+
+  unsigned char buf[8];
+  Channel::BlockWriter chan(buf, 8);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 8);
+
+  EXPECT_EQ(buf[0], 0x0A);
+  EXPECT_EQ(buf[1], 0x00);
+  EXPECT_EQ(buf[2], 0x00);
+  EXPECT_EQ(buf[3], 0x00);
+  EXPECT_EQ(buf[4], 0x02);
+
+  EXPECT_EQ(buf[5], 0x06);  // undefined
+  EXPECT_EQ(buf[6], 0x01);  // boolean
+  EXPECT_NE(buf[7], 0x00);  //  - true
+}
+
+TEST(AMFValueTest, TestWritingAMF0Date)
+{
+  AMF::Value value(AMF::Value::DATE, 2.0);
+
+  unsigned char buf[9];
+  Channel::BlockWriter chan(buf, 9);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 9);
+
+  EXPECT_EQ(buf[0], 0x0B);
+  EXPECT_EQ(buf[1], 0x40);
+  for(int i=2; i<9; i++)
+    EXPECT_EQ(buf[i], 0x00);
+}
+
+TEST(AMFValueTest, TestWritingAMF0LongString)
+{
+  string test;
+  for(int i=0; i<65536; i++) test+='A'+(i%26);
+  AMF::Value value(AMF::Value::STRING, test);
+
+  unsigned char buf[65541];
+  Channel::BlockWriter chan(buf, 65541);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 65541);
+
+  EXPECT_EQ(buf[0], 0x0C);
+  EXPECT_EQ(buf[1], 0x00);
+  EXPECT_EQ(buf[2], 0x01);
+  EXPECT_EQ(buf[3], 0x00);
+  EXPECT_EQ(buf[4], 0x00);
+  for(int i=0; i<65536; i++)
+    EXPECT_EQ(buf[5+i], 'A'+(i%26));
+}
+
+TEST(AMFValueTest, TestWritingAMF0XMLDoc)
+{
+  AMF::Value value(AMF::Value::XML_DOC, "<doc/>");
+
+  unsigned char buf[11];
+  Channel::BlockWriter chan(buf, 11);
+  ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
+  ASSERT_EQ(chan.get_offset(), 11);
+
+  EXPECT_EQ(buf[0], 0x0F);
+  EXPECT_EQ(buf[1], 0x00);
+  EXPECT_EQ(buf[2], 0x00);
+  EXPECT_EQ(buf[3], 0x00);
+  EXPECT_EQ(buf[4], 0x06);
+  string doc((char *)buf+5, 6);
+  EXPECT_EQ(doc, "<doc/>");
+}
+
+//==========================================================================
+// Complex write/readback test
+TEST(AMFValueTest, TestAMF0ReadbackOfComplexValueMatches)
+{
+  AMF::Value original(AMF::Value::ARRAY);
+  original.add(AMF::Value(AMF::Value::UNDEFINED));
+  original.add(AMF::Value(AMF::Value::NULLV));
+  original.add(AMF::Value(AMF::Value::TRUE));
+  original.add(AMF::Value(AMF::Value::FALSE));
+  original.add(AMF::Value(AMF::Value::DOUBLE, 3.1415926));
+  original.add(AMF::Value(AMF::Value::STRING, "Hello"));
+  original.add(AMF::Value(AMF::Value::XML_DOC, "<doc/>"));
+  original.add(AMF::Value(AMF::Value::DATE, -9.2252e10));
+
+  unsigned char buf[1024];
+  Channel::BlockWriter wchan(buf, 1024);
+  ASSERT_NO_THROW(original.write(wchan, AMF::FORMAT_AMF0));
+
+  AMF::Value readback;
+  Channel::BlockReader rchan(buf, 1024);
+  ASSERT_NO_THROW(readback.read(rchan, AMF::FORMAT_AMF0));
+
+  EXPECT_EQ(readback, original);
 }
 
 int main(int argc, char **argv)

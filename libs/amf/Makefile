@@ -8,7 +8,7 @@
 TYPE	= lib
 NAME   	= ot-amf
 HEADERS = ot-amf.h
-OBJS  	= message.o value.o
+OBJS  	= value.o
 DEPENDS = text misc time
 TESTS 	= test-value
 TESTLIB = -lgtest
