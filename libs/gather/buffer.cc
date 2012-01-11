@@ -66,7 +66,7 @@ Segment& Buffer::insert(const Segment& seg, unsigned int pos)
 
 //--------------------------------------------------------------------------
 // Copy some data to a contiguous buffer
-length_t Buffer::copy(data_t *data, length_t offset, length_t count) const
+length_t Buffer::copy(data_t *data, length_t offset, length_t len) const
 {
   length_t gather_offset = 0;
   length_t data_read = 0;
@@ -77,13 +77,13 @@ length_t Buffer::copy(data_t *data, length_t offset, length_t count) const
     if (offset < gather_offset + segment.length)
     {
       length_t start = (gather_offset > offset ? 0 : offset - gather_offset);
-      length_t to_read = count - data_read;
+      length_t to_read = len - data_read;
       if (to_read > segment.length - start)
         to_read = segment.length - start;
       memcpy(data, &segment.data[start], to_read);
       data += to_read;
       data_read += to_read;
-      if (data_read >= count)
+      if (data_read >= len)
         break;
     }
     gather_offset += segment.length;
@@ -201,6 +201,33 @@ void Buffer::add(const Buffer& buffer)
 {
   for(unsigned int i=0; i<buffer.count; i++)
     add(buffer.segments[i]);
+}
+
+//--------------------------------------------------------------------------
+// Add references to a run of data from another buffer
+void Buffer::add(const Buffer& buffer, length_t offset, length_t len)
+{
+  length_t gather_offset = 0;
+  length_t data_read = 0;
+
+  const Segment *segments_b = buffer.get_segments();
+
+  for (unsigned i = 0; i < buffer.get_count(); ++i)
+  {
+    const Segment &segment = segments_b[i];
+    if (offset < gather_offset + segment.length)
+    {
+      length_t start = (gather_offset > offset ? 0 : offset - gather_offset);
+      length_t to_read = len - data_read;
+      if (to_read > segment.length - start)
+        to_read = segment.length - start;
+      add(Segment(&segment.data[start], to_read));
+      data_read += to_read;
+      if (data_read >= len)
+        break;
+    }
+    gather_offset += segment.length;
+  }
 }
 
 //--------------------------------------------------------------------------

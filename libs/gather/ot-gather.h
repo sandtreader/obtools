@@ -133,6 +133,10 @@ public:
   void add(const Buffer& buffer);
 
   //--------------------------------------------------------------------------
+  // Add references to a run of data from another buffer
+  void add(const Buffer& buffer, length_t offset, length_t len);
+
+  //--------------------------------------------------------------------------
   // Insert a segment at the given index (default 0, the beginning), 
   // extending if required
   // Returns the added segment
@@ -156,7 +160,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Copy some data to a contiguous buffer
-  length_t copy(data_t *data, length_t offset, length_t count) const;
+  length_t copy(data_t *data, length_t offset, length_t len) const;
 
 #if !defined(__WIN32__)
   //--------------------------------------------------------------------------

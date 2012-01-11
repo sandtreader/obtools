@@ -133,6 +133,42 @@ TEST(GatherTest, TestCopy)
   ASSERT_EQ(expect, actual);
 }
 
+TEST(GatherTest, TestAddFromBuffer)
+{
+  Gather::Buffer buffer1(0);
+  const string one("xHell");
+  const string two("o, wo");
+  const string three("rld!x");
+  buffer1.add((Gather::data_t *)one.c_str(), one.size());
+  buffer1.add((Gather::data_t *)two.c_str(), two.size());
+  buffer1.add((Gather::data_t *)three.c_str(), three.size());
+
+  Gather::Buffer buffer2(0);
+  const string hello("Hello");
+  buffer2.add((Gather::data_t *)hello.c_str(), hello.size());
+  buffer2.add(buffer1, 6, 8);
+  const Gather::Segment *segments = buffer2.get_segments();
+
+  ASSERT_LE(3, buffer2.get_size());
+  ASSERT_EQ(3, buffer2.get_count());
+  ASSERT_TRUE(segments);
+
+  const Gather::Segment& segment1 = segments[0];
+  ASSERT_EQ(hello.size(), segment1.length);
+  ASSERT_EQ(hello,
+            string(reinterpret_cast<char *>(segment1.data), segment1.length));
+
+  const Gather::Segment& segment2 = segments[1];
+  ASSERT_EQ(two.substr(1).size(), segment2.length);
+  ASSERT_EQ(two.substr(1),
+            string(reinterpret_cast<char *>(segment2.data), segment2.length));
+
+  const Gather::Segment& segment3 = segments[2];
+  ASSERT_EQ(three.substr(0, 4).size(), segment3.length);
+  ASSERT_EQ(three.substr(0, 4),
+            string(reinterpret_cast<char *>(segment3.data), segment3.length));
+}
+
 TEST(GatherTest, TestDump)
 {
   Gather::Buffer buffer(1);
