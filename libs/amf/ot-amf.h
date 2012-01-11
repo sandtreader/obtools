@@ -30,6 +30,16 @@ enum Format
 };
 
 //==========================================================================
+// Exceptions
+class TypeException
+{
+public:
+  string text;
+  TypeException(): text("") {}
+  TypeException(const string& t): text(t) {}
+};
+
+//==========================================================================
 // AMF Value
 struct Value
 {
@@ -50,10 +60,12 @@ struct Value
     BYTE_ARRAY = 12
   } type;
 
+  typedef int32_t integer_t;
+
   // Not all in union because we can't put strings in it
   union
   {
-    int32_t n;   // INTEGER
+    integer_t n; // INTEGER
     double d;    // DOUBLE, DATE
   };
 
@@ -68,9 +80,37 @@ struct Value
   // Constructors
   Value(): type(UNDEFINED) {}
   Value(Type _type): type(_type) {}
-  Value(Type _type, int32_t _n): type(_type), n(_n) {}
+  Value(Type _type, integer_t _n): type(_type), n(_n) {}
   Value(Type _type, double _d): type(_type), d(_d) {}
   Value(Type _type, const string& _t): type(_type), text(_t) {}
+
+  //------------------------------------------------------------------------
+  // Get a value from an associative array/object
+  Value get(const string& name) throw (TypeException);
+
+  //------------------------------------------------------------------------
+  // Get a value from an associative array/object, checking for a specific type
+  Value get(const string& name, Type type, const string& type_name)
+    throw (TypeException);
+
+  //------------------------------------------------------------------------
+  // Get an integer value from an associative array/object
+  integer_t get_integer(const string& name) throw (TypeException)
+  { return get(name, INTEGER, "INTEGER").n; }
+
+  //------------------------------------------------------------------------
+  // Get a double value from an associative array/object
+  double get_double(const string& name) throw (TypeException)
+  { return get(name, DOUBLE, "DOUBLE").d; }
+
+  //------------------------------------------------------------------------
+  // Get a string value from an associative array/object
+  string get_string(const string& name) throw (TypeException)
+  { return get(name, STRING, "STRING").text; }
+
+  //------------------------------------------------------------------------
+  // Get a boolean value from an associative array/object
+  bool get_boolean(const string& name) throw (TypeException);
 
   //------------------------------------------------------------------------
   // Add an indexed array entry to the dense array

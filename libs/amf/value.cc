@@ -112,9 +112,9 @@ void Value::read(Channel::Reader& chan, Format format)
       case 3: type = OBJECT; break;
       case 5: type = NULLV; break;
       case 6: type = UNDEFINED; break;
-        // case 7: ??
+        // case 7: Reference??
       case 8: type = ARRAY; break;    // ECMA (associative) array
-        // case 9: ??
+        // case 9: Object end should never be seen seperately
       case 10: type = ARRAY; break;   // Strict (dense) array
       case 11: type = DATE; break;
       case 12: type = STRING; break;  // Long string
@@ -139,8 +139,10 @@ void Value::read(Channel::Reader& chan, Format format)
     case XML:
     case BYTE_ARRAY:
     {
-      int len = chan.read_nbo_16();
-      // !!! Check for AMF0 long string, AMF3 reference
+      // 16 or 32 bit length
+      int len = (format == FORMAT_AMF0 && original_type == 12)?
+        chan.read_nbo_32():chan.read_nbo_16();
+      // !!! Check for AMF3 reference
       chan.read(text, len);
       break;
     }
@@ -165,13 +167,22 @@ void Value::read(Channel::Reader& chan, Format format)
       uint32_t count = chan.read_nbo_32();
       while (count--)
       {
-        int len = chan.read_nbo_16();
-        string name;
-        // !!! Check for AMF3 reference
-        chan.read(name, len);
-        Value v;
-        v.read(chan, format);
-        set(name, v);
+        if (format == FORMAT_AMF0 && original_type == 10) // Strict array
+        {
+          Value v;
+          v.read(chan, format);
+          add(v);
+        }
+        else // ECMA array
+        {
+          int len = chan.read_nbo_16();
+          string name;
+          // !!! Check for AMF3 reference
+          chan.read(name, len);
+          Value v;
+          v.read(chan, format);
+          set(name, v);
+        }
       }
       break;
     }
@@ -182,7 +193,17 @@ void Value::read(Channel::Reader& chan, Format format)
       for(;;)
       {
         int len = chan.read_nbo_16();
-        if (!len) break;
+        if (!len)
+        {
+          if (format == FORMAT_AMF0)
+          {
+            // Read and check object end marker
+            uint8_t end = chan.read_byte();
+            if (end != 0x09)
+              throw Channel::Error(99, "Bad object end marker");
+          }
+          break;
+        }
 
         string name;
         // !!! Check for AMF3 reference
@@ -196,6 +217,42 @@ void Value::read(Channel::Reader& chan, Format format)
 
     default: throw Channel::Error(99, "Unknown AMF marker "+Text::itos(type));
   }
+}
+
+//------------------------------------------------------------------------
+// Get a value from an associative array/object
+Value Value::get(const string& name) throw (TypeException)
+{
+  if (type != ARRAY && type != OBJECT)
+    throw TypeException("Not an object or array");
+
+  map<string, Value>::iterator p = assoc_array.find(name);
+  if (p == assoc_array.end())
+    throw TypeException("Object/array property "+name+" not found");
+
+  return p->second;
+}
+
+//------------------------------------------------------------------------
+// Get a value from an associative array/object, checking for a specific type
+Value Value::get(const string& name, Type type, const string& type_name)
+  throw (TypeException)
+{
+  Value v = get(name);
+  if (v.type != type)
+    throw TypeException("Object/array property "+name
+                        +" is not type "+type_name);
+  return v;
+}
+
+//------------------------------------------------------------------------
+// Get a boolean value from an associative array/object
+bool Value::get_boolean(const string& name) throw (TypeException)
+{
+  Value v = get(name);
+  if (v.type == TRUE) return true;
+  if (v.type == FALSE) return false;
+  throw TypeException("Object/array property "+name+" is not TRUE or FALSE");
 }
 
 //------------------------------------------------------------------------
