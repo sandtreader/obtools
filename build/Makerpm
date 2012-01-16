@@ -44,6 +44,10 @@ Distribution: rpm
 %define _unpackaged_files_terminate_build 0
 EOF
 
+if [ -f $DEB_DIR/DEBIAN/rpmscripts ]; then
+  cat $DEB_DIR/DEBIAN/rpmscripts >> $RPM_SPEC
+fi
+
 if [ $RPM_LIB ]; then
   mkdir -p ${DEB_DIR}/etc/ld.so.conf.d/
   echo  "/usr/lib/${RPM_LCNAME}" > ${DEB_DIR}/etc/ld.so.conf.d/${NAME}.conf
