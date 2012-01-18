@@ -200,7 +200,7 @@ void Buffer::consume(length_t n)
 void Buffer::add(const Buffer& buffer)
 {
   for(unsigned int i=0; i<buffer.count; i++)
-    add(buffer.segments[i]);
+    add(Segment(buffer.segments[i]));
 }
 
 //--------------------------------------------------------------------------

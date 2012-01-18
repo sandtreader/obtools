@@ -53,6 +53,9 @@ struct Segment
   Segment(length_t _length): 
     owned_data(new data_t[_length]), data(owned_data), length(_length) {}
 
+  // Construct from segment
+  Segment(const Segment& s);
+
   //--------------------------------------------------------------------------
   // Consume N bytes from the beginning
   void consume(length_t n) { data+=n; length-=n; }
@@ -64,6 +67,81 @@ struct Segment
   //--------------------------------------------------------------------------
   // Destroy - note, explicit call, not destructor
   void destroy() { if (owned_data) delete[] owned_data; }
+
+  //--------------------------------------------------------------------------
+  // Assignment operator
+  Segment& operator=(const Segment& s);
+};
+
+//==========================================================================
+// Gather buffer iterator
+class BufferIterator
+{
+private:
+  Segment *segments;
+  unsigned int count;
+  Segment *segment;
+  length_t pos;
+
+public:
+  typedef bidirectional_iterator_tag iterator_category;
+  typedef ptrdiff_t difference_type;
+  typedef data_t value_type;
+  typedef data_t& reference;
+  typedef data_t *pointer;
+
+  BufferIterator() {}
+  BufferIterator(Segment *_segments, unsigned int _count,
+                 Segment *_segment, length_t _pos):
+    segments(_segments), count(_count), segment(_segment), pos(_pos)
+  {}
+  BufferIterator(const BufferIterator& bi):
+    segments(bi.segments), count(bi.count), segment(bi.segment),
+    pos(bi.pos)
+  {}
+
+  bool operator==(const BufferIterator& bi) const
+  {
+    return segments == bi.segments &&
+           count == bi.count &&
+           segment == bi.segment &&
+           pos == bi.pos;
+  }
+  bool operator!=(const BufferIterator& bi) const
+  {
+    return !operator==(bi);
+  }
+
+  BufferIterator& operator++()
+  {
+    if (++pos >= segment->length)
+    {
+      ++segment;
+      pos = 0;
+    }
+    return *this;
+  }
+
+  BufferIterator& operator--()
+  {
+    if (pos)
+      --pos;
+    else
+    {
+      if (segment > segments)
+      {
+        --segment;
+        pos = segment->length - 1;
+      }
+    }
+    return *this;
+  }
+
+  reference operator*()
+  {
+    return segment->data[pos];
+  }
+
 };
 
 //==========================================================================
@@ -76,6 +154,8 @@ private:
   Segment *segments;      // Allocated array of segments
 
 public:
+  typedef BufferIterator iterator;
+
   static const int DEFAULT_SIZE = 4;
 
   //--------------------------------------------------------------------------
@@ -173,6 +253,18 @@ public:
   //--------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well
   void dump(ostream& sout, bool show_data=false) const;
+
+  //--------------------------------------------------------------------------
+  // Iterator functions
+  iterator begin() const
+  {
+    return BufferIterator(segments, count, segments, 0);
+  }
+
+  iterator end() const
+  {
+    return BufferIterator(segments, count, &segments[count], 0);
+  }
 
   //--------------------------------------------------------------------------
   // Destructor
