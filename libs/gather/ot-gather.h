@@ -122,6 +122,23 @@ public:
     return *this;
   }
 
+  BufferIterator& operator+=(Gather::length_t add)
+  {
+    while ((pos += add) >= segment->length)
+    {
+      ++segment;
+      add = pos - segment->length;
+    }
+    return *this;
+  }
+
+  BufferIterator operator+(Gather::length_t add)
+  {
+    BufferIterator added = *this;
+    added += add;
+    return added;
+  }
+
   BufferIterator& operator--()
   {
     if (pos)
