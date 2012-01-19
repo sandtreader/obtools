@@ -66,7 +66,7 @@ struct Segment
 
   //--------------------------------------------------------------------------
   // Destroy - note, explicit call, not destructor
-  void destroy() { if (owned_data) delete[] owned_data; }
+  void destroy() { if (owned_data) delete[] owned_data; owned_data=0; }
 
   //--------------------------------------------------------------------------
   // Assignment operator
@@ -126,8 +126,9 @@ public:
   {
     while ((pos += add) >= segment->length)
     {
-      ++segment;
       add = pos - segment->length;
+      ++segment;
+      pos = 0;
     }
     return *this;
   }

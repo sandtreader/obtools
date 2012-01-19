@@ -34,6 +34,9 @@ void Buffer::resize(unsigned int new_size)
   // Copy over existing
   for(unsigned int i=0; i<count; i++) new_segments[i]=segments[i];
 
+  // Reset new ones
+  for(unsigned int i=count; i<new_size; i++) new_segments[i]=Segment();
+
   // Replace
   delete[] segments;
   segments = new_segments;
