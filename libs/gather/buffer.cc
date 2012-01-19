@@ -31,8 +31,8 @@ void Buffer::resize(unsigned int new_size)
   // Create new segment array with new size
   Segment *new_segments = new Segment[new_size];
 
-  // Copy over existing
-  for(unsigned int i=0; i<count; i++) new_segments[i]=segments[i];
+  // Copy over existing, shallow copy
+  for(unsigned int i=0; i<count; i++) new_segments[i].take(segments[i]);
 
   // Reset new ones
   for(unsigned int i=count; i<new_size; i++) new_segments[i]=Segment();
@@ -45,15 +45,46 @@ void Buffer::resize(unsigned int new_size)
 
 //--------------------------------------------------------------------------
 // Add a segment at the end, extending if required
+// Segment is 'taken' - seg.owned_data is copied by ref and cleared
 // Returns the added segment
-Segment& Buffer::add(const Segment& seg)
+Segment& Buffer::add(Segment& seg)
 {
   if (count >= size) resize(size ? size*2 : 1);
-  return segments[count++] = seg;
+  return segments[count++].take(seg);
 }
 
 //--------------------------------------------------------------------------
-// Insert a segment at the given index (default 0, the beginning), 
+// Add a segment from external data to the end of the buffer
+// Returns the added segment
+Segment& Buffer::add(data_t *data, length_t length)
+{
+  Segment seg(data, length);
+  return add(seg);
+}
+
+//--------------------------------------------------------------------------
+// Add a segment with allocated data to the end of the buffer
+// Returns the added segment
+Segment& Buffer::add(length_t length)
+{
+  Segment seg(length);
+  return add(seg);
+}
+
+//--------------------------------------------------------------------------
+// Add another buffer to the end of this one, copying any owned_data
+void Buffer::add(const Buffer& buffer)
+{
+  // Copy, with memory copying of owned data
+  for(unsigned int i=0; i<buffer.count; i++)
+  {
+    Segment seg = buffer.segments[i];  // Force copy
+    add(seg);
+  }
+}
+
+//--------------------------------------------------------------------------
+// Insert a segment at the given index (default 0, the beginning),
 // extending if required
 // Returns the added segment
 Segment& Buffer::insert(const Segment& seg, unsigned int pos)
@@ -198,13 +229,6 @@ void Buffer::consume(length_t n)
   }
 }
 
-//--------------------------------------------------------------------------
-// Add another buffer to the end of this one
-void Buffer::add(const Buffer& buffer)
-{
-  for(unsigned int i=0; i<buffer.count; i++)
-    add(Segment(buffer.segments[i]));
-}
 
 //--------------------------------------------------------------------------
 // Add references to a run of data from another buffer
@@ -224,7 +248,7 @@ void Buffer::add(const Buffer& buffer, length_t offset, length_t len)
       length_t to_read = len - data_read;
       if (to_read > segment.length - start)
         to_read = segment.length - start;
-      add(Segment(&segment.data[start], to_read));
+      add(&segment.data[start], to_read);
       data_read += to_read;
       if (data_read >= len)
         break;

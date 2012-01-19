@@ -15,6 +15,7 @@
 #define __OBTOOLS_GATHER_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <ostream>
 #include "ot-chan.h"
 
@@ -69,8 +70,29 @@ struct Segment
   void destroy() { if (owned_data) delete[] owned_data; owned_data=0; }
 
   //--------------------------------------------------------------------------
-  // Assignment operator
+  // Assignment operator, with owned_data copying
   Segment& operator=(const Segment& s);
+
+  //--------------------------------------------------------------------------
+  // Take the data from another segment, clearing any owned_data in the
+  // original
+  Segment& take(Segment& s)
+  { owned_data = s.owned_data; s.owned_data = 0;
+    data = s.data; length = s.length; return *this; }
+
+  //--------------------------------------------------------------------------
+  // Destructor - check no owned data left
+#if defined(DEBUG)
+  ~Segment()
+  {
+    if (owned_data)
+    {
+      cerr << "Owned data left in Segment\n";
+      abort();
+    }
+  }
+#endif
+
 };
 
 //==========================================================================
@@ -211,23 +233,22 @@ public:
 
   //--------------------------------------------------------------------------
   // Add a segment at the end, extending if required
+  // Segment is shallow copied (owned_data not copied)
   // Returns the added segment
-  Segment& add(const Segment& seg);
+  Segment& add(Segment& seg);
 
   //--------------------------------------------------------------------------
   // Add a segment from external data to the end of the buffer
   // Returns the added segment
-  Segment& add(data_t *data, length_t length)
-  { return add(Segment(data, length)); }
+  Segment& add(data_t *data, length_t length);
 
   //--------------------------------------------------------------------------
   // Add a segment with allocated data to the end of the buffer
   // Returns the added segment
-  Segment& add(length_t length)
-  { return add(Segment(length)); }
+  Segment& add(length_t length);
 
   //--------------------------------------------------------------------------
-  // Add another buffer to the end of this one
+  // Add another buffer to the end of this one, copying any owned_data
   void add(const Buffer& buffer);
 
   //--------------------------------------------------------------------------
