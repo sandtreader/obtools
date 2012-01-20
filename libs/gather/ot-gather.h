@@ -23,7 +23,7 @@
 #include "sys/uio.h"
 #endif
 
-namespace ObTools { namespace Gather { 
+namespace ObTools { namespace Gather {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -35,8 +35,15 @@ typedef unsigned long length_t;
 
 //==========================================================================
 // Individual segment of a buffer
-struct Segment
+class Segment
 {
+ private:
+  // Block copy and assignment to avoid implicit copying horrors
+  // - use 'take' or 'copy' explicitly
+  Segment(const Segment&) {}
+  void operator=(const Segment&) {}
+
+ public:
   data_t *owned_data;      // Original allocated block, if we allocated it
   data_t *data;            // Unconsumed data start
   length_t length;         // Unconsumed data length
@@ -47,15 +54,12 @@ struct Segment
   Segment(): owned_data(0), data(0), length(0) {}
 
   // Reference to external data
-  Segment(data_t *_data, length_t _length): 
+  Segment(data_t *_data, length_t _length):
     owned_data(0), data(_data), length(_length) {}
 
   // Reference to data allocated here
-  Segment(length_t _length): 
+  Segment(length_t _length):
     owned_data(new data_t[_length]), data(owned_data), length(_length) {}
-
-  // Construct from segment
-  Segment(const Segment& s);
 
   //--------------------------------------------------------------------------
   // Consume N bytes from the beginning
@@ -63,15 +67,11 @@ struct Segment
 
   //--------------------------------------------------------------------------
   // Reset to new length
-  void reset(length_t n=0) { length=n; }
+  void reset(length_t n=0);
 
   //--------------------------------------------------------------------------
   // Destroy - note, explicit call, not destructor
   void destroy() { if (owned_data) delete[] owned_data; owned_data=0; }
-
-  //--------------------------------------------------------------------------
-  // Assignment operator, with owned_data copying
-  Segment& operator=(const Segment& s);
 
   //--------------------------------------------------------------------------
   // Take the data from another segment, clearing any owned_data in the
@@ -79,6 +79,11 @@ struct Segment
   Segment& take(Segment& s)
   { owned_data = s.owned_data; s.owned_data = 0;
     data = s.data; length = s.length; return *this; }
+
+  //--------------------------------------------------------------------------
+  // Copy data from another segment - does a deep copy of the owned_data of
+  // the other segment, returns *this
+  Segment& copy(const Segment& s);
 
   //--------------------------------------------------------------------------
   // Destructor - check no owned data left
@@ -185,7 +190,7 @@ public:
 };
 
 //==========================================================================
-// Gather buffer 
+// Gather buffer
 class Buffer
 {
 private:
@@ -200,7 +205,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructor
-  Buffer(unsigned int _size = DEFAULT_SIZE): 
+  Buffer(unsigned int _size = DEFAULT_SIZE):
     size(_size), count(0), segments(new Segment[_size]) {}
 
   //--------------------------------------------------------------------------
@@ -240,12 +245,14 @@ public:
   //--------------------------------------------------------------------------
   // Add a segment from external data to the end of the buffer
   // Returns the added segment
-  Segment& add(data_t *data, length_t length);
+  Segment& add(data_t *data, length_t length)
+  { Segment seg(data, length); return add(seg); }
 
   //--------------------------------------------------------------------------
   // Add a segment with allocated data to the end of the buffer
   // Returns the added segment
-  Segment& add(length_t length);
+  Segment& add(length_t length)
+  { Segment seg(length); return add(seg); }
 
   //--------------------------------------------------------------------------
   // Add another buffer to the end of this one, copying any owned_data
@@ -256,22 +263,23 @@ public:
   void add(const Buffer& buffer, length_t offset, length_t len);
 
   //--------------------------------------------------------------------------
-  // Insert a segment at the given index (default 0, the beginning), 
+  // Insert a segment at the given index (default 0, the beginning),
   // extending if required
+  // Takes the data from seg and clears it
   // Returns the added segment
-  Segment& insert(const Segment& seg, unsigned int pos);
+  Segment& insert(Segment& seg, unsigned int pos);
 
   //--------------------------------------------------------------------------
   // Insert a segment from external data at a given position (default 0, start)
   // Returns the inserted segment
   Segment& insert(data_t *data, length_t length, unsigned int pos=0)
-  { return insert(Segment(data, length), pos); }
+  { Segment seg(data, length); return insert(seg, pos); }
 
   //--------------------------------------------------------------------------
   // Insert a segment with allocated data at a given position (default 0,start)
   // Returns the inserted segment
   Segment& insert(length_t length, unsigned int pos=0)
-  { return insert(Segment(length), pos); }
+  { Segment seg(length); return insert(seg, pos); }
 
   //--------------------------------------------------------------------------
   // Consume N bytes of data from the front of the buffer

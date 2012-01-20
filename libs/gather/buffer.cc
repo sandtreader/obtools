@@ -35,7 +35,7 @@ void Buffer::resize(unsigned int new_size)
   for(unsigned int i=0; i<count; i++) new_segments[i].take(segments[i]);
 
   // Reset new ones
-  for(unsigned int i=count; i<new_size; i++) new_segments[i]=Segment();
+  for(unsigned int i=count; i<new_size; i++) new_segments[i].reset();
 
   // Replace
   delete[] segments;
@@ -54,31 +54,14 @@ Segment& Buffer::add(Segment& seg)
 }
 
 //--------------------------------------------------------------------------
-// Add a segment from external data to the end of the buffer
-// Returns the added segment
-Segment& Buffer::add(data_t *data, length_t length)
-{
-  Segment seg(data, length);
-  return add(seg);
-}
-
-//--------------------------------------------------------------------------
-// Add a segment with allocated data to the end of the buffer
-// Returns the added segment
-Segment& Buffer::add(length_t length)
-{
-  Segment seg(length);
-  return add(seg);
-}
-
-//--------------------------------------------------------------------------
 // Add another buffer to the end of this one, copying any owned_data
 void Buffer::add(const Buffer& buffer)
 {
   // Copy, with memory copying of owned data
   for(unsigned int i=0; i<buffer.count; i++)
   {
-    Segment seg = buffer.segments[i];  // Force copy
+    Segment seg;
+    seg.copy(buffer.segments[i]);
     add(seg);
   }
 }
@@ -86,16 +69,17 @@ void Buffer::add(const Buffer& buffer)
 //--------------------------------------------------------------------------
 // Insert a segment at the given index (default 0, the beginning),
 // extending if required
+// Takes the data from seg and clears it
 // Returns the added segment
-Segment& Buffer::insert(const Segment& seg, unsigned int pos)
+Segment& Buffer::insert(Segment& seg, unsigned int pos)
 {
   if (count >= size) resize(size ? size*2 : 1);
   if (pos > count) abort();
 
   // Shift up one
-  for(unsigned int i=count++; i>pos; i--) segments[i]=segments[i-1];
+  for(unsigned int i=count++; i>pos; i--) segments[i].take(segments[i-1]);
 
-  return segments[pos] = seg;
+  return segments[pos].take(seg);
 }
 
 //--------------------------------------------------------------------------
@@ -171,10 +155,10 @@ void Buffer::dump(ostream& sout, bool show_data) const
 
 //--------------------------------------------------------------------------
 // Reset the buffer to be empty
-void Buffer::reset() 
+void Buffer::reset()
 {
   for(unsigned int i=0; i<count; i++) segments[i].destroy();
-  count = 0; 
+  count = 0;
 }
 
 //--------------------------------------------------------------------------

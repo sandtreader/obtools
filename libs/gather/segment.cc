@@ -11,13 +11,22 @@
 
 namespace ObTools { namespace Gather {
 
-Segment::Segment(const Segment& s):
-  owned_data(0), data(0), length(0)
+//--------------------------------------------------------------------------
+// Reset to new length
+void Segment::reset(length_t n)
 {
-  *this = s;
+  length=n;
+  if (!n)
+  {
+    if (owned_data) delete[] owned_data;
+    owned_data = data = 0;
+  }
 }
 
-Segment& Segment::operator=(const Segment& s)
+//--------------------------------------------------------------------------
+// Copy data from another segment - does a deep copy of the owned_data of
+// the other segment, returns *this
+Segment& Segment::copy(const Segment& s)
 {
   // Free any owned memory
   if (owned_data)
