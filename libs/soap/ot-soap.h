@@ -105,6 +105,10 @@ public:
   Message(istream& in_s, Parser& p);
 
   //------------------------------------------------------------------------
+  // Constructor from existing message - copies document
+  Message(const Message& msg) { doc = msg.doc->deep_copy(); }
+
+  //------------------------------------------------------------------------
   // Check for validity
   bool valid() { return doc!=0; }
   bool operator!() { return !valid(); }
@@ -245,6 +249,10 @@ public:
   //------------------------------------------------------------------------
   // Constructor from XML text, using the given parser
   Fault(const string& text, Parser& p): Message(text, p) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from existing message - copies document
+  Fault(const Message& msg): Message(msg) {}
 
   //------------------------------------------------------------------------
   // Set a subcode
