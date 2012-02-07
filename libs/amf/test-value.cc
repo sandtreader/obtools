@@ -204,7 +204,7 @@ TEST(AMFValueTest, TestReadingAMF0Undefined)
 
 TEST(AMFValueTest, TestReadingAMF0ECMAArray)
 {
-  unsigned char buf[18];
+  unsigned char buf[21];
   buf[0] = 0x08;
   buf[1] = 0x00;
   buf[2] = 0x00;
@@ -222,10 +222,14 @@ TEST(AMFValueTest, TestReadingAMF0ECMAArray)
   buf[16] = 0x01;
   buf[17] = 0xFF;  // true
 
-  Channel::BlockReader chan(buf, 18);
+  buf[18] = 0x00;
+  buf[19] = 0x00;
+  buf[20] = 0x09;  // end
+
+  Channel::BlockReader chan(buf, 21);
   AMF::Value value;
   ASSERT_NO_THROW(value.read(chan, AMF::FORMAT_AMF0));
-  ASSERT_EQ(chan.get_offset(), 18);
+  ASSERT_EQ(chan.get_offset(), 21);
   EXPECT_EQ(value.type, AMF::Value::ARRAY);
   EXPECT_EQ(value.assoc_array.size(), 2);
   EXPECT_EQ(value.assoc_array["foo"].type, AMF::Value::UNDEFINED);
@@ -480,10 +484,10 @@ TEST(AMFValueTest, TestWritingAMF0ECMAArray)
   value.set("foo", AMF::Value(AMF::Value::UNDEFINED));
   value.set("bar", AMF::Value(AMF::Value::TRUE));
 
-  unsigned char buf[18];
-  Channel::BlockWriter chan(buf, 18);
+  unsigned char buf[21];
+  Channel::BlockWriter chan(buf, 21);
   ASSERT_NO_THROW(value.write(chan, AMF::FORMAT_AMF0));
-  ASSERT_EQ(chan.get_offset(), 18);
+  ASSERT_EQ(chan.get_offset(), 21);
 
   EXPECT_EQ(buf[0], 0x08);
   EXPECT_EQ(buf[1], 0x00);
@@ -505,6 +509,11 @@ TEST(AMFValueTest, TestWritingAMF0ECMAArray)
   string foo((char *)buf+14, 3);
   EXPECT_EQ(foo, "foo");
   EXPECT_EQ(buf[17], 0x06); // undefined
+
+  // end marker
+  EXPECT_EQ(buf[18], 0x00);
+  EXPECT_EQ(buf[19], 0x00);
+  EXPECT_EQ(buf[20], 0x09);
 }
 
 TEST(AMFValueTest, TestWritingAMF0StrictArray)

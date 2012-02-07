@@ -202,29 +202,24 @@ void Value::read(Channel::Reader& chan, Format format)
 
     case ARRAY:
     {
-      // !!! AMF3 version
       uint32_t count = chan.read_nbo_32();
-      while (count--)
+
+      if (format == FORMAT_AMF0 && original_type == 10) // Strict array
       {
-        if (format == FORMAT_AMF0 && original_type == 10) // Strict array
+        // Assume strict just uses count
+        while (count--)
         {
           Value v;
           v.read(chan, format);
           add(v);
         }
-        else // ECMA array
-        {
-          int len = chan.read_nbo_16();
-          string name;
-          // !!! Check for AMF3 reference
-          chan.read(name, len);
-          Value v;
-          v.read(chan, format);
-          set(name, v);
-        }
+
+        break;
       }
-      break;
+
+      // ECMA array - ignore count and fall through to OBJECT
     }
+    // !Falling
 
     case OBJECT:
     {
@@ -363,6 +358,11 @@ void Value::write(Channel::Writer& chan, Format format)
             // and value
             p->second.write(chan, format);
           }
+
+          // !AMF0 spec doesn't say it but every parser/generate seems to
+          // assume it - end marker required
+          chan.write_nbo_16(0);
+          chan.write_byte(0x09);  // object-end-marker
         }
         else
         {
