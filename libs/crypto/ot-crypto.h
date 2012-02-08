@@ -26,6 +26,7 @@
 #include <openssl/des.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+#include <openssl/hmac.h>
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 #undef SSL
@@ -584,6 +585,61 @@ class SHA1
   // C++-friendly version of the above
   string digest(const string& text)
   { return digest(text.data(), text.length()); }
+};
+
+//==========================================================================
+// HMAC hash support
+// Either use as an object for repeated partial blocks, or use the static
+// digest() to do an entire block
+// Base class which can be inherited from for specific hash functions.
+class HMAC
+{
+private:
+  HMAC_CTX hmac_ctx;
+  bool finished;
+  const unsigned int digest_length;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  HMAC(const void *key, int key_len, const EVP_MD *md,
+       unsigned int digest_length);
+
+  //------------------------------------------------------------------------
+  // Return length of digest
+  unsigned int get_digest_length() const { return digest_length; }
+
+  //------------------------------------------------------------------------
+  // Update digest with a block of data
+  void update(const unsigned char *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // Get result - writes get_digest_length() bytes to result
+  void get_result(unsigned char *result);
+
+  //------------------------------------------------------------------------
+  // Get hash of block of data.  Writes get_digest_length() bytes to result
+  void digest(const unsigned char *data, size_t length,
+              unsigned char *result);
+
+  //------------------------------------------------------------------------
+  // Virtual Destructor
+  virtual ~HMAC();
+};
+
+//==========================================================================
+// HMAC SHA 256
+class HMACSHA256: public HMAC
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  HMACSHA256(const void *key, int key_len):
+    HMAC(key, key_len, EVP_sha256(), 32) {}
+
+  //------------------------------------------------------------------------
+  // Virtual Destructor
+  virtual ~HMACSHA256() {}
 };
 
 //==========================================================================

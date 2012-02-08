@@ -9,7 +9,7 @@ TYPE	= lib
 NAME   	= ot-crypto
 HEADERS = ot-crypto.h
 OBJS  	= pkcs5.o aes-key.o aes.o des-key.o des.o rsa-key.o rsa.o sha1.o \
-          x509.o store.o library.o
+          x509.o store.o library.o hmac.o
 TESTS 	= test-pkcs5 test-aes-key test-aes test-aes-string \
           test-des-key test-des \
           test-rsa-key test-rsa test-sha1 test-x509

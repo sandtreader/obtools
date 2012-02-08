@@ -9,7 +9,10 @@
 
 #include "ot-crypto.h"
 #include "ot-mt.h"
+#define SSL OpenSSL
 #include "openssl/evp.h"
+#include "openssl/engine.h"
+#undef SSL
 
 // Definition of type for dynamic locks, outside namespaces
 struct CRYPTO_dynlock_value
@@ -97,6 +100,10 @@ Library::Library()
     CRYPTO_set_dynlock_destroy_callback(openssl_dyn_destroy_function);
 
     OpenSSL_add_all_algorithms();
+
+    // Initiliase engine with default digests
+    ENGINE_load_builtin_engines();
+    ENGINE_register_all_complete();
   }
 }
 
