@@ -324,9 +324,9 @@ public:
   //--------------------------------------------------------------------------
   // Set a cookie with the given optional domain, path and expiry time
   void set_cookie(const string& name, const string& value,
-                  Time::Stamp expires = Time::Stamp(),
+                  const string& path = "",
                   const string& domain = "",
-                  const string& path = "");
+                  Time::Stamp expires = Time::Stamp());
 
   //--------------------------------------------------------------------------
   // Get a map of all cookies, name value pairs in values_p

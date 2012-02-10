@@ -298,9 +298,9 @@ ostream& operator<<(ostream& s, const HTTPMessage& msg)
 // Set a cookie with the given optional domain, path and expiry time
 void HTTPMessage::set_cookie(const string& name,
                              const string& value,
-                             Time::Stamp expires,
+                             const string& path,
                              const string& domain,
-                             const string& path)
+                             Time::Stamp expires)
 {
   ostringstream oss;
   // Name value %-encoded, including spaces
