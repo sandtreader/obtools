@@ -294,6 +294,57 @@ ostream& operator<<(ostream& s, const HTTPMessage& msg)
   return s;
 }
 
+//--------------------------------------------------------------------------
+// Set a cookie with the given optional domain, path and expiry time
+void HTTPMessage::set_cookie(const string& name,
+                             const string& value,
+                             Time::Stamp expires,
+                             const string& domain,
+                             const string& path)
+{
+  ostringstream oss;
+  // Name value %-encoded, including spaces
+  oss << URL::encode(name, false) << "=" << URL::encode(value, false);
+
+  if (!!expires) oss << "; expires=" << expires.rfc822();
+  if (!domain.empty()) oss << "; domain=" << domain;
+  if (!path.empty()) oss << "; path=" << path;
+
+  headers.put("Set-Cookie", oss.str());
+}
+
+//--------------------------------------------------------------------------
+// Get a map of all cookies, name value pairs in values_p
+void HTTPMessage::get_cookies(map<string, string>& values_p)
+{
+  list<string> cookie_headers = headers.get_all("cookie");
+  for(list<string>::iterator p = cookie_headers.begin();
+      p!=cookie_headers.end();++p)
+  {
+    string& hdr = *p;
+    // Split into pairs on ;
+    vector<string> pairs = Text::split(hdr, ';');
+    for(vector<string>::iterator q = pairs.begin(); q!=pairs.end(); ++q)
+    {
+      // Split into name, value on =
+      vector<string> bits = Text::split(*q, '=', 2);
+      if (bits.size() != 2) continue;
+      string name = Text::canonicalise_space(bits[0]);
+      string value = Text::canonicalise_space(bits[1]);
+      values_p[name] = value;
+    }
+  }
+}
+
+//--------------------------------------------------------------------------
+// Get a single cookie value, or empty if not set
+string HTTPMessage::get_cookie(const string& name)
+{
+  map<string, string> values;
+  get_cookies(values);
+  return values[name];
+}
+
 }} // namespaces
 
 

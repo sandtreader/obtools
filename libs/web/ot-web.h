@@ -320,6 +320,21 @@ public:
   // Write to a stream
   // Returns whether successful
   bool write(ostream &out) const;
+
+  //--------------------------------------------------------------------------
+  // Set a cookie with the given optional domain, path and expiry time
+  void set_cookie(const string& name, const string& value,
+                  Time::Stamp expires = Time::Stamp(),
+                  const string& domain = "",
+                  const string& path = "");
+
+  //--------------------------------------------------------------------------
+  // Get a map of all cookies, name value pairs in values_p
+  void get_cookies(map<string, string>& values_p);
+
+  //--------------------------------------------------------------------------
+  // Get a single cookie value, or empty if not set
+  string get_cookie(const string& name);
 };
 
 //------------------------------------------------------------------------
