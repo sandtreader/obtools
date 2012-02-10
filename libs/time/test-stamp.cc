@@ -34,7 +34,6 @@ int main()
     Time::Stamp s(line);
 
     time_t t = s.time();
-    
 
     cout << "--------------------\n";
     cout << "        Input: " << line << endl;
@@ -44,6 +43,7 @@ int main()
     cout << "      ISO min: " << s.iso_minimal() << endl;
     cout << "     ISO date: " << s.iso_date() << endl;
     cout << "     ISO time: " << s.iso_time(':', true) << endl;
+    cout << "       RFC822: " << s.rfc822() << endl;
 
     Time::Stamp local = s.localise();
     cout << "    localised: " << local.iso() << endl;

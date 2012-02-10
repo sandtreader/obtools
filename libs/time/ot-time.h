@@ -254,7 +254,12 @@ public:
   //------------------------------------------------------------------------
   // Get the locale-specific date and time format
   string locale_date_time() const;
-    
+
+  //------------------------------------------------------------------------
+  // Convert to RFC822 string
+  // Generates Wdy, DD-Mon-YYYY HH:MM:SS GMT, empty if invalid
+  string rfc822() const;
+
   //------------------------------------------------------------------------
   // Split the timestamp into individual items
   void split(Split &sp) const { sp = split(t); }

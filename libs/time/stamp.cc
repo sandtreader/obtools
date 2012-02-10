@@ -410,13 +410,22 @@ string Stamp::locale_date_time() const
 }
 
 //------------------------------------------------------------------------
+// Convert to RFC822 string
+// Generates Wdy, DD-Mon-YYYY HH:MM:SS GMT, empty if invalid
+string Stamp::rfc822() const
+{
+  if (!t) return "";  // Empty if invalid
+  return format("%a, %d %b %Y %T GMT");
+}
+
+//------------------------------------------------------------------------
 // Format according to strftime format (max 40 chars)
 string Stamp::format(const char *format) const
 {
   struct tm tm;
   get_tm(tm);
   char buf[40];
-  size_t len = strftime(buf, 40, format, &tm);  
+  size_t len = strftime(buf, 40, format, &tm);
   return string(buf, len);
 }
 
@@ -425,7 +434,7 @@ string Stamp::format(const char *format) const
 int Stamp::weekday() const
 {
   // Get days since epoch
-  unsigned long seconds = (unsigned long)(t>>NTP_SHIFT); 
+  unsigned long seconds = (unsigned long)(t>>NTP_SHIFT);
   unsigned long days = seconds/3600/24;
 
   // 1st January 1900 was a Monday, so..
