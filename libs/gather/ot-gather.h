@@ -120,7 +120,7 @@ private:
 
   inline bool is_end() const
   {
-    return !countdown;
+    return dp == &end;
   }
 
   void next_segment()
@@ -395,9 +395,11 @@ public:
   // Iterator functions
   iterator begin() const
   {
-    return BufferIterator(segments, count, segments,
-                          (count ? segments[0].length : 0),
-                          (count ? &segments[0].data[0] : 0));
+    for (Segment *segment = segments; segment < &segments[count]; ++segment)
+      if (segment->length)
+        return BufferIterator(segments, count, segment,
+                              segment->length, &segment->data[0]);
+    return end();
   }
 
   iterator end() const
