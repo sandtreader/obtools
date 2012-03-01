@@ -1,9 +1,9 @@
 //==========================================================================
 // ObTools::Text: ot-text.h
 //
-// Public definitions for ObTools::Text 
+// Public definitions for ObTools::Text
 // Generally useful text/matching extensions to standard C++ library:
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -15,7 +15,7 @@
 #include <vector>
 #include <stdint.h>
 
-namespace ObTools { namespace Text { 
+namespace ObTools { namespace Text {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -77,7 +77,7 @@ vector<string> split_words(const string& text);
 // multiple internal whitespace into one) if canonicalise is set
 // If max is set, stops after 'max-1' fields have been read, and drops the
 // rest of the string into the last one
-vector<string> split(const string& text, char delim=',', 
+vector<string> split(const string& text, char delim=',',
 		     bool canonicalise = true, int max=0);
 
 //==========================================================================
@@ -95,11 +95,11 @@ vector<string> split(const string& text, char delim=',',
 //	\	Escapes following character special character
 //
 //	   cased gives whether case sensitive match (true)
-bool pattern_match(const char *pattern, const char *text, 
+bool pattern_match(const char *pattern, const char *text,
 		   bool cased=true);
 
 // More C++ friendly version
-bool pattern_match(const string& pattern, const string& text, 
+bool pattern_match(const string& pattern, const string& text,
 		   bool cased=true);
 
 //==========================================================================
@@ -108,7 +108,7 @@ bool pattern_match(const string& pattern, const string& text,
 // Case sensitive
 // Handles case where new string includes old
 string subst(string text, const string& old, const string& rep);
- 
+
 //==========================================================================
 // Case functions (case.cc)
 
@@ -179,7 +179,7 @@ string btox(const string& data);
 //--------------------------------------------------------------------------
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
-unsigned int xtob(const string& hex, unsigned char *data, 
+unsigned int xtob(const string& hex, unsigned char *data,
 		  unsigned int max_length);
 
 //==========================================================================
@@ -201,7 +201,7 @@ public:
   // Split gives length of line to split at - default (76) is to RFC
   // Set 0 to suppress split altogether
   // line_end is string to split with, and indent for next line
-  string encode(const unsigned char *block, size_t length, 
+  string encode(const unsigned char *block, size_t length,
 		int split=76, const string& line_end = "\r\n");
 
   //--------------------------------------------------------------------------
@@ -211,17 +211,17 @@ public:
 
   //--------------------------------------------------------------------------
   // Encode a binary string - options as encode above
-  string encode(const string& binary, int split=76, 
+  string encode(const string& binary, int split=76,
 		const string& line_end="\r\n");
 
   //--------------------------------------------------------------------------
-  // Get length of binary block required for decode 
+  // Get length of binary block required for decode
   // This is a maximum estimate - real length may be less than this, but
   // will never be more
   size_t binary_length(const string& base64);
 
   //--------------------------------------------------------------------------
-  // Decode a base64 string into a binary block.  
+  // Decode a base64 string into a binary block.
   // Returns real length decoded if it fitted, max_length+1 if it didn't
   // - but it will never actually write more than max_length bytes
   size_t decode(const string& base64, unsigned char *block, size_t max_length);
@@ -245,11 +245,11 @@ class Base36
 {
 public:
   //--------------------------------------------------------------------------
-  // Default constructor 
+  // Default constructor
   Base36() {}
 
   //--------------------------------------------------------------------------
-  // Encode a 64-bit integer 
+  // Encode a 64-bit integer
   // Uses as many characters as required
   static string encode(uint64_t n);
 
@@ -266,11 +266,11 @@ class Base16Alpha
 {
 public:
   //--------------------------------------------------------------------------
-  // Default constructor 
+  // Default constructor
   Base16Alpha() {}
 
   //--------------------------------------------------------------------------
-  // Encode a 64-bit integer 
+  // Encode a 64-bit integer
   // Uses as many characters as required
   static string encode(uint64_t n);
 
