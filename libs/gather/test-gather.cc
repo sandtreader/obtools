@@ -205,7 +205,7 @@ TEST(GatherTest, TestAddBuffer)
             string(reinterpret_cast<char *>(segment3.data), segment3.length));
 }
 
-TEST(GatherTest, TestIterator)
+TEST(GatherTest, TestIteratorLoop)
 {
   Gather::Buffer buffer(0);
   const string one("Hello");
@@ -221,7 +221,48 @@ TEST(GatherTest, TestIterator)
   for (Gather::Buffer::iterator it = buffer.begin(); it != buffer.end(); ++it)
     actual += reinterpret_cast<char&>(*it);
 
+  ASSERT_EQ(expect.size(), actual.size());
   ASSERT_EQ(expect, actual);
+}
+
+TEST(GatherTest, TestIteratorAdd)
+{
+  Gather::Buffer buffer(0);
+  const string one("Hello");
+  const string two(", wo");
+  const string three("rld!");
+  buffer.add((Gather::data_t *)one.c_str(), one.size());
+  buffer.add((Gather::data_t *)two.c_str(), two.size());
+  buffer.add((Gather::data_t *)three.c_str(), three.size());
+
+  string expect = one + two + three;
+
+  Gather::Buffer::iterator it = buffer.begin();
+  it += 7;
+
+  ASSERT_EQ(expect[7], *it);
+}
+
+TEST(GatherTest, TestIteratorSub)
+{
+  Gather::Buffer buffer(0);
+  const string one("Hello");
+  const string two(", wo");
+  const string three("rld!");
+  buffer.add((Gather::data_t *)one.c_str(), one.size());
+  buffer.add((Gather::data_t *)two.c_str(), two.size());
+  buffer.add((Gather::data_t *)three.c_str(), three.size());
+
+  string expect = one + two + three;
+
+  Gather::Buffer::iterator it = buffer.end();
+  it -= 6;
+
+  ASSERT_EQ(expect[7], *it);
+
+  it -= 1;
+
+  ASSERT_EQ(expect[6], *it);
 }
 
 TEST(GatherTest, TestDump)

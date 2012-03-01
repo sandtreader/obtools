@@ -17,12 +17,13 @@ namespace ObTools { namespace Gather {
 // Read implementation
 size_t Reader::basic_read(void *buf, size_t count) throw (Channel::Error)
 {
+  data_t *bufp = static_cast<data_t *>(buf);
   if (count)
   {
-    count = buffer.copy(reinterpret_cast<data_t *>(buf), offset, count);
+    count = buffer.copy(reinterpret_cast<data_t *>(buf), it, count);
+    it += count;
     offset += count;
   }
-
   return count;
 }
 
@@ -33,13 +34,17 @@ void Reader::skip(size_t n) throw (Channel::Error)
     throw Channel::Error(1, "Skip beyond end of block");
 
   offset += n;
+  it += n;
 }
 
 // Rewind implementation
 void Reader::rewind(size_t n) throw (Channel::Error)
 {
   if (n <= offset)
+  {
     offset -= n;
+    it -= n;
+  }
   else throw Channel::Error(1, "Rewound too far");
 }
 

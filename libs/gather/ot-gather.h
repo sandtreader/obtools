@@ -104,12 +104,6 @@ class Segment
 // Gather buffer iterator
 class BufferIterator
 {
-private:
-  Segment *segments;
-  unsigned int count;
-  Segment *segment;
-  length_t pos;
-
 public:
   typedef bidirectional_iterator_tag iterator_category;
   typedef ptrdiff_t difference_type;
@@ -117,50 +111,126 @@ public:
   typedef data_t& reference;
   typedef data_t *pointer;
 
+private:
+  Segment *segments;
+  unsigned int count;
+  Segment *segment;
+  length_t countdown;
+  pointer dp;
+
+  inline bool is_end() const
+  {
+    return dp == &end;
+  }
+
+  void next_segment()
+  {
+    for (;;)
+    {
+      ++segment;
+      if (segment >= &segments[count])
+      {
+        countdown = 0;
+        dp = &end;
+        return;
+      }
+      else if (segment->length)
+      {
+        countdown = segment->length;
+        dp = &segment->data[0];
+        return;
+      }
+    }
+  }
+
+  void previous_segment()
+  {
+    if (segment == segments)
+    {
+      countdown = segment->length;
+      dp = &segment->data[0];
+      return;
+    }
+    while (segment > segments && !(--segment)->length);
+    if (segment->length)
+    {
+      countdown = 1;
+      dp = &segment->data[segment->length - 1];
+    }
+    else
+      next_segment();
+  }
+
+  static value_type end;
+
+public:
   BufferIterator() {}
   BufferIterator(Segment *_segments, unsigned int _count,
-                 Segment *_segment, length_t _pos):
-    segments(_segments), count(_count), segment(_segment), pos(_pos)
-  {}
+                 Segment *_segment, length_t _countdown,
+                 pointer _dp):
+    segments(_segments), count(_count), segment(_segment),
+    countdown(_countdown), dp(_dp)
+  {
+    if (segment >= &segments[count])
+      dp = &end;
+  }
   BufferIterator(const BufferIterator& bi):
     segments(bi.segments), count(bi.count), segment(bi.segment),
-    pos(bi.pos)
+    countdown(bi.countdown), dp(bi.dp)
   {}
 
-  bool operator==(const BufferIterator& bi) const
+  Segment *get_segment() const
   {
-    return segments == bi.segments &&
-           count == bi.count &&
-           segment == bi.segment &&
-           pos == bi.pos;
+    if (is_end())
+      return 0;
+    else
+      return segment;
   }
-  bool operator!=(const BufferIterator& bi) const
+
+  length_t get_segment_offset() const
+  {
+    if (is_end())
+      return 0;
+    else
+      return segment->length - countdown;
+  }
+
+  inline bool operator==(const BufferIterator& bi) const
+  {
+    return dp == bi.dp;
+  }
+
+  inline bool operator!=(const BufferIterator& bi) const
   {
     return !operator==(bi);
   }
 
   BufferIterator& operator++()
   {
-    if (++pos >= segment->length)
-    {
-      ++segment;
-      pos = 0;
-    }
+    if (is_end())
+      return *this;
+    if (!--countdown)
+      next_segment();
+    else
+      ++dp;
     return *this;
   }
 
-  BufferIterator& operator+=(Gather::length_t add)
+  BufferIterator& operator+=(length_t add)
   {
-    while ((pos += add) >= segment->length)
+    while (add >= countdown)
     {
-      add = pos - segment->length;
-      ++segment;
-      pos = 0;
+      if (is_end())
+        return *this;
+      add -= countdown;
+      next_segment();
     }
+    countdown -= add;
+    dp += add;
     return *this;
   }
 
-  BufferIterator operator+(Gather::length_t add)
+  BufferIterator operator+(length_t add)
   {
     BufferIterator added = *this;
     added += add;
@@ -169,22 +239,33 @@ public:
 
   BufferIterator& operator--()
   {
-    if (pos)
-      --pos;
+    if (is_end() || ++countdown > segment->length)
+      previous_segment();
     else
+      --dp;
+    return *this;
+  }
+
+  BufferIterator& operator-=(length_t sub)
+  {
+    while (is_end() || sub > segment->length - countdown)
     {
-      if (segment > segments)
-      {
-        --segment;
-        pos = segment->length - 1;
-      }
+      if (segment == segments)
+        throw("Attempt to decrement past start of buffer");
+      if (is_end())
+        --sub;
+      else
+        sub -= segment->length - countdown + 1;
+      previous_segment();
     }
+    countdown += sub;
+    dp -= sub;
     return *this;
   }
 
   reference operator*()
   {
-    return segment->data[pos];
+    return *dp;
   }
 
 };
@@ -286,8 +367,17 @@ public:
   void consume(length_t n);
 
   //--------------------------------------------------------------------------
+  // Tidy up a buffer, shuffling occupied segments back over empty ones
+  void tidy();
+
+  //--------------------------------------------------------------------------
   // Copy some data to a contiguous buffer
   length_t copy(data_t *data, length_t offset, length_t len) const;
+
+  //--------------------------------------------------------------------------
+  // Copy some data to a contiguous buffer from an iterator position
+  length_t copy(data_t *data, const BufferIterator& offset,
+                length_t len) const;
 
 #if !defined(__WIN32__)
   //--------------------------------------------------------------------------
@@ -305,12 +395,17 @@ public:
   // Iterator functions
   iterator begin() const
   {
-    return BufferIterator(segments, count, segments, 0);
+    for (Segment *segment = segments; segment < &segments[count]; ++segment)
+      if (segment->length)
+        return BufferIterator(segments, count, segment,
+                              segment->length, &segment->data[0]);
+    return end();
   }
 
   iterator end() const
   {
-    return BufferIterator(segments, count, &segments[count], 0);
+    return BufferIterator(segments, count, &segments[count],
+                          0, 0);
   }
 
   //--------------------------------------------------------------------------
@@ -324,12 +419,13 @@ class Reader: public Channel::Reader
 {
 private:
   const Buffer& buffer;
+  BufferIterator it;
 
 public:
   //------------------------------------------------------------------------
   // Constructor
   Reader(const Buffer& _buffer):
-    buffer(_buffer)
+    buffer(_buffer), it(_buffer.begin())
   {}
 
   //--------------------------------------------------------------------------

@@ -13,6 +13,8 @@
 
 namespace ObTools { namespace Gather {
 
+BufferIterator::value_type BufferIterator::end(0);
+
 //--------------------------------------------------------------------------
 // Get total length of data in buffer
 length_t Buffer::get_length() const
@@ -105,6 +107,34 @@ length_t Buffer::copy(data_t *data, length_t offset, length_t len) const
         break;
     }
     gather_offset += segment.length;
+  }
+  return data_read;
+}
+
+//--------------------------------------------------------------------------
+// Copy some data to a contiguous buffer from an iterator position
+length_t Buffer::copy(data_t *data, const BufferIterator& offset,
+                      length_t len) const
+{
+  Segment *s = offset.get_segment();
+  if (!s || s < segments || s >= &segments[count])
+    return 0;
+
+  length_t segment_offset = offset.get_segment_offset();
+  length_t data_read = 0;
+
+  for (; s < &segments[count]; ++s)
+  {
+    const Segment &segment = *s;
+    length_t to_read = len - data_read;
+    if (to_read > segment.length - segment_offset)
+      to_read = segment.length - segment_offset;
+    memcpy(data, &segment.data[segment_offset], to_read);
+    data += to_read;
+    data_read += to_read;
+    if (data_read >= len)
+      break;
+    segment_offset = 0;
   }
   return data_read;
 }
@@ -213,6 +243,35 @@ void Buffer::consume(length_t n)
   }
 }
 
+//--------------------------------------------------------------------------
+// Tidy up a buffer, shuffling occupied segments back over empty ones
+void Buffer::tidy()
+{
+  queue<Segment *> free_segments;
+  unsigned int new_count(0);
+
+  for (Segment *segment = &segments[0]; segment < &segments[count];
+       ++segment)
+  {
+    if (segment->length)
+    {
+      if (free_segments.size())
+      {
+        Segment *first_free = free_segments.front();
+        first_free->take(*segment);
+        free_segments.pop();
+        segment->consume(segment->length);
+        free_segments.push(segment);
+      }
+      new_count++;
+    }
+    else
+    {
+      free_segments.push(segment);
+    }
+  }
+  count = new_count;
+}
 
 //--------------------------------------------------------------------------
 // Add references to a run of data from another buffer
