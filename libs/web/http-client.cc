@@ -149,15 +149,6 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 
     stream->flush();
 
-    // Finish sending so server gets EOF
-    if (!http_1_1 || http_1_1_close)
-    {
-#if !defined(__WIN32__)
-      socket->finish();  // !!! Seems to cause loss of received data in Vista
-                         // !!! and doesn't send FIN anyway
-#endif
-    }
-
     // If progressive, just read the headers
     // otherwise, read all, allowing for EOF marker for end of body
     if (progressive?!response.read_headers(*stream)
