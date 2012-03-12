@@ -43,8 +43,8 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       ObTools::Web::HTTPMessage request, response;
 
       // Try to read a message, stop if not (probably connection dropped)
-      // Allow EOF to mark end of body in absence of Content-Length
-      if (!request.read(ss, true))
+      // Don't wait for EOF in absence of Content-Length, just assume 0
+      if (!request.read(ss, false))
       {
 	if (persistent)
 	  log.detail << "Persistent connection from " << client 
