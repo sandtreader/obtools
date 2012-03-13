@@ -40,13 +40,13 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor from pointer
-  SharedPointer(T *_pointer):
+  SharedPointer(T *_pointer = 0):
     ref_count(new unsigned int(1)), pointer(_pointer)
   {}
 
   //------------------------------------------------------------------------
   // Copy constructor
-  SharedPointer(SharedPointer<T>& shared_pointer):
+  SharedPointer(const SharedPointer<T>& shared_pointer):
     ref_count(shared_pointer.ref_count), pointer(shared_pointer.pointer)
   {
     ++*ref_count;
@@ -54,7 +54,7 @@ public:
 
   //------------------------------------------------------------------------
   // Assignment operator
-  SharedPointer& operator=(SharedPointer<T>& shared_pointer)
+  SharedPointer& operator=(const SharedPointer<T>& shared_pointer)
   {
     release();
     ref_count = shared_pointer.ref_count;
@@ -64,10 +64,15 @@ public:
   }
 
   //------------------------------------------------------------------------
-  // Pointer operator
+  // Pointer operators
   T& operator*()
   {
     return *pointer;
+  }
+
+  T* operator->()
+  {
+    return pointer;
   }
 
   //------------------------------------------------------------------------
