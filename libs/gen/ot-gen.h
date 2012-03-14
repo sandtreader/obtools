@@ -65,12 +65,12 @@ public:
 
   //------------------------------------------------------------------------
   // Pointer operators
-  T& operator*()
+  T& operator*() const
   {
     return *pointer;
   }
 
-  T* operator->()
+  T* operator->() const
   {
     return pointer;
   }
