@@ -89,6 +89,6 @@ tar cvf /dev/null $DEB_DIR |grep  "/$" |cut -c ${NUMCHAR}- |grep -v "^/DEBIAN/" 
 #all files
 tar cvf /dev/null $DEB_DIR |grep  -v "/$" |grep -v $DEB_VERSION.spec |cut -c ${NUMCHAR}-| grep -v "^/DEBIAN/"|sed -e 's/^/\"/' -e 's/$/\"/' >> $RPM_SPEC
 
-fakeroot -- rpmbuild -bb  $RPM_SPEC
+fakeroot -- rpmbuild --buildroot ${DEB_DIR} -bb  $RPM_SPEC
 
 mv ../${NAME}${VARIANT}${RPM_DEVEL}-$VERSION-${REV}.${TARGARCH}.rpm $RELEASE_DIR
