@@ -53,6 +53,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Equality operator
+  bool operator==(const SharedPointer<T>& shared_pointer)
+  {
+    return pointer == shared_pointer.pointer;
+  }
+
+  //------------------------------------------------------------------------
   // Assignment operator
   SharedPointer& operator=(const SharedPointer<T>& shared_pointer)
   {
