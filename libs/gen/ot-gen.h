@@ -53,8 +53,17 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Reset function - release and point to something else
+  void reset(T *_pointer = 0)
+  {
+    release();
+    ref_count = new unsigned int(1);
+    pointer = _pointer;
+  }
+
+  //------------------------------------------------------------------------
   // Equality operator
-  bool operator==(const SharedPointer<T>& shared_pointer)
+  bool operator==(const SharedPointer<T>& shared_pointer) const
   {
     return pointer == shared_pointer.pointer;
   }
