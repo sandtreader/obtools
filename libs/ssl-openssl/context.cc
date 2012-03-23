@@ -184,7 +184,11 @@ Connection *Context::accept_connection(int fd)
     int ret = SSL_accept(ssl);
     if (ret < 1)
     {
-      log_errors("Failed to accept SSL");
+      // Use temporary socket object to get address
+      Net::TCPSocket socket(fd);
+      Net::EndPoint remote = socket.remote();
+      socket.detach_fd();
+      log_errors("Failed to accept SSL from "+remote.host.get_dotted_quad());
       SSL_free(ssl);
       return 0;
     }
@@ -241,14 +245,16 @@ Context::~Context()
 void Context::log_errors(const string& text)
 {
   Log::Streams log;
-  log.error << "SSL: " << text << endl;
+  log.error << "SSL: " << text << " - ";
 
   unsigned long err;
   while ((err = ERR_get_error()) != 0)
   {
     char buf[120];
-    log.error << ERR_error_string(err, buf) << endl;
+    log.error << ERR_error_string(err, buf) << ". ";
   }
+
+  log.error << endl;
 }
 
 //--------------------------------------------------------------------------
