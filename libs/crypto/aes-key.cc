@@ -182,7 +182,7 @@ bool AESKey::set_from_base64(const string& s)
 
 //------------------------------------------------------------------------
 // Convert to a base64 string
-string AESKey::str_base64()
+string AESKey::str_base64() const
 {
   Text::Base64 base64;
   return base64.encode(key, size/8);

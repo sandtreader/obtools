@@ -155,7 +155,7 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to a base64 string
-  string str_base64();
+  string str_base64() const;
 
 #if defined(__OBTOOLS_CHAN_H)
   // Provide channel versions without forcing use of ot-chan.h
