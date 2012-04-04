@@ -327,6 +327,26 @@ string Stamp::iso() const
 }
 
 //------------------------------------------------------------------------
+// Convert to minimal (and URL-safe) ISO-compatible timestamp string
+// Generates YYYYMMDDTHHMMSS form or empty if invalid
+string Stamp::iso_minimal() const
+{
+  if (!t) return "";  // Empty if invalid
+
+  ostringstream oss;
+  Split sp = split(t);
+
+  oss << setw(2) << setfill('0') << sp.year
+      << setw(2) << setfill('0') << sp.month
+      << setw(2) << setfill('0') << sp.day   << 'T'
+      << setw(2) << setfill('0') << sp.hour
+      << setw(2) << setfill('0') << sp.min
+      << setw(2) << setfill('0') << (int)sp.sec;
+
+  return oss.str();
+}
+
+//------------------------------------------------------------------------
 // Convert to ISO date
 // Generates YYYY-MM-DD form or empty if invalid
 // sep can be specified, defaults to '-' - set to 0 to leave out

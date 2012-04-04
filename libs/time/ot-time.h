@@ -222,6 +222,11 @@ public:
   string iso() const;
 
   //------------------------------------------------------------------------
+  // Convert to minimal (and URL-safe) ISO-compatible timestamp string
+  // Generates YYYYMMDDTHHMMSS form or empty if invalid
+  string iso_minimal() const;
+
+  //------------------------------------------------------------------------
   // Convert to ISO date
   // Generates YYYY-MM-DD form or empty if invalid
   // sep can be specified, defaults to '-' - set to 0 to leave out
