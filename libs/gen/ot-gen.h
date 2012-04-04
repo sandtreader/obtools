@@ -11,9 +11,11 @@
 #ifndef __OBTOOLS_GEN_H
 #define __OBTOOLS_GEN_H
 
-#include "ot-gen.h"
+#include <iostream>
 
 namespace ObTools { namespace Gen {
+
+using namespace std;
 
 //==========================================================================
 // Shared Pointer
@@ -69,6 +71,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Inequality operator
+  bool operator!=(const SharedPointer<T>& shared_pointer) const
+  {
+    return !operator==(shared_pointer);
+  }
+
+  //------------------------------------------------------------------------
   // Assignment operator
   SharedPointer& operator=(const SharedPointer<T>& shared_pointer)
   {
@@ -77,6 +86,13 @@ public:
     pointer = shared_pointer.pointer;
     ++*ref_count;
     return *this;
+  }
+
+  //------------------------------------------------------------------------
+  // Get pointer to target
+  T* get() const
+  {
+    return pointer;
   }
 
   //------------------------------------------------------------------------
@@ -98,6 +114,14 @@ public:
     release();
   }
 };
+
+//--------------------------------------------------------------------------
+// Stream output handler
+template<class T>
+ostream& operator<<(ostream& os, const SharedPointer<T>& shared_pointer)
+{
+  return os << "Gen::SharedPointer *" << shared_pointer.get();
+}
 
 //==========================================================================
 }} //namespaces
