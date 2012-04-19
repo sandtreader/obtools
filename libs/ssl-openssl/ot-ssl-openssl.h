@@ -107,6 +107,10 @@ public:
   void set_default_verify_paths();
 
   //--------------------------------------------------------------------------
+  // Use given file of CA certs as list of CA's to request from clients
+  void set_client_ca_file(const string& ca_file);
+
+  //--------------------------------------------------------------------------
   // Set session ID context
   void set_session_id_context(const string& s);
 

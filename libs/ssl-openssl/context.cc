@@ -148,6 +148,19 @@ void Context::set_verify_paths(const string& ca_file, const string& ca_dir)
 }
 
 //--------------------------------------------------------------------------
+// Use given file of CA certs as list of CA's to request from clients
+void Context::set_client_ca_file(const string& ca_file)
+{
+  const char *file = ca_file.c_str();
+  STACK_OF(X509_NAME) *cert_names;
+  cert_names = SSL_load_client_CA_file(file);
+  if (cert_names)
+   SSL_CTX_set_client_CA_list(ctx, cert_names);
+ else
+   log_errors("Can't load client CA file");
+}
+
+//--------------------------------------------------------------------------
 // Use default verify paths
 void Context::set_default_verify_paths()
 {
@@ -279,6 +292,11 @@ void Context::configure_verification(Context *ssl_ctx, XML::Element& ssl_e)
     // Optionally load defaults
     if (xpath.get_value_bool("verify/root/@defaults"))
       ssl_ctx->set_default_verify_paths();
+
+    // Load list of acceptable client CAs
+    string client_ca_file = xpath.get_value("verify/client/ca-file");
+    if (!client_ca_file.empty())
+      ssl_ctx->set_client_ca_file(client_ca_file);
   }
 }
 
