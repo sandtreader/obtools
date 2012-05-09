@@ -115,7 +115,7 @@ public:
   //------------------------------------------------------------------------
   // Validity checks - 0 time is not valid
   bool valid() const { return t!=0; }
-  bool operator!() { return !t; }
+  bool operator!() const { return !t; }
 
   //------------------------------------------------------------------------
   // Convert to floating point seconds (e.g. for NTP timestamp in text)
