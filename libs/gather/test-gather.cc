@@ -342,6 +342,79 @@ TEST(GatherTest, TestFill)
 }
 #endif
 
+TEST(GatherTest, TestGetFlatDataSingleSegment)
+{
+  Gather::Buffer buffer(0);
+  const string data("Hello, world!");
+  buffer.add((Gather::data_t *)data.c_str(), data.size());
+
+  Gather::data_t buf[4];
+  Gather::data_t *p = buffer.get_flat_data(0, 4, buf);
+  ASSERT_NE(p, buf) << "Single segment get_flat_data used temporary buffer!\n";
+  ASSERT_EQ(string(reinterpret_cast<char *>(p), 4), "Hell");
+}
+
+TEST(GatherTest, TestGetFlatDataMultiSegment)
+{
+  Gather::Buffer buffer(0);
+  const string one("Hello");
+  const string two(", wo");
+  const string three("rld!");
+  buffer.add((Gather::data_t *)one.c_str(), one.size());
+  buffer.add((Gather::data_t *)two.c_str(), two.size());
+  buffer.add((Gather::data_t *)three.c_str(), three.size());
+
+  Gather::data_t buf[7];
+  Gather::data_t *p = buffer.get_flat_data(3, 7, buf);
+  ASSERT_EQ(p, buf) << "Multi-segment get_flat_data didn't use temporary buffer!\n";
+  ASSERT_EQ(string(reinterpret_cast<char *>(p), 7), "lo, wor");
+}
+
+TEST(GatherTest, TestGetFlatDataOffEndFails)
+{
+  Gather::Buffer buffer(0);
+  const string one("Hello");
+  const string two(", wo");
+  const string three("rld!");
+  buffer.add((Gather::data_t *)one.c_str(), one.size());
+  buffer.add((Gather::data_t *)two.c_str(), two.size());
+  buffer.add((Gather::data_t *)three.c_str(), three.size());
+
+  Gather::data_t buf[7];
+  Gather::data_t *p = buffer.get_flat_data(7, 7, buf);
+  ASSERT_FALSE(p) << "get_flat_data off the end didn't fail!\n";
+}
+
+TEST(GatherTest, TestReplaceSingleSegment)
+{
+  Gather::Buffer buffer(0);
+
+  // Need to ensure it's owned data, not referenced
+  memcpy(buffer.add(13).data, "Hello, world!", 13);
+  buffer.replace(0, (const Gather::data_t *)"Salut", 5);
+
+  Gather::data_t buf[13];
+  Gather::data_t *p = buffer.get_flat_data(0, 13, buf);
+  ASSERT_EQ(string(reinterpret_cast<char *>(p), 13), "Salut, world!");
+}
+
+TEST(GatherTest, TestReplaceMultiSegment)
+{
+  Gather::Buffer buffer(0);
+  const string one("Hello");
+  const string two(", wo");
+  const string three("rld!");
+  buffer.add((Gather::data_t *)one.c_str(), one.size());
+  buffer.add((Gather::data_t *)two.c_str(), two.size());
+  buffer.add((Gather::data_t *)three.c_str(), three.size());
+
+  buffer.replace(4, (const Gather::data_t *)" freezeth", 9);
+
+  Gather::data_t buf[13];
+  Gather::data_t *p = buffer.get_flat_data(0, 13, buf);
+  ASSERT_EQ(string(reinterpret_cast<char *>(p), 13), "Hell freezeth");
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

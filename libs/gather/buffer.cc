@@ -301,6 +301,105 @@ void Buffer::add(const Buffer& buffer, length_t offset, length_t len)
 }
 
 //--------------------------------------------------------------------------
+// Get a flattened data pointer at the given offset and length, multiple
+// segment version (see ot-gather.h for single-segment optimised inline)
+data_t *Buffer::get_flat_data_multi(length_t offset, length_t length,
+                                    data_t *temp_buf)
+{
+  // Find the starting segment
+  for(unsigned int i=0; i<count; i++)
+  {
+    Segment &seg = segments[i];
+    length_t slen = seg.length;
+
+    // Starts in this one?
+    if (offset < slen)
+    {
+      // All in this one?
+      if (offset + length < slen)
+        return seg.data+offset;
+      else
+      {
+        // We need to flatten multiple segments into temp_buf...
+
+        // First the remainder of this segment
+        length_t copied = slen-offset;
+        memcpy(temp_buf, seg.data+offset, copied);
+
+        // Then following segments to make up the rest
+        for(++i; copied<length; i++)
+        {
+          // If we run out of segments, fail
+          if (i >= count) return 0;
+
+          Segment &seg2 = segments[i];
+
+          // Copy as much as we need, or whole segment if less
+          length_t needed = length-copied;
+          if (needed > seg2.length) needed = seg2.length;
+          memcpy(temp_buf+copied, seg2.data, needed);
+          copied += needed;
+        }
+
+        // We completed - return their buffer back
+        return temp_buf;
+      }
+    }
+
+    offset -= seg.length;
+  }
+
+  // Offset off the end of the buffer - fail
+  return 0;
+}
+
+//--------------------------------------------------------------------------
+// Replace data from a flat buffer at the given offset
+// Data must already exist, otherwise it just stops at end of existing data
+void Buffer::replace(length_t offset, const data_t *buf, length_t length)
+{
+  // Find the starting segment
+  for(unsigned int i=0; i<count; i++)
+  {
+    Segment &seg = segments[i];
+    length_t slen = seg.length;
+
+    // Starts in this one?
+    if (offset < slen)
+    {
+      // All in this one?  Fast case
+      if (offset + length < slen)
+      {
+        memcpy(seg.data+offset, buf, length);
+      }
+      else
+      {
+        // First the remainder of this segment
+        length_t copied = slen-offset;
+        memcpy(seg.data+offset, buf, copied);
+
+        // Then following segments to make up the rest
+        for(++i; copied<length && i<count; i++)
+        {
+          Segment &seg2 = segments[i];
+
+          // Copy as much as we need, or whole segment if less
+          length_t needed = length-copied;
+          if (needed > seg2.length) needed = seg2.length;
+          memcpy(seg2.data, buf+copied, needed);
+          copied += needed;
+        }
+      }
+
+      // Done either way
+      break;
+    }
+
+    offset -= seg.length;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Destructor
 Buffer::~Buffer()
 {

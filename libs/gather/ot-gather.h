@@ -279,6 +279,10 @@ private:
   unsigned int count;     // Number of segments used
   Segment *segments;      // Allocated array of segments
 
+  // Internal
+  data_t *get_flat_data_multi(length_t offset, length_t length,
+                              data_t *temp_buf);
+
 public:
   typedef BufferIterator iterator;
 
@@ -386,6 +390,32 @@ public:
   // Returns the number of segments filled in, or size+1 if it overflowed
   unsigned int fill(struct iovec *iovec, unsigned int size);
 #endif
+
+  //--------------------------------------------------------------------------
+  // Get a flattened data pointer at the given offset and length, either
+  // returning direct pointer into buffer's data segments if it doesn't
+  // cross a boundary, or copying into the given temporary buffer if it does.
+  // Returns pointer to flat data block or 0 if not enough data in buffer
+  // to fulfill it
+  // temp_buf must be allocated to at least 'length' bytes
+  data_t *get_flat_data(length_t offset, length_t length, data_t *temp_buf)
+  {
+    // Fast inline optimisation for single segment
+    if (count == 1)
+    {
+      Segment &seg = *segments;
+      if (offset + length > seg.length) return 0;
+      return seg.data + offset;
+    }
+
+    // Otherwise full multi-segment version
+    return get_flat_data_multi(offset, length, temp_buf);
+  }
+
+  //--------------------------------------------------------------------------
+  // Replace data from a flat buffer at the given offset
+  // Data must already exist, otherwise it just stops at end of existing data
+  void replace(length_t offset, const data_t *buf, length_t length);
 
   //--------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well
