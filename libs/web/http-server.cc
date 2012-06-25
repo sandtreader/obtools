@@ -139,10 +139,6 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	  log.error << "Handler failed - sending 500\n";
 	  error(response, 500, "Server Failure");
 	}
-
-	// Suppress body if a HEAD request - saves simple handlers having to
-	// worry about it
-	if (request.method == "HEAD") response.body.clear();
       }
       else
       {
@@ -160,7 +156,10 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	)
 
       // Send out response
-      if (!response.write(ss)) log.error << "HTTP response failed\n";
+      // Suppress body if a HEAD request - saves simple handlers having to
+      // worry about it
+      if (!response.write(ss, request.method == "HEAD"))
+        log.error << "HTTP response failed\n";
       ss.flush();
 
       // Allow subclasses to generate progressive data following on, if

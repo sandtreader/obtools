@@ -262,16 +262,19 @@ bool HTTPMessage::write_headers(ostream &out) const
 //--------------------------------------------------------------------------
 // Write to a stream
 // Returns whether successful
-bool HTTPMessage::write(ostream &out) const
+bool HTTPMessage::write(ostream &out, bool headers_only) const
 {
   // Output headers
   if (!write_headers(out)) return false;
 
-  // Output body (if any), or size if it's interleaved data
-  if (method == "$")
-    out << "[Binary data, " << body.size() << " bytes]\n";
-  else
-    out << body;
+  if (!headers_only)
+  {
+    // Output body (if any), or size if it's interleaved data
+    if (method == "$")
+      out << "[Binary data, " << body.size() << " bytes]\n";
+    else
+      out << body;
+  }
 
   return !out.fail();
 }

@@ -319,7 +319,7 @@ public:
   //--------------------------------------------------------------------------
   // Write to a stream
   // Returns whether successful
-  bool write(ostream &out) const;
+  bool write(ostream &out, bool headers_only = false) const;
 
   //--------------------------------------------------------------------------
   // Set a cookie with the given optional domain, path and expiry time
