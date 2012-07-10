@@ -86,8 +86,25 @@ NUMCHAR=`echo ${DEB_DIR}|wc -c `
 # all dirs first
 tar cvf /dev/null $DEB_DIR |grep  "/$" |cut -c ${NUMCHAR}- |grep -v "^/DEBIAN/" |sed -e 's/^/%dir \"/' -e 's/$/\"/' >> $RPM_SPEC
 
-#all files
-tar cvf /dev/null $DEB_DIR |grep  -v "/$" |grep -v $DEB_VERSION.spec |cut -c ${NUMCHAR}-| grep -v "^/DEBIAN/"|sed -e 's/^/\"/' -e 's/$/\"/' >> $RPM_SPEC
+# any conf files?
+if [ -s $DEB_DIR/DEBIAN/conffiles ]; then
+  egrep -v "^#" $DEB_DIR/DEBIAN/conffiles|
+  sed 's/^/^/g;s/$/$/g' $DEB_DIR/DEBIAN/conffiles  > $DEB_DIR/DEBIAN/conffilesgrep
+else
+  touch $DEB_DIR/DEBIAN/conffilesgrep
+fi
+
+# all files apart from conffiles
+tar cvf /dev/null $DEB_DIR |grep  -v "/$" |grep -v $DEB_VERSION.spec |cut -c ${NUMCHAR}-|
+  grep -v "^/DEBIAN/"|
+  egrep -v -f $DEB_DIR/DEBIAN/conffilesgrep|
+  sed -e 's/^/\"/' -e 's/$/\"/' >> $RPM_SPEC
+
+# conffiles
+if [ -s $DEB_DIR/DEBIAN/conffiles ]; then
+   cat $DEB_DIR/DEBIAN/conffiles| 
+  sed 's/^/%config(noreplace) %verify(not mtime) "/g;s/$/"/g' $DEB_DIR/DEBIAN/conffiles  >> $RPM_SPEC
+fi
 
 fakeroot -- rpmbuild --buildroot ${DEB_DIR} -bb  $RPM_SPEC
 
