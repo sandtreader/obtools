@@ -316,44 +316,119 @@ public:
 
 //==========================================================================
 // Mesh Transport subscriber for use with message Transport below
+template<class CONTEXT>
 class MessageTransportSubscriber: public Subscriber
 {
+  // Context to work in
+  CONTEXT& context;
+
   // Message handler to send message to
-  ObTools::Message::Handler& message_handler;
+  ObTools::Message::Handler<CONTEXT>& message_handler;
 
  public:
 
   //--------------------------------------------------------------------------
   // Constructor - takes URL pattern
-  MessageTransportSubscriber(const string& _subject, 
-			     MultiClient& client,
-			     ObTools::Message::Handler& _handler);
+  MessageTransportSubscriber(CONTEXT& _context,
+                             const string& _subject,
+                             MultiClient& client,
+                             ObTools::Message::Handler<CONTEXT>& _handler):
+    Subscriber(client, _subject+".request"), context(_context),
+    message_handler(_handler)
+  {}
 
   //--------------------------------------------------------------------------
   // Handle a message
-  void handle(Message& msg);
+  void handle(Message& msg)
+  {
+    Log::Streams log;
+    const XML::Element& request = msg.get_body();
+
+    // Check body document name, if specified
+    if (!message_handler.document_name.empty()
+     && request.name != message_handler.ns_prefix + ":" 
+                      + message_handler.document_name+"-request")
+    {
+      client.respond(SOAP::Fault::CODE_SENDER, "Bad document name", msg);
+      return;
+    }
+
+    // Prepare response body, even if not used
+    XML::Element response(message_handler.ns_prefix+":"
+                          +message_handler.document_name+"-response",
+                          "xmlns:" + message_handler.ns_prefix, 
+                          message_handler.ns_url);
+
+    // Create fake SSL client details
+    Net::EndPoint ep;
+    SSL::ClientDetails ssl(ep, "#xmlmesh");  // Fake
+
+    // Get handler to deal with message
+    string error = message_handler.handle_message(context, request,
+                                                  ssl, response);
+    if (error.empty())
+    {
+      if (message_handler.complex_result)
+      {
+        // Change .request to .response
+        string orig_subject(subject, 0, subject.size()-8);
+
+        // Send correlated response
+        XMLMesh::Message resp(orig_subject+".response", response,
+                              false, msg.get_id());
+        client.send(resp);
+      }
+      else
+      {
+        // Simple OK
+        client.respond(msg);
+      }
+    }
+    else
+      client.respond(SOAP::Fault::CODE_SENDER, error, msg);
+  }
 };
 
 //==========================================================================
 // Mesh Transport class for use with Message::Broker
-class MessageTransport: public ObTools::Message::Transport
+template<class CONTEXT>
+class MessageTransport: public ObTools::Message::Transport<CONTEXT>
 {
+  CONTEXT& context;
   MultiClient& client;
-  list<XMLMesh::Subscriber *> subscribers;  
+  list<XMLMesh::Subscriber *> subscribers;
 
  public:
   //--------------------------------------------------------------------------
-  MessageTransport(MultiClient& _client): 
-    ObTools::Message::Transport("xmlmesh"), client(_client) {}
+  MessageTransport(CONTEXT& _context, MultiClient& _client):
+    ObTools::Message::Transport<CONTEXT>("xmlmesh"), context(_context),
+    client(_client)
+  {}
 
   //--------------------------------------------------------------------------
   // Register a handler with the given config element
-  void register_handler(ObTools::Message::Handler& handler, 
-			XML::Element& config);
+  virtual void register_handler(ObTools::Message::Handler<CONTEXT>& handler,
+                                XML::Element& config)
+  {
+    // Get subject
+    string subject = config["subject"];
+
+    // Create URL handler
+    MessageTransportSubscriber<CONTEXT> *sub =
+      new MessageTransportSubscriber<CONTEXT>(context, subject,
+                                              client, handler);
+    subscribers.push_back(sub);
+  }
 
   //--------------------------------------------------------------------------
   // Destructor
-  ~MessageTransport();
+  ~MessageTransport()
+  {
+    // Destroy subscribers
+    for(list<XMLMesh::Subscriber *>::iterator p = subscribers.begin();
+        p != subscribers.end(); ++p)
+      (*p)->disconnect();
+  }
 };
 
 //==========================================================================

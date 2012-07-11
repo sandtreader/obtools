@@ -81,6 +81,7 @@ public:
 
 //==========================================================================
 // Mesh message interface configured from standard config file <xmlmesh>
+template<class CONTEXT>
 class OTMPMessageInterface
 {
   OTMPMultiClient *client;
@@ -88,25 +89,55 @@ class OTMPMessageInterface
 public:
   //--------------------------------------------------------------------------
   // Constructor, taking 'xmlmesh' element
-  OTMPMessageInterface(XML::Element& config, 
-		       ObTools::Message::Broker& broker);
+  OTMPMessageInterface(CONTEXT& context, XML::Element& config,
+                       ObTools::Message::Broker<CONTEXT>& broker):
+    client(0)
+  {
+    Log::Streams log;
+    XML::XPathProcessor xpath(config);
+
+    // Set up mesh connection - note, no default here, so if not present,
+    // we disable it
+    string host = xpath.get_value("server/@host");
+    if (host.empty()) return;
+
+    int port = xpath.get_value_int("server/@port", OTMP::DEFAULT_PORT);
+
+    Net::IPAddress addr(host);
+    if (!addr)
+    {
+      log.error << "Can't resolve XMLMesh host: " << host << endl;
+      return;
+    }
+
+    Net::EndPoint ep(addr, port);
+    log.summary << "Connecting to XMLMesh at " << ep << endl;
+
+    // Start mesh client
+    client = new OTMPMultiClient(ep);
+
+    // Register our transport into server message broker
+    broker.add_transport(new MessageTransport<CONTEXT>(context, *client));
+  }
 
   //------------------------------------------------------------------------
   // MultiClient methods exposed for outgoing messages
   bool request(Message& req, Message& response)
   { return client?client->request(req, response):false; }
 
-  bool request(Message& req) 
+  bool request(Message& req)
   { return client?client->request(req):false; }
 
-  bool send(Message& req) 
+  bool send(Message& req)
   { return client?client->send(req):false; }
 
   //--------------------------------------------------------------------------
   // Destructor - destroys message interface
-  ~OTMPMessageInterface();
+  ~OTMPMessageInterface()
+  {
+    if (client) delete client;
+  }
 };
-
 
 //==========================================================================
 }} //namespaces
