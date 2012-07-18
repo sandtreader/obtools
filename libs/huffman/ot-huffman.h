@@ -13,6 +13,7 @@
 
 #include <map>
 #include "ot-chan.h"
+#include "ot-gen.h"
 
 namespace ObTools { namespace Huffman {
 
@@ -102,7 +103,8 @@ class Node
 private:
   bool leaf;
   Value value;
-  map<bool, Node> nodes;
+  Gen::SharedPointer<Node> zero;
+  Gen::SharedPointer<Node> one;
 
 public:
   //------------------------------------------------------------------------
@@ -139,32 +141,32 @@ public:
 
   //------------------------------------------------------------------------
   // Set the node for a bit value
-  void set_node(bool bit, const Node& node)
-  {
-    nodes[bit] = node;
-    leaf = false;
-  }
+  void set_node(bool bit, const Node& node);
 
   //------------------------------------------------------------------------
   // Get the node for a bit value
   // returns null if no node found
   const Node *get_node(bool bit) const
   {
-    map<bool, Node>::const_iterator it = nodes.find(bit);
-    if (it != nodes.end())
-      return &it->second;
-    return 0;
+    if (bit)
+      return one.get();
+    else
+      return zero.get();
   }
 
   //------------------------------------------------------------------------
   // Get the node for a bit sequence
   // returns null if no node found
-  const Node *get_node(vector<bool> sequence) const;
+  const Node *get_node(const vector<bool>& sequence) const;
+  const Node *get_node(const vector<bool>& sequence,
+                       vector<bool>::const_iterator& pos) const;
 
   //------------------------------------------------------------------------
   // Ensures a node for the given sequence exists and returns a reference
   // to it
-  Node& ensure_node(vector<bool> sequence);
+  Node& ensure_node(const vector<bool>& sequence);
+  Node& ensure_node(const vector<bool>& sequence,
+                    vector<bool>::const_iterator& pos);
 };
 
 //==========================================================================

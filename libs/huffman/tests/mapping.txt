@@ -1,8 +1,6 @@
-# Basic tests
 START:00:T:
 p:101:ESCAPE:
 x:01:0x3a:
-# String tests
 START:01:a:
 a:0110:b:
 b:1011:c:
