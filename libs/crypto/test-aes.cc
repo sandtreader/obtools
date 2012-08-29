@@ -16,9 +16,10 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Test a AES encryptor
-void test(Crypto::AES& aes, const string& what, bool capture_iv = false)
+void test(Crypto::AES& aes, const string& what, bool capture_iv = false,
+          bool rtb = false)
 {
-#define TEST_LEN 64
+  const int TEST_LEN(rtb ? 73 : 64);
   unsigned char data[TEST_LEN];
   unsigned char copy[TEST_LEN];
   Misc::Random random;
@@ -33,10 +34,21 @@ void test(Crypto::AES& aes, const string& what, bool capture_iv = false)
   Crypto::AESKey iv;
   if (capture_iv) iv = aes.get_iv();
 
-  if (!aes.encrypt(data, TEST_LEN))
+  if (rtb)
   {
-    cerr << what << " - can't encrypt!" << endl;
-    exit(2);
+    if (!aes.encrypt_rtb(data, TEST_LEN))
+    {
+      cerr << what << " - can't encrypt!" << endl;
+      exit(2);
+    }
+  }
+  else
+  {
+    if (!aes.encrypt(data, TEST_LEN))
+    {
+      cerr << what << " - can't encrypt!" << endl;
+      exit(2);
+    }
   }
 
   cout << what << " - encrypted:" << endl;
@@ -49,10 +61,21 @@ void test(Crypto::AES& aes, const string& what, bool capture_iv = false)
     aes.set_iv(iv);
   }
 
-  if (!aes.decrypt(data, TEST_LEN))
+  if (rtb)
   {
-    cerr << what << " - can't decrypt!" << endl;
-    exit(2);
+    if (!aes.decrypt_rtb(data, TEST_LEN))
+    {
+      cerr << what << " - can't decrypt!" << endl;
+      exit(2);
+    }
+  }
+  else
+  {
+    if (!aes.decrypt(data, TEST_LEN))
+    {
+      cerr << what << " - can't decrypt!" << endl;
+      exit(2);
+    }
   }
 
   cout << what << " - decrypted:" << endl;
@@ -115,6 +138,22 @@ int main()
   cbc256.set_key(k256);
   cbc256.set_iv(iv);
   test(cbc256, "CBC 256", true);
+
+  // CBC versions with residual block termination
+  Crypto::AES cbc128_rtb;
+  cbc128_rtb.set_key(k128);
+  cbc128_rtb.set_iv(iv);
+  test(cbc128_rtb, "CBC 128 RTB", true, true);
+
+  Crypto::AES cbc192_rtb;
+  cbc192_rtb.set_key(k192);
+  cbc192_rtb.set_iv(iv);
+  test(cbc192_rtb, "CBC 192 RTB", true, true);
+
+  Crypto::AES cbc256_rtb;
+  cbc256_rtb.set_key(k256);
+  cbc256_rtb.set_iv(iv);
+  test(cbc256_rtb, "CBC 256 RTB", true, true);
 
   // CTR version
   Crypto::AES ctr128;

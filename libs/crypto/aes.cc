@@ -15,12 +15,7 @@ namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
 // Encrypt/decrypt a block in place
-// If block is not padded to 8 bytes, the remainder (up to 7) bytes 
-// WILL NOT BE ENCRYPTED
-// Encrypts if 'encryption' is set (default), otherwise decrypts
-// IV is modified if set
-// Returns whether successful (keys set up correctly)
-bool AES::encrypt(unsigned char *data, int length, bool encryption)
+bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
 {
   AES_KEY aes_key;
   int enc;
@@ -50,10 +45,34 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption)
   else if (iv.valid) // Check for CBC - IV is valid
   {
     // Round length down to block size multiple
-    length = AES_BLOCK_SIZE * (length / AES_BLOCK_SIZE);
+    int enc_length = AES_BLOCK_SIZE * (length / AES_BLOCK_SIZE);
+    unsigned char dec_last_full[AES_BLOCK_SIZE];
+
+    // Residual termination block if requested
+    if (!encryption && rtb && length > enc_length)
+    {
+      memcpy(dec_last_full, data + enc_length - AES_BLOCK_SIZE, AES_BLOCK_SIZE);
+    }
 
     // CBC
-    AES_cbc_encrypt(data, data, length, &aes_key, &iv.key[0], enc);
+    AES_cbc_encrypt(data, data, enc_length, &aes_key, &iv.key[0], enc);
+
+    // Residual termination block if requested (encryption)
+    if (rtb && length > enc_length)
+    {
+      unsigned char last[AES_BLOCK_SIZE];
+      unsigned char *p = encryption
+                         ? (data + enc_length - AES_BLOCK_SIZE)
+                         : dec_last_full;
+      AES_set_encrypt_key(&key.key[0], key.size, &aes_key);
+      AES_cbc_encrypt(p, last, length - enc_length, &aes_key,
+                      &iv.key[0], AES_ENCRYPT);
+      unsigned char *final = data + enc_length;
+      unsigned char *end = data + length;
+      unsigned char *last_p = last;
+      while (final != end)
+        *final++ ^= *last_p++;
+    }
   }
   else
   {

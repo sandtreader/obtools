@@ -217,17 +217,37 @@ public:
 
   //------------------------------------------------------------------------
   // Encrypt/decrypt a block in place
+  bool encrypt(unsigned char *data, int length, bool encryption, bool rtb);
+
+  //------------------------------------------------------------------------
+  // Encrypt/decrypt a block in place
   // If block is not padded to 8 bytes, the remainder (up to 7) bytes
   // WILL NOT BE ENCRYPTED
   // Encrypts if 'encryption' is set (default), otherwise decrypts
   // IV is modified if set
   // Returns whether successful (keys set up correctly)
-  bool encrypt(unsigned char *data, int length, bool encryption = true);
+  bool encrypt(unsigned char *data, int length, bool encryption = true)
+  { return encrypt(data, length, encryption, false); }
 
   //------------------------------------------------------------------------
   // Decrypt a block in place - shorthand for above
   bool decrypt(unsigned char *data, int length)
   { return encrypt(data, length, false); }
+
+  //------------------------------------------------------------------------
+  // Encrypt/decrypt a block in place
+  // If block is not padded to 8 bytes, the remainder (up to 7) bytes
+  // will be encrypted using a residual termination block
+  // Encrypts if 'encryption' is set (default), otherwise decrypts
+  // IV is modified if set
+  // Returns whether successful (keys set up correctly)
+  bool encrypt_rtb(unsigned char *data, int length, bool encryption = true)
+  { return encrypt(data, length, encryption, true); }
+
+  //------------------------------------------------------------------------
+  // Decrypt a block in place - shorthand for above
+  bool decrypt_rtb(unsigned char *data, int length)
+  { return encrypt_rtb(data, length, false); }
 
   //------------------------------------------------------------------------
   // Sugared versions with binary strings and PKCS5 padding
