@@ -65,8 +65,16 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
                          ? (data + enc_length - AES_BLOCK_SIZE)
                          : dec_last_full;
       AES_set_encrypt_key(&key.key[0], key.size, &aes_key);
-      AES_cbc_encrypt(p, last, length - enc_length, &aes_key,
-                      &iv.key[0], AES_ENCRYPT);
+      if (enc_length)
+      {
+        AESKey rtb_iv(iv);
+        AES_cbc_encrypt(p, last, length - enc_length, &aes_key,
+                        &rtb_iv.key[0], AES_ENCRYPT);
+      }
+      else
+      {
+        AES_ecb_encrypt(&short_rand.key[0], last, &aes_key, AES_ENCRYPT);
+      }
       unsigned char *final = data + enc_length;
       unsigned char *end = data + length;
       unsigned char *last_p = last;

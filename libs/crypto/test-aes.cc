@@ -17,9 +17,9 @@ using namespace ObTools;
 //--------------------------------------------------------------------------
 // Test a AES encryptor
 void test(Crypto::AES& aes, const string& what, bool capture_iv = false,
-          bool rtb = false)
+          bool rtb = false, bool shorty = false)
 {
-  const int TEST_LEN(rtb ? 73 : 64);
+  const int TEST_LEN(rtb ? (shorty ? 13 : 73) : 64);
   unsigned char data[TEST_LEN];
   unsigned char copy[TEST_LEN];
   Misc::Random random;
@@ -109,6 +109,10 @@ int main()
   iv.create();
   cout << "IV:  " << iv << endl;
 
+  Crypto::AESKey short_rand(Crypto::AESKey::BITS_128, false);
+  short_rand.create();
+  cout << "Short Random:  " << short_rand << endl;
+
   // Try all the combinations
   // ECB versions
   Crypto::AES ecb128;
@@ -154,6 +158,24 @@ int main()
   cbc256_rtb.set_key(k256);
   cbc256_rtb.set_iv(iv);
   test(cbc256_rtb, "CBC 256 RTB", true, true);
+
+  Crypto::AES cbc128_rtb_short;
+  cbc128_rtb_short.set_key(k128);
+  cbc128_rtb_short.set_iv(iv);
+  cbc128_rtb_short.set_short_rand(short_rand);
+  test(cbc128_rtb_short, "CBC 128 RTB short", true, true, true);
+
+  Crypto::AES cbc192_rtb_short;
+  cbc192_rtb_short.set_key(k192);
+  cbc192_rtb_short.set_iv(iv);
+  cbc192_rtb_short.set_short_rand(short_rand);
+  test(cbc192_rtb_short, "CBC 192 RTB short", true, true, true);
+
+  Crypto::AES cbc256_rtb_short;
+  cbc256_rtb_short.set_key(k256);
+  cbc256_rtb_short.set_iv(iv);
+  cbc256_rtb_short.set_short_rand(short_rand);
+  test(cbc256_rtb_short, "CBC 256 RTB short", true, true, true);
 
   // CTR version
   Crypto::AES ctr128;

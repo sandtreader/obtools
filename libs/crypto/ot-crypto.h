@@ -191,6 +191,9 @@ public:
   // IV
   AESKey iv;  // Remains invalid if not used
 
+  // RTB Short Termination Block random number
+  AESKey short_rand; // Remains invalid if not used
+
   // Use CTR mode
   bool ctr;
 
@@ -208,12 +211,20 @@ public:
   void set_iv(const AESKey& _iv) { iv = _iv; }
 
   //------------------------------------------------------------------------
+  // Set the random number used for short termination blocks
+  void set_short_rand(const AESKey& _short_rand) { short_rand = _short_rand; }
+
+  //------------------------------------------------------------------------
   // Set key
   void set_ctr(bool _ctr) { ctr = _ctr; }
 
   //------------------------------------------------------------------------
   // Get current IV (in case it needs to be snapshotted for (e.g.) test
   AESKey& get_iv() { return iv; }
+
+  //------------------------------------------------------------------------
+  // Get current short rand (in case it needs to be snapshotted for (e.g.) test
+  AESKey& get_short_rand() { return short_rand; }
 
   //------------------------------------------------------------------------
   // Encrypt/decrypt a block in place
