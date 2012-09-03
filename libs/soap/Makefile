@@ -12,8 +12,9 @@ OBJS  	= message.o fault.o parser.o http-client.o url-handler.o
 DEPENDS = web net log xml misc text mt msg
 TESTS 	= test-soap test-http-client test-url-handler
 TESTCMD	= ./test-soap < ../tests/soap1-2.xml \
-       && ./test-http-client http://terraservice.net/terraService.asmx \
-             < ../tests/place.soap.xml
+       && ./test-http-client http://msrmaps.com/terraService2.asmx \
+	http://msrmaps.com/ConvertPlaceToLonLatPt \
+	< ../tests/place.soap.xml
 SOCKET = 1
 
 ROOT    = ../..

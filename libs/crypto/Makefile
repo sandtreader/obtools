@@ -18,7 +18,7 @@ TESTLIB = -lgtest
 TESTCMD	= ./test-pkcs5 && ./test-aes-key && ./test-aes && ./test-aes-string \
        && ./test-des-key && ./test-des \
        && ./test-rsa-key && ./test-rsa && ./test-sha1 \
-       && ./test-x509 < test.x509.pem
+       && ./test-x509 < ../test.x509.pem
 SOCKET = 1
 
 ifdef MINGW
