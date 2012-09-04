@@ -10,7 +10,7 @@ NAME   	= ot-daemon
 HEADERS = ot-daemon.h
 OBJS  	= shell.o
 TESTS 	= test-daemon
-TESTCMD	= ./test-daemon
+TESTCMD	= ../test-daemon.sh
 DEPENDS = misc net log mt text xml init file
 
 ROOT    = ../..
