@@ -427,7 +427,10 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
     // Destroy subscribers
     for(list<XMLMesh::Subscriber *>::iterator p = subscribers.begin();
         p != subscribers.end(); ++p)
+    {
       (*p)->disconnect();
+      delete *p;
+    }
   }
 };
 
