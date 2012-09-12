@@ -338,6 +338,9 @@ else
 TARGARCH  = amd64
 endif
 endif
+ifeq ($(HOSTTYPE), armv6l)
+TARGARCH = armel
+endif
 endif
 
 #Targets for executable
