@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 #define DEFAULT_BUFFER_LENGTH 100
-#define DEFAULT_ITERATIONS 10000000
+#define DEFAULT_ITERATIONS 100000
 
 using namespace std;
 using namespace ObTools;
