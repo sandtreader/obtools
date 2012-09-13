@@ -5,7 +5,7 @@
       <place> 
 	<City>Towel</City> 
 	<State/> 
-	<Country></Country> 
+	<Country>US</Country> 
       </place> 
     </ConvertPlaceToLonLatPt> 
   </env:Body> 
