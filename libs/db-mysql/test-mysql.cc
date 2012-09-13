@@ -25,10 +25,20 @@ int main()
   Log::Streams log;
 
   // Connect database
-  DB::MySQL::Connection conn("localhost", "", "", "test");
+  DB::MySQL::Connection conn("testhost", "root", "", "");
   if (!conn) return 2;
 
   conn.exec("THIS DOESN'T WORK");
+
+  if (!conn.exec("DROP database if exists test")) return 2;
+  if (!conn.exec("CREATE database if not exists test")) return 2;
+  if (!conn.exec("USE test")) return 2;
+  if (!conn.exec("CREATE table test (id int, name varchar(256) )")) return 2;
+  if (!conn.exec("INSERT into test values(3, 'Fred')")) return 2;
+  if (!conn.exec("INSERT into test values(4, 'Jim')")) return 2;
+  if (!conn.exec("INSERT into test values(5, 'Pete')")) return 2;
+
+
   if (!conn.exec("DELETE from test where id=3")) return 2;
   if (!conn.exec("INSERT into test values(3, 'Fred')")) return 2;
 
