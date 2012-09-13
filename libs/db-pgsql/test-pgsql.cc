@@ -25,12 +25,16 @@ int main()
   Log::Streams log;
 
   // Connect database
-  DB::PG::Connection conn("host=localhost dbname=test user=postgres");
+//  DB::PG::Connection conn("host=testhost dbname=test user=postgres");
+  DB::PG::Connection conn("host=testhost  dbname=postgres user=postgres");
   if (!conn) return 2;
 
   conn.exec("THIS DOESN'T WORK");
-  if (!conn.exec("DELETE from test where id=3")) return 2;
+  conn.exec("DROP table  test");
+  if (!conn.exec("CREATE table test (id int, name varchar(256) )")) return 2;
   if (!conn.exec("INSERT into test values(3, 'Fred')")) return 2;
+  if (!conn.exec("INSERT into test values(4, 'Jim')")) return 2;
+  if (!conn.exec("INSERT into test values(5, 'Pete')")) return 2;
 
   DB::Result res = conn.query("SELECT * from test");
   if (!res) return 2;
@@ -38,6 +42,8 @@ int main()
   DB::Row row;
   while (res.fetch(row))
     log.detail << row["id"] << ":" << row["name"] << endl;
+
+  if (!conn.exec("DELETE from test where id=3")) return 2;
 
   return 0;  
 }
