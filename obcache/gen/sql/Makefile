@@ -10,8 +10,8 @@ NAME   	= ot-generate-sql-schema \
           ot-generate-sql-cpp
 OBJS 	= 
 DEPENDS = xmi regen text misc
-TESTCMD = ./ot-generate-sql-schema ../ot-generate-sql-schema.cfg.xml < ../../../models/test.xmi && \
-          ./ot-generate-sql-cpp ../ot-generate-sql-cpp.cfg.xml < ../../../models/test.xmi 
+TESTCMD = ./ot-generate-sql-schema ../ot-generate-sql-schema.cfg.xml < ../../../../tools/xmitoolgen/tests/test.xmi && \
+          ./ot-generate-sql-cpp ../ot-generate-sql-cpp.cfg.xml < ../../../../tools/xmitoolgen/tests/test.xmi
 
 
 ROOT    = ../../..
