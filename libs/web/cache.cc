@@ -22,8 +22,8 @@ namespace ObTools { namespace Web {
 //--------------------------------------------------------------------------
 // Constructor
 Cache::Cache(const File::Directory& _dir, SSL::Context *_ssl_ctx,
-	     const string& _ua): 
-  directory(_dir), ssl_ctx(_ssl_ctx), user_agent(_ua) 
+	     const string& _ua):
+  directory(_dir), ssl_ctx(_ssl_ctx), user_agent(_ua)
 {
   if (user_agent.empty()) user_agent = DEFAULT_USER_AGENT;
 }
@@ -80,7 +80,7 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
       // Does it need checking again?
       if (Time::Stamp::now() - last_check < check_interval)
       {
-	log.detail << "Doesn't need checking again until " 
+	log.detail << "Doesn't need checking again until "
 		   << (last_check+check_interval).iso() << endl;
 	check_for_updates = false;
       }
@@ -123,13 +123,13 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
     {
       case 200:
       {
-	log.detail << "File fetched OK, length " << response.body.length() 
+	log.detail << "File fetched OK, length " << response.body.length()
 		   << endl;
 
 	// Make sure the domain dir exists
 	if (!domain_dir.ensure())
 	{
-	  log.error << "Can't create cache directory " << domain_dir 
+	  log.error << "Can't create cache directory " << domain_dir
 		    << ": " << strerror(errno) << endl;
 	  return false;
 	}
@@ -138,14 +138,14 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
 	string err = file_path.write_all(response.body);
 	if (!err.empty())
 	{
-	  log.error << "Can't write cache file '" << file_path 
+	  log.error << "Can't write cache file '" << file_path
 		    << "': " << err << endl;
 	  return false;
 	}
 
 	// Capture last-modified and E-tag for the config
 	status_cfg.ensure_path("server/last-modified");
-	status_cfg.set_value("server/last-modified", 
+	status_cfg.set_value("server/last-modified",
 			     response.headers.get("last-modified"));
 
 	status_cfg.ensure_path("server/etag");
@@ -153,7 +153,7 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
 
 	// Update last check time
 	status_cfg.ensure_path("update/check");
-	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso()); 
+	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso());
 
 	status_cfg.write();
 
@@ -169,13 +169,13 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
       case 304:  // Not modified
 	// Update last check time only
 	status_cfg.ensure_path("update/check");
-	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso()); 
+	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso());
 	status_cfg.write();
 	path_p = file_path;
 	return true;
 
       default:
-	log.error << "HTTP cache fetch failed: " << response.code 
+	log.error << "HTTP cache fetch failed: " << response.code
 		  << " " << response.reason << endl;
 	return false;
     }
@@ -203,7 +203,7 @@ bool Cache::fetch(const URL& url, string& contents_p, bool check_for_updates)
 bool Cache::set_update_interval(const URL& url, const string& interval)
 {
   Log::Streams log;
-  log.detail << "Setting update interval for " << url << " to " 
+  log.detail << "Setting update interval for " << url << " to "
 	     << interval << endl;
 
   File::Directory domain_dir;
@@ -256,7 +256,7 @@ bool Cache::get_paths(const URL& url,
   // Get the extension of the path
   string upath = xpath["path"];
   string::size_type p = upath.rfind('.');
-  if (p != string::npos) 
+  if (p != string::npos)
   {
     string ext(upath, p);
 

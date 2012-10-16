@@ -18,9 +18,9 @@ namespace ObTools { namespace Web {
 // Constructor from URL - extracts server from host/port parts
 // Handles https if ctx is set
 HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
-		       int _connection_timeout, int _operation_timeout): 
-  user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
-  operation_timeout(_operation_timeout), socket(0), stream(0), 
+		       int _connection_timeout, int _operation_timeout):
+  user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
+  operation_timeout(_operation_timeout), socket(0), stream(0),
   http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
   current_chunk_length(-1)
 {
@@ -29,7 +29,7 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
   {
     XML::XPathProcessor xpath(xml);
     string host = xpath["host"];
-    
+
     // Check for HTTPS
     string scheme = xpath["scheme"];
     if (scheme == "https")
@@ -87,7 +87,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
   // Regenerate URL
   request.url = URL(xml);
 
-  OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP " << request.method << " for " 
+  OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP " << request.method << " for "
 		       << request.url << " from " << server << endl;)
 
   // Set protocol
@@ -172,7 +172,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
       if (chunked)
 	current_chunk_length = 0;  // Trigger chunk header read on first fetch
       else            // Capture the file length, if given
-	current_chunk_length = 
+	current_chunk_length =
 	  Text::stoi(response.headers.get("content-length"));
 
       OBTOOLS_LOG_IF_DEBUG(log.debug << "Progressive download: "
@@ -291,7 +291,7 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
 
       // Read up to requested length, limited to that available
       uint64_t wanted = length-n;
-      if (current_chunk_length && wanted > current_chunk_length) 
+      if (current_chunk_length && wanted > current_chunk_length)
 	wanted = current_chunk_length;
 
       // Try to read this much or up to end of stream

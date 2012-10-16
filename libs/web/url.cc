@@ -40,7 +40,7 @@ URL::URL(XML::Element& xml)
       }
 
       urls << host;
-      
+
       string port = xpath["port"];
       if (port.size()) urls << ":" << port;
     }
@@ -214,10 +214,10 @@ string URL::get_fragment() const
 //------------------------------------------------------------------------
 // << operator to write URL to ostream
 // e.g. cout << url;
-ostream& operator<<(ostream& s, const URL& u) 
-{ 
-  s<<u.text; 
-  return s; 
+ostream& operator<<(ostream& s, const URL& u)
+{
+  s<<u.text;
+  return s;
 }
 
 //------------------------------------------------------------------------
@@ -247,9 +247,9 @@ string URL::encode(const string& s, bool space_as_plus)
 	else
 	  r+="%20";
 	break;
-	
+
       // Reserved characters;
-      case '+': case '%': 
+      case '+': case '%':
       case '!': case '*': case '\'': case '(': case ')':
       case ';': case ':': case '@': case '&': case '=':
       case '$': case ',': case '/': case '?': case '#':
@@ -340,7 +340,7 @@ void URL::decode(const string& s, Misc::PropertyList& props,
     {
       string name(param, 0, q);
       string value(param, q+1);
-      props.add(name, decode(value, space_as_plus)); 
+      props.add(name, decode(value, space_as_plus));
     }
   }
 }

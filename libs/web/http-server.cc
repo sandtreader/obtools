@@ -22,7 +22,7 @@ namespace ObTools { namespace Web {
 void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 {
   Log::Streams log;
-  OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP: Connection from " 
+  OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP: Connection from "
 		       << client << endl;)
 
   // Enable keepalives
@@ -47,7 +47,7 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       if (!request.read(ss, false))
       {
 	if (persistent)
-	  log.detail << "Persistent connection from " << client 
+	  log.detail << "Persistent connection from " << client
 		     << " now closed\n";
 	else
 	  log.error << "Can't read HTTP request from socket\n";
@@ -55,21 +55,21 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       }
 
       // Log request
-      log.detail << request.version << " request: " << request.method 
-		 << " from " << client << " for " 
+      log.detail << request.version << " request: " << request.method
+		 << " from " << client << " for "
 		 << request.url << endl;
       OBTOOLS_LOG_IF_DEBUG(
         log.debug << request.headers.xml;
-        if (request.body.size()) 
+        if (request.body.size())
 	  log.debug << "Body:\n" << request.body << endl;
       )
 
       // Set version to reflect client
       response.version = request.version;
-      
+
       // Add our own advert
       if (version.size()) response.headers.put("server", version);
-    
+
       // Add date
       response.headers.put_date();
 
@@ -84,8 +84,8 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	  // Check for Connection: close - otherwise, assume persistent
 	  if (conn_hdr == "close")
 	  {
-	    if (persistent) 
-	      log.detail << "HTTP/1.1 persistent connection from " 
+	    if (persistent)
+	      log.detail << "HTTP/1.1 persistent connection from "
 			 << client << " closed\n";
 	    else
 	      log.detail << "HTTP/1.1 non-persistent connection\n";
@@ -120,8 +120,8 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	  else
 	  {
 	    // We stop
-	    if (persistent) 
-	      log.detail << "HTTP/1.0 persistent connection from " 
+	    if (persistent)
+	      log.detail << "HTTP/1.0 persistent connection from "
 			 << client << " closed\n";
 	    else
 	      log.detail << "HTTP/1.0 non-persistent connection\n";
@@ -132,7 +132,7 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	// Be optimistic - saves handler doing it for simple cases
 	response.code = 200;
 	response.reason = "OK";
-      
+
 	// Call down to subclass implementation
 	if (!handle_request(request, response, client, s, ss))
 	{
@@ -147,11 +147,11 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       }
 
       // Log response
-      log.detail << "Response: " << response.code << " " 
+      log.detail << "Response: " << response.code << " "
 		 << response.reason << endl;
       OBTOOLS_LOG_IF_DEBUG(
         log.debug << response.headers.xml;
-        if (response.body.size()) 
+        if (response.body.size())
 	  log.debug << "Body:\n" << response.body << endl;
 	)
 
@@ -175,14 +175,14 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
   {
     log.error << se << endl;
   }
-} 
+}
 
 //==========================================================================
 // Simple HTTP server with handler registrations
 
 //--------------------------------------------------------------------------
 // Implementation of general request handler
-bool SimpleHTTPServer::handle_request(HTTPMessage& request, 
+bool SimpleHTTPServer::handle_request(HTTPMessage& request,
 				      HTTPMessage& response,
 				      SSL::ClientDetails& client,
 				      SSL::TCPSocket&, Net::TCPStream&)
@@ -190,7 +190,7 @@ bool SimpleHTTPServer::handle_request(HTTPMessage& request,
   MT::RWReadLock lock(mutex);
 
   // Check all handlers for a URL match
-  for(list<URLHandler *>::iterator p = handlers.begin(); 
+  for(list<URLHandler *>::iterator p = handlers.begin();
       p!=handlers.end(); ++p)
   {
     URLHandler& h = **p;
@@ -206,7 +206,7 @@ bool SimpleHTTPServer::handle_request(HTTPMessage& request,
 // Destructor
 SimpleHTTPServer::~SimpleHTTPServer()
 {
-  for(list<URLHandler *>::iterator p = handlers.begin(); 
+  for(list<URLHandler *>::iterator p = handlers.begin();
       p!=handlers.end(); ++p)
     delete *p;
 }

@@ -50,7 +50,7 @@ bool HTTPMessage::get_first_line(istream& in, string& s)
 	if (++count < MAX_FIRST_LINE)  // DOS protection
 	  s+=c;
 	else
-	  return false;            // Bomb out 
+	  return false;            // Bomb out
     }
   }
 
@@ -124,7 +124,7 @@ bool HTTPMessage::read_headers(istream &in)
     if (sp2 == string::npos) return false;
     code = atoi(string(line, sp1+1, sp2-sp1-1).c_str());
 
-    // Rest is reason 
+    // Rest is reason
     reason = string(line, sp2+1);
 
     // Method, URL are empty
@@ -168,7 +168,7 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
   // (ugly HTTP-specific hack, but the protocol mixes levels here)
   if (method != "POST" && !method.empty()) read_to_eof = false;
 
-  // Read body - check for Content-Length header and use to limit 
+  // Read body - check for Content-Length header and use to limit
   // length if present
   int length = Text::stoi(headers.get("content-length"));
 
@@ -201,7 +201,7 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
       length = Text::xtoi(bits[0]);
       if (!length) break;  // Last chunk
     }
-    
+
     if (length || read_to_eof)
     {
       // Try to read this much or up to end of stream

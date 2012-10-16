@@ -3,8 +3,8 @@
 //
 // Public definitions for ObTools::Web
 // Web protocols parsers, helpers and client/server
-// 
-// Copyright (c) 2005-2006 Paul Clark.  All rights reserved
+//
+// Copyright (c) 2005-2012 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -22,7 +22,7 @@
 #include "ot-log.h"
 #include "ot-file.h"
 
-namespace ObTools { namespace Web { 
+namespace ObTools { namespace Web {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -103,7 +103,7 @@ public:
   // Static function to URL-encode (percent-encode) a set of variables
   // (expressed as a PropertyList)
   // Escapes space as '+' if 'space_as_plus' is set (the default)
-  static string encode(const Misc::PropertyList& props, 
+  static string encode(const Misc::PropertyList& props,
 		       bool space_as_plus=true);
 
   //------------------------------------------------------------------------
@@ -128,17 +128,17 @@ ostream& operator<<(ostream& s, const URL& u);
 //==========================================================================
 // MIME header block (mime-headers.cc)
 // Represents a block of MIME headers - e.g. from a mail message, or an HTTP
-// request.  
+// request.
 //
 // Stores in XML, since we have convenient access & iteration methods for this.
 //
 // On input, headers are unfolded and each header is added as a sub-element of
-// the root 'xml', with name (tag) equal to the header tag **lowercased**, 
+// the root 'xml', with name (tag) equal to the header tag **lowercased**,
 // and content equal to the text of the header
 //
-// On output, header names are generated with first letter capitalised, 
-// following convention.  Values longer than 64 characters are folded at 
-// commas (if any) or spaces (if any)             
+// On output, header names are generated with first letter capitalised,
+// following convention.  Values longer than 64 characters are folded at
+// commas (if any) or spaces (if any)
 
 class MIMEHeaders
 {
@@ -253,7 +253,7 @@ ostream& operator<<(ostream& s, const MIMEHeaders& mh);
 class HTTPMessage
 {
 private:
-  static const unsigned int READ_SIZE = 4096;  
+  static const unsigned int READ_SIZE = 4096;
   static const unsigned int MAX_FIRST_LINE = 8000;  // Input DoS protection
 
   bool get_first_line(istream& in, string& s);
@@ -278,11 +278,11 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructors for requests
-  HTTPMessage(const string& _method, const URL& _url, 
+  HTTPMessage(const string& _method, const URL& _url,
 	      const string& _version = "HTTP/1.0"):
     method(_method), url(_url), version(_version) {}
 
-  HTTPMessage(const string& _method, const string& _url, 
+  HTTPMessage(const string& _method, const string& _url,
 	      const string& _version = "HTTP/1.0"):
     method(_method), url(_url), version(_version) {}
 
@@ -366,9 +366,9 @@ private:
   bool http_1_1_close;      // Whether this the last request on persistent conn
 
   // Progressive download: caller fetches blocks at a time
-  bool progressive;               
+  bool progressive;
   bool chunked;                   // Chunked read (progressive only)
-  uint64_t current_chunk_length;  // Current length remaining of chunk 
+  uint64_t current_chunk_length;  // Current length remaining of chunk
 
 protected:
   Net::EndPoint server;
@@ -376,10 +376,10 @@ protected:
 public:
   //--------------------------------------------------------------------------
   // Constructor from server
-  HTTPClient(Net::EndPoint _server, const string& _ua="", 
-	     int _connection_timeout=0, int _operation_timeout=0): 
-    user_agent(_ua), ssl_ctx(0), connection_timeout(_connection_timeout), 
-    operation_timeout(_operation_timeout), socket(0), stream(0), 
+  HTTPClient(Net::EndPoint _server, const string& _ua="",
+	     int _connection_timeout=0, int _operation_timeout=0):
+    user_agent(_ua), ssl_ctx(0), connection_timeout(_connection_timeout),
+    operation_timeout(_operation_timeout), socket(0), stream(0),
     http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
     current_chunk_length(-1),
     server(_server) {}
@@ -387,9 +387,9 @@ public:
   //--------------------------------------------------------------------------
   // Constructor for SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0): 
-    user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout), 
-    operation_timeout(_operation_timeout), socket(0), stream(0), 
+	     int _connection_timeout=0, int _operation_timeout=0):
+    user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
+    operation_timeout(_operation_timeout), socket(0), stream(0),
     http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
     current_chunk_length(-1),
     server(_server) {}
@@ -434,7 +434,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Simple POST operation on a URL
-  // Returns result code, fills in response_body if provided, 
+  // Returns result code, fills in response_body if provided,
   // reason code if not
   int post(const URL& url, const string& request_body, string& response_body);
 
@@ -454,7 +454,7 @@ public:
 
 //==========================================================================
 // HTTP Server abstract class (http-server.cc)
-// Multi-threaded server for HTTP - manages HTTP protocol state, and 
+// Multi-threaded server for HTTP - manages HTTP protocol state, and
 // passes request messages to subclasses
 class HTTPServer: public SSL::TCPServer
 {
@@ -502,7 +502,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor to bind to any interface (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
-  HTTPServer(int port=80, const string& _version="", int backlog=5, 
+  HTTPServer(int port=80, const string& _version="", int backlog=5,
 	     int min_spare=1, int max_threads=10, int _timeout=90):
     SSL::TCPServer(0, port, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
@@ -510,7 +510,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor to bind to specific address (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
-  HTTPServer(Net::EndPoint address, const string& _version="", int backlog=5, 
+  HTTPServer(Net::EndPoint address, const string& _version="", int backlog=5,
 	     int min_spare=1, int max_threads=10, int _timeout=90):
     SSL::TCPServer(0, address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
@@ -518,8 +518,8 @@ public:
   //--------------------------------------------------------------------------
   // Constructor to bind to any interface, with SSL
   // See ObTools::Net::TCPServer for details of threadpool management
-  HTTPServer(SSL::Context *ctx, 
-	     int port=80, const string& _version="", int backlog=5, 
+  HTTPServer(SSL::Context *ctx,
+	     int port=80, const string& _version="", int backlog=5,
 	     int min_spare=1, int max_threads=10, int _timeout=90):
     SSL::TCPServer(ctx, port, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
@@ -528,7 +528,7 @@ public:
   // Constructor to bind to specific address, with SSL
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(SSL::Context *ctx,
-	     Net::EndPoint address, const string& _version="", int backlog=5, 
+	     Net::EndPoint address, const string& _version="", int backlog=5,
 	     int min_spare=1, int max_threads=10, int _timeout=90):
     SSL::TCPServer(ctx, address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
@@ -564,7 +564,7 @@ public:
 };
 
 //==========================================================================
-// Simple HTTP server which just fields GET and/or POST requests to a list 
+// Simple HTTP server which just fields GET and/or POST requests to a list
 // of registered URLs (http-server.cc)
 // Handlers are checked in order, so later ones can be defaults
 class SimpleHTTPServer: public HTTPServer
@@ -580,15 +580,15 @@ class SimpleHTTPServer: public HTTPServer
 public:
   //--------------------------------------------------------------------------
   // Constructor on all interfaces, basic TCP
-  SimpleHTTPServer(int port=80, const string& _version="", int backlog=5, 
+  SimpleHTTPServer(int port=80, const string& _version="", int backlog=5,
 		   int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(port, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
 
   //--------------------------------------------------------------------------
   // Constructor for specific address, basic TCP
-  SimpleHTTPServer(Net::EndPoint address, const string& _version="", 
-		   int backlog=5, 
+  SimpleHTTPServer(Net::EndPoint address, const string& _version="",
+		   int backlog=5,
 		   int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(address, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
@@ -596,7 +596,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor on all interfaces, with SSL
   SimpleHTTPServer(SSL::Context *ctx,
-		   int port=80, const string& _version="", int backlog=5, 
+		   int port=80, const string& _version="", int backlog=5,
 		   int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(ctx, port, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
@@ -604,20 +604,20 @@ public:
   //--------------------------------------------------------------------------
   // Constructor for specific address, with SSL
   SimpleHTTPServer(SSL::Context *ctx,
-		   Net::EndPoint address, const string& _version="", 
-		   int backlog=5, 
+		   Net::EndPoint address, const string& _version="",
+		   int backlog=5,
 		   int min_spare=1, int max_threads=10, int _timeout=90):
-    HTTPServer(ctx, address, _version, backlog, min_spare, max_threads, 
+    HTTPServer(ctx, address, _version, backlog, min_spare, max_threads,
 	       _timeout), mutex() {}
 
   //--------------------------------------------------------------------------
   // Add a handler - will be deleted on destruction of server
-  void add(URLHandler *h) 
+  void add(URLHandler *h)
   { MT::RWWriteLock lock(mutex); handlers.push_back(h); }
 
   //--------------------------------------------------------------------------
   // Remove a handler
-  void remove(URLHandler *h) 
+  void remove(URLHandler *h)
   { MT::RWWriteLock lock(mutex); handlers.remove(h); }
 
   //--------------------------------------------------------------------------
@@ -634,7 +634,7 @@ class Cache
 {
   File::Directory directory;
   SSL::Context *ssl_ctx;
-  string user_agent;  
+  string user_agent;
 
   // Internal
   bool get_paths(const URL& url, File::Directory& domain_dir_p,

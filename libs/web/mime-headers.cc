@@ -53,7 +53,7 @@ bool MIMEHeaders::getline(istream& in, string& s)
 	if (++count < MAX_HEADER)  // DOS protection
 	  s+=c;
 	else
-	  return false;            // Bomb out 
+	  return false;            // Bomb out
     }
   }
 
@@ -129,7 +129,7 @@ Misc::PropertyList MIMEHeaders::split_parameters(string& value)
 
     if (!element.empty())
     {
-      // Treat first specially - capture into remaining 
+      // Treat first specially - capture into remaining
       if (!p)
 	remaining = element;
       else
@@ -140,7 +140,7 @@ Misc::PropertyList MIMEHeaders::split_parameters(string& value)
 	  pl.add(element, "1");
 	else
 	{
-	  // Split 
+	  // Split
 	  string pn(element, 0, eq);
 	  string pv(element, eq+1);
 	  pn = Text::canonicalise_space(pn);
@@ -176,8 +176,8 @@ bool MIMEHeaders::read(istream& in)
   {
     string line;
     if (!getline(in, line)) return false;
-    
-    if (line.empty()) 
+
+    if (line.empty())
       return true;
 
     // Check for :
@@ -202,10 +202,10 @@ bool MIMEHeaders::read(istream& in)
 	  // we need to check the total length
 	  if (value.size() + extra.size() > MAX_HEADER) return false;
 
-	  value += ' '; 
+	  value += ' ';
 	  value += extra;
 	}
-	else 
+	else
 	{
 	  in.putback(c);
 	  break;
@@ -253,7 +253,7 @@ bool MIMEHeaders::write(ostream& out) const
     {
       // Look for a likely breakpoint - try commas first
       string::size_type split = value.rfind(',', MAX_LINE);
-      
+
       if (split != string::npos)
       {
 	// Move over it, leaving it on first line
