@@ -3,8 +3,8 @@
 //
 // Public definitions for ObTools::Time
 // Representation and conversion of timestamps and durations
-// 
-// Copyright (c) 2005 Paul Clark.  All rights reserved
+//
+// Copyright (c) 2005-2012 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -16,7 +16,7 @@
 #include <ctime>
 #include <stdint.h>
 
-namespace ObTools { namespace Time { 
+namespace ObTools { namespace Time {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -190,10 +190,11 @@ public:
   // Constructor from string
   // Reads one of the following formats:
   //   ISO8601:  YYYY[-]MM[-]DD(T| )HH[:]MM[:]SS.ss(Z|+00) (UTC always assumed)
-  //   HTTP:     to come!
-  //   RFC822:   to come!
+  //   RFC822:   [day, ignored] DD MMM YYYY HH:MM:SS GMT
+  //   RFC850:   [day+, ignored] DD-MMM-YY HH:MM:SS GMT (Y2K split at 1937)
+  //   asctime:  [day ignored] MMM [D]D HH:MM:SS YYYY
   // The lenient flag allows the time parts to be omitted from the string
-  // and zero value assumed for those parts
+  // and zero value assumed for those parts (ISO only)
   Stamp(const string& text, bool lenient = false);
 
   //------------------------------------------------------------------------
@@ -207,13 +208,13 @@ public:
 
   //------------------------------------------------------------------------
   // Get more accurate partial seconds count (0-59.999')
-  double seconds() const 
+  double seconds() const
   { ntp_stamp_t s = t%(60ULL<<NTP_SHIFT);  // Partial seconds
     return (double)s/(1ULL<<NTP_SHIFT); }
 
   //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
-  ntp_stamp_t ntp() const { return t; } 
+  ntp_stamp_t ntp() const { return t; }
 
   //------------------------------------------------------------------------
   // Convert to ISO timestamp string
@@ -275,7 +276,7 @@ public:
   //------------------------------------------------------------------------
   // Get a timestamp in local time (according to TZ) from a normal UTC one
   // Note: Fractional seconds are lost
-  Stamp localise() const; 
+  Stamp localise() const;
 
   //------------------------------------------------------------------------
   // Get a timestamp in UTC time from a localised one

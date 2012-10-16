@@ -12,6 +12,8 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <vector>
+#include <ot-text.h>
 
 #if defined(__WIN32__)
 #include <windows.h>
@@ -25,7 +27,7 @@
 namespace ObTools { namespace Time {
 
 // Look up table of cumulative days at start of each month (non leap-years)
-static const int monthdays[] = {   0,  31,  59,  90, 120, 151, 
+static const int monthdays[] = {   0,  31,  59,  90, 120, 151,
                                  181, 212, 243, 273, 304, 334 };
 
 //------------------------------------------------------------------------
@@ -42,10 +44,10 @@ ntp_stamp_t Stamp::combine(const Split& split)
   // Accumulate seconds initially, then worry about shifting up to NTP
   // at the end - time_t should be safe for this
   time_t seconds;
- 
-  // First work out leapdays since 1900 - one every 4, lose one every 100, 
+
+  // First work out leapdays since 1900 - one every 4, lose one every 100,
   // gain one every 400 from 2000.  Note - we're using year from zero here!
-  // Also, remember this includes the current year as well.  For this purpose, 
+  // Also, remember this includes the current year as well.  For this purpose,
   // if the month is Jan or Feb, put us back a year so we don't include the
   // leap day (if there is one)
   int ldyear = split.year;
@@ -87,12 +89,12 @@ Split Stamp::split(ntp_stamp_t ts)
   // So, we're back to doing it ourselves...
   Split sp;
 
-  // First we downgrade to integer to make life easier - we'll add 
-  // back the fractional part later.  
-  unsigned long seconds = (unsigned long)(ts>>NTP_SHIFT); 
+  // First we downgrade to integer to make life easier - we'll add
+  // back the fractional part later.
+  unsigned long seconds = (unsigned long)(ts>>NTP_SHIFT);
 
   // Get estimate of years - near enough for NTP validity timeframe
-  int years = seconds/(365.24*DAY); 
+  int years = seconds/(365.24*DAY);
   int leapdays = years/4;
   leapdays-=years/100;             // Chop off centuries
   leapdays+=(years+300)/400;       // Add back 400's, allowing for 1900 start
@@ -162,10 +164,14 @@ Split Stamp::split(ntp_stamp_t ts)
 //------------------------------------------------------------------------
 // Constructor from string
 // See ot-time.h for details
-namespace {
+
+// Helpers
+namespace
+{
   const int OT_NO_DATA = -1;  // Avoid Windows NO_DATA macro! :-(
   const int OT_BAD_DATA = -2;
 
+  // Read an integer field in length characters, modifying pos
   int read_part(const string& text, string::size_type& pos, int length)
   {
     if (text.size() == pos)
@@ -183,6 +189,7 @@ namespace {
     return atoi(s.c_str());
   }
 
+  // Read a floating field in length characters, modifying pos
   // not general - specific for float seconds with optional Z at end
   double read_part_f(const string& text, string::size_type& pos, int length)
   {
@@ -216,6 +223,7 @@ namespace {
     return atof(s.c_str());
   }
 
+  // Read an optional filler character
   bool read_filler(const string& text, string::size_type& pos, char c)
   {
     if (text.size() > pos)
@@ -228,71 +236,225 @@ namespace {
     }
     return false;
   }
-}
-Stamp::Stamp(const string& text, bool lenient)
-{
-  string::size_type pos=0;
 
-  // Clear stamp incase we fail
-  t=0;
-
-  // Accumulate a Split structure to convert later
-  Split split;
-
-  // Read year
-  int y = read_part(text, pos, 4);
-  if (y < 0) return;
-  split.year = y;
-
-  // Check for dash
-  read_filler(text, pos, '-');
-
-  // Read month
-  int m = read_part(text, pos, 2);
-  if (m < 0) return;
-  split.month = m;
-
-  // Check for dash
-  read_filler(text, pos, '-');
-
-  // Read day
-  int d = read_part(text, pos, 2);
-  if (d < 0) return;
-  split.day = d;
-
-  // Check for space or 'T', otherwise fail if not lenient
-  if (!read_filler(text, pos, ' ') && !read_filler(text, pos, 'T') &&
-      !lenient)
-    return;
-
-  // Read hour
-  int h = read_part(text, pos, 2);
-  if (h == OT_BAD_DATA || (h == OT_NO_DATA && !lenient)) return;
-  if (h >= 0)
+  // Read HH[:]MM[:]SS into time portion of a split, returns whether successful
+  // If float_secs is set, accepts floating point seconds with optional Z
+  bool read_time(const string& text, string::size_type& pos, bool lenient,
+                 bool float_secs, Split& split)
   {
-    split.hour = h;
-
-    // Check for colon
-    read_filler(text, pos, ':');
-
-    // Read minute
-    int mi = read_part(text, pos, 2);
-    if (mi == OT_BAD_DATA || (h == OT_NO_DATA && !lenient)) return;
-    if (mi >= 0)
+    // Read hour
+    int h = read_part(text, pos, 2);
+    if (h == OT_BAD_DATA || (h == OT_NO_DATA && !lenient)) return false;
+    if (h >= 0)
     {
-      split.min = mi;
+      split.hour = h;
 
       // Check for colon
       read_filler(text, pos, ':');
 
-      // Read seconds as float for all the rest
-      double s = read_part_f(text, pos, text.size() - pos);
-      if (s == OT_BAD_DATA || (s == OT_NO_DATA && !lenient)) return;
-      if (s >= 0) split.sec = s;
+      // Read minute
+      int mi = read_part(text, pos, 2);
+      if (mi == OT_BAD_DATA || (h == OT_NO_DATA && !lenient)) return false;
+      if (mi >= 0)
+      {
+        split.min = mi;
+
+        // Check for colon
+        read_filler(text, pos, ':');
+
+        // Read seconds as float for all the rest
+        double s = float_secs?read_part_f(text, pos, text.size() - pos)
+                             :read_part(text, pos, 2);
+        if (s == OT_BAD_DATA || (s == OT_NO_DATA && !lenient)) return false;
+        if (s >= 0) split.sec = s;
+      }
     }
+
+    return true;
   }
 
-  // Set timestamp
+  // Read an ISO timestamp into split, returns whether successful
+  bool read_iso(const string& text, bool lenient, Split& split)
+  {
+    string::size_type pos=0;
+
+    // Read year
+    int y = read_part(text, pos, 4);
+    if (y < 0) return false;
+    split.year = y;
+
+    // Check for dash
+    read_filler(text, pos, '-');
+
+    // Read month
+    int m = read_part(text, pos, 2);
+    if (m < 0) return false;
+    split.month = m;
+
+    // Check for dash
+    read_filler(text, pos, '-');
+
+    // Read day
+    int d = read_part(text, pos, 2);
+    if (d < 0) return false;
+    split.day = d;
+
+    // Check for space or 'T', otherwise fail if not lenient
+    if (!read_filler(text, pos, ' ') && !read_filler(text, pos, 'T') &&
+        !lenient)
+      return false;
+
+    // Read ISO time with optional Z
+    return read_time(text, pos, lenient, true, split);
+  }
+
+  // Get a month number (1-12) from a 3-character word, or 0 if invalid
+  int get_month(const string& word)
+  {
+         if (word == "Jan") return 1;
+    else if (word == "Feb") return 2;
+    else if (word == "Mar") return 3;
+    else if (word == "Apr") return 4;
+    else if (word == "May") return 5;
+    else if (word == "Jun") return 6;
+    else if (word == "Jul") return 7;
+    else if (word == "Aug") return 8;
+    else if (word == "Sep") return 9;
+    else if (word == "Oct") return 10;
+    else if (word == "Nov") return 11;
+    else if (word == "Dec") return 12;
+    else return 0;
+  }
+
+  // Read RFC822/RFC1123 into split, returns whether successful
+  //    Sun, 06 Nov 1994 08:49:37 GMT
+  bool read_rfc_822(vector<string>& words, Split& split)
+  {
+    // Ignore weekday
+
+    // Day
+    split.day = Text::stoi(words[1]);
+    if (!split.day) return false;
+
+    // Month
+    split.month = get_month(words[2]);
+    if (!split.month) return false;
+
+    // Year
+    split.year = Text::stoi(words[3]);
+    if (!split.year) return false;
+
+    // Read time
+    string::size_type pos=0;
+    if (!read_time(words[4], pos, false, false, split)) return false;
+
+    // Last word must be GMT
+    // ! Check for time zone modifier?
+    return (words[5] == "GMT");
+  }
+
+  // Read RFC850/RFC1036 into split, returns whether successful
+  //    Sunday, 06-Nov-94 08:49:37 GMT
+  bool read_rfc_850(vector<string>& words, Split& split)
+  {
+    // Ignore weekday
+
+    // Split date into 3 bits
+    vector<string> bits = Text::split(words[1], '-', false, 3);
+    if (bits.size() != 3) return false;
+
+    // Day
+    split.day = Text::stoi(bits[0]);
+    if (!split.day) return false;
+
+    // Month
+    split.month = get_month(bits[1]);
+    if (!split.month) return false;
+
+    // Year
+    split.year = Text::stoi(bits[2]);
+    if (!split.year) return false;
+    // Arbitary split to guess century - based on the fact that NTP
+    // (which is our core storage format) can't go beyond 2036 anyway
+    if (split.year < 37)
+      split.year += 2000;
+    else
+      split.year += 1900;
+
+    // Read time
+    string::size_type pos=0;
+    if (!read_time(words[2], pos, false, false, split)) return false;
+
+    // Last word must be GMT
+    // ! Check for time zone modifier?
+    return (words[3] == "GMT");
+  }
+
+  // Read asctime() format into split, returns whether successful
+  //    Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
+  bool read_asctime(vector<string>& words, Split& split)
+  {
+    // Ignore weekday
+
+    // Month
+    split.month = get_month(words[1]);
+    if (!split.month) return false;
+
+    // Day
+    split.day = Text::stoi(words[2]);
+    if (!split.day) return false;
+
+    // Read time
+    string::size_type pos=0;
+    if (!read_time(words[3], pos, false, false, split)) return false;
+
+    // Year
+    split.year = Text::stoi(words[4]);
+    if (!split.year) return false;
+
+    return true;
+  }
+
+  // Read an HTTP textual timestamp into split, returns whether successful
+  // Handles RFC822, RFC 850, asctime - e.g. (from RFC2616#3.3.1)
+  //    Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+  //    Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
+  //    Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
+  // Never lenient in the sense of missing off time parts
+  bool read_http(const string& text, Split& split)
+  {
+    vector<string> words = Text::split_words(text);
+    switch (words.size())
+    {
+      case 6:  // RFC 822
+        return read_rfc_822(words, split);
+
+      case 4:  // RFC 850
+        return read_rfc_850(words, split);
+
+      case 5:  // asctime
+        return read_asctime(words, split);
+
+      default:
+        return false;
+    }
+  }
+}
+
+Stamp::Stamp(const string& text, bool lenient)
+{
+  t=0; // Clear stamp incase we fail
+  Split split;
+
+  // If the first part is a digit, assume it's ISO
+  if (isdigit(text[0]))
+  {
+    if (!read_iso(text, lenient, split)) return;
+  }
+  else // assume it's an HTTP text format
+  {
+    if (!read_http(text, split)) return;
+  }
   t = combine(split);
 }
 
@@ -305,7 +467,7 @@ string Stamp::iso() const
   if (!t) return "";  // Empty if invalid
 
   ostringstream oss;
-  Split sp = split(t);  
+  Split sp = split(t);
 
   // Fudge to pad floating seconds, because setw() won't do it
   const char *pad = "";
@@ -356,7 +518,7 @@ string Stamp::iso_date(char sep) const
   if (!t) return "";  // Empty if invalid
 
   ostringstream oss;
-  Split sp = split(t);  
+  Split sp = split(t);
 
   oss << setw(2) << setfill('0') << sp.year;
   if (sep) oss << sep;
@@ -376,7 +538,7 @@ string Stamp::iso_time(char sep, bool with_secs) const
   if (!t) return "";  // Empty if invalid
 
   ostringstream oss;
-  Split sp = split(t);  
+  Split sp = split(t);
 
   oss << setw(2) << setfill('0') << sp.hour;
   if (sep) oss << sep;
@@ -471,12 +633,12 @@ Stamp Stamp::localise() const
 }
 
 //------------------------------------------------------------------------
-// Fill a struct tm 
+// Fill a struct tm
 void Stamp::get_tm(struct tm& tm) const
 {
   // Split it
   Split sp = split(t);
-  
+
   // Fill tm
   tm.tm_year = sp.year-1900;
   tm.tm_mon  = sp.month-1;  // They want 0.11
@@ -508,7 +670,7 @@ Stamp Stamp::now()
   GetSystemTimeAsFileTime(&ft);
 
   // Get get 64-bit FILETIME (100ns since 1-1-1601)
-  uint64_t t = ((uint64_t)ft.dwHighDateTime << 32) + ft.dwLowDateTime; 
+  uint64_t t = ((uint64_t)ft.dwHighDateTime << 32) + ft.dwLowDateTime;
 
   // Split into seconds and microseconds
   uint64_t secs = t/(10*MICRO);  // 10*(100ns) = 1us
