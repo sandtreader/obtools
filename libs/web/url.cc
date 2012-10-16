@@ -168,6 +168,16 @@ bool URL::split(XML::Element& xml) const
 }
 
 //------------------------------------------------------------------------
+// Quick access to host of URL
+// Returns host or "" if can't read it
+string URL::get_host() const
+{
+  XML::Element xml;
+  if (!split(xml)) return "";
+  return xml.get_child("host").content;
+}
+
+//------------------------------------------------------------------------
 // Quick access to path of URL
 // Returns path or "" if can't read it
 string URL::get_path() const

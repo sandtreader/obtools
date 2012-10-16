@@ -309,11 +309,11 @@ void HTTPMessage::set_cookie(const string& name,
   // Name value %-encoded, including spaces
   oss << URL::encode(name, false) << "=" << URL::encode(value, false);
 
-  if (!!expires) oss << "; expires=" << expires.rfc822();
-  if (!domain.empty()) oss << "; domain=" << domain;
-  if (!path.empty()) oss << "; path=" << path;
+  if (!!expires) oss << "; Expires=" << expires.rfc822();
+  if (!domain.empty()) oss << "; Domain=" << domain;
+  if (!path.empty()) oss << "; Path=" << path;
 
-  headers.put("Set-Cookie", oss.str());
+  headers.put("set-cookie", oss.str());
 }
 
 //--------------------------------------------------------------------------

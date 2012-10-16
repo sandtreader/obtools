@@ -61,35 +61,52 @@ bool MIMEHeaders::getline(istream& in, string& s)
 }
 
 //--------------------------------------------------------------------------
-// Split multi-value headers at commas
-// Reads all headers of name 'name', and splits any with commas at
-// comma to give a flattened list of values
-list<string> MIMEHeaders::get_all(const string& name)
+// Get all headers of name 'name'
+list<string> MIMEHeaders::get_all(const string& name) const
 {
   list<string> l;
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(e, xml, name)
+  for(ObTools::XML::ConstElementIterator p(xml.get_children(name)); p; ++p)
+  {
+    const ObTools::XML::Element& e=*p;
+    string value = e.content;
+    if (!value.empty()) l.push_back(value);
+  }
+
+  return l;
+}
+
+//--------------------------------------------------------------------------
+// Split multi-value headers at commas
+// Reads all headers of name 'name', and splits at delimiter to give a
+// flattened list of values
+list<string> MIMEHeaders::get_all_splitting(const string& name,
+                                            char delimiter) const
+{
+  list<string> l;
+  for(ObTools::XML::ConstElementIterator p(xml.get_children(name)); p; ++p)
+  {
+    const ObTools::XML::Element& e=*p;
     string value = e.content;
 
     // Loop over all values in each header
     for(;;)
     {
-      // Check for comma, and split if so
-      string::size_type comma = value.find(',');
+      // Check for delimiter, and split if so
+      string::size_type delim = value.find(delimiter);
 
-      if (comma == string::npos) break;
+      if (delim == string::npos) break;
 
       // Split here, store it and chop for next round
-      string sub(value, 0, comma);
+      string sub(value, 0, delim);
       sub = Text::canonicalise_space(sub);
       if (!sub.empty()) l.push_back(sub);
-      value.erase(0, comma+1);
+      value.erase(0, delim+1);
     }
 
     // Add (remaining) value to the list (too)
     value = Text::canonicalise_space(value);
     if (!value.empty()) l.push_back(value);
-
-  OBTOOLS_XML_ENDFOR
+  }
 
   return l;
 }
@@ -239,8 +256,13 @@ bool MIMEHeaders::write(ostream& out) const
     string name = e.name;
     string value = e.content;
 
-    // Uppercase first letter to be tidy
-    name[0] = toupper(name[0]);
+    // Uppercase first letter and any letters after - to be conformant
+    bool first = true;
+    for(string::size_type i=0; i<name.size(); i++)
+    {
+      if (first) name[i] = toupper(name[i]);
+      first = (name[i] == '-');
+    }
 
     // Check stream is OK
     if (out.fail()) return false;

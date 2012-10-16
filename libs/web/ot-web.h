@@ -74,6 +74,11 @@ public:
   bool split(XML::Element& xml) const;
 
   //------------------------------------------------------------------------
+  // Quick access to host of URL
+  // Returns host or "" if can't read it
+  string get_host() const;
+
+  //------------------------------------------------------------------------
   // Quick access to path of URL
   // Returns path or "" if can't read it
   string get_path() const;
@@ -183,10 +188,14 @@ public:
   void put_date(const string& header="date");
 
   //--------------------------------------------------------------------------
+  // Get all headers of name 'name'
+  list<string> get_all(const string& name) const;
+
+  //--------------------------------------------------------------------------
   // Split multi-value headers at commas
-  // Reads all headers of name 'name', and splits any with commas at
-  // comma to give a flattened list of values
-  list<string> get_all(const string& name);
+  // Reads all headers of name 'name', and splits at delimiter to give a
+  // flattened list of values
+  list<string> get_all_splitting(const string& name, char delimiter=',') const;
 
   //--------------------------------------------------------------------------
   // Split a header value (e.g. from get or get_all) into a prime value
@@ -321,6 +330,9 @@ public:
   // Returns whether successful
   bool write(ostream &out, bool headers_only = false) const;
 
+  // The following cookie support is for server-side use - for client side
+  // see CookieJar below
+
   //--------------------------------------------------------------------------
   // Set a cookie with the given optional domain, path and expiry time
   void set_cookie(const string& name, const string& value,
@@ -346,6 +358,81 @@ istream& operator>>(istream& s, HTTPMessage& msg);
 // << operator to write HTTPMessage to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const HTTPMessage& msg);
+
+//==========================================================================
+// Representation of a cookie (cookies.cc)
+struct Cookie
+{
+  // Basic
+  string name;
+  string value;
+
+  // Attributes
+  Time::Stamp expires;
+  Time::Duration max_age;
+  string path;
+  string domain;
+  bool http_only;
+  bool secure;
+
+  // Storage internals
+  Time::Stamp created;
+  Web::URL origin;
+
+  //--------------------------------------------------------------------------
+  // Constructors
+  Cookie(): http_only(false), secure(false) {}
+  Cookie(const string& _name, const string& _value):
+    name(_name), value(_value), http_only(false), secure(false) {}
+
+  //--------------------------------------------------------------------------
+  // Comparison (for evicting existing)
+  bool operator==(const Cookie& c)
+  { return name==c.name && domain==c.domain && path==c.path; }
+
+  //--------------------------------------------------------------------------
+  // Read from a Set-Cookie header value
+  // Returns whether valid cookie read
+  bool read_from(const string& header_value);
+
+  //--------------------------------------------------------------------------
+  // Output as a string, including attributes if attrs is set
+  string str(bool attrs=false) const;
+};
+
+//==========================================================================
+// Client cookie jar (cookies.cc)
+class CookieJar
+{
+  MT::RWMutex mutex;
+  list<Cookie> cookies;
+
+ public:
+  //--------------------------------------------------------------------------
+  // Constructor
+  CookieJar() {}
+
+  //--------------------------------------------------------------------------
+  // Get number of cookies available
+  int count() { return cookies.size(); }
+
+  //--------------------------------------------------------------------------
+  // Take cookies from the given server response
+  void take_cookies_from(const HTTPMessage& response, const URL& origin);
+
+  //--------------------------------------------------------------------------
+  // Add cookies to the given client request
+  void add_cookies_to(HTTPMessage& request);
+
+  //--------------------------------------------------------------------------
+  // Prune expired cookies from the jar, including session cookies if session
+  // ended
+  void prune(bool session_ended=false);
+
+  //--------------------------------------------------------------------------
+  // Dump the cookie jar to the given stream
+  void dump(ostream& sout);
+};
 
 //==========================================================================
 // HTTP Client class (http-client.cc)

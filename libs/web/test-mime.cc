@@ -27,7 +27,7 @@ int main()
   cout << headers.xml;
 
   cout << "\n--- Foo headers, split at commas:\n";
-  list<string> foos = headers.get_all("foo");
+  list<string> foos = headers.get_all_splitting("foo");
   for(list<string>::iterator p=foos.begin();
       p!=foos.end();
       p++)
