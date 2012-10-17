@@ -338,7 +338,9 @@ public:
   void set_cookie(const string& name, const string& value,
                   const string& path = "",
                   const string& domain = "",
-                  Time::Stamp expires = Time::Stamp());
+                  Time::Stamp expires = Time::Stamp(),
+                  bool secure = false,
+                  bool http_only = false);
 
   //--------------------------------------------------------------------------
   // Get a map of all cookies, name value pairs in values_p
@@ -369,7 +371,6 @@ struct Cookie
 
   // Attributes
   Time::Stamp expires;
-  Time::Duration max_age;
   string path;
   string domain;
   bool http_only;
@@ -457,6 +458,9 @@ private:
   bool chunked;                   // Chunked read (progressive only)
   uint64_t current_chunk_length;  // Current length remaining of chunk
 
+  // Cookie support
+  CookieJar *cookie_jar;
+
 protected:
   Net::EndPoint server;
 
@@ -468,7 +472,7 @@ public:
     user_agent(_ua), ssl_ctx(0), connection_timeout(_connection_timeout),
     operation_timeout(_operation_timeout), socket(0), stream(0),
     http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
-    current_chunk_length(-1),
+    current_chunk_length(-1), cookie_jar(0),
     server(_server) {}
 
   //--------------------------------------------------------------------------
@@ -478,7 +482,7 @@ public:
     user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
     operation_timeout(_operation_timeout), socket(0), stream(0),
     http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
-    current_chunk_length(-1),
+    current_chunk_length(-1), cookie_jar(0),
     server(_server) {}
 
   //--------------------------------------------------------------------------
@@ -503,6 +507,10 @@ public:
   //--------------------------------------------------------------------------
   // Disable progressive download
   void disable_progressive() { progressive=false; }
+
+  //--------------------------------------------------------------------------
+  // Set cookie jar (referenced, not taken) = 0 to disable cookies
+  void set_cookie_jar(CookieJar *jar) { cookie_jar = jar; }
 
   //--------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response

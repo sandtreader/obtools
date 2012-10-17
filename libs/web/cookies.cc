@@ -45,15 +45,24 @@ bool Cookie::read_from(const string& header_value)
       // Attributes
       string aname = Text::tolower(bits[0]);
 
-      if (bits.size() == 2)
+      if (bits.size() == 2 && bits[1].size())
       {
         // Name=value attributes
         if (aname == "expires")
           expires = Time::Stamp(bits[1]);  // RFC1123 date
         else if (aname == "max-age")
-          max_age = Time::Duration(Text::stoi(bits[1]));
+        {
+          int delta = Text::stoi(bits[1]);
+          if (delta > 0)
+            expires = Time::Stamp::now()+Time::Duration(delta);
+          else
+            expires = Time::Stamp(1);  // Force expiry
+        }
         else if (aname == "domain")
-          domain = bits[1];
+        {
+          domain = Text::tolower(bits[1]);
+          if (domain[0] == '.') domain.erase(0, 1);  // Strip leading .
+        }
         else if (aname == "path")
           path = bits[1];
       }
@@ -80,7 +89,6 @@ string Cookie::str(bool attrs) const
   if (attrs)
   {
     if (!!expires) oss << "; Expires=" << expires.rfc822();
-    if (!!max_age) oss << "; Max-Age=" << (int)max_age.seconds();
     if (domain.size()) oss << "; Domain=" << domain;
     if (path.size()) oss << "; Path=" << path; 
     if (secure) oss << "; Secure";
@@ -94,25 +102,81 @@ string Cookie::str(bool attrs) const
 // Cookie jar
 
 //--------------------------------------------------------------------------
+// Internals
+namespace
+{
+  // Domain suffix match
+  bool domain_match(const string& cookie_domain, const string& origin_host)
+  {
+    string::size_type c_size = cookie_domain.size();
+    string::size_type o_size = origin_host.size();
+
+    // Origin must be either identical or domain must be a suffix of it
+    // with '.' as the previous character
+    return origin_host == cookie_domain
+      || (o_size > c_size
+          && !origin_host.compare(o_size-c_size, c_size, cookie_domain)
+          && origin_host[o_size-c_size-1] == '.');
+  }
+
+  // Path prefix match
+  bool path_match(const string& cookie_path, const string& origin_path)
+  {
+    string::size_type c_size = cookie_path.size();
+    string::size_type o_size = origin_path.size();
+
+    // Origin must either be identical or cookie path must be a prefix of it
+    // either ending with '/' or with '/' as the next character
+    return (!origin_path.compare(0, c_size, cookie_path)
+            && (o_size == c_size
+                || (o_size > c_size
+                    && (origin_path[c_size-1] == '/'
+                        || origin_path[c_size] == '/'))));
+  }
+}
+
+//--------------------------------------------------------------------------
 // Take cookies from the given server response
 void CookieJar::take_cookies_from(const HTTPMessage& response,
                                   const URL& origin)
 {
   const list<string> headers = response.headers.get_all("set-cookie");
-  string origin_host = origin.get_host();
+  XML::Element origin_xml;
+  if (!origin.split(origin_xml)) return;
+  string origin_scheme = Text::tolower(origin_xml.get_child("scheme").content);
+  string origin_host = Text::tolower(origin_xml.get_child("host").content);
+  string origin_path = Text::tolower(origin_xml.get_child("path").content);
+
   MT::RWWriteLock lock(mutex);
   for(list<string>::const_iterator p = headers.begin(); p!=headers.end(); ++p)
   {
     Cookie cookie;
     if (cookie.read_from(*p))
     {
-      // Check if domain specified that it is a prefix of the origin
-      if (cookie.domain.size())
+      // Check if domain specified that it is a suffix of the origin
+      if (cookie.domain.size() && !domain_match(cookie.domain, origin_host))
+        continue;
+
+      // Check if path specified and absolute - if not, ignore it and get
+      // path from origin
+      if (!cookie.path.size() || cookie.path[0] != '/')
       {
-        if (origin_host.size() < cookie.domain.size()
-            || origin_host.compare(0, cookie.domain.size(), cookie.domain))
-          continue;
+        cookie.path = origin_path;
+
+        // Get default path
+        if (!cookie.path.size() || cookie.path[0] != '/')
+          cookie.path = "/";
+        else
+        {
+          string::size_type slash = cookie.path.rfind('/');
+          if (slash != string::npos)
+            cookie.path.erase(slash?slash:1); // / if only one
+        }
       }
+
+      // If cookie is HTTPOnly check the scheme is HTTP
+      if (cookie.http_only && origin_scheme != "http"
+                           && origin_scheme != "https") continue;
 
       // Evict any existing identical ones (name, domain, path)
       cookies.remove(cookie);
@@ -131,7 +195,14 @@ void CookieJar::add_cookies_to(HTTPMessage& request)
 {
   string s;
   Time::Stamp now = Time::Stamp::now();
-  string origin_host = request.url.get_host();
+
+  XML::Element origin_xml;
+  if (!request.url.split(origin_xml)) return;
+  string origin_scheme = Text::tolower(origin_xml.get_child("scheme").content);
+  string origin_host = Text::tolower(origin_xml.get_child("host").content);
+  string origin_path = Text::tolower(origin_xml.get_child("path").content);
+  if (origin_path.empty()) origin_path = "/";
+
   MT::RWReadLock lock(mutex);
   for(list<Cookie>::const_iterator p = cookies.begin(); p!=cookies.end(); ++p)
   {
@@ -139,21 +210,28 @@ void CookieJar::add_cookies_to(HTTPMessage& request)
 
     // Check for expiry
     if (!!cookie.expires && now >= cookie.expires) continue;
-    if (!!cookie.max_age && now > cookie.created
-        && now-cookie.created > cookie.max_age) continue;
 
     // Check for wrong domain
-    // If cookie specifies a domain we use that as a prefix
     if (cookie.domain.size())
     {
-      if (origin_host.size() < cookie.domain.size()
-          || origin_host.compare(0, cookie.domain.size(), cookie.domain))
-        continue;
+      // If cookie specifies a domain we allow suffix match
+      if (!domain_match(cookie.domain, origin_host)) continue;
     }
-    else // No domain, must be exact same origin
+    else
     {
+      // No domain, must be exact same origin
       if (origin_host != cookie.origin.get_host()) continue;
     }
+
+    // Check for wrong path
+    if (!path_match(cookie.path, origin_path)) continue;
+
+    // Check for security
+    if (cookie.secure && origin_scheme != "https") continue;
+
+    // Check for http only
+    if (cookie.http_only && origin_scheme != "http"
+                         && origin_scheme != "https") continue;
 
     if (s.size()) s += "; ";
     s += cookie.str();
@@ -175,9 +253,7 @@ void CookieJar::prune(bool session_ended)
 
     // Check for expiry
     if ((session_ended && !cookie.expires)
-     || (!!cookie.expires && now >= cookie.expires)
-     || (!!cookie.max_age && now > cookie.created
-         && now-cookie.created > cookie.max_age))
+     || (!!cookie.expires && now >= cookie.expires))
       p = cookies.erase(p);
   }
 }

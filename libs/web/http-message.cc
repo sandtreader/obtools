@@ -303,7 +303,9 @@ void HTTPMessage::set_cookie(const string& name,
                              const string& value,
                              const string& path,
                              const string& domain,
-                             Time::Stamp expires)
+                             Time::Stamp expires,
+                             bool secure,
+                             bool http_only)
 {
   ostringstream oss;
   // Name value %-encoded, including spaces
@@ -312,6 +314,8 @@ void HTTPMessage::set_cookie(const string& name,
   if (!!expires) oss << "; Expires=" << expires.rfc822();
   if (!domain.empty()) oss << "; Domain=" << domain;
   if (!path.empty()) oss << "; Path=" << path;
+  if (secure) oss << "; Secure";
+  if (http_only) oss << "; HttpOnly";
 
   headers.put("set-cookie", oss.str());
 }
