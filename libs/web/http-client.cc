@@ -22,7 +22,7 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
   user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
   operation_timeout(_operation_timeout), socket(0), stream(0),
   http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
-  current_chunk_length(-1), cookie_jar(0)
+  current_chunk_length(0), cookie_jar(0)
 {
   XML::Element xml;
   if (url.split(xml))
