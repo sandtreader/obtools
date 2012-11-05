@@ -42,6 +42,9 @@ endif
 # Main target
 all: build-dir generate sub-makefile sub-build
 
+# Test, just to make it do something
+test: all
+
 # Create build directory
 build-dir:
 	-@mkdir build
