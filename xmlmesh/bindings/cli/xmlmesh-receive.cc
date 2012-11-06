@@ -333,14 +333,15 @@ int main(int argc, char **argv)
       close(stdin_pipe[1]);
 
       // Same for stdout
-      close(1);             
-      dup(stdout_pipe[1]);   
-      close(stdout_pipe[0]);  
+      close(1);
+      dup(stdout_pipe[1]);
+      close(stdout_pipe[0]);
       close(stdout_pipe[1]);
 
       // stderr remains the same
       // Exec the receiver
-      if (execl(process.c_str(), process.c_str(), subject.c_str(), 0))
+      if (execl(process.c_str(), process.c_str(), subject.c_str(),
+                (char *)NULL))
       {
 	log.error << "Can't exec " << process << ": " << strerror(errno) << endl;
 	log.summary << "Can't start receiving process\n";
@@ -352,7 +353,7 @@ int main(int argc, char **argv)
   // Sleep to ensure messages sent
   MT::Thread::sleep(1);
 
-  return 0;  
+  return 0;
 }
 
 
