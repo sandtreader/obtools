@@ -151,7 +151,8 @@ private:
       dp = &segment->data[0];
       return;
     }
-    while (segment > segments && !(--segment)->length);
+    while (segment > segments && !(--segment)->length)
+      ;
     if (segment->length)
     {
       countdown = 1;

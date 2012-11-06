@@ -17,7 +17,6 @@ namespace ObTools { namespace Gather {
 // Read implementation
 size_t Reader::basic_read(void *buf, size_t count) throw (Channel::Error)
 {
-  data_t *bufp = static_cast<data_t *>(buf);
   if (count)
   {
     count = buffer.copy(reinterpret_cast<data_t *>(buf), it, count);
