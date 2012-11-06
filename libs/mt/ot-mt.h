@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::MT
 // C++ wrapping of pthreads and useful multithreading bits - queues, etc.
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -15,7 +15,7 @@
 #include <queue>
 #include <list>
 
-namespace ObTools { namespace MT { 
+namespace ObTools { namespace MT {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -54,12 +54,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Join - caller waits for this thread to end
-  void join() 
+  void join()
   { if (valid && !joined) pthread_join(thread, NULL); joined=true; }
 
   //--------------------------------------------------------------------------
   // Detach - let it die silently when it ends, we aren't going to join with it
-  void detach() 
+  void detach()
   { if (valid && !joined) pthread_detach(thread); joined=true; }
 
   //--------------------------------------------------------------------------
@@ -92,8 +92,8 @@ public:
 //==========================================================================
 // Mutex class
 // Note:  These mutexes are NOT recursive - PTHREAD_MUTEX_RECURSIVE is not
-// portable.  Use RecursiveMutex if you need to lock it multiple times within 
-// the same thread 
+// portable.  Use RMutex if you need to lock it multiple times within
+// the same thread
 class Mutex
 {
 private:
@@ -107,9 +107,9 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Default Constructor - initialises mutex 
+  // Default Constructor - initialises mutex
   Mutex() { pthread_mutex_init(&mutex, NULL); }
-  
+
   //--------------------------------------------------------------------------
   // Destructor - destroys mutex
   ~Mutex() { pthread_mutex_destroy(&mutex); }
@@ -152,7 +152,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor - locks mutex
   Lock(Mutex &m): mutex(m) { mutex.lock(); }
-  
+
   //--------------------------------------------------------------------------
   // Destructor - unlocks mutex
   ~Lock() { mutex.unlock(); }
@@ -162,7 +162,7 @@ public:
 // BasicCondVar class - basic condition variable like pthread_condvar
 // Uses caller's mutex to allow mutex to extend beyond the wait() call
 
-// NB All wait(), signal() and broadcast() calls must be made with 
+// NB All wait(), signal() and broadcast() calls must be made with
 // mutex locked
 
 // Cancellation handler to unlock a mutex
@@ -177,15 +177,15 @@ public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises condvar
   BasicCondVar()
-  { 
-    pthread_cond_init(&cv, NULL); 
+  {
+    pthread_cond_init(&cv, NULL);
   }
-  
+
   //--------------------------------------------------------------------------
-  // Destructor - destroys condvar 
-  ~BasicCondVar() 
-  { 
-    pthread_cond_destroy(&cv); 
+  // Destructor - destroys condvar
+  ~BasicCondVar()
+  {
+    pthread_cond_destroy(&cv);
   }
 
   //--------------------------------------------------------------------------
@@ -193,7 +193,7 @@ public:
   // Note mutex should already be locked, will be unlocked during wait
   // and then relocked again
   void wait(Mutex& mutex)
-  { 
+  {
     // Handle unlock of mutex should cond_wait be cancelled
     pthread_cleanup_push(_unlock_mutex, &mutex.mutex);
     pthread_cond_wait(&cv, &mutex.mutex);
@@ -201,16 +201,16 @@ public:
   }
 
   //--------------------------------------------------------------------------
-  // Signal the condition 
+  // Signal the condition
   void signal()
-  { 
+  {
     pthread_cond_signal(&cv);
   }
 
   //--------------------------------------------------------------------------
   // Broadcast the condition to multiple waiters
   void broadcast()
-  { 
+  {
     pthread_cond_broadcast(&cv);
   }
 };
@@ -229,29 +229,29 @@ public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises condvar and mutex
   Condition(bool initial=false): flag(initial)
-  { 
-    pthread_cond_init(&cv, NULL); 
+  {
+    pthread_cond_init(&cv, NULL);
   }
-  
+
   //--------------------------------------------------------------------------
   // Destructor - destroys condvar and mutex
-  ~Condition() 
-  { 
-    pthread_cond_destroy(&cv); 
+  ~Condition()
+  {
+    pthread_cond_destroy(&cv);
   }
 
   //--------------------------------------------------------------------------
   // Wait on the condition to become as desired
   void wait(bool desired=true)
-  { 
+  {
     Lock lock(mutex);       // Use locks to ensure exception safety
 
-    // But also, because C++ exceptions and thread cancellation isn't 
+    // But also, because C++ exceptions and thread cancellation isn't
     // integrated yet (grr), make sure that if the cond_wait is cancelled
     // the mutex gets unlocked again
     pthread_cleanup_push(_unlock_mutex, &mutex.mutex);
 
-    while (flag!=desired) 
+    while (flag!=desired)
       pthread_cond_wait(&cv, &mutex.mutex);
 
     pthread_cleanup_pop(0);
@@ -260,7 +260,7 @@ public:
   //--------------------------------------------------------------------------
   // Signal the condition to become as stated
   void signal(bool value=true)
-  { 
+  {
     Lock lock(mutex);
     if (flag != value)
     {
@@ -272,7 +272,7 @@ public:
   //--------------------------------------------------------------------------
   // Broadcast the condition to become as stated (multiple waiters)
   void broadcast(bool value=true)
-  { 
+  {
     Lock lock(mutex);
     if (flag != value)
     {
@@ -291,7 +291,7 @@ public:
 
 //==========================================================================
 // Recursive Mutex class
-// You can use these recursively - i.e. hold them locked in one function 
+// You can use these recursively - i.e. hold them locked in one function
 // while you call another one which locks it again
 class RMutex
 {
@@ -304,12 +304,12 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Default Constructor - initialises mutex 
+  // Default Constructor - initialises mutex
   RMutex(): mutex(), available(true), count(0), owned(false) {}
-  
+
   //--------------------------------------------------------------------------
   // Lock the mutex, block if locked
-  void lock() 
+  void lock()
   {
     pthread_t self = pthread_self();
     for(;;) // May loop if we lose the race after wait()
@@ -321,7 +321,7 @@ public:
       Lock lock(mutex);
 
       // Make sure we're still OK
-      if (!count || (owned && pthread_equal(owner,self)))  
+      if (!count || (owned && pthread_equal(owner,self)))
       {
 	++count;
 	owned=true;
@@ -335,10 +335,10 @@ public:
   //--------------------------------------------------------------------------
   // Unlock the mutex
   void unlock()
-  { 
+  {
     Lock lock(mutex);
 
-    if (!--count) 
+    if (!--count)
     {
       owned = false;
       available.signal();    // Wake up waiters
@@ -396,13 +396,13 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Default Constructor - initialises mutex 
-  RWMutex(): 
+  // Default Constructor - initialises mutex
+  RWMutex():
     mutex(), readers_active(0), no_readers(),
     writers_waiting(0), writer_active(false), no_writer(),
     count(0)
     {}
-  
+
   //--------------------------------------------------------------------------
   // Lock the mutex for read
   void lock_reader() 
@@ -412,7 +412,7 @@ public:
     // Check if we already own this as a writer
     if (!writer_active || !pthread_equal(writer, pthread_self()))
     {
-      // If I'm the first reader in, wait until there are no writers, 
+      // If I'm the first reader in, wait until there are no writers,
       // either queued or active - after that, my presence will protect
       // the rest (including any that recurse inside me)
       // NB:  Without this check, a recursed read which happens after a
@@ -430,20 +430,20 @@ public:
   //--------------------------------------------------------------------------
   // Unlock the mutex for read
   void unlock_reader()
-  { 
+  {
     Lock lock(mutex);
 
     // Check if we already own this as a writer
     if (!writer_active || !pthread_equal(writer, pthread_self()))
     {
       // Wake up all writers so they can proceed through the no-readers gate
-      if (!--readers_active) no_readers.broadcast();  
+      if (!--readers_active) no_readers.broadcast();
     }
   }
 
   //--------------------------------------------------------------------------
   // Lock the mutex for write
-  void lock_writer() 
+  void lock_writer()
   {
     Lock lock(mutex);
     pthread_t self = pthread_self();
@@ -464,7 +464,7 @@ public:
 
       // Wait until there are no other writers using it
       while (writer_active) no_writer.wait(mutex);
-    
+
       // We're not waiting any more, we're active
       writers_waiting--;
       writer_active = true;
@@ -473,12 +473,12 @@ public:
       writer = self;
       count = 1;
     }
-  }  
+  }
 
   //--------------------------------------------------------------------------
   // Unlock the mutex for write
   void unlock_writer()
-  { 
+  {
     Lock lock(mutex);
 
     // Check we've bottomed out any recursion
@@ -540,7 +540,7 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   Queue() {}
 
   //--------------------------------------------------------------------------
@@ -553,7 +553,7 @@ public:
   {
     Lock lock(mutex);
     q.push(msg);
-    available.signal(); 
+    available.signal();
   }
 
   //--------------------------------------------------------------------------
@@ -584,7 +584,7 @@ public:
       }
     }
   }
-}; 
+};
 
 //==========================================================================
 // Queue template - send any message between threads safety
@@ -600,7 +600,7 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   MQueue() {}
 
   //--------------------------------------------------------------------------
@@ -613,7 +613,7 @@ public:
   {
     Lock lock(mutex);
     q.push(msg);
-    available.signal(); 
+    available.signal();
   }
 
   //--------------------------------------------------------------------------
@@ -633,7 +633,7 @@ public:
       if (q.empty()) available.wait(mutex);
 
       // Check again in case someone else got there first
-      if (!q.empty()) 
+      if (!q.empty())
       {
 	T msg = q.front();
 	q.pop();
@@ -650,7 +650,7 @@ public:
   //--------------------------------------------------------------------------
   // Flush the queue
   void flush() { Lock lock(mutex); q = queue<T>(); }
-}; 
+};
 
 //==========================================================================
 // Data queue class (dqueue.cc)
@@ -665,7 +665,7 @@ struct DataBlock
   const data_t *data;        // 0 = EOF marker
   size_t length;
   DataBlock(): data(0), length(0) {}
-  DataBlock(const data_t *_data, size_t _length): 
+  DataBlock(const data_t *_data, size_t _length):
     data(_data), length(_length) {}
 };
 
@@ -677,7 +677,7 @@ class DataQueue: public MQueue<DataBlock>
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   DataQueue(): MQueue<DataBlock>(), working_block_used(0), eof(false) {}
 
   //-------------------------------------------------------------------------
@@ -741,7 +741,7 @@ public:
 //==========================================================================
 // Template for pool replacers
 // This piece of evil allows a 'PoolThread' to replace itself in the pool
-// knowing only that it is a subclass of PoolThread, not what the 
+// knowing only that it is a subclass of PoolThread, not what the
 // pool template is instantiated to (the actual subclass)
 template<class T> class PoolReplacer: public IPoolReplacer
 {
@@ -779,18 +779,18 @@ private:
   // Fill pool to provide 'min' spares, but not more than 'max' in all
   // unless max is 0
   // Always creates at least one spare
-  void fill() 
-  { 
-    while (spares.size() < (min_spares?min_spares:1) 
-	   && (!max_threads || spares.size()+actives.size() < max_threads)) 
-      add_spare(); 
+  void fill()
+  {
+    while (spares.size() < (min_spares?min_spares:1)
+	   && (!max_threads || spares.size()+actives.size() < max_threads))
+      add_spare();
   }
 
 public:
   //--------------------------------------------------------------------------
   // Constructor
   // min-max is range of number of threads the pool will keep alive
-  ThreadPool(unsigned int min=1, unsigned int max=10, bool _realtime=false): 
+  ThreadPool(unsigned int min=1, unsigned int max=10, bool _realtime=false):
     min_spares(min), max_threads(max), realtime(_realtime),
     replacer(*this), shutting_down(false)
   { fill(); }
@@ -823,7 +823,7 @@ public:
     if (shutting_down) return 0;
     Lock lock(mutex);
     fill();  // Try and make spares
-    if (!spares.size()) return 0; 
+    if (!spares.size()) return 0;
 
     T *t = spares.front();
     spares.pop_front();
@@ -919,7 +919,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Destructor
-  // Kill all threads 
+  // Kill all threads
   ~ThreadPool()
   {
     shutdown();
