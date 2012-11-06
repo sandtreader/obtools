@@ -588,7 +588,8 @@ protected:
   // and initial body (if any)
   // Simply continue sending data to the socket or stream until done
   // Does nothing by default
-  virtual void generate_progressive(HTTPMessage & /*request*/,
+  virtual void generate_progressive(HTTPMessage& /*request*/,
+                                    HTTPMessage& /*response*/,
 				    SSL::ClientDetails& /*client*/,
 				    SSL::TCPSocket& /*socket*/,
         		            Net::TCPStream& /*stream*/) {}

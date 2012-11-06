@@ -166,7 +166,7 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 
       // Allow subclasses to generate progressive data following on, if
       // required
-      generate_progressive(request, client, s, ss);
+      generate_progressive(request, response, client, s, ss);
     }
     while (persistent);
 
