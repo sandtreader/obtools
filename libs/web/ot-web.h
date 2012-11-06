@@ -593,6 +593,12 @@ protected:
 				    SSL::TCPSocket& /*socket*/,
         		            Net::TCPStream& /*stream*/) {}
 
+  //--------------------------------------------------------------------------
+  // Interface to clear per-connection state
+  // Does nothing by default
+  virtual void handle_close(SSL::ClientDetails& /*client*/,
+                            SSL::TCPSocket& /*socket*/) {}
+
 public:
   //--------------------------------------------------------------------------
   // Constructor to bind to any interface (basic TCP)

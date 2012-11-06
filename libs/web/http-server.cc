@@ -51,6 +51,8 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 		     << " now closed\n";
 	else
 	  log.error << "Can't read HTTP request from socket\n";
+
+        handle_close(client, s);
 	return;
       }
 
@@ -167,6 +169,9 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       generate_progressive(request, client, s, ss);
     }
     while (persistent);
+
+    // Clear any connection state
+    handle_close(client, s);
 
     // Shut down socket
     s.shutdown();
