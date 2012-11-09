@@ -94,7 +94,7 @@ Split Stamp::split(ntp_stamp_t ts)
   unsigned long seconds = (unsigned long)(ts>>NTP_SHIFT);
 
   // Get estimate of years - near enough for NTP validity timeframe
-  int years = seconds/(365.24*DAY);
+  int years = (int)(seconds/(365.24*DAY));
   int leapdays = years/4;
   leapdays-=years/100;             // Chop off centuries
   leapdays+=(years+300)/400;       // Add back 400's, allowing for 1900 start

@@ -159,7 +159,7 @@ string RSAKey::str(const string& pass_phrase, bool force_public) const
   else
     PEM_write_bio_RSA_PUBKEY(bio, rsa);
 
-  BIO_flush(bio);
+  (void)BIO_flush(bio);
 
   // Get buffer
   BUF_MEM *buf;

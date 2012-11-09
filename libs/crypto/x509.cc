@@ -114,7 +114,7 @@ string Certificate::str() const
 
   // Write certificate
   PEM_write_bio_X509(bio, x509);
-  BIO_flush(bio);
+  (void)BIO_flush(bio);
 
   // Get buffer
   BUF_MEM *buf;
