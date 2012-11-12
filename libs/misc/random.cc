@@ -101,18 +101,18 @@ string Random::generate_hex(int n)
 // Get a random 32-bit number
 uint32_t Random::generate_32()
 {
-  unsigned char buf[4];
-  generate_binary(buf, 4);
-  return *(uint32_t *)buf;  // Big endian, little endian, who cares?
+  uint32_t n; // Big endian, little endian, who cares?
+  generate_binary((unsigned char *)&n, 4);
+  return n;
 }
 
 //------------------------------------------------------------------------
 // Get a random 64-bit number
 uint64_t Random::generate_64()
 {
-  unsigned char buf[8];
-  generate_binary(buf, 8);
-  return *(uint64_t *)buf;  
+  uint64_t n;
+  generate_binary((unsigned char *)&n, 8);
+  return n;
 }
 
 //------------------------------------------------------------------------
