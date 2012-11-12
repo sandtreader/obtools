@@ -347,9 +347,13 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
   // Normal behaviour with device name given
   struct arpreq arp;
   memset(&arp, 0, sizeof(arp));
-  struct sockaddr_in *sin = (struct sockaddr_in *)&arp.arp_pa;
-  sin->sin_family = AF_INET;
-  sin->sin_addr.s_addr = ip.nbo();
+
+  // Avoid strict aliasing problems with memcpy
+  struct sockaddr_in sin;
+  sin.sin_family = AF_INET;
+  sin.sin_addr.s_addr = ip.nbo();
+  memcpy(&arp.arp_pa, &sin, sizeof(sin));
+
   strncpy(arp.arp_dev, device_name.c_str(), sizeof(arp.arp_dev));
 
   if (SOCKIOCTL(fd, SIOCGARP, &arp)<0) return "";
