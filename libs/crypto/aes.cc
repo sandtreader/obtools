@@ -68,7 +68,7 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
       if (enc_length)
       {
         AESKey rtb_iv(iv);
-        AES_cbc_encrypt(p, last, length - enc_length, &aes_key,
+        AES_cbc_encrypt(p, last, sizeof(last), &aes_key,
                         &rtb_iv.key[0], AES_ENCRYPT);
       }
       else
