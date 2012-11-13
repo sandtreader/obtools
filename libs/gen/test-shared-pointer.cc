@@ -39,28 +39,47 @@ TEST(SharedPointerTest, TestAssignmentPointsTo)
   ASSERT_EQ(*s, *sp2);
 }
 
-TEST(SharedPointerDeathTest, TestReleaseOnDestruct)
+//--------------------------------------------------------------------------
+// Helper class that alters a string on destruction
+class OnDestructByeBye
 {
-  string *s = new string("Hello, world!");
+private:
+  string *str;
+
+public:
+  OnDestructByeBye(string *_str):
+    str(_str)
+  {}
+
+  ~OnDestructByeBye()
   {
-    Gen::SharedPointer<string> sp(s);
+    *str = "Bye bye, cruel world!";
   }
-  ASSERT_DEATH(s->substr(0, 5) == "Hello", "");
+};
+
+TEST(SharedPointerTest, TestReleaseOnDestruct)
+{
+  string s("Hello, world!");
+  {
+    Gen::SharedPointer<OnDestructByeBye> sp(new OnDestructByeBye(&s));
+  }
+  ASSERT_EQ("Bye bye", s.substr(0, 7));
 }
 
-TEST(SharedPointerDeathTest, TestLastCopyReleasesOnDestruct)
+TEST(SharedPointerTest, TestLastCopyReleasesOnDestruct)
 {
-  string *s = new string("Hello, world!");
+  string s("Hello, world!");
   {
-    Gen::SharedPointer<string> *sp3(0);
+    Gen::SharedPointer<OnDestructByeBye> *sp3(0);
     {
-      Gen::SharedPointer<string> sp(s);
-      Gen::SharedPointer<string> sp2(sp);
-      sp3 = new Gen::SharedPointer<string>(sp2);
+      Gen::SharedPointer<OnDestructByeBye> sp(new OnDestructByeBye(&s));
+      Gen::SharedPointer<OnDestructByeBye> sp2(sp);
+      sp3 = new Gen::SharedPointer<OnDestructByeBye>(sp2);
     }
+    ASSERT_EQ("Hello", s.substr(0, 5));
     delete sp3;
   }
-  ASSERT_DEATH(s->substr(0, 5) == "Hello", "");
+  ASSERT_EQ("Bye bye", s.substr(0, 7));
 }
 
 } // anonymous namespace
