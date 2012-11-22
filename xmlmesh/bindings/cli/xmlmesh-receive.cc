@@ -327,14 +327,12 @@ int main(int argc, char **argv)
       // CHILD PROCESS
 
       // Close and replace my current stdin with pipe
-      close(0);              // Close my current stdin
-      dup(stdin_pipe[0]);    // dup pipe into the hole
+      dup2(stdin_pipe[0], 0);// Replace stdin with the pipe
       close(stdin_pipe[0]);  // close the pipe ends
       close(stdin_pipe[1]);
 
       // Same for stdout
-      close(1);
-      dup(stdout_pipe[1]);
+      dup2(stdout_pipe[1], 1);
       close(stdout_pipe[0]);
       close(stdout_pipe[1]);
 
