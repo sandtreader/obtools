@@ -78,6 +78,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Not operator (check if invalid)
+  bool operator!() const
+  {
+    return !pointer;
+  }
+
+  //------------------------------------------------------------------------
   // Assignment operator
   SharedPointer& operator=(const SharedPointer<T>& shared_pointer)
   {

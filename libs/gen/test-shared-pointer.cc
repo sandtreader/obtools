@@ -39,6 +39,12 @@ TEST(SharedPointerTest, TestAssignmentPointsTo)
   ASSERT_EQ(*s, *sp2);
 }
 
+TEST(SharedPointerTest, TestEmptyPointerIsInvalid)
+{
+  Gen::SharedPointer<int> sp(0);
+  ASSERT_TRUE(!sp);
+}
+
 //--------------------------------------------------------------------------
 // Helper class that alters a string on destruction
 class OnDestructByeBye
