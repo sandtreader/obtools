@@ -351,8 +351,9 @@ bool Path::erase() const
 // Returns whether successful
 bool Path::touch(mode_t mode) const
 {
-  int fd = OPEN(CPATH, O_CREAT|O_WRONLY|O_TRUNC, mode);
+  int fd = OPEN(CPATH, O_CREAT|O_WRONLY, mode);
   if (fd < 0) return false;
+  if ( futimens(fd,NULL) ) return false;
   close(fd);
   return true;
 }
