@@ -61,29 +61,38 @@ void Element::write_attrs(ostream &s) const
       p!=attrs.end();
       p++)
   {
-    xmlchar delim='"';
     const string &v = p->second;
-    bool escquote=false;
 
-    // Decide whether value contains ' or " or both
-    if (v.find('"') != string::npos)
+    // Fast path for simple values
+    if (v.find_first_of("<>&\"") == string::npos)
     {
-      //It has a " in it - see if it also contains a '
-      if (v.find('\'') != string::npos)
-      {
-	//Oops - it has both.  Better escape the quote, then
-	escquote=true;
-      }
-      else
-      {
-	//We'll be OK by swapping to using ' as delimiter
-	delim = '\'';
-      }
+      s << ' ' << p->first << "=\"" << v << '"';
     }
+    else
+    {
+      xmlchar delim='"';
+      bool escquote=false;
 
-    //But we must escape &, < and > as well
-    s << ' ' << p->first << "=" << delim << escape(v, escquote) << delim;
-  } 
+      // Decide whether value contains ' or " or both
+      if (v.find('"') != string::npos)
+      {
+        //It has a " in it - see if it also contains a '
+        if (v.find('\'') != string::npos)
+        {
+          //Oops - it has both.  Better escape the quote, then
+          escquote=true;
+        }
+        else
+        {
+          //We'll be OK by swapping to using ' as delimiter
+          delim = '\'';
+        }
+      }
+
+      //But we must escape &, < and > as well
+      s << ' ' << p->first << "=" << delim << escape(v, escquote) << delim;
+    }
+  }
 }
 
 //--------------------------------------------------------------------------
