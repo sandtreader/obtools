@@ -188,6 +188,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
 
     //Read attribute value to matching quote
     string aval;
+    aval.reserve(256);
     for(;;)
     {
       c=0;
@@ -278,6 +279,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 {
   // Read until non-escaped '<'
   string content;
+  content.reserve(1024);
   bool first = true;
 
   for(;;)
@@ -448,6 +450,7 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
 string Parser::read_rest_of_name(xmlchar& c, istream& s)
 {
   string name;
+  name.reserve(16);
   name+=c;
 
   //Read rest of name
