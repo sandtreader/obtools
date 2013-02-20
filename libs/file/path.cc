@@ -44,6 +44,7 @@
 #define UTIME utime
 #define CHMOD chmod
 #define UNLINK unlink
+#include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
 #endif
