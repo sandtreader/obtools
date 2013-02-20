@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <utime.h>
+#include <sys/time.h>
 #include <sstream>
 #include <fstream>
 #include <errno.h>
@@ -351,8 +352,9 @@ bool Path::erase() const
 // Returns whether successful
 bool Path::touch(mode_t mode) const
 {
-  int fd = OPEN(CPATH, O_CREAT|O_WRONLY|O_TRUNC, mode);
+  int fd = OPEN(CPATH, O_CREAT|O_WRONLY, mode);
   if (fd < 0) return false;
+  if ( futimes(fd,NULL) ) return false;
   close(fd);
   return true;
 }
