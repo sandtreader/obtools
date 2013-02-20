@@ -102,7 +102,7 @@ list<Element *> XPathProcessor::get_elements(const string& path)
 Element *XPathProcessor::get_element(const string& path)
 {
   list<Element *> l = get_elements(path);
-  if (l.size())
+  if (!l.empty())
     return l.front();
   else
     return 0;

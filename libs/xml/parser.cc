@@ -210,7 +210,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
   }
 
   //Add this as a child of the last open element, if any
-  if (elements.size()) elements.back()->add(e);
+  if (!elements.empty()) elements.back()->add(e);
 
   //Process namespaces etc. for this element
   initial_processing(e);
@@ -242,7 +242,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
 
   //This should be whatever's on the top of the stack...
   //... if there is a stack
-  if (elements.size())
+  if (!elements.empty())
   {
     Element *e = elements.back();
     if (name==e->name)
@@ -321,14 +321,14 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
   }
 
   //Create sub-element with content, and add it to currently open element
-  if (elements.size()) 
+  if (!elements.empty())
   {
     Element *e = elements.back();
 
     //See if the last thing we read was also a content element - if so,
     //we probably got broken by a comment, and it would be nice to just
     //continue it so it remains available for optimisation
-    if (e->children.size() && e->children.back()->name.empty())
+    if (!e->children.empty() && e->children.back()->name.empty())
     {
       //We'll treat the comment like whitespace, because we suppressed
       //any that was at end of previous one or start of this.
@@ -587,7 +587,7 @@ void Parser::initial_processing(Element *e)
   if (flags & PARSER_FIX_NAMESPACES)
   {
     // Open a new nsmap level - copy current and push to back of ns_maps
-    if (ns_maps.size())
+    if (!ns_maps.empty())
       ns_maps.push_back(ns_maps.back());
     else
       ns_maps.resize(1);
@@ -633,7 +633,7 @@ void Parser::final_processing(Element *e)
     e->optimise();
 
   if ((flags & PARSER_FIX_NAMESPACES)
-    && ns_maps.size())  // Should always be OK, but be safe
+    && !ns_maps.empty())  // Should always be OK, but be safe
   {
     //Check current element name in latest ns_map and see if we need to 
     //translate it - including default namespace

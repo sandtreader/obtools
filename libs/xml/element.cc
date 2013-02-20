@@ -244,7 +244,9 @@ string Element::end_to_string() const
 // a simple content string within us - and kill the child
 void Element::optimise()
 {
-  if (children.size()==1 && children.back()->name.empty())
+  // Check for size()=1 without O(N) for large lists
+  if (!children.empty() && ++children.begin() == children.end()
+    && children.back()->name.empty())
   {
     content = children.back()->content;
     delete children.back();

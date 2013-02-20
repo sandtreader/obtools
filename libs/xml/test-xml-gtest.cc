@@ -16,6 +16,40 @@ namespace {
 using namespace std;
 using namespace ObTools;
 
+TEST(XMLTest, TestBasicParse)
+{
+  string xml="<foo><bar/></foo>\n";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  XML::Element& e = parser.get_root();
+  ASSERT_FALSE(!e);
+  EXPECT_EQ("foo", e.name);
+  EXPECT_EQ(1, e.children.size());
+  EXPECT_FALSE(!e.get_child("bar"));
+}
+
+TEST(XMLTest, TestContentOptimisation)
+{
+  string xml="<foo>content</foo>\n";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  XML::Element& e = parser.get_root();
+  ASSERT_FALSE(!e);
+  EXPECT_EQ("foo", e.name);
+  EXPECT_EQ("content", *e);
+}
+
+TEST(XMLTest, TestContentOptimisationWithComment)
+{
+  string xml="<foo>content<!--comment-->more</foo>\n";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  XML::Element& e = parser.get_root();
+  ASSERT_FALSE(!e);
+  EXPECT_EQ("foo", e.name);
+  EXPECT_EQ("content more", *e);
+}
+
 TEST(XMLTest, TestAttributeEscaping)
 {
   XML::Element e("test");
@@ -30,6 +64,7 @@ TEST(XMLTest, TestAttributeEscaping)
   string streamed_xml = e.to_string();
   ASSERT_EQ("<test amp=\"&amp;foo\" bothquot=\"'&quot;foo\" dquot='\"foo' gt=\"&gt;foo\" lt=\"&lt;foo\" normal=\"foo\" squot=\"'foo\"/>\n", streamed_xml);
 }
+
 
 } // anonymous namespace
 
