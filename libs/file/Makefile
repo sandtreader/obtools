@@ -8,16 +8,17 @@
 TYPE	= lib
 NAME   	= ot-file
 HEADERS = ot-file.h 
-OBJS  	= path.o directory.o
+OBJS  	= path.o directory.o stream.o
 DEPENDS = text
 TESTLIB = -lgtest
-TESTS 	= test-path test-dir test-mkdir test-path-gtest
+TESTS 	= test-path test-dir test-mkdir test-path-gtest test-stream
 TESTCMD	= ./test-path ~/.emacs &&                 \
 	  ./test-path /foo/bar/wombat/fred.exe && \
           ./test-path /usr/include/linux/ ../../foo && \
 	  ./test-dir /usr/bin/ && \
     echo "123456789" > ./test-path-gtest.gpt && sleep 2 && \
-   ./test-path-gtest
+   ./test-path-gtest && \
+   ./test-stream
 
 
 ROOT    = ../..
