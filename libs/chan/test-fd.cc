@@ -10,6 +10,11 @@
 #include "ot-chan.h"
 #include <fcntl.h>
 #include <errno.h>
+#ifndef __WIN32__
+#include <unistd.h>
+#endif
+
+
 using namespace std;
 
 //--------------------------------------------------------------------------

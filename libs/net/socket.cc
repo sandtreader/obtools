@@ -17,6 +17,7 @@
 typedef int socklen_t;
 typedef const char *sockopt_t;
 #else
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <net/if_arp.h>
 #include <net/if.h>
