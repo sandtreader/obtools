@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <list>
 #include <fstream>
+#include <vector>
 
 // Define uid_t and gid_t in Windows to make build easier
 #if defined(__WIN32__)
@@ -376,6 +377,45 @@ class OutStream: public ofstream
 };
 
 #endif
+
+//==========================================================================
+// Buffered Output Stream
+// Has a similar, but reduced, interface to ofstream, and provides simple
+// buffering
+class BufferedOutStream
+{
+private:
+  int fd;
+  vector<char> buffer;
+  uint64_t buffer_pos;
+  bool failbit;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  BufferedOutStream(const string& fn, uint64_t buffer_size,
+                    ios::openmode = ios::out | ios::trunc | ios::binary);
+
+  //------------------------------------------------------------------------
+  // Evaluate stream
+  bool operator!() const;
+
+  //------------------------------------------------------------------------
+  // Is this stream open?
+  bool is_open();
+
+  //------------------------------------------------------------------------
+  // Current file position
+  streampos tellp();
+
+  //------------------------------------------------------------------------
+  // Write data to stream
+  BufferedOutStream& write(const char* s, streamsize n);
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~BufferedOutStream();
+};
 
 //==========================================================================
 }} //namespaces
