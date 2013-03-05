@@ -10,6 +10,9 @@
 #include "angeld.h"
 #include <fstream>
 #include <errno.h>
+#ifndef __WIN32__
+#include <unistd.h>
+#endif
 
 #define DEFAULT_LOGFILE "/var/log/angel/angeld.log"
 #define PID_FILE        "/var/run/angeld.pid"
