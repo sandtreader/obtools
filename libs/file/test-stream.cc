@@ -43,7 +43,8 @@ TEST_F(StreamTest, TestBufferedWrite)
   const char data[] = "buffered-write";
 
   {
-    File::BufferedOutStream bos(test_file, 4);
+    File::BufferedOutStream bos(test_file);
+    bos.set_buffer_size(4);
     for (unsigned i = 0; i < sizeof(data); i += 2)
       bos.write(&data[i], 2);
   }
@@ -61,7 +62,8 @@ TEST_F(StreamTest, TestWriteLargerThanBuffer)
   const char data[] = "write-larger-than-buffer";
 
   {
-    File::BufferedOutStream bos(test_file, 4);
+    File::BufferedOutStream bos(test_file);
+    bos.set_buffer_size(4);
     bos.write(data, sizeof(data));
   }
 
@@ -77,7 +79,8 @@ TEST_F(StreamTest, TestCurrentStreamPos)
   const string test_file(test_dir + "/current-stream-pos");
   const char data[] = "current-stream-pos";
 
-  File::BufferedOutStream bos(test_file, 4);
+  File::BufferedOutStream bos(test_file);
+  bos.set_buffer_size(4);
   bos.write(data, 3);
   bos.write(data, 4);
 
