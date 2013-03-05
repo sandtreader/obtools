@@ -14,6 +14,7 @@
 #include <io.h>
 #define SOCKCLOSE closesocket
 #else
+#include <unistd.h>
 #define SOCKCLOSE close
 #endif
 

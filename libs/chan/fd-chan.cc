@@ -10,6 +10,9 @@
 #include "ot-chan.h"
 #include "ot-net.h"
 #include <errno.h>
+#ifndef __WIN32__
+#include <unistd.h>
+#endif
 
 #define SKIP_BUF_SIZE 4096
 

@@ -18,6 +18,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fstream>
+#ifndef __WIN32__
+#include <unistd.h>
+#endif
 
 #define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
 #define FIRST_WATCHDOG_SLEEP_TIME 1
