@@ -390,11 +390,34 @@ private:
   uint64_t buffer_pos;
   bool failbit;
 
+  //------------------------------------------------------------------------
+  // Flush buffer content to file
+  void flush_buffer();
+
 public:
   //------------------------------------------------------------------------
-  // Constructor
-  BufferedOutStream(const string& fn, uint64_t buffer_size,
-                    ios::openmode = ios::out | ios::trunc | ios::binary);
+  // Constructors
+  BufferedOutStream();
+  BufferedOutStream(const char *filename,
+                    ios_base::openmode mode = ios_base::out,
+                    uint64_t buffer_size = 0);
+  BufferedOutStream(const string& filename,
+                    ios_base::openmode mode = ios_base::out
+                                            | ios_base::trunc
+                                            | ios_base::binary,
+                    uint64_t buffer_size = 0);
+
+  //------------------------------------------------------------------------
+  // Set buffer size
+  void set_buffer_size(uint64_t buffer_size);
+
+  //------------------------------------------------------------------------
+  // Open a file
+  void open(const char *filename, ios_base::openmode mode = ios_base::out);
+
+  //------------------------------------------------------------------------
+  // Close file
+  void close();
 
   //------------------------------------------------------------------------
   // Evaluate stream
