@@ -72,7 +72,7 @@ bool BufferedOutStream::is_open()
 streampos BufferedOutStream::tellp()
 {
   if (is_open())
-    return lseek64(fd, 0, SEEK_CUR);
+    return lseek64(fd, 0, SEEK_CUR) + buffer_pos;
   else
     return -1;
 }
