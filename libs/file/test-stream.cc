@@ -37,7 +37,7 @@ class StreamTest: public ::testing::Test
   }
 };
 
-TEST_F(StreamTest, TestTestBufferedWrite)
+TEST_F(StreamTest, TestBufferedWrite)
 {
   const string test_file(test_dir + "/buffered-write");
   const char data[] = "buffered-write";
@@ -55,7 +55,7 @@ TEST_F(StreamTest, TestTestBufferedWrite)
   ASSERT_STREQ(data, str.c_str());
 }
 
-TEST_F(StreamTest, TestTestWriteLargerThanBuffer)
+TEST_F(StreamTest, TestWriteLargerThanBuffer)
 {
   const string test_file(test_dir + "/write-larger-than-buffer");
   const char data[] = "write-larger-than-buffer";
@@ -70,6 +70,18 @@ TEST_F(StreamTest, TestTestWriteLargerThanBuffer)
   string str;
   ASSERT_TRUE(path.read_all(str));
   ASSERT_STREQ(data, str.c_str());
+}
+
+TEST_F(StreamTest, TestCurrentStreamPos)
+{
+  const string test_file(test_dir + "/current-stream-pos");
+  const char data[] = "current-stream-pos";
+
+  File::BufferedOutStream bos(test_file, 4);
+  bos.write(data, 3);
+  bos.write(data, 4);
+
+  ASSERT_EQ(7, bos.tellp());
 }
 
 } // anonymous namespace
