@@ -62,6 +62,13 @@ void BufferedOutStream::set_buffer_size(uint64_t buffer_size)
 }
 
 //--------------------------------------------------------------------------
+// Get buffer size
+uint64_t BufferedOutStream::get_buffer_size() const
+{
+  return buffer.size();
+}
+
+//--------------------------------------------------------------------------
 // Open a file
 void BufferedOutStream::open(const char *filename, ios_base::openmode mode)
 {
