@@ -412,6 +412,10 @@ public:
   void set_buffer_size(uint64_t buffer_size);
 
   //------------------------------------------------------------------------
+  // Get buffer size
+  uint64_t get_buffer_size() const;
+
+  //------------------------------------------------------------------------
   // Open a file
   void open(const char *filename, ios_base::openmode mode = ios_base::out);
 
