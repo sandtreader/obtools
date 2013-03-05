@@ -147,7 +147,7 @@ void Server::run()
 { 
   for(;;)
   {
-    sleep(1); 
+    MT::Thread::sleep(1);
 
     //!!!
   }

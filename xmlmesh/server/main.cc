@@ -12,6 +12,9 @@
 #include "ot-file.h"
 #include <fstream>
 #include <errno.h>
+#ifndef __WIN32__
+#include <unistd.h>
+#endif
 
 #define DEFAULT_LOGFILE "/var/log/obtools/xmlmesh.log"
 #define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
