@@ -96,6 +96,7 @@ void BufferedOutStream::close()
   {
     flush_buffer();
     ::close(fd);
+    fd = -1;
   }
 }
 

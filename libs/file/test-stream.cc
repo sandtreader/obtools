@@ -110,6 +110,23 @@ TEST_F(StreamTest, TestTruncation)
   ASSERT_TRUE(str.empty());
 }
 
+TEST_F(StreamTest, TestClose)
+{
+  const string test_file(test_dir + "/close");
+  const char data[] = "close";
+
+  File::BufferedOutStream bos(test_file);
+  bos.write(data, sizeof(data));
+  bos.close();
+
+  ASSERT_FALSE(bos.is_open());
+  File::Path path(test_file);
+  ASSERT_TRUE(path.readable());
+  string str;
+  ASSERT_TRUE(path.read_all(str));
+  ASSERT_STREQ(data, str.c_str());
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
