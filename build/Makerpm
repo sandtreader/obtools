@@ -69,7 +69,7 @@ if [ $RPM_SERVICE ]; then
   NO_NS_PART=`echo $NAME|cut -d\- -f2`
   RPM_SERVERNAME=${NO_NS_PART:-$NAME}
 
-  if [ $CENTOS ] ; then
+  if [ "`lsb_release -i -s `" = "CentOS" ] ; then
     . $ROOT/build/Makerpm.centos.service
   else
     if [ $SLES ] ; then
