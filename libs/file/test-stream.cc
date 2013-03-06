@@ -64,7 +64,8 @@ TEST_F(StreamTest, TestWriteLargerThanBuffer)
   {
     File::BufferedOutStream bos(test_file);
     bos.set_buffer_size(4);
-    bos.write(data, sizeof(data));
+    bos.write(data, 10);
+    bos.write(&data[10], sizeof(data) - 10);
   }
 
   File::Path path(test_file);
@@ -85,6 +86,28 @@ TEST_F(StreamTest, TestCurrentStreamPos)
   bos.write(data, 4);
 
   ASSERT_EQ(7, bos.tellp());
+}
+
+TEST_F(StreamTest, TestTruncation)
+{
+  const string test_file(test_dir + "/truncation");
+  const char data[] = "truncation";
+
+  File::Path path(test_file);
+  path.write_all(data);
+
+  ASSERT_TRUE(path.readable());
+  string str;
+  ASSERT_TRUE(path.read_all(str));
+  ASSERT_STREQ(data, str.c_str());
+
+  File::BufferedOutStream bos(test_file, ios_base::out | ios_base::trunc);
+  bos.close();
+
+  ASSERT_TRUE(path.readable());
+  str.resize(0);
+  ASSERT_TRUE(path.read_all(str));
+  ASSERT_TRUE(str.empty());
 }
 
 } // anonymous namespace

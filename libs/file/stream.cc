@@ -144,7 +144,7 @@ BufferedOutStream& BufferedOutStream::write(const char* s, streamsize n)
 
     if (buffer.size() < static_cast<vector<char>::size_type>(n))
     {
-      if (::write(fd, s, n) != static_cast<ssize_t>(buffer_pos))
+      if (::write(fd, s, n) != n)
         failbit = true;
     }
     else
