@@ -1,7 +1,8 @@
 # prepare rpm build
 #  should work unmodified for any Obtools package 
 
-NAME=$1
+# NAME may have been overridden in calling script
+NAME=${NAME:$1}
 VERSION=$2
 REV=$3
 TARGARCH=${TARGARCH:-4}
