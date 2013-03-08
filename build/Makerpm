@@ -2,7 +2,7 @@
 #  should work unmodified for any Obtools package 
 
 # NAME may have been overridden in calling script
-NAME=${NAME:$1}
+NAME=${NAME:-$1}
 VERSION=$2
 REV=$3
 TARGARCH=${TARGARCH:-4}
