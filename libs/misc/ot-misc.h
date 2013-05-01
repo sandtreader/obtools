@@ -377,6 +377,9 @@ public:
     {}
 
     offset_t end() const { return start+length; }  // One past the end
+
+    bool operator==(const Range& b) const
+    { return start == b.start && length == b.length; }
   };
 
   // List of ranges, stored in order
@@ -391,6 +394,9 @@ public:
   typedef typename list<Range>::iterator iterator;
   iterator begin() { return ranges.begin(); }
   iterator end()   { return ranges.end();   }
+  typedef typename list<Range>::const_iterator const_iterator;
+  const_iterator begin() const { return ranges.begin(); }
+  const_iterator end() const   { return ranges.end();   }
 
   //------------------------------------------------------------------------
   // Constructor
@@ -655,7 +661,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get number of ranges
-  int count() const { return ranges.size(); }
+  typename list<Range>::size_type count() const { return ranges.size(); }
 
   //------------------------------------------------------------------------
   // Check if the set is complete up to total_length, or there was nothing
