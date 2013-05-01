@@ -16,7 +16,7 @@ TESTLIB = -lgtest
 TESTCMD	= ./test-md5 && ./test-crc hello && ./test-crc32 hello \
        && ./test-prop \
        && ./test-random \
-       && ./test-dump && ./test-range < ../test-range.dat
+       && ./test-dump && ./test-range
 
 SOCKET  = 1  # Because chan needs net
 

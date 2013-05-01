@@ -80,11 +80,11 @@ string UInt64RangeSet::str() const
 // Read from XML - reads <range start="x" length="y"/> elements
 // (or other element name if provided) from given parent element.
 // Ranges may overlap and will be optimised
-// together.  Also reads total_length attribute of parent if present
+// together.  Also reads end_offset attribute of parent if present
 void UInt64RangeSet::read_from_xml(const XML::Element& parent,
                                    const string& element_name)
 {
-  total_length = parent.get_attr_int64("total_length");
+  end_offset = parent.get_attr_int64("end_offset");
   for(XML::Element::const_iterator p(parent.get_children(element_name));p;++p)
   {
     const XML::Element& range = *p;
@@ -96,7 +96,7 @@ void UInt64RangeSet::read_from_xml(const XML::Element& parent,
 // Convert to XML
 // Adds <range start="x" length="y"/> elements to the given XML element
 // or other element name if provided
-// and adds total_length attribute to parent
+// and adds end_offset attribute to parent
 void UInt64RangeSet::add_to_xml(XML::Element& parent,
                                 const string& element_name) const
 {
@@ -108,14 +108,14 @@ void UInt64RangeSet::add_to_xml(XML::Element& parent,
     re.set_attr_int64("length", r.length);
   }
 
-  parent.set_attr_int64("total_length", total_length);
+  parent.set_attr_int64("end_offset", end_offset);
 }
 
 //------------------------------------------------------------------------
 // Read as binary from a channel;  format as below
 void UInt64RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
 {
-  total_length = chan.read_nbo_64();
+  end_offset = chan.read_nbo_64();
   uint32_t n = chan.read_nbo_32();
   while (n--)
   {
@@ -132,7 +132,7 @@ void UInt64RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
 // All values NBO
 void UInt64RangeSet::write(Channel::Writer& chan) const throw(Channel::Error)
 {
-  chan.write_nbo_64(total_length);
+  chan.write_nbo_64(end_offset);
   chan.write_nbo_32(ranges.size());
   for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
   {

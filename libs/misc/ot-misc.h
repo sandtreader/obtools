@@ -359,13 +359,13 @@ public:
 //==========================================================================
 //Range set - stores a list of integer ranges - e.g. file fragments, and
 //offers various useful operations on them (range.cc)
-template<typename T>
+template<typename T, typename L>
 class RangeSet
 {
 public:
   // Offset and length typedefs
   typedef T offset_t;
-  typedef T length_t;
+  typedef L length_t;
 
   // Internal record of a single range
   struct Range
@@ -385,10 +385,10 @@ public:
   // List of ranges, stored in order
   list<Range> ranges;
 
-  // Expected total length - provides information for various operations 
+  // Expected end offset - provides information for various operations 
   // below.  Will be modified by insertions if exceeded - hence 0 is fine
   // if you want just to count the total length seen so far
-  length_t total_length;
+  offset_t end_offset;
 
   // Iterator types
   typedef typename list<Range>::iterator iterator;
@@ -400,7 +400,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor
-  RangeSet(length_t _total_length=0): total_length(_total_length) {}
+  RangeSet(offset_t _end_offset=offset_t()): end_offset(_end_offset) {}
 
   //------------------------------------------------------------------------
   // Insert a range
@@ -461,8 +461,8 @@ public:
       }
     }
 
-    // Check if total_length exceeded 
-    if (end>total_length) total_length = end;
+    // Check if end offset exceeded
+    if (end>end_offset) end_offset = end;
   }
 
   //------------------------------------------------------------------------
@@ -567,7 +567,7 @@ public:
   RangeSet operator-(const RangeSet& o) { return difference(o); }
 
   //------------------------------------------------------------------------
-  // Return a new set of all the 'holes' in the set, up to the total_length
+  // Return a new set of all the 'holes' in the set, up to the end offset
   RangeSet inverse() const
   {
     RangeSet inverse;
@@ -589,17 +589,17 @@ public:
     // Complete with gap (if any) between final end and total length
     if (last)
     {
-      if (total_length > last->end())
-        inverse.ranges.push_back(Range(last->end(), total_length-last->end()));
+      if (end_offset > last->end())
+        inverse.ranges.push_back(Range(last->end(), end_offset-last->end()));
     }
-    else if (total_length > 0)
+    else if (end_offset > 0)
     {
       // Empty set - add whole range
-      inverse.ranges.push_back(Range(0, total_length));
+      inverse.ranges.push_back(Range(0, end_offset));
     }
 
     // Total length is the same as ours
-    inverse.total_length = total_length;
+    inverse.end_offset = end_offset;
     return inverse;
   }
 
@@ -610,7 +610,7 @@ public:
   {
     // Ensure the other set extends to the same size as we do
     RangeSet o2 = o;
-    o2.total_length = total_length;
+    o2.end_offset = end_offset;
 
     // Get the inverse of the other set, to our full length
     RangeSet io2 = o2.inverse();
@@ -622,6 +622,75 @@ public:
   }
 
   RangeSet operator^(const RangeSet& o) const { return intersection(o); }
+
+  //------------------------------------------------------------------------
+  // Return a new set which is the intersection of all given sets
+private:
+  struct IntersectState
+  {
+    const_iterator it;
+    bool end;
+    const_iterator list_end;
+
+    IntersectState(const const_iterator& _it, const const_iterator& _list_end):
+      it(_it), end(false), list_end(_list_end)
+    {}
+
+    bool operator<(const IntersectState& b) const
+    {
+      return (end ? it->end() : it->start)
+              < (b.end ? b.it->end() : b.it->start);
+    }
+  };
+
+public:
+  static RangeSet intersection(const list<RangeSet>& sets)
+  {
+    list<IntersectState> state;
+    for (typename list<RangeSet>::const_iterator
+         it = sets.begin(); it != sets.end(); ++it)
+    {
+      state.push_back(IntersectState(it->begin(), it->end()));
+    }
+
+    RangeSet result;
+    unsigned int count(0);
+    T current_start;
+
+    while (true)
+    {
+      typename list<IntersectState>::iterator first = state.end();
+      for (typename list<IntersectState>::iterator
+           it = state.begin(); it != state.end(); ++it)
+      {
+        if (it->it != it->list_end &&
+            (first == state.end() || *it < *first))
+        {
+          first = it;
+        }
+      }
+      if (first == state.end())
+        break;
+
+      if (first->end)
+      {
+        if (count == state.size())
+          result.insert(current_start, first->it->end() - current_start);
+        --count;
+        ++(first->it);
+        first->end = false;
+      }
+      else
+      {
+        ++count;
+        first->end = true;
+        if (count == state.size())
+          current_start = first->it->start;
+      }
+    }
+
+    return result;
+  }
 
   //------------------------------------------------------------------------
   // Clear the set
@@ -664,18 +733,18 @@ public:
   typename list<Range>::size_type count() const { return ranges.size(); }
 
   //------------------------------------------------------------------------
-  // Check if the set is complete up to total_length, or there was nothing
+  // Check if the set is complete up to end_offset, or there was nothing
   // to fetch
-  bool is_complete() const { return !total_length||contains(0, total_length); } 
+  bool is_complete() const { return !end_offset||contains(0, end_offset); }
   //------------------------------------------------------------------------
   // Get percentage coverage
   int percentage_complete() 
-  { return total_length?(100*coverage()/total_length):100; }
+  { return end_offset?(100*coverage()/end_offset):100; }
 
   //------------------------------------------------------------------------
   // Show the set as a string 'fuel gauge' of the given max string length
   // Each character in the string maps to a fractional part of the range
-  // (measured to total_length):
+  // (measured to end_offset):
   //   ' ' (space):  No range present in this fraction
   //   '-'        :  Part of range present in this fraction
   //   '='        :  Full range present in this fraction
@@ -688,14 +757,14 @@ public:
     typename list<Range>::const_iterator p = ranges.begin();
     string s;
 
-    if (length > total_length) length = total_length;
+    if (length > end_offset) length = end_offset;
 
     for(unsigned int i=0; i<length; i++)
     {
       // Calculate (exactly, avoiding rounding and overflow) start and end 
       // of this fraction (end=start of next)
-      double this_start = (double)total_length*i/(double)length;
-      double this_end   = (double)total_length*(i+1)/(double)length;
+      double this_start = (double)end_offset*i/(double)length;
+      double this_end   = (double)end_offset*(i+1)/(double)length;
 
       int contained = 0;  // 0 = none, 1 = some, 2 = all
 
@@ -729,21 +798,23 @@ public:
   }
 };
 
-class UInt64RangeSet: public RangeSet<uint64_t>
+class UInt64RangeSet: public RangeSet<uint64_t, uint64_t>
 {
 public:
   //------------------------------------------------------------------------
   // Constructor
-  UInt64RangeSet(length_t total_length=0): RangeSet<uint64_t>(total_length) {}
+  UInt64RangeSet(length_t end_offset=0):
+    RangeSet<uint64_t, uint64_t>(end_offset) {}
 
   //------------------------------------------------------------------------
   // Copy Constructor
-  UInt64RangeSet(const RangeSet<uint64_t>& rs): RangeSet<uint64_t>(rs) {}
+  UInt64RangeSet(const RangeSet<uint64_t, uint64_t>& rs):
+    RangeSet<uint64_t, uint64_t>(rs) {}
 
   //------------------------------------------------------------------------
   // Constructor from string
-  UInt64RangeSet(const string& text, length_t total_length=0):
-    RangeSet<uint64_t>(total_length) { read(text); }
+  UInt64RangeSet(const string& text, length_t end_offset=0):
+    RangeSet<uint64_t, uint64_t>(end_offset) { read(text); }
 
   //------------------------------------------------------------------------
   // Read from a comma-delimited range string
@@ -761,7 +832,7 @@ public:
   // Read from XML - reads <range start="x" length="y"/> elements
   // (or other element name if provided) from given parent element.
   // Ranges may overlap and will be optimised
-  // together.  Also reads total_length attribute of parent if present
+  // together.  Also reads end_offset attribute of parent if present
   void read_from_xml(const XML::Element& parent,
                      const string& element_name="range");
 
@@ -769,7 +840,7 @@ public:
   // Convert to XML
   // Adds <range start="x" length="y"/> elements to the given XML element
   // or other element name if provided
-  // and adds total_length attribute to parent
+  // and adds end_offset attribute to parent
   void add_to_xml(XML::Element& parent,
                   const string& element_name="range") const;
 

@@ -112,6 +112,48 @@ TEST(RangeSetTest, TestIntersection)
   }
 }
 
+TEST(RangeSetTest, TestMultiRangeSetIntersection)
+{
+  Misc::RangeSet<double, double> rs1(5.0);
+  ASSERT_TRUE(rs1.begin() == rs1.end());
+  rs1.insert(10.0, 2.0);
+  ASSERT_EQ(1, rs1.count());
+  rs1.insert(16.0, 5.0);
+  ASSERT_EQ(2, rs1.count());
+
+  Misc::RangeSet<double, double> rs2(5.0);
+  ASSERT_TRUE(rs2.begin() == rs2.end());
+  rs2.insert(9.0, 2.0);
+  ASSERT_EQ(1, rs2.count());
+  rs2.insert(13.0, 10.0);
+  ASSERT_EQ(2, rs2.count());
+
+  Misc::RangeSet<double, double> rs3(5.0);
+  ASSERT_TRUE(rs3.begin() == rs3.end());
+  rs3.insert(5.0, 12.0);
+  ASSERT_EQ(1, rs3.count());
+
+  list<Misc::RangeSet<double, double> > rs_list;
+  rs_list.push_back(rs1);
+  rs_list.push_back(rs2);
+  rs_list.push_back(rs3);
+
+  Misc::RangeSet<double, double>
+         actual = Misc::RangeSet<double, double>::intersection(rs_list);
+
+  list<Misc::RangeSet<double, double>::Range> expected;
+  expected.push_back(Misc::RangeSet<double, double>::Range(10.0, 1.0));
+  expected.push_back(Misc::RangeSet<double, double>::Range(16.0, 1.0));
+
+  ASSERT_EQ(expected.size(), actual.count());
+  for (Misc::RangeSet<double, double>::const_iterator
+       it = actual.begin(), ex = expected.begin();
+       it != actual.end(); ++it, ++ex)
+  {
+    ASSERT_EQ(*ex, *it);
+  }
+}
+
 TEST(RangeSetTest, TestContains)
 {
   Misc::UInt64RangeSet rs(5);
