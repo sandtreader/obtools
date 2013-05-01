@@ -20,6 +20,7 @@
 #include <sstream>
 #include "ot-xml.h"
 #include "ot-chan.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace Misc { 
 
@@ -358,20 +359,24 @@ public:
 //==========================================================================
 //Range set - stores a list of integer ranges - e.g. file fragments, and
 //offers various useful operations on them (range.cc)
+template<typename T>
 class RangeSet
 {
 public:
-  // Integer size typedefs 
-  typedef uint64_t off_t;
-  typedef uint64_t len_t;
+  // Offset and length typedefs
+  typedef T offset_t;
+  typedef T length_t;
 
   // Internal record of a single range
   struct Range
   {
-    off_t start;
-    len_t length;
-    Range(off_t _start, len_t _length): start(_start), length(_length) {}
-    off_t end() const { return start+length; }  // One past the end
+    offset_t start;
+    length_t length;
+    Range(offset_t _start, length_t _length):
+      start(_start), length(_length)
+    {}
+
+    offset_t end() const { return start+length; }  // One past the end
   };
 
   // List of ranges, stored in order
@@ -380,30 +385,91 @@ public:
   // Expected total length - provides information for various operations 
   // below.  Will be modified by insertions if exceeded - hence 0 is fine
   // if you want just to count the total length seen so far
-  len_t total_length;
+  length_t total_length;
 
   // Iterator types
-  typedef list<Range>::iterator iterator;
+  typedef typename list<Range>::iterator iterator;
   iterator begin() { return ranges.begin(); }
   iterator end()   { return ranges.end();   }
 
   //------------------------------------------------------------------------
   // Constructor
-  RangeSet(len_t _total_length=0): total_length(_total_length) {}
-
-  //------------------------------------------------------------------------
-  // Constructor from string
-  RangeSet(const string& text, len_t _total_length=0): 
-    total_length(_total_length) { read(text); }
+  RangeSet(length_t _total_length=0): total_length(_total_length) {}
 
   //------------------------------------------------------------------------
   // Insert a range
   // Optimises against adjacent ranges, overlaps allowed
-  void insert(off_t start, len_t length=1);
+  void insert(offset_t start, length_t length=1)
+  {
+    // Catch daftness which would otherwise break us
+    if (!length) return;
+
+    offset_t end = start+length;
+
+    // Find the first range which starts after or at the new one
+    typename list<Range>::iterator prev_p = ranges.end();
+    typename list<Range>::iterator next_p;
+    typename list<Range>::iterator new_p;
+
+    for (next_p=ranges.begin(); 
+         next_p!=ranges.end() && next_p->start < start;
+         prev_p = next_p++)
+      ;
+
+    // If there was one before, check if it overlaps or touches us
+    if (prev_p != ranges.end() && prev_p->end() >= start)
+    {
+      // Extend this one to include this if it's smaller
+      if (end > prev_p->end())
+        prev_p->length = start+length-prev_p->start;
+
+      // Use this one as the one to check for overlaps afterwards
+      new_p = prev_p;
+    }
+    else
+    {
+      // Not overlapping/touching previous - insert before next, or at 
+      // end if none found
+      new_p = ranges.insert(next_p, Range(start, length));
+    }
+
+    // Convenient refs for accessing & modifying new (or extended) range
+    offset_t& new_start  = new_p->start;
+    length_t& new_length = new_p->length;
+
+    // Now work forward from new_p 'eating' ranges we overlap with or touch
+    for(next_p = new_p, ++next_p;
+        next_p != ranges.end();)
+    {
+      typename list<Range>::iterator this_p = next_p++; // Protect from deletion
+      Range& next = *this_p;
+
+      // Check for overlap/touch
+      if (new_start + new_length >= next.start)
+      {
+        // Extend new one to include this if it is longer
+        if (next.start+next.length > new_start+new_length)
+          new_length = next.start+next.length-new_start;
+
+        ranges.erase(this_p);  // Delete eaten one
+      }
+    }
+
+    // Check if total_length exceeded 
+    if (end>total_length) total_length = end;
+  }
 
   //------------------------------------------------------------------------
   // Insert a range set (inserts every element = set union)
-  void insert(const RangeSet& o);
+  void insert(const RangeSet& o)
+  {
+    for(typename list<Range>::const_iterator
+        p = o.ranges.begin(); p!=o.ranges.end(); ++p)
+    {
+      const Range& r = *p;
+      insert(r.start, r.length);
+    }
+  }
 
   //------------------------------------------------------------------------
   // Set union and addition operator
@@ -414,11 +480,78 @@ public:
 
   //------------------------------------------------------------------------
   // Remove a range
-  void remove(off_t start, len_t length=1);
+  void remove(offset_t start, length_t length=1)
+  {
+    // Catch daftness which would otherwise break us
+    if (!length) return;
+
+    offset_t end = start+length;
+
+    // Find the first range that ends after or at the start point
+    typename list<Range>::iterator p;
+
+    for (p=ranges.begin(); p!=ranges.end() && p->end() <= start; p++)
+      ;
+
+    if (p == ranges.end()) return;  // All end before - nothing to do
+
+    // Now check every range until we reach one that starts after our end
+    while (p!=ranges.end() && p->start < end)
+    {
+      typename list<Range>::iterator q=p++;  // Protect from deletion
+      offset_t q_start = q->start;
+      offset_t q_end = q->end();
+
+      // Check for various cases:
+      // (1) Range entirely covered by deletion
+      if (start <= q_start && end >= q_end)
+      {
+        // Remove it entirely
+        ranges.erase(q);
+      }
+      // (2) Range truncated right by start
+      else if (end >= q_end)
+      {
+        // Adjust length 
+        q->length = start-q_start;
+      }
+      // (3) Range truncated left by end
+      else if (start <= q_start)
+      {
+        // Shift start and adjust length
+        q->length -= (end-q_start);
+        q->start = end;
+
+        // Stop here
+        break;
+      }
+      // (4) Worst case - deletion is in the middle of the range
+      else
+      {
+        // Truncate the current one to hold the left-hand end
+        q->length = start-q_start;
+
+        // Create a new one to hold the right-hand end, inserted after
+        // the current one, or at end
+        ranges.insert(p, Range(end, q_end-end));
+
+        // Stop here
+        break;
+      }
+    }
+  }
 
   //------------------------------------------------------------------------
   // Remove a range set (removes every element = set difference)
-  void remove(const RangeSet& o);
+  void remove(const RangeSet& o)
+  {
+    for(typename list<Range>::const_iterator
+        p = o.ranges.begin(); p!=o.ranges.end(); ++p)
+    {
+      const Range& r = *p;
+      remove(r.start, r.length);
+    }
+  }
 
   //------------------------------------------------------------------------
   // Set difference, and subtraction operator
@@ -429,12 +562,59 @@ public:
 
   //------------------------------------------------------------------------
   // Return a new set of all the 'holes' in the set, up to the total_length
-  RangeSet inverse() const;
+  RangeSet inverse() const
+  {
+    RangeSet inverse;
+    const Range *last = 0;
+
+    // Walk filling in gaps between last end (or 0) and new start
+    for(typename list<Range>::const_iterator
+        p = ranges.begin(); p!=ranges.end(); ++p)
+    {
+      const Range& r = *p;
+      if (last)
+        inverse.ranges.push_back(Range(last->end(), r.start-last->end()));
+      else if (r.start > 0)
+        inverse.ranges.push_back(Range(0, r.start));
+
+      last = &r;
+    }
+
+    // Complete with gap (if any) between final end and total length
+    if (last)
+    {
+      if (total_length > last->end())
+        inverse.ranges.push_back(Range(last->end(), total_length-last->end()));
+    }
+    else if (total_length > 0)
+    {
+      // Empty set - add whole range
+      inverse.ranges.push_back(Range(0, total_length));
+    }
+
+    // Total length is the same as ours
+    inverse.total_length = total_length;
+    return inverse;
+  }
 
   //------------------------------------------------------------------------
   // Return a new set which is the intersection of this set with another
   // and ^ operator
-  RangeSet intersection(const RangeSet& o) const;
+  RangeSet intersection(const RangeSet& o) const
+  {
+    // Ensure the other set extends to the same size as we do
+    RangeSet o2 = o;
+    o2.total_length = total_length;
+
+    // Get the inverse of the other set, to our full length
+    RangeSet io2 = o2.inverse();
+
+    // Subtract this from us - thus removing anything that is not in o
+    RangeSet r = *this;
+    r.remove(io2);
+    return r;
+  }
+
   RangeSet operator^(const RangeSet& o) const { return intersection(o); }
 
   //------------------------------------------------------------------------
@@ -443,11 +623,35 @@ public:
 
   //------------------------------------------------------------------------
   // Check if a given range is all present
-  bool contains(off_t start, len_t length=1) const;
+  bool contains(offset_t start, length_t length=1) const
+  {
+    offset_t end = start+length;
+
+    // Because the set is always optimal, there must be a single range
+    // which includes both the start and end
+    for(typename list<Range>::const_iterator
+        p = ranges.begin(); p!=ranges.end(); ++p)
+    {
+      const Range& r = *p;
+      if (start >= r.start && start < r.end() && end <= r.end()) return true;
+    }
+
+    return false;
+  }
 
   //------------------------------------------------------------------------
   // Get total coverage of the set (sum of all range lengths)
-  len_t coverage() const;
+  length_t coverage() const
+  {
+    length_t sum = 0;
+
+    // Simply add up all the range lengths
+    for(typename list<Range>::const_iterator
+        p = ranges.begin(); p!=ranges.end(); ++p)
+      sum += p->length;
+
+    return sum;
+  }
 
   //------------------------------------------------------------------------
   // Get number of ranges
@@ -473,7 +677,67 @@ public:
   // ranges, but also allows for insertion at multiple points
   // If length is more than the total length of the range, it is reduced to it
   // (a character can never represent less than 1 unit)
-  string gauge(unsigned int length=50) const;
+  string gauge(unsigned int length=50) const
+  {
+    typename list<Range>::const_iterator p = ranges.begin();
+    string s;
+
+    if (length > total_length) length = total_length;
+
+    for(unsigned int i=0; i<length; i++)
+    {
+      // Calculate (exactly, avoiding rounding and overflow) start and end 
+      // of this fraction (end=start of next)
+      double this_start = (double)total_length*i/(double)length;
+      double this_end   = (double)total_length*(i+1)/(double)length;
+
+      int contained = 0;  // 0 = none, 1 = some, 2 = all
+
+      while (p!=ranges.end())
+      {
+        const Range& r = *p;
+
+        // Skip to next fraction if not yet overlapping this range
+        if ((double)r.start >= this_end) break;
+
+        // Check if we've already left this range
+        if (this_start >= (double)r.end())
+        {
+          ++p;
+          continue;
+        }
+
+        // So we have an overlap - is it total?
+        if ((double)r.start <= this_start && (double)r.end() >= this_end)
+          contained = 2;
+        else
+          contained = 1;
+
+        break;
+      }
+
+      s += " -="[contained];
+    }
+
+    return s;
+  }
+};
+
+class UInt64RangeSet: public RangeSet<uint64_t>
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  UInt64RangeSet(length_t total_length=0): RangeSet<uint64_t>(total_length) {}
+
+  //------------------------------------------------------------------------
+  // Copy Constructor
+  UInt64RangeSet(const RangeSet<uint64_t>& rs): RangeSet<uint64_t>(rs) {}
+
+  //------------------------------------------------------------------------
+  // Constructor from string
+  UInt64RangeSet(const string& text, length_t total_length=0):
+    RangeSet<uint64_t>(total_length) { read(text); }
 
   //------------------------------------------------------------------------
   // Read from a comma-delimited range string
@@ -489,19 +753,19 @@ public:
 
   //------------------------------------------------------------------------
   // Read from XML - reads <range start="x" length="y"/> elements
-  // (or other element name if provided) from given parent element.  
+  // (or other element name if provided) from given parent element.
   // Ranges may overlap and will be optimised
   // together.  Also reads total_length attribute of parent if present
-  void read_from_xml(const XML::Element& parent, 
-		     const string& element_name="range");
+  void read_from_xml(const XML::Element& parent,
+                     const string& element_name="range");
 
   //------------------------------------------------------------------------
   // Convert to XML
   // Adds <range start="x" length="y"/> elements to the given XML element
   // or other element name if provided
   // and adds total_length attribute to parent
-  void add_to_xml(XML::Element& parent, 
-		  const string& element_name="range") const;
+  void add_to_xml(XML::Element& parent,
+                  const string& element_name="range") const;
 
   //------------------------------------------------------------------------
   // Read as binary from a channel;  format as below
@@ -521,24 +785,8 @@ public:
 
 //------------------------------------------------------------------------
 // << operator to write RangeSet to ostream
-ostream& operator<<(ostream& s, const RangeSet& rs);
+ostream& operator<<(ostream& s, const UInt64RangeSet& rs);
 
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_MISC_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

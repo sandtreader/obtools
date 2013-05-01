@@ -20,13 +20,9 @@ int main()
 {
   Misc::Dumper dumper(cout, 16, 4, true);
 
-  char *s = "Mary had a little lamb, its fleece was white as snow\nAnd everywhere that Mary went, the lamb was sure to go\n";
+  string s("Mary had a little lamb, its fleece was white as snow\nAnd everywhere that Mary went, the lamb was sure to go\n");
 
-  dumper.dump(s, strlen(s)+1);
+  dumper.dump(s.c_str(), s.size());
 
-  return 0;  
+  return 0;
 }
-
-
-
-

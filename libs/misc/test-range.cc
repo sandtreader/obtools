@@ -18,7 +18,7 @@ using namespace ObTools;
 
 int main()
 {
-  Misc::RangeSet s(5);
+  Misc::UInt64RangeSet s(5);
   bool begin = true;
 
   // Read numbers from cin
@@ -31,7 +31,7 @@ int main()
     }
     else
     {
-      Misc::RangeSet::off_t start, length;
+      Misc::UInt64RangeSet::offset_t start, length;
       char action;
 
       cin >> action >> start >> length;
@@ -63,7 +63,7 @@ int main()
     cout << "Includes 15,5? " << (s.contains(15,5)?"Yes":"No") << endl;
 
     // Set operations
-    Misc::RangeSet so;
+    Misc::UInt64RangeSet so;
     so.insert(0,10);
     so.insert(50,10);
 
@@ -78,7 +78,7 @@ int main()
     cout << "Text:\n";
     string text = s.str();
     cout << text << endl;
-    Misc::RangeSet s1(text);
+    Misc::UInt64RangeSet s1(text);
     cout << "Read back from text:\n";
     cout << s1 << endl;
 
@@ -87,7 +87,7 @@ int main()
     XML::Element e("rangeset");
     s.add_to_xml(e);
     cout << e;
-    Misc::RangeSet s2;
+    Misc::UInt64RangeSet s2;
     s2.read_from_xml(e);
     cout << "Read back from XML (total length " << s2.total_length << "):\n";
     cout << s2 << endl;
@@ -101,14 +101,14 @@ int main()
     Misc::Dumper dumper(cout);
     dumper.dump(buf, bw.get_offset());
 
-    Misc::RangeSet s3;
+    Misc::UInt64RangeSet s3;
     Channel::BlockReader br(buf, bw.get_offset());
     s3.read(br);
     cout << "Read back from binary (total length "<< s3.total_length<< "):\n";
     cout << s3 << endl;
 
     // Invert
-    Misc::RangeSet inv = s.inverse();
+    Misc::UInt64RangeSet inv = s.inverse();
     cout << "Inverse:\n";
     cout << inv;
     // Gauge
