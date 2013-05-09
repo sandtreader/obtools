@@ -231,6 +231,15 @@ public:
   { parent=0; line=src.line; 
     clear_children(); src.deep_copy_to(*this); return src; }
 
+  //------------------------------------------------------------------------
+  // Superimpose an element on top of this one
+  // Any attributes or children from the given child are added to this
+  // element, replacing any existing data where the attribute/child matches
+  // the original. This happens recursively through the element's children.
+  // An identifier attribute can be specified to determine uniqueness by. If
+  // left empty, the element name is used.
+  void superimpose(const Element& source, const string& identifier);
+
   //--------------------------------------------------------------------------
   // Merge with another element
   // The attributes and content of the source element are copied into this

@@ -65,6 +65,39 @@ TEST(XMLTest, TestAttributeEscaping)
   ASSERT_EQ("<test amp=\"&amp;foo\" bothquot=\"'&quot;foo\" dquot='\"foo' gt=\"&gt;foo\" lt=\"&lt;foo\" normal=\"foo\" squot=\"'foo\"/>\n", streamed_xml);
 }
 
+TEST(XMLTest, TestSuperimpose)
+{
+  XML::Element a("root");
+  a.set_attr("name", "foo");
+  XML::Element &a_c1 = a.add("child", "id", "1");
+  XML::Element &a_c2 = a.add("child", "id", "2");
+  a_c1.set_attr("name", "pickle");
+  a_c2.set_attr("name", "sprout");
+  a_c2.add("colour", "name", "green");
+  XML::Element b("root");
+  b.set_attr("name", "bar");
+  XML::Element &b_c1 = b.add("child", "id", "1");
+  XML::Element &b_c3 = b.add("child", "id", "3");
+  b_c1.set_attr("name", "apricot");
+  b_c3.set_attr("name", "plum");
+  b_c1.add("colour", "name", "orange");
+  b_c3.add("colour", "name", "purple");
+
+  a.superimpose(b, "id");
+
+  string expected = "<root name=\"bar\">\n"
+                    "  <child id=\"1\" name=\"apricot\">\n"
+                    "    <colour name=\"orange\"/>\n"
+                    "  </child>\n"
+                    "  <child id=\"2\" name=\"sprout\">\n"
+                    "    <colour name=\"green\"/>\n"
+                    "  </child>\n"
+                    "  <child id=\"3\" name=\"plum\">\n"
+                    "    <colour name=\"purple\"/>\n"
+                    "  </child>\n"
+                    "</root>\n";
+  ASSERT_EQ(expected, a.to_string());
+}
 
 } // anonymous namespace
 

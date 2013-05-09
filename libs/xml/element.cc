@@ -34,6 +34,43 @@ void Element::deep_copy_to(Element& dest) const
 }
 
 //--------------------------------------------------------------------------
+// Superimpose an element on top of this one
+// Any attributes or children from the given child are added to this
+// element, replacing any existing data where the attribute/child matches
+// the original. This happens recursively through the element's children.
+// An identifier attribute can be specified to determine uniqueness by. If
+// left empty, the element name is used.
+void Element::superimpose(const Element& source, const string& identifier)
+{
+  // Copy over all attributes, replacing any duplicates
+  for (map<string, string>::const_iterator
+       p = source.attrs.begin(); p != source.attrs.end(); ++p)
+    attrs[p->first] = p->second;
+
+  // Loop through children and add if not present in original, else
+  // superimpose
+  for (list<Element *>::const_iterator
+       p = source.children.begin(); p != source.children.end(); ++p)
+  {
+    string pid = (*p)->get_attr(identifier, (*p)->name);
+    bool found(false);
+    for (list<Element *>::iterator
+         q = children.begin(); q != children.end(); ++q)
+    {
+      string qid = (*q)->get_attr(identifier, (*q)->name);
+      if (pid == qid)
+      {
+        (*q)->superimpose(**p, identifier);
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      add((*p)->deep_copy());
+  }
+}
+
+//--------------------------------------------------------------------------
 // Merge with another element
 // The attributes and content of the source element are copied into this
 // element, adding to or replacing (attributes only) what was there before
