@@ -314,21 +314,22 @@ public:
     pthread_t self = pthread_self();
     for(;;) // May loop if we lose the race after wait()
     {
-      // Wait for it to be available
-      if (owned && !pthread_equal(owner, self)) available.wait();
-
-      // Take it
-      Lock lock(mutex);
-
-      // Make sure we're still OK
-      if (!count || (owned && pthread_equal(owner,self)))
       {
-	++count;
-	owned=true;
-	owner=self;
-	available.clear();
-	return;
+        Lock lock(mutex);
+        bool am_owner = (owned && pthread_equal(owner, self));
+        if (!count || am_owner)
+        {
+          ++count;
+          owned=true;
+          owner=self;
+          available.clear();
+          return;
+        }
       }
+
+      Lock lock(mutex);
+      if (count)
+        available.wait();
     }
   }
 
