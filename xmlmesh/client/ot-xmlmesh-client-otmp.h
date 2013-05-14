@@ -28,7 +28,10 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - take server address
-  OTMPClientTransport(Net::EndPoint server): otmp(server) {}
+  OTMPClientTransport(Net::EndPoint server): otmp(server)
+  {
+    otmp.start();
+  }
 
   // Implementations of ClientTransport virtuals (q.v. ot-xmlmesh.h)
   bool send(const string& data);

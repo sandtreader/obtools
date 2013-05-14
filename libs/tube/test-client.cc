@@ -184,6 +184,7 @@ int main(int argc, char **argv)
   else
   {
     Tube::Client client(server, ssl?&ssl_ctx:0);
+    client.start();
 
     // Loop for a while just sending 
     for(int i=0; i<n; i++)

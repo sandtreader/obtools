@@ -175,6 +175,10 @@ public:
 	 const string& _name="Tube");
 
   //------------------------------------------------------------------------
+  // Start send and receive threads
+  void start();
+
+  //------------------------------------------------------------------------
   // Check it hasn't been killed
   bool is_alive() { return alive; }
 

@@ -62,7 +62,7 @@ class ClientReceiveThread: public MT::Thread
   }
 
 public:
-  ClientReceiveThread(Client &_client): client(_client) { start(); }
+  ClientReceiveThread(Client &_client): client(_client) {}
 };
 
 //------------------------------------------------------------------------
@@ -200,7 +200,7 @@ class ClientSendThread: public MT::Thread
   }
 
 public:
-  ClientSendThread(Client &_client): client(_client) { start(); }
+  ClientSendThread(Client &_client): client(_client) {}
 };
 
 //------------------------------------------------------------------------
@@ -311,6 +311,16 @@ Client::Client(Net::EndPoint _server, SSL::Context *_ctx,
 }
 
 //------------------------------------------------------------------------
+// Start send and receive threads
+void Client::start()
+{
+  if (receive_thread)
+    receive_thread->start();
+  if (send_thread)
+    send_thread->start();
+}
+
+//------------------------------------------------------------------------
 // Send a message
 // Can busy-wait if send queue is more than max_send_queue
 void Client::send(Message& msg)
@@ -376,7 +386,9 @@ Client::~Client()
 
   // Now it's safe to delete them
   delete receive_thread;
+  receive_thread = 0;
   delete send_thread;
+  send_thread = 0;
   if (socket) delete socket;
 }
 
