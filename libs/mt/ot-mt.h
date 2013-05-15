@@ -326,10 +326,7 @@ public:
           return;
         }
       }
-
-      Lock lock(mutex);
-      if (count)
-        available.wait();
+      available.wait();
     }
   }
 
