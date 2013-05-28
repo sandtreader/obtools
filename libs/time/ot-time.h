@@ -68,8 +68,8 @@ private:
   // Unit dictionary - just one static instance of this
   static struct UnitDictionary
   {
-    map<string, int> multiples; 
-    map<string, int> fractions; 
+    map<string, int> multiples;
+    map<string, int> fractions;
 
     UnitDictionary();  // Static initialiser in duration.cc
   } units;
@@ -95,9 +95,9 @@ public:
   //               ns - nanoseconds
   //               us - microseconds
   //               ms - milliseconds
-  //               cs - centiseconds 
+  //               cs - centiseconds
   //               s(ec(ond)(s)) - seconds
-  //               min(ute)(s)   - minutes
+  //               m(in(ute)(s)) - minutes
   //               h(our(s))     - hours
   //               d(ay(s))      - calendar days
   //               w(eek(s))     - weeks
