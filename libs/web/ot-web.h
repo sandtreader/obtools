@@ -100,6 +100,11 @@ public:
   bool get_query(Misc::PropertyList& props) const;
 
   //------------------------------------------------------------------------
+  // Get an individual parameter from query
+  // Returns parameter value or "" if not present
+  string get_query_parameter(const string& name) const;
+
+  //------------------------------------------------------------------------
   // Static function to URL-encode (percent-encode) a string
   // Escapes space as '+' if 'space_as_plus' is set (the default)
   static string encode(const string& s, bool space_as_plus=true);

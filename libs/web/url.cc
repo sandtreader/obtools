@@ -212,6 +212,16 @@ bool URL::get_query(Misc::PropertyList& props) const
 }
 
 //------------------------------------------------------------------------
+// Get an individual parameter from query
+// Returns parameter value or "" if not present
+string URL::get_query_parameter(const string& name) const
+{
+  Misc::PropertyList params;
+  if (!get_query(params)) return "";
+  return params[name];
+}
+
+//------------------------------------------------------------------------
 // Quick access to fragment of URL
 // Returns fragment or "" if can't read it
 string URL::get_fragment() const
