@@ -380,6 +380,9 @@ public:
 
     bool operator==(const Range& b) const
     { return start == b.start && length == b.length; }
+
+    friend ostream& operator<<(ostream& s, const Range& r)
+    { return s << r.start << "+" << r.length; }
   };
 
   // List of ranges, stored in order
@@ -863,6 +866,7 @@ public:
 //------------------------------------------------------------------------
 // << operator to write RangeSet to ostream
 ostream& operator<<(ostream& s, const UInt64RangeSet& rs);
+
 
 //==========================================================================
 }} //namespaces
