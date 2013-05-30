@@ -35,7 +35,7 @@ bool Directory::ensure(bool parents, int mode) const
   {
     // Split directory into leaf and parent dir and recurse to parent
     Directory ppath(dirname());
-    if (!ppath.ensure()) return false;
+    if (!ppath.ensure(parents, mode)) return false;
   }
 
 #if defined(__WIN32__)
