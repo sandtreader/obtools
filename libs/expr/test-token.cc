@@ -154,7 +154,7 @@ TEST(Tokeniser, TestOptionallyDoubledOperators)
 
 TEST(Tokeniser, TestComparisonOperators)
 {
-  string input("<<=>>=<>!=");
+  string input("<<=>>=<>!=!!");
   Tokeniser tokeniser(input, cerr);
   Token token = tokeniser.read_token();
   ASSERT_EQ(Token::LT, token.type);
@@ -175,6 +175,12 @@ TEST(Tokeniser, TestComparisonOperators)
   ASSERT_EQ(Token::NE, token.type);
 
   token = tokeniser.read_token();
+  ASSERT_EQ(Token::NOT, token.type);
+
+  token = tokeniser.read_token();
+  ASSERT_EQ(Token::NOT, token.type);
+
+  token = tokeniser.read_token();
   ASSERT_EQ(Token::EOT, token.type);
 }
 
@@ -193,14 +199,6 @@ TEST(Tokeniser, TestRandomCrapFailsCleanly)
 
   token = tokeniser.read_token();
   ASSERT_EQ(Token::EOT, token.type);
-}
-
-TEST(Tokeniser, TestBrokenPlingFails)
-{
-  string input("!foo");
-  Tokeniser tokeniser(input, cerr);
-  Token token = tokeniser.read_token();
-  ASSERT_EQ(Token::UNKNOWN, token.type);
 }
 
 int main(int argc, char **argv)

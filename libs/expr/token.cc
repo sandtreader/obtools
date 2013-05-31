@@ -29,14 +29,15 @@ Token Tokeniser::read_token()
     name += c;
     for(;;)
     {
-      c = getc();
+      c = peekc();
       if (isalpha(c) || isdigit(c) || c=='_')
+      {
         name += c;
-      else
-        break;
+        step();
+      }
+      else break;
     }
 
-    rewind();
     return Token(Token::NAME, name);
   }
 
@@ -50,30 +51,34 @@ Token Tokeniser::read_token()
     // Integer part
     for(;;)
     {
-      c = getc();
+      c = peekc();
       if (isdigit(c))
+      {
         value += c;
-      else
-        break;
+        step();
+      }
+      else break;
     }
 
     // Optional decimal part
     if (c == '.')
     {
+      step();
       value += c;
       for(;;)
       {
-        c = getc();
+        c = peekc();
         if (isdigit(c))
+        {
           value += c;
-        else
-          break;
+          step();
+        }
+        else break;
       }
     }
 
     // Maybe exponential later?!!!
 
-    rewind();
     return Token(Token::NUMBER, Text::stof(value));
   }
 
@@ -93,36 +98,39 @@ Token Tokeniser::read_token()
 
     // One or two character equivalents - &/&& |/|| =/==
     case '&':
-      if (getc()!=c) rewind();
+      if (peekc()==c) step();
       return Token(Token::AND);
 
     case '|':
-      if (getc()!=c) rewind();
+      if (peekc()==c) step();
       return Token(Token::OR);
 
     case '=':
-      if (getc()!=c) rewind();
+      if (peekc()==c) step();
       return Token(Token::EQ);
 
     // Comparators - < <= > >= <> !=
     case '<':
-      switch (getc())
+      switch (peekc())
       {
-        case '=': return Token(Token::LTEQ);
-        case '>': return Token(Token::NE);
-        default: rewind(); return Token(Token::LT);
+        case '=': step(); return Token(Token::LTEQ);
+        case '>': step(); return Token(Token::NE);
+        default: return Token(Token::LT);
       }
 
     case '>':
-      switch (getc())
+      switch (peekc())
       {
-        case '=': return Token(Token::GTEQ);
-        default: rewind(); return Token(Token::GT);
+        case '=': step(); return Token(Token::GTEQ);
+        default: return Token(Token::GT);
       }
 
     case '!':
-      if (getc() == '=') return Token(Token::NE);
-      // Falling if not!
+      switch (peekc())
+      {
+        case '=': step(); return Token(Token::NE);
+        default: return Token(Token::NOT);
+      }
 
     // Unrecognised
     default:

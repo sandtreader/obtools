@@ -38,6 +38,7 @@ struct Token
 
     AND,     // & or &&
     OR,      // | or ||
+    NOT,     // !
 
     EQ,      // = or ==
     LT,      // <
@@ -68,12 +69,16 @@ class Tokeniser
   ostream& serr;
 
   //------------------------------------------------------------------------
-  // Get next character or 0 for EOF
+  // Get next character or 0 for EOF and move forwards
   char getc() { return it==input.end()?0:*it++; }
 
   //------------------------------------------------------------------------
-  // Replace a character
-  void rewind() { if (it != input.begin() && it != input.end()) --it; }
+  // Get next character or 0 for EOF but don't move forwards
+  char peekc() { return it==input.end()?0:*it; }
+
+  //------------------------------------------------------------------------
+  // Move forwards if not already at end
+  void step() { if (it!=input.end()) ++it; }
 
 public:
   //------------------------------------------------------------------------
