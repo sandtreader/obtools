@@ -9,10 +9,10 @@ TYPE    = lib
 NAME    = ot-expr
 HEADERS = ot-expr.h
 DEPENDS = text
-OBJS    = token.o
-TESTS   = test-token
+OBJS    = token.o eval.o
+TESTS   = test-token test-eval
 TESTLIB = -lgtest
-TESTCMD = ./test-token
+TESTCMD = ./test-token && ./test-eval
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
