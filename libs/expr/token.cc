@@ -14,7 +14,7 @@ namespace ObTools { namespace Expression {
 
 //------------------------------------------------------------------------
 // Read a token from the input
-Token Tokeniser::read_token()
+Token Tokeniser::read_token() throw (Exception)
 {
   char c = getc();
 
@@ -134,8 +134,7 @@ Token Tokeniser::read_token()
 
     // Unrecognised
     default:
-      serr << "Unrecognised token near '" << c << "'\n";
-      return Token(Token::UNKNOWN);
+      throw Exception(string("Unrecognised token near '")+c+"'");
   }
 }
 

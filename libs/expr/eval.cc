@@ -14,22 +14,22 @@ namespace ObTools { namespace Expression {
 //------------------------------------------------------------------------
 // Get value for a name in the expression
 // By default just errors and returns 0 - override if variables required
-double Evaluator::get_value_for_name(const string& name)
+double Evaluator::get_value_for_name(const string& name) throw (Exception)
 {
-  serr << "Variable name lookup for '" << name << "' not implemented\n";
+  throw Exception("Variable name lookup for '" + name + "' not implemented");
   return 0;
 }
 
 //------------------------------------------------------------------------
 // Get next token
-void Evaluator::next()
+void Evaluator::next() throw (Exception)
 {
   token = tokeniser.read_token();
 }
 
 //------------------------------------------------------------------------
 // Read a factor
-double Evaluator::read_factor()
+double Evaluator::read_factor() throw (Exception)
 {
   switch (token.type)
   {
@@ -62,19 +62,19 @@ double Evaluator::read_factor()
       if (token.type == Token::RPAR)
         next();
       else
-        serr << "Mismatched parentheses in expression\n";
+        throw Exception("Mismatched parentheses");
       return v;
     }
 
     default:
-      serr << "Unrecognised token in expression\n";
+      throw Exception("Unrecognised token in expression");
       return 0;
   }
 }
 
 //------------------------------------------------------------------------
 // Read a term
-double Evaluator::read_term()
+double Evaluator::read_term() throw (Exception)
 {
   double v = read_factor();
   for(;;)
@@ -102,7 +102,7 @@ double Evaluator::read_term()
 
 //------------------------------------------------------------------------
 // Read a side (of conditional)
-double Evaluator::read_side()
+double Evaluator::read_side() throw (Exception)
 {
   double v = read_term();
   for(;;)
@@ -130,7 +130,7 @@ double Evaluator::read_side()
 
 //------------------------------------------------------------------------
 // Read a predicate (comparison)
-double Evaluator::read_predicate()
+double Evaluator::read_predicate() throw (Exception)
 {
   double v = read_side();
 
@@ -166,7 +166,7 @@ double Evaluator::read_predicate()
 
 //------------------------------------------------------------------------
 // Read an expression
-double Evaluator::read_expression()
+double Evaluator::read_expression() throw (Exception)
 {
   double v = read_predicate();
   for(;;)
@@ -196,7 +196,7 @@ double Evaluator::read_expression()
 
 //------------------------------------------------------------------------
 // Evaluate an expression
-double Evaluator::evaluate(const string& expr)
+double Evaluator::evaluate(const string& expr) throw (Exception)
 {
   tokeniser.reset(expr);
   next();
@@ -205,8 +205,7 @@ double Evaluator::evaluate(const string& expr)
 
   // Must be EOF now
   if (token.type != Token::EOT)
-    serr << "Additional text in expression ignored: token type "
-         << token.type << endl;
+    throw Exception("Parse error");
 
   return v;
 }

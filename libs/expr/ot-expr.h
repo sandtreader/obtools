@@ -31,7 +31,7 @@ struct Token
 {
   enum Type
   {
-    UNKNOWN, // Not recognised
+    UNKNOWN, // Not set
     EOT,     // End of text
     NUMBER,  // Any float
     NAME,    // Any variable name
@@ -68,12 +68,19 @@ struct Token
 };
 
 //==========================================================================
+// Expression exception
+struct Exception
+{
+  string error;
+  Exception(const string& _error): error(_error) {}
+};
+
+//==========================================================================
 // Tokeniser
 class Tokeniser
 {
   string input;
   string::iterator it;
-  ostream& serr;
 
   //------------------------------------------------------------------------
   // Get next character or 0 for EOF and move forwards
@@ -89,13 +96,12 @@ class Tokeniser
 
 public:
   //------------------------------------------------------------------------
-  // Constructor on string input, with error channel
-  Tokeniser(const string& _input, ostream& _serr):
-    input(_input), it(input.begin()), serr(_serr) {}
+  // Blank constructor - use reset() to set input
+  Tokeniser() {}
 
   //------------------------------------------------------------------------
-  // Constructor with only error channel - use reset() to set input
-  Tokeniser(ostream& _serr): serr(_serr) {}
+  // Constructor on string input
+  Tokeniser(const string& _input) { reset(_input); }
 
   //------------------------------------------------------------------------
   // Reset input to given string
@@ -104,7 +110,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read a token from the input
-  Token read_token();
+  Token read_token() throw (Exception);
 };
 
 //==========================================================================
@@ -112,31 +118,30 @@ public:
 // Override get_name_value() for variable binding
 class Evaluator
 {
-  ostream& serr;
   Tokeniser tokeniser;
   Token token;
 
-  void next();
-  double read_factor();
-  double read_term();
-  double read_side();
-  double read_predicate();
-  double read_expression();
+  void next() throw (Exception);
+  double read_factor() throw (Exception);
+  double read_term() throw (Exception);
+  double read_side() throw (Exception);
+  double read_predicate() throw (Exception);
+  double read_expression() throw (Exception);
 
 protected:
   //------------------------------------------------------------------------
   // Get value for a name in the expression
   // By default just errors and returns 0 - override if variables required
-  virtual double get_value_for_name(const string& name);
+  virtual double get_value_for_name(const string& name) throw (Exception);
 
 public:
   //------------------------------------------------------------------------
-  // Constructor with error channel
-  Evaluator(ostream& _serr): serr(_serr), tokeniser(serr) {}
+  // Constructor
+  Evaluator() {}
 
   //------------------------------------------------------------------------
   // Evaluate an expression
-  double evaluate(const string& expr);
+  double evaluate(const string& expr) throw (Exception);
 };
 
 //==========================================================================
