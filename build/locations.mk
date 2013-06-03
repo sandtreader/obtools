@@ -29,7 +29,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  cache:libs/cache:mt:NOLIB  		\
 	  chan:libs/chan:net			\
 	  crypto:libs/crypto:misc,chan,text	\
-	  expr:libs/expr:text                   \
+	  expr:libs/expr:text,misc              \
 	  file:libs/file:text                   \
 	  gather:libs/gather:misc,chan          \
           gen:libs/gen:-:NOLIB                  \
