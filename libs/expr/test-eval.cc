@@ -122,11 +122,35 @@ TEST(Evaluator, TestComplexExpression)
   });
 }
 
+TEST(Evaluator, TestEmptyAndWhitespaceStringFails)
+{
+  Evaluator evaluator;
+  ASSERT_THROW(evaluator.evaluate(""), Expression::Exception);
+  ASSERT_THROW(evaluator.evaluate(" "), Expression::Exception);
+}
+
 TEST(Evaluator, TestVariablesDontWorkByDefault)
 {
   Evaluator evaluator;
   ASSERT_THROW(evaluator.evaluate("foo"), Expression::Exception);
 }
+
+TEST(Evaluator, TestPropertyListVariables)
+{
+  Misc::PropertyList vars;
+  vars.add("foo", "42");
+  vars.add("bar", "0");
+
+  PropertyListEvaluator evaluator(vars);
+  ASSERT_NO_THROW(
+  {
+    ASSERT_EQ(42.0, evaluator.evaluate("foo"));
+    ASSERT_EQ(42.0, evaluator.evaluate("foo+bar"));
+    ASSERT_EQ(0.0, evaluator.evaluate("foo*bar"));
+  });
+
+  ASSERT_THROW(evaluator.evaluate("wombat"), Expression::Exception);
+};
 
 int main(int argc, char **argv)
 {

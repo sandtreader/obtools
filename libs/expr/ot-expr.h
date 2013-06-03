@@ -19,6 +19,7 @@
 
 #include <string>
 #include <iostream>
+#include "ot-misc.h"
 
 namespace ObTools { namespace Expression {
 
@@ -142,6 +143,25 @@ public:
   //------------------------------------------------------------------------
   // Evaluate an expression
   double evaluate(const string& expr) throw (Exception);
+};
+
+//==========================================================================
+// Property list evaluator - gets variable values from property list
+class PropertyListEvaluator: public Evaluator
+{
+  Misc::PropertyList& vars;
+
+  // Implementation of get value
+  double get_value_for_name(const string& name) throw (Exception)
+  {
+    if (vars.has(name)) return vars.get_real(name);
+    throw Exception(string("No such variable '")+name+"'");
+  }
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  PropertyListEvaluator(Misc::PropertyList& _vars): vars(_vars) {}
 };
 
 //==========================================================================

@@ -66,8 +66,12 @@ double Evaluator::read_factor() throw (Exception)
       return v;
     }
 
+    case Token::EOT:
+      throw Exception("Unexpected end");
+      return 0;
+
     default:
-      throw Exception("Unrecognised token in expression");
+      throw Exception("Unrecognised token");
       return 0;
   }
 }

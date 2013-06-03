@@ -8,9 +8,9 @@
 TYPE    = lib
 NAME    = ot-expr
 HEADERS = ot-expr.h
-DEPENDS = text
+DEPENDS = text misc
 OBJS    = token.o eval.o
-TESTS   = test-token test-eval
+TESTS   = test-token test-eval test-calc
 TESTLIB = -lgtest
 TESTCMD = ./test-token && ./test-eval
 
