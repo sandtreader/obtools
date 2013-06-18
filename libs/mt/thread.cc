@@ -46,17 +46,17 @@ extern "C" void _unlock_mutex(void *m)
 bool Thread::start()
 {
   self = this;
-  running = true;  // Set before it actually starts, in case caller checks
-                   // before it runs - otherwise it could delete us again
+  valid = true;    // Set before the thread is started, in case caller checks
+  running = true;  // before it runs - otherwise it could delete us again
                    // before we've even started!
                    // Set before trying to create the thread in order to avoid
                    // race condition with _thread_start
   if (pthread_create(&thread, NULL, _thread_start, &self))
   {
     running = false;
+    valid = false;
     return false;
   }
-  valid = true;
   return true;
 }
 
