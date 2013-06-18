@@ -374,6 +374,34 @@ Element& Element::get_child(int n)
 }
 
 //--------------------------------------------------------------------------
+// Find n'th (first, by default) child element, but ignoring text/WS
+// Returns Element::none if none
+// Const and non-const implementations
+const Element& Element::get_child_element(int n) const
+{
+  list<Element *>::const_iterator p=children.begin();
+  for(;p!=children.end() && ((*p)->name.empty() || n--); ++p)
+    ;
+
+  if (p!=children.end())
+    return **p;
+  else
+    return Element::none;
+}
+
+Element& Element::get_child_element(int n)
+{
+  list<Element *>::iterator p=children.begin();
+  for(;p!=children.end() && ((*p)->name.empty() || n--); ++p)
+    ;
+
+  if (p!=children.end())
+    return **p;
+  else
+    return Element::none;
+}
+
+//--------------------------------------------------------------------------
 // Find n'th (first, by default) child element of given name
 // Returns Element::none if none
 // Const and non-const implementations
