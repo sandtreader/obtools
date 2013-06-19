@@ -41,7 +41,7 @@ int main()
       SOAP::Header h = *p;
       cout << "- " << h.content->name;
       if (h.must_understand) cout << " (must understand)";
-      cout << " (role " << (int)h.role << ")\n";
+      cout << " (role " << static_cast<int>(h.role) << ")\n";
     }
 
     cout << "\nBody elements:\n";
