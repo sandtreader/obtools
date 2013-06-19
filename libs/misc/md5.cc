@@ -37,9 +37,10 @@ void MD5::byte_reverse(char *buf, unsigned longs)
   uint32_t t;
   do 
   {
-    t = (uint32_t) ((unsigned) buf[3] << 8 | buf[2]) << 16 |
-      ((unsigned) buf[1] << 8 | buf[0]);
-    *(uint32_t *) buf = t;
+    t = static_cast<uint32_t>(static_cast<unsigned>(buf[3]) << 8
+                              | buf[2]) << 16
+                              | (static_cast<unsigned>(buf[1]) << 8 | buf[0]);
+    *reinterpret_cast<uint32_t *>(buf) = t;
     buf += 4;
   } 
   while (--longs);
@@ -75,7 +76,7 @@ void MD5::update(const char *buf, unsigned len)
 
   /* Update bitcount */
   t = ctx_bits[0];
-  if ((ctx_bits[0] = t + ((uint32_t) len << 3)) < t)
+  if ((ctx_bits[0] = t + (static_cast<uint32_t>(len) << 3)) < t)
     ctx_bits[1]++; 	/* Carry from low to high */
   ctx_bits[1] += len >> 29;
 
@@ -84,7 +85,7 @@ void MD5::update(const char *buf, unsigned len)
   /* Handle any leading odd-sized chunks */
   if (t) 
   {
-    char *p = (char *)ctx_in + t;
+    char *p = static_cast<char *>(ctx_in) + t;
 
     t = 64 - t;
     if (len < t) 
@@ -94,7 +95,7 @@ void MD5::update(const char *buf, unsigned len)
     }
     memcpy(p, buf, t);
     byte_reverse(ctx_in, 16);
-    transform(ctx_buf, (uint32_t *)ctx_in);
+    transform(ctx_buf, reinterpret_cast<uint32_t *>(ctx_in));
     buf += t;
     len -= t;
   }
@@ -104,7 +105,7 @@ void MD5::update(const char *buf, unsigned len)
   {
     memcpy(ctx_in, buf, 64);
     byte_reverse(ctx_in, 16);
-    transform(ctx_buf, (uint32_t *)ctx_in);
+    transform(ctx_buf, reinterpret_cast<uint32_t *>(ctx_in));
     buf += 64;
     len -= 64;
   }
@@ -140,7 +141,7 @@ void MD5::finalise(unsigned char digest[16])
     /* Two lots of padding:  Pad the first block to 64 bytes */
     memset(p, 0, count);
     byte_reverse(ctx_in, 16);
-    transform(ctx_buf, (uint32_t *)ctx_in);
+    transform(ctx_buf, reinterpret_cast<uint32_t *>(ctx_in));
 
     /* Now fill the next block with 56 bytes */
     memset(ctx_in, 0, 56);
@@ -154,10 +155,10 @@ void MD5::finalise(unsigned char digest[16])
   byte_reverse(ctx_in, 14);
 
   /* Append length in bits and transform */
-  ((uint32_t *)ctx_in)[14] = ctx_bits[0];
-  ((uint32_t *)ctx_in)[15] = ctx_bits[1];
+  reinterpret_cast<uint32_t *>(ctx_in)[14] = ctx_bits[0];
+  reinterpret_cast<uint32_t *>(ctx_in)[15] = ctx_bits[1];
 
-  transform(ctx_buf, (uint32_t *)ctx_in);
+  transform(ctx_buf, reinterpret_cast<uint32_t *>(ctx_in));
   byte_reverse((char *)ctx_buf, 4);
   memcpy(digest, ctx_buf, 16);
 }
@@ -296,7 +297,7 @@ string MD5::sum(const string& text)
   // Turn it back into a hex string
   ostringstream oss;
   for(int i=0; i<16; i++)
-    oss << hex << setfill('0') << setw(2) << (unsigned)digest[i];
+    oss << hex << setfill('0') << setw(2) << static_cast<unsigned>(digest[i]);
   return oss.str();
 }
 

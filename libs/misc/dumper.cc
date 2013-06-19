@@ -17,7 +17,7 @@ namespace ObTools { namespace Misc {
 // Dump a block
 void Dumper::dump(const void *block, int length)
 {
-  const unsigned char *p = (const unsigned char *)block;
+  const unsigned char *p = static_cast<const unsigned char *>(block);
   int offset = 0;
 
   while (offset < length)
@@ -29,7 +29,7 @@ void Dumper::dump(const void *block, int length)
     for(int i=0; i<w; i++)
     {
       if (split && !(i%split)) sout << ' ';
-      sout << hex << setw(2) << setfill('0') << (int)(p[offset+i]);
+      sout << hex << setw(2) << setfill('0') << static_cast<int>(p[offset+i]);
     }
     if (ascii)
     {

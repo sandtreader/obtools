@@ -177,10 +177,11 @@ public:
 
   //------------------------------------------------------------------------
   // Copy constructor and assignment operator from map<string, string>
-  PropertyList(const map<string, string>& o) 
-  { *(map<string, string> *)this = o; }
-  PropertyList& operator=(const map<string, string>& o) 
-  { *(map<string, string> *)this = o; return *this; }
+  PropertyList(const map<string, string>& o):
+    map<string, string>(o)
+  {}
+  PropertyList& operator=(const map<string, string>& o)
+  { map<string, string>::operator=(o); return *this; }
 
   //--------------------------------------------------------------------------
   // Add a value
@@ -766,8 +767,10 @@ public:
     {
       // Calculate (exactly, avoiding rounding and overflow) start and end 
       // of this fraction (end=start of next)
-      double this_start = (double)end_offset*i/(double)length;
-      double this_end   = (double)end_offset*(i+1)/(double)length;
+      double this_start = static_cast<double>(end_offset)*i
+                          / static_cast<double>(length);
+      double this_end   = static_cast<double>(end_offset)*(i+1)
+                          / static_cast<double>(length);
 
       int contained = 0;  // 0 = none, 1 = some, 2 = all
 
@@ -776,17 +779,18 @@ public:
         const Range& r = *p;
 
         // Skip to next fraction if not yet overlapping this range
-        if ((double)r.start >= this_end) break;
+        if (static_cast<double>(r.start) >= this_end) break;
 
         // Check if we've already left this range
-        if (this_start >= (double)r.end())
+        if (this_start >= static_cast<double>(r.end()))
         {
           ++p;
           continue;
         }
 
         // So we have an overlap - is it total?
-        if ((double)r.start <= this_start && (double)r.end() >= this_end)
+        if (static_cast<double>(r.start) <= this_start
+            && static_cast<double>(r.end()) >= this_end)
           contained = 2;
         else
           contained = 1;

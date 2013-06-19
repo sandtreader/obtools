@@ -48,8 +48,8 @@ void Random::generate_binary(unsigned char *p, int n)
     if (f)
     {
       // Reseed from entropy bytes
-      f.read((char *)&w, 4);
-      f.read((char *)&z, 4);
+      f.read(reinterpret_cast<char *>(&w), 4);
+      f.read(reinterpret_cast<char *>(&z), 4);
     }
     else
 #endif
@@ -78,7 +78,8 @@ void Random::generate_binary(unsigned char *p, int n)
     w = 18000 * (w & 65535) + (w >> 16);
 
     // Use all the bits to make a byte
-    p[i] = (unsigned char)(z^w^(z>>8)^(w>>8)^(z>>16)^(w>>16)^(z>>24)^(w>>24));
+    p[i] = static_cast<unsigned char>(z^w^(z>>8)^(w>>8)^(z>>16)^(w>>16)
+                                      ^(z>>24)^(w>>24));
   }
 }
 
@@ -91,7 +92,7 @@ string Random::generate_hex(int n)
 
   ostringstream oss;
   for(int i=0; i<n; i++)
-    oss << hex << setfill('0') << setw(2) << (unsigned)p[i];
+    oss << hex << setfill('0') << setw(2) << static_cast<unsigned>(p[i]);
 
   delete[] p;
   return oss.str();
@@ -102,7 +103,7 @@ string Random::generate_hex(int n)
 uint32_t Random::generate_32()
 {
   uint32_t n; // Big endian, little endian, who cares?
-  generate_binary((unsigned char *)&n, 4);
+  generate_binary(reinterpret_cast<unsigned char *>(&n), 4);
   return n;
 }
 
@@ -111,7 +112,7 @@ uint32_t Random::generate_32()
 uint64_t Random::generate_64()
 {
   uint64_t n;
-  generate_binary((unsigned char *)&n, 8);
+  generate_binary(reinterpret_cast<unsigned char *>(&n), 8);
   return n;
 }
 
