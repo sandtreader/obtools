@@ -32,7 +32,7 @@ void ReceiveThread::run()
   {
     unsigned char buf[16];
     int n = dq.read(buf, 16);
-    cout << "RX: " << string((char *)buf, n) << endl;
+    cout << "RX: " << string(reinterpret_cast<char *>(buf), n) << endl;
     if (n<16) break;
   }
   
@@ -50,7 +50,7 @@ int main()
   // Transmit for a while
   for(int i=0; i<1000; i++)
   {
-    dq.write((const unsigned char *)"Hello, world!", 13);
+    dq.write(reinterpret_cast<const unsigned char *>("Hello, world!"), 13);
     ObTools::MT::Thread::usleep(10000);
   }
 
@@ -59,7 +59,7 @@ int main()
   ObTools::MT::Thread::sleep(1);
 
   // Send one more to make sure destructor cleans up
-  dq.write((const unsigned char *)"Goodbye, world!", 15);
+  dq.write(reinterpret_cast<const unsigned char *>("Goodbye, world!"), 15);
 
   return 0;  
 }

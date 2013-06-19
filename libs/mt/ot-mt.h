@@ -660,10 +660,10 @@ struct DataBlock
   typedef unsigned char data_t;
   typedef unsigned long size_t;
 
-  const data_t *data;        // 0 = EOF marker
+  data_t *data;        // 0 = EOF marker
   size_t length;
   DataBlock(): data(0), length(0) {}
-  DataBlock(const data_t *_data, size_t _length):
+  DataBlock(data_t *_data, size_t _length):
     data(_data), length(_length) {}
 };
 

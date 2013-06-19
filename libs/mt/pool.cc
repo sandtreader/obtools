@@ -17,7 +17,7 @@ namespace ObTools { namespace MT {
 // Takes 'self' as argument and bounces on to (virtual) run()
 static void *_pool_start(void *arg)
 {
-  PoolThread *self = *(PoolThread **)arg;
+  PoolThread *self = *static_cast<PoolThread **>(arg);
 
   for(;;)
   {

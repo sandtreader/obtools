@@ -18,7 +18,7 @@ namespace ObTools { namespace MT {
 // Data is copied into the queue
 void DataQueue::write(const DataBlock::data_t *data, DataBlock::size_t length) 
 {
-  DataBlock::data_t *copy = (DataBlock::data_t *)malloc(length);
+  DataBlock::data_t *copy = static_cast<DataBlock::data_t *>(malloc(length));
   memcpy(copy, data, length);
   send(DataBlock(copy, length)); 
 }
@@ -50,7 +50,7 @@ DataBlock::size_t DataQueue::read(DataBlock::data_t *data,
       // Have we used it up?  Delete it
       if (working_block_used >= working_block.length)
       {
-	free((void *)working_block.data);
+	free(reinterpret_cast<void *>(working_block.data));
 	working_block.length = 0;
       }
     }
@@ -75,14 +75,14 @@ DataBlock::size_t DataQueue::read(DataBlock::data_t *data,
 DataQueue::~DataQueue()
 {
   if (working_block.length && working_block.data) 
-    free((void *)working_block.data);
+    free(reinterpret_cast<void *>(working_block.data));
 
   // Pull out all remaining blocks
   while (poll())
   {
     DataBlock block = wait();
     if (block.length && block.data) 
-      free((void *)block.data);
+      free(reinterpret_cast<void *>(block.data));
   }
 }
 
