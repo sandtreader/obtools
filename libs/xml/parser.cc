@@ -393,20 +393,20 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
 
     // 7-bit is simple
     if (n < 0x80)
-      text += (xmlchar)n;
+      text += static_cast<xmlchar>(n);
     else 
     {
       // 8-bit and above depends on the length
       // NB we only handle UCS2 here, so can only go to 3 bytes
       if (n < 0x800)
-	text += (xmlchar)(0xC0 | (n >> 6));
+	text += static_cast<xmlchar>(0xC0 | (n >> 6));
       else
       {
-	text += (xmlchar)(0xE0 | (n >> 12));
-	text += (xmlchar)(0x80 | ((n >> 6) & 0x3f));
+	text += static_cast<xmlchar>(0xE0 | (n >> 12));
+	text += static_cast<xmlchar>(0x80 | ((n >> 6) & 0x3f));
       }
 
-      text += (xmlchar)(0x80 | (n & 0x3f));
+      text += static_cast<xmlchar>(0x80 | (n & 0x3f));
     }
   }
   else if (isalpha(c)) //Entity name - alphabetic only
