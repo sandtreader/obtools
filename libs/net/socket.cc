@@ -99,7 +99,8 @@ void Socket::go_blocking()
 void Socket::enable_keepalive()
 {
   int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (sockopt_t)&one, sizeof(int));
+  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, static_cast<sockopt_t>(&one),
+             sizeof(int));
 }
 
 //--------------------------------------------------------------------------
@@ -107,21 +108,24 @@ void Socket::enable_keepalive()
 void Socket::enable_reuse()
 {
   int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (sockopt_t)&one, sizeof(int));
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, static_cast<sockopt_t>(&one),
+             sizeof(int));
 }
 
 //--------------------------------------------------------------------------
 // Set socket TTL
 void Socket::set_ttl(int hops)
 {
-  setsockopt(fd, IPPROTO_IP, IP_TTL, (sockopt_t)&hops, sizeof(int));
+  setsockopt(fd, IPPROTO_IP, IP_TTL, static_cast<sockopt_t>(&hops),
+             sizeof(int));
 }
 
 //--------------------------------------------------------------------------
 // Set socket multicast TTL
 void Socket::set_multicast_ttl(int hops)
 {
-  setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, (sockopt_t)&hops, sizeof(int));
+  setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, static_cast<sockopt_t>(&hops),
+             sizeof(int));
 }
 
 //--------------------------------------------------------------------------
@@ -138,9 +142,9 @@ void Socket::set_timeout(int secs, int usecs)
   tv.tv_sec = secs;
   tv.tv_usec = usecs;
 
-  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (sockopt_t)&tv, 
+  setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, static_cast<sockopt_t>(&tv),
 	     sizeof(struct timeval));
-  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (sockopt_t)&tv, 
+  setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, static_cast<sockopt_t>(&tv),
 	     sizeof(struct timeval));
 #endif
 }
@@ -152,7 +156,7 @@ void Socket::set_priority(int prio)
 #if defined(__WIN32__) || defined(__APPLE__)
 #warning set_priority not implemented 
 #else
-  unsigned long n = (unsigned long)prio;
+  unsigned long n = static_cast<unsigned long>(prio);
 
   setsockopt(fd, SOL_SOCKET, SO_PRIORITY, &n, sizeof(unsigned long));
 #endif
@@ -165,7 +169,7 @@ void Socket::set_tos(int tos)
 #ifdef __WIN32__
 #warning set_tos not implemented in Windows
 #else
-  unsigned long n = (unsigned long)tos;
+  unsigned long n = static_cast<unsigned long>(tos);
 
   setsockopt(fd, IPPROTO_IP, IP_TOS, &n, sizeof(unsigned long));
 #endif
@@ -181,11 +185,11 @@ bool Socket::join_multicast(IPAddress address)
 #else
 #ifdef __BSD__
   struct ip_mreq mreq;
-  mreq.imr_interface.s_addr = INADDR_ANY;
+  mreq.imr_interface.s_addr = inaddr_any;
 #else
   struct ip_mreqn mreq;
   mreq.imr_ifindex = 0; 
-  mreq.imr_address.s_addr = INADDR_ANY;
+  mreq.imr_address.s_addr = inaddr_any;
 #endif
   mreq.imr_multiaddr.s_addr = address.nbo();
 
@@ -203,11 +207,11 @@ bool Socket::leave_multicast(IPAddress address)
 #else
 #ifdef __BSD__
   struct ip_mreq mreq;
-  mreq.imr_interface.s_addr = INADDR_ANY;
+  mreq.imr_interface.s_addr = inaddr_any;
 #else
   struct ip_mreqn mreq;
   mreq.imr_ifindex = 0; 
-  mreq.imr_address.s_addr = INADDR_ANY;
+  mreq.imr_address.s_addr = inaddr_any;
 #endif
 
   mreq.imr_multiaddr.s_addr = address.nbo();
@@ -224,10 +228,11 @@ bool Socket::bind(int port)
   // Bind to local port, allow any remote address or port 
   struct sockaddr_in saddr;
   saddr.sin_family      = AF_INET;
-  saddr.sin_addr.s_addr = INADDR_ANY;
+  saddr.sin_addr.s_addr = inaddr_any;
   saddr.sin_port        = htons(port);
 
-  return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+  return !::bind(fd, reinterpret_cast<struct sockaddr *>(&saddr),
+                 sizeof(saddr));
 }
 
 //--------------------------------------------------------------------------
@@ -239,7 +244,8 @@ bool Socket::bind(EndPoint address)
   struct sockaddr_in saddr;
   address.set(saddr);
 
-  return !::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+  return !::bind(fd, reinterpret_cast<struct sockaddr *>(&saddr),
+                 sizeof(saddr));
 }
 
 //--------------------------------------------------------------------------
@@ -250,7 +256,9 @@ bool Socket::wait_readable(int timeout)
 {
   fd_set rfds;
   FD_ZERO(&rfds);
+#pragma GCC diagnostic ignored "-Wold-style-cast"
   FD_SET(fd, &rfds);
+#pragma GCC diagnostic pop
   struct timeval tv;
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
@@ -267,7 +275,9 @@ bool Socket::wait_writeable(int timeout)
 {
   fd_set wfds;
   FD_ZERO(&wfds);
+#pragma GCC diagnostic ignored "-Wold-style-cast"
   FD_SET(fd, &wfds);
+#pragma GCC diagnostic pop
   struct timeval tv;
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
@@ -285,7 +295,7 @@ EndPoint Socket::local()
   struct sockaddr_in name;
   socklen_t namelen = sizeof(name);
 
-  if (!getsockname(fd, (struct sockaddr *)&name, &namelen))
+  if (!getsockname(fd, reinterpret_cast<struct sockaddr *>(&name), &namelen))
     return EndPoint(name);
   else
     return EndPoint();
@@ -299,7 +309,7 @@ EndPoint Socket::remote()
   struct sockaddr_in name;
   socklen_t namelen = sizeof(name);
 
-  if (!getpeername(fd, (struct sockaddr *)&name, &namelen))
+  if (!getpeername(fd, reinterpret_cast<struct sockaddr *>(&name), &namelen))
     return EndPoint(name);
   else
     return EndPoint();
@@ -364,7 +374,7 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
 
   // Create upper-case hex string
   char mac[18];
-  unsigned char *p = (unsigned char *)arp.arp_ha.sa_data;
+  unsigned char *p = reinterpret_cast<unsigned char *>(arp.arp_ha.sa_data);
   sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
 	  p[0], p[1], p[2], p[3], p[4], p[5]);
   return mac;
@@ -474,7 +484,7 @@ ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
 { 
   ssize_t size = cwrite(buf, count);
-  if (size!=(ssize_t)count) throw SocketError(SOCKERRNO);
+  if (size!=static_cast<ssize_t>(count)) throw SocketError(SOCKERRNO);
 }
 
 //--------------------------------------------------------------------------
@@ -528,7 +538,7 @@ bool TCPSocket::read(string& s, size_t count) throw (SocketError)
 bool TCPSocket::read_exact(void *buf, size_t count) throw (SocketError)
 {
   size_t done = 0;
-  unsigned char *cbuf = (unsigned char *)buf;
+  unsigned char *cbuf = static_cast<unsigned char *>(buf);
 
   while (done < count)
   {
@@ -612,7 +622,7 @@ int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
         // Update length and pointer - if all used, this just leaves 
         // a zero length with pointer still in place
         v.iov_len -= used;
-        v.iov_base = (unsigned char *)v.iov_base+used;
+        v.iov_base = static_cast<unsigned char *>(v.iov_base)+used;
 
         sent -= used;
       }
@@ -724,7 +734,9 @@ UDPSocket::UDPSocket(EndPoint remote)
   struct sockaddr_in saddr;
   remote.set(saddr);
 
-  if (fd!=INVALID_FD && connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+  if (fd!=INVALID_FD && connect(fd,
+                                reinterpret_cast<struct sockaddr *>(&saddr),
+                                sizeof(saddr)))
     close();
 }
 
@@ -739,7 +751,9 @@ UDPSocket::UDPSocket(EndPoint local, EndPoint remote)
   struct sockaddr_in saddr;
   remote.set(saddr);
 
-  if (fd!=INVALID_FD && connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+  if (fd!=INVALID_FD && connect(fd,
+                                reinterpret_cast<struct sockaddr *>(&saddr),
+                                sizeof(saddr)))
     close();
 }
 
@@ -749,7 +763,7 @@ void UDPSocket::enable_broadcast()
 {
   unsigned long n = 1;
 
-  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, (sockopt_t)&n, 
+  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, static_cast<sockopt_t>(&n),
 	     sizeof(unsigned long));
 }
 
@@ -815,7 +829,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
   do
   {
     size = ::recvfrom(fd, buf, len, flags, 
-		      (struct sockaddr *)&saddr, &slen); 
+                      reinterpret_cast<struct sockaddr *>(&saddr), &slen);
   }
   while (size<0 && errno == EINTR);
 #endif
@@ -842,7 +856,7 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
   do
   {
     res = ::sendto(fd, msg, len, flags, 
-		  (struct sockaddr *)&saddr, sizeof(saddr)); 
+                   reinterpret_cast<struct sockaddr *>(&saddr), sizeof(saddr));
   }
   while (res<0 && errno == EINTR);
 #endif

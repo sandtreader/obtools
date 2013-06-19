@@ -40,7 +40,7 @@ int TCPStreamBuf::overflow(int c)
 
   // We know we can always add an extra character, because we advertise
   // one less than we have
-  if (c != traits_type::eof()) *p++ = (char)c;
+  if (c != traits_type::eof()) *p++ = static_cast<char>(c);
 
   // Now send out what we have
   int n = s.cwrite(out_buf, p-out_buf);
@@ -73,7 +73,8 @@ int TCPStreamBuf::underflow()
   if (n>0)
   {
     setg(in_buf, in_buf, in_buf+n);
-    return *(unsigned char *)in_buf; // Avoid sign extension generating EOF!
+    return *reinterpret_cast<unsigned char *>(in_buf); // Avoid sign extension
+                                                       // generating EOF!
   }
   else return traits_type::eof();
 }

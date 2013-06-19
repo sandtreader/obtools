@@ -54,7 +54,8 @@ IPAddress::IPAddress(const string& hostname_s)
     int err;
     if (!gethostbyname_r(hostname, &host, buf, AUX_BUF_SIZE, &result, &err)
 	&& result)
-      address = (uint32_t)ntohl(*(unsigned long *)(host.h_addr));
+      address = static_cast<uint32_t>(
+                        ntohl(*reinterpret_cast<unsigned long *>(host.h_addr)));
     else
       address = BADADDR;
 #endif
@@ -93,7 +94,7 @@ string IPAddress::get_hostname() const
   char buf[AUX_BUF_SIZE];
   int err;
 
-  if (!gethostbyaddr_r((char *)&nbo_addr, 4, AF_INET,
+  if (!gethostbyaddr_r(reinterpret_cast<char *>(&nbo_addr), 4, AF_INET,
 		       &host, buf, AUX_BUF_SIZE, &result, &err)
 	&& result)
     return host.h_name;

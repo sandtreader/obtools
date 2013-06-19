@@ -40,6 +40,12 @@ namespace ObTools { namespace Net {
 //Make our lives easier without polluting anyone else
 using namespace std;
 
+//--------------------------------------------------------------------------
+// INADDR_ANY address
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+const uint32_t inaddr_any = INADDR_ANY;
+#pragma GCC diagnostic pop
+
 //==========================================================================
 // IP Address (address.cc)
 // Designed to be upgradeable to IPv6
@@ -786,7 +792,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
   TCPSingleServer(int _port, int _backlog=5):
-    TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog) 
+    TCPSocket(), address(IPAddress(inaddr_any), _port), backlog(_backlog)
     { start(); }
 
   //--------------------------------------------------------------------------
@@ -837,7 +843,7 @@ public:
   // Constructor with just port (INADDR_ANY binding)
   TCPServer(int _port, int _backlog=5, 
 	    int min_spare=1, int max_threads=10):
-    TCPSocket(), address(IPAddress(INADDR_ANY), _port), backlog(_backlog), 
+    TCPSocket(), address(IPAddress(inaddr_any), _port), backlog(_backlog),
     threadpool(min_spare, max_threads), alive(true) { start(); }
 
   //--------------------------------------------------------------------------

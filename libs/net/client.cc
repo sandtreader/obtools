@@ -25,7 +25,7 @@ TCPClient::TCPClient(EndPoint endpoint):
   server.set(saddr);
 
   if (fd != INVALID_FD 
-   && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+   && !connect(fd, reinterpret_cast<struct sockaddr *>(&saddr), sizeof(saddr)))
     connected = true;
 }
 
@@ -42,7 +42,8 @@ TCPClient::TCPClient(EndPoint endpoint, int timeout):
   if (fd != INVALID_FD)
   {
     set_timeout(timeout);
-    if (!connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+    if (!connect(fd, reinterpret_cast<struct sockaddr *>(&saddr),
+                 sizeof(saddr)))
       connected = true;
     set_timeout(0);  // Cancel timeout for operation
   }
@@ -66,7 +67,8 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote):
 
     // Bind local side first
     if (bind(local)
-	&& !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+        && !connect(fd, reinterpret_cast<struct sockaddr *>(&saddr),
+                    sizeof(saddr)))
       connected = true;
   }
 }
@@ -90,7 +92,9 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout):
     enable_reuse();
 
     // Bind local side first
-    if (bind(local) && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+    if (bind(local) && !connect(fd,
+                                reinterpret_cast<struct sockaddr *>(&saddr),
+                                sizeof(saddr)))
 	connected = true;
 
     set_timeout(0);  // Cancel timeout for operation
@@ -117,7 +121,9 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl):
     enable_reuse();
 
     // Bind local side first
-    if (bind(local) && !connect(fd, (struct sockaddr *)&saddr, sizeof(saddr)))
+    if (bind(local) && !connect(fd,
+                                reinterpret_cast<struct sockaddr *>(&saddr),
+                                sizeof(saddr)))
 	connected = true;
 
     set_timeout(0);  // Cancel timeout for operation
