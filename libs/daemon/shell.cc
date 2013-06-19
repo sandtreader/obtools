@@ -32,11 +32,16 @@ namespace ObTools { namespace Daemon {
 // Signal handlers for both processes
 static Shell *the_shell = 0;
 
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+const sighandler_t sig_ign(SIG_IGN);
+const sighandler_t sig_dfl(SIG_DFL);
+#pragma GCC diagnostic pop
+
 // SIGTERM:  Clean shutdown
 void sigterm(int)
 {
   if (the_shell) the_shell->shutdown();
-  signal(SIGTERM, SIG_IGN);
+  signal(SIGTERM, sig_ign);
 }
 
 // SIGHUP:  Reload config
@@ -50,7 +55,7 @@ void sighup(int)
 void sigevil(int sig)
 {
   if (the_shell) the_shell->log_evil(sig);
-  signal(sig, SIG_DFL);
+  signal(sig, sig_dfl);
   raise(sig);
 }
 
@@ -78,6 +83,8 @@ int Shell::run()
 //--------------------------------------------------------------------------
 // Start process, with arguments
 // Returns process exit code
+// pragma for WIFEXITED and WEXITSTATUS macros
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 int Shell::start(int argc, char **argv)
 {
   // Run initialisation sequence (auto-registration of modules etc.)
@@ -118,7 +125,7 @@ int Shell::start(int argc, char **argv)
   Log::TimestampFilter tsfilter(config.get_value("log/@timestamp",
                                                  DEFAULT_TIMESTAMP), chan_out);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
-  Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
+  Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
   log.summary << name << " version " << version << " starting\n";
@@ -157,7 +164,7 @@ int Shell::start(int argc, char **argv)
   signal(SIGABRT, sigevil);
 
   // Ignore SIGPIPE from closed sockets etc.
-  signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, sig_ign);
 
   // Watchdog? Master/slave processes...
   bool enable_watchdog = config.get_value_bool("watchdog/@restart", true);
@@ -237,7 +244,7 @@ int Shell::start(int argc, char **argv)
 	    {
 	      log.summary << "Changing to group " << groupname
 			  << " (" << gid << ")\n";
-	      if (setgid((gid_t)gid))
+              if (setgid(static_cast<gid_t>(gid)))
 	      {
 		log.error << "Can't change group: " << strerror(errno) << endl;
 		exit(2);
@@ -258,7 +265,7 @@ int Shell::start(int argc, char **argv)
 	    {
 	      log.summary << "Changing to user " << username
 			  << " (" << uid << ")\n";
-	      if (setuid((uid_t)uid))
+              if (setuid(static_cast<uid_t>(uid)))
 	      {
 		log.error << "Can't change user: " << strerror(errno) << endl;
 		exit(2);
@@ -292,6 +299,7 @@ int Shell::start(int argc, char **argv)
     return rc;
   }
 }
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------
 // Signal to shut down - called from SIGTERM handler first in master and then
