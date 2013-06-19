@@ -58,7 +58,8 @@ int main()
   int l = Text::xtob(sx, buf, 4);
   cout << "Hex string:     " << sx
        << " -> " << l << " bytes binary ["
-       << hex << (int)buf[0] << (int)buf[1] << (int)buf[2] << (int)buf[3] 
+       << hex << static_cast<int>(buf[0]) << static_cast<int>(buf[1])
+              << static_cast<int>(buf[2]) << static_cast<int>(buf[3])
        << dec << "] -> " << Text::btox(buf, 4) << endl;
 
   cout << "\nFloat formats for 1.0, 0.999999:\n";

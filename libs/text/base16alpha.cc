@@ -35,7 +35,7 @@ string Base16Alpha::encode(uint64_t n)
 
   while (n)
   {
-    int r = (int)(n % 16);
+    int r = static_cast<int>(n % 16);
     base16.insert(base16.begin(), alphabet[r]);  // Prepend
     n/=16;
   }

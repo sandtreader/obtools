@@ -58,7 +58,8 @@ int main(int argc, char **argv)
   Text::Base64 base64;
 
   // Encode text
-  string es = base64.encode((unsigned char *)s.c_str(), s.size());
+  string es = base64.encode(reinterpret_cast<const unsigned char *>(s.c_str()),
+                            s.size());
   cout << "Base 64 of [" << s << "] (" << s.size() << " bytes):\n" 
        << es << endl;
   
@@ -68,7 +69,7 @@ int main(int argc, char **argv)
   unsigned char *buf = new unsigned char[len+1]; // So we can add 0
   len = base64.decode(es, buf, len);
   buf[len] = 0;
-  string ds((char *)buf);
+  string ds(reinterpret_cast<char *>(buf));
   cout << "Decode gave " << len << " bytes:\n[" << ds << "]\n";
 
   if (s == ds)

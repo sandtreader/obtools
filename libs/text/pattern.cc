@@ -45,7 +45,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
     switch (c)
     {
       case '\0': 		/* Finished - text must have finished too */
-        return (bool)!d;
+        return !d;
 
       case '\\': 		/* Literal - must match next character */
         c = *p++;

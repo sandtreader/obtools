@@ -49,7 +49,7 @@ string i64tos(uint64_t i)
 {
   // Use sprintf for speed
   char buf[21];  // Enough for 64-bits
-  snprintf(buf, 21, FORMAT_UNSIGNED_64, (unsigned long long)i);
+  snprintf(buf, 21, FORMAT_UNSIGNED_64, static_cast<unsigned long long>(i));
   return string(buf);
 }
 
@@ -61,7 +61,7 @@ uint64_t stoi64(const string& s)
   // anything over 2^63-1
   unsigned long long n = 0;
   sscanf(s.c_str(), FORMAT_UNSIGNED_64, &n);
-  return (uint64_t)n;
+  return static_cast<uint64_t>(n);
 }
 
 //--------------------------------------------------------------------------
@@ -145,7 +145,7 @@ string i64tox(uint64_t i)
 {
   // Use sprintf for speed
   char buf[17];  // Enough for 64-bit integers, just in case
-  snprintf(buf, 17, FORMAT_HEX_64, (unsigned long long)i);
+  snprintf(buf, 17, FORMAT_HEX_64, static_cast<unsigned long long>(i));
   return string(buf);
 }
 
@@ -155,7 +155,7 @@ uint64_t xtoi64(const string& s)
 {
   unsigned long long n = 0;
   sscanf(s.c_str(), FORMAT_HEX_64, &n);
-  return (uint64_t)n;
+  return static_cast<uint64_t>(n);
 }
 
 //--------------------------------------------------------------------------
@@ -181,7 +181,7 @@ string btox(const string& data)
   for(string::const_iterator p=data.begin();p!=data.end();++p)
   {
     char buf[3];
-    snprintf(buf, 3, "%02x", (unsigned char)*p);
+    snprintf(buf, 3, "%02x", static_cast<unsigned char>(*p));
     s += buf;
   }
 
@@ -205,7 +205,7 @@ unsigned int xtob(const string& hex, unsigned char *data,
     buf[2] = 0;
     int n;
     sscanf(buf, "%x", &n);
-    data[i] = (unsigned char)n;
+    data[i] = static_cast<unsigned char>(n);
   }
 
   return length;

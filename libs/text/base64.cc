@@ -94,7 +94,7 @@ string Base64::encode(uint64_t n)
   // Extract bytes, top byte first
   for(int i=0; i<count; i++)
   {
-    buf[i] = (unsigned char)(n>>56);
+    buf[i] = static_cast<unsigned char>(n>>56);
     n <<= 8;
   }
 
@@ -106,8 +106,8 @@ string Base64::encode(uint64_t n)
 string Base64::encode(const string& binary, int split, 
 		      const string& line_end)
 {
-  return encode((const unsigned char *)binary.c_str(), binary.size(), 
-		split, line_end);
+  return encode(reinterpret_cast<const unsigned char *>(binary.c_str()),
+                binary.size(), split, line_end);
 }
 
 //--------------------------------------------------------------------------
@@ -164,7 +164,7 @@ size_t Base64::decode(const string& base64, unsigned char *block,
       for(int j=0; j<3; j++)
       {
 	if (written < max_length)
-	  block[written++] = (unsigned char)(n >> 16);
+	  block[written++] = static_cast<unsigned char>(n >> 16);
 	else
 	  return max_length+1;
 	n <<=8;
@@ -183,7 +183,7 @@ size_t Base64::decode(const string& base64, unsigned char *block,
     for(int j=0; j<(i&3)-1; j++)
     {
       if (written < max_length)
-	block[written++] = (unsigned char)(n >> 16);
+	block[written++] = static_cast<unsigned char>(n >> 16);
       else
 	return max_length+1;
       n <<=8;
@@ -220,7 +220,7 @@ bool Base64::decode(const string& base64, string& binary)
   size_t len = decode(base64, buf, max_length);
   if (len > max_length) return false;
 
-  binary.append((const char *)buf, len);
+  binary.append(reinterpret_cast<const char *>(buf), len);
   delete[] buf;
   return true;
 }

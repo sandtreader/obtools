@@ -25,7 +25,7 @@ string Base36::encode(uint64_t n)
 
   while (n)
   {
-    int r = (int)(n % 36);
+    int r = static_cast<int>(n % 36);
     base36.insert(base36.begin(), alphabet[r]);  // Prepend
     n/=36;
   }
