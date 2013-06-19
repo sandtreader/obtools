@@ -109,7 +109,7 @@ int FieldValue::as_int() const
       return bool_val;
 
     case REAL:
-      return (int)real_val;
+      return static_cast<int>(real_val);
 
     case NULLTYPE:
       return 0;
@@ -138,7 +138,7 @@ uint64_t FieldValue::as_int64() const
       return bool_val;
 
     case REAL:
-      return (uint64_t)real_val;
+      return static_cast<uint64_t>(real_val);
 
     case NULLTYPE:
       return 0;
