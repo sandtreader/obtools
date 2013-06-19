@@ -49,7 +49,7 @@ int StreamBuf::overflow(int c)
     channel.log(msg);
     buffer.erase();
   }
-  else buffer += (char)c;
+  else buffer += static_cast<char>(c);
 
   return 0;
 }
