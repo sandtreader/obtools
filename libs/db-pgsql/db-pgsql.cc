@@ -20,7 +20,7 @@ namespace ObTools { namespace DB { namespace PG {
 //Get number of rows in result set
 int ResultSet::count()
 {
-  PGresult *res = (PGresult *)pgres;
+  PGresult *res = static_cast<PGresult *>(pgres);
   return PQntuples(res);
 }
 
@@ -29,7 +29,7 @@ int ResultSet::count()
 //Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
 {
-  PGresult *res = (PGresult *)pgres;
+  PGresult *res = static_cast<PGresult *>(pgres);
 
   if (row_cursor < PQntuples(res))
   {
@@ -51,7 +51,7 @@ bool ResultSet::fetch(Row& row)
 //Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
-  PGresult *res = (PGresult *)pgres;
+  PGresult *res = static_cast<PGresult *>(pgres);
   if (row_cursor < PQntuples(res) && PQnfields(res) > 0)
   {
     value = FieldValue::unescape(PQgetvalue(res, row_cursor++, 0));
@@ -64,7 +64,7 @@ bool ResultSet::fetch(string& value)
 //Destructor
 ResultSet::~ResultSet() 
 {
-  PGresult *res = (PGresult *)pgres;
+  PGresult *res = static_cast<PGresult *>(pgres);
   PQclear(res);
 }
 
@@ -101,7 +101,7 @@ Connection::Connection(const string& conninfo):
 //Check whether connection is OK
 bool Connection::ok()
 {
-  PGconn *conn = (PGconn *)pgconn;
+  PGconn *conn = static_cast<PGconn *>(pgconn);
   if (PQstatus(conn) == CONNECTION_OK) return true;
 
   log.error << "Postgres connection failed: " << PQerrorMessage(conn) << endl;
@@ -113,7 +113,7 @@ bool Connection::ok()
 //Returns whether successful
 bool Connection::exec(const string& sql)
 {
-  PGconn *conn = (PGconn *)pgconn;
+  PGconn *conn = static_cast<PGconn *>(pgconn);
 
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec: " << sql << endl;)
 
@@ -147,7 +147,7 @@ bool Connection::exec(const string& sql)
 //Returns result - check this for validity
 Result Connection::query(const string& sql)
 {
-  PGconn *conn = (PGconn *)pgconn;
+  PGconn *conn = static_cast<PGconn *>(pgconn);
 
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery: " << sql << endl;)
 
@@ -180,7 +180,7 @@ Result Connection::query(const string& sql)
 //Destructor
 Connection::~Connection() 
 {
-  PGconn *conn = (PGconn *)pgconn;
+  PGconn *conn = static_cast<PGconn *>(pgconn);
   if (valid && conn) PQfinish(conn);
 }
 
