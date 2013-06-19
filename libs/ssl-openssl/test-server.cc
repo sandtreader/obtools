@@ -24,7 +24,6 @@ public:
     SSL::TCPServer(ctx, port) {}
 
   void process(Net::TCPSocket& s, Net::EndPoint client);
-  void process(SSL::TCPSocket&, SSL::ClientDetails&) {}
 };
 
 void TestServer::process(Net::TCPSocket& s, 
