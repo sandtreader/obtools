@@ -317,7 +317,7 @@ bool Path::set_ownership(const string& owner, const string& group) const
   int uid = user_name_to_id(owner);
   int gid = group_name_to_id(group);
   if (uid < 0 || gid < 0) return false;
-  return set_ownership((uid_t)uid, (gid_t)gid); 
+  return set_ownership(static_cast<uid_t>(uid), static_cast<gid_t>(gid));
 }
 
 //--------------------------------------------------------------------------
@@ -444,7 +444,7 @@ string Path::user_id_to_name(uid_t uid)
 #else
   // Painful reentrant way of doing this!
   int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  char *buf = (char *)malloc(buflen);
+  char *buf = static_cast<char *>(malloc(buflen));
   if (!buf) abort();
 
   struct passwd user;
@@ -473,7 +473,7 @@ int Path::user_name_to_id(const string& uname)
   // Even more painful reentrant way of doing this, given we never use
   // the name!
   int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  char *buf = (char *)malloc(buflen);
+  char *buf = static_cast<char *>(malloc(buflen));
   if (!buf) abort();
 
   struct passwd user;
@@ -500,7 +500,7 @@ string Path::group_id_to_name(gid_t gid)
 #else
   // Painful reentrant way of doing this!
   int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-  char *buf = (char *)malloc(buflen);
+  char *buf = static_cast<char *>(malloc(buflen));
   if (!buf) abort();
 
   struct group group;
@@ -529,7 +529,7 @@ int Path::group_name_to_id(const string& gname)
   // Even more painful reentrant way of doing this, given we never use
   // the name!
   int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-  char *buf = (char *)malloc(buflen);
+  char *buf = static_cast<char *>(malloc(buflen));
   if (!buf) abort();
 
   struct group group;
