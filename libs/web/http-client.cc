@@ -301,7 +301,7 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
 	wanted = current_chunk_length;
 
       // Try to read this much or up to end of stream
-      stream->read((char *)data+n, wanted);
+      stream->read(reinterpret_cast<char *>(data)+n, wanted);
       ssize_t count = stream->gcount();
       n += count;
 

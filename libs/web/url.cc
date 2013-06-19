@@ -256,7 +256,7 @@ string URL::encode(const string& s, bool space_as_plus)
     // Check for controls and 8-bit
     if (c<32 || c>126)
     {
-      snprintf(buf, 4, "%%%02X", (unsigned int)c);
+      snprintf(buf, 4, "%%%02X", static_cast<unsigned int>(c));
       r+=buf;
     }
     else switch (c)
@@ -274,7 +274,7 @@ string URL::encode(const string& s, bool space_as_plus)
       case ';': case ':': case '@': case '&': case '=':
       case '$': case ',': case '/': case '?': case '#':
       case '[': case ']':
-	snprintf(buf, 4, "%%%02X", (unsigned int)c);
+        snprintf(buf, 4, "%%%02X", static_cast<unsigned int>(c));
 	r+=buf;
 	break;
 
@@ -331,7 +331,7 @@ string URL::decode(const string& s, bool space_as_plus)
 	string hex;
 	if (++p < l) hex+=s[p];
 	if (++p < l) hex+=s[p];
-	r += (char)Text::xtoi(hex);
+	r += static_cast<char>(Text::xtoi(hex));
 	break;
       }
 

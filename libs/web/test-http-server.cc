@@ -69,13 +69,16 @@ public:
 
 //--------------------------------------------------------------------------
 // Main
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+const sighandler_t sig_ign(SIG_IGN);
+#pragma GCC diagnostic pop
 int main(int argc, char **argv)
 {
 #ifdef __WIN32__
   winsock_initialise();
 #else
   // Force ignore for SIGPIPE
-  signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, sig_ign);
 #endif
 
   Log::StreamChannel chan_out(cout);

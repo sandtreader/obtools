@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 	while ((n = client->read(buf, PROGRESSIVE_BUF_SIZE)) != 0)
 	{
 	  log.detail << "Read buffer " << n << endl;
-	  cout.write((char *)buf, n);
+	  cout.write(reinterpret_cast<char *>(buf), n);
 	  total += n;
 	}
 
