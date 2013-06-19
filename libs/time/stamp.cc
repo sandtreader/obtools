@@ -75,8 +75,8 @@ ntp_stamp_t Stamp::combine(const Split& split)
 
   // Now upshift this to NTP form and add float seconds (do it in this
   // order to preserve precision)
-  ntp_stamp_t ts = (ntp_stamp_t)seconds << NTP_SHIFT;
-  ts += (ntp_stamp_t)(split.sec * (1ULL << NTP_SHIFT));
+  ntp_stamp_t ts = static_cast<ntp_stamp_t>(seconds) << NTP_SHIFT;
+  ts += static_cast<ntp_stamp_t>(split.sec * (1ULL << NTP_SHIFT));
 
   return ts;
 }
@@ -91,10 +91,10 @@ Split Stamp::split(ntp_stamp_t ts)
 
   // First we downgrade to integer to make life easier - we'll add
   // back the fractional part later.
-  unsigned long seconds = (unsigned long)(ts>>NTP_SHIFT);
+  unsigned long seconds = static_cast<unsigned long>(ts>>NTP_SHIFT);
 
   // Get estimate of years - near enough for NTP validity timeframe
-  int years = (int)(seconds/(365.24*DAY));
+  int years = static_cast<int>(seconds/(365.24*DAY));
   int leapdays = years/4;
   leapdays-=years/100;             // Chop off centuries
   leapdays+=(years+300)/400;       // Add back 400's, allowing for 1900 start
@@ -156,7 +156,7 @@ Split Stamp::split(ntp_stamp_t ts)
   // Get integer part of seconds, then add back float part by masking off
   // lower 32 bits and dividing down
   sp.sec = seconds;
-  sp.sec += (double)(ts & ((1ULL<<NTP_SHIFT)-1))/(1ULL<<NTP_SHIFT);
+  sp.sec += static_cast<double>(ts & ((1ULL<<NTP_SHIFT)-1))/(1ULL<<NTP_SHIFT);
 
   return sp;
 }
@@ -503,7 +503,7 @@ string Stamp::iso_minimal() const
       << setw(2) << setfill('0') << sp.day   << 'T'
       << setw(2) << setfill('0') << sp.hour
       << setw(2) << setfill('0') << sp.min
-      << setw(2) << setfill('0') << (int)sp.sec;
+      << setw(2) << setfill('0') << static_cast<int>(sp.sec);
 
   return oss.str();
 }
@@ -545,7 +545,7 @@ string Stamp::iso_time(char sep, bool with_secs) const
   oss << setw(2) << setfill('0') << sp.min;
 
   if (with_secs && sep) oss << sep;
-  if (with_secs) oss << setw(2) << setfill('0') << (int)sp.sec;
+  if (with_secs) oss << setw(2) << setfill('0') << static_cast<int>(sp.sec);
 
   return oss.str();
 }
@@ -596,7 +596,7 @@ string Stamp::format(const char *format) const
 int Stamp::weekday() const
 {
   // Get days since epoch
-  unsigned long seconds = (unsigned long)(t>>NTP_SHIFT);
+  unsigned long seconds = static_cast<unsigned long>(t>>NTP_SHIFT);
   unsigned long days = seconds/3600/24;
 
   // 1st January 1900 was a Monday, so..
@@ -645,7 +645,7 @@ void Stamp::get_tm(struct tm& tm) const
   tm.tm_mday = sp.day;
   tm.tm_hour = sp.hour;
   tm.tm_min  = sp.min;
-  tm.tm_sec  = (int)sp.sec;
+  tm.tm_sec  = static_cast<int>(sp.sec);
   tm.tm_wday = weekday() % 7;  // Move Sunday=7 back to Sunday=0
 }
 
@@ -686,8 +686,8 @@ Stamp Stamp::now()
   struct timeval tv;
   gettimeofday(&tv, 0);
 
-  s.t = (ntp_stamp_t)(tv.tv_sec + EPOCH_1970) << NTP_SHIFT;
-  s.t += ((ntp_stamp_t)tv.tv_usec << NTP_SHIFT)/MICRO;
+  s.t = static_cast<ntp_stamp_t>(tv.tv_sec + EPOCH_1970) << NTP_SHIFT;
+  s.t += (static_cast<ntp_stamp_t>(tv.tv_usec) << NTP_SHIFT)/MICRO;
 #endif
 
   return s;

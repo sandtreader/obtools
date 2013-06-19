@@ -87,7 +87,7 @@ Duration::Duration(const string& text)
 
 	  case 3:  // Third is harder - hours moving to days
 	  {
-	    int hours = (int)(t/HOUR);
+	    int hours = static_cast<int>(t/HOUR);
 	    double minsecs = t-hours*HOUR;
 	    t=DAY*hours + MINUTE*minsecs;
 	  }
@@ -147,8 +147,8 @@ string Duration::hms() const
   // (e.g.) 59.999999 -> 00:00:60
   double rt = floor(t*MILLI+0.5)/MILLI;
 
-  int hours = (int)(rt/HOUR);
-  int mins  = (int)((rt-hours*HOUR)/MINUTE);
+  int hours = static_cast<int>(rt/HOUR);
+  int mins  = static_cast<int>((rt-hours*HOUR)/MINUTE);
   double secs = rt-hours*HOUR-mins*MINUTE;
 
   // Fudge to pad floating seconds, because setw() won't do it
@@ -178,7 +178,8 @@ Duration Duration::clock()
 #if defined(CLOCK_MONOTONIC) && !defined(_SINGLE)
   struct timespec ts;
   if (!clock_gettime(CLOCK_MONOTONIC, &ts))
-    return Duration((double)ts.tv_sec+(double)ts.tv_nsec/1.0e9);
+    return Duration(static_cast<double>(ts.tv_sec) +
+                    static_cast<double>(ts.tv_nsec)/1.0e9);
 #endif
 
   return Duration();

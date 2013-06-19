@@ -110,7 +110,7 @@ public:
   // Static constructor-like function from NTP timestamp
   // (done this way to avoid ambiguity with time_t version)
   static Duration from_ntp(ntp_stamp_t n)
-  { return Duration((double)n/(1ULL<<NTP_SHIFT)); }
+  { return Duration(static_cast<double>(n)/(1ULL<<NTP_SHIFT)); }
 
   //------------------------------------------------------------------------
   // Validity checks - 0 time is not valid
@@ -123,7 +123,10 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
-  ntp_stamp_t ntp() const { return (uint64_t)(t * (1ULL<<NTP_SHIFT)); }
+  ntp_stamp_t ntp() const
+  {
+    return static_cast<uint64_t>(t * (1ULL<<NTP_SHIFT));
+  }
 
   //------------------------------------------------------------------------
   // Convert to HH:MM:SS string - never goes into days or higher
@@ -180,7 +183,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from time_t
-  Stamp(time_t _t): t((ntp_stamp_t)(_t+EPOCH_1970)<<NTP_SHIFT) {}
+  Stamp(time_t _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
 
   //------------------------------------------------------------------------
   // Constructor from split time
@@ -204,13 +207,13 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to time_t
-  time_t time() const { return (time_t)(t>>NTP_SHIFT)-EPOCH_1970; }
+  time_t time() const { return static_cast<time_t>(t>>NTP_SHIFT)-EPOCH_1970; }
 
   //------------------------------------------------------------------------
   // Get more accurate partial seconds count (0-59.999')
   double seconds() const
   { ntp_stamp_t s = t%(60ULL<<NTP_SHIFT);  // Partial seconds
-    return (double)s/(1ULL<<NTP_SHIFT); }
+    return static_cast<double>(s)/(1ULL<<NTP_SHIFT); }
 
   //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
