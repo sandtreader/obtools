@@ -94,7 +94,7 @@ int regenbuf::overflow(int c)
   if (c==EOF)
     close();
   else
-    buffer += (char)c;
+    buffer += static_cast<char>(c);
 
   return 0;
 }
