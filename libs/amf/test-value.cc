@@ -416,7 +416,7 @@ TEST(AMFValueTest, TestWritingAMF0String)
   EXPECT_EQ(buf[0], 0x02);
   EXPECT_EQ(buf[1], 0x00);
   EXPECT_EQ(buf[2], 0x05);
-  string hello((char *)buf+3, 5);
+  string hello(reinterpret_cast<char *>(buf)+3, 5);
   EXPECT_EQ(hello, "Hello");
 }
 
@@ -436,7 +436,7 @@ TEST(AMFValueTest, TestWritingAMF0Object)
   // bar (note alphabetical - not required but test is too complex otherwise!)
   EXPECT_EQ(buf[1], 0x00);
   EXPECT_EQ(buf[2], 0x03);
-  string bar((char *)buf+3, 3);
+  string bar(reinterpret_cast<char *>(buf)+3, 3);
   EXPECT_EQ(bar, "bar");
   EXPECT_EQ(buf[6], 0x01);
   EXPECT_NE(buf[7], 0);  // true
@@ -444,7 +444,7 @@ TEST(AMFValueTest, TestWritingAMF0Object)
   // foo
   EXPECT_EQ(buf[8], 0x00);
   EXPECT_EQ(buf[9], 0x03);
-  string foo((char *)buf+10, 3);
+  string foo(reinterpret_cast<char *>(buf)+10, 3);
   EXPECT_EQ(foo, "foo");
   EXPECT_EQ(buf[13], 0x06); // undefined
 
@@ -498,7 +498,7 @@ TEST(AMFValueTest, TestWritingAMF0ECMAArray)
   // bar (note alphabetical - not required but test is too complex otherwise!)
   EXPECT_EQ(buf[5], 0x00);
   EXPECT_EQ(buf[6], 0x03);
-  string bar((char *)buf+7, 3);
+  string bar(reinterpret_cast<char *>(buf)+7, 3);
   EXPECT_EQ(bar, "bar");
   EXPECT_EQ(buf[10], 0x01);
   EXPECT_NE(buf[11], 0);  // true
@@ -506,7 +506,7 @@ TEST(AMFValueTest, TestWritingAMF0ECMAArray)
   // foo
   EXPECT_EQ(buf[12], 0x00);
   EXPECT_EQ(buf[13], 0x03);
-  string foo((char *)buf+14, 3);
+  string foo(reinterpret_cast<char *>(buf)+14, 3);
   EXPECT_EQ(foo, "foo");
   EXPECT_EQ(buf[17], 0x06); // undefined
 
@@ -587,7 +587,7 @@ TEST(AMFValueTest, TestWritingAMF0XMLDoc)
   EXPECT_EQ(buf[2], 0x00);
   EXPECT_EQ(buf[3], 0x00);
   EXPECT_EQ(buf[4], 0x06);
-  string doc((char *)buf+5, 6);
+  string doc(reinterpret_cast<char *>(buf)+5, 6);
   EXPECT_EQ(doc, "<doc/>");
 }
 

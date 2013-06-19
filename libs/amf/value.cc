@@ -134,13 +134,14 @@ ostream& Value::log(ostream& sout, const string& indent) const
 void Value::read(Channel::Reader& chan, Format format)
   throw (Exception, Channel::Error)
 {
-  type = (Type)chan.read_byte();
+  char b = chan.read_byte();
+  type = static_cast<Type>(b);
   Type original_type = type;
 
   // If AMF0, map to AMF3 types
   if (format == FORMAT_AMF0)
   {
-    switch (type)
+    switch (b)
     {
       case 0x00: type = DOUBLE; break;   // Number
       case 0x01: type = chan.read_byte()?TRUE:FALSE; break; // Bool - read it
@@ -333,7 +334,7 @@ void Value::write(Channel::Writer& chan, Format format)
       case INTEGER:
         // No INTEGER in AMF0 - cast to double
         chan.write_byte(0x00);
-        chan.write_nbo_double((double)n);
+        chan.write_nbo_double(static_cast<double>(n));
         break;
 
       case DOUBLE:
