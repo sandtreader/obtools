@@ -143,6 +143,10 @@ public:
   //------------------------------------------------------------------------
   // Evaluate an expression
   double evaluate(const string& expr) throw (Exception);
+
+  //------------------------------------------------------------------------
+  // Virtual destructor to keep compiler happy!
+  virtual ~Evaluator() {}
 };
 
 //==========================================================================
