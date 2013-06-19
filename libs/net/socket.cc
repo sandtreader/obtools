@@ -252,13 +252,12 @@ bool Socket::bind(EndPoint address)
 // Select for read on a socket
 // Use to allow a timeout on read/accept on blocking sockets
 // Returns whether socket is readable within the given timeout (seconds)
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 bool Socket::wait_readable(int timeout)
 {
   fd_set rfds;
   FD_ZERO(&rfds);
-#pragma GCC diagnostic ignored "-Wold-style-cast"
   FD_SET(fd, &rfds);
-#pragma GCC diagnostic pop
   struct timeval tv;
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
@@ -266,24 +265,25 @@ bool Socket::wait_readable(int timeout)
   return select(fd+1, &rfds, 0, 0, &tv) == 1;
 
 }
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------
 // Select for write on a socket
 // Use to allow a timeout on connect/write on blocking sockets
 // Returns whether socket is readable within the given timeout (seconds)
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 bool Socket::wait_writeable(int timeout)
 {
   fd_set wfds;
   FD_ZERO(&wfds);
-#pragma GCC diagnostic ignored "-Wold-style-cast"
   FD_SET(fd, &wfds);
-#pragma GCC diagnostic pop
   struct timeval tv;
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
 
   return select(fd+1, 0, &wfds, 0, &tv) == 1;
 }
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------
 // Get local address
