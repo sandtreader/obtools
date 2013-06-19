@@ -20,7 +20,7 @@ namespace ObTools { namespace Channel {
 size_t DataQueueReader::basic_read(void *buf, size_t count) throw (Error)
 {
   // Note: DataQueue::read handles data=0 OK
-  size_t n = dq.read((MT::DataBlock::data_t *)buf, count);
+  size_t n = dq.read(static_cast<MT::DataBlock::data_t *>(buf), count);
   offset += n;
   return n;
 }
@@ -31,7 +31,7 @@ size_t DataQueueReader::basic_read(void *buf, size_t count) throw (Error)
 // Write implementation
 void DataQueueWriter::basic_write(const void *buf, size_t count) throw (Error)
 {
-  dq.write((const MT::DataBlock::data_t *)buf, count);
+  dq.write(static_cast<const MT::DataBlock::data_t *>(buf), count);
   offset += count;
 }
 

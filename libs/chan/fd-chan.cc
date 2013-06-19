@@ -48,7 +48,7 @@ size_t FDReader::basic_read(void *buf, size_t count) throw (Error)
 void FDWriter::basic_write(const void *buf, size_t count) throw (Error)
 {
   ssize_t n = ::write(fd, buf, count);
-  if (n<0 || (size_t)n != count) throw Error(2, strerror(errno));
+  if (n<0 || static_cast<size_t>(n) != count) throw Error(2, strerror(errno));
   offset += count;
 }
 

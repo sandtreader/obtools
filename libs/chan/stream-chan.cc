@@ -23,7 +23,7 @@ size_t StreamReader::basic_read(void *buf, size_t count) throw (Error)
   if (!sin) throw Error(1, "Stream failed");
 
   if (buf)
-    sin.read((char *)buf, count);
+    sin.read(static_cast<char *>(buf), count);
   else
     sin.ignore(count);
 
@@ -38,7 +38,7 @@ void StreamReader::rewind(size_t n) throw (Error)
   if (n<=offset)
   {
     offset-=n;
-    sin.seekg(-(streamoff)n, ios_base::cur);
+    sin.seekg(-static_cast<streamoff>(n), ios_base::cur);
     if (!sin) throw Error(2, "Can't rewind");
   }
   else throw Error(1, "Rewound too far");
@@ -52,7 +52,7 @@ void StreamWriter::basic_write(const void *buf, size_t count) throw (Error)
 {
   if (!sout) throw Error(1, "Stream failed");
 
-  sout.write((char *)buf, count);
+  sout.write(static_cast<const char *>(buf), count);
   offset += count;
 }
 
@@ -62,7 +62,7 @@ void StreamWriter::rewind(size_t n) throw (Error)
   if (n<=offset)
   {
     offset-=n;
-    sout.seekp(-(streamoff)n, ios_base::cur);
+    sout.seekp(-static_cast<streamoff>(n), ios_base::cur);
     if (!sout) throw Error(2, "Can't rewind");
   }
   else throw Error(1, "Rewound too far");

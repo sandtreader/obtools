@@ -27,7 +27,7 @@ namespace ObTools { namespace Channel {
 // Throws Error on failure, or EOF after a read
 bool Reader::try_read(void *buf, size_t count) throw (Error)
 {
-  char *p = (char *)buf;
+  char *p = static_cast<char *>(buf);
   size_t done = 0;
 
   while (done < count)
@@ -53,7 +53,7 @@ bool Reader::try_read(void *buf, size_t count) throw (Error)
 // Throws Error on failure
 void Reader::read(void *buf, size_t count) throw (Error)
 {
-  char *p = (char *)buf;
+  char *p = static_cast<char *>(buf);
   size_t done = 0;
 
   while (done < count)
@@ -119,7 +119,8 @@ uint32_t Reader::read_nbo_24() throw (Error)
 {
   unsigned char buf[3];
   read(buf, 3);
-  return ((uint32_t)buf[0] << 16) + ((uint32_t)buf[1] << 8) + buf[2];
+  return (static_cast<uint32_t>(buf[0]) << 16)
+         + (static_cast<uint32_t>(buf[1]) << 8) + buf[2];
 }
 
 //--------------------------------------------------------------------------
@@ -172,7 +173,7 @@ uint16_t Reader::read_le_16() throw (Error)
   // a NOOP anyway - so do it manually
   unsigned char buf[2];
   read(buf, 2);
-  return buf[0] + ((uint16_t)buf[1] << 8);
+  return buf[0] + (static_cast<uint16_t>(buf[1]) << 8);
 }
 
 //--------------------------------------------------------------------------
@@ -182,7 +183,8 @@ uint32_t Reader::read_le_24() throw (Error)
 {
   unsigned char buf[3];
   read(buf, 3);
-  return buf[0] + ((uint32_t)buf[1] << 8) + ((uint32_t)buf[2] << 16);
+  return buf[0] + (static_cast<uint32_t>(buf[1]) << 8)
+                + (static_cast<uint32_t>(buf[2]) << 16);
 }
 
 //--------------------------------------------------------------------------
@@ -192,8 +194,9 @@ uint32_t Reader::read_le_32() throw (Error)
 {
   unsigned char buf[4];
   read(buf, 4);
-  return buf[0] + ((uint32_t)buf[1] << 8) + ((uint32_t)buf[2] << 16)
-                + ((uint32_t)buf[3] << 24);
+  return buf[0] + (static_cast<uint32_t>(buf[1]) << 8)
+                + (static_cast<uint32_t>(buf[2]) << 16)
+                + (static_cast<uint32_t>(buf[3]) << 24);
 }
 
 //--------------------------------------------------------------------------
@@ -203,8 +206,9 @@ bool Reader::read_le_32(uint32_t& n) throw (Error)
 {
   unsigned char buf[4];
   if (!try_read(&buf, 4)) return false;
-  n = buf[0] + ((uint32_t)buf[1] << 8) + ((uint32_t)buf[2] << 16)
-             + ((uint32_t)buf[3] << 24);
+  n = buf[0] + (static_cast<uint32_t>(buf[1]) << 8)
+             + (static_cast<uint32_t>(buf[2]) << 16)
+             + (static_cast<uint32_t>(buf[3]) << 24);
   return true;
 }
 
@@ -214,7 +218,7 @@ bool Reader::read_le_32(uint32_t& n) throw (Error)
 uint64_t Reader::read_le_64() throw (Error)
 {
   uint64_t n = read_le_32();
-  return n + ((uint64_t)read_le_32()<<32);
+  return n + (static_cast<uint64_t>(read_le_32())<<32);
 }
 
 //--------------------------------------------------------------------------
@@ -239,7 +243,7 @@ void Reader::skip(size_t n) throw (Error)
 // Skip to given alignment (bytes) from current offset
 void Reader::align(size_t n) throw (Error)
 { 
-  skip((size_t)(n*((offset+n-1)/n) - offset));  // Bytes to skip
+  skip(static_cast<size_t>(n*((offset+n-1)/n) - offset));  // Bytes to skip
 }
 
 }} // namespaces

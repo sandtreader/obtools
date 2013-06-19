@@ -24,7 +24,7 @@ size_t StringReader::basic_read(void *buf, size_t count) throw (Error)
 
   if (count)
   {
-    if (buf) data.copy((char *)buf, count, offset);
+    if (buf) data.copy(static_cast<char *>(buf), count, offset);
     offset += count;
   }
 
@@ -58,7 +58,7 @@ void StringReader::rewind(size_t n) throw (Error)
 void StringWriter::basic_write(const void *buf, size_t count) throw (Error)
 {
   // Just append - no limit!
-  data.append((const char *)buf, count);
+  data.append(static_cast<const char *>(buf), count);
   offset += count;
 }
 

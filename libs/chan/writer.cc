@@ -57,9 +57,9 @@ void Writer::write_nbo_16(uint16_t i) throw (Error)
 void Writer::write_nbo_24(uint32_t i) throw (Error)
 {
   unsigned char buf[3];
-  buf[0] = (unsigned char)(i>>16);
-  buf[1] = (unsigned char)(i>>8);
-  buf[2] = (unsigned char)(i);
+  buf[0] = static_cast<unsigned char>(i>>16);
+  buf[1] = static_cast<unsigned char>(i>>8);
+  buf[2] = static_cast<unsigned char>(i);
   basic_write(buf, 3);
 }
 
@@ -77,8 +77,8 @@ void Writer::write_nbo_32(uint32_t i) throw (Error)
 // Throws Error on failure
 void Writer::write_nbo_64(uint64_t i) throw (Error)
 {
-  write_nbo_32((uint32_t)(i >> 32));
-  write_nbo_32((uint32_t)(i & 0xFFFFFFFF));
+  write_nbo_32(static_cast<uint32_t>(i >> 32));
+  write_nbo_32(static_cast<uint32_t>(i & 0xFFFFFFFF));
 }
 
 //--------------------------------------------------------------------------
@@ -100,8 +100,8 @@ void Writer::write_le_16(uint16_t i) throw (Error)
   // No easy way to do this with htonl, since if we're big-endian it's 
   // a NOOP anyway - so do it manually
   unsigned char buf[2];
-  buf[0] = (unsigned char)(i);
-  buf[1] = (unsigned char)(i>>8);
+  buf[0] = static_cast<unsigned char>(i);
+  buf[1] = static_cast<unsigned char>(i>>8);
   basic_write(buf, 2);
 }
 
@@ -111,9 +111,9 @@ void Writer::write_le_16(uint16_t i) throw (Error)
 void Writer::write_le_24(uint32_t i) throw (Error)
 {
   unsigned char buf[3];
-  buf[0] = (unsigned char)(i);
-  buf[1] = (unsigned char)(i>>8);
-  buf[2] = (unsigned char)(i>>16);
+  buf[0] = static_cast<unsigned char>(i);
+  buf[1] = static_cast<unsigned char>(i>>8);
+  buf[2] = static_cast<unsigned char>(i>>16);
   basic_write(buf, 3);
 }
 
@@ -123,10 +123,10 @@ void Writer::write_le_24(uint32_t i) throw (Error)
 void Writer::write_le_32(uint32_t i) throw (Error)
 {
   unsigned char buf[4];
-  buf[0] = (unsigned char)(i);
-  buf[1] = (unsigned char)(i>>8);
-  buf[2] = (unsigned char)(i>>16);
-  buf[3] = (unsigned char)(i>>24);
+  buf[0] = static_cast<unsigned char>(i);
+  buf[1] = static_cast<unsigned char>(i>>8);
+  buf[2] = static_cast<unsigned char>(i>>16);
+  buf[3] = static_cast<unsigned char>(i>>24);
   basic_write(buf, 4);
 }
 
@@ -135,8 +135,8 @@ void Writer::write_le_32(uint32_t i) throw (Error)
 // Throws Error on failure
 void Writer::write_le_64(uint64_t i) throw (Error)
 {
-  write_nbo_32((uint32_t)(i & 0xFFFFFFFF));
-  write_nbo_32((uint32_t)(i >> 32));
+  write_nbo_32(static_cast<uint32_t>(i & 0xFFFFFFFF));
+  write_nbo_32(static_cast<uint32_t>(i >> 32));
 }
 
 //--------------------------------------------------------------------------
@@ -168,7 +168,7 @@ void Writer::skip(size_t n) throw (Error)
 // Pad to given alignment (bytes) from current offset
 void Writer::align(size_t n) throw (Error)
 { 
-  skip((int)(n*((offset+n-1)/n) - offset));  // Bytes to pad
+  skip(static_cast<int>(n*((offset+n-1)/n) - offset));  // Bytes to pad
 }
 
 }} // namespaces
