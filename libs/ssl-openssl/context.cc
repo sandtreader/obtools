@@ -172,8 +172,9 @@ void Context::set_default_verify_paths()
 // Set session ID context
 void Context::set_session_id_context(const string& s)
 {
-  if (ctx) SSL_CTX_set_session_id_context(ctx, (const unsigned char *)s.data(),
-					  s.length());
+  if (ctx) SSL_CTX_set_session_id_context(ctx,
+                          reinterpret_cast<const unsigned char *>(s.data()),
+                          s.length());
 }
 
 //--------------------------------------------------------------------------

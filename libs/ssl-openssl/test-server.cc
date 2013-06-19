@@ -23,8 +23,8 @@ public:
   TestServer(SSL::Context *ctx, int port): 
     SSL::TCPServer(ctx, port) {}
 
-  void process(Net::TCPSocket& s, 
-	       Net::EndPoint client);
+  void process(Net::TCPSocket& s, Net::EndPoint client);
+  void process(SSL::TCPSocket&, SSL::ClientDetails&) {}
 };
 
 void TestServer::process(Net::TCPSocket& s, 
@@ -55,13 +55,17 @@ void TestServer::process(Net::TCPSocket& s,
 //--------------------------------------------------------------------------
 // Main
 
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+const sighandler_t sig_ign(SIG_IGN);
+#pragma GCC diagnostic pop
+
 int main(int argc, char **argv)
 {
 #if defined(__WIN32__)
   winsock_initialise();
 #else
   // Force ignore for SIGPIPE
-  signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, sig_ign);
 #endif
 
   if (argc < 2)
