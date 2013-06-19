@@ -23,7 +23,7 @@ bool LogAction::run(Context& con)
   // Interpolate with context vars
   text = con.vars.interpolate(text);
 
-  Log::Message msg((Log::Level)level, text);
+  Log::Message msg(static_cast<Log::Level>(level), text);
   Log::logger.log(msg);
 
   return true;
