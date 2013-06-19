@@ -437,6 +437,11 @@ endif
 #Set standard flags
 ifndef SUPPRESS_WARNINGS
 CPPFLAGS += -W -Wall
+ifeq ($(CC), gcc)
+ifeq ($(shell $(CC) -dumpversion),4.7)
+CPPFLAGS += -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wnoexcept
+endif
+endif
 endif
 
 # Always reentrant
