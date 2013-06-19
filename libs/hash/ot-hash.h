@@ -106,7 +106,7 @@ public:
 #endif
   {
     int table_size = size*sizeof(entry_t);
-    table = (entry_t *)malloc(table_size);
+    table = static_cast<entry_t *>(malloc(table_size));
 
     // Clear it and create freelist
     for(HASH_INDEX_T i=0; i<size; i++)
@@ -611,7 +611,7 @@ public:
   {
     int nblocks = 1<<nbits;
     int size = nblocks*sizeof(block_t *);
-    table = (block_t **)malloc(size);
+    table = static_cast<block_t **>(malloc(size));
 
     if (!table) return;
 
@@ -803,16 +803,16 @@ public:
 
   //--------------------------------------------------------------------------
   // Get block array index from ID
-  int get_block_no(ID_T id) { return (int)(id & block_mask); }
+  int get_block_no(ID_T id) { return static_cast<int>(id & block_mask); }
 
   //--------------------------------------------------------------------------
   // Get hash ID within block from full ID
-  HASH_ID_T get_hash_id(ID_T id) { return(HASH_ID_T)(id >> nbits); }
+  HASH_ID_T get_hash_id(ID_T id) { return static_cast<HASH_ID_T>(id >> nbits); }
 
   //--------------------------------------------------------------------------
   // Get start offset in hash block from hash ID
   HASH_INDEX_T get_start(HASH_ID_T id) 
-  { return(HASH_INDEX_T)(id % block_size); }
+  { return static_cast<HASH_INDEX_T>(id % block_size); }
 
 };
 

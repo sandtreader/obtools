@@ -57,7 +57,8 @@ void TestThread::run()
       do
       {
 	// Generate a random ID with thread uniqueness in lowest bits
-	ids[j] = ((uint32_t)(rand()^(rand()<<1))/nthreads)*nthreads+n;
+        ids[j] = (static_cast<uint32_t>(rand()^(rand()<<1))/nthreads)
+                 *nthreads+n;
       } while (hash.lookup(ids[j]) != Hash::INVALID_INDEX);
 
       // Now OK to add
