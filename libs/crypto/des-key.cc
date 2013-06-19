@@ -104,7 +104,7 @@ void DESKey::read(istream& sin)
 void DESKey::write(ostream& sout) const
 {
   for(int i=0; i<8; i++)
-    sout << hex << setw(2) << setfill('0') << (int)key[i];
+    sout << hex << setw(2) << setfill('0') << static_cast<int>(key[i]);
   sout << dec << setw(0) << setfill(' ');
 }
 

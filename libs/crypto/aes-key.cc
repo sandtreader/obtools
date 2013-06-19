@@ -83,7 +83,7 @@ void AESKey::read(istream& sin)
 // Read from stream as binary
 void AESKey::read_binary(istream& sin)
 {
-  sin.read((char *)key, size/8);
+  sin.read(reinterpret_cast<char *>(key), size/8);
   valid = sin.gcount() == size/8;
 }
 
@@ -93,7 +93,7 @@ void AESKey::read_binary(istream& sin)
 void AESKey::write(ostream& sout) const
 {
   for (int i = 0; i < size / 8; ++i)
-    sout << hex << setw(2) << setfill('0') << (int)key[i];
+    sout << hex << setw(2) << setfill('0') << static_cast<int>(key[i]);
   sout << dec << setw(0) << setfill(' ');
 }
 
@@ -101,7 +101,7 @@ void AESKey::write(ostream& sout) const
 // Write to stream as binary
 void AESKey::write_binary(ostream& sout) const
 {
-  sout.write((char *)key, size/8);
+  sout.write(reinterpret_cast<const char *>(key), size/8);
 }
 
 //------------------------------------------------------------------------
@@ -175,7 +175,7 @@ void AESKey::write(Channel::Writer& writer) const throw (Channel::Error)
 bool AESKey::set_from_base64(const string& s)
 {
   Text::Base64 base64;
-  if ((int)base64.decode(s, key, size/8) != size/8) return false;
+  if (static_cast<int>(base64.decode(s, key, size/8)) != size/8) return false;
   valid = true;
   return true;
 }

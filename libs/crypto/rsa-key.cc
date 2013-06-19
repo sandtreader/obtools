@@ -63,6 +63,7 @@ void RSAKey::write(ostream& sout, bool force_public) const
 //------------------------------------------------------------------------
 // Read from string - reads PEM format, with pass phrase
 // If force_private is set, reads a private key even if public (see above)
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 void RSAKey::read(const string& text, 
 		  const string& pass_phrase,
 		  bool force_private)
@@ -88,7 +89,7 @@ void RSAKey::read(const string& text,
 
   // Read key
   if (is_private || force_private)
-    rsa = PEM_read_bio_RSAPrivateKey(bio, 0, 0, (void *)pp);
+    rsa = PEM_read_bio_RSAPrivateKey(bio, 0, 0, const_cast<char *>(pp));
   else
     rsa = PEM_read_bio_RSA_PUBKEY(bio, 0, 0, 0);
 
@@ -97,10 +98,12 @@ void RSAKey::read(const string& text,
 
   if (rsa) valid = true;
 }
+#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------
 // Read from DER
 // If force_private is set, reads a private key even if public (see above)
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 void RSAKey::read_der(const unsigned char *der, int length, bool force_private)
 {
   // Create 'BIO'
@@ -127,6 +130,7 @@ void RSAKey::read_der(const unsigned char *der, int length, bool force_private)
 
   if (rsa) valid = true;
 }
+#pragma GCC diagnostic pop
 
 // Backwards compatibility stub
 void RSAKey::read(const string& text, bool force_private)
@@ -135,6 +139,7 @@ void RSAKey::read(const string& text, bool force_private)
 //------------------------------------------------------------------------
 // Convert to PEM format string with pass phrase
 // force_public forces public key output from private key (see above)
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 string RSAKey::str(const string& pass_phrase, bool force_public) const
 {
   if (!valid) return "INVALID!";
@@ -155,11 +160,11 @@ string RSAKey::str(const string& pass_phrase, bool force_public) const
 
   // Write key
   if (is_private && !force_public)
-    PEM_write_bio_RSAPrivateKey(bio, rsa, enc, 0, 0, 0, (void *)pp);
+    PEM_write_bio_RSAPrivateKey(bio, rsa, enc, 0, 0, 0, const_cast<char *>(pp));
   else
     PEM_write_bio_RSA_PUBKEY(bio, rsa);
 
-  (void)BIO_flush(bio);
+  static_cast<void>(BIO_flush(bio));
 
   // Get buffer
   BUF_MEM *buf;
@@ -169,7 +174,8 @@ string RSAKey::str(const string& pass_phrase, bool force_public) const
   BIO_free(bio);  // buf goes too
   return key;
 }
-  
+#pragma GCC diagnostic pop
+
 // Backwards compatibility stub
 string RSAKey::str(bool force_public) const
 { return str("", force_public); }

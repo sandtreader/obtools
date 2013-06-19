@@ -25,7 +25,8 @@ SHA1::SHA1(): finished(false)
 // Update digest with a block of data
 void SHA1::update(const void *data, size_t length)
 {
-  if (!finished) SHA1_Update(&sha_ctx, data, (unsigned long)length);
+  if (!finished) SHA1_Update(&sha_ctx, data,
+                             static_cast<unsigned long>(length));
 }
 
 //------------------------------------------------------------------------
@@ -42,7 +43,7 @@ string SHA1::hex20(unsigned char *b)
 {
   ostringstream oss;
   oss << hex << setw(2) << setfill('0');
-  for(int i=0; i<DIGEST_LENGTH; i++, b++) oss << (int)*b;
+  for(int i=0; i<DIGEST_LENGTH; i++, b++) oss << static_cast<int>(*b);
   return oss.str();
 }
 
@@ -76,7 +77,8 @@ SHA1::~SHA1()
 // Static: Get hash of block of data.  Writes DIGEST_LENGTH bytes to result
 void SHA1::digest(const void *data, size_t length, unsigned char *result)
 {
-  ::SHA1((const unsigned char *)data, (unsigned long)length, result);
+  ::SHA1(static_cast<const unsigned char *>(data),
+         static_cast<unsigned long>(length), result);
 }
 
 //------------------------------------------------------------------------

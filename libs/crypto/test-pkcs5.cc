@@ -24,7 +24,9 @@ int main(int argc, char **argv)
   const char *s = (argc>1)?argv[1]:"ABCD";
   int length = strlen(s);
 
-  unsigned char *ps = Crypto::PKCS5::pad((const unsigned char *)s, length, 8);
+  unsigned char *ps = Crypto::PKCS5::pad(
+                                  reinterpret_cast<const unsigned char *>(s),
+                                  length, 8);
   cout << "Padded:\n";
   dumper.dump(ps, length);
 

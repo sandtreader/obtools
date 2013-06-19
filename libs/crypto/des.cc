@@ -27,6 +27,7 @@ namespace ObTools { namespace Crypto {
 // Encrypts if 'encryption' is set (default), otherwise decrypts
 // IV is modified if set
 // Returns whether successful (keys set up correctly)
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 bool DES::encrypt(unsigned char *data, int length, bool encryption)
 {
   // Round length down to 8-byte multiple
@@ -70,7 +71,7 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
       {
 	case 1:
 	{
-	  DES_cblock *block = (DES_cblock *)data;
+          DES_cblock *block = reinterpret_cast<DES_cblock *>(data);
 	  DES_ecb_encrypt(block, block, &keys[0].schedule, enc);
 	}
 	break;
@@ -96,6 +97,7 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
 
   return true;
 }
+#pragma GCC diagnostic pop
 
 }} // namespaces
 

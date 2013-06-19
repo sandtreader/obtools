@@ -34,7 +34,7 @@ int main(int argc, char **argv)
   // Check for explicit string to SHA1
   if (argc > 1) 
   {
-    p = (unsigned char *)argv[1];
+    p = reinterpret_cast<unsigned char *>(argv[1]);
     length = strlen(argv[1]);
     cout << "Input: [" << argv[1] << "]\n";
   }

@@ -35,7 +35,7 @@ void Certificate::read(istream& sin)
   while (sin) 
   {
     int c = sin.get();
-    if (c>=0) text+=(char)c;
+    if (c>=0) text+=static_cast<char>(c);
   }
   read(text);
 }
@@ -49,10 +49,12 @@ void Certificate::write(ostream& sout) const
 
 //------------------------------------------------------------------------
 // Read from string - reads PEM or DER format
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 void Certificate::read(const string& text)
 {
   int length = text.size();
-  const unsigned char *data = (const unsigned char *)text.data();
+  const unsigned char *data = reinterpret_cast<const unsigned char *>(
+                                                              text.data());
 
   // Scan for top-bit set characters indicating DER format
   bool der = false;
@@ -74,7 +76,7 @@ void Certificate::read(const string& text)
   {
     fixed = PEM_CERT_START + text + PEM_CERT_END;
     length = fixed.size();
-    data = (const unsigned char *)fixed.data();
+    data = reinterpret_cast<const unsigned char *>(fixed.data());
   }
 
   // Create 'BIO'
@@ -101,9 +103,11 @@ void Certificate::read(const string& text)
   // Clean up
   BIO_free(bio);
 }
+#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------
 // Convert to PEM format string 
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 string Certificate::str() const
 {
   if (!x509) return "INVALID!";
@@ -114,7 +118,7 @@ string Certificate::str() const
 
   // Write certificate
   PEM_write_bio_X509(bio, x509);
-  (void)BIO_flush(bio);
+  static_cast<void>(BIO_flush(bio));
 
   // Get buffer
   BUF_MEM *buf;
@@ -124,6 +128,7 @@ string Certificate::str() const
   BIO_free(bio);  // buf goes too
   return pem;
 }
+#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------
 // Get common name
