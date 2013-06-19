@@ -439,7 +439,7 @@ ifndef SUPPRESS_WARNINGS
 CPPFLAGS += -W -Wall
 ifeq ($(CC), gcc)
 ifeq ($(shell $(CC) -dumpversion),4.7)
-CPPFLAGS += -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wnoexcept
+CPPFLAGS += -Wnon-virtual-dtor -Wold-style-cast -Wnoexcept
 endif
 endif
 endif
