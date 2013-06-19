@@ -99,6 +99,19 @@ TEST(XMLTest, TestSuperimpose)
   ASSERT_EQ(expected, a.to_string());
 }
 
+TEST(XMLTest, TestGetChildElement)
+{
+  string xml="<foo>text<bar/> <splat/></foo>\n";
+  XML::Parser parser(XML::PARSER_PRESERVE_WHITESPACE);
+  ASSERT_NO_THROW(parser.read_from(xml));
+  XML::Element& e = parser.get_root();
+  ASSERT_FALSE(!e);
+  XML::Element& bar = e.get_child_element();
+  ASSERT_EQ("bar", bar.name);
+  XML::Element& splat = e.get_child_element(1);
+  ASSERT_EQ("splat", splat.name);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

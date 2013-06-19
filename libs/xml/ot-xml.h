@@ -326,17 +326,24 @@ public:
 
   //------------------------------------------------------------------------
   /// 'Optimise' single text sub-elements back to 'content' string here
-  void optimise(); 
+  void optimise();
 
   //--------------------------------------------------------------------------
   /// Find n'th (first, by default) child element, whatever it is
-  /// \return Element::none if there isn't one 
+  /// \return Element::none if there isn't one
   Element& get_child(int n=0);
   const Element& get_child(int n=0) const;      ///< \copydoc get_child(int)
 
   //--------------------------------------------------------------------------
+  /// Find n'th (first, by default) child element, but ignoring text/WS
+  /// \return Element::none if there isn't one
+  Element& get_child_element(int n=0);
+  const Element& get_child_element(int n=0) const;
+                                         ///< \copydoc get_child_element(int)
+
+  //--------------------------------------------------------------------------
   /// Find n'th (first, by default) child element of given name.
-  /// \return Element::none if there isn't one 
+  /// \return Element::none if there isn't one
   /// \note Use valid() to check which you've got - e.g.:
   /// \code
   ///     XML::Element& e = get_child(root, "foo");
@@ -353,7 +360,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Find first (or only) descendant of given name
-  // Returns Element::none if there isn't one 
+  // Returns Element::none if there isn't one
   // (Like get_child() but ignoring intervening cruft)
   const Element& get_descendant(const string& ename) const;
   Element& get_descendant(const string& ename);
