@@ -20,7 +20,7 @@ namespace ObTools { namespace DB { namespace MySQL {
 //Constructor
 ResultSet::ResultSet(void *_myres): myres(_myres)
 {
-  MYSQL_RES *res = (MYSQL_RES *)myres;
+  MYSQL_RES *res = static_cast<MYSQL_RES *>(myres);
 
   // Get field definitions
   mynum_fields = mysql_num_fields(res);
@@ -31,7 +31,7 @@ ResultSet::ResultSet(void *_myres): myres(_myres)
 //Get number of rows in result set
 int ResultSet::count()
 {
-  MYSQL_RES *res = (MYSQL_RES *)myres;
+  MYSQL_RES *res = static_cast<MYSQL_RES *>(myres);
   return mysql_num_rows(res);
 }
 
@@ -40,7 +40,7 @@ int ResultSet::count()
 //Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
 {
-  MYSQL_RES *res = (MYSQL_RES *)myres;
+  MYSQL_RES *res = static_cast<MYSQL_RES *>(myres);
 
   // Try to fetch a row
   MYSQL_ROW myrow = mysql_fetch_row(res);
@@ -50,7 +50,7 @@ bool ResultSet::fetch(Row& row)
     row.clear();
 
     // Load all the fields by name into the row, unescaping as we go
-    MYSQL_FIELD *fields = (MYSQL_FIELD *)myfields;
+    MYSQL_FIELD *fields = static_cast<MYSQL_FIELD *>(myfields);
     for(unsigned int i=0; i<mynum_fields; i++)
       if (myrow[i]) row.add_unescaped(fields[i].name, myrow[i]);
 
@@ -65,7 +65,7 @@ bool ResultSet::fetch(Row& row)
 //Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
-  MYSQL_RES *res = (MYSQL_RES *)myres;
+  MYSQL_RES *res = static_cast<MYSQL_RES *>(myres);
 
   // Try to fetch a row
   MYSQL_ROW myrow = mysql_fetch_row(res);
@@ -82,7 +82,7 @@ bool ResultSet::fetch(string& value)
 //Destructor
 ResultSet::~ResultSet() 
 {
-  MYSQL_RES *res = (MYSQL_RES *)myres;
+  MYSQL_RES *res = static_cast<MYSQL_RES *>(myres);
   mysql_free_result(res);
 }
 
@@ -124,7 +124,7 @@ Connection::Connection(const string& host, const string& user,
 //Check whether connection is OK
 bool Connection::ok()
 {
-  MYSQL *conn = (MYSQL *)myconn;
+  MYSQL *conn = static_cast<MYSQL *>(myconn);
   if (!mysql_ping(conn)) return true;
 
   log.error << "MySQL connection failed: " << mysql_error(conn) << endl;
@@ -136,7 +136,7 @@ bool Connection::ok()
 //Returns whether successful
 bool Connection::exec(const string& sql)
 {
-  MYSQL *conn = (MYSQL *)myconn;
+  MYSQL *conn = static_cast<MYSQL *>(myconn);
 
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec: " << sql << endl;)
 
@@ -156,7 +156,7 @@ bool Connection::exec(const string& sql)
 //Returns result - check this for validity
 Result Connection::query(const string& sql)
 {
-  MYSQL *conn = (MYSQL *)myconn;
+  MYSQL *conn = static_cast<MYSQL *>(myconn);
 
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery: " << sql << endl;)
 
@@ -185,7 +185,7 @@ Result Connection::query(const string& sql)
 //Destructor
 Connection::~Connection() 
 {
-  MYSQL *conn = (MYSQL *)myconn;
+  MYSQL *conn = static_cast<MYSQL *>(myconn);
   if (valid && conn) mysql_close(conn);
 }
 
