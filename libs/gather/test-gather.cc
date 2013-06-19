@@ -18,10 +18,11 @@ using namespace ObTools;
 TEST(GatherTest, TestSimpleAdd)
 {
   Gather::Buffer buffer(0);
-  const string data("Hello, world!");
-  Gather::Segment& seg = buffer.add((Gather::data_t *)data.c_str(),
-                                    data.size());
-  ASSERT_EQ(data.size(), buffer.get_length());
+  char data[] = "Hello, world!";
+  const string expected(&data[0], strlen(data));
+  Gather::Segment& seg = buffer.add(reinterpret_cast<unsigned char *>(&data[0]),
+                                    strlen(data));
+  ASSERT_EQ(expected.size(), buffer.get_length());
   ASSERT_LE(1, buffer.get_size());
   ASSERT_EQ(1, buffer.get_count());
   ASSERT_EQ(data, string(reinterpret_cast<char *>(seg.data), seg.length));
@@ -43,109 +44,125 @@ TEST(GatherTest, TestInternalAdd)
 TEST(GatherTest, TestSimpleInsert)
 {
   Gather::Buffer buffer(0);
-  const uint32_t n = 0xDEADBEEF;
-  Gather::Segment &seg = buffer.insert((Gather::data_t *)&n, sizeof(n));
-  ASSERT_EQ(sizeof(n), buffer.get_length());
+  uint32_t n = 0xDEADBEEF;
+  const uint32_t expected = n;
+  Gather::Segment &seg = buffer.insert(reinterpret_cast<Gather::data_t *>(&n),
+                                       sizeof(n));
+  ASSERT_EQ(sizeof(expected), buffer.get_length());
   ASSERT_LE(1, buffer.get_size());
   ASSERT_EQ(1, buffer.get_count());
-  ASSERT_EQ(sizeof(n), seg.length);
-  for (unsigned i = 0; i < sizeof(n); ++i)
-    ASSERT_EQ((n >> (i * 8)) & 0xff, seg.data[i]) << "Where i = " << i;
+  ASSERT_EQ(sizeof(expected), seg.length);
+  for (unsigned i = 0; i < sizeof(expected); ++i)
+    ASSERT_EQ((expected >> (i * 8)) & 0xff, seg.data[i]) << "Where i = " << i;
 }
 
 TEST(GatherTest, TestInsertBetween)
 {
   Gather::Buffer buffer(0);
-  const string data("Hello, world!");
-  const uint32_t n = 0x01234567;
-  buffer.add((Gather::data_t *)data.c_str(), data.size());
-  buffer.add((Gather::data_t *)data.c_str(), data.size());
-  buffer.insert((Gather::data_t *)&n, sizeof(n), 1);
+  char data[] = "Hello, world!";
+  const string expected_str(&data[0], strlen(data));
+  uint32_t n = 0x01234567;
+  const uint32_t expected_num(n);
+  buffer.add(reinterpret_cast<Gather::data_t *>(&data[0]), strlen(data));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&data[0]), strlen(data));
+  buffer.insert(reinterpret_cast<Gather::data_t *>(&n), sizeof(n), 1);
   const Gather::Segment *segments = buffer.get_segments();
 
-  ASSERT_EQ(data.size() * 2 + sizeof(n), buffer.get_length());
+  ASSERT_EQ(expected_str.size() * 2 + sizeof(expected_num),
+            buffer.get_length());
   ASSERT_LE(3, buffer.get_size());
   ASSERT_EQ(3, buffer.get_count());
   ASSERT_TRUE(segments);
 
   const Gather::Segment &seg1 = segments[0];
-  ASSERT_EQ(data.size(), seg1.length);
-  ASSERT_EQ(data, string(reinterpret_cast<char *>(seg1.data), seg1.length));
+  ASSERT_EQ(expected_str.size(), seg1.length);
+  ASSERT_EQ(expected_str,
+            string(reinterpret_cast<char *>(seg1.data), seg1.length));
 
   const Gather::Segment &seg2 = segments[1];
-  ASSERT_EQ(sizeof(n), seg2.length);
-  for (unsigned i = 0; i < sizeof(n); ++i)
-    ASSERT_EQ((n >> (i * 8)) & 0xff, seg2.data[i]) << "Where i = " << i;
+  ASSERT_EQ(sizeof(expected_num), seg2.length);
+  for (unsigned i = 0; i < sizeof(expected_num); ++i)
+    ASSERT_EQ((expected_num >> (i * 8)) & 0xff, seg2.data[i])
+             << "Where i = " << i;
 
   const Gather::Segment &seg3 = segments[2];
-  ASSERT_EQ(data.size(), seg3.length);
-  ASSERT_EQ(data, string(reinterpret_cast<char *>(seg3.data), seg3.length));
+  ASSERT_EQ(expected_str.size(), seg3.length);
+  ASSERT_EQ(expected_str,
+            string(reinterpret_cast<char *>(seg3.data), seg3.length));
 }
 
 TEST(GatherTest, TestSimpleLimit)
 {
   Gather::Buffer buffer(0);
-  const string data("Hello, world!");
+  char data[] = "Hello, world!";
   const unsigned int chop(8);
-  Gather::Segment& seg = buffer.add((Gather::data_t *)data.c_str(),
-                                    data.size());
+  const string expected(&data[0], strlen(data) - chop);
+  Gather::Segment& seg = buffer.add(
+                              reinterpret_cast<Gather::data_t *>(&data[0]),
+                              strlen(data));
   buffer.limit(buffer.get_length() - chop);
-  ASSERT_EQ(data.size() - chop, buffer.get_length());
+  ASSERT_EQ(expected.size(), buffer.get_length());
   ASSERT_LE(1, buffer.get_size());
   ASSERT_EQ(1, buffer.get_count());
-  ASSERT_EQ(data.substr(0, data.size() - chop),
-            string(reinterpret_cast<char *>(seg.data), seg.length));
+  ASSERT_EQ(expected, string(reinterpret_cast<char *>(seg.data), seg.length));
 }
 
 TEST(GatherTest, TestSimpleConsume)
 {
   Gather::Buffer buffer(0);
-  const string data("Hello, world!");
+  char data[] = "Hello, world!";
   const unsigned int chop(7);
-  Gather::Segment& seg = buffer.add((Gather::data_t *)data.c_str(),
-                                    data.size());
+  const string expected(&data[chop], strlen(data) - chop);
+  Gather::Segment& seg = buffer.add(
+                              reinterpret_cast<Gather::data_t *>(&data[0]),
+                              strlen(data));
   buffer.consume(chop);
-  ASSERT_EQ(data.size() - chop, buffer.get_length());
+  ASSERT_EQ(expected.size(), buffer.get_length());
   ASSERT_LE(1, buffer.get_size());
   ASSERT_EQ(1, buffer.get_count());
-  ASSERT_EQ(data.substr(chop, data.size() - chop),
-            string(reinterpret_cast<char *>(seg.data), seg.length));
+  ASSERT_EQ(expected, string(reinterpret_cast<char *>(seg.data), seg.length));
 }
 
 TEST(GatherTest, TestCopy)
 {
   Gather::Buffer buffer(0);
-  const string one("xHell");
-  const string two("o, wo");
-  const string three("rld!x");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "xHell";
+  char two[] = "o, wo";
+  char three[] = "rld!x";
+  const string expected = string(&one[1], strlen(one) - 1)
+                        + string(&two[0], strlen(two))
+                        + string(&three[0], strlen(three) - 1);
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
-  const string expect = one.substr(1) + two + three.substr(0, 4);
   string actual;
-  actual.resize(expect.size());
+  actual.resize(expected.size());
   unsigned int copied = buffer.copy(
       reinterpret_cast<Gather::data_t *>(const_cast<char *>(actual.c_str())),
-      1, expect.size());
+      1, expected.size());
 
-  ASSERT_EQ(expect.size(), copied);
-  ASSERT_EQ(expect, actual);
+  ASSERT_EQ(expected.size(), copied);
+  ASSERT_EQ(expected, actual);
 }
 
 TEST(GatherTest, TestAddFromBuffer)
 {
   Gather::Buffer buffer1(0);
-  const string one("xHell");
-  const string two("o, wo");
-  const string three("rld!x");
-  buffer1.add((Gather::data_t *)one.c_str(), one.size());
-  buffer1.add((Gather::data_t *)two.c_str(), two.size());
-  buffer1.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "xHell";
+  const string one_str(&one[0], strlen(one));
+  char two[] = "o, wo";
+  const string two_str(&two[0], strlen(two));
+  char three[] = "rld!x";
+  const string three_str(&three[0], strlen(three));
+  buffer1.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer1.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer1.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
   Gather::Buffer buffer2(0);
-  const string hello("Hello");
-  buffer2.add((Gather::data_t *)hello.c_str(), hello.size());
+  char data[] = "Hello";
+  const string hello(&data[0], strlen(data));
+  buffer2.add(reinterpret_cast<Gather::data_t *>(&data[0]), strlen(data));
   buffer2.add(buffer1, 6, 8);
   const Gather::Segment *segments = buffer2.get_segments();
 
@@ -159,28 +176,31 @@ TEST(GatherTest, TestAddFromBuffer)
             string(reinterpret_cast<char *>(segment1.data), segment1.length));
 
   const Gather::Segment& segment2 = segments[1];
-  ASSERT_EQ(two.substr(1).size(), segment2.length);
-  ASSERT_EQ(two.substr(1),
+  ASSERT_EQ(two_str.substr(1).size(), segment2.length);
+  ASSERT_EQ(two_str.substr(1),
             string(reinterpret_cast<char *>(segment2.data), segment2.length));
 
   const Gather::Segment& segment3 = segments[2];
-  ASSERT_EQ(three.substr(0, 4).size(), segment3.length);
-  ASSERT_EQ(three.substr(0, 4),
+  ASSERT_EQ(three_str.substr(0, 4).size(), segment3.length);
+  ASSERT_EQ(three_str.substr(0, 4),
             string(reinterpret_cast<char *>(segment3.data), segment3.length));
 }
 
 TEST(GatherTest, TestAddBuffer)
 {
   Gather::Buffer buffer1(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer1.add((Gather::data_t *)one.c_str(), one.size());
+  char one[] = "Hello";
+  const string one_str(&one[0], strlen(one));
+  char two[] = ", wo";
+  const string two_str(&two[0], strlen(two));
+  char three[] = "rld!";
+  const string three_str(&three[0], strlen(three));
+  buffer1.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
 
   Gather::Buffer buffer2(0);
-  Gather::Segment& segment = buffer2.add(two.size());
-  memcpy(segment.data, two.c_str(), segment.length);
-  buffer2.add((Gather::data_t *)three.c_str(), three.size());
+  Gather::Segment& segment = buffer2.add(strlen(two));
+  memcpy(segment.data, &two[0], segment.length);
+  buffer2.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
   buffer1.add(buffer2);
 
@@ -190,32 +210,35 @@ TEST(GatherTest, TestAddBuffer)
   ASSERT_TRUE(segments);
 
   const Gather::Segment& segment1 = segments[0];
-  ASSERT_EQ(one.size(), segment1.length);
-  ASSERT_EQ(one,
+  ASSERT_EQ(one_str.size(), segment1.length);
+  ASSERT_EQ(one_str,
             string(reinterpret_cast<char *>(segment1.data), segment1.length));
 
   const Gather::Segment& segment2 = segments[1];
-  ASSERT_EQ(two.size(), segment2.length);
-  ASSERT_EQ(two,
+  ASSERT_EQ(two_str.size(), segment2.length);
+  ASSERT_EQ(two_str,
             string(reinterpret_cast<char *>(segment2.data), segment2.length));
 
   const Gather::Segment& segment3 = segments[2];
-  ASSERT_EQ(three.size(), segment3.length);
-  ASSERT_EQ(three,
+  ASSERT_EQ(three_str.size(), segment3.length);
+  ASSERT_EQ(three_str,
             string(reinterpret_cast<char *>(segment3.data), segment3.length));
 }
 
 TEST(GatherTest, TestIteratorLoop)
 {
   Gather::Buffer buffer(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "Hello";
+  const string one_str(&one[0], strlen(one));
+  char two[] = ", wo";
+  const string two_str(&two[0], strlen(two));
+  char three[] = "rld!";
+  const string three_str(&three[0], strlen(three));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
-  string expect = one + two + three;
+  const string expect = one_str + two_str + three_str;
   string actual;
 
   for (Gather::Buffer::iterator it = buffer.begin(); it != buffer.end(); ++it)
@@ -228,14 +251,17 @@ TEST(GatherTest, TestIteratorLoop)
 TEST(GatherTest, TestIteratorAdd)
 {
   Gather::Buffer buffer(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "Hello";
+  const string one_str(&one[0], strlen(one));
+  char two[] = ", wo";
+  const string two_str(&two[0], strlen(two));
+  char three[] = "rld!";
+  const string three_str(&three[0], strlen(three));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
-  string expect = one + two + three;
+  const string expect = one_str + two_str + three_str;
 
   Gather::Buffer::iterator it = buffer.begin();
   it += 7;
@@ -246,14 +272,17 @@ TEST(GatherTest, TestIteratorAdd)
 TEST(GatherTest, TestIteratorSub)
 {
   Gather::Buffer buffer(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "Hello";
+  const string one_str(&one[0], strlen(one));
+  char two[] = ", wo";
+  const string two_str(&two[0], strlen(two));
+  char three[] = "rld!";
+  const string three_str(&three[0], strlen(three));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
-  string expect = one + two + three;
+  const string expect = one_str + two_str + three_str;
 
   Gather::Buffer::iterator it = buffer.end();
   it -= 6;
@@ -278,19 +307,19 @@ TEST(GatherTest, TestDump)
          << "* 8" << endl
          << "0000: 00010203 04050607                   | ........" << endl
          << "Total length 24" << endl;
-  const string data("Hello, world!");
+  char data[] = "Hello, world!";
 
-  buffer.add((Gather::data_t *)data.c_str(), data.size());
+  buffer.add(reinterpret_cast<Gather::data_t *>(&data[0]), strlen(data));
 
   Gather::Segment& seg = buffer.add(16);
   for (unsigned int i = 0; i < seg.length; ++i)
     seg.data[i] = i;
 
-  const uint32_t n = 0xDEADBEEF;
-  buffer.insert((Gather::data_t *)&n, 4);
+  uint32_t n = 0xDEADBEEF;
+  buffer.insert(reinterpret_cast<Gather::data_t *>(&n), sizeof(n));
 
   uint32_t n2 = 0x01234567;
-  buffer.insert((Gather::data_t *)&n2, 4, 2);
+  buffer.insert(reinterpret_cast<Gather::data_t *>(&n2), sizeof(n2), 2);
 
   buffer.limit(buffer.get_length() - 8);
 
@@ -307,19 +336,19 @@ TEST(GatherTest, TestFill)
 {
   Gather::Buffer buffer(1);
 
-  const string data("Hello, world!");
+  char data[] = "Hello, world!";
 
-  buffer.add((Gather::data_t *)data.c_str(), data.size());
+  buffer.add(reinterpret_cast<Gather::data_t *>(&data[0]), strlen(data));
 
   Gather::Segment& seg = buffer.add(16);
   for (unsigned int i = 0; i < seg.length; ++i)
     seg.data[i] = i;
 
-  const uint32_t n = 0xDEADBEEF;
-  buffer.insert((Gather::data_t *)&n, 4);
+  uint32_t n = 0xDEADBEEF;
+  buffer.insert(reinterpret_cast<Gather::data_t *>(&n), sizeof(n));
 
   uint32_t n2 = 0x01234567;
-  buffer.insert((Gather::data_t *)&n2, 4, 2);
+  buffer.insert(reinterpret_cast<Gather::data_t *>(&n2), sizeof(n), 2);
 
   buffer.limit(buffer.get_length() - 8);
 
@@ -345,8 +374,8 @@ TEST(GatherTest, TestFill)
 TEST(GatherTest, TestGetFlatDataSingleSegment)
 {
   Gather::Buffer buffer(0);
-  const string data("Hello, world!");
-  buffer.add((Gather::data_t *)data.c_str(), data.size());
+  char data[] = "Hello, world!";
+  buffer.add(reinterpret_cast<Gather::data_t *>(&data[0]), strlen(data));
 
   Gather::data_t buf[4];
   Gather::data_t *p = buffer.get_flat_data(0, 4, buf);
@@ -357,12 +386,12 @@ TEST(GatherTest, TestGetFlatDataSingleSegment)
 TEST(GatherTest, TestGetFlatDataMultiSegment)
 {
   Gather::Buffer buffer(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "Hello";
+  char two[] = ", wo";
+  char three[] = "rld!";
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
   Gather::data_t buf[7];
   Gather::data_t *p = buffer.get_flat_data(3, 7, buf);
@@ -373,12 +402,12 @@ TEST(GatherTest, TestGetFlatDataMultiSegment)
 TEST(GatherTest, TestGetFlatDataOffEndFails)
 {
   Gather::Buffer buffer(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "Hello";
+  char two[] = ", wo";
+  char three[] = "rld!";
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
   Gather::data_t buf[7];
   Gather::data_t *p = buffer.get_flat_data(7, 7, buf);
@@ -391,7 +420,7 @@ TEST(GatherTest, TestReplaceSingleSegment)
 
   // Need to ensure it's owned data, not referenced
   memcpy(buffer.add(13).data, "Hello, world!", 13);
-  buffer.replace(0, (const Gather::data_t *)"Salut", 5);
+  buffer.replace(0, reinterpret_cast<const Gather::data_t *>("Salut"), 5);
 
   Gather::data_t buf[13];
   Gather::data_t *p = buffer.get_flat_data(0, 13, buf);
@@ -401,14 +430,14 @@ TEST(GatherTest, TestReplaceSingleSegment)
 TEST(GatherTest, TestReplaceMultiSegment)
 {
   Gather::Buffer buffer(0);
-  const string one("Hello");
-  const string two(", wo");
-  const string three("rld!");
-  buffer.add((Gather::data_t *)one.c_str(), one.size());
-  buffer.add((Gather::data_t *)two.c_str(), two.size());
-  buffer.add((Gather::data_t *)three.c_str(), three.size());
+  char one[] = "Hello";
+  char two[] = ", wo";
+  char three[] = "rld!";
+  buffer.add(reinterpret_cast<Gather::data_t *>(&one[0]), strlen(one));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&two[0]), strlen(two));
+  buffer.add(reinterpret_cast<Gather::data_t *>(&three[0]), strlen(three));
 
-  buffer.replace(4, (const Gather::data_t *)" freezeth", 9);
+  buffer.replace(4, reinterpret_cast<const Gather::data_t *>(" freezeth"), 9);
 
   Gather::data_t buf[13];
   Gather::data_t *p = buffer.get_flat_data(0, 13, buf);

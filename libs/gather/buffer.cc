@@ -155,7 +155,7 @@ unsigned int Buffer::fill(struct iovec *iovec, unsigned int size)
       // Check we haven't overflowed
       if (n >= size) return size+1;
 
-      iovec->iov_base = (void *)seg.data;
+      iovec->iov_base = static_cast<void *>(seg.data);
       iovec->iov_len  = seg.length;
       iovec++; n++;
     }
