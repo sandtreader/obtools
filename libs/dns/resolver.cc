@@ -119,7 +119,8 @@ string Resolver::query(const string& domain, Type type,
 #else
   // Use libresolv
   unsigned char buf[MAX_RESULT];
-  int len = res_query(domain.c_str(), ns_c_in, (ns_type)type, buf, MAX_RESULT);
+  int len = res_query(domain.c_str(), ns_c_in, static_cast<ns_type>(type),
+                      buf, MAX_RESULT);
   if (len < 0) 
   {
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
