@@ -26,7 +26,8 @@ void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
 
     if ((now-req.started).seconds() >= timeout)
     {
-      log.summary << name << ": Request " << (int)p->first << " timed out\n";
+      log.summary << name << ": Request " << static_cast<int>(p->first)
+                  << " timed out\n";
       req.ready.signal();  // Response is still invalid
     }
   }
@@ -58,8 +59,9 @@ retry:
     goto retry;
   }
 
-  OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Sending request ID " << (int)id 
-		       << " - " << request.stag() << endl;)
+  OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Sending request ID "
+                                 << static_cast<int>(id)
+                                 << " - " << request.stag() << endl;)
 
   // Start the clock
   requests[id] = Request(client);
@@ -76,7 +78,8 @@ bool SyncRequestCache::wait_response(Message& request, Message& response)
 {
   // Lock mutex - wait will unlock it then relock on exit
   MT::Lock lock(request_mutex); 
-  id_t id = (id_t)((request.flags & MASK_REQUEST_ID) >> SHIFT_REQUEST_ID);
+  id_t id = static_cast<id_t>((request.flags & MASK_REQUEST_ID)
+                              >> SHIFT_REQUEST_ID);
   Request& req = requests[id];
 
   // Wait for signal, unlocking and then relocking mutex
@@ -103,11 +106,13 @@ bool SyncRequestCache::handle_response(Message& response, const string& name)
   if (response.flags & FLAG_RESPONSE_PROVIDED)
   {
     // Get ID
-    id_t id = (id_t)((response.flags & MASK_REQUEST_ID)>>SHIFT_REQUEST_ID);
+    id_t id = static_cast<id_t>((response.flags & MASK_REQUEST_ID)
+                                >>SHIFT_REQUEST_ID);
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << name 
-			 << ": Got response message for ID " 
-			 << (int)id << " - " << response.stag() << endl;)
+    OBTOOLS_LOG_IF_DEBUG(log.debug << name
+                                   << ": Got response message for ID "
+                                   << static_cast<int>(id) << " - "
+                                   << response.stag() << endl;)
 
     // Lookup ID in mutex
     MT::Lock lock(request_mutex); 
@@ -122,7 +127,7 @@ bool SyncRequestCache::handle_response(Message& response, const string& name)
     }
     else
     {
-      log.error << name << ": Response for unknown ID " << (int)id 
+      log.error << name << ": Response for unknown ID " << static_cast<int>(id)
 		<< " - " << response.stag() << endl;
     }
 

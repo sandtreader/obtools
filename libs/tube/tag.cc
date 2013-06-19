@@ -20,7 +20,7 @@ string tag_to_string(tag_t tag)
   string s;
   for(int i=0; i<4; i++)
   {
-    char c = (char)(tag >> (24-8*i));  // Big-endian
+    char c = static_cast<char>(tag >> (24-8*i));  // Big-endian
     if (isprint(c)) 
       s+=c;
     else 
@@ -41,7 +41,7 @@ tag_t string_to_tag(const string& str)
   tag_t tag = 0;
   for(unsigned int i=0; i<4 && i<str.size(); i++)
   {
-    tag = (tag << 8) | (int)str[i];
+    tag = (tag << 8) | static_cast<int>(str[i]);
   }
 
   return tag;

@@ -22,7 +22,9 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Main
-
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+const sighandler_t sig_ign(SIG_IGN);
+#pragma GCC diagnostic pop
 int main(int argc, char **argv)
 {
   if (argc < 3)
@@ -68,8 +70,10 @@ int main(int argc, char **argv)
     else if (arg == "-tag" && i<argc-3)
     {
       char *s = argv[++i];
-      tag = ((uint32_t)s[0]<<24) | ((uint32_t)s[1]<<16) 
-  	  | ((uint32_t)s[2]<< 8) | ((uint32_t)s[3]);
+      tag = (static_cast<uint32_t>(s[0])<<24)
+          | (static_cast<uint32_t>(s[1])<<16)
+          | (static_cast<uint32_t>(s[2])<< 8)
+          | (static_cast<uint32_t>(s[3]));
     }
     else if (arg == "-r")
       result = true;
@@ -105,7 +109,7 @@ int main(int argc, char **argv)
   winsock_initialise();
 #else
   // Ignore SIGPIPE (not quite why we're getting them!)
-  signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, sig_ign);
 #endif
 
   // Resolve name
