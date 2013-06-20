@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   // Set up logging
   Log::StreamChannel chan_out(cout);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
-  Log::LevelFilter level_out((Log::Level)log_level, chan_out);
+  Log::LevelFilter level_out(static_cast<Log::Level>(log_level), chan_out);
   Log::logger.connect(level_out);
   Log::Streams log;
 
