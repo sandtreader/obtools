@@ -58,8 +58,7 @@ int main(int argc, char **argv)
   Text::Base64 base64;
 
   // Encode text
-  string es = base64.encode(reinterpret_cast<const unsigned char *>(s.c_str()),
-                            s.size());
+  string es = base64.encode(s);
   cout << "Base 64 of [" << s << "] (" << s.size() << " bytes):\n" 
        << es << endl;
   
