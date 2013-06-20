@@ -106,7 +106,7 @@ string Base64::encode(uint64_t n)
 string Base64::encode(const string& binary, int split, 
 		      const string& line_end)
 {
-  return encode(reinterpret_cast<const unsigned char *>(binary.c_str()),
+  return encode(reinterpret_cast<const unsigned char *>(binary.data()),
                 binary.size(), split, line_end);
 }
 
