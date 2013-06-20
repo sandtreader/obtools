@@ -40,7 +40,7 @@ Object *Storage::load(object_id_t id) throw (Exception)
 
 //--------------------------------------------------------------------------
 // Save an object
-void Storage::save(Object *ob) throw (Exception)
+void Storage::save(Object * /*ob*/) throw (Exception)
 {
   // !!! Get type name from object get_name
   // !!! Look up storer interface

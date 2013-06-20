@@ -67,6 +67,10 @@ public:
   //--------------------------------------------------------------------------
   /// Interface to save an object to the given DB connection
   virtual void save(Object *ob, DB::AutoConnection& db) throw (Exception) = 0;
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Storer() {}
 };
 
 //==========================================================================
