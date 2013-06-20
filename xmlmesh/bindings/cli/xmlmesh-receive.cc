@@ -57,6 +57,8 @@ void usage(char *pname)
 
 //--------------------------------------------------------------------------
 // Main
+// pragma for WIFEXITED and WEXITSTATUS
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 int main(int argc, char **argv)
 {
   if (argc < 3)
@@ -158,7 +160,7 @@ int main(int argc, char **argv)
   }
 
   Log::TimestampFilter tsfilter(DEFAULT_TIMESTAMP, *chan_out);
-  Log::LevelFilter     level_out((Log::Level)log_level, tsfilter);
+  Log::LevelFilter     level_out(static_cast<Log::Level>(log_level), tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
 
@@ -339,7 +341,7 @@ int main(int argc, char **argv)
       // stderr remains the same
       // Exec the receiver
       if (execl(process.c_str(), process.c_str(), subject.c_str(),
-                (char *)NULL))
+                static_cast<char *>(NULL)))
       {
 	log.error << "Can't exec " << process << ": " << strerror(errno) << endl;
 	log.summary << "Can't start receiving process\n";
@@ -353,8 +355,4 @@ int main(int argc, char **argv)
 
   return 0;
 }
-
-
-
-
-
+#pragma GCC diagnostic pop
