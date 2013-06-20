@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   Log::TimestampFilter tsfilter(config.get_value("log/@timestamp", 
 						 DEFAULT_TIMESTAMP), chan_out);
   int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
-  Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
+  Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
 
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
       {
 	log.summary << "Changing to group " << groupname 
 		    << " (" << gid << ")\n";
-	if (setgid((gid_t)gid))
+        if (setgid(static_cast<gid_t>(gid)))
 	{
 	  log.error << "Can't change group: " << strerror(errno) << endl;
 	  goto shutdown;
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
       if (uid >= 0)
       {
 	log.summary << "Changing to user " << username << " (" << uid << ")\n";
-	if (setuid((uid_t)uid))
+        if (setuid(static_cast<uid_t>(uid)))
 	{
 	  log.error << "Can't change user: " << strerror(errno) << endl;
 	  goto shutdown;
