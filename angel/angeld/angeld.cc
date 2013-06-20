@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 #endif
   Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y: ", chan_out);
   int log_level = server.get_value_int("log/@level", Log::LEVEL_SUMMARY);
-  Log::LevelFilter level_out((Log::Level)log_level, tsfilter);
+  Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
 
