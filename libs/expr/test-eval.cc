@@ -34,14 +34,10 @@ TEST(Evaluator, TestSimpleOperators)
     ASSERT_EQ(6.0, evaluator.evaluate("3*2"));
     ASSERT_EQ(1.5, evaluator.evaluate("3/2"));
 
-    ASSERT_EQ(1.0, evaluator.evaluate("2=2"));
     ASSERT_EQ(1.0, evaluator.evaluate("2==2"));
-    ASSERT_EQ(0.0, evaluator.evaluate("3=2"));
     ASSERT_EQ(0.0, evaluator.evaluate("3==2"));
 
-    ASSERT_EQ(1.0, evaluator.evaluate("2<>3"));
     ASSERT_EQ(1.0, evaluator.evaluate("2!=3"));
-    ASSERT_EQ(0.0, evaluator.evaluate("2<>2"));
     ASSERT_EQ(0.0, evaluator.evaluate("2!=2"));
 
     ASSERT_EQ(1.0, evaluator.evaluate("2<3"));
@@ -55,13 +51,9 @@ TEST(Evaluator, TestSimpleOperators)
     ASSERT_EQ(1.0, evaluator.evaluate("2>=2"));
     ASSERT_EQ(0.0, evaluator.evaluate("2>=3"));
 
-    ASSERT_EQ(1.0, evaluator.evaluate("1&1"));
     ASSERT_EQ(1.0, evaluator.evaluate("1&&1"));
-    ASSERT_EQ(0.0, evaluator.evaluate("1&0"));
     ASSERT_EQ(0.0, evaluator.evaluate("1&&0"));
-    ASSERT_EQ(1.0, evaluator.evaluate("0|1"));
     ASSERT_EQ(1.0, evaluator.evaluate("0||1"));
-    ASSERT_EQ(0.0, evaluator.evaluate("0|0"));
     ASSERT_EQ(0.0, evaluator.evaluate("0||0"));
 
     ASSERT_EQ(0.0, evaluator.evaluate("!1"));
@@ -80,8 +72,8 @@ TEST(Evaluator, TestChainedOperators)
     ASSERT_EQ(2.0, evaluator.evaluate("2+2-2"));
     ASSERT_EQ(8.0, evaluator.evaluate("2*2*2"));
     ASSERT_EQ(2.0, evaluator.evaluate("2*2/2"));
-    ASSERT_EQ(1.0, evaluator.evaluate("1&1&1"));
-    ASSERT_EQ(1.0, evaluator.evaluate("0|1|0"));
+    ASSERT_EQ(1.0, evaluator.evaluate("1&&1&&1"));
+    ASSERT_EQ(1.0, evaluator.evaluate("0||1||0"));
     ASSERT_EQ(1.0, evaluator.evaluate("--1"));
     ASSERT_EQ(1.0, evaluator.evaluate("!!1"));
   });

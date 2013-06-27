@@ -132,9 +132,9 @@ TEST(Tokeniser, TestSimpleOperators)
   ASSERT_EQ(Token::EOT, token.type);
 }
 
-TEST(Tokeniser, TestOptionallyDoubledOperators)
+TEST(Tokeniser, TestDoubledOperators)
 {
-  string input("&|=&&||===");
+  string input("&&||==&|=");
   Tokeniser tokeniser(input);
   Token token;
   ASSERT_NO_THROW(token = tokeniser.read_token());
@@ -146,25 +146,15 @@ TEST(Tokeniser, TestOptionallyDoubledOperators)
   ASSERT_NO_THROW(token = tokeniser.read_token());
   ASSERT_EQ(Token::EQ, token.type);
 
-  ASSERT_NO_THROW(token = tokeniser.read_token());
-  ASSERT_EQ(Token::AND, token.type);
-
-  ASSERT_NO_THROW(token = tokeniser.read_token());
-  ASSERT_EQ(Token::OR, token.type);
-
-  ASSERT_NO_THROW(token = tokeniser.read_token());
-  ASSERT_EQ(Token::EQ, token.type);
-
-  ASSERT_NO_THROW(token = tokeniser.read_token());
-  ASSERT_EQ(Token::EQ, token.type);
-
-  ASSERT_NO_THROW(token = tokeniser.read_token());
-  ASSERT_EQ(Token::EOT, token.type);
+  // Single versions must fail
+  ASSERT_THROW(token = tokeniser.read_token(), Expression::Exception);
+  ASSERT_THROW(token = tokeniser.read_token(), Expression::Exception);
+  ASSERT_THROW(token = tokeniser.read_token(), Expression::Exception);
 }
 
 TEST(Tokeniser, TestComparisonOperators)
 {
-  string input("<<=>>=<>!=!!");
+  string input("<<=>>=!=!!");
   Tokeniser tokeniser(input);
   Token token;
   ASSERT_NO_THROW(token = tokeniser.read_token());
@@ -178,9 +168,6 @@ TEST(Tokeniser, TestComparisonOperators)
 
   ASSERT_NO_THROW(token = tokeniser.read_token());
   ASSERT_EQ(Token::GTEQ, token.type);
-
-  ASSERT_NO_THROW(token = tokeniser.read_token());
-  ASSERT_EQ(Token::NE, token.type);
 
   ASSERT_NO_THROW(token = tokeniser.read_token());
   ASSERT_EQ(Token::NE, token.type);

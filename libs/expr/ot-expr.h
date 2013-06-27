@@ -2,10 +2,12 @@
 // ObTools::Expression: ot-expr.h
 //
 // Public definitions for ObTools::Expression
-// Basic expression parser with the following grammar:
+// Basic expression parser with the following grammar, like C but without
+// the bitwise operators and ternary operator.  Precedence is also slightly
+// simplified
 //
-// EXPR:   PRED ([ & && | || ] PRED)+
-// PRED:   SIDE [ = == < > <= >= <> !=] SIDE
+// EXPR:   PRED ([ && || ] PRED)+
+// PRED:   SIDE [ == < > <= >= !=] SIDE
 // SIDE:   TERM ([ + - ] TERM)+
 // TERM:   FACTOR ([ * / ] FACTOR)+
 // FACTOR: [ ! - ] [ number | variable | (EXPR)]
@@ -43,16 +45,16 @@ struct Token
     PLUS,    // +
     MINUS,   // -
 
-    AND,     // & or &&
-    OR,      // | or ||
+    AND,     // &&
+    OR,      // ||
     NOT,     // !
 
-    EQ,      // = or ==
+    EQ,      // ==
     LT,      // <
     GT,      // >
     LTEQ,    // <=
     GTEQ,    // >=
-    NE,      // <> or !=
+    NE,      // !=
 
     LPAR,    // (
     RPAR     // )
