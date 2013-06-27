@@ -96,25 +96,27 @@ Token Tokeniser::read_token() throw (Exception)
     case '(': return Token(Token::LPAR);
     case ')': return Token(Token::RPAR);
 
-    // One or two character equivalents - &/&& |/|| =/==
+    // Doubled character cases - && || ==
     case '&':
-      if (peekc()==c) step();
+      if (peekc()!=c) throw Exception("Single (bitwise) & not implemented");
+      step();
       return Token(Token::AND);
 
     case '|':
-      if (peekc()==c) step();
+      if (peekc()!=c) throw Exception("Single (bitwise) | not implemented");
+      step();
       return Token(Token::OR);
 
     case '=':
-      if (peekc()==c) step();
+      if (peekc()!=c) throw Exception("Assignment not implemented - use ==");
+      step();
       return Token(Token::EQ);
 
-    // Comparators - < <= > >= <> !=
+    // Comparators - < <= > >= !=
     case '<':
       switch (peekc())
       {
         case '=': step(); return Token(Token::LTEQ);
-        case '>': step(); return Token(Token::NE);
         default: return Token(Token::LT);
       }
 
