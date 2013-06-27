@@ -234,6 +234,14 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Get configuration
+  map<T, vector<Handler *> > get_config()
+  {
+    MT::Lock lock(handlers_mutex);
+    return handlers;
+  }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Manager()
   {
