@@ -27,6 +27,7 @@ int main(int argc, char **argv)
     cout << "Options:\n";
     cout << "       -p   POST using input from stdin\n";
     cout << "       -P   Progressive download\n";
+    cout << "       -u   PUT upload using input from stdin\n";
     cout << "       -1   Use HTTP/1.1\n";
     return 2;
   }
@@ -43,6 +44,7 @@ int main(int argc, char **argv)
   string in;
   bool post = false;
   bool progressive = false;
+  bool put = false;
   bool http_1_1 = false;
 
   for(;i<argc;i++)
@@ -52,6 +54,7 @@ int main(int argc, char **argv)
 
     if (arg == "-p") post = true;
     else if (arg == "-P") progressive = true;
+    else if (arg == "-u") put = true;
     else if (arg == "-1") http_1_1 = true;
     else 
     {
@@ -78,7 +81,8 @@ int main(int argc, char **argv)
   for(;i<argc;i++)
   {
     Web::URL url(argv[i]);
-    log.summary << "Test HTTP client " << (post?"posting":"fetching") 
+    log.summary << "Test HTTP client "
+                << (post?"posting":(put ? "putting" : "fetching"))
 		<< " " << url << endl;
 
     // Create client on first URL
@@ -94,7 +98,9 @@ int main(int argc, char **argv)
     if (http_1_1 && i==argc-1) client->close_persistence();
 
     string body;
-    int result = post?client->post(url, in, body):client->get(url, body);
+    int result = post ? client->post(url, in, body)
+                      : (put ? client->put(url, "text/plain", cin, body)
+                             : client->get(url, body));
     if (result == 200)
     {
       log.detail << "We connected from " << client->get_last_local_address() 

@@ -447,6 +447,8 @@ class CookieJar
 class HTTPClient
 {
 private:
+  static const uint64_t DEFAULT_WRITE_CHUNK_LENGTH = 65536;
+
   string user_agent;    // String to quote in User-Agent: header
   Net::EndPoint last_local_address;  // Address we connected from last, for P2P
   SSL::Context *ssl_ctx; // Optional SSL context
@@ -463,6 +465,10 @@ private:
   bool chunked;                   // Chunked read (progressive only)
   uint64_t current_chunk_length;  // Current length remaining of chunk
 
+  // Progressive write: caller sends blocks at a time
+  bool progressive_write;
+  uint64_t write_chunk_length;    // Size of written chunks
+
   // Cookie support
   CookieJar *cookie_jar;
 
@@ -477,7 +483,9 @@ public:
     user_agent(_ua), ssl_ctx(0), connection_timeout(_connection_timeout),
     operation_timeout(_operation_timeout), socket(0), stream(0),
     http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
-    current_chunk_length(0), cookie_jar(0),
+    current_chunk_length(0),
+    progressive_write(false), write_chunk_length(DEFAULT_WRITE_CHUNK_LENGTH),
+    cookie_jar(0),
     server(_server) {}
 
   //--------------------------------------------------------------------------
@@ -487,7 +495,9 @@ public:
     user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
     operation_timeout(_operation_timeout), socket(0), stream(0),
     http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
-    current_chunk_length(-1), cookie_jar(0),
+    current_chunk_length(-1),
+    progressive_write(false), write_chunk_length(DEFAULT_WRITE_CHUNK_LENGTH),
+    cookie_jar(0),
     server(_server) {}
 
   //--------------------------------------------------------------------------
@@ -514,6 +524,20 @@ public:
   void disable_progressive() { progressive=false; }
 
   //--------------------------------------------------------------------------
+  // Enable progressive upload - initial fetch is just for headers, then
+  // call write() to get data
+  void enable_progressive_upload(unsigned long chunk_length
+                                 = DEFAULT_WRITE_CHUNK_LENGTH)
+  {
+    write_chunk_length = chunk_length;
+    progressive_write = true;
+  }
+
+  //--------------------------------------------------------------------------
+  // Disable progressive upload
+  void disable_progressive_upload() { progressive_write = false; }
+
+  //--------------------------------------------------------------------------
   // Set cookie jar (referenced, not taken) = 0 to disable cookies
   void set_cookie_jar(CookieJar *jar) { cookie_jar = jar; }
 
@@ -528,6 +552,11 @@ public:
   bool fetch(HTTPMessage& request, HTTPMessage& response);
 
   //--------------------------------------------------------------------------
+  // Basic operation - just receive HTTP response
+  // Returns detailed status code
+  int do_receive(HTTPMessage& request, HTTPMessage& response);
+
+  //--------------------------------------------------------------------------
   // Simple GET operation on a URL
   // Returns result code, fills in body if provided, reason code if not
   int get(const URL& url, string& body);
@@ -539,9 +568,21 @@ public:
   int post(const URL& url, const string& request_body, string& response_body);
 
   //--------------------------------------------------------------------------
+  // Simple PUT operation on a URL
+  // Returns result code, fills in response_body if provided,
+  // reason code if not
+  int put(const URL& url, const string& content_type,
+          istream& is, string& response_body);
+
+  //--------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
   // Returns the actual amount read
   unsigned long read(unsigned char *data, unsigned long length);
+
+  //--------------------------------------------------------------------------
+  // Write a block of data to a progressive upload
+  // Returns the actual amount written
+  unsigned long write(unsigned char *data, unsigned long length);
 
   //--------------------------------------------------------------------------
   // Get the local address we last connected from (for P2P)

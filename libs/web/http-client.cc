@@ -22,7 +22,9 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
   user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
   operation_timeout(_operation_timeout), socket(0), stream(0),
   http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
-  current_chunk_length(0), cookie_jar(0)
+  current_chunk_length(0),
+  progressive_write(false), write_chunk_length(DEFAULT_WRITE_CHUNK_LENGTH),
+  cookie_jar(0)
 {
   XML::Element xml;
   if (url.split(xml))
@@ -142,7 +144,10 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
   try
   {
     if (!stream) stream = new Net::TCPStream(*socket);
-    if (!request.write(*stream))
+    // If progressive write, just write the headers
+    // otherwise write all
+    if (progressive_write ? !request.write_headers(*stream)
+                          : !request.write(*stream))
     {
       log.error << "HTTP: Can't send request to " << server << endl;
       delete stream; stream = 0;
@@ -152,45 +157,10 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 
     stream->flush();
 
-    // If progressive, just read the headers
-    // otherwise, read all, allowing for EOF marker for end of body
-    if (progressive?!response.read_headers(*stream)
-                   :!response.read(*stream, true))
-    {
-      log.error << "HTTP: Can't fetch response from " << server << endl;
-      delete stream; stream = 0;
-      delete socket; socket = 0;
-      return 202;
-    }
+    if (progressive_write)
+      return 0;
 
-    OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
-			response.write(log.dump);)
-
-    // Take cookies if we have a jar
-    if (cookie_jar) cookie_jar->take_cookies_from(response, request.url);
-
-    if (progressive)
-    {
-      // Check for chunked encoding
-      chunked = Text::tolower(response.headers.get("transfer-encoding"))
-	          == "chunked";
-
-      if (chunked)
-	current_chunk_length = 0;  // Trigger chunk header read on first fetch
-      else            // Capture the file length, if given
-	current_chunk_length =
-	  Text::stoi(response.headers.get("content-length"));
-
-      OBTOOLS_LOG_IF_DEBUG(log.debug << "Progressive download: "
-			   << (chunked?"chunked":"continuous")
-			   << " length " << current_chunk_length << endl;)
-    }
-    else if (!http_1_1 || http_1_1_close)
-    {
-      socket->close();
-      delete stream; stream = 0;
-      delete socket; socket = 0;
-    }
+    return do_receive(request, response);
   }
   catch (ObTools::Net::SocketError se)
   {
@@ -209,6 +179,67 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 bool HTTPClient::fetch(HTTPMessage& request, HTTPMessage& response)
 {
   return !do_fetch(request, response);
+}
+
+//--------------------------------------------------------------------------
+// Basic operation - just receive HTTP response
+// Returns detailed status code
+int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
+{
+  if (!socket || !*socket || !stream) return 1;
+  Log::Streams log;
+
+  try
+  {
+    // If progressive, just read the headers
+    // otherwise, read all, allowing for EOF marker for end of body
+    if (progressive?!response.read_headers(*stream)
+                   :!response.read(*stream, true))
+    {
+      log.error << "HTTP: Can't fetch response from " << server << endl;
+      delete stream; stream = 0;
+      delete socket; socket = 0;
+      return 202;
+    }
+
+    OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
+                        response.write(log.dump);)
+
+    // Take cookies if we have a jar
+    if (cookie_jar) cookie_jar->take_cookies_from(response, request.url);
+
+    if (progressive)
+    {
+      // Check for chunked encoding
+      chunked = Text::tolower(response.headers.get("transfer-encoding"))
+                  == "chunked";
+
+      if (chunked)
+        current_chunk_length = 0;  // Trigger chunk header read on first fetch
+      else            // Capture the file length, if given
+        current_chunk_length =
+          Text::stoi(response.headers.get("content-length"));
+
+      OBTOOLS_LOG_IF_DEBUG(log.debug << "Progressive download: "
+                           << (chunked?"chunked":"continuous")
+                           << " length " << current_chunk_length << endl;)
+    }
+    else if (!http_1_1 || http_1_1_close)
+    {
+      socket->close();
+      delete stream; stream = 0;
+      delete socket; socket = 0;
+    }
+  }
+  catch (ObTools::Net::SocketError se)
+  {
+    log.error << "HTTP: " << se << endl;
+    delete stream; stream = 0;
+    delete socket; socket = 0;
+    return 203;
+  }
+
+  return 0;
 }
 
 //--------------------------------------------------------------------------
@@ -250,6 +281,57 @@ int HTTPClient::post(const URL& url, const string& request_body,
   HTTPMessage response;
   int result(0);
   if ((result = do_fetch(request, response)))
+  {
+    response_body = "Connection failed";
+    return -result;
+  }
+
+  // Now extract body, if any
+  if (response.body.size())
+    response_body = response.body;
+  else
+    response_body = response.reason;
+
+  return response.code;
+}
+
+//--------------------------------------------------------------------------
+// Simple PUT operation on a URL
+// Returns result code, fills in response_body if provided,
+// reason code if not
+int HTTPClient::put(const URL& url, const string& content_type,
+                    istream& is, string& response_body)
+{
+  HTTPMessage request("PUT", url);
+  request.headers.put("Content-Type", content_type);
+  request.headers.put("Transfer-Encoding", "chunked");
+
+  HTTPMessage response;
+
+  bool old_progressive_write = progressive_write;
+  progressive_write = true;
+  int result = do_fetch(request, response);
+  progressive_write = old_progressive_write;
+
+  if (result)
+  {
+    response_body = "Connection failed";
+    return -result;
+  }
+
+  // Write data from input stream
+  vector<char> data(write_chunk_length);
+  while (uint64_t length = is.read(&data[0], data.size()).gcount())
+  {
+    if (write(reinterpret_cast<unsigned char *>(&data[0]), length) != length)
+      break;
+  }
+
+  // Terminated chunked data
+  write(0, 0);
+
+  result = do_receive(request, response);
+  if (result)
   {
     response_body = "Connection failed";
     return -result;
@@ -331,6 +413,39 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
     return n;
   }
 }
+
+//--------------------------------------------------------------------------
+// Write a block of data to a progressive upload
+// Returns the actual amount written
+unsigned long HTTPClient::write(unsigned char *data, unsigned long length)
+{
+  if (!socket || !*socket || !stream) return 0;
+  unsigned long n = 0;
+
+  try
+  {
+    socket->write(Text::i64tox(length));
+    socket->write("\r\n");
+    socket->write(data, length);
+    socket->write("\r\n");
+
+    // Read what was needed
+    return n;
+  }
+  catch (Net::SocketError se)
+  {
+    // End of file - optionally close socket
+    if (!http_1_1 || http_1_1_close)
+    {
+      socket->close();
+      delete stream; stream = 0;
+      delete socket; socket = 0;
+    }
+
+    return n;
+  }
+}
+
 
 //--------------------------------------------------------------------------
 // Destructor
