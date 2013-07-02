@@ -420,7 +420,6 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
 unsigned long HTTPClient::write(unsigned char *data, unsigned long length)
 {
   if (!socket || !*socket || !stream) return 0;
-  unsigned long n = 0;
 
   try
   {
@@ -429,8 +428,8 @@ unsigned long HTTPClient::write(unsigned char *data, unsigned long length)
     socket->write(data, length);
     socket->write("\r\n");
 
-    // Read what was needed
-    return n;
+    // Return what was written
+    return length;
   }
   catch (Net::SocketError se)
   {
@@ -442,7 +441,7 @@ unsigned long HTTPClient::write(unsigned char *data, unsigned long length)
       delete socket; socket = 0;
     }
 
-    return n;
+    return 0;
   }
 }
 
