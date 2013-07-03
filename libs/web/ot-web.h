@@ -562,6 +562,11 @@ public:
   int get(const URL& url, string& body);
 
   //--------------------------------------------------------------------------
+  // Simple DELETE operation on a URL
+  // Returns result code, fills in body if provided, reason code if not
+  int del(const URL& url, string& body);
+
+  //--------------------------------------------------------------------------
   // Simple POST operation on a URL
   // Returns result code, fills in response_body if provided,
   // reason code if not

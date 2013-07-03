@@ -267,6 +267,30 @@ int HTTPClient::get(const URL& url, string& body)
 }
 
 //--------------------------------------------------------------------------
+// Simple DELETE operation on a URL
+// Returns result code, fills in body if provided, reason code if not
+int HTTPClient::del(const URL& url, string& body)
+{
+  HTTPMessage request("DELETE", url);
+  HTTPMessage response;
+
+  int result(0);
+  if ((result = do_fetch(request, response)))
+  {
+    body = "Connection failed";
+    return -result;
+  }
+
+  // Now extract body, if any
+  if (response.body.size())
+    body = response.body;
+  else
+    body = response.reason;
+
+  return response.code;
+}
+
+//--------------------------------------------------------------------------
 // Simple POST operation on a URL
 // Returns result code, fills in response_body if provided, reason code if not
 int HTTPClient::post(const URL& url, const string& request_body,

@@ -28,6 +28,7 @@ int main(int argc, char **argv)
     cout << "       -p   POST using input from stdin\n";
     cout << "       -P   Progressive download\n";
     cout << "       -u   PUT upload using input from stdin\n";
+    cout << "       -d   perform DELETE on the given URL\n";
     cout << "       -1   Use HTTP/1.1\n";
     return 2;
   }
@@ -42,9 +43,14 @@ int main(int argc, char **argv)
 
   int i=1;
   string in;
-  bool post = false;
+  enum Operation
+  {
+    get,
+    post,
+    put,
+    del,
+  } op(get);
   bool progressive = false;
-  bool put = false;
   bool http_1_1 = false;
 
   for(;i<argc;i++)
@@ -52,9 +58,10 @@ int main(int argc, char **argv)
     string arg = argv[i];
     if (arg[0] != '-') break;
 
-    if (arg == "-p") post = true;
+    if (arg == "-p") op = post;
     else if (arg == "-P") progressive = true;
-    else if (arg == "-u") put = true;
+    else if (arg == "-u") op = put;
+    else if (arg == "-d") op = del;
     else if (arg == "-1") http_1_1 = true;
     else 
     {
@@ -64,7 +71,7 @@ int main(int argc, char **argv)
   }
 
   // Read cin for post
-  if (post)
+  if (op == post)
   {
     // Read stdin
     while (cin)
@@ -81,9 +88,23 @@ int main(int argc, char **argv)
   for(;i<argc;i++)
   {
     Web::URL url(argv[i]);
-    log.summary << "Test HTTP client "
-                << (post?"posting":(put ? "putting" : "fetching"))
-		<< " " << url << endl;
+    log.summary << "Test HTTP client ";
+    switch (op)
+    {
+      case get:
+        log.summary << "getting";
+        break;
+      case post:
+        log.summary << "posting";
+        break;
+      case put:
+        log.summary << "putting";
+        break;
+      case del:
+        log.summary << "deleting";
+        break;
+    }
+    log.summary << " " << url << endl;
 
     // Create client on first URL
     if (!client)
@@ -98,9 +119,23 @@ int main(int argc, char **argv)
     if (http_1_1 && i==argc-1) client->close_persistence();
 
     string body;
-    int result = post ? client->post(url, in, body)
-                      : (put ? client->put(url, "text/plain", cin, body)
-                             : client->get(url, body));
+    int result(0);
+    switch (op)
+    {
+      case get:
+        result = client->get(url, body);
+        break;
+      case post:
+        result = client->post(url, in, body);
+        break;
+      case put:
+        result = client->put(url, "text/plain", cin, body);
+        break;
+      case del:
+        result = client->del(url, body);
+        break;
+    }
+
     if (result == 200)
     {
       log.detail << "We connected from " << client->get_last_local_address() 
