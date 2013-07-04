@@ -136,7 +136,7 @@ int main(int argc, char **argv)
         break;
     }
 
-    if (result == 200)
+    if (result >= 200 && result < 300)
     {
       log.detail << "We connected from " << client->get_last_local_address() 
 		 << endl;
