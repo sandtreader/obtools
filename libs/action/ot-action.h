@@ -82,7 +82,6 @@ private:
     ActionThread():
       handler(0)
     {
-      start();
     }
 
     //----------------------------------------------------------------------
@@ -147,7 +146,6 @@ private:
     WorkerThread(Manager& _manager):
       manager(_manager)
     {
-      start();
     }
 
     //----------------------------------------------------------------------
@@ -190,7 +188,11 @@ private:
              it = h->second.begin(); it != h->second.end(); ++it)
         {
           if (i++ >= threads.size())
-            threads.push_back(new ActionThread());
+          {
+            Gen::SharedPointer<ActionThread> at(new ActionThread());
+            at->start();
+            threads.push_back(at);
+          }
           threads.back()->set_action(action, *it);
           active.push_back(threads.back());
         }
@@ -215,7 +217,9 @@ public:
   // Constructor
   Manager():
     worker_thread(*this)
-  {}
+  {
+    worker_thread.start();
+  }
 
   //------------------------------------------------------------------------
   // Register a handler
