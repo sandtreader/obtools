@@ -65,8 +65,7 @@ private:
   map<T, vector<Handler *> > handlers;
   MT::Mutex handlers_mutex;
 
-  vector<Gen::SharedPointer<Action<T> > > actions;
-  MT::Mutex actions_mutex;
+  MT::MQueue<Gen::SharedPointer<Action<T> > > actions;
 
   class ActionThread: public MT::Thread
   {
@@ -153,10 +152,7 @@ private:
     virtual void run()
     {
       while (running)
-      {
-        if (!manager.next_action())
-          MT::Thread::usleep(10000);
-      }
+        manager.next_action();
     }
   } worker_thread;
 
@@ -165,16 +161,12 @@ private:
   //------------------------------------------------------------------------
   // Handle next action on queue
   // Returns whether more to process
-  bool next_action()
+  void next_action()
   {
-    Gen::SharedPointer<Action<T> > action;
-    {
-      MT::Lock lock(actions_mutex);
-      if (actions.empty())
-        return false;
-      action = actions.front();
-      actions.erase(actions.begin());
-    }
+    Gen::SharedPointer<Action<T> > action = actions.wait();
+
+    if (!action.get())
+      return;
 
     vector<Gen::SharedPointer<ActionThread > > active;
     {
@@ -205,11 +197,6 @@ private:
     {
       (*it)->wait();
     }
-
-    {
-      MT::Lock lock(actions_mutex);
-      return !actions.empty();
-    }
   }
 
 public:
@@ -233,8 +220,7 @@ public:
   // Queue an action
   void queue(const Gen::SharedPointer<Action<T> >& action)
   {
-    MT::Lock lock(actions_mutex);
-    actions.push_back(action);
+    actions.send(action);
   }
 
   //------------------------------------------------------------------------
@@ -251,6 +237,7 @@ public:
   {
     // Politely ask worker thread to stop
     worker_thread.running = false;
+    actions.send(Gen::SharedPointer<Action<T> >(0));
     worker_thread.join();
     // Politely ask action threads to stop
     // threads is normally only accessed by worker_thread, but that's gone now
