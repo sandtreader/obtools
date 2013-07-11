@@ -89,6 +89,8 @@ private:
     {
       while (running)
       {
+        condition.wait(false);
+
         Gen::SharedPointer<Action<T> > a;
         Handler *h;
         {
@@ -104,11 +106,7 @@ private:
             action.reset();
             handler = 0;
           }
-          condition.signal();
-        }
-        else
-        {
-          MT::Thread::usleep(10000);
+          condition.signal(true);
         }
       }
     }
@@ -118,17 +116,19 @@ private:
     void set_action(Gen::SharedPointer<Action<T> > new_action,
                     Handler *new_handler)
     {
-      condition.clear();
-      MT::Lock lock(mutex);
-      action = new_action;
-      handler = new_handler;
+      {
+        MT::Lock lock(mutex);
+        action = new_action;
+        handler = new_handler;
+      }
+      condition.signal(false);
     }
 
     //---------------------------------------------------------------------
     // Wait on action being used
     void wait()
     {
-      condition.wait();
+      condition.wait(true);
     }
   };
 
@@ -246,6 +246,7 @@ public:
          it = threads.begin(); it != threads.end(); ++it)
     {
       (*it)->running = false;
+      (*it)->set_action(0, 0);
       (*it)->join();
     }
   }
