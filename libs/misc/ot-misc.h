@@ -13,7 +13,7 @@
 
 #include <string>
 #include <map>
-#include <list>
+#include <set>
 #include <stdint.h>
 #include <stdlib.h>
 #include <iostream>
@@ -382,12 +382,75 @@ public:
     bool operator==(const Range& b) const
     { return start == b.start && length == b.length; }
 
+    bool operator<(const Range& b) const
+    { return start < b.start; }
+
     friend ostream& operator<<(ostream& s, const Range& r)
     { return s << r.start << "+" << r.length; }
+
+    // Merge a range with this one
+    void merge(const Range& b)
+    {
+      offset_t e = end();
+      start = min(start, b.start);
+      length = max(e, b.end()) - start;
+    }
+
+    // Remove a range from start
+    void remove_from_start(const Range& b)
+    {
+      offset_t e = end();
+      start = max(start, b.end());
+      length = e - start;
+    }
+
+    // Remove a range from end
+    void remove_from_end(const Range& b)
+    {
+      length = min(end(), b.start) - start;
+    }
+
+    // Remove range from middle - returns new range created by split
+    Range remove_from_middle(const Range& b)
+    {
+      offset_t e = end();
+      length = b.start - start;
+      Range c(b.end(), e - b.end());
+      return c;
+    }
+
+    // Overlaps in any way including at edge
+    bool overlaps_with(const Range& b) const
+    {
+      offset_t e = end();
+      offset_t b_e = b.end();
+      return ((start <= b.start && e >= b.start) ||
+              (start <= b_e && e >= b_e) ||
+              (start >= b.start && e <= b_e));
+    }
+
+    // Is contained by a range
+    bool contained_by(const Range& b) const
+    {
+      return start >= b.start && end() <= b.end();
+    }
+
+    // Is start overlapped by range?
+    bool start_overlapped_by(const Range& b) const
+    {
+      return start >= b.start && start < b.end();
+    }
+
+    // Is end overlapped by range?
+    bool end_overlapped_by(const Range& b) const
+    {
+      offset_t e = end();
+      return e > b.start && e <= b.end();
+    }
   };
 
-  // List of ranges, stored in order
-  list<Range> ranges;
+  // Ordered set of ranges
+  set<Range> ranges;
 
   // Expected end offset - provides information for various operations 
   // below.  Will be modified by insertions if exceeded - hence 0 is fine
@@ -395,12 +458,13 @@ public:
   offset_t end_offset;
 
   // Iterator types
-  typedef typename list<Range>::iterator iterator;
+  typedef typename set<Range>::iterator iterator;
   iterator begin() { return ranges.begin(); }
   iterator end()   { return ranges.end();   }
-  typedef typename list<Range>::const_iterator const_iterator;
+  typedef typename set<Range>::const_iterator const_iterator;
   const_iterator begin() const { return ranges.begin(); }
   const_iterator end() const   { return ranges.end();   }
+  typedef typename set<Range>::size_type size_type;
 
   //------------------------------------------------------------------------
   // Constructor
@@ -414,67 +478,36 @@ public:
     // Catch daftness which would otherwise break us
     if (!length) return;
 
-    offset_t end = start+length;
+    Range range(start, length);
 
-    // Find the first range which starts after or at the new one
-    typename list<Range>::iterator prev_p = ranges.end();
-    typename list<Range>::iterator next_p;
-    typename list<Range>::iterator new_p;
+    // Find the first range which starts immediately before the new one
+    iterator it = ranges.lower_bound(range);
+    if ((it == ranges.end() && it != ranges.begin()) || it->start > start)
+      --it;
 
-    for (next_p=ranges.begin(); 
-         next_p!=ranges.end() && next_p->start < start;
-         prev_p = next_p++)
-      ;
-
-    // If there was one before, check if it overlaps or touches us
-    if (prev_p != ranges.end() && prev_p->end() >= start)
+    // Eat and remove any existing ranges that overlap with this one
+    if (it != ranges.end() && it->overlaps_with(range))
     {
-      // Extend this one to include this if it's smaller
-      if (end > prev_p->end())
-        prev_p->length = start+length-prev_p->start;
-
-      // Use this one as the one to check for overlaps afterwards
-      new_p = prev_p;
-    }
-    else
-    {
-      // Not overlapping/touching previous - insert before next, or at 
-      // end if none found
-      new_p = ranges.insert(next_p, Range(start, length));
+      // Adjust new one to include it
+      range.merge(*it);
+      // Remove the existing one and move pointer to next
+      iterator eatme = it++;
+      ranges.erase(eatme);
     }
 
-    // Convenient refs for accessing & modifying new (or extended) range
-    offset_t& new_start  = new_p->start;
-    length_t& new_length = new_p->length;
-
-    // Now work forward from new_p 'eating' ranges we overlap with or touch
-    for(next_p = new_p, ++next_p;
-        next_p != ranges.end();)
-    {
-      typename list<Range>::iterator this_p = next_p++; // Protect from deletion
-      Range& next = *this_p;
-
-      // Check for overlap/touch
-      if (new_start + new_length >= next.start)
-      {
-        // Extend new one to include this if it is longer
-        if (next.start+next.length > new_start+new_length)
-          new_length = next.start+next.length-new_start;
-
-        ranges.erase(this_p);  // Delete eaten one
-      }
-    }
+    // Insert new range
+    ranges.insert(range);
 
     // Check if end offset exceeded
-    if (end>end_offset) end_offset = end;
+    if (range.end()>end_offset)
+      end_offset = range.end();
   }
 
   //------------------------------------------------------------------------
   // Insert a range set (inserts every element = set union)
   void insert(const RangeSet& o)
   {
-    for(typename list<Range>::const_iterator
-        p = o.ranges.begin(); p!=o.ranges.end(); ++p)
+    for(const_iterator p = o.ranges.begin(); p!=o.ranges.end(); ++p)
     {
       const Range& r = *p;
       insert(r.start, r.length);
@@ -496,57 +529,59 @@ public:
     if (!length) return;
 
     offset_t end = start+length;
+    Range range(start, length);
 
-    // Find the first range that ends after or at the start point
-    typename list<Range>::iterator p;
+    // Find the first range which starts immediately before the range
+    iterator it = ranges.lower_bound(range);
+    if ((it == ranges.end() && it != ranges.begin()) || it->start > start)
+      --it;
 
-    for (p=ranges.begin(); p!=ranges.end() && p->end() <= start; p++)
-      ;
-
-    if (p == ranges.end()) return;  // All end before - nothing to do
-
-    // Now check every range until we reach one that starts after our end
-    while (p!=ranges.end() && p->start < end)
+    // Eat any existing ranges that overlap with the range
+    while (it != ranges.end() && it->overlaps_with(range))
     {
-      typename list<Range>::iterator q=p++;  // Protect from deletion
-      offset_t q_start = q->start;
-      offset_t q_end = q->end();
-
-      // Check for various cases:
-      // (1) Range entirely covered by deletion
-      if (start <= q_start && end >= q_end)
+      // Entirely contained by range
+      if (it->contained_by(range))
       {
-        // Remove it entirely
-        ranges.erase(q);
+        // Just eat it
+        iterator eatme = it++;
+        ranges.erase(eatme);
       }
-      // (2) Range truncated right by start
-      else if (end >= q_end)
+      // Start overlapped by range
+      else if (it->start_overlapped_by(range))
       {
-        // Adjust length 
-        q->length = start-q_start;
+        // Create non-overlapped portion of range
+        Range r = *it;
+        r.remove_from_start(range);
+        // Remove old range
+        iterator eatme = it++;
+        ranges.erase(eatme);
+        // Insert portion
+        ranges.insert(r);
       }
-      // (3) Range truncated left by end
-      else if (start <= q_start)
+      // End overlapped by range
+      else if (it->end_overlapped_by(range))
       {
-        // Shift start and adjust length
-        q->length -= (end-q_start);
-        q->start = end;
-
-        // Stop here
-        break;
+        // Create non-overlapped portion of range
+        Range r = *it;
+        r.remove_from_end(range);
+        // Remove old range
+        iterator eatme = it++;
+        ranges.erase(eatme);
+        // Insert portion
+        ranges.insert(r);
       }
-      // (4) Worst case - deletion is in the middle of the range
+      // Entirely contains the range
       else
       {
-        // Truncate the current one to hold the left-hand end
-        q->length = start-q_start;
-
-        // Create a new one to hold the right-hand end, inserted after
-        // the current one, or at end
-        ranges.insert(p, Range(end, q_end-end));
-
-        // Stop here
-        break;
+        // Create non-overlapped portions of range
+        Range r = *it;
+        Range r2 = r.remove_from_middle(range);
+        // Remove old range
+        iterator eatme = it++;
+        ranges.erase(eatme);
+        // Insert portions
+        pair<iterator, bool> p = ranges.insert(r);
+        ranges.insert(p.first, r2);
       }
     }
   }
@@ -555,8 +590,7 @@ public:
   // Remove a range set (removes every element = set difference)
   void remove(const RangeSet& o)
   {
-    for(typename list<Range>::const_iterator
-        p = o.ranges.begin(); p!=o.ranges.end(); ++p)
+    for(const_iterator p = o.ranges.begin(); p != o.ranges.end(); ++p)
     {
       const Range& r = *p;
       remove(r.start, r.length);
@@ -576,16 +610,17 @@ public:
   {
     RangeSet inverse;
     const Range *last = 0;
+    iterator end(inverse.begin());
 
     // Walk filling in gaps between last end (or 0) and new start
-    for(typename list<Range>::const_iterator
-        p = ranges.begin(); p!=ranges.end(); ++p)
+    for(const_iterator p = ranges.begin(); p != ranges.end(); ++p)
     {
       const Range& r = *p;
       if (last)
-        inverse.ranges.push_back(Range(last->end(), r.start-last->end()));
+        end = inverse.ranges.insert(end,
+                                    Range(last->end(), r.start-last->end()));
       else if (r.start > 0)
-        inverse.ranges.push_back(Range(0, r.start));
+        end = inverse.ranges.insert(end, Range(0, r.start));
 
       last = &r;
     }
@@ -594,12 +629,13 @@ public:
     if (last)
     {
       if (end_offset > last->end())
-        inverse.ranges.push_back(Range(last->end(), end_offset-last->end()));
+        end = inverse.ranges.insert(end,
+                                    Range(last->end(), end_offset-last->end()));
     }
     else if (end_offset > 0)
     {
       // Empty set - add whole range
-      inverse.ranges.push_back(Range(0, end_offset));
+      end = inverse.ranges.insert(end, Range(0, end_offset));
     }
 
     // Total length is the same as ours
@@ -704,15 +740,14 @@ public:
   // Check if a given range is all present
   bool contains(offset_t start, length_t length=1) const
   {
-    offset_t end = start+length;
+    Range range(start, length);
 
     // Because the set is always optimal, there must be a single range
     // which includes both the start and end
-    for(typename list<Range>::const_iterator
-        p = ranges.begin(); p!=ranges.end(); ++p)
+    for(const_iterator p = ranges.begin(); p != ranges.end(); ++p)
     {
-      const Range& r = *p;
-      if (start >= r.start && start < r.end() && end <= r.end()) return true;
+      if (range.contained_by(*p))
+        return true;
     }
 
     return false;
@@ -725,8 +760,7 @@ public:
     length_t sum = 0;
 
     // Simply add up all the range lengths
-    for(typename list<Range>::const_iterator
-        p = ranges.begin(); p!=ranges.end(); ++p)
+    for(const_iterator p = ranges.begin(); p != ranges.end(); ++p)
       sum += p->length;
 
     return sum;
@@ -734,12 +768,13 @@ public:
 
   //------------------------------------------------------------------------
   // Get number of ranges
-  typename list<Range>::size_type count() const { return ranges.size(); }
+  size_type count() const { return ranges.size(); }
 
   //------------------------------------------------------------------------
   // Check if the set is complete up to end_offset, or there was nothing
   // to fetch
   bool is_complete() const { return !end_offset||contains(0, end_offset); }
+
   //------------------------------------------------------------------------
   // Get percentage coverage
   int percentage_complete() 
@@ -758,7 +793,7 @@ public:
   // (a character can never represent less than 1 unit)
   string gauge(unsigned int length=50) const
   {
-    typename list<Range>::const_iterator p = ranges.begin();
+    const_iterator p = ranges.begin();
     string s;
 
     if (length > end_offset) length = end_offset;

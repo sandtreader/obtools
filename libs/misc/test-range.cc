@@ -25,17 +25,14 @@ TEST(RangeSetTest, TestInsert)
   ASSERT_EQ(2, rs.count());
   rs.insert(16, 5);
   ASSERT_EQ(2, rs.count());
+  rs.insert(9, 2);
+  ASSERT_EQ(2, rs.count());
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(10, 2));
-  expected.push_back(Misc::UInt64RangeSet::Range(14, 7));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(9, 3));
+  expected.insert(Misc::UInt64RangeSet::Range(14, 7));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestRemove)
@@ -48,16 +45,14 @@ TEST(RangeSetTest, TestRemove)
   ASSERT_EQ(2, rs.count());
   rs.remove(9, 10);
   ASSERT_EQ(1, rs.count());
+  rs.insert(9, 2);
+  rs.remove(10, 10);
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(19, 2));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(9, 1));
+  expected.insert(Misc::UInt64RangeSet::Range(20, 1));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestInverse)
@@ -70,16 +65,11 @@ TEST(RangeSetTest, TestInverse)
   ASSERT_EQ(2, rs.count());
   rs = rs.inverse();
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(0, 10));
-  expected.push_back(Misc::UInt64RangeSet::Range(12, 4));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(0, 10));
+  expected.insert(Misc::UInt64RangeSet::Range(12, 4));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestIntersection)
@@ -100,16 +90,11 @@ TEST(RangeSetTest, TestIntersection)
 
   rs = rs.intersection(rs2);
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(10, 1));
-  expected.push_back(Misc::UInt64RangeSet::Range(16, 5));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(10, 1));
+  expected.insert(Misc::UInt64RangeSet::Range(16, 5));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestMultiRangeSetIntersection)
@@ -141,17 +126,11 @@ TEST(RangeSetTest, TestMultiRangeSetIntersection)
   Misc::RangeSet<double, double>
          actual = Misc::RangeSet<double, double>::intersection(rs_list);
 
-  list<Misc::RangeSet<double, double>::Range> expected;
-  expected.push_back(Misc::RangeSet<double, double>::Range(10.0, 1.0));
-  expected.push_back(Misc::RangeSet<double, double>::Range(16.0, 1.0));
+  set<Misc::RangeSet<double, double>::Range> expected;
+  expected.insert(Misc::RangeSet<double, double>::Range(10.0, 1.0));
+  expected.insert(Misc::RangeSet<double, double>::Range(16.0, 1.0));
 
-  ASSERT_EQ(expected.size(), actual.count());
-  for (Misc::RangeSet<double, double>::const_iterator
-       it = actual.begin(), ex = expected.begin();
-       it != actual.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, actual.ranges);
 }
 
 TEST(RangeSetTest, TestContains)
@@ -209,16 +188,11 @@ TEST(RangeSetTest, TestRead)
   Misc::UInt64RangeSet rs(5);
   rs.read("10-11,16-20");
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(10, 2));
-  expected.push_back(Misc::UInt64RangeSet::Range(16, 5));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(10, 2));
+  expected.insert(Misc::UInt64RangeSet::Range(16, 5));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestToString)
@@ -247,16 +221,11 @@ TEST(RangeSetTest, TestReadFromXML)
   Misc::UInt64RangeSet rs(5);
   rs.read_from_xml(xml);
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(10, 2));
-  expected.push_back(Misc::UInt64RangeSet::Range(16, 5));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(10, 2));
+  expected.insert(Misc::UInt64RangeSet::Range(16, 5));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestAddToXML)
@@ -271,9 +240,9 @@ TEST(RangeSetTest, TestAddToXML)
   XML::Element xml("rangeset");
   rs.add_to_xml(xml);
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(10, 2));
-  expected.push_back(Misc::UInt64RangeSet::Range(16, 5));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(10, 2));
+  expected.insert(Misc::UInt64RangeSet::Range(16, 5));
 
   list<XML::Element *> elements = xml.get_children("range");
 
@@ -297,16 +266,11 @@ TEST(RangeSetTest, TestReadBinary)
   Misc::UInt64RangeSet rs(5);
   rs.read(br);
 
-  list<Misc::UInt64RangeSet::Range> expected;
-  expected.push_back(Misc::UInt64RangeSet::Range(10, 2));
-  expected.push_back(Misc::UInt64RangeSet::Range(16, 5));
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(10, 2));
+  expected.insert(Misc::UInt64RangeSet::Range(16, 5));
 
-  ASSERT_EQ(expected.size(), rs.count());
-  for (Misc::UInt64RangeSet::const_iterator
-       it = rs.begin(), ex = expected.begin(); it != rs.end(); ++it, ++ex)
-  {
-    ASSERT_EQ(*ex, *it);
-  }
+  ASSERT_EQ(expected, rs.ranges);
 }
 
 TEST(RangeSetTest, TestWriteBinary)

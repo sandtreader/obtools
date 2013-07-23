@@ -59,7 +59,7 @@ string UInt64RangeSet::str() const
 {
   string s;
 
-  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  for(const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
   {
     const Range& r = *p;
     if (!s.empty()) s+=",";
@@ -100,7 +100,7 @@ void UInt64RangeSet::read_from_xml(const XML::Element& parent,
 void UInt64RangeSet::add_to_xml(XML::Element& parent,
                                 const string& element_name) const
 {
-  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  for(const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
   {
     const Range& r = *p;
     XML::Element& re = parent.add(element_name);
@@ -134,7 +134,7 @@ void UInt64RangeSet::write(Channel::Writer& chan) const throw(Channel::Error)
 {
   chan.write_nbo_64(end_offset);
   chan.write_nbo_32(ranges.size());
-  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  for(const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
   {
     const Range& r = *p;
     chan.write_nbo_64(r.start);
@@ -147,7 +147,7 @@ void UInt64RangeSet::write(Channel::Writer& chan) const throw(Channel::Error)
 // start, length
 void UInt64RangeSet::dump(ostream& sout) const
 {
-  for(list<Range>::const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
+  for(const_iterator p = ranges.begin(); p!=ranges.end(); ++p)
   {
     const Range& r = *p;
     sout << r.start << ", " << r.length << endl;
