@@ -528,7 +528,6 @@ public:
     // Catch daftness which would otherwise break us
     if (!length) return;
 
-    offset_t end = start+length;
     Range range(start, length);
 
     // Find the first range which starts immediately before the range
