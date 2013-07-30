@@ -361,7 +361,7 @@ public:
     Web::HTTPClient(url, ctx, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
-  // Simple request POST operation on a specified URL and SOAP action
+  // Simple request POST operation on a specified URL and optional SOAP action
   // Returns result code, fills in response
   int post(Web::URL& url, const string& soap_action,
 	   Message& request, Message& response);

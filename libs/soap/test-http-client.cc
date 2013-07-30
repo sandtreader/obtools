@@ -17,9 +17,9 @@ using namespace ObTools;
 
 int main(int argc, char **argv)
 {
-  if (argc < 3)
+  if (argc < 2)
   {
-    cout << "Usage: " << argv[0] << " <url> <soap action>\n";
+    cout << "Usage: " << argv[0] << " <url> [<soap action>]\n";
     cout << "  Accepts SOAP input from stdin\n";
     return 2;
   }
@@ -52,9 +52,13 @@ int main(int argc, char **argv)
   }
 
   Web::URL url(argv[1]);
-  string soap_action(argv[2]);
+  string soap_action;
+  if (argc > 2) soap_action = argv[2];
 
-  log.summary << "Test SOAP client to " << url << "(" << soap_action << ")\n";
+  log.summary << "Test SOAP client to " << url;
+  if (!soap_action.empty()) log.summary << " (" << soap_action << ")";
+  log.summary << endl;
+
   SOAP::HTTPClient client(url, "ObTools Test SOAP client", 5);
 
   // Create SOAP message
