@@ -14,6 +14,7 @@
 #include <pthread.h>
 #include <queue>
 #include <list>
+#include <memory>
 
 namespace ObTools { namespace MT {
 
@@ -924,6 +925,99 @@ public:
   }
 };
 
+//==========================================================================
+// Task
+// A function object that can be run on a thread in a managed way by a
+// TaskThread
+class Task
+{
+private:
+  bool running;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Task():
+    running(true)
+  {}
+
+  //------------------------------------------------------------------------
+  // Pure virtual run method - called when the TaskThread is constructed
+  // Implementations of this should frequently check is_running() to see
+  // if the thread has been asked to shutdown
+  virtual void run() = 0;
+
+  //------------------------------------------------------------------------
+  // Check that thread hasn't been asked to shutdown
+  bool is_running() const
+  {
+    return running;
+  }
+
+  //------------------------------------------------------------------------
+  // Virtual shutdown method
+  // Override if anything special is needed to unblock something in the run()
+  // method (e.g. closing a socket to unblock a recv)
+  virtual void shutdown()
+  {
+    running = false;
+  }
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Task() {}
+};
+
+//==========================================================================
+// Task Thread
+// A class that runs a task in a thread
+// !Note: takes ownership of task
+class TaskThread
+{
+private:
+  auto_ptr<Task> task;
+
+  class Thread: public MT::Thread
+  {
+  private:
+    Task *task;
+
+  public:
+    Thread (Task *_task):
+      task(_task)
+    {
+    }
+    void run()
+    {
+      task->run();
+    }
+  } thread;
+
+  //------------------------------------------------------------------------
+  // Virtual run() method from Thread
+  void run()
+  {
+    task->run();
+  }
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  // Takes ownership of passed in Task
+  TaskThread(Task *_task):
+    task(_task), thread(_task)
+  {
+    thread.start();
+  }
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~TaskThread()
+  {
+    task->shutdown();
+    thread.join();
+  }
+};
 
 //==========================================================================
 }} //namespaces
