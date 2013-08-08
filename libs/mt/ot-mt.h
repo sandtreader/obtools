@@ -972,10 +972,11 @@ public:
 // Task Thread
 // A class that runs a task in a thread
 // !Note: takes ownership of task
+template<class T>
 class TaskThread
 {
 private:
-  auto_ptr<Task> task;
+  auto_ptr<T> task;
 
   class Thread: public MT::Thread
   {
@@ -1004,10 +1005,17 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   // Takes ownership of passed in Task
-  TaskThread(Task *_task):
+  TaskThread(T *_task):
     task(_task), thread(_task)
   {
     thread.start();
+  }
+
+  //------------------------------------------------------------------------
+  // Arrow operator to get to the task
+  T *operator->()
+  {
+    return task.get();
   }
 
   //------------------------------------------------------------------------
