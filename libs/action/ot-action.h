@@ -67,7 +67,7 @@ private:
 
   MT::MQueue<Gen::SharedPointer<Action<T> > > actions;
 
-  class ActionThread: public MT::Thread
+  class ActionTask: public MT::Task
   {
   private:
     MT::Condition condition;
@@ -78,7 +78,7 @@ private:
   public:
     //----------------------------------------------------------------------
     // Constructor
-    ActionThread():
+    ActionTask():
       handler(0)
     {
     }
@@ -87,7 +87,7 @@ private:
     // Run routine
     virtual void run()
     {
-      while (running)
+      while (is_running())
       {
         condition.wait(false);
 
@@ -112,6 +112,15 @@ private:
     }
 
     //---------------------------------------------------------------------
+    // Virtual shutdown
+    void shutdown()
+    {
+      MT::Task::shutdown();
+      // Call with empty action to wake
+      set_action(0, 0);
+    }
+
+    //---------------------------------------------------------------------
     // Set the action to work upon
     void set_action(Gen::SharedPointer<Action<T> > new_action,
                     Handler *new_handler)
@@ -132,9 +141,9 @@ private:
     }
   };
 
-  vector<Gen::SharedPointer<ActionThread> > threads;
+  vector<Gen::SharedPointer<MT::TaskThread<ActionTask> > > threads;
 
-  class WorkerThread: public MT::Thread
+  class WorkerTask: public MT::Task
   {
   private:
     Manager& manager;
@@ -142,7 +151,7 @@ private:
   public:
     //----------------------------------------------------------------------
     // Constructor
-    WorkerThread(Manager& _manager):
+    WorkerTask(Manager& _manager):
       manager(_manager)
     {
     }
@@ -151,10 +160,21 @@ private:
     // Run routine
     virtual void run()
     {
-      while (running)
+      while (is_running())
         manager.next_action();
     }
-  } worker_thread;
+
+    //----------------------------------------------------------------------
+    // Virtual shutdown
+    virtual void shutdown()
+    {
+      MT::Task::shutdown();
+      // Wake up thread with empty action
+      manager.queue(0);
+    }
+  };
+
+  MT::TaskThread<WorkerTask> worker_thread;
 
   friend class WorkerThread;
 
@@ -168,7 +188,7 @@ private:
     if (!action.get())
       return;
 
-    vector<Gen::SharedPointer<ActionThread > > active;
+    vector<Gen::SharedPointer<MT::TaskThread<ActionTask > > > active;
     {
       MT::Lock lock(handlers_mutex);
       typename map<T, vector<Handler *> >::iterator
@@ -181,21 +201,20 @@ private:
         {
           if (i++ >= threads.size())
           {
-            Gen::SharedPointer<ActionThread> at(new ActionThread());
-            at->start();
-            threads.push_back(at);
+            threads.push_back(new MT::TaskThread<ActionTask>(new ActionTask()));
           }
-          threads.back()->set_action(action, *it);
+          (*threads.back())->set_action(action, *it);
           active.push_back(threads.back());
         }
       }
     }
 
     // Wait for all active threads to finish
-    for (typename std::vector<Gen::SharedPointer<ActionThread > >::iterator
+    for (typename std::vector<Gen::SharedPointer<
+                              MT::TaskThread<ActionTask > > >::iterator
          it = active.begin(); it != active.end(); ++it)
     {
-      (*it)->wait();
+      (**it)->wait();
     }
   }
 
@@ -203,9 +222,8 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Manager():
-    worker_thread(*this)
+    worker_thread(new WorkerTask(*this))
   {
-    worker_thread.start();
   }
 
   //------------------------------------------------------------------------
@@ -229,26 +247,6 @@ public:
   {
     MT::Lock lock(handlers_mutex);
     return handlers;
-  }
-
-  //------------------------------------------------------------------------
-  // Destructor
-  ~Manager()
-  {
-    // Politely ask worker thread to stop
-    worker_thread.running = false;
-    actions.send(Gen::SharedPointer<Action<T> >(0));
-    worker_thread.join();
-    // Politely ask action threads to stop
-    // threads is normally only accessed by worker_thread, but that's gone now
-    // so we are safe to use without a lock
-    for (typename vector<Gen::SharedPointer<ActionThread> >::iterator
-         it = threads.begin(); it != threads.end(); ++it)
-    {
-      (*it)->running = false;
-      (*it)->set_action(0, 0);
-      (*it)->join();
-    }
   }
 };
 
