@@ -65,13 +65,13 @@ private:
   map<T, vector<Handler *> > handlers;
   MT::Mutex handlers_mutex;
 
-  MT::MQueue<Gen::SharedPointer<Action<T> > > actions;
+  MT::MQueue<Action<T> *> actions;
 
   class ActionTask: public MT::Task
   {
   private:
     MT::Condition condition;
-    Gen::SharedPointer<Action<T> > action;
+    Action<T> *action;
     Handler *handler;
     MT::Mutex mutex;
 
@@ -91,19 +91,19 @@ private:
       {
         condition.wait(false);
 
-        Gen::SharedPointer<Action<T> > a;
+        Action<T> *a;
         Handler *h;
         {
           MT::Lock lock(mutex);
           a = action;
           h = handler;
         }
-        if (a.get())
+        if (a)
         {
           h->handle(*a);
           {
             MT::Lock lock(mutex);
-            action.reset();
+            action = 0;
             handler = 0;
           }
           condition.signal(true);
@@ -122,8 +122,7 @@ private:
 
     //---------------------------------------------------------------------
     // Set the action to work upon
-    void set_action(Gen::SharedPointer<Action<T> > new_action,
-                    Handler *new_handler)
+    void set_action(Action<T> *new_action, Handler *new_handler)
     {
       {
         MT::Lock lock(mutex);
@@ -183,7 +182,7 @@ private:
   // Returns whether more to process
   void next_action()
   {
-    Gen::SharedPointer<Action<T> > action = actions.wait();
+    auto_ptr<Action<T> > action(actions.wait());
 
     if (!action.get())
       return;
@@ -203,7 +202,7 @@ private:
           {
             threads.push_back(new MT::TaskThread<ActionTask>(new ActionTask()));
           }
-          (*threads.back())->set_action(action, *it);
+          (*threads.back())->set_action(action.get(), *it);
           active.push_back(threads.back());
         }
       }
@@ -236,7 +235,7 @@ public:
 
   //------------------------------------------------------------------------
   // Queue an action
-  void queue(const Gen::SharedPointer<Action<T> >& action)
+  void queue(Action<T> *action)
   {
     actions.send(action);
   }
