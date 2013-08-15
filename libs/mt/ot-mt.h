@@ -15,6 +15,7 @@
 #include <queue>
 #include <list>
 #include <memory>
+#include <signal.h>
 
 namespace ObTools { namespace MT {
 
@@ -66,6 +67,11 @@ public:
   //--------------------------------------------------------------------------
   // Cancel - ask it to stop
   void cancel();
+
+  //------------------------------------------------------------------------
+  // Kill a thread (or send another signal)
+  void kill(int signal = SIGTERM)
+  { if (valid && !joined) pthread_kill(thread, signal); }
 
   //--------------------------------------------------------------------------
   // Allow Cancel - allow it to stop if asked
@@ -964,6 +970,10 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Get a signal to send at shutdown
+  int shutdown_signal() { return 0; }
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Task() {}
 };
@@ -1023,6 +1033,8 @@ public:
   ~TaskThread()
   {
     task->shutdown();
+    if (int signal = task->shutdown_signal())
+      thread.kill(signal);
     thread.join();
   }
 };
