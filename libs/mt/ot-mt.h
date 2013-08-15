@@ -971,7 +971,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get a signal to send at shutdown
-  int shutdown_signal() { return 0; }
+  virtual int shutdown_signal() { return 0; }
 
   //------------------------------------------------------------------------
   // Virtual destructor
