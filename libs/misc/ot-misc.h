@@ -158,6 +158,21 @@ public:
   //------------------------------------------------------------------------
   // Calculate a CRC for a string (can be binary)
   crc_t calculate(const string& data);
+
+  //------------------------------------------------------------------------
+  // Stream-style usage
+
+  //------------------------------------------------------------------------
+  // Get the initial value to work with
+  crc_t initialiser() const;
+
+  //------------------------------------------------------------------------
+  // Consume some data and update CRC
+  crc_t consume(const unsigned char *data, size_t length, crc_t crc) const;
+
+  //------------------------------------------------------------------------
+  // Finalise CRC
+  crc_t finalise(crc_t crc) const;
 };
 
 
