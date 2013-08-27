@@ -19,6 +19,8 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
 {
   AES_KEY aes_key;
   int enc;
+  // Save the initial IV for residual termination block
+  AESKey initial_iv(iv);
 
   // Set up AES key
   if (ctr || encryption) {
@@ -67,9 +69,8 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
       AES_set_encrypt_key(&key.key[0], key.size, &aes_key);
       if (enc_length)
       {
-        AESKey rtb_iv(iv);
         AES_cbc_encrypt(p, last, sizeof(last), &aes_key,
-                        &rtb_iv.key[0], AES_ENCRYPT);
+                        &initial_iv.key[0], AES_ENCRYPT);
       }
       else
       {
