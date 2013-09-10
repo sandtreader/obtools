@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-chan.h"
+#include "math.h"
 
 // Network headers for ntohl
 #if defined(__WIN32__)
@@ -161,6 +162,24 @@ double Reader::read_nbo_double() throw (Error)
   union { uint64_t n; double f; } u;  // Union type hack
   u.n = read_nbo_64();
   return u.f;
+}
+
+//--------------------------------------------------------------------------
+// Read a fixed-point number from the channel
+double Reader::read_nbo_fixed_point(int before_bits, int after_bits)
+{
+  int bits = before_bits + after_bits;
+  if (bits % 8 || bits > 64)
+    throw Error(9, "Total number of bits must be order of 8 "
+                   "and no greater than 64");
+  uint64_t n(0);
+  while (bits)
+  {
+    n = n << 8;
+    n += read_byte();
+    bits -= 8;
+  }
+  return n / pow(2, after_bits);
 }
 
 //--------------------------------------------------------------------------
