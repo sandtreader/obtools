@@ -103,7 +103,7 @@ int Shell::start(int argc, char **argv)
   }
 
 #if defined(DEBUG)
-  bool go_daemon = false;
+  bool go_daemon = config.get_value_bool("background/@daemon", false);
 #else
   bool go_daemon = config.get_value_bool("background/@daemon", true);
 #endif
