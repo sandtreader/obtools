@@ -134,6 +134,12 @@ public:
   string hms() const;
 
   //------------------------------------------------------------------------
+  // Convert to ISO duration string
+  // Generates P[n]Y[n]M[n]DT[n]H[n]M[n]S form or empty if invalid
+  // This format is also compatible with XML
+  string iso() const;
+
+  //------------------------------------------------------------------------
   // Arithmetic operators, so far as it makes sense
   Duration operator-(const Duration& o) const { return Duration(t-o.t); }
   Duration operator+(const Duration& o) const { return Duration(t+o.t); }
