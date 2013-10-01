@@ -173,10 +173,12 @@ string Duration::hms() const
 // This format is also compatible with XML
 string Duration::iso() const
 {
-  ostringstream oss;
   // Round seconds to milliseconds, to avoid unfortunate combinations
   // (e.g.) 59.999999 -> 00:00:60
   double rt = floor(t*MILLI+0.5)/MILLI;
+
+  if (rt == 0.0)
+    return "P0D";
 
   int days = static_cast<int>(rt / (HOUR * 24));
   rt -= days * HOUR * 24;
@@ -186,6 +188,7 @@ string Duration::iso() const
   rt -= minutes * MINUTE;
   double secs = rt;
 
+  ostringstream oss;
   oss << 'P';
   if (days)
     oss << days << 'D';
