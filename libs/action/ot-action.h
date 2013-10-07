@@ -65,78 +65,84 @@ private:
   map<T, vector<Handler *> > handlers;
   MT::Mutex handlers_mutex;
 
-  vector<Gen::SharedPointer<Action<T> > > actions;
-  MT::Mutex actions_mutex;
+  MT::MQueue<Action<T> *> actions;
 
-  class ActionThread: public MT::Thread
+  class ActionTask: public MT::Task
   {
   private:
     MT::Condition condition;
-    Gen::SharedPointer<Action<T> > action;
+    Action<T> *action;
     Handler *handler;
     MT::Mutex mutex;
 
   public:
     //----------------------------------------------------------------------
     // Constructor
-    ActionThread():
+    ActionTask():
       handler(0)
     {
-      start();
     }
 
     //----------------------------------------------------------------------
     // Run routine
     virtual void run()
     {
-      while (running)
+      while (is_running())
       {
-        Gen::SharedPointer<Action<T> > a;
+        condition.wait(false);
+
+        Action<T> *a;
         Handler *h;
         {
           MT::Lock lock(mutex);
           a = action;
           h = handler;
         }
-        if (a.get())
+        if (a)
         {
           h->handle(*a);
           {
             MT::Lock lock(mutex);
-            action.reset();
+            action = 0;
             handler = 0;
           }
-          condition.signal();
-        }
-        else
-        {
-          MT::Thread::usleep(10000);
+          condition.signal(true);
         }
       }
     }
 
     //---------------------------------------------------------------------
-    // Set the action to work upon
-    void set_action(Gen::SharedPointer<Action<T> > new_action,
-                    Handler *new_handler)
+    // Virtual shutdown
+    void shutdown()
     {
-      condition.clear();
-      MT::Lock lock(mutex);
-      action = new_action;
-      handler = new_handler;
+      MT::Task::shutdown();
+      // Call with empty action to wake
+      set_action(0, 0);
+    }
+
+    //---------------------------------------------------------------------
+    // Set the action to work upon
+    void set_action(Action<T> *new_action, Handler *new_handler)
+    {
+      {
+        MT::Lock lock(mutex);
+        action = new_action;
+        handler = new_handler;
+      }
+      condition.signal(false);
     }
 
     //---------------------------------------------------------------------
     // Wait on action being used
     void wait()
     {
-      condition.wait();
+      condition.wait(true);
     }
   };
 
-  vector<Gen::SharedPointer<ActionThread> > threads;
+  vector<Gen::SharedPointer<MT::TaskThread<ActionTask> > > threads;
 
-  class WorkerThread: public MT::Thread
+  class WorkerTask: public MT::Task
   {
   private:
     Manager& manager;
@@ -144,41 +150,44 @@ private:
   public:
     //----------------------------------------------------------------------
     // Constructor
-    WorkerThread(Manager& _manager):
+    WorkerTask(Manager& _manager):
       manager(_manager)
     {
-      start();
     }
 
     //----------------------------------------------------------------------
     // Run routine
     virtual void run()
     {
-      while (running)
-      {
-        if (!manager.next_action())
-          MT::Thread::usleep(10000);
-      }
+      while (is_running())
+        manager.next_action();
     }
-  } worker_thread;
+
+    //----------------------------------------------------------------------
+    // Virtual shutdown
+    virtual void shutdown()
+    {
+      MT::Task::shutdown();
+      // Wake up thread with empty action
+      manager.queue(0);
+    }
+  };
+
+  MT::TaskThread<WorkerTask> worker_thread;
 
   friend class WorkerThread;
 
   //------------------------------------------------------------------------
   // Handle next action on queue
   // Returns whether more to process
-  bool next_action()
+  void next_action()
   {
-    Gen::SharedPointer<Action<T> > action;
-    {
-      MT::Lock lock(actions_mutex);
-      if (actions.empty())
-        return false;
-      action = actions.front();
-      actions.erase(actions.begin());
-    }
+    auto_ptr<Action<T> > action(actions.wait());
 
-    vector<Gen::SharedPointer<ActionThread > > active;
+    if (!action.get())
+      return;
+
+    vector<Gen::SharedPointer<MT::TaskThread<ActionTask > > > active;
     {
       MT::Lock lock(handlers_mutex);
       typename map<T, vector<Handler *> >::iterator
@@ -190,23 +199,21 @@ private:
              it = h->second.begin(); it != h->second.end(); ++it)
         {
           if (i++ >= threads.size())
-            threads.push_back(new ActionThread());
-          threads.back()->set_action(action, *it);
+          {
+            threads.push_back(new MT::TaskThread<ActionTask>(new ActionTask()));
+          }
+          (*threads.back())->set_action(action.get(), *it);
           active.push_back(threads.back());
         }
       }
     }
 
     // Wait for all active threads to finish
-    for (typename std::vector<Gen::SharedPointer<ActionThread > >::iterator
+    for (typename std::vector<Gen::SharedPointer<
+                              MT::TaskThread<ActionTask > > >::iterator
          it = active.begin(); it != active.end(); ++it)
     {
-      (*it)->wait();
-    }
-
-    {
-      MT::Lock lock(actions_mutex);
-      return !actions.empty();
+      (**it)->wait();
     }
   }
 
@@ -214,8 +221,9 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Manager():
-    worker_thread(*this)
-  {}
+    worker_thread(new WorkerTask(*this))
+  {
+  }
 
   //------------------------------------------------------------------------
   // Register a handler
@@ -227,10 +235,9 @@ public:
 
   //------------------------------------------------------------------------
   // Queue an action
-  void queue(const Gen::SharedPointer<Action<T> >& action)
+  void queue(Action<T> *action)
   {
-    MT::Lock lock(actions_mutex);
-    actions.push_back(action);
+    actions.send(action);
   }
 
   //------------------------------------------------------------------------
@@ -239,24 +246,6 @@ public:
   {
     MT::Lock lock(handlers_mutex);
     return handlers;
-  }
-
-  //------------------------------------------------------------------------
-  // Destructor
-  ~Manager()
-  {
-    // Politely ask worker thread to stop
-    worker_thread.running = false;
-    worker_thread.join();
-    // Politely ask action threads to stop
-    // threads is normally only accessed by worker_thread, but that's gone now
-    // so we are safe to use without a lock
-    for (typename vector<Gen::SharedPointer<ActionThread> >::iterator
-         it = threads.begin(); it != threads.end(); ++it)
-    {
-      (*it)->running = false;
-      (*it)->join();
-    }
   }
 };
 

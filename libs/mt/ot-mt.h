@@ -14,6 +14,8 @@
 #include <pthread.h>
 #include <queue>
 #include <list>
+#include <memory>
+#include <signal.h>
 
 namespace ObTools { namespace MT {
 
@@ -65,6 +67,11 @@ public:
   //--------------------------------------------------------------------------
   // Cancel - ask it to stop
   void cancel();
+
+  //------------------------------------------------------------------------
+  // Kill a thread (or send another signal)
+  void kill(int signal = SIGTERM)
+  { if (valid && !joined) pthread_kill(thread, signal); }
 
   //--------------------------------------------------------------------------
   // Allow Cancel - allow it to stop if asked
@@ -924,6 +931,113 @@ public:
   }
 };
 
+//==========================================================================
+// Task
+// A function object that can be run on a thread in a managed way by a
+// TaskThread
+class Task
+{
+private:
+  bool running;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Task():
+    running(true)
+  {}
+
+  //------------------------------------------------------------------------
+  // Pure virtual run method - called when the TaskThread is constructed
+  // Implementations of this should frequently check is_running() to see
+  // if the thread has been asked to shutdown
+  virtual void run() = 0;
+
+  //------------------------------------------------------------------------
+  // Check that thread hasn't been asked to shutdown
+  bool is_running() const
+  {
+    return running;
+  }
+
+  //------------------------------------------------------------------------
+  // Virtual shutdown method
+  // Override if anything special is needed to unblock something in the run()
+  // method (e.g. closing a socket to unblock a recv)
+  virtual void shutdown()
+  {
+    running = false;
+  }
+
+  //------------------------------------------------------------------------
+  // Get a signal to send at shutdown
+  virtual int shutdown_signal() { return 0; }
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Task() {}
+};
+
+//==========================================================================
+// Task Thread
+// A class that runs a task in a thread
+// !Note: takes ownership of task
+template<class T>
+class TaskThread
+{
+private:
+  auto_ptr<T> task;
+
+  class Thread: public MT::Thread
+  {
+  private:
+    Task *task;
+
+  public:
+    Thread (Task *_task):
+      task(_task)
+    {
+    }
+    void run()
+    {
+      task->run();
+    }
+  } thread;
+
+  //------------------------------------------------------------------------
+  // Virtual run() method from Thread
+  void run()
+  {
+    task->run();
+  }
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  // Takes ownership of passed in Task
+  TaskThread(T *_task):
+    task(_task), thread(_task)
+  {
+    thread.start();
+  }
+
+  //------------------------------------------------------------------------
+  // Arrow operator to get to the task
+  T *operator->()
+  {
+    return task.get();
+  }
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~TaskThread()
+  {
+    task->shutdown();
+    if (int signal = task->shutdown_signal())
+      thread.kill(signal);
+    thread.join();
+  }
+};
 
 //==========================================================================
 }} //namespaces

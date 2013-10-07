@@ -84,15 +84,38 @@ CRC32::CRC32(Algorithm _alg, bool _reflected, bool _flip):
 // Calculate new CRC for a block
 CRC32::crc_t CRC32::calculate(const unsigned char *data, size_t length)
 {
-  crc_t crc;
+  crc_t crc = initialiser();
+  crc = consume(data, length, crc);
+  return finalise(crc);
+}
 
+//------------------------------------------------------------------------
+// Calculate a CRC for a string (can be binary)
+CRC32::crc_t CRC32::calculate(const string& data)
+{
+  return calculate(reinterpret_cast<const unsigned char *>(data.c_str()),
+                   data.size());
+}
+
+//--------------------------------------------------------------------------
+// Stream-style usage
+
+//--------------------------------------------------------------------------
+// Get the initial value to work with
+CRC32::crc_t CRC32::initialiser() const
+{
   switch (algorithm)
   {
     default:
-      crc = 0xFFFFFFFFUL;  // All ones initialiser
-      break;
+      return 0xFFFFFFFFUL;  // All ones initialiser
   }
+}
 
+//--------------------------------------------------------------------------
+// Consume some data and update CRC
+CRC32::crc_t CRC32::consume(const unsigned char *data, size_t length,
+                            crc_t crc) const
+{
   // Run each byte through table
   if (reflected)
   {
@@ -112,19 +135,15 @@ CRC32::crc_t CRC32::calculate(const unsigned char *data, size_t length)
       crc = ((crc << 8) & 0xffffffff) ^ combinations[combiner];
     }
   }
-
-  if (flip) crc ^= 0xFFFFFFFF;
-
   return crc;
 }
 
-//------------------------------------------------------------------------
-// Calculate a CRC for a string (can be binary)
-CRC32::crc_t CRC32::calculate(const string& data)
+//--------------------------------------------------------------------------
+// Finalise CRC
+CRC32::crc_t CRC32::finalise(crc_t crc) const
 {
-  return calculate(reinterpret_cast<const unsigned char *>(data.c_str()),
-                   data.size());
+  if (flip) crc ^= 0xFFFFFFFF;
+  return crc;
 }
-
 
 }} // namespaces

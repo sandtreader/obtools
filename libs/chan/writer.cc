@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-chan.h"
+#include "math.h"
 
 // Network headers for ntohl
 #if defined(__WIN32__)
@@ -90,6 +91,22 @@ void Writer::write_nbo_double(double f) throw (Error)
   union { uint64_t n; double f; } u;  // Union type hack
   u.f = f;
   write_nbo_64(u.n);
+}
+
+//--------------------------------------------------------------------------
+// Write a network byte order fixed-point double
+void Writer::write_nbo_fixed_point(double f, int before_bits, int after_bits)
+{
+  int bits = before_bits + after_bits;
+  if (bits % 8 || bits > 64)
+    throw Error(9, "Total number of bits must be order of 8 "
+                   "and no greater than 64");
+  uint64_t n = f * pow(2, after_bits);
+  while (bits)
+  {
+    bits -= 8;
+    write_byte(n >> bits);
+  }
 }
 
 //--------------------------------------------------------------------------

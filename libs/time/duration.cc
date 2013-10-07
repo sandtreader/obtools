@@ -168,6 +168,52 @@ string Duration::hms() const
 }
 
 //------------------------------------------------------------------------
+// Convert to ISO duration string
+// Generates P[n]Y[n]M[n]DT[n]H[n]M[n]S form or empty if invalid
+// This format is also compatible with XML
+string Duration::iso() const
+{
+  // Round seconds to milliseconds, to avoid unfortunate combinations
+  // (e.g.) 59.999999 -> 00:00:60
+  double rt = floor(t*MILLI+0.5)/MILLI;
+
+  if (rt == 0.0)
+    return "P0D";
+
+  int days = static_cast<int>(rt / (HOUR * 24));
+  rt -= days * HOUR * 24;
+  int hours = static_cast<int>(rt / HOUR);
+  rt -= hours * HOUR;
+  int minutes = static_cast<int>(rt / MINUTE);
+  rt -= minutes * MINUTE;
+  double secs = rt;
+
+  ostringstream oss;
+  oss << 'P';
+  if (days)
+    oss << days << 'D';
+  if (hours || minutes || secs)
+  {
+    oss << 'T';
+    if (hours)
+      oss << hours << 'H';
+    if (minutes)
+      oss << minutes << 'M';
+    if (secs)
+    {
+      int precision = 2;
+      if (secs > 1)
+        ++precision;
+      if (secs > 10)
+        ++precision;
+      oss << setprecision(precision) << secs << 'S';
+    }
+  }
+
+  return oss.str();
+}
+
+//------------------------------------------------------------------------
 // Constructor-like static function to return monotonic clock - baseline
 // unknown, but guaranteed never to get mangled by ntpd, DST et al.
 // Returns Duration(0.0) if clock not available

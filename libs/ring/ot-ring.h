@@ -84,6 +84,10 @@ public:
   void flush_from_get() { out_index = in_index; }
 
   //--------------------------------------------------------------------------
+  // Get array size
+  int size() const { return length; }
+
+  //--------------------------------------------------------------------------
   // Destructor
   ~Buffer()
   {

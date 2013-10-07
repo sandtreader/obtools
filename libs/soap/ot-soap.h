@@ -361,7 +361,7 @@ public:
     Web::HTTPClient(url, ctx, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
-  // Simple request POST operation on a specified URL and SOAP action
+  // Simple request POST operation on a specified URL and optional SOAP action
   // Returns result code, fills in response
   int post(Web::URL& url, const string& soap_action,
 	   Message& request, Message& response);
@@ -583,13 +583,32 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
+  // Clean shutdown
+  void shutdown()
+  {
+    if (http_server)
+      http_server->shutdown();
+    if (https_server)
+      https_server->shutdown();
+    if (http_server_thread)
+    {
+      delete http_server_thread;
+      http_server_thread = 0;
+    }
+    if (https_server_thread)
+    {
+      delete https_server_thread;
+      https_server_thread = 0;
+    }
+  }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~MessageInterface()
   {
-    if (http_server_thread) delete http_server_thread;
+    shutdown();
     if (http_server) delete http_server;
-    if (https_server_thread) delete https_server_thread;
     if (https_server) delete https_server;
   }
 };
@@ -597,20 +616,3 @@ public:
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_SOAP_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

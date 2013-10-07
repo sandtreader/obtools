@@ -109,6 +109,10 @@ public:
   double read_nbo_double() throw (Error);
 
   //--------------------------------------------------------------------------
+  // Read a fixed-point number from the channel
+  double read_nbo_fixed_point(int before_bits, int after_bits);
+
+  //--------------------------------------------------------------------------
   // Little-endian equivalents of the above
   // Used only for external protocols specified that way
   uint16_t read_le_16() throw (Error);
@@ -207,6 +211,11 @@ public:
   // Write a network byte order 8-byte double to the channel
   // Throws Error on failure or EOF
   void write_nbo_double(double f) throw (Error);
+
+  //--------------------------------------------------------------------------
+  // Write a network byte order fixed-point double
+  // Throws Error on failure or EOF
+  void write_nbo_fixed_point(double f, int before_bits, int after_bits);
 
   //--------------------------------------------------------------------------
   // Little-endian (LSB first) versions of the above
