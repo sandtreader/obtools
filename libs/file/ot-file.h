@@ -382,17 +382,19 @@ class OutStream: public ofstream
 // Buffered Output Stream
 // Has a similar, but reduced, interface to ofstream, and provides simple
 // buffering
-class BufferedOutStream
+class BufferedOutFileBuf: public filebuf
+{
+protected:
+  //------------------------------------------------------------------------
+  // Handle characters one at a time
+  streamsize xsputn(const char *s, streamsize n);
+};
+
+class BufferedOutStream: public ostream
 {
 private:
-  int fd;
+  BufferedOutFileBuf file_buf;
   vector<char> buffer;
-  uint64_t buffer_pos;
-  bool failbit;
-
-  //------------------------------------------------------------------------
-  // Flush buffer content to file
-  void flush_buffer();
 
 public:
   //------------------------------------------------------------------------
@@ -416,32 +418,30 @@ public:
   uint64_t get_buffer_size() const;
 
   //------------------------------------------------------------------------
+  // Test for file being open
+  bool is_open()
+  {
+    return file_buf.is_open();
+  }
+
+  //------------------------------------------------------------------------
   // Open a file
-  void open(const char *filename, ios_base::openmode mode = ios_base::out);
+  void open (const char *filename, ios_base::openmode mode = ios_base::in
+                                                           | ios_base::out)
+  {
+    if (!file_buf.open(filename, mode))
+      setstate(ios_base::failbit);
+    else
+      clear();
+  }
 
   //------------------------------------------------------------------------
   // Close file
-  void close();
-
-  //------------------------------------------------------------------------
-  // Evaluate stream
-  bool operator!() const;
-
-  //------------------------------------------------------------------------
-  // Is this stream open?
-  bool is_open();
-
-  //------------------------------------------------------------------------
-  // Current file position
-  streampos tellp();
-
-  //------------------------------------------------------------------------
-  // Write data to stream
-  BufferedOutStream& write(const char* s, streamsize n);
-
-  //------------------------------------------------------------------------
-  // Destructor
-  ~BufferedOutStream();
+  void close()
+  {
+    if (!file_buf.close())
+      setstate(ios_base::failbit);
+  }
 };
 
 //==========================================================================

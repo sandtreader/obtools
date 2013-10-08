@@ -30,25 +30,48 @@
 
 namespace ObTools { namespace File {
 
+//==========================================================================
+// BufferedOutFileBuf
+
+//--------------------------------------------------------------------------
+// Handle characters one at a time
+streamsize BufferedOutFileBuf::xsputn(const char *s, streamsize n)
+{
+  streamsize avail = this->epptr() - this->pptr();
+  if (avail >= n)
+    return __streambuf_type::xsputn(s, n);
+  else
+    return filebuf::xsputn(s, n);
+}
+
+//==========================================================================
+// BufferedOutStream
+
 //--------------------------------------------------------------------------
 // Constructors
-BufferedOutStream::BufferedOutStream():
-  fd(-1), buffer_pos(0), failbit(false)
-{}
+BufferedOutStream::BufferedOutStream()
+{
+  file_buf.pubsetbuf(0, 0);
+  init(&file_buf);
+}
 
 BufferedOutStream::BufferedOutStream(const char *filename,
                                      ios::openmode mode,
                                      uint64_t buffer_size):
-  fd(-1), buffer(buffer_size), buffer_pos(0), failbit(false)
+  buffer(buffer_size)
 {
+  file_buf.pubsetbuf(&buffer[0], buffer.size());
+  init(&file_buf);
   open(filename, mode);
 }
 
 BufferedOutStream::BufferedOutStream(const string& filename,
                                      ios::openmode mode,
                                      uint64_t buffer_size):
-  fd(-1), buffer(buffer_size), buffer_pos(0), failbit(false)
+  buffer(buffer_size)
 {
+  file_buf.pubsetbuf(&buffer[0], buffer.size());
+  init(&file_buf);
   open(CPATH(filename), mode);
 }
 
@@ -56,9 +79,16 @@ BufferedOutStream::BufferedOutStream(const string& filename,
 // Set buffer size
 void BufferedOutStream::set_buffer_size(uint64_t buffer_size)
 {
-  if (buffer_size < buffer_pos)
-    flush_buffer();
-  buffer.resize(buffer_size);
+  if (buffer_size > buffer.size())
+  {
+    buffer.resize(buffer_size);
+    file_buf.pubsetbuf(&buffer[0], buffer_size);
+  }
+  else
+  {
+    file_buf.pubsetbuf(&buffer[0], buffer_size);
+    buffer.resize(buffer_size);
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -66,105 +96,6 @@ void BufferedOutStream::set_buffer_size(uint64_t buffer_size)
 uint64_t BufferedOutStream::get_buffer_size() const
 {
   return buffer.size();
-}
-
-//--------------------------------------------------------------------------
-// Open a file
-void BufferedOutStream::open(const char *filename, ios_base::openmode mode)
-{
-  fd = OPEN(filename, O_LARGEFILE |
-          ((mode & ios_base::app) ? O_APPEND : 0) |
-          ((mode & ios_base::binary) ? O_BINARY : 0) |
-          ((mode & ios_base::out) ? O_CREAT : 0) |
-          ((mode & ios_base::trunc) ? O_TRUNC : 0) |
-          ((mode & ios_base::out) ? ((mode & ios_base::in) ? O_RDWR : O_WRONLY)
-                                  : ((mode & ios_base::in) ? O_RDONLY : 0)),
-          S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH
-          );
-  if (is_open() && (mode & ios_base::ate))
-  {
-    if (lseek64(fd, 0, SEEK_END) < 0)
-      failbit = true;
-  }
-}
-
-//--------------------------------------------------------------------------
-// Close file
-void BufferedOutStream::close()
-{
-  if (is_open())
-  {
-    flush_buffer();
-    ::close(fd);
-    fd = -1;
-  }
-}
-
-//--------------------------------------------------------------------------
-// Flush buffer content to file
-void BufferedOutStream::flush_buffer()
-{
-  if (::write(fd, &buffer[0], buffer_pos)
-      != static_cast<ssize_t>(buffer_pos))
-    failbit = true;
-  buffer_pos = 0;
-}
-
-//--------------------------------------------------------------------------
-// Evaluate stream
-bool BufferedOutStream::operator!() const
-{
-  return failbit;
-}
-
-//--------------------------------------------------------------------------
-// Is this stream open?
-bool BufferedOutStream::is_open()
-{
-  return fd >= 0;
-}
-
-//--------------------------------------------------------------------------
-// Current file position
-streampos BufferedOutStream::tellp()
-{
-  if (is_open())
-    return lseek64(fd, 0, SEEK_CUR) + buffer_pos;
-  else
-    return -1;
-}
-
-//--------------------------------------------------------------------------
-// Write data to stream
-BufferedOutStream& BufferedOutStream::write(const char* s, streamsize n)
-{
-  if (!failbit && n > 0)
-  {
-    if (buffer.size() < buffer_pos + n)
-      flush_buffer();
-
-    if (buffer.size() < static_cast<vector<char>::size_type>(n))
-    {
-      if (::write(fd, s, n) != n)
-        failbit = true;
-    }
-    else
-    {
-      copy(s, s + n, &buffer[buffer_pos]);
-      buffer_pos += n;
-    }
-  }
-  return *this;
-}
-
-//--------------------------------------------------------------------------
-// Destructor
-BufferedOutStream::~BufferedOutStream()
-{
-  close();
-  buffer_pos = 0;
-  fd = -1;
-  failbit = false;
 }
 
 }} // namespaces
