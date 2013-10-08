@@ -98,5 +98,5 @@ else
 fi
 
 # clean up
-#rm -rf $DEB_RUN_DIR $DEB_DEV_DIR
+rm -rf $DEB_RUN_DIR $DEB_DEV_DIR
 
