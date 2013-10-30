@@ -18,7 +18,7 @@ namespace ObTools { namespace Channel {
 //--------------------------------------------------------------------------
 // Read a single bit from the channel, returning an integer
 // Throws SocketError on failure or EOF
-int BitReader::read_bit() throw (Error)
+int BitReader::read_bit()
 {
   if (!bits_valid)
   {
@@ -33,7 +33,7 @@ int BitReader::read_bit() throw (Error)
 // Read up to 32 bits from the channel
 // Returns bits in LSB of integer returned
 // Throws SocketError on failure or EOF
-uint32_t BitReader::read_bits(int n) throw (Error)
+uint32_t BitReader::read_bits(int n)
 {
   uint32_t bits=0;
   while (n--)
@@ -57,7 +57,7 @@ uint32_t BitReader::read_bits(int n) throw (Error)
 //--------------------------------------------------------------------------
 // Write a single bit to the channel
 // Throws SocketError on failure or EOF
-void BitWriter::write_bit(int bit) throw (Error)
+void BitWriter::write_bit(int bit)
 {
   // Add to current byte
   current_byte <<= 1;
@@ -76,7 +76,7 @@ void BitWriter::write_bit(int bit) throw (Error)
 // Write up to 32 bits to the channel
 // Writes bits from LSB of integer given
 // Throws SocketError on failure or EOF
-void BitWriter::write_bits(int n, uint32_t bits) throw (Error)
+void BitWriter::write_bits(int n, uint32_t bits)
 {
   while (n--)
   {
@@ -97,7 +97,7 @@ void BitWriter::write_bits(int n, uint32_t bits) throw (Error)
 //--------------------------------------------------------------------------
 // Flush remaining bits (if any) as a final byte, padding with zeros
 // Throws SocketError on failure or EOF
-void BitWriter::flush() throw (Error)
+void BitWriter::flush()
 {
   if (bits_valid)
   {
@@ -117,7 +117,7 @@ void BitWriter::flush() throw (Error)
 //--------------------------------------------------------------------------
 // Read an Exp-Golomb coded value from the channel
 // Throws Error on failure or EOF
-uint32_t BitEGReader::read_exp_golomb() throw (Error)
+uint32_t BitEGReader::read_exp_golomb()
 {
   uint32_t value = 0;
   int len = 0;

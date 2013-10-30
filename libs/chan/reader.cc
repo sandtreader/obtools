@@ -26,7 +26,7 @@ namespace ObTools { namespace Channel {
 // Returns false if channel goes EOF before anything is read
 // Buf may be 0 to skip data
 // Throws Error on failure, or EOF after a read
-bool Reader::try_read(void *buf, size_t count) throw (Error)
+bool Reader::try_read(void *buf, size_t count)
 {
   char *p = static_cast<char *>(buf);
   size_t done = 0;
@@ -52,7 +52,7 @@ bool Reader::try_read(void *buf, size_t count) throw (Error)
 // Read exact amount of data from the channel into a binary buffer
 // Buf may be 0 to skip data
 // Throws Error on failure
-void Reader::read(void *buf, size_t count) throw (Error)
+void Reader::read(void *buf, size_t count)
 {
   char *p = static_cast<char *>(buf);
   size_t done = 0;
@@ -72,7 +72,7 @@ void Reader::read(void *buf, size_t count) throw (Error)
 //--------------------------------------------------------------------------
 // Read exact amount of data from the channel into a string
 // Throws Error on failure
-void Reader::read(string& s, size_t count) throw (Error)
+void Reader::read(string& s, size_t count)
 {
   char buf[CHANNEL_BUFFER_SIZE+1];
   size_t done = 0;
@@ -96,7 +96,7 @@ void Reader::read(string& s, size_t count) throw (Error)
 //--------------------------------------------------------------------------
 // Read a single byte from the channel
 // Throws SocketError on failure or EOF
-unsigned char Reader::read_byte() throw (Error)
+unsigned char Reader::read_byte()
 {
   unsigned char n;
   read(&n, 1);
@@ -106,7 +106,7 @@ unsigned char Reader::read_byte() throw (Error)
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 2-byte integer from the channel
 // Throws SocketError on failure or EOF
-uint16_t Reader::read_nbo_16() throw (Error)
+uint16_t Reader::read_nbo_16()
 {
   uint16_t n;
   read(&n, 2);
@@ -116,7 +116,7 @@ uint16_t Reader::read_nbo_16() throw (Error)
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 3-byte integer from the channel
 // Throws SocketError on failure or EOF
-uint32_t Reader::read_nbo_24() throw (Error)
+uint32_t Reader::read_nbo_24()
 {
   unsigned char buf[3];
   read(buf, 3);
@@ -127,7 +127,7 @@ uint32_t Reader::read_nbo_24() throw (Error)
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 4-byte integer from the socket
 // Throws SocketError on failure or EOF
-uint32_t Reader::read_nbo_32() throw (Error)
+uint32_t Reader::read_nbo_32()
 {
   uint32_t n;
   read(&n, 4);
@@ -137,7 +137,7 @@ uint32_t Reader::read_nbo_32() throw (Error)
 //--------------------------------------------------------------------------
 // Ditto, but allowing the possibility of failure at EOF
 // Throws Error on non-EOF failure
-bool Reader::read_nbo_32(uint32_t& n) throw (Error)
+bool Reader::read_nbo_32(uint32_t& n)
 {
   if (!try_read(&n, 4)) return false;
   n=ntohl(n);
@@ -147,7 +147,7 @@ bool Reader::read_nbo_32(uint32_t& n) throw (Error)
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 8-byte integer from the socket
 // Throws SocketError on failure or EOF
-uint64_t Reader::read_nbo_64() throw (Error)
+uint64_t Reader::read_nbo_64()
 {
   uint64_t n = read_nbo_32();
   return (n<<32) + read_nbo_32();
@@ -156,7 +156,7 @@ uint64_t Reader::read_nbo_64() throw (Error)
 //--------------------------------------------------------------------------
 // Read a network byte order 8-byte double from the channel
 // Throws Error on failure or EOF
-double Reader::read_nbo_double() throw (Error)
+double Reader::read_nbo_double()
 {
   if (sizeof(double) != 8) throw Error(8, "Double is not 8 bytes here");
   union { uint64_t n; double f; } u;  // Union type hack
@@ -186,7 +186,7 @@ double Reader::read_nbo_fixed_point(int before_bits, int after_bits)
 // Read a little-endian (LSB-first) 2-byte integer from the channel
 // Used only for external protocols specified that way
 // Throws Error on failure or EOF
-uint16_t Reader::read_le_16() throw (Error)
+uint16_t Reader::read_le_16()
 {
   // No easy way to do this with htonl, since if we're big-endian it's 
   // a NOOP anyway - so do it manually
@@ -198,7 +198,7 @@ uint16_t Reader::read_le_16() throw (Error)
 //--------------------------------------------------------------------------
 // Read a little-endian (LSB-first) 3-byte integer from the channel
 // Throws Error on failure or EOF
-uint32_t Reader::read_le_24() throw (Error)
+uint32_t Reader::read_le_24()
 {
   unsigned char buf[3];
   read(buf, 3);
@@ -209,7 +209,7 @@ uint32_t Reader::read_le_24() throw (Error)
 //--------------------------------------------------------------------------
 // Read a little-endian (LSB-first) 4-byte integer from the channel
 // Throws Error on failure or EOF
-uint32_t Reader::read_le_32() throw (Error)
+uint32_t Reader::read_le_32()
 {
   unsigned char buf[4];
   read(buf, 4);
@@ -221,7 +221,7 @@ uint32_t Reader::read_le_32() throw (Error)
 //--------------------------------------------------------------------------
 // Ditto, but allowing the possibility of failure at EOF
 // Throws Error on non-EOF failure
-bool Reader::read_le_32(uint32_t& n) throw (Error)
+bool Reader::read_le_32(uint32_t& n)
 {
   unsigned char buf[4];
   if (!try_read(&buf, 4)) return false;
@@ -234,7 +234,7 @@ bool Reader::read_le_32(uint32_t& n) throw (Error)
 //--------------------------------------------------------------------------
 // Read a little-endian (LSB-first) 8-byte integer from the channel
 // Throws Error on failure or EOF
-uint64_t Reader::read_le_64() throw (Error)
+uint64_t Reader::read_le_64()
 {
   uint64_t n = read_le_32();
   return n + (static_cast<uint64_t>(read_le_32())<<32);
@@ -243,7 +243,7 @@ uint64_t Reader::read_le_64() throw (Error)
 //--------------------------------------------------------------------------
 // Read a little-endian 8-byte double from the channel
 // Throws Error on failure or EOF
-double Reader::read_le_double() throw (Error)
+double Reader::read_le_double()
 {
   if (sizeof(double) != 8) throw Error(8, "Double is not 8 bytes here");
   union { uint64_t n; double f; } u;  // Union type hack
@@ -253,14 +253,14 @@ double Reader::read_le_double() throw (Error)
 
 //--------------------------------------------------------------------------
 // Skip N bytes
-void Reader::skip(size_t n) throw (Error)
+void Reader::skip(size_t n)
 {
   read(0, n);
 }
 
 //--------------------------------------------------------------------------
 // Skip to given alignment (bytes) from current offset
-void Reader::align(size_t n) throw (Error)
+void Reader::align(size_t n)
 { 
   skip(static_cast<size_t>(n*((offset+n-1)/n) - offset));  // Bytes to skip
 }

@@ -18,7 +18,7 @@ namespace ObTools { namespace Channel {
 // TCP Socket Reader
 
 // Read implementation
-size_t TCPSocketReader::basic_read(void *buf, size_t count) throw (Error)
+size_t TCPSocketReader::basic_read(void *buf, size_t count)
 {
   try
   {
@@ -46,7 +46,7 @@ size_t TCPSocketReader::basic_read(void *buf, size_t count) throw (Error)
 // TCP Socket Writer
 
 // Write implementation
-void TCPSocketWriter::basic_write(const void *buf, size_t count) throw (Error)
+void TCPSocketWriter::basic_write(const void *buf, size_t count)
 {
   try
   {

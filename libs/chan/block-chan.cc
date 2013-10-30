@@ -15,7 +15,7 @@ namespace ObTools { namespace Channel {
 // Block Reader
 
 // Read implementation
-size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
+size_t BlockReader::basic_read(void *buf, size_t count)
 {
   // Limit to length available
   if (length-offset < count) count = length-offset;
@@ -31,7 +31,7 @@ size_t BlockReader::basic_read(void *buf, size_t count) throw (Error)
 }
 
 // Skip N bytes
-void BlockReader::skip(size_t n) throw (Error)
+void BlockReader::skip(size_t n )
 {
   if (offset+n > length)
   {
@@ -44,7 +44,7 @@ void BlockReader::skip(size_t n) throw (Error)
 }
 
 // Rewind implementation
-void BlockReader::rewind(size_t n) throw (Error)
+void BlockReader::rewind(size_t n)
 {
   if (n<=offset)
   {
@@ -58,7 +58,7 @@ void BlockReader::rewind(size_t n) throw (Error)
 // Block Writer
 
 // Write implementation
-void BlockWriter::basic_write(const void *buf, size_t count) throw (Error)
+void BlockWriter::basic_write(const void *buf, size_t count)
 {
   // Must fit, or error
   if (count <= length-offset)
@@ -71,7 +71,7 @@ void BlockWriter::basic_write(const void *buf, size_t count) throw (Error)
 }
 
 // Skip N bytes
-void BlockWriter::skip(size_t n) throw (Error)
+void BlockWriter::skip(size_t n)
 {
   // Must fit, or error
   if (offset+n <= length)
@@ -84,7 +84,7 @@ void BlockWriter::skip(size_t n) throw (Error)
 }
 
 // Rewind implementation
-void BlockWriter::rewind(size_t n) throw (Error)
+void BlockWriter::rewind(size_t n)
 {
   if (n<=offset)
   {
