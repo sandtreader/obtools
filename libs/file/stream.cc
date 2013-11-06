@@ -98,4 +98,81 @@ uint64_t BufferedOutStream::get_buffer_size() const
   return buffer.size();
 }
 
+//==========================================================================
+// MultiOutFileBuf
+
+//--------------------------------------------------------------------------
+// Handle characters one at a time
+streamsize MultiOutFileBuf::xsputn(const char *s, streamsize n)
+{
+  streamsize result;
+  for (vector<Gen::UniquePointer<filebuf> >::iterator
+       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  {
+    result = (*it)->sputn(s, n);
+  }
+  return result;
+}
+
+//------------------------------------------------------------------------
+// Put character on overflow
+int MultiOutFileBuf::overflow(int c)
+{
+  for (vector<Gen::UniquePointer<filebuf> >::iterator
+       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  {
+    (*it)->sputn(reinterpret_cast<const char *>(&c), 1);
+  }
+  return c;
+}
+
+//==========================================================================
+// MultiOutStream
+
+//--------------------------------------------------------------------------
+// Constructors
+MultiOutStream::MultiOutStream():
+  file_buf(file_bufs)
+{
+  file_buf.pubsetbuf(0, 0);
+  init(&file_buf);
+}
+
+//--------------------------------------------------------------------------
+// Test for file being open
+bool MultiOutStream::is_open()
+{
+  for (vector<Gen::UniquePointer<filebuf> >::iterator
+       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+    if ((*it)->is_open())
+      return true;
+  return false;
+}
+
+//--------------------------------------------------------------------------
+// Open a file
+void MultiOutStream::open(const char *filename, ios_base::openmode mode)
+{
+  file_bufs.push_back(new filebuf);
+  if (!file_bufs.back()->open(filename, mode))
+    setstate(ios_base::failbit);
+  else
+    clear();
+}
+
+//--------------------------------------------------------------------------
+// Close file
+void MultiOutStream::close()
+{
+  file_buf.pubsync();
+  for (vector<Gen::UniquePointer<filebuf> >::iterator
+       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  {
+    (*it)->pubsync();
+    if (!(*it)->close())
+      setstate(ios_base::failbit);
+  }
+  file_bufs.clear();
+}
+
 }} // namespaces

@@ -22,6 +22,7 @@
 #include <list>
 #include <fstream>
 #include <vector>
+#include <ot-gen.h>
 
 // Define uid_t and gid_t in Windows to make build easier
 #if defined(__WIN32__)
@@ -426,8 +427,8 @@ public:
 
   //------------------------------------------------------------------------
   // Open a file
-  void open (const char *filename, ios_base::openmode mode = ios_base::in
-                                                           | ios_base::out)
+  void open(const char *filename, ios_base::openmode mode = ios_base::in
+                                                          | ios_base::out)
   {
     if (!file_buf.open(filename, mode))
       setstate(ios_base::failbit);
@@ -445,21 +446,54 @@ public:
 };
 
 //==========================================================================
+// Multi Output File Stream
+class MultiOutFileBuf: public streambuf
+{
+private:
+  vector<Gen::UniquePointer<filebuf> >& file_bufs;
+
+protected:
+  //------------------------------------------------------------------------
+  // Put sequence of characters
+  streamsize xsputn(const char *s, streamsize n);
+
+  //------------------------------------------------------------------------
+  // Put character on overflow
+  int overflow(int c = EOF);
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  MultiOutFileBuf(vector<Gen::UniquePointer<filebuf> >& _file_bufs):
+    file_bufs(_file_bufs)
+  {}
+};
+
+class MultiOutStream: public ostream
+{
+private:
+  vector<Gen::UniquePointer<filebuf> > file_bufs;
+  MultiOutFileBuf file_buf;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  MultiOutStream();
+
+  //------------------------------------------------------------------------
+  // Test for file being open
+  bool is_open();
+
+  //------------------------------------------------------------------------
+  // Open a file
+  void open(const char *filename, ios_base::openmode mode = ios_base::in
+                                                           | ios_base::out);
+
+  //------------------------------------------------------------------------
+  // Close file
+  void close();
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_FILE_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
