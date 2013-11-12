@@ -16,6 +16,7 @@
 #include <list>
 #include <memory>
 #include <signal.h>
+#include <stdint.h>
 
 namespace ObTools { namespace MT {
 
@@ -94,6 +95,9 @@ public:
 
   // Sleep for given number of microseconds
   static void usleep(int usecs);
+
+  // Sleep for given number of nanoseconds
+  static void nanosleep(uint64_t usecs);
 };
 
 //==========================================================================
@@ -1029,6 +1033,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Kill thread (or send another signal)
+  void kill(int signal = SIGTERM)
+  {
+    thread.kill(signal);
+  }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~TaskThread()
   {
@@ -1042,6 +1053,3 @@ public:
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_MT_H
-
-
-
