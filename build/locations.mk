@@ -19,6 +19,7 @@
 # 5: Optional header file (otherwise constructed from library name)
 OT-LIBS = access:libs/access:text,xml,ssl	\
           action:libs/action:gen,mt:NOLIB       \
+          alarm:libs/alarm:mt,time              \
 	  amf:libs/amf:text,misc,time		\
 	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
