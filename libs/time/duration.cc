@@ -231,5 +231,12 @@ Duration Duration::clock()
   return Duration();
 }
 
+//------------------------------------------------------------------------
+// << operator to write Duration to ostream
+ostream& operator<<(ostream& s, const Duration& d)
+{
+  s << d.hms();
+  return s;
+}
 
 }} // namespaces

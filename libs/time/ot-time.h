@@ -169,6 +169,10 @@ public:
   static Duration clock();
 };
 
+//------------------------------------------------------------------------
+// << operator to write Duration to ostream
+ostream& operator<<(ostream& s, const Duration& d);
+
 //==========================================================================
 //Stamp - fixed moment in absolute time
 //Timestamps are stored in GMT (UTC, Z), and converted from local time on
