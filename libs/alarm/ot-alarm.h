@@ -82,6 +82,10 @@ public:
   //------------------------------------------------------------------------
   // Add an alarm
   bool add_alarm(const Time::Stamp& time, Observer *observer);
+
+  //------------------------------------------------------------------------
+  // Remove an alarm
+  bool remove_alarm(const Time::Stamp& time, Observer *observer);
 };
 
 //==========================================================================

@@ -44,6 +44,36 @@ bool Clock::add_alarm(const Time::Stamp& time, Observer *observer)
 }
 
 //--------------------------------------------------------------------------
+// Remove an alarm
+bool Clock::remove_alarm(const Time::Stamp& time, Observer *observer)
+{
+  MT::Lock lock(mutex);
+  map<Time::Stamp, set<Observer *> >::iterator it = observers.find(time);
+  if (it == observers.end())
+    return false;
+
+  if (it->second.size() > 1)
+  {
+    it->second.erase(observer);
+    return true;
+  }
+
+  if (it == observers.begin())
+  {
+    map<Time::Stamp, set<Observer *> >::iterator next(it);
+    ++next;
+    if (next == observers.end())
+      timer_thread->set_alarm_time(Time::Stamp());
+    else
+      timer_thread->set_alarm_time(next->first);
+  }
+
+  observers.erase(it);
+
+  return true;
+}
+
+//--------------------------------------------------------------------------
 // Receive alarm from thread and return next time
 Time::Stamp Clock::trigger_alarm(const Time::Stamp& time)
 {
