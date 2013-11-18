@@ -66,6 +66,7 @@ TEST_F(StreamTest, TestWriteLargerThanBuffer)
     bos.set_buffer_size(4);
     bos.write(data, 10);
     bos.write(&data[10], sizeof(data) - 10);
+    bos.close();
   }
 
   File::Path path(test_file);
@@ -125,6 +126,22 @@ TEST_F(StreamTest, TestClose)
   string str;
   ASSERT_TRUE(path.read_all(str));
   ASSERT_STREQ(data, str.c_str());
+}
+
+TEST_F(StreamTest, TestLargeBuffer)
+{
+  const string test_file(test_dir + "/large");
+  vector<char> data(1234);
+
+  File::BufferedOutStream bos(test_file);
+  bos.set_buffer_size(data.size());
+  bos.write(&data[0], data.size() - 10);
+
+  File::Path path(test_file);
+  ASSERT_TRUE(path.readable());
+  string str;
+  ASSERT_TRUE(path.read_all(str));
+  ASSERT_EQ(data.size() - 10, str.size());
 }
 
 } // anonymous namespace

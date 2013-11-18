@@ -22,7 +22,7 @@ namespace ObTools { namespace Channel {
 //--------------------------------------------------------------------------
 // Write a string to the channel
 // Throws Error on failure
-void Writer::write(const string& s) throw (Error)
+void Writer::write(const string& s)
 {
   basic_write(s.c_str(), s.size());
 }
@@ -30,7 +30,7 @@ void Writer::write(const string& s) throw (Error)
 //--------------------------------------------------------------------------
 // Write the given C string to the channel
 // Throws Error on failure
-void Writer::write(const char *p) throw(Error)
+void Writer::write(const char *p)
 {
   basic_write(p, strlen(p));
 }
@@ -38,7 +38,7 @@ void Writer::write(const char *p) throw(Error)
 //--------------------------------------------------------------------------
 // Write a single byte to the channel
 // Throws Error on failure
-void Writer::write_byte(unsigned char b) throw (Error)
+void Writer::write_byte(unsigned char b)
 {
   basic_write(&b, 1);
 }
@@ -46,7 +46,7 @@ void Writer::write_byte(unsigned char b) throw (Error)
 //--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 2-byte integer to the channel
 // Throws Error on failure
-void Writer::write_nbo_16(uint16_t i) throw (Error)
+void Writer::write_nbo_16(uint16_t i)
 {
   uint16_t n = htons(i);
   basic_write(&n, 2);
@@ -55,7 +55,7 @@ void Writer::write_nbo_16(uint16_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 3-byte integer to the channel
 // Throws Error on failure
-void Writer::write_nbo_24(uint32_t i) throw (Error)
+void Writer::write_nbo_24(uint32_t i)
 {
   unsigned char buf[3];
   buf[0] = static_cast<unsigned char>(i>>16);
@@ -67,7 +67,7 @@ void Writer::write_nbo_24(uint32_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 4-byte integer to the channel
 // Throws Error on failure
-void Writer::write_nbo_32(uint32_t i) throw (Error)
+void Writer::write_nbo_32(uint32_t i)
 {
   uint32_t n = htonl(i);
   basic_write(&n, 4);
@@ -76,7 +76,7 @@ void Writer::write_nbo_32(uint32_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 8-byte integer to the channel
 // Throws Error on failure
-void Writer::write_nbo_64(uint64_t i) throw (Error)
+void Writer::write_nbo_64(uint64_t i)
 {
   write_nbo_32(static_cast<uint32_t>(i >> 32));
   write_nbo_32(static_cast<uint32_t>(i & 0xFFFFFFFF));
@@ -85,7 +85,7 @@ void Writer::write_nbo_64(uint64_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a network byte order 8-byte double to the channel
 // Throws Error on failure or EOF
-void Writer::write_nbo_double(double f) throw (Error)
+void Writer::write_nbo_double(double f)
 {
   if (sizeof(double) != 8) throw Error(8, "Double is not 8 bytes here");
   union { uint64_t n; double f; } u;  // Union type hack
@@ -112,7 +112,7 @@ void Writer::write_nbo_fixed_point(double f, int before_bits, int after_bits)
 //--------------------------------------------------------------------------
 // Write little-endian (LSB-first) 2-byte integer to the channel
 // Throws Error on failure
-void Writer::write_le_16(uint16_t i) throw (Error)
+void Writer::write_le_16(uint16_t i)
 {
   // No easy way to do this with htonl, since if we're big-endian it's 
   // a NOOP anyway - so do it manually
@@ -125,7 +125,7 @@ void Writer::write_le_16(uint16_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a little-endian (LSB-first) 3-byte integer to the channel
 // Throws Error on failure
-void Writer::write_le_24(uint32_t i) throw (Error)
+void Writer::write_le_24(uint32_t i)
 {
   unsigned char buf[3];
   buf[0] = static_cast<unsigned char>(i);
@@ -137,7 +137,7 @@ void Writer::write_le_24(uint32_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a little-endian (LSB-first) 4-byte integer to the channel
 // Throws Error on failure
-void Writer::write_le_32(uint32_t i) throw (Error)
+void Writer::write_le_32(uint32_t i)
 {
   unsigned char buf[4];
   buf[0] = static_cast<unsigned char>(i);
@@ -150,7 +150,7 @@ void Writer::write_le_32(uint32_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a little-endian (LSB-first) 8-byte integer to the channel
 // Throws Error on failure
-void Writer::write_le_64(uint64_t i) throw (Error)
+void Writer::write_le_64(uint64_t i)
 {
   write_nbo_32(static_cast<uint32_t>(i & 0xFFFFFFFF));
   write_nbo_32(static_cast<uint32_t>(i >> 32));
@@ -159,7 +159,7 @@ void Writer::write_le_64(uint64_t i) throw (Error)
 //--------------------------------------------------------------------------
 // Write a little-endian 8-byte double to the channel
 // Throws Error on failure or EOF
-void Writer::write_le_double(double f) throw (Error)
+void Writer::write_le_double(double f)
 {
   if (sizeof(double) != 8) throw Error(8, "Double is not 8 bytes here");
   union { uint64_t n; double f; } u;  // Union type hack
@@ -169,7 +169,7 @@ void Writer::write_le_double(double f) throw (Error)
 
 //--------------------------------------------------------------------------
 // Skip N bytes, writing zero
-void Writer::skip(size_t n) throw (Error)
+void Writer::skip(size_t n)
 {
   static char buf[256] = { 0 };
   while (n)
@@ -183,7 +183,7 @@ void Writer::skip(size_t n) throw (Error)
 
 //--------------------------------------------------------------------------
 // Pad to given alignment (bytes) from current offset
-void Writer::align(size_t n) throw (Error)
+void Writer::align(size_t n)
 { 
   skip(static_cast<int>(n*((offset+n-1)/n) - offset));  // Bytes to pad
 }

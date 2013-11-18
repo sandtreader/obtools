@@ -18,7 +18,7 @@ namespace ObTools { namespace Channel {
 // Stream Reader
 
 // Read implementation
-size_t StreamReader::basic_read(void *buf, size_t count) throw (Error)
+size_t StreamReader::basic_read(void *buf, size_t count)
 {
   if (!sin) throw Error(1, "Stream failed");
 
@@ -33,7 +33,7 @@ size_t StreamReader::basic_read(void *buf, size_t count) throw (Error)
 }
 
 // Rewind implementation
-void StreamReader::rewind(size_t n) throw (Error)
+void StreamReader::rewind(size_t n)
 {
   if (n<=offset)
   {
@@ -48,7 +48,7 @@ void StreamReader::rewind(size_t n) throw (Error)
 // Stream Writer
 
 // Write implementation
-void StreamWriter::basic_write(const void *buf, size_t count) throw (Error)
+void StreamWriter::basic_write(const void *buf, size_t count)
 {
   if (!sout) throw Error(1, "Stream failed");
 
@@ -57,7 +57,7 @@ void StreamWriter::basic_write(const void *buf, size_t count) throw (Error)
 }
 
 // Rewind implementation
-void StreamWriter::rewind(size_t n) throw (Error)
+void StreamWriter::rewind(size_t n)
 {
   if (n<=offset)
   {

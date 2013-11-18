@@ -15,7 +15,7 @@ namespace ObTools { namespace Channel {
 // String Reader
 
 // Read implementation
-size_t StringReader::basic_read(void *buf, size_t count) throw (Error)
+size_t StringReader::basic_read(void *buf, size_t count)
 {
   size_t length = data.size();
 
@@ -32,7 +32,7 @@ size_t StringReader::basic_read(void *buf, size_t count) throw (Error)
 }
 
 // Skip N bytes
-void StringReader::skip(size_t n) throw (Error)
+void StringReader::skip(size_t n)
 {
   size_t length = data.size();
 
@@ -43,7 +43,7 @@ void StringReader::skip(size_t n) throw (Error)
 }
 
 // Rewind implementation
-void StringReader::rewind(size_t n) throw (Error)
+void StringReader::rewind(size_t n)
 {
   if (n<=offset)
     offset-=n;
@@ -55,7 +55,7 @@ void StringReader::rewind(size_t n) throw (Error)
 // String Writer
 
 // Write implementation
-void StringWriter::basic_write(const void *buf, size_t count) throw (Error)
+void StringWriter::basic_write(const void *buf, size_t count)
 {
   // Just append - no limit!
   data.append(static_cast<const char *>(buf), count);
@@ -63,7 +63,7 @@ void StringWriter::basic_write(const void *buf, size_t count) throw (Error)
 }
 
 // Skip N bytes
-void StringWriter::skip(size_t n) throw (Error)
+void StringWriter::skip(size_t n)
 {
   // Append zero bytes
   data.append(n, 0);
@@ -71,7 +71,7 @@ void StringWriter::skip(size_t n) throw (Error)
 }
 
 // Rewind implementation
-void StringWriter::rewind(size_t n) throw (Error)
+void StringWriter::rewind(size_t n)
 {
   if (n<=offset)
   {

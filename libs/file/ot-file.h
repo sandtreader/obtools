@@ -22,6 +22,7 @@
 #include <list>
 #include <fstream>
 #include <vector>
+#include <ot-gen.h>
 
 // Define uid_t and gid_t in Windows to make build easier
 #if defined(__WIN32__)
@@ -382,17 +383,19 @@ class OutStream: public ofstream
 // Buffered Output Stream
 // Has a similar, but reduced, interface to ofstream, and provides simple
 // buffering
-class BufferedOutStream
+class BufferedOutFileBuf: public filebuf
+{
+protected:
+  //------------------------------------------------------------------------
+  // Handle characters one at a time
+  streamsize xsputn(const char *s, streamsize n);
+};
+
+class BufferedOutStream: public ostream
 {
 private:
-  int fd;
+  BufferedOutFileBuf file_buf;
   vector<char> buffer;
-  uint64_t buffer_pos;
-  bool failbit;
-
-  //------------------------------------------------------------------------
-  // Flush buffer content to file
-  void flush_buffer();
 
 public:
   //------------------------------------------------------------------------
@@ -416,50 +419,81 @@ public:
   uint64_t get_buffer_size() const;
 
   //------------------------------------------------------------------------
+  // Test for file being open
+  bool is_open()
+  {
+    return file_buf.is_open();
+  }
+
+  //------------------------------------------------------------------------
   // Open a file
-  void open(const char *filename, ios_base::openmode mode = ios_base::out);
+  void open(const char *filename, ios_base::openmode mode = ios_base::in
+                                                          | ios_base::out)
+  {
+    if (!file_buf.open(filename, mode))
+      setstate(ios_base::failbit);
+    else
+      clear();
+  }
+
+  //------------------------------------------------------------------------
+  // Close file
+  void close()
+  {
+    if (!file_buf.close())
+      setstate(ios_base::failbit);
+  }
+};
+
+//==========================================================================
+// Multi Output File Stream
+class MultiOutFileBuf: public streambuf
+{
+private:
+  vector<Gen::UniquePointer<filebuf> >& file_bufs;
+
+protected:
+  //------------------------------------------------------------------------
+  // Put sequence of characters
+  streamsize xsputn(const char *s, streamsize n);
+
+  //------------------------------------------------------------------------
+  // Put character on overflow
+  int overflow(int c = EOF);
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  MultiOutFileBuf(vector<Gen::UniquePointer<filebuf> >& _file_bufs):
+    file_bufs(_file_bufs)
+  {}
+};
+
+class MultiOutStream: public ostream
+{
+private:
+  vector<Gen::UniquePointer<filebuf> > file_bufs;
+  MultiOutFileBuf file_buf;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  MultiOutStream();
+
+  //------------------------------------------------------------------------
+  // Test for file being open
+  bool is_open();
+
+  //------------------------------------------------------------------------
+  // Open a file
+  void open(const char *filename, ios_base::openmode mode = ios_base::in
+                                                           | ios_base::out);
 
   //------------------------------------------------------------------------
   // Close file
   void close();
-
-  //------------------------------------------------------------------------
-  // Evaluate stream
-  bool operator!() const;
-
-  //------------------------------------------------------------------------
-  // Is this stream open?
-  bool is_open();
-
-  //------------------------------------------------------------------------
-  // Current file position
-  streampos tellp();
-
-  //------------------------------------------------------------------------
-  // Write data to stream
-  BufferedOutStream& write(const char* s, streamsize n);
-
-  //------------------------------------------------------------------------
-  // Destructor
-  ~BufferedOutStream();
 };
 
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_FILE_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

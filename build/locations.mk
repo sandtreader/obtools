@@ -19,6 +19,7 @@
 # 5: Optional header file (otherwise constructed from library name)
 OT-LIBS = access:libs/access:text,xml,ssl	\
           action:libs/action:gen,mt:NOLIB       \
+          alarm:libs/alarm:mt,time              \
 	  amf:libs/amf:text,misc,time		\
 	  cli:libs/cli:text,net,mt		\
 	  cppt:libs/cppt   			\
@@ -31,7 +32,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  chan:libs/chan:net			\
 	  crypto:libs/crypto:misc,chan,text	\
 	  expr:libs/expr:text,misc              \
-	  file:libs/file:text                   \
+	  file:libs/file:text,gen               \
 	  gather:libs/gather:misc,chan          \
           gen:libs/gen:-:NOLIB                  \
 	  hash:libs/hash:-:NOLIB  		\
