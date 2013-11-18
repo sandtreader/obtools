@@ -49,7 +49,11 @@ void TCPServer::process(Net::TCPSocket &s, Net::EndPoint client)
 
   // Get Common Name from client certificate (if any)
   string cn = ss.get_peer_cn();
-  ClientDetails cd(client, cn);
+
+  // Get MAC address from socket
+  string mac = ss.get_mac(client.host);
+
+  ClientDetails cd(client, cn, mac);
   process(ss, cd);
 }
 
@@ -59,6 +63,7 @@ ostream& operator<<(ostream& s, const ClientDetails& cd)
 {
   s << cd.address;
   if (!cd.cert_cn.empty()) s << " (" << cd.cert_cn << ")";
+  if (!cd.mac.empty()) s << ", MAC " << cd.mac;
   return s;
 }
 

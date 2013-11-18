@@ -164,9 +164,12 @@ struct ClientDetails
 {
   Net::EndPoint address;   // IP address/port
   string cert_cn;          // CN from certificate, or empty if not provided
+  string mac;              // Local MAC address, empty if not known
 
-  ClientDetails(Net::EndPoint _addr, const string& _cn):
-    address(_addr), cert_cn(_cn) {}
+  ClientDetails() {}
+  ClientDetails(Net::EndPoint _addr, const string& _cn="",
+                const string& _mac=""):
+    address(_addr), cert_cn(_cn), mac(_mac) {}
 };
 
 //------------------------------------------------------------------------
