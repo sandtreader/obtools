@@ -292,7 +292,7 @@ public:
   //  $name$;s -> fred;s
   //  $$name  -> $fred
   // Unset variables are not substituted
-  string interpolate(const string& text);
+  string interpolate(const string& text) const;
 
   //--------------------------------------------------------------------------
   // Dump contents

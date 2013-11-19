@@ -130,7 +130,7 @@ string PropertyList::str(char sep, char quote)
 //  $name$;s -> fred;s
 //  $$name  -> $fred
 // Unset variables are not substituted
-string PropertyList::interpolate(const string& text)
+string PropertyList::interpolate(const string& text) const
 {
   string result;
 
