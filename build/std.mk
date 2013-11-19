@@ -274,7 +274,7 @@ else
 #Normal native build
 CC = gcc
 CXX = g++
-EXTRALIBS += -lrt
+EXTRALIBS += -lrt -lm
 STRIP = strip
 endif
 endif
