@@ -607,6 +607,7 @@ class HTTPServer: public SSL::TCPServer
 private:
   int timeout;    // Socket inactivity timeout
   string version; // Version reported in Server: header
+  string cors_origin;  // Pattern for Access-Control-Allow-Origin header
 
   //--------------------------------------------------------------------------
   // Implementation of worker process method
@@ -685,6 +686,14 @@ public:
 	     int min_spare=1, int max_threads=10, int _timeout=90):
     SSL::TCPServer(ctx, address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
+
+  //--------------------------------------------------------------------------
+  // Set origin pattern for CORS (Access-Control-Allow-Origin header)
+  // pattern defaults to '*' = any origin
+  void set_cors_origin(const string& pattern = "*")
+  {
+    cors_origin = pattern;
+  }
 
   //--------------------------------------------------------------------------
   // Virtual destructor

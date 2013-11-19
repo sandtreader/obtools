@@ -70,7 +70,11 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
       response.version = request.version;
 
       // Add our own advert
-      if (version.size()) response.headers.put("server", version);
+      if (!version.empty()) response.headers.put("server", version);
+
+      // Add CORS origin header if set and they supply an Origin
+      if (!cors_origin.empty() && request.headers.has("origin"))
+        response.headers.put("Access-Control-Allow-Origin", cors_origin);
 
       // Add date
       response.headers.put_date();
@@ -135,8 +139,14 @@ void HTTPServer::process(SSL::TCPSocket& s, SSL::ClientDetails&client)
 	response.code = 200;
 	response.reason = "OK";
 
-	// Call down to subclass implementation
-	if (!handle_request(request, response, client, s, ss))
+        // Check for OPTIONS request - mainly for CORS
+        // (we have already set access-control header above)
+        if (request.method == "OPTIONS")
+        {
+          response.headers.put("Allow", "GET, POST, HEAD");
+        }
+	// In all other cases call down to subclass implementation
+	else if (!handle_request(request, response, client, s, ss))
 	{
 	  log.error << "Handler failed - sending 500\n";
 	  error(response, 500, "Server Failure");
