@@ -83,6 +83,16 @@ endif
 endif
 endif
 
+#Spot 'cross-compile' on CentOS
+OSNAME=$(shell /usr/bin/lsb_release -d |sed 's/^.*:\t//g;s/ .*//g')
+ifdef OSNAME
+ifeq ($(OSNAME), CentOS)
+ifndef CROSS
+CROSS = centos
+endif
+endif
+endif
+
 #Spot 'cross-compile' on CentOS, RHEL5
 OSNAME=$(shell uname -r|sed 's/\(.*\)\.//'|cut -c1-2)
 ifdef OSNAME
