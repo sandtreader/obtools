@@ -23,6 +23,11 @@
 #include <fstream>
 #include <vector>
 #include <ot-gen.h>
+#include <stdexcept>
+
+#ifndef __WIN32__
+#include <glob.h>
+#endif
 
 // Define uid_t and gid_t in Windows to make build easier
 #if defined(__WIN32__)
@@ -492,6 +497,51 @@ public:
   //------------------------------------------------------------------------
   // Close file
   void close();
+};
+
+//==========================================================================
+// Glob class
+// Perform actions on multiple files specified by a glob
+
+class Glob
+{
+private:
+#ifndef __WIN32__
+  glob_t result;
+#endif
+
+public:
+  //------------------------------------------------------------------------
+  // Error exception
+  class Error: public runtime_error
+  {
+  public:
+    Error(const string& error):
+      runtime_error(error)
+    {}
+  };
+
+  typedef char ** const_iterator;
+
+  //------------------------------------------------------------------------
+  // Constructor
+  Glob(const string& pattern);
+
+  //------------------------------------------------------------------------
+  // Erase files / directories
+  bool erase() const;
+
+  //------------------------------------------------------------------------
+  // Beginning iterator
+  const_iterator begin() const;
+
+  //------------------------------------------------------------------------
+  // Ending iterator
+  const_iterator end() const;
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Glob();
 };
 
 //==========================================================================
