@@ -13,14 +13,14 @@
 
 namespace ObTools { namespace File {
 
+#ifndef __WIN32__
+
 //--------------------------------------------------------------------------
 // Constructor
 Glob::Glob(const string& pattern)
 {
-#ifndef __WIN32__
   if (glob(pattern.c_str(), 0, 0, &result))
     throw(Error(strerror(errno)));
-#endif
 }
 
 //--------------------------------------------------------------------------
@@ -40,27 +40,23 @@ bool Glob::erase() const
 // Beginning iterator
 Glob::const_iterator Glob::begin() const
 {
-#ifndef __WIN32__
   return &result.gl_pathv[0];
-#endif
 }
 
 //--------------------------------------------------------------------------
 // Ending iterator
 Glob::const_iterator Glob::end() const
 {
-#ifndef __WIN32__
   return &result.gl_pathv[result.gl_pathc];
-#endif
 }
 
 //--------------------------------------------------------------------------
 // Destructor
 Glob::~Glob()
 {
-#ifndef __WIN32__
   globfree(&result);
-#endif
 }
+
+#endif
 
 }} // namespaces

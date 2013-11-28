@@ -503,12 +503,11 @@ public:
 // Glob class
 // Perform actions on multiple files specified by a glob
 
+#ifndef __WIN32__
 class Glob
 {
 private:
-#ifndef __WIN32__
   glob_t result;
-#endif
 
 public:
   //------------------------------------------------------------------------
@@ -543,6 +542,7 @@ public:
   // Destructor
   ~Glob();
 };
+#endif
 
 //==========================================================================
 }} //namespaces
