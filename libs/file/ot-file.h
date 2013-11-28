@@ -310,6 +310,10 @@ public:
   // Returns whether successful (directory readable)
   // Fills in paths if so
   bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
+
+  //------------------------------------------------------------------------
+  // Is the directory empty?
+  bool empty() const;
 };
 
 //==========================================================================
