@@ -23,6 +23,11 @@
 #include <fstream>
 #include <vector>
 #include <ot-gen.h>
+#include <stdexcept>
+
+#ifndef __WIN32__
+#include <glob.h>
+#endif
 
 // Define uid_t and gid_t in Windows to make build easier
 #if defined(__WIN32__)
@@ -305,6 +310,10 @@ public:
   // Returns whether successful (directory readable)
   // Fills in paths if so
   bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
+
+  //------------------------------------------------------------------------
+  // Is the directory empty?
+  bool empty() const;
 };
 
 //==========================================================================
@@ -493,6 +502,51 @@ public:
   // Close file
   void close();
 };
+
+//==========================================================================
+// Glob class
+// Perform actions on multiple files specified by a glob
+
+#ifndef __WIN32__
+class Glob
+{
+private:
+  glob_t result;
+
+public:
+  //------------------------------------------------------------------------
+  // Error exception
+  class Error: public runtime_error
+  {
+  public:
+    Error(const string& error):
+      runtime_error(error)
+    {}
+  };
+
+  typedef char ** const_iterator;
+
+  //------------------------------------------------------------------------
+  // Constructor
+  Glob(const string& pattern);
+
+  //------------------------------------------------------------------------
+  // Erase files / directories
+  bool erase() const;
+
+  //------------------------------------------------------------------------
+  // Beginning iterator
+  const_iterator begin() const;
+
+  //------------------------------------------------------------------------
+  // Ending iterator
+  const_iterator end() const;
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Glob();
+};
+#endif
 
 //==========================================================================
 }} //namespaces

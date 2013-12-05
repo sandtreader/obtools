@@ -114,5 +114,52 @@ bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
   return true;
 }
 
+//--------------------------------------------------------------------------
+// Is the directory empty?
+bool Directory::empty() const
+{
+  bool result(true);
+
+#if defined(__WIN32__)
+  // Use full '*' search, so we can use full pattern format without
+  // worrying whether Windows implements it natively
+  Path pat_path(*this, "*");
+  WIN32_FIND_DATAW data;
+  HANDLE h = FindFirstFileW(pat_path.wide_path().c_str(), &data);
+  if (h != INVALID_HANDLE_VALUE)
+  {
+    for(;;)
+    {
+      string fn = wide_to_utf8(data.cFileName);
+      if (fn != "." && fn != "..")
+      {
+        result = false;
+        break;
+      }
+      if (!FindNextFileW(h, &data)) break;
+    }
+
+    FindClose(h);
+  }
+#else
+  DIR *dir = opendir(c_str());
+  if (!dir) return false;
+
+  struct dirent *de;
+  while ((de=readdir(dir))!=0)
+  {
+    string fn(de->d_name);
+    if (fn != "." && fn != "..")
+    {
+      result = false;
+      break;
+    }
+  }
+
+  closedir(dir);
+#endif
+
+  return result;
+}
 
 }} // namespaces

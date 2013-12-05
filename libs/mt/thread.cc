@@ -128,11 +128,11 @@ void Thread::usleep(int usecs)
 
 //--------------------------------------------------------------------------
 // Sleep for given number of nano-seconds
-void Thread::nanosleep(uint64_t usecs)
+void Thread::nanosleep(uint64_t nsecs)
 {
   struct timespec interval;
-  interval.tv_sec = usecs/1000000000;
-  interval.tv_nsec = usecs % 1000000000;
+  interval.tv_sec = nsecs/1000000000;
+  interval.tv_nsec = nsecs % 1000000000;
 #if (defined(MINGW) || defined(BORLAND))
   // Use pthread_delay_np to provide cancellation point
   pthread_delay_np(&interval);
