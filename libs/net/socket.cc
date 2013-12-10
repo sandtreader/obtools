@@ -381,6 +381,46 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
 #endif
 }
 
+//--------------------------------------------------------------------------
+// Get MAC address of all Ethernet interfaces as upper-case hex strings
+// with colons
+set<string> Socket::get_host_macs()
+{
+  set<string> macs;
+
+#if defined(__WIN32__) || defined(__APPLE__)
+#warning get_host_macs not implemented
+  return macs;
+#else
+  struct if_nameindex *ifs = if_nameindex();
+  if (!ifs) return macs;
+
+  for(struct if_nameindex *ifp = ifs; ifp->if_name; ifp++)
+  {
+    string ifname = ifp->if_name;
+
+    // Ignore lo and aliases
+    if (ifname=="lo" || ifname.find(':') != string::npos) continue;
+
+    struct ifreq ifr;
+    strcpy(ifr.ifr_name, ifname.c_str());
+    if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) continue;
+
+    // Create upper-case hex string
+    char mac[18];
+    unsigned char *p=reinterpret_cast<unsigned char *>(ifr.ifr_hwaddr.sa_data);
+    sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
+            p[0], p[1], p[2], p[3], p[4], p[5]);
+    macs.insert(mac);
+  }
+
+  if_freenameindex(ifs);
+
+  return macs;
+#endif
+}
+
+
 //==========================================================================
 // Socket exceptions
 

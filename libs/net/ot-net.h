@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <string.h>
+#include <set>
 
 #if defined(__WIN32__)
 
@@ -464,6 +465,11 @@ public:
   // are searched
   // Returns empty string if it can't find it
   string get_mac(IPAddress ip, const string& device_name="");
+
+  //--------------------------------------------------------------------------
+  // Get MAC address of all Ethernet interfaces as upper-case hex strings
+  // with colons
+  set<string> get_host_macs();
 };
 
 //==========================================================================
