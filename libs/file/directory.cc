@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #if defined(__WIN32__)
 #include <windows.h>
@@ -42,7 +43,13 @@ bool Directory::ensure(bool parents, int mode) const
   if (_wmkdir(wide_path().c_str())) return false;
   return !_wchmod(wide_path().c_str(), mode);
 #else
-  return !::mkdir(c_str(), mode);
+  int result = ::mkdir(c_str(), mode);
+  if (result == EEXIST)
+  {
+    // Someone else beat us to it maybe!
+    return exists();
+  }
+  return !result;
 #endif
 }
 
@@ -112,6 +119,13 @@ bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
   }
 
   return true;
+}
+
+//--------------------------------------------------------------------------
+// Does the directory exist and is it actually dir?
+bool Directory::exists() const
+{
+  return Path::exists() && is_dir();
 }
 
 //--------------------------------------------------------------------------

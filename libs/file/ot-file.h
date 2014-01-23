@@ -150,7 +150,7 @@ public:
   // Methods to get file information -----------------------------------------
   //--------------------------------------------------------------------------
   // Does the file exist?
-  bool exists() const;
+  virtual bool exists() const;
 
   //--------------------------------------------------------------------------
   // Is it a directory?
@@ -269,6 +269,10 @@ public:
   // (e.g. returned from FindNextFileW) to a UTF8 one
   string wide_to_utf8(const wstring& wide);
 #endif
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Path() {}
 };
 
 //------------------------------------------------------------------------
@@ -310,6 +314,10 @@ public:
   // Returns whether successful (directory readable)
   // Fills in paths if so
   bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
+
+  //--------------------------------------------------------------------------
+  // Does the directory exist and is it actually dir?
+  bool exists() const;
 
   //------------------------------------------------------------------------
   // Is the directory empty?
