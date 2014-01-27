@@ -345,7 +345,12 @@ bool Path::erase() const
     return !system((string("rm -rf \"")+path+"\"").c_str());
 #endif
   else
-    return !UNLINK(CPATH);
+  {
+    if (UNLINK(CPATH))
+      return !exists();
+    else
+      return true;
+  }
 }
 
 //--------------------------------------------------------------------------
