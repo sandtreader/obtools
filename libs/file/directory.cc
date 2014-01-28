@@ -44,12 +44,11 @@ bool Directory::ensure(bool parents, int mode) const
   return !_wchmod(wide_path().c_str(), mode);
 #else
   int result = ::mkdir(c_str(), mode);
-  if (result == EEXIST)
-  {
-    // Someone else beat us to it maybe!
+  // Someone else beat us to it maybe!
+  if (result)
     return exists();
-  }
-  return !result;
+  else
+    return true;
 #endif
 }
 
