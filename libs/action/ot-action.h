@@ -79,7 +79,7 @@ private:
     //----------------------------------------------------------------------
     // Constructor
     ActionTask():
-      handler(0)
+      action(0), handler(0)
     {
     }
 
