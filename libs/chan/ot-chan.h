@@ -69,9 +69,29 @@ public:
   void read(void *buf, size_t count);
 
   //--------------------------------------------------------------------------
+  // Try to read an exact amount of data from the channel into a string
+  // Returns false if channel goes EOF before anything is read
+  // Buf may be 0 to skip data
+  // Throws Error on failure, or EOF after a read
+  bool try_read(string& s, size_t count);
+
+  //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a string
   // Throws Error on failure
   void read(string& s, size_t count);
+
+  //------------------------------------------------------------------------
+  // Read data into buf until EOF or limit encountered
+  virtual void read_to_eof(vector<unsigned char>& buf, size_t limit);
+
+  //------------------------------------------------------------------------
+  // Read data into string until EOF or limit encountered
+  virtual void read_to_eof(string& s, size_t limit);
+
+  //------------------------------------------------------------------------
+  // Try to read a single byte from the channel
+  // Throws Error on failure
+  virtual bool try_read_byte(unsigned char& b);
 
   //--------------------------------------------------------------------------
   // Read a single byte from the channel
@@ -87,6 +107,11 @@ public:
   // Read a network byte order (MSB-first) 3-byte integer from the channel
   // Throws Error on failure or EOF
   uint32_t read_nbo_24();
+
+  //------------------------------------------------------------------------
+  // Try to read a network byte order (MSB-first) 4-byte integer
+  // Throws Error on failure
+  virtual bool try_read_nbo_32(uint32_t& n);
 
   //--------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the channel
@@ -126,6 +151,11 @@ public:
   //--------------------------------------------------------------------------
   // Get current offset
   uint64_t get_offset() { return offset; }
+
+  //--------------------------------------------------------------------------
+  // Skips to EOF
+  // Useful for things using LimitedReader
+  virtual void skip_to_eof();
 
   //--------------------------------------------------------------------------
   // Skip N bytes
@@ -578,7 +608,7 @@ public:
     reader(_reader), left(limit)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read as much data as is available, up to 'count' bytes
   // Returns amount read, also adjusts offset
   // If 'buf' is 0, just skip as much data as possible
@@ -591,6 +621,47 @@ public:
     left -= r;
     offset += r;
     return r;
+  }
+
+  //------------------------------------------------------------------------
+  // Read data into buf until EOF or limit encountered
+  void read_to_eof(vector<unsigned char>& buf, size_t limit)
+  {
+    Reader::read_to_eof(buf, min(left, limit));
+  }
+
+  //------------------------------------------------------------------------
+  // Read data into string until EOF or limit encountered
+  void read_to_eof(string& s, size_t limit)
+  {
+    Reader::read_to_eof(s, min(left, limit));
+  }
+
+  //------------------------------------------------------------------------
+  // Try to read a network byte order (MSB-first) 4-byte integer
+  // Throws Error on failure
+  bool try_read_nbo_32(uint32_t& n)
+  {
+    if (!left)
+      return false;
+    return Reader::try_read_nbo_32(n);
+  }
+
+  //------------------------------------------------------------------------
+  // Try to read a single byte from the channel
+  // Throws Error on failure
+  bool try_read_byte(unsigned char& b)
+  {
+    if (!left)
+      return false;
+    return Reader::try_read_byte(b);
+  }
+
+  //--------------------------------------------------------------------------
+  // Skips to EOF
+  void skip_to_eof()
+  {
+    reader.skip(left);
   }
 };
 

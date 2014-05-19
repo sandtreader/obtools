@@ -54,25 +54,16 @@ bool Reader::try_read(void *buf, size_t count)
 // Throws Error on failure
 void Reader::read(void *buf, size_t count)
 {
-  char *p = static_cast<char *>(buf);
-  size_t done = 0;
-
-  while (done < count)
-  {
-    size_t size = basic_read(p, count-done);
-    if (size)
-    {
-      if (p) p += size;
-      done += size;
-    }
-    else throw Error(0, "EOF");
-  }
+  if (!try_read(buf, count))
+    throw Error(0, "EOF");
 }
 
 //--------------------------------------------------------------------------
-// Read exact amount of data from the channel into a string
-// Throws Error on failure
-void Reader::read(string& s, size_t count)
+// Try to read an exact amount of data from the channel into a string
+// Returns false if channel goes EOF before anything is read
+// Buf may be 0 to skip data
+// Throws Error on failure, or EOF after a read
+bool Reader::try_read(string& s, size_t count)
 {
   char buf[CHANNEL_BUFFER_SIZE+1];
   size_t done = 0;
@@ -89,8 +80,77 @@ void Reader::read(string& s, size_t count)
       s.append(buf, size);
       done += size;
     }
-    else throw Error(0, "EOF in string");
+    else if (done)
+      throw Error(0, "EOF in string");
+    else
+      return false;
   }
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Read exact amount of data from the channel into a string
+// Throws Error on failure
+void Reader::read(string& s, size_t count)
+{
+  if (!try_read(s, count))
+    throw Error(0, "EOF in string");
+}
+
+//--------------------------------------------------------------------------
+// Read data into buf until EOF or limit encountered
+void Reader::read_to_eof(vector<unsigned char>& buffer, size_t limit)
+{
+  char buf[CHANNEL_BUFFER_SIZE+1];
+  size_t done = 0;
+
+  while (done < limit)
+  {
+    // Limit read to buffer size, or what's wanted
+    size_t n = CHANNEL_BUFFER_SIZE;
+    if (limit-done < n) n = limit-done;
+
+    size_t size = basic_read(buf, n);
+    if (size)
+    {
+      buffer.insert(buffer.end(), &buf[0], &buf[size]);
+      done += size;
+    }
+    else
+      return;
+  }
+}
+
+//--------------------------------------------------------------------------
+// Read data into string until EOF or limit encountered
+void Reader::read_to_eof(string& s, size_t limit)
+{
+  char buf[CHANNEL_BUFFER_SIZE+1];
+  size_t done = 0;
+
+  while (done < limit)
+  {
+    // Limit read to buffer size, or what's wanted
+    size_t n = CHANNEL_BUFFER_SIZE;
+    if (limit-done < n) n = limit-done;
+
+    size_t size = basic_read(buf, n);
+    if (size)
+    {
+      s.append(&buf[0], size);
+      done += size;
+    }
+    else
+      return;
+  }
+}
+
+//--------------------------------------------------------------------------
+// Try to read a single byte from the channel
+// Throws Error on failure
+bool Reader::try_read_byte(unsigned char& b)
+{
+  return try_read(&b, 1);
 }
 
 //--------------------------------------------------------------------------
@@ -132,6 +192,18 @@ uint32_t Reader::read_nbo_32()
   uint32_t n;
   read(&n, 4);
   return ntohl(n);
+}
+
+//--------------------------------------------------------------------------
+// Try to read a network byte order (MSB-first) 4-byte integer
+// Throws Error on failure
+bool Reader::try_read_nbo_32(uint32_t& n)
+{
+  if (!try_read(&n, 4))
+    return false;
+
+  n = ntohl(n);
+  return true;
 }
 
 //--------------------------------------------------------------------------
@@ -249,6 +321,13 @@ double Reader::read_le_double()
   union { uint64_t n; double f; } u;  // Union type hack
   u.n = read_le_64();
   return u.f;
+}
+
+//--------------------------------------------------------------------------
+// Skip to EOF
+void Reader::skip_to_eof()
+{
+  while (try_read(0, CHANNEL_BUFFER_SIZE));
 }
 
 //--------------------------------------------------------------------------
