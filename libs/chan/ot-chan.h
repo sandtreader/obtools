@@ -562,6 +562,39 @@ public:
 };
 
 //==========================================================================
+// Limited Reader
+// Container for an abstract Reader that limits the amount of data that may
+// be read from it
+class LimitedReader: public Reader
+{
+private:
+  Reader& reader;
+  size_t left;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  LimitedReader(Reader& _reader, size_t limit):
+    reader(_reader), left(limit)
+  {}
+
+  //--------------------------------------------------------------------------
+  // Read as much data as is available, up to 'count' bytes
+  // Returns amount read, also adjusts offset
+  // If 'buf' is 0, just skip as much data as possible
+  // Throws Error on failure (not EOF)
+  size_t basic_read(void *buf, size_t count)
+  {
+    if (count > left)
+      throw(Error(0, "Attempt to exceed limit"));
+    size_t r = reader.basic_read(buf, count);
+    left -= r;
+    offset += r;
+    return r;
+  }
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_CHAN_H
 

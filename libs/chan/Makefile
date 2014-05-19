@@ -5,22 +5,23 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-TYPE	= lib
-NAME   	= ot-chan
+TYPE    = lib
+NAME    = ot-chan
 HEADERS = ot-chan.h
 DEPENDS = net mt
-OBJS  	= reader.o writer.o error.o tcp-chan.o block-chan.o stream-chan.o \
-	  string-chan.o dq-chan.o bits.o
-TESTS 	= test-block test-stream test-string test-dq test-bits
+OBJS    = reader.o writer.o error.o tcp-chan.o block-chan.o stream-chan.o \
+          string-chan.o dq-chan.o bits.o
+TESTLIB = -lgtest
+TESTS   = test-block test-stream test-string test-dq test-bits test-limited
 TESTCMD = ./test-block && ./test-stream && ./test-string && ./test-dq \
-          && ./test-bits
+          && ./test-bits && ./test-limited
 SOCKET  = 1
 
 # FD-chan is Unix/Mac only
 ifndef MINGW
 OBJS += fd-chan.o
 TESTS += test-fd
-TESTCMD += && ./test-fd 
+TESTCMD += && ./test-fd
 endif
 
 ROOT    = ../..
