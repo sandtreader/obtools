@@ -40,7 +40,7 @@ RELEASE-VARIANTS-ONLY = 1
 
 DEBIAN-NAME    = libot-db-mysql2
 DEBIAN-VERSION = $(VERSION)
-DEBIAN-REVISION = 3
+DEBIAN-REVISION = 4
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk
