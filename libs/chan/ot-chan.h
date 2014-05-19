@@ -60,7 +60,7 @@ public:
   // Returns false if channel goes EOF before anything is read
   // Buf may be 0 to skip data
   // Throws Error on failure, or EOF after a read
-  bool try_read(void *buf, size_t count);
+  virtual bool try_read(void *buf, size_t count);
 
   //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a binary buffer
@@ -73,7 +73,7 @@ public:
   // Returns false if channel goes EOF before anything is read
   // Buf may be 0 to skip data
   // Throws Error on failure, or EOF after a read
-  bool try_read(string& s, size_t count);
+  virtual bool try_read(string& s, size_t count);
 
   //--------------------------------------------------------------------------
   // Read exact amount of data from the channel into a string
@@ -616,11 +616,35 @@ public:
   size_t basic_read(void *buf, size_t count)
   {
     if (count > left)
-      throw(Error(0, "Attempt to exceed limit"));
+      count = left;
     size_t r = reader.basic_read(buf, count);
     left -= r;
     offset += r;
     return r;
+  }
+
+  //--------------------------------------------------------------------------
+  // Try to read an exact amount of data from the channel into a binary buffer
+  // Returns false if channel goes EOF before anything is read
+  // Buf may be 0 to skip data
+  // Throws Error on failure, or EOF after a read
+  bool try_read(void *buf, size_t count)
+  {
+    if (!left)
+      return false;
+    return Reader::try_read(buf, count);
+  }
+
+  //--------------------------------------------------------------------------
+  // Try to read an exact amount of data from the channel into a string
+  // Returns false if channel goes EOF before anything is read
+  // Buf may be 0 to skip data
+  // Throws Error on failure, or EOF after a read
+  bool try_read(string& s, size_t count)
+  {
+    if (!left)
+      return false;
+    return Reader::try_read(s, count);
   }
 
   //------------------------------------------------------------------------
