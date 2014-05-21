@@ -685,7 +685,8 @@ public:
   // Skips to EOF
   void skip_to_eof()
   {
-    reader.skip(left);
+    if (left)
+      reader.skip(left);
   }
 };
 
