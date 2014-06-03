@@ -707,20 +707,20 @@ endif
 NOTMAINS = $(filter-out $(MAINOBJ),$(OBJS))
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(NOTMAINS) $$(DEPLIBS) $$(DEPHEADERS) 
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o  $$(NOTMAINS) $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o  $$(NOTMAINS) $$(DEPLIBS) $(LDLOOPEND) $(TESTLIB) $$(EXTRALIBS) 
 TESTOBJS += $(1).o
 endef
 else
 ifeq ($(TYPE), reloc)
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(RELEASABLE) $$(DEPLIBS) $$(DEPHEADERS)
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o -ldl $$(RELEASABLE) $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o -ldl $$(RELEASABLE) $$(DEPLIBS) $(LDLOOPEND) $(TESTLIB) $$(EXTRALIBS) 
 TESTOBJS += $(1).o
 endef
 else
 define test_template
 $(1)$$(EXE-SUFFIX): $(1).o $$(LIB) $$(DEPLIBS) $$(DEPHEADERS)
-	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o $$(LIB) $$(DEPLIBS) $(LDLOOPEND) $$(EXTRALIBS) $(TESTLIB)
+	$$(CC) $$(LDFLAGS) -o $$@ $(LDLOOPSTART) $(1).o $$(LIB) $$(DEPLIBS) $(LDLOOPEND) $(TESTLIB) $$(EXTRALIBS)
 TESTOBJS += $(1).o
 endef
 endif
