@@ -12,15 +12,14 @@ NAME=$1
 VERSION=$2
 REV=$3
 TARGARCH=$4
-VARIANT=$5
 DEB_VERSION=$VERSION-$3
 SRC_DIR=`dirname $0`
 RELEASE_DIR=$SRC_DIR/../../release
 
-PACKAGE_RUN=${NAME}${VARIANT}_$VERSION-${REV}_${TARGARCH}.deb
+PACKAGE_RUN=${NAME}_$VERSION-${REV}_${TARGARCH}.deb
 DEB_RUN_DIR=/tmp/$PACKAGE_RUN.$$
 
-PACKAGE_DEV=${NAME}${VARIANT}-dev_$VERSION-${REV}_${TARGARCH}.deb
+PACKAGE_DEV=${NAME}-dev_$VERSION-${REV}_${TARGARCH}.deb
 DEB_DEV_DIR=/tmp/$PACKAGE_DEV.$$
 
 # Split down Debian version 
@@ -35,18 +34,18 @@ IFS=$OLDIFS
 mkdir -p $DEB_RUN_DIR/DEBIAN
 mkdir -p $DEB_RUN_DIR/usr/lib/obtools
 
-install -m 0644 $SRC_DIR/DEBIAN.RUN/control$VARIANT $DEB_RUN_DIR/DEBIAN/control
+install -m 0644 $SRC_DIR/DEBIAN.RUN/control $DEB_RUN_DIR/DEBIAN/control
 install -m 0755 $SRC_DIR/DEBIAN.RUN/postinst $DEB_RUN_DIR/DEBIAN/postinst
 install -m 0755 $SRC_DIR/DEBIAN.RUN/postrm $DEB_RUN_DIR/DEBIAN/postrm
 
 echo "Version: $DEB_VERSION" >> $DEB_RUN_DIR/DEBIAN/control
 echo "Architecture: $TARGARCH" >> $DEB_RUN_DIR/DEBIAN/control
 
-install -s -m 0644 $NAME$VARIANT.so.$VERSION $DEB_RUN_DIR/usr/lib/obtools/$NAME$VARIANT.so.$VERSION
+install -s -m 0644 $NAME.so.$VERSION $DEB_RUN_DIR/usr/lib/obtools/$NAME.so.$VERSION
 
 #Make ld.so links
 pushd $DEB_RUN_DIR/usr/lib/obtools
-ln -s $NAME$VARIANT.so.$VERSION $NAME$VARIANT.so.$VERSION_MAJOR
+ln -s $NAME.so.$VERSION $NAME.so.$VERSION_MAJOR
 popd
 
 #Create dev package structure
@@ -54,55 +53,78 @@ mkdir -p $DEB_DEV_DIR/DEBIAN
 mkdir -p $DEB_DEV_DIR/usr/lib/obtools
 mkdir -p $DEB_DEV_DIR/usr/include/obtools
 
-install -m 0644 $SRC_DIR/DEBIAN.DEV/control$VARIANT $DEB_DEV_DIR/DEBIAN/control
+install -m 0644 $SRC_DIR/DEBIAN.DEV/control $DEB_DEV_DIR/DEBIAN/control
 
 echo "Depends: $NAME (>= $DEB_VERSION)" >> $DEB_DEV_DIR/DEBIAN/control
 echo "Version: $DEB_VERSION" >> $DEB_DEV_DIR/DEBIAN/control
 echo "Architecture: $TARGARCH" >> $DEB_DEV_DIR/DEBIAN/control
 
-install -m 0644 $RELEASE_DIR/ot-chan$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-crypto$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-file$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-init$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-log$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-misc$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-net$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-ssl$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-text$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-time$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-tube$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-web$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-install -m 0644 $RELEASE_DIR/ot-xml$VARIANT.a $DEB_DEV_DIR/usr/lib/obtools/
-
-if [ -z $VARIANT ]; then
-#Only install multi-dependent libraries in base
-install -m 0644 $RELEASE_DIR/ot-mt.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-access.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-alarm.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-amf.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-chan.a $DEB_DEV_DIR/usr/lib/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-crypto.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-daemon.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-dns.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-expr.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-file.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-gather.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-huffman.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-init.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-log.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-misc.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-mt.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-net.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-script.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-soap.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-ssl.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-ssl-openssl.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-text.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-time.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-tube.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-web.a $DEB_DEV_DIR/usr/lib/obtools/
+install -m 0644 $RELEASE_DIR/ot-xml.a $DEB_DEV_DIR/usr/lib/obtools/
 
-#Only install common header files in base - Depends on variants reflects this
+
+install -m 0644 $RELEASE_DIR/ot-access.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-action.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-alarm.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-amf.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-cache.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-chan.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli-telnet.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-cli.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-crypto.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-daemon.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-dns.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-expr.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-file.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-gather.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-gen.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-hash.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-huffman.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-init.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-log.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-misc.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-msg.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-mt.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-net.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-ring.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-script.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-soap.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-ssl.h $DEB_DEV_DIR/usr/include/obtools/
+install -m 0644 $RELEASE_DIR/ot-ssl-openssl.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-text.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-time.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-tube.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-web.h $DEB_DEV_DIR/usr/include/obtools/
 install -m 0644 $RELEASE_DIR/ot-xml.h $DEB_DEV_DIR/usr/include/obtools/
 
-fi
 
 #Make library build links
 pushd $DEB_DEV_DIR/usr/lib/obtools
-ln -s $NAME$VARIANT.so.$VERSION_MAJOR $NAME$VARIANT.so
+ln -s $NAME.so.$VERSION_MAJOR $NAME.so
 popd
 
 if [ $CENTOS ]; then

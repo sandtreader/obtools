@@ -11,7 +11,7 @@ else
 TYPE	= superlib
 endif
 NAME	= ot-general2
-VERSION	= 2.4.0
+VERSION	= 2.5
 CONTAINS = xml misc text net log init chan time web file crypto hash soap \
 	   mt cache cli tube ssl access dns msg gather ring
 SOCKET  = 1
