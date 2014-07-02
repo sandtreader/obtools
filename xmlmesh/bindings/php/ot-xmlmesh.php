@@ -108,7 +108,7 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     if (!$dom)
     {
       $xmlmesh_last_error = "Can't parse XML result";
-      return false;
+      return true;
     }
     $xpath = new DOMXPath( $dom );
     $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
