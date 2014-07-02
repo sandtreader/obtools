@@ -8,7 +8,7 @@
 NAME   	= php_xmlmesh_native
 
 DEBIAN-NAME    = ot-xmlmesh-php-native
-DEBIAN-VERSION = 0.3.0
+DEBIAN-VERSION = 0.3.1
 DEBIAN-REVISION = 1
 RELEASEDIR = ../../release
 

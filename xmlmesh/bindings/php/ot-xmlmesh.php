@@ -103,6 +103,23 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
       $xmlmesh_socket = null;
       return false;
     }
+    $dom = new DOMDocument();
+    $dom->loadXML($response);
+    if (!$dom)
+    {
+      $xmlmesh_last_error = "Can't parse XML result";
+      return false;
+    }
+    $xpath = new DOMXPath( $dom );
+    $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
+    $xpath->registerNamespace( "x",  "http://obtools.com/ns/xmlmesh");
+    // Look for a Fault response
+    $nodes = $xpath->query("//env:Fault/env:Reason/env:Text");
+    if ($nodes->length)
+    {
+      $item = $nodes->item(0);
+      $xmlmesh_last_error = $item->nodeValue;
+    }
 
     return true;
   }
