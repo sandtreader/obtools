@@ -85,7 +85,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Get array size
-  int size() const { return length; }
+  int size() const { return length-1; }
+
+  //--------------------------------------------------------------------------
+  // Get number of items used
+  int used() const { return out_index<=in_index?
+                              in_index-out_index:
+                              in_index+length-out_index; }
 
   //--------------------------------------------------------------------------
   // Destructor
