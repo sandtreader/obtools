@@ -168,6 +168,16 @@ bool URL::split(XML::Element& xml) const
 }
 
 //------------------------------------------------------------------------
+// Quick access to scheme of URL
+// Returns host or "" if there isn't one
+string URL::get_scheme() const
+{
+  XML::Element xml;
+  if (!split(xml)) return "";
+  return xml.get_child("scheme").content;
+}
+
+//------------------------------------------------------------------------
 // Quick access to host of URL
 // Returns host or "" if can't read it
 string URL::get_host() const
@@ -229,6 +239,45 @@ string URL::get_fragment() const
   XML::Element xml;
   if (!split(xml)) return "";
   return xml.get_child("fragment").content;
+}
+
+//------------------------------------------------------------------------
+// Resolve against a base URL
+// Returns the resolved URL
+// Handles absolute, relative and .. forms
+URL URL::resolve(const URL& base) const
+{
+  XML::Element xml;
+  if (!split(xml)) return base;  // Probably empty
+
+  // Are we absolute?  Then it's just us
+  if (!!xml.get_child("scheme")) return *this;
+
+  XML::Element base_xml;
+  if (!base.split(base_xml)) return *this;  // Not useful but indicates error
+
+  // Otherwise resolve the path
+  File::Path path(xml.get_child("path").content);
+  File::Path base_path(base_xml.get_child("path").content);
+  string res_path = base_path.resolve(path).str();
+
+  // Force to be absolute
+  if (res_path.empty() || res_path[0] != '/')
+    res_path.insert(0, 1, '/');
+
+  // Reconstruct from base using resolved path and our query/fragment (if any)
+  base_xml.remove_children("path");
+  base_xml.add("path", res_path);
+
+  base_xml.remove_children("query");
+  if (!!xml.get_child("query"))
+    base_xml.add("query", xml.get_child("query").content);
+
+  base_xml.remove_children("fragment");
+  if (!!xml.get_child("fragment"))
+    base_xml.add("fragment", xml.get_child("fragment").content);
+
+  return URL(base_xml);
 }
 
 //------------------------------------------------------------------------

@@ -74,6 +74,11 @@ public:
   bool split(XML::Element& xml) const;
 
   //------------------------------------------------------------------------
+  // Quick access to scheme of URL
+  // Returns host or "" if there isn't one
+  string get_scheme() const;
+
+  //------------------------------------------------------------------------
   // Quick access to host of URL
   // Returns host or "" if can't read it
   string get_host() const;
@@ -103,6 +108,12 @@ public:
   // Get an individual parameter from query
   // Returns parameter value or "" if not present
   string get_query_parameter(const string& name) const;
+
+  //------------------------------------------------------------------------
+  // Resolve against a base URL
+  // Returns the resolved URL
+  // Handles absolute, relative and .. forms
+  URL resolve(const URL& base) const;
 
   //------------------------------------------------------------------------
   // Static function to URL-encode (percent-encode) a string
