@@ -271,7 +271,7 @@ void MultiClientWorker::run()
 MultiClient::MultiClient(ClientTransport& _transport,
 			 int _min_spare_workers, int _max_workers):
   transport(_transport), workers(_min_spare_workers, _max_workers),
-  alive(true)
+  alive(true), shutting_down(false)
 {
   dispatch_thread = new DispatchThread(*this, transport);
 }
@@ -413,13 +413,23 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
 {
   // Unsubscribe for that subject
   SubscriptionMessage msg(SubscriptionMessage::LEAVE, sub->subject);
-  if (!request(msg))
+
+  // If shutting down, don't wait for a response - otherwise we can get
+  // blocked waiting for OTMP socket to recover, when we don't really care
+  if (shutting_down?!send(msg):!request(msg))
   {
     Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
     error_log << "Unable to unsubscribe for " << sub->subject << endl;
   }
 
   sub->dead = true;  // Trigger deletion in dispatch() when safe
+}
+
+//------------------------------------------------------------------------
+// Prepare for shutdown
+void MultiClient::prepare_shutdown()
+{
+  shutting_down = true;
 }
 
 //------------------------------------------------------------------------

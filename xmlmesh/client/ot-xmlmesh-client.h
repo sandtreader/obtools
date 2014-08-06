@@ -238,6 +238,7 @@ private:
   MT::Queue<Message *> pending_queue;          // Queued messages
   MT::RMutex mutex;                            // Global state lock
   bool alive;
+  bool shutting_down;
 
 public:
   static const int DEFAULT_MIN_SPARE_WORKERS = 1;
@@ -304,6 +305,10 @@ public:
   //------------------------------------------------------------------------
   // Resubscribe for all subjects we should be subscribed to (background)
   void resubscribe(Log::Streams& log);
+
+  //------------------------------------------------------------------------
+  // Prepare for shutdown
+  void prepare_shutdown();
 
   //------------------------------------------------------------------------
   // Clean shutdown
@@ -424,6 +429,9 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
   // Destructor
   ~MessageTransport()
   {
+    // Tell client to prepare to shut down
+    client.prepare_shutdown();
+
     // Destroy subscribers
     for(list<XMLMesh::Subscriber *>::iterator p = subscribers.begin();
         p != subscribers.end(); ++p)
