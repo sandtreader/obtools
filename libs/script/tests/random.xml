@@ -1,0 +1,8 @@
+<!-- Example ObTools::Script script demonstrating <random> -->
+<script>
+  <repeat>
+    <random probability="0.1">
+      <log>Randomness!</log>
+    </random>
+  </repeat>
+</script>

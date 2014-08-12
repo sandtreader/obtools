@@ -10,7 +10,7 @@ NAME   	= ot-script
 HEADERS = ot-script.h
 OBJS  	= language.o baselang.o script.o \
           sequence.o repeat.o parallel.o replicate.o \
-          log.o delay.o scope.o set.o thread.o
+          log.o delay.o scope.o set.o thread.o random.o
 DEPENDS = xml log text misc init time mt
 TESTS 	= test-script
 TESTCMD	= ./test-script ../tests/test.xml

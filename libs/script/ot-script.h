@@ -364,6 +364,27 @@ public:
 };
 
 //==========================================================================
+//Random action
+// e.g. <random probability="0.01">
+//        ... sub actions executed only at given probability ...
+//      </random>
+class RandomAction: public SequenceAction
+{
+private:
+  bool running;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  RandomAction(const CP& cp);
+
+  //------------------------------------------------------------------------
+  // Tick action
+  // Returns whether still active
+  bool tick(Context& con);
+};
+
+//==========================================================================
 // General script language class with no set bindings
 class Language
 {
