@@ -215,11 +215,16 @@ int Shell::start(int argc, char **argv)
 	else
 	{
 	  int rc = WEXITSTATUS(status);
-	  if (shut_down && !rc)
-	    log.summary << "Slave process exited OK\n";  // Expected
-	  else
+	  if (rc)
+          {
 	    log.error << "*** Slave process " << slave_pid
 		      << " exited with code " << rc << " ***\n";
+          }
+          else
+          {
+	    log.summary << "Slave process exited OK\n";  // Expected
+            shut_down = true;
+          }
 	}
       }
       else
