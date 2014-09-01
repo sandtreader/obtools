@@ -122,6 +122,26 @@ void Reader::read_to_eof(vector<unsigned char>& buffer, size_t limit)
 }
 
 //--------------------------------------------------------------------------
+// Read data into buf until EOF
+void Reader::read_to_eof(vector<unsigned char>& buffer)
+{
+  char buf[CHANNEL_BUFFER_SIZE+1];
+
+  while (true)
+  {
+    // Limit read to buffer size, or what's wanted
+    size_t n = CHANNEL_BUFFER_SIZE;
+    size_t size = basic_read(buf, n);
+    if (size)
+    {
+      buffer.insert(buffer.end(), &buf[0], &buf[size]);
+    }
+    if (size != n)
+      return;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Read data into string until EOF or limit encountered
 void Reader::read_to_eof(string& s, size_t limit)
 {
@@ -141,6 +161,26 @@ void Reader::read_to_eof(string& s, size_t limit)
       done += size;
     }
     else
+      return;
+  }
+}
+
+//--------------------------------------------------------------------------
+// Read data into string until EOF
+void Reader::read_to_eof(string& s)
+{
+  char buf[CHANNEL_BUFFER_SIZE+1];
+
+  while (true)
+  {
+    // Limit read to buffer size, or what's wanted
+    size_t n = CHANNEL_BUFFER_SIZE;
+    size_t size = basic_read(buf, n);
+    if (size)
+    {
+      s.append(&buf[0], size);
+    }
+    if (size != n)
       return;
   }
 }
@@ -340,11 +380,8 @@ void Reader::skip(size_t n)
 //--------------------------------------------------------------------------
 // Skip to given alignment (bytes) from current offset
 void Reader::align(size_t n)
-{ 
+{
   skip(static_cast<size_t>(n*((offset+n-1)/n) - offset));  // Bytes to skip
 }
 
 }} // namespaces
-
-
-

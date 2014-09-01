@@ -28,6 +28,14 @@ void Writer::write(const string& s)
 }
 
 //--------------------------------------------------------------------------
+// Write a vector of unsigned chars to the channel
+// Throws Error on failure
+void Writer::write(const vector<unsigned char>& v)
+{
+  basic_write(&v[0], v.size());
+}
+
+//--------------------------------------------------------------------------
 // Write the given C string to the channel
 // Throws Error on failure
 void Writer::write(const char *p)

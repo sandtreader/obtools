@@ -85,8 +85,16 @@ public:
   virtual void read_to_eof(vector<unsigned char>& buf, size_t limit);
 
   //------------------------------------------------------------------------
+  // Read data into buf until EOF
+  virtual void read_to_eof(vector<unsigned char>& buf);
+
+  //------------------------------------------------------------------------
   // Read data into string until EOF or limit encountered
   virtual void read_to_eof(string& s, size_t limit);
+
+  //------------------------------------------------------------------------
+  // Read data into string until EOF
+  virtual void read_to_eof(string& s);
 
   //------------------------------------------------------------------------
   // Try to read a single byte from the channel
@@ -216,6 +224,11 @@ public:
   // Write the given C string to the channel
   // Throws Error on failure
   void write(const char *p);
+
+  //--------------------------------------------------------------------------
+  // Write a vector of unsigned chars to the channel
+  // Throws Error on failure
+  void write(const vector<unsigned char>& v);
 
   //--------------------------------------------------------------------------
   // Write a single byte to the channel
@@ -655,10 +668,24 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Read data into buf until EOF
+  void read_to_eof(vector<unsigned char>& buf)
+  {
+    Reader::read_to_eof(buf, left);
+  }
+
+  //------------------------------------------------------------------------
   // Read data into string until EOF or limit encountered
   void read_to_eof(string& s, size_t limit)
   {
     Reader::read_to_eof(s, min(left, limit));
+  }
+
+  //------------------------------------------------------------------------
+  // Read data into string until EOF
+  void read_to_eof(string& s)
+  {
+    Reader::read_to_eof(s, left);
   }
 
   //------------------------------------------------------------------------
@@ -693,6 +720,3 @@ public:
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_CHAN_H
-
-
-
