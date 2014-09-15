@@ -144,6 +144,18 @@ TEST_F(StreamTest, TestLargeBuffer)
   ASSERT_EQ(data.size() - 10, str.size());
 }
 
+TEST_F(StreamTest, TestTellpReturnsAmountWritten)
+{
+  const string test_file(test_dir + "/tellp");
+  const char data[] = "some-text-as-a-test";
+
+  File::BufferedOutStream bos(test_file);
+  bos.set_buffer_size(4);
+  bos.write(data, 10);
+  bos.write(&data[10], sizeof(data) - 10);
+  ASSERT_EQ(sizeof(data), bos.tellp());
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
