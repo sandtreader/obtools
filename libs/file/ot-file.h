@@ -437,7 +437,7 @@ public:
 
   //------------------------------------------------------------------------
   // Test for file being open
-  bool is_open()
+  bool is_open() const
   {
     return file_buf.is_open();
   }
@@ -499,7 +499,7 @@ public:
 
   //------------------------------------------------------------------------
   // Test for file being open
-  bool is_open();
+  bool is_open() const;
 
   //------------------------------------------------------------------------
   // Open a file

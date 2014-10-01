@@ -140,9 +140,9 @@ MultiOutStream::MultiOutStream():
 
 //--------------------------------------------------------------------------
 // Test for file being open
-bool MultiOutStream::is_open()
+bool MultiOutStream::is_open() const
 {
-  for (vector<Gen::UniquePointer<filebuf> >::iterator
+  for (vector<Gen::UniquePointer<filebuf> >::const_iterator
        it = file_bufs.begin(); it != file_bufs.end(); ++it)
     if ((*it)->is_open())
       return true;
