@@ -71,9 +71,10 @@ public:
 // Tests
 TEST(AlarmTest, TestAlarm)
 {
-  Time::Duration max_expected_drift(0.001);
+  const Time::Duration resolution(0.001);
+  const Time::Duration max_expected_drift(1.1 * resolution.seconds());
   Observer observer;
-  Alarm::Clock clock(0.001);
+  Alarm::Clock clock(resolution);
   Time::Stamp alarm_time = Time::Stamp::now();
   alarm_time += Time::Duration(0.2);
   ASSERT_TRUE(clock.add_alarm(alarm_time, &observer));
