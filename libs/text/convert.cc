@@ -189,6 +189,20 @@ string btox(const string& data)
 }
 
 //--------------------------------------------------------------------------
+// Binary to hex (simple, use Misc::Dumper for long blocks)
+string btox(const vector<uint8_t>& data)
+{
+  ostringstream os;
+  os << hex << setw(2);
+  for (vector<uint8_t>::const_iterator p = data.begin(); p != data.end(); ++p)
+  {
+    os << static_cast<unsigned int>(*p);
+  }
+
+  return os.str();
+}
+
+//--------------------------------------------------------------------------
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
 unsigned int xtob(const string& hex, unsigned char *data, 

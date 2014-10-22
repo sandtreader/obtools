@@ -175,6 +175,7 @@ uint64_t xtoi64(const string& s);
 // Binary to hex (simple, use Misc::Dumper for long blocks)
 string btox(const unsigned char *data, unsigned int length);
 string btox(const string& data);
+string btox(const vector<uint8_t>& data);
 
 //--------------------------------------------------------------------------
 // Hex to binary
