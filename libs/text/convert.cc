@@ -193,10 +193,10 @@ string btox(const string& data)
 string btox(const vector<uint8_t>& data)
 {
   ostringstream os;
-  os << hex << setw(2);
+  os << hex << setfill('0');
   for (vector<uint8_t>::const_iterator p = data.begin(); p != data.end(); ++p)
   {
-    os << static_cast<unsigned int>(*p);
+    os << setw(2) << static_cast<int>(*p);
   }
 
   return os.str();

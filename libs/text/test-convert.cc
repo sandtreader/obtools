@@ -8,71 +8,112 @@
 //==========================================================================
 
 #include "ot-text.h"
-#include <iostream>
+#include <gtest/gtest.h>
+
+namespace {
 
 using namespace std;
 using namespace ObTools;
 
-//--------------------------------------------------------------------------
-// Main
-
-int main()
+TEST(ConvertTest, TestStringToInt)
 {
-  string si = "1234567890";
-  string sf = "12345.6789";
-  string sx = "deadbeef";
-  string si64 = "12345678901234567890";
-  string sx64 = "fedcba9876543210";
-  string sifix2 = "-0.89";
-  string sifix2neg = "-12345678900";
-
-  cout << "Integer string: " << si 
-       << " -> " << Text::stoi(si) 
-       << " -> " << Text::itos(Text::stoi(si)) << endl;
-
-  cout << "Float string:   " << sf 
-       << " -> " << Text::stof(sf) 
-       << " -> " << Text::ftos(Text::stof(sf)) << endl;
-
-  cout << "Hex string:     " << sx 
-       << " -> " << hex << Text::xtoi(sx) << dec
-       << " -> " << Text::itox(Text::xtoi(sx)) << endl;
-
-  cout << "64-bit integer string: " << si64 
-       << " -> " << Text::stoi64(si64) 
-       << " -> " << Text::i64tos(Text::stoi64(si64)) << endl;
-
-  cout << "64-bit hex string:     " << sx64 
-       << " -> " << hex << Text::xtoi64(sx64) << dec 
-       << " -> " << Text::i64tox(Text::xtoi64(sx64)) << endl;
-
-  cout << "Integer representing fixed point to 2 d.p. string:  " << sifix2
-       << " -> " << Text::stoifix(sifix2, 2)
-       << " -> " << Text::ifixtos(Text::stoifix(sifix2, 2), 2) << endl;
-
-  cout << "Integer representing fixed point to -2 d.p. string: " << sifix2neg
-       << " -> " << Text::stoifix(sifix2neg, -2)
-       << " -> " << Text::ifixtos(Text::stoifix(sifix2neg, -2), -2) << endl;
-
-  unsigned char buf[4];
-  int l = Text::xtob(sx, buf, 4);
-  cout << "Hex string:     " << sx
-       << " -> " << l << " bytes binary ["
-       << hex << static_cast<int>(buf[0]) << static_cast<int>(buf[1])
-              << static_cast<int>(buf[2]) << static_cast<int>(buf[3])
-       << dec << "] -> " << Text::btox(buf, 4) << endl;
-
-  cout << "\nFloat formats for 1.0, 0.999999:\n";
-  cout << "Default: " << Text::ftos(1.0) 
-       << " " << Text::ftos(0.999999) << endl;
-  cout << "(0,3): " << Text::ftos(1.0, 0, 3) 
-       << " " << Text::ftos(0.999999, 0, 3) << endl;
-  cout << "(16,6,true): " << Text::ftos(1.0, 16, 6, true) 
-       << " " << Text::ftos(0.999999, 16, 6, true) << endl;
-
-  return 0;  
+  ASSERT_EQ(1234567890, Text::stoi("1234567890"));
 }
 
+TEST(ConvertTest, TestIntToString)
+{
+  ASSERT_EQ("1234567890", Text::itos(1234567890));
+}
 
+TEST(ConvertTest, TestStringToFloat)
+{
+  ASSERT_EQ(12345.6789, Text::stof("12345.6789"));
+}
 
+TEST(ConvertTest, TestFloatToString)
+{
+  ASSERT_EQ("12345.6789", Text::ftos(12345.6789, 0, 4, false));
+  ASSERT_EQ("12345.68", Text::ftos(12345.6789, 0, 2, false));
+}
 
+TEST(ConvertTest, TestHexStringToInt)
+{
+  ASSERT_EQ(3735928559, Text::xtoi("deadbeef"));
+}
+
+TEST(ConvertTest, TestIntToHexString)
+{
+  ASSERT_EQ("deadbeef", Text::itox(3735928559));
+}
+
+TEST(ConvertTest, TestStringToInt64)
+{
+  ASSERT_EQ(12345678901234567890ULL, Text::stoi64("12345678901234567890"));
+}
+
+TEST(ConvertTest, TestInt64ToString)
+{
+  ASSERT_EQ("12345678901234567890", Text::i64tos(12345678901234567890ULL));
+}
+
+TEST(ConvertTest, TestHexStringToInt64)
+{
+  ASSERT_EQ(18364758544493064720ULL, Text::xtoi64("fedcba9876543210"));
+}
+
+TEST(ConvertTest, TestInt64ToHexString)
+{
+  ASSERT_EQ("fedcba9876543210", Text::i64tox(18364758544493064720ULL));
+}
+
+TEST(ConvertTest, TestStringToFixedPoint)
+{
+  ASSERT_EQ(-89, Text::stoifix("-0.89", 2));
+  ASSERT_EQ(-123456789, Text::stoifix("-12345678900", -2));
+}
+
+TEST(ConvertTest, TestFixedPointToString)
+{
+  ASSERT_EQ("-0.89", Text::ifixtos(-89, 2));
+  ASSERT_EQ("-12345678900", Text::ifixtos(-123456789, -2));
+}
+
+TEST(ConvertTest, TestStringToBinary)
+{
+  unsigned char buf[4] = {0, 0, 0, 0};
+  unsigned char expected[4] = {0xde, 0xad, 0xbe, 0xef};
+  Text::xtob("deadbeef", buf, sizeof(buf));
+  for (unsigned i = 0; i < sizeof(buf); ++i)
+    ASSERT_EQ(expected[i], buf[i]);
+}
+
+TEST(ConvertTest, TestBinaryToString)
+{
+  unsigned char buf[4] = {0xde, 0xad, 0xbe, 0xef};
+  ASSERT_EQ("deadbeef", Text::btox(buf, sizeof(buf)));
+}
+
+TEST(ConvertTest, TestBinaryVectorToString)
+{
+  vector<uint8_t> buf;
+  buf.push_back(0xde);
+  buf.push_back(0xad);
+  buf.push_back(0xbe);
+  buf.push_back(0xef);
+  vector<uint8_t> buf2;
+  buf2.push_back(0x00);
+  buf2.push_back(0x00);
+  buf2.push_back(0xbe);
+  buf2.push_back(0xef);
+
+  ASSERT_EQ("deadbeef", Text::btox(buf));
+  ASSERT_EQ("0000beef", Text::btox(buf2));
+}
+
+} // anonymous namespace
+
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
