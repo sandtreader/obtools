@@ -244,8 +244,11 @@ public:
   EndPoint(const string& hostname, int _port): host(hostname), port(_port) {}
 
   // Constructor from a sockaddr_in - note ntohl/ntohs here!
+  // ntohl has old-style casts
+#pragma GCC diagnostic ignored "-Wold-style-cast"
   EndPoint(const struct sockaddr_in& saddr):
     host(ntohl(saddr.sin_addr.s_addr)), port(ntohs(saddr.sin_port)) {}
+#pragma GCC diagnostic pop
 
   //--------------------------------------------------------------------------
   // Export to sockaddr_in - note htonl/htons here!
@@ -254,7 +257,10 @@ public:
     memset(&saddr, 0, sizeof(struct sockaddr_in)); // Stop valgrind whinging
     saddr.sin_family = AF_INET;
     saddr.sin_addr.s_addr = host.nbo();
+    // ntohs has old-style casts
+#pragma GCC diagnostic ignored "-Wold-style-cast"
     saddr.sin_port = htons(port);
+#pragma GCC diagnostic pop
   }
 
   //--------------------------------------------------------------------------
