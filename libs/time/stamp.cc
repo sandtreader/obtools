@@ -509,6 +509,27 @@ string Stamp::iso_minimal() const
 }
 
 //------------------------------------------------------------------------
+// Convert to numeric-only ISO-compatible timestamp string
+// May not be considered valid by all parsers - including ours if non-lenient
+// Generates YYYYMMDDHHMMSS form or empty if invalid
+string Stamp::iso_numeric() const
+{
+  if (!t) return "";  // Empty if invalid
+
+  ostringstream oss;
+  Split sp = split(t);
+
+  oss << setw(2) << setfill('0') << sp.year
+      << setw(2) << setfill('0') << sp.month
+      << setw(2) << setfill('0') << sp.day
+      << setw(2) << setfill('0') << sp.hour
+      << setw(2) << setfill('0') << sp.min
+      << setw(2) << setfill('0') << static_cast<int>(sp.sec);
+
+  return oss.str();
+}
+
+//------------------------------------------------------------------------
 // Convert to ISO date
 // Generates YYYY-MM-DD form or empty if invalid
 // sep can be specified, defaults to '-' - set to 0 to leave out
