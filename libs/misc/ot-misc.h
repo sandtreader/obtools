@@ -206,7 +206,13 @@ public:
   //--------------------------------------------------------------------------
   // Add a integer value
   void add(const string& name, int value)
-  { 
+  {
+    ostringstream oss;
+    oss << value;
+    add(name, oss.str());
+  }
+  void add(const string& name, uint64_t value)
+  {
     ostringstream oss;
     oss << value;
     add(name, oss.str());

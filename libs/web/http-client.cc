@@ -409,6 +409,7 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
       // Try to read this much or up to end of stream
       stream->read(reinterpret_cast<char *>(data)+n, wanted);
       ssize_t count = stream->gcount();
+      if (!count) throw Net::SocketError(EOF);
       n += count;
 
       // Count down length only if specified to begin with

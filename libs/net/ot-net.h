@@ -244,6 +244,8 @@ public:
   EndPoint(const string& hostname, int _port): host(hostname), port(_port) {}
 
   // Constructor from a sockaddr_in - note ntohl/ntohs here!
+  // ntohl has old-style casts
+#pragma GCC diagnostic ignored "-Wold-style-cast"
   EndPoint(const struct sockaddr_in& saddr):
     host(ntohl(saddr.sin_addr.s_addr)), port(ntohs(saddr.sin_port)) {}
 
@@ -256,6 +258,7 @@ public:
     saddr.sin_addr.s_addr = host.nbo();
     saddr.sin_port = htons(port);
   }
+#pragma GCC diagnostic pop
 
   //--------------------------------------------------------------------------
   // Output to given stream

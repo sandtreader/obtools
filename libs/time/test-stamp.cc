@@ -41,6 +41,7 @@ int main()
     cout << "   check time: " << asctime(gmtime(&t));
     cout << "      weekday: " << days[s.weekday()-1] << endl;
     cout << "      ISO min: " << s.iso_minimal() << endl;
+    cout << "      ISO num: " << s.iso_numeric() << endl;
     cout << "     ISO date: " << s.iso_date() << endl;
     cout << "     ISO time: " << s.iso_time(':', true) << endl;
     cout << "       RFC822: " << s.rfc822() << endl;

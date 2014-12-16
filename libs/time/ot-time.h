@@ -241,6 +241,12 @@ public:
   string iso_minimal() const;
 
   //------------------------------------------------------------------------
+  // Convert to numeric-only ISO-compatible timestamp string
+  // May not be considered valid by all parsers - including ours if non-lenient
+  // Generates YYYYMMDDHHMMSS form or empty if invalid
+  string iso_numeric() const;
+
+  //------------------------------------------------------------------------
   // Convert to ISO date
   // Generates YYYY-MM-DD form or empty if invalid
   // sep can be specified, defaults to '-' - set to 0 to leave out
