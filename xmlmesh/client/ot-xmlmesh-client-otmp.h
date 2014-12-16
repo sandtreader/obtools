@@ -34,6 +34,7 @@ public:
   }
 
   // Implementations of ClientTransport virtuals (q.v. ot-xmlmesh.h)
+  bool is_connected() { return otmp.is_connected(); }
   bool send(const string& data);
   bool poll();
   bool wait(string& data);

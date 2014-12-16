@@ -183,6 +183,10 @@ public:
   bool is_alive() { return alive; }
 
   //------------------------------------------------------------------------
+  // Check if it's connected
+  bool is_connected() { return check_socket(); }
+
+  //------------------------------------------------------------------------
   // Set maximum send queue
   void set_max_send_queue(int q) { max_send_queue = q; }
 

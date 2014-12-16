@@ -398,6 +398,17 @@ void MultiClient::register_subscriber(Subscriber *sub)
     subscribers.push_back(sub);
   }
 
+  // If the transport isn't connected we just give up because when it
+  // comes back we will resubscribe, and blocking here would lock up
+  // the application
+  if (!transport.is_connected())
+  {
+    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    error_log << "XMLMesh not connected - delaying subscription for "
+              << sub->subject << endl;
+    return;
+  }
+
   // Subscribe for that subject
   SubscriptionMessage msg(SubscriptionMessage::JOIN, sub->subject);
   if (!request(msg))

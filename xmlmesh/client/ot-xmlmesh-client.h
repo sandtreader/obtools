@@ -30,6 +30,10 @@ class ClientTransport
 {
 public:
   //------------------------------------------------------------------------
+  // Check if the transport is connected
+  virtual bool is_connected() = 0;
+
+  //------------------------------------------------------------------------
   // Send a message - returns whether successful
   virtual bool send(const string& data) = 0;
 
