@@ -279,6 +279,8 @@ ifeq ($(CROSS), centos)
 CC = gcc
 CXX = g++
 EXTRALIBS += -lrt
+CPPFLAGS += -pthread
+LDFLAGS += -pthread
 else
 
 #Normal native build
@@ -286,6 +288,8 @@ CC = gcc
 CXX = g++
 EXTRALIBS += -lrt -lm
 STRIP = strip
+CPPFLAGS += -pthread
+LDFLAGS += -pthread
 endif
 endif
 endif
@@ -465,8 +469,6 @@ CPPFLAGS += -mthreads
 LDFLAGS += -mthreads
 
 EXTRALIBS += -lpthreadGC2
-else
-EXTRALIBS += -lpthread
 endif
 
 ifdef DEBUG
