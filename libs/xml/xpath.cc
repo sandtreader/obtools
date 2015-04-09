@@ -16,14 +16,28 @@
 
 using namespace ObTools::XML;
 
+// In order to allow the implementation of the template to be in this .cc
+// file we explicitly specialise for the two template parameters we need,
+// const and non-const Elements, for every method
+
+//==========================================================================
+// Base template functions
+
 //------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
-// Only first (or n'th) element of intermediate steps is used - 
+// Only first (or n'th) element of intermediate steps is used -
 // cousins are not merged!
-list<Element *> XPathProcessor::get_elements(const string& path)
+template list<Element *>
+  BaseXPathProcessor<Element>::get_elements(const string& path) const;
+template list<const Element *>
+  BaseXPathProcessor<const Element>::get_elements(const string& path) const;
+
+template<typename ELEMENT>
+list<ELEMENT *>
+  BaseXPathProcessor<ELEMENT>::get_elements(const string& path) const
 {
-  list<Element *> el;
-  Element *current = &root;
+  list<ELEMENT *> el;
+  ELEMENT *current = &root;
   string::size_type pos=0;
   string::size_type size=path.size();
 
@@ -64,7 +78,7 @@ list<Element *> XPathProcessor::get_elements(const string& path)
     {
       name_end = delim;
     }
-    
+
     // Extract name
     string name(path, pos, name_end-pos);
 
@@ -77,7 +91,7 @@ list<Element *> XPathProcessor::get_elements(const string& path)
 
     // Need to find a single element, either to return or continue with
     // Get first or counted child
-    Element& child = current->get_child(name, count<0?0:count);
+    ELEMENT& child = current->get_child(name, count<0?0:count);
     if (child.valid())
       current = &child;
     else
@@ -99,9 +113,15 @@ list<Element *> XPathProcessor::get_elements(const string& path)
 
 //------------------------------------------------------------------------
 // Single element fetch - first of list, if any, or 0
-Element *XPathProcessor::get_element(const string& path)
+template Element *
+  BaseXPathProcessor<Element>::get_element(const string& path) const;
+template const Element *
+  BaseXPathProcessor<const Element>::get_element(const string& path) const;
+
+template<typename ELEMENT>
+ELEMENT *BaseXPathProcessor<ELEMENT>::get_element(const string& path) const
 {
-  list<Element *> l = get_elements(path);
+  list<ELEMENT *> l = get_elements(path);
   if (!l.empty())
     return l.front();
   else
@@ -111,7 +131,16 @@ Element *XPathProcessor::get_element(const string& path)
 //------------------------------------------------------------------------
 // Value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
-string XPathProcessor::get_value(const string& path, const string& def)
+template string
+  BaseXPathProcessor<Element>::get_value(const string& path,
+                                         const string& def) const;
+template string
+  BaseXPathProcessor<const Element>::get_value(const string& path,
+                                               const string& def) const;
+
+template<typename ELEMENT>
+string BaseXPathProcessor<ELEMENT>::get_value(const string& path,
+                                              const string& def) const
 {
   // See if it's an attribute step at the end
   string::size_type att = path.rfind('@');
@@ -120,7 +149,7 @@ string XPathProcessor::get_value(const string& path, const string& def)
   {
     // Strip off attribute step to get final element
     string spath(path, 0, att);
-    Element *e = get_element(spath);
+    ELEMENT *e = get_element(spath);
     if (e)
     {
       // Get attribute
@@ -131,7 +160,7 @@ string XPathProcessor::get_value(const string& path, const string& def)
   else
   {
     // Use path as is and return final content (aggregated)
-    Element *e = get_element(path);
+    ELEMENT *e = get_element(path);
     if (e) return e->get_content();
   }
 
@@ -143,7 +172,16 @@ string XPathProcessor::get_value(const string& path, const string& def)
 // Boolean value fetch
 // Defaults to default value given (or false) if not present
 // Recognises words beginning [TtYy] as true, everything else is false
-bool XPathProcessor::get_value_bool(const string& path, bool def)
+template bool
+  BaseXPathProcessor<Element>::get_value_bool(const string& path,
+                                              bool def) const;
+template bool
+  BaseXPathProcessor<const Element>::get_value_bool(const string& path,
+                                                    bool def) const;
+
+template<typename ELEMENT>
+bool BaseXPathProcessor<ELEMENT>::get_value_bool(const string& path,
+                                                 bool def) const
 {
   string v = get_value(path);
   if (!v.empty())
@@ -166,7 +204,15 @@ bool XPathProcessor::get_value_bool(const string& path, bool def)
 // Integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int XPathProcessor::get_value_int(const string& path, int def)
+template int
+  BaseXPathProcessor<Element>::get_value_int(const string& path, int def) const;
+template int
+  BaseXPathProcessor<const Element>::get_value_int(const string& path,
+                                                   int def) const;
+
+template<typename ELEMENT>
+int BaseXPathProcessor<ELEMENT>::get_value_int(const string& path,
+                                               int def) const
 {
   string v = get_value(path);
   if (!v.empty()) return atoi(v.c_str());
@@ -177,7 +223,15 @@ int XPathProcessor::get_value_int(const string& path, int def)
 // Hex value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int XPathProcessor::get_value_hex(const string& path, int def)
+template int
+  BaseXPathProcessor<Element>::get_value_hex(const string& path, int def) const;
+template int
+  BaseXPathProcessor<const Element>::get_value_hex(const string& path,
+                                                   int def) const;
+
+template<typename ELEMENT>
+int BaseXPathProcessor<ELEMENT>::get_value_hex(const string& path,
+                                               int def) const
 {
   string v = get_value(path);
   if (!v.empty()) sscanf(v.c_str(), "%x", &def);
@@ -188,7 +242,16 @@ int XPathProcessor::get_value_hex(const string& path, int def)
 // 64-bit integer value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
+template uint64_t
+  BaseXPathProcessor<Element>::get_value_int64(const string& path,
+                                               uint64_t def) const;
+template uint64_t
+  BaseXPathProcessor<const Element>::get_value_int64(const string& path,
+                                                     uint64_t def) const;
+
+template<typename ELEMENT>
+uint64_t BaseXPathProcessor<ELEMENT>::get_value_int64(const string& path,
+                                                      uint64_t def) const
 {
   string v = get_value(path);
   if (!v.empty()) def = Text::stoi64(v);
@@ -199,7 +262,16 @@ uint64_t XPathProcessor::get_value_int64(const string& path, uint64_t def)
 // 64-bit integer value fetch from hex
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-uint64_t XPathProcessor::get_value_hex64(const string& path, uint64_t def)
+template uint64_t
+  BaseXPathProcessor<Element>::get_value_hex64(const string& path,
+                                               uint64_t def) const;
+template uint64_t
+  BaseXPathProcessor<const Element>::get_value_hex64(const string& path,
+                                               uint64_t def) const;
+
+template<typename ELEMENT>
+uint64_t BaseXPathProcessor<ELEMENT>::get_value_hex64(const string& path,
+                                                      uint64_t def) const
 {
   string v = get_value(path);
   if (!v.empty()) def = Text::xtoi64(v);
@@ -210,18 +282,30 @@ uint64_t XPathProcessor::get_value_hex64(const string& path, uint64_t def)
 // Real value fetch
 // Defaults to default value given (or 0.0) if not present
 // Returns 0.0 if present but bogus
-double XPathProcessor::get_value_real(const string& path, double def)
+template double
+  BaseXPathProcessor<Element>::get_value_real(const string& path,
+                                              double def) const;
+template double
+  BaseXPathProcessor<const Element>::get_value_real(const string& path,
+                                                    double def) const;
+
+template<typename ELEMENT>
+double BaseXPathProcessor<ELEMENT>::get_value_real(const string& path,
+                                                   double def) const
 {
   string v = get_value(path);
   if (!v.empty()) return atof(v.c_str());
   return def;
 }
 
+//==========================================================================
+// Full read-write functions
+
 //------------------------------------------------------------------------
 // Set value either attribute or content of single (first) element
 // Returns whether value was settable
 // Can only set content or attributes of existing elements - use add_element
-// to create new ones. 
+// to create new ones.
 bool XPathProcessor::set_value(const string& path, const string& value)
 {
   // See if it's an attribute step at the end
@@ -251,7 +335,7 @@ bool XPathProcessor::set_value(const string& path, const string& value)
     }
   }
 
-  // Failed 
+  // Failed
   return false;
 }
 

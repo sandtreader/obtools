@@ -376,7 +376,7 @@ public:
   // Returns flat list of pointers
   // Prunes tree walk at 'prune' tags if set - use for recursive structures
   // where you want to deal with each level independently
-  // Ename and prune can be the same - then returns only first level of 
+  // Ename and prune can be the same - then returns only first level of
   // <ename>s, not <ename>s within <ename>s
   list<const Element *> get_descendants(const string& ename,
 					const string& prune="") const;
@@ -727,76 +727,104 @@ ostream& operator<<(ostream& s, const Element& e);
 
 //==========================================================================
 // XPath processor
-// Only handles child and attribute axis steps in abbreviated form, no 
+// Only handles child and attribute axis steps in abbreviated form, no
 // predicates
 // e.g. /config/foo/@width
 // Paths can be absolute or relative - always rooted at 'root'
 
-class XPathProcessor
+//------------------------------------------------------------------------
+// Base template which can be specialised either as const or non-const
+// Because we only need the two specialisations these are done in xpath.cc
+// which allows us to put the implementation in there too
+template<class ELEMENT> class BaseXPathProcessor
 {
-private:
-  Element& root;           // Document root we're working on
+protected:
+  ELEMENT& root;           // Document root we're working on
 
 public:
   //------------------------------------------------------------------------
   // Constructors
-  XPathProcessor(): root(Element::none) {}
-  XPathProcessor(Element& _root): root(_root) {}
-  
+  BaseXPathProcessor(): root(Element::none) {}
+  BaseXPathProcessor(ELEMENT& _root): root(_root) {}
+
   //------------------------------------------------------------------------
   // Element list fetch - all elements matching final child step.
   // Only first element of intermediate steps is used - list is not merged!
-  list<Element *> get_elements(const string& path);
+  list<ELEMENT *> get_elements(const string& path) const;
 
   //------------------------------------------------------------------------
   // Single element fetch - first of list, if any, or 0
-  Element *get_element(const string& path);
+  ELEMENT *get_element(const string& path) const;
 
   //------------------------------------------------------------------------
   // Value fetch - either attribute or content of single (first) element
   // Returns def if anything not found
-  string get_value(const string& path, const string& def="");
+  string get_value(const string& path, const string& def="") const;
 
   //------------------------------------------------------------------------
   // [] operator to make things easy
   // e.g. xpath["foo/bar"]
-  string operator[](const string& path) { return get_value(path); }
+  string operator[](const string& path) const { return get_value(path); }
 
   //--------------------------------------------------------------------------
   // Boolean value fetch
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy] as true, everything else is false
-  bool get_value_bool(const string& path, bool def=false);
+  bool get_value_bool(const string& path, bool def=false) const;
 
   //--------------------------------------------------------------------------
   // Integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_int(const string& path, int def=0);
+  int get_value_int(const string& path, int def=0) const;
 
   //--------------------------------------------------------------------------
   // Hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_hex(const string& path, int def=0);
+  int get_value_hex(const string& path, int def=0) const;
 
   //--------------------------------------------------------------------------
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  uint64_t get_value_int64(const string& path, uint64_t def=0);
+  uint64_t get_value_int64(const string& path, uint64_t def=0) const;
 
   //--------------------------------------------------------------------------
   // 64-bit integer value fetch from hex
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  uint64_t get_value_hex64(const string& path, uint64_t def=0);
+  uint64_t get_value_hex64(const string& path, uint64_t def=0) const;
 
   //--------------------------------------------------------------------------
   // Real value fetch
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
-  double get_value_real(const string& path, double def=0.0);
+  double get_value_real(const string& path, double def=0.0) const;
+};
+
+//------------------------------------------------------------------------
+// Const XPathProcessor which only provides read functionality
+class ConstXPathProcessor: public BaseXPathProcessor<const Element>
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  ConstXPathProcessor(): BaseXPathProcessor<const Element>() {}
+  ConstXPathProcessor(const Element& _root):
+    BaseXPathProcessor<const Element>(_root) {}
+};
+
+//------------------------------------------------------------------------
+// Read-write XPathProcessor which offers set methods etc. as well
+class XPathProcessor: public BaseXPathProcessor<Element>
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  XPathProcessor(): BaseXPathProcessor<Element>() {}
+  XPathProcessor(Element& _root):
+    BaseXPathProcessor<Element>(_root) {}
 
   //------------------------------------------------------------------------
   // Set value, either attribute or content of single (first) element
