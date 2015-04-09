@@ -810,8 +810,9 @@ class ConstXPathProcessor: public BaseXPathProcessor<const Element>
 public:
   //------------------------------------------------------------------------
   // Constructors
-  ConstXPathProcessor(): BaseXPathProcessor() {}
-  ConstXPathProcessor(const Element& _root): BaseXPathProcessor(_root) {}
+  ConstXPathProcessor(): BaseXPathProcessor<const Element>() {}
+  ConstXPathProcessor(const Element& _root):
+    BaseXPathProcessor<const Element>(_root) {}
 };
 
 //------------------------------------------------------------------------
@@ -821,8 +822,9 @@ class XPathProcessor: public BaseXPathProcessor<Element>
 public:
   //------------------------------------------------------------------------
   // Constructors
-  XPathProcessor(): BaseXPathProcessor() {}
-  XPathProcessor(Element& _root): BaseXPathProcessor(_root) {}
+  XPathProcessor(): BaseXPathProcessor<Element>() {}
+  XPathProcessor(Element& _root):
+    BaseXPathProcessor<Element>(_root) {}
 
   //------------------------------------------------------------------------
   // Set value, either attribute or content of single (first) element
