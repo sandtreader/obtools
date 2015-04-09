@@ -273,9 +273,10 @@ void Context::log_errors(const string& text)
 
 //--------------------------------------------------------------------------
 // Static:  Configure verification from an <ssl> configuration element
-void Context::configure_verification(Context *ssl_ctx, XML::Element& ssl_e)
+void Context::configure_verification(Context *ssl_ctx,
+                                     const XML::Element& ssl_e)
 {
-  XML::XPathProcessor xpath(ssl_e);
+  XML::ConstXPathProcessor xpath(ssl_e);
 
   // Enable verification if requested
   if (xpath.get_value_bool("verify/@enabled"))
@@ -304,11 +305,11 @@ void Context::configure_verification(Context *ssl_ctx, XML::Element& ssl_e)
 //--------------------------------------------------------------------------
 // Static:  Create from an <ssl> configuration element
 // Returns context, or 0 if disabled or failed
-Context *Context::create(XML::Element& ssl_e, string pass_phrase)
+Context *Context::create(const XML::Element& ssl_e, string pass_phrase)
 {
   if (!ssl_e.get_attr_bool("enabled")) return 0;
 
-  XML::XPathProcessor xpath(ssl_e);
+  XML::ConstXPathProcessor xpath(ssl_e);
   Log::Streams log;
 
   // Get SOAP RSA pass-phrase first, if required
@@ -364,11 +365,11 @@ Context *Context::create(XML::Element& ssl_e, string pass_phrase)
 //--------------------------------------------------------------------------
 // Static:  Create from an <ssl> configuration element with no key or cert
 // Returns context, or 0 if disabled or failed
-Context *Context::create_anonymous(XML::Element& ssl_e)
+Context *Context::create_anonymous(const XML::Element& ssl_e)
 {
   if (!ssl_e.get_attr_bool("enabled")) return 0;
 
-  XML::XPathProcessor xpath(ssl_e);
+  XML::ConstXPathProcessor xpath(ssl_e);
   Log::Streams log;
 
   Context *ssl_ctx = new Context();
