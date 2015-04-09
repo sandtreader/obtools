@@ -43,6 +43,11 @@ int main(int argc, char **argv)
   // Do it with static function
   string d1 = Crypto::SHA1::digest(p, length);
   cout << "One-block digest: " << d1 << endl;
+  if (d1.size() != Crypto::SHA1::DIGEST_LENGTH * 2)
+  {
+    cerr << "Bad digest length!\n";
+    return 2;
+  }
 
   // Now do it with multiple-block object
   Crypto::SHA1 sha1;
@@ -51,6 +56,11 @@ int main(int argc, char **argv)
 
   string d2 = sha1.get_result();
   cout << "  N-block digest: " << d2 << endl;
+  if (d2.size() != Crypto::SHA1::DIGEST_LENGTH * 2)
+  {
+    cerr << "Bad digest length!\n";
+    return 2;
+  }
 
   if (d1 == d2)
   {
