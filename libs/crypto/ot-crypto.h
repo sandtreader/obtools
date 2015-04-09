@@ -574,13 +574,11 @@ class PKCS5
 // digest() to do an entire block
 class SHA1
 {
- private:
+private:
   SHA_CTX sha_ctx;
   bool finished;
 
-  static string hex20(unsigned char *b);
-
- public:
+public:
   static const int DIGEST_LENGTH = 20;
 
   //------------------------------------------------------------------------
@@ -614,7 +612,7 @@ class SHA1
 
   //------------------------------------------------------------------------
   // C++-friendly version of the above
-  string digest(const string& text)
+  static string digest(const string& text)
   { return digest(text.data(), text.length()); }
 };
 

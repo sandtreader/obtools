@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include "ot-crypto.h"
+#include "ot-text.h"
 #include <sstream>
 #include <iomanip>
 
@@ -38,16 +39,6 @@ void SHA1::get_result(unsigned char *result)
 }
 
 //------------------------------------------------------------------------
-// Get 20-byte hex string
-string SHA1::hex20(unsigned char *b)
-{
-  ostringstream oss;
-  oss << hex << setw(2) << setfill('0');
-  for(int i=0; i<DIGEST_LENGTH; i++, b++) oss << static_cast<int>(*b);
-  return oss.str();
-}
-
-//------------------------------------------------------------------------
 // Get result as a hex string
 string SHA1::get_result()
 {
@@ -56,7 +47,7 @@ string SHA1::get_result()
     unsigned char buf[DIGEST_LENGTH];
     SHA1_Final(buf, &sha_ctx);
     finished = true;
-    return hex20(buf);
+    return Text::btox(buf, DIGEST_LENGTH);
   }
   else return "REUSED SHA1!";
 }
@@ -87,7 +78,7 @@ string SHA1::digest(const void *data, size_t length)
 {
   unsigned char buf[DIGEST_LENGTH];
   digest(data, length, buf);
-  return hex20(buf);
+  return Text::btox(buf, DIGEST_LENGTH);
 }
 
 }} // namespaces

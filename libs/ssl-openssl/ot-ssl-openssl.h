@@ -134,17 +134,18 @@ public:
 
   //--------------------------------------------------------------------------
   // Static:  Set verification options from an <ssl> configuration element
-  static void configure_verification(Context *ssl_ctx, XML::Element& ssl_e);
+  static void configure_verification(Context *ssl_ctx,
+                                     const XML::Element& ssl_e);
 
   //--------------------------------------------------------------------------
   // Static:  Create from an <ssl> configuration element
   // Returns context, or 0 if disabled or failed
-  static Context *create(XML::Element& ssl_e, string pass_phrase = "");
+  static Context *create(const XML::Element& ssl_e, string pass_phrase = "");
 
   //--------------------------------------------------------------------------
   // Static:  Create from an <ssl> configuration element with no key or cert
   // Returns context, or 0 if disabled or failed
-  static Context *create_anonymous(XML::Element& ssl_e);
+  static Context *create_anonymous(const XML::Element& ssl_e);
 };
 
 
