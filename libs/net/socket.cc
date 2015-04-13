@@ -669,7 +669,7 @@ int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
     }
   }
 #endif
-};
+}
 
 //--------------------------------------------------------------------------
 // Safe stream sendmsg wrapper
@@ -902,7 +902,7 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
 #endif
 
   return res;
-};
+}
 
 //--------------------------------------------------------------------------
 // Raw datagram sendmsg wrapper
@@ -934,7 +934,7 @@ int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
 #endif
 
   return res;
-};
+}
 
 //--------------------------------------------------------------------------
 // Safe datagram recv wrapper

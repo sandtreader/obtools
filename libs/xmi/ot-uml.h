@@ -25,7 +25,7 @@ namespace ObTools { namespace UML {
 class Element; 
 class Classifier;
 class Model;
-}};
+}}
 #include "ot-xmi.h"
 
 //==========================================================================
