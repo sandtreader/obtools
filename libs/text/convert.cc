@@ -94,10 +94,10 @@ string ifixtos(int i, int decimal_places)
 int stoifix(const string& s, int decimal_places)
 {
   if (decimal_places <= 0)
-    return stoi(s.substr(0, s.size() + decimal_places));
+    return Text::stoi(s.substr(0, s.size() + decimal_places));
   string sfix = s;
   sfix.erase(s.size() - decimal_places - 1, 1);
-  return stoi(sfix);
+  return Text::stoi(sfix);
 }
 
 //--------------------------------------------------------------------------

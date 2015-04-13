@@ -266,8 +266,8 @@ EXTRALIBS += -lrt
 else
 #Compiler override for OS X build
 ifdef OSX
-CC = i686-apple-darwin9-gcc-4.0.1
-CXX = i686-apple-darwin9-g++-4.0.1
+CC = clang
+CXX = clang
 LD = ld
 AR = ar
 PLATFORM = -osx
