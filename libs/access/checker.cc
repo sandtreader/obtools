@@ -16,22 +16,23 @@ namespace ObTools { namespace Access {
 //--------------------------------------------------------------------------
 // Takes <access> config level (containing <groups> and <resources>)
 // Also allows optional namespace prefix for all sub-elements
-Checker::Checker(XML::Element& config, const string& ns)
+Checker::Checker(const XML::Element& config, const string& ns)
 {
   // Read groups
-  XML::Element& groups_e = config.get_child(ns+"groups");
-  for(XML::Element::iterator p(groups_e.get_children(ns+"group")); p; ++p)
+  const XML::Element& groups_e = config.get_child(ns+"groups");
+  for(XML::Element::const_iterator p(groups_e.get_children(ns+"group")); p; ++p)
   {
-    XML::Element& g_e = *p;
+    const XML::Element& g_e = *p;
     Group *g = new Group(g_e, ns);
     groups[g->get_id()] = g;
   }
 
   // Read resources
-  XML::Element& resources_e = config.get_child(ns+"resources");
-  for(XML::Element::iterator p(resources_e.get_children(ns+"resource")); p;++p)
+  const XML::Element& resources_e = config.get_child(ns+"resources");
+  for(XML::Element::const_iterator p(resources_e.get_children(ns+"resource"));
+      p;++p)
   {
-    XML::Element& r_e = *p;
+    const XML::Element& r_e = *p;
     Resource *r = new Resource(r_e, groups, ns);
     resources.push_back(r);
   }

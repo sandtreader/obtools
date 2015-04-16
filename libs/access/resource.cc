@@ -16,7 +16,7 @@ namespace ObTools { namespace Access {
 //--------------------------------------------------------------------------
 // Constructor - reads from a <resource> element, using groups in given map
 // ns gives optional namespace prefix
-Resource::Resource(XML::Element& resource_e, 
+Resource::Resource(const XML::Element& resource_e, 
 		   map<string, Group *>& groups,
 		   const string& ns)
 {
@@ -25,16 +25,18 @@ Resource::Resource(XML::Element& resource_e,
   name = resource_e["name"];
 
   // Get allows
-  for(XML::Element::iterator p(resource_e.get_children(ns+"allow")); p; ++p)
+  for(XML::Element::const_iterator p(resource_e.get_children(ns+"allow"));
+      p; ++p)
   {
-    XML::Element& a_e = *p;
+    const XML::Element& a_e = *p;
     allowed.push_back(Rule(a_e, groups));
   }
 
   // Get denies
-  for(XML::Element::iterator p(resource_e.get_children(ns+"deny")); p; ++p)
+  for(XML::Element::const_iterator p(resource_e.get_children(ns+"deny"));
+      p; ++p)
   {
-    XML::Element& d_e = *p;
+    const XML::Element& d_e = *p;
     denied.push_back(Rule(d_e, groups));
   }
 }
