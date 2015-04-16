@@ -17,7 +17,7 @@
 
 //Mutual recursion problems - define only what ot-uml.h needs 
 //before including it
-namespace ObTools { namespace XMI { class Reader; }};
+namespace ObTools { namespace XMI { class Reader; }}
 #include "ot-uml.h"
 
 //==========================================================================
