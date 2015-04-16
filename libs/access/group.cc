@@ -16,13 +16,13 @@ namespace ObTools { namespace Access {
 //--------------------------------------------------------------------------
 // Constructor - reads from a <group> element
 // ns gives optional namespace prefix for <user> element
-Group::Group(XML::Element& group_e, const string& ns)
+Group::Group(const XML::Element& group_e, const string& ns)
 {
   id = group_e["id"];
 
-  for(XML::Element::iterator p(group_e.get_children(ns+"user")); p; ++p)
+  for(XML::Element::const_iterator p(group_e.get_children(ns+"user")); p; ++p)
   {
-    XML::Element& u_e = *p;
+    const XML::Element& u_e = *p;
     users.push_back(u_e["name"]);
   }
 }

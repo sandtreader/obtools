@@ -34,12 +34,12 @@ class Group
   //--------------------------------------------------------------------------
   // Constructor - reads from a <group> element
   // ns gives optional namespace prefix for <user> element
-  Group(XML::Element& group_e, const string& ns="");
+  Group(const XML::Element& group_e, const string& ns="");
 
   //--------------------------------------------------------------------------
   // Get ID
   string get_id() { return id; }
-  
+
   //--------------------------------------------------------------------------
   // Check if a given user name is in the group
   bool contains(const string& user);
@@ -101,7 +101,7 @@ class Resource
   //--------------------------------------------------------------------------
   // Constructor - reads from a <resource> element, using groups in given map
   // ns gives optional namespace prefix
-  Resource(XML::Element& resource_e, map<string, Group *>& groups,
+  Resource(const XML::Element& resource_e, map<string, Group *>& groups,
 	   const string& ns="");
 
   //--------------------------------------------------------------------------
@@ -133,7 +133,7 @@ public:
   // Constructor 
   // Takes <access> config level (containing <groups> and <resources>)
   // Also allows optional namespace prefix for all sub-elements
-  Checker(XML::Element& config, const string& ns="");
+  Checker(const XML::Element& config, const string& ns="");
 
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given user
