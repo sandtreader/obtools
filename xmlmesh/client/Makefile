@@ -14,7 +14,7 @@ DEPENDS = xmlmesh-core xmlmesh-otmp net log xml text soap web misc time \
 SOCKET  = 1
 
 TESTS 	= test-client test-mclient
-TESTCMD = ./test-client localhost
+TESTCMD = ./test-client testhost
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
