@@ -1,5 +1,7 @@
 <?php
 
+# phpunit tests for ot-xmlmesh.php
+
 require_once("../ot-xmlmesh.php");
 
 class TestOtxmlmesh extends PHPUnit_Framework_TestCase
