@@ -42,14 +42,6 @@ class TestOtxmlmesh extends PHPUnit_Framework_TestCase
     $this->assertEquals("Nothing to handle this request",$xmlmesh_last_error);
   }
 
-  public function testRequestFailErrorSet()
-  {
-    global $xmlmesh_host,$xmlmesh_last_error;
-    $xmlmesh_host = "testhost";
-    $result = xmlmesh_request("foo", "<foo/>");
-    $this->assertEquals("Nothing to handle this request",$xmlmesh_last_error);
-  }
-
   public function testSimpleRequest()
   {
     global $xmlmesh_host,$xmlmesh_last_error;
