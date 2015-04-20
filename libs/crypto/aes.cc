@@ -102,19 +102,30 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
 // Sugared version of encrypt with binary strings and PKCS5 padding
 bool AES::encrypt(const string& plaintext, string& ciphertext_p)
 {
-  // Pad token to AES_BLOCK_SIZE
   int length = plaintext.size();
-  auto_ptr<unsigned char> padded(PKCS5::pad(
-	     reinterpret_cast<const unsigned char *>(plaintext.data()), 
-	     length, AES_BLOCK_SIZE));
+
+  // Copy to safe buffer and pad
+  vector<unsigned char> pt(length);
+  memcpy(&pt[0], plaintext.data(), length);
+
+  PKCS5::pad(pt, AES_BLOCK_SIZE);
+  length = pt.size();
 
   // Encrypt
-  if (!encrypt(padded.get(), length)) return false;
+  if (!encrypt(&pt[0], length)) return false;
 
   // Convert back to string
-  ciphertext_p = string(reinterpret_cast<const char *>(padded.get()), length);
+  ciphertext_p = string(reinterpret_cast<const char *>(&pt[0]), length);
 
   return true;
+}
+
+//------------------------------------------------------------------------
+// Sugared version of encrypt, encrypting and PKCS5 padding in place
+bool AES::encrypt(vector<unsigned char>& data)
+{
+  PKCS5::pad(data, AES_BLOCK_SIZE);
+  return encrypt(&data[0], data.size());
 }
 
 //------------------------------------------------------------------------
@@ -137,6 +148,15 @@ bool AES::decrypt(const string& ciphertext, string& plaintext_p)
   // Convert back to string
   plaintext_p = string(reinterpret_cast<const char *>(data), length);
 
+  return true;
+}
+
+//------------------------------------------------------------------------
+// Sugared version of decrypt, PKCS5 unpadding and decrypting in place
+bool AES::decrypt(vector<unsigned char>& data)
+{
+  if (!decrypt(&data[0], data.size())) return false;
+  PKCS5::unpad(data);
   return true;
 }
 
