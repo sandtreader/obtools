@@ -28,9 +28,11 @@
 #define UTIME _wutime
 #define CHMOD _wchmod
 #define UNLINK _wunlink
+#define ACCESS _waccess
 #define O_LARGEFILE 0
 #include <windows.h>
 #include <fcntl.h>
+#include <io.h>
 #include <ext/stdio_filebuf.h>
 #else
 #if defined(__APPLE__)
@@ -44,6 +46,7 @@
 #define UTIME utime
 #define CHMOD chmod
 #define UNLINK unlink
+#define ACCESS access
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
@@ -208,24 +211,17 @@ bool Path::is_dir() const
 // Is the file readable (by me)?
 bool Path::readable() const
 {
-  int fd = OPEN(CPATH, O_RDONLY | O_LARGEFILE);
-  if (fd < 0) return false;
-  close(fd);
-  return true;
+  return !ACCESS(CPATH, 04);
 }
 
 //--------------------------------------------------------------------------
 // Is the file writable (by me)?
-// Warning: potential race condition
 bool Path::writeable() const
 {
-  bool existed = exists();
-  int fd = OPEN(CPATH, O_CREAT | O_RDWR | O_LARGEFILE, S_IRUSR | S_IWUSR);
-  if (fd < 0) return false;
-  close(fd);
-  if (!existed)
-    erase();
-  return true;
+  if (exists())
+    return !ACCESS(CPATH, 02);
+  else
+    return !ACCESS(dirname().CPATH, 02);
 }
 
 //--------------------------------------------------------------------------
@@ -449,20 +445,17 @@ string Path::user_id_to_name(uid_t uid)
 #else
   // Painful reentrant way of doing this!
   int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  char *buf = static_cast<char *>(malloc(buflen));
-  if (!buf) abort();
+  vector<char> buf(buflen);
 
   struct passwd user;
   struct passwd *uptr;
-  int rc = getpwuid_r(uid, &user, buf, buflen, &uptr);
+  int rc = getpwuid_r(uid, &user, &buf[0], buflen, &uptr);
   if (rc || !uptr)
   {
-    free(buf);
     return "UNKNOWN";
   }
 
   string name(uptr->pw_name);
-  free(buf);
   return name;
 #endif
 }
@@ -478,20 +471,17 @@ int Path::user_name_to_id(const string& uname)
   // Even more painful reentrant way of doing this, given we never use
   // the name!
   int buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  char *buf = static_cast<char *>(malloc(buflen));
-  if (!buf) abort();
+  vector<char> buf(buflen);
 
   struct passwd user;
   struct passwd *uptr;
-  int rc = getpwnam_r(uname.c_str(), &user, buf, buflen, &uptr);
+  int rc = getpwnam_r(uname.c_str(), &user, &buf[0], buflen, &uptr);
   if (rc || !uptr)
   {
-    free(buf);
     return -1;
   }
 
   int uid = uptr->pw_uid;
-  free(buf);
   return uid;
 #endif
 }
@@ -505,20 +495,17 @@ string Path::group_id_to_name(gid_t gid)
 #else
   // Painful reentrant way of doing this!
   int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-  char *buf = static_cast<char *>(malloc(buflen));
-  if (!buf) abort();
+  vector<char> buf(buflen);
 
   struct group group;
   struct group *gptr;
-  int rc = getgrgid_r(gid, &group, buf, buflen, &gptr);
+  int rc = getgrgid_r(gid, &group, &buf[0], buflen, &gptr);
   if (rc || !gptr)
   {
-    free(buf);
     return "UNKNOWN";
   }
 
   string name(gptr->gr_name);
-  free(buf);
   return name;
 #endif
 }
@@ -534,20 +521,17 @@ int Path::group_name_to_id(const string& gname)
   // Even more painful reentrant way of doing this, given we never use
   // the name!
   int buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-  char *buf = static_cast<char *>(malloc(buflen));
-  if (!buf) abort();
+  vector<char> buf(buflen);
 
   struct group group;
   struct group *gptr;
-  int rc = getgrnam_r(gname.c_str(), &group, buf, buflen, &gptr);
+  int rc = getgrnam_r(gname.c_str(), &group, &buf[0], buflen, &gptr);
   if (rc || !gptr)
-  {  
-    free(buf);
+  {
     return -1;
   }
 
   int gid = gptr->gr_gid;
-  free(buf);
   return gid;
 #endif
 }

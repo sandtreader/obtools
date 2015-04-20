@@ -12,12 +12,8 @@ OBJS    = path.o directory.o stream.o glob.o
 DEPENDS = text gen
 TESTLIB = -lgtest
 TESTS   = test-path test-dir test-mkdir test-path-gtest test-stream test-glob
-TESTCMD = ./test-path ~/.emacs &&                 \
-          ./test-path /foo/bar/wombat/fred.exe && \
-          ./test-path /usr/include/linux/ ../../foo && \
+TESTCMD = ./test-path && \
           ./test-dir /usr/bin/ && \
-          echo "123456789" > ./test-path-gtest.gpt && sleep 2 && \
-          ./test-path-gtest && \
           ./test-stream && \
           ./test-glob
 

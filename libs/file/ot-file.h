@@ -162,13 +162,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Is the file writable (by me)?
-  // Warning: potential race condition
   bool writeable() const;
 
   //--------------------------------------------------------------------------
   // Get the file's length
   uint64_t length() const;
- 
+
   //--------------------------------------------------------------------------
   // Get the file's last-modified time (mtime)
   time_t last_modified() const;
