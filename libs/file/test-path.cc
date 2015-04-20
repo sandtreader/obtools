@@ -28,10 +28,12 @@ public:
   PathTest()
   {
     close(open("../tests/no-access", O_CREAT, 0000));
+    close(open("../tests/read-only", O_CREAT, 0444));
   }
 
   ~PathTest()
   {
+    unlink("../tests/read-only");
     unlink("../tests/no-access");
   }
 };
