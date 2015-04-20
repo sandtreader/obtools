@@ -22,13 +22,13 @@ unsigned char *PKCS5::pad(const unsigned char *data, int& length,
   // Always adds padding, even if not really needed
   int new_length = (length+multiple)/multiple*multiple;
   int extra = new_length-length;
-  unsigned char *new_data = static_cast<unsigned char *>(malloc(new_length));
+  unsigned char *new_data = new unsigned char[new_length];
   if (!new_data) abort();
 
   // Copy data and add padding
   memcpy(new_data, data, length);
   memset(new_data+length, extra, extra);
-  
+
   length = new_length;
   return new_data;
 }
