@@ -265,8 +265,16 @@ public:
   bool encrypt(const string& plaintext, string& ciphertext_p);
 
   //------------------------------------------------------------------------
+  // Sugared version of encrypt, encrypting and PKCS5 padding in place
+  bool encrypt(vector<unsigned char>& data);
+
+  //------------------------------------------------------------------------
   // Sugared version of decrypt with binary strings and PKCS5 unpadding
   bool decrypt(const string& ciphertext, string& plaintext_p);
+
+  //------------------------------------------------------------------------
+  // Sugared version of decrypt, PKCS5 unpadding and decrypting in place
+  bool decrypt(vector<unsigned char>& data);
 };
 
 //==========================================================================
@@ -553,8 +561,13 @@ class PKCS5
   // Pad a block of data to given length multiple
   // Returns copied and padded malloc'ed data block, and modifies length
   // to length of padded block
-  static unsigned char *pad(const unsigned char *data, int& length, 
+  static unsigned char *pad(const unsigned char *data, int& length,
 			    int multiple);
+
+  //------------------------------------------------------------------------
+  // Pad a block of data to given length multiple
+  // Updates data vector in place
+  static void pad(vector<unsigned char>& data, int multiple);
 
   //------------------------------------------------------------------------
   // Pad a block of data to given length multiple, in place
@@ -563,9 +576,14 @@ class PKCS5
   static int pad_in_place(unsigned char *data, int length, int multiple);
 
   //------------------------------------------------------------------------
-  // Unpad a block of data 
+  // Unpad a block of data
   // Returns original length of block - data is not copied or modified
   static int original_length(const unsigned char *data, int length);
+
+  //------------------------------------------------------------------------
+  // Unpad a block of data
+  // Updates data vector in place
+  static void unpad(vector<unsigned char>& data);
 };
 
 //==========================================================================

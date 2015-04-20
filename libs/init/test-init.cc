@@ -40,6 +40,7 @@ int main()
   Super *s = sr.create("sub", 98);
 
   cout << "Sub: " << s->a << endl;
+  delete s;
   return 0;  
 }
 

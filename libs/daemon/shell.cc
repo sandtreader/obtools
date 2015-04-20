@@ -44,6 +44,13 @@ void sigterm(int)
   signal(SIGTERM, sig_ign);
 }
 
+// SIGQUIT:  Quit from keyboard
+void sigquit(int)
+{
+  if (the_shell) the_shell->shutdown();
+  signal(SIGQUIT, sig_ign);
+}
+
 // SIGHUP:  Reload config
 void sighup(int)
 {
@@ -77,6 +84,7 @@ int Shell::run()
     if (wait)
       MT::Thread::usleep(wait);
   }
+
   return 0;
 }
 
@@ -157,6 +165,7 @@ int Shell::start(int argc, char **argv)
   // Register signal handlers - same for both master and slave
   the_shell = this;
   signal(SIGTERM, sigterm);
+  if (!go_daemon) signal(SIGQUIT, sigquit); // quit from Ctrl-backslash
   signal(SIGHUP,  sighup);
   signal(SIGSEGV, sigevil);
   signal(SIGILL,  sigevil);
@@ -317,15 +326,7 @@ void Shell::shutdown()
   Log::Streams log;
 
   // Tell the slave to stop, if we're the master
-  if (slave_pid)
-  {
-    log.summary << "SIGTERM received in master process\n";
-    kill(slave_pid, SIGTERM);
-  }
-  else
-  {
-    log.summary << "SIGTERM received in slave process\n";
-  }
+  if (slave_pid) kill(slave_pid, SIGTERM);
 }
 
 //--------------------------------------------------------------------------
