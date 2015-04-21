@@ -14,6 +14,7 @@ TESTLIB = -lgtest
 TESTS   = test-path test-dir test-mkdir test-stream test-glob
 TESTCMD = ./test-path && \
           ./test-dir /usr/bin/ && \
+          ./test-dir && \
           ./test-stream && \
           ./test-glob
 
