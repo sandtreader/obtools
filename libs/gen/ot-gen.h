@@ -18,6 +18,15 @@ namespace ObTools { namespace Gen {
 using namespace std;
 
 //==========================================================================
+// Tristate enumeration
+enum Tristate
+{
+  UNSET,
+  ON,
+  OFF,
+};
+
+//==========================================================================
 // Shared Pointer
 template<class T>
 class SharedPointer
