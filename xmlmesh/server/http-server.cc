@@ -47,6 +47,12 @@ class HTTPServer: public Web::HTTPServer
                       SSL::TCPSocket& socket,
                       Net::TCPStream& stream);
 
+  void generate_progressive(Web::HTTPMessage& request,
+                            Web::HTTPMessage& response,
+                            SSL::ClientDetails& client,
+                            SSL::TCPSocket& socket,
+                            Net::TCPStream& stream);
+
 public:
   //--------------------------------------------------------------------------
   // Constructor to bind to any interface (basic TCP)
@@ -74,11 +80,8 @@ private:
 
   struct ClientRequest
   {
-    string *response;
-    MT::Condition *condition;
-    ClientRequest(): response(0), condition(0) {}
-    ClientRequest(string* _response, MT::Condition *_condition):
-      response(_response), condition(_condition) {}
+    Gen::SharedPointer<MT::MQueue<string> > response_queue;
+    ClientRequest() {}
   };
 
   MT::RWMutex client_request_map_mutex;
@@ -94,17 +97,28 @@ public:
   // Check the service is happy
   bool started();
 
+  //------------------------------------------------------------------------
+  // Handle an incoming HTTP request
   bool handle_request(Web::HTTPMessage& request,
                       Web::HTTPMessage& response,
                       SSL::ClientDetails& client,
-                      bool rsvp);
+                      bool rsvp, bool is_subscribe);
+
+  //--------------------------------------------------------------------------
+  // Generate additional HTTP data
+  void generate_progressive(SSL::ClientDetails& client,
+                            Net::TCPStream& stream);
 
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
   bool handle(RoutingMessage& msg);
 };
 
+//==========================================================================
+// HTTP Server implementation
+
 //--------------------------------------------------------------------------
+// Handle HTTP request (downcall from HTTP::Server)
 bool HTTPServer::handle_request(Web::HTTPMessage& request,
                                 Web::HTTPMessage& response,
                                 SSL::ClientDetails& client,
@@ -116,10 +130,12 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
 
   // Check URL for /request /send or /subscribe
   bool rsvp = false;
+  bool is_subscribe = false;
   const string& path = request.url.get_path();
   if (path == "/subscribe")
   {
     rsvp = true;
+    is_subscribe = true;
   }
   else if (path == "/request")
   {
@@ -130,8 +146,23 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
     return error(response, 404, "Not found");
   }
 
-  return service.handle_request(request, response, client, rsvp);
+  return service.handle_request(request, response, client, rsvp, is_subscribe);
 }
+
+//--------------------------------------------------------------------------
+// Generate additional HTTP data (downcall from HTTP::Server)
+void HTTPServer::generate_progressive(Web::HTTPMessage& /*request*/,
+                                      Web::HTTPMessage& /*response*/,
+                                      SSL::ClientDetails& client,
+                                      SSL::TCPSocket& /*socket*/,
+                                      Net::TCPStream& stream)
+{
+  service.generate_progressive(client, stream);
+}
+
+
+//==========================================================================
+// HTTP Server Service implementation
 
 //------------------------------------------------------------------------
 // Constructor
@@ -168,7 +199,7 @@ bool HTTPServerService::started()
 bool HTTPServerService::handle_request(Web::HTTPMessage& request,
                                        Web::HTTPMessage& response,
                                        SSL::ClientDetails& client,
-                                       bool rsvp)
+                                       bool rsvp, bool is_subscribe)
 {
   // Create our reference for the client
   ServiceClient sclient(this, client.address);
@@ -182,29 +213,58 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
   rmsg.path.push(client.address.port);
 
   // If RSVP, register into an endpoint map
-  MT::Condition response_available;
+  Gen::SharedPointer<MT::MQueue<string> > response_queue;
   if (rsvp)
   {
     MT::RWWriteLock lock(client_request_map_mutex);
-    client_request_map[client.address] = ClientRequest(&response.body,
-                                                       &response_available);
+    response_queue.reset(new MT::MQueue<string>());
+    client_request_map[client.address].response_queue = response_queue;
   }
 
   // Send it into the system
   originate(rmsg);
 
-  // If response required, block on it
+  // If response required, wait for first message from queue
   if (rsvp)
   {
-    response_available.wait();
+    response.body = response_queue->wait();
 
-    MT::RWWriteLock lock(client_request_map_mutex);
-    client_request_map.erase(client.address);
+    // Leave request record in place if subscribed
+    if (!is_subscribe)
+    {
+      MT::RWWriteLock lock(client_request_map_mutex);
+      client_request_map.erase(client.address);
+    }
   }
 
   return true;
 }
 
+//--------------------------------------------------------------------------
+// Generate additional HTTP data
+void HTTPServerService::generate_progressive(SSL::ClientDetails& client,
+                                             Net::TCPStream& stream)
+{
+  // Find request - if present it must be a subscribe request which gets
+  // progressive messages sent back
+  MT::MQueue<string> *response_queue = 0;
+
+  {
+    MT::RWReadLock lock(client_request_map_mutex);
+    client_request_map_t::iterator p = client_request_map.find(client.address);
+    if (p != client_request_map.end())
+      response_queue = p->second.response_queue.get();
+  }
+
+  if (!response_queue) return;
+
+  for(;;) // !!! How do we get out of this!!
+  {
+    string response = response_queue->wait();
+
+    // !!! Send as chunked encoded block!
+  }
+}
 
 //------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
@@ -248,8 +308,7 @@ bool HTTPServerService::handle(RoutingMessage& msg)
   if (p != client_request_map.end())
   {
     ClientRequest& cr = p->second;
-    *cr.response = msg.message.get_text();
-    cr.condition->signal();
+    cr.response_queue->send(msg.message.get_text());
   }
 
   return false;  // Nowhere else to go
