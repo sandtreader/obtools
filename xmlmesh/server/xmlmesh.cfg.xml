@@ -40,7 +40,7 @@
 	 'timeout' is a keepalive timeout to apply to connections (seconds)
          - defaults to 0=off
      -->
-    <otmp-server id="server" port="29167" backlog="5"
+    <otmp-server id="otmp-server" port="29167" backlog="5"
                  max-threads="50" min-spare="10" timeout="0">
 
       <!-- Address filters:  Messages will only be
@@ -52,6 +52,16 @@
 
       <!-- <filter address="10.0.0.0/255.255.255.128"/> -->
     </otmp-server>
+
+    <!-- HTTP server.  Binds to given 'port' (default 29180).
+         'backlog' (default 5) gives the accept() backlog for new connections
+         'min-spare' is the minimum spare threads to keep in the pool (1) 
+	 'max-threads' is the maximum threads allowed
+	 'timeout' is a keepalive timeout to apply to connections (seconds)
+         - defaults to 0=off
+     -->
+    <http-server id="http-server" port="29180" backlog="5"
+                 max-threads="50" min-spare="10" timeout="0"/>
 
     <!-- Request/response correlator: Matches returned responses to
          original requests.  'timeout' (default 60) gives time in
@@ -77,7 +87,8 @@
   <!-- Routing between services.  Each route connects a 'from' service to
        a 'to' service for the given 'subject' (default '*'=all) -->
   <routes>
-    <route from="server" to="correlator"/>
+    <route from="otmp-server" to="correlator"/>
+    <route from="http-server" to="correlator"/>
     <route from="correlator" to="publisher"/>
     <!-- route from="uplink" to="correlator" subject="report.*"/> -->
     <!-- route from="correlator" to="uplink" subject="master.*"/> -->

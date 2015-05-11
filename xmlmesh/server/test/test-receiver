@@ -1,0 +1,4 @@
+#!/bin/bash
+
+../../bindings/cli/build-debug/xmlmesh-receive -v -v -f -r "test.*" ../../bindings/cli/script.reflect
+

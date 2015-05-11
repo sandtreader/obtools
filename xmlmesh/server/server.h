@@ -3,7 +3,7 @@
 //
 // Internal definitions for XMLMesh Server
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2015 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -24,7 +24,7 @@ namespace ObTools { namespace XMLMesh {
 using namespace std;
 
 class Service;  // Forward
-class Server;     
+class Server;
 
 //==========================================================================
 // Signature of a client
@@ -40,7 +40,7 @@ struct ServiceClient
   // Comparators
   bool operator==(const ServiceClient& o)
   { return service==o.service && client==o.client; }
-  bool operator!=(const ServiceClient& o) 
+  bool operator!=(const ServiceClient& o)
   { return service!=o.service || client!=o.client; }
 };
 
@@ -61,7 +61,7 @@ class MessagePath
   void push(const string& s) { path.push_back(s); }
 
   //------------------------------------------------------------------------
-  // Push a path level integer 
+  // Push a path level integer
   void push(int n);
 
   //------------------------------------------------------------------------
@@ -194,12 +194,12 @@ class ServiceThread: public MT::PoolThread
 public:
   Service *service;
   RoutingMessage *msg;
-  
+
   ServiceThread(ObTools::MT::PoolReplacer<ServiceThread>& _rep):
     PoolThread(_rep) {}
 
   //------------------------------------------------------------------------
-  // Run function - pass msg to service 
+  // Run function - pass msg to service
   void run();
 };
 
@@ -254,9 +254,9 @@ protected:
 public:
   //------------------------------------------------------------------------
   // Constructors
-  Service(const string& _id, 
-	  int _min_threads=1, int _max_threads=1): 
-    multithreaded(_max_threads>1), 
+  Service(const string& _id,
+	  int _min_threads=1, int _max_threads=1):
+    multithreaded(_max_threads>1),
     threads(_min_threads, _max_threads),
     id(_id)
   {}
@@ -280,7 +280,7 @@ public:
   { routes.push_back(MessageRoute(subject, service)); }
 
   //------------------------------------------------------------------------
-  // Accept a message 
+  // Accept a message
   // Performs local processing on messages (optionally in a worker thread)
   // and then forwards it to routes (also optionally in worker threads)
   void accept(RoutingMessage& msg);
@@ -313,19 +313,19 @@ private:
   // List of active modules
   list<Service *> services;                 // List of active services
   map<string, Service *> service_ids;       // Map of service ids
-  
+
   Log::Streams log;                         // Foreground logging
 
   // Internal functions
-  bool create_service(XML::Element& xml); 
-  bool create_route(XML::Element& xml); 
+  bool create_service(XML::Element& xml);
+  bool create_route(XML::Element& xml);
 
 public:
   // Factories for use during configuration
   Init::Registry<Service> service_registry;
 
   //------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   Server() {}
 
   //------------------------------------------------------------------------
@@ -342,7 +342,7 @@ public:
 
   //------------------------------------------------------------------------
   // Run method - never returns
-  void run(); 
+  void run();
 
   //------------------------------------------------------------------------
   // Destructor

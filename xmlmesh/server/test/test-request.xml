@@ -1,0 +1,11 @@
+<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"
+              xmlns:x="http://obtools.com/ns/xmlmesh">
+  <env:Header>
+    <x:routing env:mustUnderstand="true" env:relay="true"
+               env:role="http://www.w3.org/2003/05/soap-envelope/role/next"
+               x:id="foo" x:subject="test.foo" x:rsvp="true"/>
+  </env:Header>
+  <env:Body>
+    <test/>
+  </env:Body>
+</env:Envelope>

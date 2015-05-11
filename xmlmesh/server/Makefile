@@ -9,13 +9,12 @@ TYPE	= exe
 NAME    = xmlmesh-server
 HEADERS = server.h
 OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
-	  correlator.o publisher.o
+	  correlator.o publisher.o http-server.o
 
 DEBIAN-NAME    = ot-xmlmesh
-DEBIAN-VERSION = 2.4.3
-DEBIAN-REVISION = 2
+DEBIAN-VERSION = 3.0.0
+DEBIAN-REVISION = dev1
 
-#Always build statically
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
           net log mt xml soap web text cache init misc tube file
 
