@@ -27,15 +27,18 @@ namespace ObTools { namespace XMLMesh {
 class HTTPServerService; // forward
 
 //==========================================================================
-// HTTP Server - accepts one of two POST requests:
+// HTTP Server - accepts one of three POST requests:
 //   /send - sends a one-way message
 //     Request body is an XMLMesh SOAP message
 //   /request - sends a request and gets a response
 //     Request body is an XMLMesh SOAP message
 //     Response body is XMLMesh SOAP message
-//   /subscribe - subscribes for messages
-//     Request body is an XMLMesh subscription request
-//     Response is potentially multiple SOAP messages in chunked encoding
+//   /subscribe/<id> - sends a subscription request which can then be polled
+//     with /poll with the same <id>
+//
+// ... and one GET:
+//   /poll/<id> - polls for subscribed messages
+//     Response body is XMLMesh SOAP message
 class HTTPServer: public Web::HTTPServer
 {
   HTTPServerService& service;
@@ -46,12 +49,6 @@ class HTTPServer: public Web::HTTPServer
                       SSL::ClientDetails& client,
                       SSL::TCPSocket& socket,
                       Net::TCPStream& stream);
-
-  void generate_progressive(Web::HTTPMessage& request,
-                            Web::HTTPMessage& response,
-                            SSL::ClientDetails& client,
-                            SSL::TCPSocket& socket,
-                            Net::TCPStream& stream);
 
 public:
   //--------------------------------------------------------------------------
@@ -78,6 +75,8 @@ private:
   HTTPServer http_server;
   Net::TCPServerThread http_server_thread;
 
+  // Map of active requests/subscriptions based on source path, containing
+  // a message queue for that client
   struct ClientRequest
   {
     Gen::SharedPointer<MT::MQueue<string> > response_queue;
@@ -85,7 +84,7 @@ private:
   };
 
   MT::RWMutex client_request_map_mutex;
-  typedef map<Net::EndPoint, ClientRequest> client_request_map_t;
+  typedef map<string, ClientRequest> client_request_map_t;
   client_request_map_t client_request_map;
 
 public:
@@ -98,16 +97,16 @@ public:
   bool started();
 
   //------------------------------------------------------------------------
-  // Handle an incoming HTTP request
+  // Handle an incoming message POST request
   bool handle_request(Web::HTTPMessage& request,
                       Web::HTTPMessage& response,
-                      SSL::ClientDetails& client,
-                      bool rsvp, bool is_subscribe);
+                      const string& path,
+                      bool rsvp=false,
+                      bool is_subscribe=false);
 
-  //--------------------------------------------------------------------------
-  // Generate additional HTTP data
-  void generate_progressive(SSL::ClientDetails& client,
-                            Net::TCPStream& stream);
+  //------------------------------------------------------------------------
+  // Handle a poll GET request
+  bool handle_poll(Web::HTTPMessage& response, const string& path="");
 
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
@@ -128,38 +127,52 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
   Log::Streams log;
   log.summary << "HTTP request from " << client << endl;
 
-  // Check URL for /request /send or /subscribe
-  bool rsvp = false;
-  bool is_subscribe = false;
+  // Split on / to get optional ID
+  // bits[0] will be empty because of leading /
   const string& path = request.url.get_path();
-  if (path == "/subscribe")
+  vector<string> bits = Text::split(path, '/');
+  if (bits.size() < 2) return error(response, 403, "Forbidden");
+  string command = bits[1];
+
+  MessagePath mpath;
+  if (bits.size() > 2)
   {
-    rsvp = true;
-    is_subscribe = true;
+    // If ID is specified, use alone as path so it can be valid across
+    // different connections
+    mpath.push(bits[2]);
   }
-  else if (path == "/request")
+  else
   {
-    rsvp = true;
+    // Push the soruce address onto the path - valid only for this
+    // connection
+    mpath.push(client.address.host.get_dotted_quad());
+    mpath.push(client.address.port);
   }
-  else if (path != "/send")
+  string mpaths = mpath.to_string();
+
+  // Split on command
+  if (command == "send")
+  {
+    return service.handle_request(request, response, mpaths);
+  }
+  else if (command == "request")
+  {
+    return service.handle_request(request, response, mpaths, true);
+  }
+  else if (command == "subscribe")
+  {
+    return service.handle_request(request, response, mpaths, true, true);
+  }
+  else if (command == "poll")
+  {
+    if (service.handle_poll(response, mpaths)) return true;
+    return error(response, 404, "No such subscription ID");
+  }
+  else
   {
     return error(response, 404, "Not found");
   }
-
-  return service.handle_request(request, response, client, rsvp, is_subscribe);
 }
-
-//--------------------------------------------------------------------------
-// Generate additional HTTP data (downcall from HTTP::Server)
-void HTTPServer::generate_progressive(Web::HTTPMessage& /*request*/,
-                                      Web::HTTPMessage& /*response*/,
-                                      SSL::ClientDetails& client,
-                                      SSL::TCPSocket& /*socket*/,
-                                      Net::TCPStream& stream)
-{
-  service.generate_progressive(client, stream);
-}
-
 
 //==========================================================================
 // HTTP Server Service implementation
@@ -197,27 +210,24 @@ bool HTTPServerService::started()
 }
 
 //------------------------------------------------------------------------
-// Handle an incoming HTTP request
+// Handle an incoming message POST request
 bool HTTPServerService::handle_request(Web::HTTPMessage& request,
                                        Web::HTTPMessage& response,
-                                       SSL::ClientDetails& client,
+                                       const string& path,
                                        bool rsvp, bool is_subscribe)
 {
   // Create mesh message from the body
   Message msg(request.body);
   RoutingMessage rmsg(msg);
+  rmsg.path = path;
 
-  // Push our client info onto the path
-  rmsg.path.push(client.address.host.get_dotted_quad());
-  rmsg.path.push(client.address.port);
-
-  // If RSVP, register into an endpoint map
+  // If RSVP, register into a map based on our source path as above
   Gen::SharedPointer<MT::MQueue<string> > response_queue;
   if (rsvp)
   {
     MT::RWWriteLock lock(client_request_map_mutex);
     response_queue.reset(new MT::MQueue<string>());
-    client_request_map[client.address].response_queue = response_queue;
+    client_request_map[path].response_queue = response_queue;
   }
 
   // Send it into the system
@@ -232,37 +242,45 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
     if (!is_subscribe)
     {
       MT::RWWriteLock lock(client_request_map_mutex);
-      client_request_map.erase(client.address);
+      client_request_map.erase(path);
     }
   }
 
   return true;
 }
 
-//--------------------------------------------------------------------------
-// Generate additional HTTP data
-void HTTPServerService::generate_progressive(SSL::ClientDetails& client,
-                                             Net::TCPStream& stream)
+//------------------------------------------------------------------------
+// Handle a poll GET request
+bool HTTPServerService::handle_poll(Web::HTTPMessage& response,
+                                    const string& path)
 {
-  // Find request - if present it must be a subscribe request which gets
-  // progressive messages sent back
-  MT::MQueue<string> *response_queue = 0;
+  Gen::SharedPointer<MT::MQueue<string> > response_queue;
 
+  // Look up the client request record and get its queue
   {
     MT::RWReadLock lock(client_request_map_mutex);
-    client_request_map_t::iterator p = client_request_map.find(client.address);
+    client_request_map_t::iterator p = client_request_map.find(path);
     if (p != client_request_map.end())
-      response_queue = p->second.response_queue.get();
+    {
+      ClientRequest& cr = p->second;
+      response_queue = cr.response_queue;
+    }
   }
 
-  if (!response_queue) return;
+  if (!response_queue) return false;
 
-  for(;;) // !!! How do we get out of this!!
+  // Wait for the response
+  response.body = response_queue->wait();
+
+  // Erase record
+  // !!! for now, it could be left lying around in a timeout cache
+  // !!! for successive polls
   {
-    string response = response_queue->wait();
-
-    // !!! Send as chunked encoded block!
+    MT::RWWriteLock lock(client_request_map_mutex);
+    client_request_map.erase(path);
   }
+
+  return true;
 }
 
 //------------------------------------------------------------------------
@@ -282,32 +300,13 @@ bool HTTPServerService::handle(RoutingMessage& msg)
         return false;
       }
 
-      // Pop off the port and host from the path
-      int port = msg.path.popi();
-      string hosts = msg.path.pop();
-
-      if (!port || !hosts.size())
-      {
-        log.error << "HTTP Server received bogus reverse path\n";
-        return false;
-      }
-
-      Net::IPAddress host(hosts);
-      if (!host)
-      {
-        log.error << "HTTP Server can't lookup reverse path host: "
-                  << hosts << endl;
-        return false;
-      }
-
-      Net::EndPoint address(host, port);
-
+      string path = msg.path.to_string();  // The whole thing, whatever is left
       OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP Server: responding to "
-                           << address << endl;)
+                           << path << endl;)
 
       // Post response to worker thread that is waiting for it
       MT::RWReadLock lock(client_request_map_mutex);
-      client_request_map_t::iterator p = client_request_map.find(address);
+      client_request_map_t::iterator p = client_request_map.find(path);
       if (p != client_request_map.end())
       {
         ClientRequest& cr = p->second;
