@@ -25,16 +25,14 @@ class Subscription
 public:
   string subject;          // Subject pattern
   string path;             // Client return path
-  ServiceClient client;    // Originator's client reference
-  
-  Subscription(const string& _subject, const string& _path,
-	       ServiceClient& _client):
-    subject(_subject), path(_path), client(_client) 
+
+  Subscription(const string& _subject, const string& _path):
+    subject(_subject), path(_path)
   {}
 };
 
 //==========================================================================
-// Publisher Service 
+// Publisher Service
 class Publisher: public Service
 {
 private:
@@ -44,10 +42,10 @@ private:
 
   bool handle_subscription(RoutingMessage& msg, Log::Streams& tlog);
   bool subscribe(const string& subject, const string& path,
-		 ServiceClient& client, Log::Streams& tlog);
+		 Log::Streams& tlog);
   void unsubscribe(const string& subject, const string& path,
-		   ServiceClient& client, Log::Streams& tlog);
-  void unsubscribe_all(ServiceClient& client, Log::Streams& tlog); 
+		   Log::Streams& tlog);
+  void unsubscribe_all(const string& path, Log::Streams& tlog);
 
 public:
   //------------------------------------------------------------------------
@@ -55,18 +53,14 @@ public:
   Publisher(XML::Element& cfg);
 
   //------------------------------------------------------------------------
-  // Signal various global events, independent of message routing
-  void signal(Signal sig, ServiceClient& client);
-
-  //------------------------------------------------------------------------
-  // Handle any message 
+  // Handle any message
   bool handle(RoutingMessage& msg);
 };
 
 //------------------------------------------------------------------------
-// Constructor - take subject and transport to attach to 
+// Constructor - take subject and transport to attach to
 Publisher::Publisher(XML::Element& cfg):
-  Service(cfg), 
+  Service(cfg),
   subject_pattern(cfg.get_attr("subject", "*"))
 {
   log.summary << "Publish Service '" << id << "' started for subjects '"
@@ -74,63 +68,58 @@ Publisher::Publisher(XML::Element& cfg):
 }
 
 //------------------------------------------------------------------------
-// Signal various global events, independent of message routing
-void Publisher::signal(Signal sig, ServiceClient& client)
-{
-  switch (sig)
-  {
-    case Service::CLIENT_STARTED:
-      // Ignore for now
-      break;
-
-    case Service::CLIENT_FINISHED:
-      // Force unsubscription on everything
-      Log::Streams tlog;
-      tlog.summary << "Forcibly unsubscribing client " 
-		   << client.client << "\n";
-
-      unsubscribe_all(client, tlog);
-      break;
-  }
-}
-
-//------------------------------------------------------------------------
 // Handle any message
 bool Publisher::handle(RoutingMessage& msg)
 {
-  string subject = msg.message.get_subject();
   Log::Streams tlog;
 
-  tlog.detail << "Publish service received message subject " << subject 
-	      << " from client " << msg.client.client << endl;
-
-  // Check for xmlmesh.subscription messages first - note we let them
-  // continue to other subscribers if they're not bogus
-  if (Text::pattern_match("xmlmesh.subscription.*", subject)
-      && !handle_subscription(msg, tlog))
-    return false;
-
-  // Try each subscription in turn to see if it wants it
-  MT::RWReadLock lock(mutex);
-  for(list<Subscription>::iterator p = subscriptions.begin();
-      p!=subscriptions.end();
-      p++)
+  switch (msg.type)
   {
-    Subscription& sub = *p;
-    if (Text::pattern_match(sub.subject, subject))
+    case RoutingMessage::CONNECTION:
+      break;
+
+    case RoutingMessage::MESSAGE:
     {
-      // Create new RoutingMessage from the inbound one, with us
-      // as originator, and with the same path, but set as response
-      // Note however that the message isn't modified - no ref set
-      ServiceClient client(this, msg.client.client);
-      MessagePath path(sub.path);
-      RoutingMessage submsg(client, msg.message, path);
+      string subject = msg.message.get_subject();
+      tlog.detail << "Publish service received message subject " << subject
+                  << " from " << msg.path.to_string() << endl;
 
-      // If old message was being tracked, attach new one as well
-      if (msg.tracker) submsg.track(msg.tracker);
+      // Check for xmlmesh.subscription messages first - note we let them
+      // continue to other subscribers if they're not bogus
+      if (Text::pattern_match("xmlmesh.subscription.*", subject)
+          && !handle_subscription(msg, tlog))
+        return false;
 
-      originate(submsg);
+      // Try each subscription in turn to see if it wants it
+      MT::RWReadLock lock(mutex);
+      for(list<Subscription>::iterator p = subscriptions.begin();
+          p!=subscriptions.end();
+          p++)
+      {
+        Subscription& sub = *p;
+        if (Text::pattern_match(sub.subject, subject))
+        {
+          // Create new RoutingMessage from the inbound one, with us
+          // as originator, and with the same path, but set as response
+          // Note however that the message isn't modified - no ref set
+          MessagePath path(sub.path);
+          RoutingMessage submsg(msg.message, path);
+
+          // If old message was being tracked, attach new one as well
+          if (msg.tracker) submsg.track(msg.tracker);
+
+          originate(submsg);
+        }
+      }
     }
+    break;
+
+    case RoutingMessage::DISCONNECTION:
+    {
+      // Unsubscribe everything that uses this
+      unsubscribe_all(msg.path.to_string(), tlog);
+    }
+    break;
   }
 
   return true;  // Not likely to have forward routing, but possible
@@ -140,7 +129,7 @@ bool Publisher::handle(RoutingMessage& msg)
 // Handle an xmlmesh.subscription message
 bool Publisher::handle_subscription(RoutingMessage& msg, Log::Streams& tlog)
 {
-  // Unpack it 
+  // Unpack it
   SubscriptionMessage smsg(msg.message);
   string path = msg.path.to_string();
 
@@ -158,7 +147,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg, Log::Streams& tlog)
   switch (smsg.operation)
   {
     case SubscriptionMessage::JOIN:
-      if (subscribe(smsg.subject, path, msg.client, tlog))
+      if (subscribe(smsg.subject, path, tlog))
       {
 	respond(msg);
 	return false;  // Take it
@@ -166,7 +155,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg, Log::Streams& tlog)
       break;
 
     case SubscriptionMessage::LEAVE:
-      unsubscribe(smsg.subject, path, msg.client, tlog);
+      unsubscribe(smsg.subject, path, tlog);
       respond(msg);
       return false;
 
@@ -183,17 +172,16 @@ bool Publisher::handle_subscription(RoutingMessage& msg, Log::Streams& tlog)
 // Subscribe a client
 bool Publisher::subscribe(const string& subject,
 			  const string& path,
-			  ServiceClient& client,
 			  Log::Streams& tlog)
 {
   // Check pattern is one we can accept subscription for
   if (Text::pattern_match(subject_pattern, subject))
   {
     // Unsubscribe from this first
-    unsubscribe(subject, path, client, tlog);
+    unsubscribe(subject, path, tlog);
 
     // (Re)subscribe
-    Subscription sub(subject, path, client);
+    Subscription sub(subject, path);
 
     tlog.detail << "Client " << path << " subscribed to "
 		<< subject << "\n";
@@ -211,7 +199,6 @@ bool Publisher::subscribe(const string& subject,
 // E.g. foo.* unsubscribes foo.blah.*, foo.splat as well as foo.*
 void Publisher::unsubscribe(const string& subject,
 			    const string& path,
-			    ServiceClient& client,
 			    Log::Streams& tlog)
 {
   MT::RWWriteLock lock(mutex);  // Require write now because may need it later
@@ -222,10 +209,7 @@ void Publisher::unsubscribe(const string& subject,
     list<Subscription>::iterator q = p++;  // Move safely before deletion
     Subscription& sub = *q;
 
-    // Note, we still check path, in case we get multiple subscriptions
-    // for the same client over multiple paths - weird, but possible
     if (sub.path == path
-	&& sub.client == client
 	&& Text::pattern_match(subject, sub.subject))
     {
       tlog.detail << "Client " << path << " unsubscribed from "
@@ -238,7 +222,7 @@ void Publisher::unsubscribe(const string& subject,
 
 //------------------------------------------------------------------------
 // Unsubscribe a client entirely
-void Publisher::unsubscribe_all(ServiceClient& client,
+void Publisher::unsubscribe_all(const string& path,
 				Log::Streams& tlog)
 {
   MT::RWWriteLock lock(mutex);  // Require write now because may need it later
@@ -248,9 +232,9 @@ void Publisher::unsubscribe_all(ServiceClient& client,
   {
     list<Subscription>::iterator q = p++;  // Move safely before deletion
     Subscription& sub = *q;
-    if (sub.client == client)
+    if (sub.path == path)
     {
-      tlog.detail << "Client " << sub.path << " unsubscribed from "
+      tlog.detail << "Client " << path << " unsubscribed from "
 		  << sub.subject << "\n";
 
       subscriptions.erase(q);

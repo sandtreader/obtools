@@ -3,7 +3,7 @@
 //
 // Implementation of OTMP server service for XMLMesh
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2015 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -96,8 +96,8 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   min_spare_threads(cfg.get_attr_int("min-spare", DEFAULT_MIN_THREADS)),
   max_threads(cfg.get_attr_int("max-threads", DEFAULT_MAX_THREADS)),
   timeout(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT)),
-  otmp(receive_q, port, backlog, min_spare_threads, max_threads, timeout), 
-  server_thread(otmp), 
+  otmp(receive_q, port, backlog, min_spare_threads, max_threads, timeout),
+  server_thread(otmp),
   message_thread(*this)
 {
   bool filtered = false;
@@ -141,43 +141,44 @@ bool OTMPServer::started()
 //--------------------------------------------------------------------------
 // OTMP Message dispatcher
 // Fetch OTMP messages and send into the system
-void OTMPServer::dispatch() 
-{ 
+void OTMPServer::dispatch()
+{
   OTMP::ClientMessage otmp_msg = receive_q.wait();
 
-  // Create our reference for the client. 
-  ServiceClient client(this, otmp_msg.client.address);
+  // Create path for this client = endpoint
+  MessagePath path;
+  path.push(otmp_msg.client.address.host.get_dotted_quad());
+  path.push(otmp_msg.client.address.port);
 
   switch (otmp_msg.action)
   {
     case OTMP::ClientMessage::STARTED:
     {
-      // Tell all services a new client has started
-      server.signal_services(Service::CLIENT_STARTED, client);
-      break;
+      // Send CONNECTION routing message with this path
+      RoutingMessage rmsg(RoutingMessage::CONNECTION, path);
+      originate(rmsg);
     }
+    break;
 
     case OTMP::ClientMessage::MESSAGE_DATA:
     {
       // Convert to routing message
       Message msg(otmp_msg.msg.data);
-      RoutingMessage rmsg(client, msg);
-
-      // Push our client info onto the path
-      rmsg.path.push(otmp_msg.client.address.host.get_dotted_quad());
-      rmsg.path.push(otmp_msg.client.address.port);
+      RoutingMessage rmsg(msg);
+      rmsg.path = path; // Note not with constructor because this is forward
 
       // Send it into the system
       originate(rmsg);
-      break;
     }
+    break;
 
     case OTMP::ClientMessage::FINISHED:
     {
-      // Tell all services a client has finished
-      server.signal_services(Service::CLIENT_FINISHED, client);
-      break;
+      // Send DISCONNECTION routing message with this path
+      RoutingMessage rmsg(RoutingMessage::DISCONNECTION, path);
+      originate(rmsg);
     }
+    break;
   }
 }
 
@@ -188,43 +189,52 @@ bool OTMPServer::handle(RoutingMessage& msg)
 {
   Log::Streams tlog;  // Local log - can be called in any worker thread
 
-  if (!msg.reversing)
+  switch (msg.type)
   {
-    tlog.error << "OTMP Server received forward routing\n";
-    return false;
+    case RoutingMessage::MESSAGE:
+    {
+      if (!msg.reversing)
+      {
+        tlog.error << "OTMP Server received forward routing\n";
+        return false;
+      }
+
+      // Pop off the port and host from the path
+      int port = msg.path.popi();
+      string hosts = msg.path.pop();
+
+      if (!port || !hosts.size())
+      {
+        tlog.error << "OTMP Server received bogus reverse path\n";
+        return false;
+      }
+
+      Net::IPAddress host(hosts);
+      if (!host)
+      {
+        tlog.error << "OTMP Server can't lookup reverse path host: "
+                   << hosts << endl;
+        return false;
+      }
+
+      Net::EndPoint address(host, port);
+      SSL::ClientDetails client(address, "");
+
+      OBTOOLS_LOG_IF_DEBUG(tlog.debug << "OTMP Server: responding to "
+                           << client << endl;)
+
+        OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
+      if (otmp.send(otmp_msg))
+      {
+        // Tell tracker it was forwarded
+        msg.notify_forwarded();
+      }
+      else tlog.error << "OTMP Server can't send message\n";
+    }
+    break;
+
+    default:;
   }
-
-  // Pop off the port and host from the path
-  int port = msg.path.popi();
-  string hosts = msg.path.pop();
-  
-  if (!port || !hosts.size())
-  {
-    tlog.error << "OTMP Server received bogus reverse path\n";
-    return false;
-  }
-
-  Net::IPAddress host(hosts);
-  if (!host)
-  {
-    tlog.error << "OTMP Server can't lookup reverse path host: " 
-	       << hosts << endl;
-    return false;
-  }
-
-  Net::EndPoint address(host, port); 
-  SSL::ClientDetails client(address, "");
-
-  OBTOOLS_LOG_IF_DEBUG(tlog.debug << "OTMP Server: responding to " 
-		       << client << endl;)
-
-  OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
-  if (otmp.send(otmp_msg))
-  {
-    // Tell tracker it was forwarded
-    msg.notify_forwarded();
-  }
-  else tlog.error << "OTMP Server can't send message\n";  
 
   return false;  // Nowhere else to go
 }

@@ -3,7 +3,7 @@
 //
 // Implementation of OTMP client service for XMLMesh
 //
-// Copyright (c) 2003-2004 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2015 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -41,7 +41,7 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   OTMPClientService(XML::Element& cfg);
 
   //--------------------------------------------------------------------------
@@ -80,17 +80,14 @@ OTMPClientService::OTMPClientService(XML::Element& cfg):
 //--------------------------------------------------------------------------
 // OTMP Message dispatcher
 // Fetch OTMP messages and send into the system
-void OTMPClientService::dispatch() 
-{ 
+void OTMPClientService::dispatch()
+{
   Message msg;
 
   if (client.wait(msg))
   {
-    // Create our reference for the 'client' - the host at the other end
-    ServiceClient sclient(this, host);
-
     // Convert to routing message
-    RoutingMessage rmsg(sclient, msg);
+    RoutingMessage rmsg(msg);
 
     // Send it into the system
     originate(rmsg);
@@ -106,16 +103,25 @@ void OTMPClientService::dispatch()
 // Implementation of Service virtual interface - q.v. server.h
 bool OTMPClientService::handle(RoutingMessage& msg)
 {
-  if (client.send(msg.message))
+  switch (msg.type)
   {
-    // Tell tracker the message has been forwarded, so it can call off
-    // the dogs locally
-    msg.notify_forwarded();
-  }
-  else
-  {
-    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
-    error_log << "OTMP Client can't send message\n"; 
+    case RoutingMessage::MESSAGE:
+    {
+      if (client.send(msg.message))
+      {
+        // Tell tracker the message has been forwarded, so it can call off
+        // the dogs locally
+        msg.notify_forwarded();
+      }
+      else
+      {
+        Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+        error_log << "OTMP Client can't send message\n"; 
+      }
+    }
+    break;
+
+    default:;
   }
 
   return false;  // Nowhere else to go

@@ -106,7 +106,13 @@ public:
 // Message to be routed through the system
 struct RoutingMessage
 {
-  ServiceClient client;        // Original client received from
+  enum Type
+  {
+    CONNECTION,   // New connection from a given client path
+    MESSAGE,      // An actual message
+    DISCONNECTION // Disconnection from the given client path
+  };
+  Type type;
   Message message;             // The message
   bool reversing;              // Is this a response going back up the chain?
 
@@ -117,22 +123,28 @@ struct RoutingMessage
 
   //------------------------------------------------------------------------
   // Constructor for inbound messages with empty path
-  RoutingMessage(ServiceClient& _client, Message _message):
-    client(_client), message(_message), reversing(false), tracker(0)
+  RoutingMessage(Message _message):
+    type(MESSAGE), message(_message), reversing(false), tracker(0)
   {}
 
   //------------------------------------------------------------------------
   // Constructor for returned messages, with reverse path
-  RoutingMessage(ServiceClient& _client, Message _message, MessagePath& _path):
-    client(_client), message(_message), reversing(true), path(_path),
-    tracker(0)
+  RoutingMessage(Message _message, MessagePath& _path):
+    type(MESSAGE), message(_message), reversing(true), path(_path), tracker(0)
+  {}
+
+  //------------------------------------------------------------------------
+  // Constructor for informational types (CONNECTION, DISCONNECTION) with
+  // no message or path (yet)
+RoutingMessage(Type _type, const MessagePath& _path):
+  type(_type), reversing(false), path(_path), tracker(0)
   {}
 
   //------------------------------------------------------------------------
   // Copy constructor
   // Piecewise copy, except tells tracker that it was copied, too
   RoutingMessage(const RoutingMessage& orig):
-    client(orig.client), message(orig.message), reversing(orig.reversing),
+    type(orig.type), message(orig.message), reversing(orig.reversing),
     path(orig.path), tracker(orig.tracker)
   {
     // Attach new copy to tracker, if any
@@ -140,7 +152,7 @@ struct RoutingMessage
   }
 
   //------------------------------------------------------------------------
-  // Attach tracker 
+  // Attach tracker
   void track(MessageTracker *_tracker)
   {
     // Detach any old tracker
@@ -286,17 +298,6 @@ public:
   void accept(RoutingMessage& msg);
 
   //------------------------------------------------------------------------
-  // Signal various global events, independent of message routing
-  // Does nothing by default, can be overridden
-  enum Signal
-  {
-    CLIENT_STARTED,
-    CLIENT_FINISHED
-  };
-
-  virtual void signal(Signal, ServiceClient&) {}
-
-  //------------------------------------------------------------------------
   // Tick function - does nothing by default, can be overridden
   virtual void tick() {}
 
@@ -327,10 +328,6 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Server() {}
-
-  //------------------------------------------------------------------------
-  // Signal all services a global event (e.g. clients starting and finishing)
-  void signal_services(Service::Signal sig, ServiceClient& client);
 
   //------------------------------------------------------------------------
   // Look up a service by id

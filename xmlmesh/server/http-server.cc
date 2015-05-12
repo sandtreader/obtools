@@ -201,12 +201,9 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
                                        SSL::ClientDetails& client,
                                        bool rsvp, bool is_subscribe)
 {
-  // Create our reference for the client
-  ServiceClient sclient(this, client.address);
-
   // Create mesh message from the body
   Message msg(request.body);
-  RoutingMessage rmsg(sclient, msg);
+  RoutingMessage rmsg(msg);
 
   // Push our client info onto the path
   rmsg.path.push(client.address.host.get_dotted_quad());
@@ -273,42 +270,51 @@ bool HTTPServerService::handle(RoutingMessage& msg)
 {
   Log::Streams tlog;  // Local log - can be called in any worker thread
 
-  if (!msg.reversing)
+  switch (msg.type)
   {
-    tlog.error << "HTTP Server received forward routing\n";
-    return false;
-  }
+    case RoutingMessage::MESSAGE:
+    {
+      if (!msg.reversing)
+      {
+        tlog.error << "HTTP Server received forward routing\n";
+        return false;
+      }
 
-  // Pop off the port and host from the path
-  int port = msg.path.popi();
-  string hosts = msg.path.pop();
+      // Pop off the port and host from the path
+      int port = msg.path.popi();
+      string hosts = msg.path.pop();
 
-  if (!port || !hosts.size())
-  {
-    tlog.error << "HTTP Server received bogus reverse path\n";
-    return false;
-  }
+      if (!port || !hosts.size())
+      {
+        tlog.error << "HTTP Server received bogus reverse path\n";
+        return false;
+      }
 
-  Net::IPAddress host(hosts);
-  if (!host)
-  {
-    tlog.error << "HTTP Server can't lookup reverse path host: "
-	       << hosts << endl;
-    return false;
-  }
+      Net::IPAddress host(hosts);
+      if (!host)
+      {
+        tlog.error << "HTTP Server can't lookup reverse path host: "
+                   << hosts << endl;
+        return false;
+      }
 
-  Net::EndPoint address(host, port);
+      Net::EndPoint address(host, port);
 
-  OBTOOLS_LOG_IF_DEBUG(tlog.debug << "HTTP Server: responding to "
-		       << address << endl;)
+      OBTOOLS_LOG_IF_DEBUG(tlog.debug << "HTTP Server: responding to "
+                           << address << endl;)
 
-  // Post response to worker thread that is waiting for it
-  MT::RWReadLock lock(client_request_map_mutex);
-  client_request_map_t::iterator p = client_request_map.find(address);
-  if (p != client_request_map.end())
-  {
-    ClientRequest& cr = p->second;
-    cr.response_queue->send(msg.message.get_text());
+        // Post response to worker thread that is waiting for it
+        MT::RWReadLock lock(client_request_map_mutex);
+      client_request_map_t::iterator p = client_request_map.find(address);
+      if (p != client_request_map.end())
+      {
+        ClientRequest& cr = p->second;
+        cr.response_queue->send(msg.message.get_text());
+      }
+    }
+    break;
+
+    default:;
   }
 
   return false;  // Nowhere else to go

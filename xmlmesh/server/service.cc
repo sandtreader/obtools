@@ -129,8 +129,7 @@ bool Service::respond(Message& response, RoutingMessage& request)
 {
   // Create a new routing message from us, but with the same path as
   // that received
-  ServiceClient client(this, request.client.client);
-  RoutingMessage msg(client, response, request.path);
+  RoutingMessage msg(response, request.path);
   return originate(msg);
 }
 
@@ -158,12 +157,12 @@ bool Service::respond(RoutingMessage& request,
 // ServiceThread worker thread
 
 //------------------------------------------------------------------------
-// Run function - pass msg to service 
-void ServiceThread::run() 
-{ 
+// Run function - pass msg to service
+void ServiceThread::run()
+{
   // Take a local copy of the message for this thread to work with
   RoutingMessage localmsg = *msg;  // Copy Constructor!
-  service->work(localmsg); 
+  service->work(localmsg);
 }
 
 }} // namespaces
