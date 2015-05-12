@@ -30,8 +30,8 @@ class OTMPServerThread: public MT::Thread
   {
     server.run();
 
-    Log::Streams log;
-    log.error << "OTMP server exited: Can't listen on port?\n";
+    Log::Error log;
+    log << "OTMP server exited: Can't listen on port?\n";
   }
 
 public:
@@ -100,6 +100,7 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   server_thread(otmp),
   message_thread(*this)
 {
+  Log::Streams log;
   bool filtered = false;
   log.summary << "OTMP server on port " << port << endl;
   log.detail << "Listen backlog " << backlog << endl;
@@ -134,7 +135,8 @@ OTMPServer::OTMPServer(XML::Element& cfg):
 bool OTMPServer::started()
 {
   if (!!otmp && !!server_thread) return true;
-  log.error << "OTMP server failed to start\n";
+  Log::Error log;
+  log << "OTMP server failed to start\n";
   return false;
 }
 
@@ -187,7 +189,7 @@ void OTMPServer::dispatch()
 // Note this only gets called for reversing messages coming back out
 bool OTMPServer::handle(RoutingMessage& msg)
 {
-  Log::Streams tlog;  // Local log - can be called in any worker thread
+  Log::Streams log;  // Local log - can be called in any worker thread
 
   switch (msg.type)
   {
@@ -195,7 +197,7 @@ bool OTMPServer::handle(RoutingMessage& msg)
     {
       if (!msg.reversing)
       {
-        tlog.error << "OTMP Server received forward routing\n";
+        log.error << "OTMP Server received forward routing\n";
         return false;
       }
 
@@ -205,31 +207,31 @@ bool OTMPServer::handle(RoutingMessage& msg)
 
       if (!port || !hosts.size())
       {
-        tlog.error << "OTMP Server received bogus reverse path\n";
+        log.error << "OTMP Server received bogus reverse path\n";
         return false;
       }
 
       Net::IPAddress host(hosts);
       if (!host)
       {
-        tlog.error << "OTMP Server can't lookup reverse path host: "
-                   << hosts << endl;
+        log.error << "OTMP Server can't lookup reverse path host: "
+                  << hosts << endl;
         return false;
       }
 
       Net::EndPoint address(host, port);
       SSL::ClientDetails client(address, "");
 
-      OBTOOLS_LOG_IF_DEBUG(tlog.debug << "OTMP Server: responding to "
+      OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP Server: responding to "
                            << client << endl;)
 
-        OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
+      OTMP::ClientMessage otmp_msg(client, msg.message.get_text());
       if (otmp.send(otmp_msg))
       {
         // Tell tracker it was forwarded
         msg.notify_forwarded();
       }
-      else tlog.error << "OTMP Server can't send message\n";
+      else log.error << "OTMP Server can't send message\n";
     }
     break;
 

@@ -135,14 +135,15 @@ Correlator::Correlator(XML::Element& cfg):
     Service(cfg),
     request_cache(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT))
 {
-  log.summary << "Correlator Service '" << id << "' started\n";
+  Log::Summary log;
+  log << "Correlator Service '" << id << "' started\n";
 }
 
 //------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
 bool Correlator::handle(RoutingMessage& msg)
 {
-  Log::Streams tlog;   // Thread-safe log
+  Log::Streams log;
 
   switch (msg.type)
   {
@@ -165,7 +166,7 @@ bool Correlator::handle(RoutingMessage& msg)
         Correlation *cr = request_cache.detach(our_ref);
         if (cr)
         {
-          tlog.detail << "Correlator: Found correlation:\n  " << *cr << endl;
+          log.detail << "Correlator: Found correlation:\n  " << *cr << endl;
 
           // Create new copy message to be re-originated here
           MessagePath path(cr->source_path);
@@ -182,13 +183,13 @@ bool Correlator::handle(RoutingMessage& msg)
         }
         else
         {
-          tlog.error << "Can't find correlation for response ref:" 
-                     << our_ref << endl;
+          log.error << "Can't find correlation for response ref:"
+                    << our_ref << endl;
           return false;
         }
       }
       // Only look at original requests, before they get
-      // reversed by the publisher - otherwise we'll generate two 
+      // reversed by the publisher - otherwise we'll generate two
       // correlations for each one
       else if (!msg.reversing)
       {
@@ -208,7 +209,7 @@ bool Correlator::handle(RoutingMessage& msg)
           msg.track(cr);
 
           // Log it
-          tlog.detail << "Correlator: Opened correlation:\n  " << *cr << endl;
+          log.detail << "Correlator: Opened correlation:\n  " << *cr << endl;
         }
       }
     }
@@ -227,8 +228,8 @@ bool Correlator::handle(RoutingMessage& msg)
 	CacheType::iterator q = p++;  // Protect while deleting
 	if (msg_path == q->source_path)
 	{
-	  Log::Summary slog;
-	  slog << "Deleted correlation " << *q << " for disconnected client\n";
+	  log.summary << "Deleted correlation " << *q
+                      << " for disconnected client\n";
 	  request_cache.remove(q.id());
 	}
       }
@@ -250,7 +251,8 @@ void Correlator::tick()
 // Handle orphan messages (messages that cannot now be replied to)
 void Correlator::handle_orphan(const string& id, Correlation *cr)
 {
-  log.error << "Correlation " << *cr << " orphaned with no response\n";
+  Log::Error log;
+  log << "Correlation " << *cr << " orphaned with no response\n";
 
   FaultMessage response(id, SOAP::Fault::CODE_RECEIVER,
 			"Nothing to handle this request");

@@ -63,6 +63,7 @@ OTMPClientService::OTMPClientService(XML::Element& cfg):
   client(host),
   client_thread(*this)
 {
+  Log::Streams log;
   client_thread.start();
 
   log.summary << "OTMP Client '" << id << "' to " << host << " started\n";
@@ -72,7 +73,7 @@ OTMPClientService::OTMPClientService(XML::Element& cfg):
     if (client.subscribe(subject))
       log.summary << "  Subscribed to " << subject << " at " << host << endl;
     else
-      log.error << "OTMP Client to " << host << " can't subscribe to " 
+      log.error << "OTMP Client to " << host << " can't subscribe to "
 		<< subject << endl;
   OBTOOLS_XML_ENDFOR
 }
@@ -94,8 +95,8 @@ void OTMPClientService::dispatch()
   }
   else
   {
-    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
-    error_log << "OTMP Client connection restarted\n";
+    Log::Error log;
+    log << "OTMP Client connection restarted\n";
   }
 }
 
@@ -115,8 +116,8 @@ bool OTMPClientService::handle(RoutingMessage& msg)
       }
       else
       {
-        Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
-        error_log << "OTMP Client can't send message\n"; 
+        Log::Error log;
+        log << "OTMP Client can't send message\n";
       }
     }
     break;

@@ -3,7 +3,7 @@
 //
 // Implementation of XMLMesh server object
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2015 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -11,20 +11,21 @@
 #include "ot-log.h"
 #include <time.h>
 
-namespace ObTools { namespace XMLMesh { 
+namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
 // Load modules etc. from XML config
 void Server::configure(XML::Configuration& config)
 {
+  Log::Error log;
   XML::Element& root = config.get_root();
 
   // Read all services
   XML::Element& services = root.get_child("services");
-  
+
   OBTOOLS_XML_FOREACH_CHILD(se, services)
     if (!create_service(se))
-      log.error << "Failed to create service from XML:\n" << se;
+      log << "Failed to create service from XML:\n" << se;
   OBTOOLS_XML_ENDFOR
 
   // Read all routes
@@ -32,7 +33,7 @@ void Server::configure(XML::Configuration& config)
 
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(re, routes, "route")
     if (!create_route(re))
-      log.error << "Failed to create route from XML:\n" << re;
+      log << "Failed to create route from XML:\n" << re;
   OBTOOLS_XML_ENDFOR
 }
 
@@ -43,7 +44,7 @@ bool Server::create_service(XML::Element& xml)
 {
   Service *s = server.service_registry.create(xml.name, xml);
   if (!s) return false;
-  
+
   // Store it
   services.push_back(s);
 
@@ -59,6 +60,7 @@ bool Server::create_service(XML::Element& xml)
 // Returns whether successful
 bool Server::create_route(XML::Element& xml)
 {
+  Log::Streams log;
   string from = xml["from"];
   if (!from.size())
   {
@@ -98,7 +100,7 @@ bool Server::create_route(XML::Element& xml)
 }
 
 //------------------------------------------------------------------------
-// Look up a service by name 
+// Look up a service by name
 Service *Server::lookup_service(const string& name)
 {
   map<string, Service *>::iterator p = service_ids.find(name);
@@ -110,23 +112,24 @@ Service *Server::lookup_service(const string& name)
 
 //--------------------------------------------------------------------------
 // Server run method
-void Server::run() 
-{ 
+void Server::run()
+{
   for(;;)
   {
-    MT::Thread::sleep(1); 
+    MT::Thread::sleep(1);
 
-    // Tick all services 
+    // Tick all services
     for(list<Service *>::iterator p=services.begin();
 	p!=services.end();
 	p++)
     {
       Service *s = *p;
-      if (s->started()) 
+      if (s->started())
 	s->tick();
       else
       {
-	log.error << "Service failed to start - shutting down\n";
+        Log::Error log;
+	log << "Service failed to start - shutting down\n";
 	return;
       }
     }

@@ -232,7 +232,6 @@ private:
 
 protected:
   string id;
-  Log::Streams log;             // Private log for foreground operations only
 
   //------------------------------------------------------------------------
   // Virtual message handler to be implemented by subclasses
@@ -314,8 +313,6 @@ private:
   // List of active modules
   list<Service *> services;                 // List of active services
   map<string, Service *> service_ids;       // Map of service ids
-
-  Log::Streams log;                         // Foreground logging
 
   // Internal functions
   bool create_service(XML::Element& xml);
