@@ -229,20 +229,9 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
   {
     response.body = response_queue->wait();
 
-    if (is_subscribe)
+    // Leave request record in place if subscribed
+    if (!is_subscribe)
     {
-      // Output as chunked encoding, because the rest will be too
-      response.headers.put("Transfer-Encoding", "chunked");
-
-      ostringstream oss;
-      oss << hex << uppercase << response.body.size() << "\r\n"
-          << response.body
-          << "\r\n";
-      response.body = oss.str();
-    }
-    else
-    {
-      // Remove record if not subscribed
       MT::RWWriteLock lock(client_request_map_mutex);
       client_request_map.erase(client.address);
     }
@@ -273,10 +262,7 @@ void HTTPServerService::generate_progressive(SSL::ClientDetails& client,
   {
     string response = response_queue->wait();
 
-    // Send as chunked encoded block
-    stream << hex << uppercase << response.size() << "\r\n"
-           << response
-           << "\r\n";
+    // !!! Send as chunked encoded block!
   }
 }
 
