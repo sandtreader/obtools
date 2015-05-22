@@ -106,7 +106,8 @@ private:
 
   public:
     ClientRequestMap(HTTPServerService& _service, int timeout):
-      UseTimeoutPointerCache(timeout), service(_service) {}
+      ObTools::Cache::UseTimeoutPointerCache<string, ClientRequest>(timeout),
+      service(_service) {}
   };
 
   int client_request_map_timeout;
@@ -128,7 +129,7 @@ private:
 
   public:
     ActivePollerMap(HTTPServerService& _service, int timeout):
-      AgeTimeoutCache(timeout), service(_service) {}
+      ObTools::Cache::AgeTimeoutCache<string, bool>(timeout), service(_service) {}
   };
 
   int active_poller_map_timeout;
