@@ -61,7 +61,15 @@
          - defaults to 0=off
      -->
     <http-server id="http-server" port="29180" backlog="5"
-                 max-threads="50" min-spare="10" timeout="0"/>
+                 max-threads="50" min-spare="10" timeout="0">
+
+      <!-- Timeout for subscriptions if not renewed by a poll (seconds, 90) -->
+      <subscription timeout="90"/>
+
+      <!-- Timeout for poll requests before returning an empty message (seconds, 60) -->
+      <poll timeout="60"/>
+
+    </http-server>
 
     <!-- Request/response correlator: Matches returned responses to
          original requests.  'timeout' (default 60) gives time in

@@ -22,6 +22,12 @@
 #define DEFAULT_MIN_THREADS 1
 #define DEFAULT_TIMEOUT 0
 
+// Default subscription timeout is set to be longer than the client poll
+// timeout, so that new polls refresh it, otherwise a subscription can finish
+// while a poll is still waiting
+#define DEFAULT_SUBSCRIPTION_TIMEOUT 90
+#define DEFAULT_POLL_TIMEOUT 60
+
 namespace ObTools { namespace XMLMesh {
 
 class HTTPServerService; // forward
@@ -79,13 +85,54 @@ private:
   // a message queue for that client
   struct ClientRequest
   {
-    Gen::SharedPointer<MT::MQueue<string> > response_queue;
+    typedef Gen::SharedPointer<MT::MQueue<string> > response_queue_t;
+    response_queue_t response_queue;
+    ClientRequest(const response_queue_t& q): response_queue(q) {}
     ClientRequest() {}
   };
 
-  MT::RWMutex client_request_map_mutex;
-  typedef map<string, ClientRequest> client_request_map_t;
-  client_request_map_t client_request_map;
+  class ClientRequestMap:
+    public Cache::UseTimeoutPointerCache<string, ClientRequest>
+  {
+    HTTPServerService& service;
+
+    // Implementation of delete_allowed, called when an item is about to
+    // get aged out
+    bool delete_allowed(const string& path, ClientRequest *)
+    {
+      service.client_request_timeout(path);
+      return true;
+    }
+
+  public:
+    ClientRequestMap(HTTPServerService& _service, int timeout):
+      UseTimeoutPointerCache(timeout), service(_service) {}
+  };
+
+  int client_request_map_timeout;
+  ClientRequestMap client_request_map;
+
+  // Set of currently active polls, by message path
+  class ActivePollerMap:
+    public Cache::AgeTimeoutCache<string, bool>
+  {
+    HTTPServerService& service;
+
+    // Implementation of delete_allowed, called when an item is about to
+    // get aged out
+    bool delete_allowed(const string& path, bool&)
+    {
+      service.poller_timeout(path);
+      return true;
+    }
+
+  public:
+    ActivePollerMap(HTTPServerService& _service, int timeout):
+      AgeTimeoutCache(timeout), service(_service) {}
+  };
+
+  int active_poller_map_timeout;
+  ActivePollerMap active_poller_map;
 
 public:
   //------------------------------------------------------------------------
@@ -111,6 +158,15 @@ public:
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
   bool handle(RoutingMessage& msg);
+  void tick();
+
+  //------------------------------------------------------------------------
+  // Callback from client_request_map when a subscription request is timed out
+  void client_request_timeout(const string& path);
+
+  //------------------------------------------------------------------------
+  // Callback from active_poller_map when a poller is timed out
+  void poller_timeout(const string& path);
 };
 
 //==========================================================================
@@ -143,7 +199,7 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
   }
   else
   {
-    // Push the soruce address onto the path - valid only for this
+    // Push the source address onto the path - valid only for this
     // connection
     mpath.push(client.address.host.get_dotted_quad());
     mpath.push(client.address.port);
@@ -187,7 +243,13 @@ HTTPServerService::HTTPServerService(XML::Element& cfg):
   max_threads(cfg.get_attr_int("max-threads", DEFAULT_MAX_THREADS)),
   timeout(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT)),
   http_server(*this, port, backlog, min_spare_threads, max_threads, timeout),
-  http_server_thread(http_server)
+  http_server_thread(http_server),
+  client_request_map_timeout(cfg.get_child("subscription")
+                             .get_attr_int("timeout", DEFAULT_SUBSCRIPTION_TIMEOUT)),
+  client_request_map(*this, client_request_map_timeout),
+  active_poller_map_timeout(cfg.get_child("poll")
+                            .get_attr_int("timeout", DEFAULT_POLL_TIMEOUT)),
+  active_poller_map(*this, active_poller_map_timeout)
 {
   Log::Streams log;
   log.summary << "HTTP server on port " << port << endl;
@@ -195,7 +257,10 @@ HTTPServerService::HTTPServerService(XML::Element& cfg):
   log.detail << "Minimum spare threads: " << min_spare_threads << endl;
   log.summary << "Maximum threads: " << max_threads << endl;
   if (timeout)
-    log.summary << "Timeout: " << timeout << endl;
+    log.summary << "Connection timeout: " << timeout << endl;
+
+  log.summary << "Subscription timeout: " << client_request_map_timeout << endl;
+  log.summary << "Poll timeout: " << active_poller_map_timeout << endl;
 }
 
 //------------------------------------------------------------------------
@@ -221,13 +286,19 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
   RoutingMessage rmsg(msg);
   rmsg.path = path;
 
+  // If subscription, announce our (persistent) presence
+  if (is_subscribe)
+  {
+    RoutingMessage rmsg(RoutingMessage::CONNECTION, path);
+    originate(rmsg);
+  }
+
   // If RSVP, register into a map based on our source path as above
   Gen::SharedPointer<MT::MQueue<string> > response_queue;
   if (rsvp)
   {
-    MT::RWWriteLock lock(client_request_map_mutex);
     response_queue.reset(new MT::MQueue<string>());
-    client_request_map[path].response_queue = response_queue;
+    client_request_map.add(path, new ClientRequest(response_queue));
   }
 
   // Send it into the system
@@ -239,11 +310,7 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
     response.body = response_queue->wait();
 
     // Leave request record in place if subscribed
-    if (!is_subscribe)
-    {
-      MT::RWWriteLock lock(client_request_map_mutex);
-      client_request_map.erase(path);
-    }
+    if (!is_subscribe) client_request_map.remove(path);
   }
 
   return true;
@@ -254,31 +321,26 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
 bool HTTPServerService::handle_poll(Web::HTTPMessage& response,
                                     const string& path)
 {
-  Gen::SharedPointer<MT::MQueue<string> > response_queue;
+  // Keep it alive
+  client_request_map.touch(path);
 
   // Look up the client request record and get its queue
+  Gen::SharedPointer<MT::MQueue<string> > response_queue;
   {
-    MT::RWReadLock lock(client_request_map_mutex);
-    client_request_map_t::iterator p = client_request_map.find(path);
-    if (p != client_request_map.end())
-    {
-      ClientRequest& cr = p->second;
-      response_queue = cr.response_queue;
-    }
+    MT::RWReadLock lock(client_request_map.mutex);
+    ClientRequest *cr = client_request_map.lookup(path);
+    if (!cr) return false;
+    response_queue = cr->response_queue;
   }
 
-  if (!response_queue) return false;
+  // Add to active pollers
+  active_poller_map.add(path, true);
 
   // Wait for the response
   response.body = response_queue->wait();
 
-  // Erase record
-  // !!! for now, it could be left lying around in a timeout cache
-  // !!! for successive polls
-  {
-    MT::RWWriteLock lock(client_request_map_mutex);
-    client_request_map.erase(path);
-  }
+  // Remove from active pollers again
+  active_poller_map.remove(path);
 
   return true;
 }
@@ -305,13 +367,12 @@ bool HTTPServerService::handle(RoutingMessage& msg)
                            << path << endl;)
 
       // Post response to worker thread that is waiting for it
-      MT::RWReadLock lock(client_request_map_mutex);
-      client_request_map_t::iterator p = client_request_map.find(path);
-      if (p != client_request_map.end())
-      {
-        ClientRequest& cr = p->second;
-        cr.response_queue->send(msg.message.get_text());
-      }
+      MT::RWReadLock lock(client_request_map.mutex);
+      ClientRequest *cr = client_request_map.lookup(path);
+      if (cr)
+        cr->response_queue->send(msg.message.get_text());
+      else
+        log.error << "Orphan reverse message received to " << path << endl;
     }
     break;
 
@@ -319,6 +380,43 @@ bool HTTPServerService::handle(RoutingMessage& msg)
   }
 
   return false;  // Nowhere else to go
+}
+
+//------------------------------------------------------------------------
+// Tick function
+void HTTPServerService::tick()
+{
+  client_request_map.tidy();
+  active_poller_map.tidy();
+}
+
+//------------------------------------------------------------------------
+// Callback from client_request_map when an item is timed out
+void HTTPServerService::client_request_timeout(const string& path)
+{
+  Log::Detail log;
+  log << "HTTP server subscription timed out on " << path << endl;
+
+  // Send DISCONNECTION routing message with this path
+  RoutingMessage rmsg(RoutingMessage::DISCONNECTION, path);
+  originate(rmsg);
+}
+
+//------------------------------------------------------------------------
+// Callback from active_poller_map when a poller is timed out
+void HTTPServerService::poller_timeout(const string& path)
+{
+  Log::Detail log;
+  log << "Poller timed out on " << path << endl;
+
+  // Keep any subscription alive for another full timeout period until the next
+  // poll
+  client_request_map.touch(path);
+
+  // If there is a client request queue, send an empty message
+  MT::RWReadLock lock(client_request_map.mutex);
+  ClientRequest *cr = client_request_map.lookup(path);
+  if (cr) cr->response_queue->send(string());
 }
 
 //==========================================================================

@@ -61,25 +61,46 @@ void Service::work(RoutingMessage& msg)
 // Forward message to ongoing routes
 bool Service::forward(RoutingMessage& msg)
 {
-  // Get subject
-  string subject = msg.message.get_subject();
-
   // Push our ID onto path
   msg.path.push(id);
 
-  // Loop over all routes to see if they want it
-  for(list<MessageRoute>::iterator p=routes.begin();
-      p!=routes.end();
-      p++)
+  switch (msg.type)
   {
-    MessageRoute& route = *p;
-
-    // Check for subject match - CASE INSENSITIVE
-    if (Text::pattern_match(route.subject_pattern, subject, false))
+    case RoutingMessage::MESSAGE:
     {
-      // Send it to the next service
-      route.service.accept(msg);
+      // Get subject
+      string subject = msg.message.get_subject();
+
+      // Loop over all routes to see if they want it
+      for(list<MessageRoute>::iterator p=routes.begin();
+          p!=routes.end();
+          p++)
+      {
+        MessageRoute& route = *p;
+
+        // Check for subject match - CASE INSENSITIVE
+        if (Text::pattern_match(route.subject_pattern, subject, false))
+        {
+          // Send it to the next service
+          route.service.accept(msg);
+        }
+      }
     }
+    break;
+
+    case RoutingMessage::CONNECTION:
+    case RoutingMessage::DISCONNECTION:
+    {
+      // All routes get it
+      for(list<MessageRoute>::iterator p=routes.begin();
+          p!=routes.end();
+          p++)
+      {
+        MessageRoute& route = *p;
+        route.service.accept(msg);
+      }
+    }
+    break;
   }
 
   // Pop our ID off again

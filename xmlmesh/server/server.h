@@ -136,8 +136,8 @@ struct RoutingMessage
   //------------------------------------------------------------------------
   // Constructor for informational types (CONNECTION, DISCONNECTION) with
   // no message or path (yet)
-RoutingMessage(Type _type, const MessagePath& _path):
-  type(_type), reversing(false), path(_path), tracker(0)
+  RoutingMessage(Type _type, const MessagePath& _path):
+    type(_type), reversing(false), path(_path), tracker(0)
   {}
 
   //------------------------------------------------------------------------
