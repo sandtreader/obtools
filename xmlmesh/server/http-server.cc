@@ -91,14 +91,16 @@ private:
     ClientRequest() {}
   };
 
+  typedef Gen::SharedPointer<ClientRequest> client_request_t;
+
   class ClientRequestMap:
-    public Cache::UseTimeoutPointerCache<string, ClientRequest>
+    public Cache::UseTimeoutCache<string, client_request_t>
   {
     HTTPServerService& service;
 
     // Implementation of delete_allowed, called when an item is about to
     // get aged out
-    bool delete_allowed(const string& path, ClientRequest *)
+    bool delete_allowed(const string& path, client_request_t&)
     {
       service.client_request_timeout(path);
       return true;
@@ -106,30 +108,32 @@ private:
 
   public:
     ClientRequestMap(HTTPServerService& _service, int timeout):
-      ObTools::Cache::UseTimeoutPointerCache<string, ClientRequest>(timeout),
+      ObTools::Cache::UseTimeoutCache<string, client_request_t>(timeout),
       service(_service) {}
   };
 
   int client_request_map_timeout;
   ClientRequestMap client_request_map;
 
-  // Set of currently active polls, by message path
+  // Set of currently active polls, by message path, pointing to client request
+  // for that path
   class ActivePollerMap:
-    public Cache::AgeTimeoutCache<string, bool>
+    public Cache::AgeTimeoutCache<string, client_request_t>
   {
     HTTPServerService& service;
 
     // Implementation of delete_allowed, called when an item is about to
     // get aged out
-    bool delete_allowed(const string& path, bool&)
+    bool delete_allowed(const string& path, client_request_t& cr)
     {
-      service.poller_timeout(path);
+      service.poller_timeout(path, cr);
       return true;
     }
 
   public:
     ActivePollerMap(HTTPServerService& _service, int timeout):
-      ObTools::Cache::AgeTimeoutCache<string, bool>(timeout), service(_service) {}
+      ObTools::Cache::AgeTimeoutCache<string, client_request_t>(timeout),
+      service(_service) {}
   };
 
   int active_poller_map_timeout;
@@ -167,7 +171,7 @@ public:
 
   //------------------------------------------------------------------------
   // Callback from active_poller_map when a poller is timed out
-  void poller_timeout(const string& path);
+  void poller_timeout(const string& path, client_request_t cr);
 };
 
 //==========================================================================
@@ -295,11 +299,12 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
   }
 
   // If RSVP, register into a map based on our source path as above
-  Gen::SharedPointer<MT::MQueue<string> > response_queue;
+  ClientRequest::response_queue_t response_queue;
   if (rsvp)
   {
     response_queue.reset(new MT::MQueue<string>());
-    client_request_map.add(path, new ClientRequest(response_queue));
+    client_request_t cr(new ClientRequest(response_queue));
+    client_request_map.add(path, cr);
   }
 
   // Send it into the system
@@ -326,16 +331,16 @@ bool HTTPServerService::handle_poll(Web::HTTPMessage& response,
   client_request_map.touch(path);
 
   // Look up the client request record and get its queue
-  Gen::SharedPointer<MT::MQueue<string> > response_queue;
+  ClientRequest::response_queue_t response_queue;
+  client_request_t cr;
   {
     MT::RWReadLock lock(client_request_map.mutex);
-    ClientRequest *cr = client_request_map.lookup(path);
-    if (!cr) return false;
+    if (!client_request_map.lookup(path, cr)) return false;
     response_queue = cr->response_queue;
   }
 
   // Add to active pollers
-  active_poller_map.add(path, true);
+  active_poller_map.add(path, cr);
 
   // Wait for the response
   response.body = response_queue->wait();
@@ -369,8 +374,8 @@ bool HTTPServerService::handle(RoutingMessage& msg)
 
       // Post response to worker thread that is waiting for it
       MT::RWReadLock lock(client_request_map.mutex);
-      ClientRequest *cr = client_request_map.lookup(path);
-      if (cr)
+      client_request_t cr;
+      if (client_request_map.lookup(path, cr))
         cr->response_queue->send(msg.message.get_text());
       else
         log.error << "Orphan reverse message received to " << path << endl;
@@ -405,7 +410,7 @@ void HTTPServerService::client_request_timeout(const string& path)
 
 //------------------------------------------------------------------------
 // Callback from active_poller_map when a poller is timed out
-void HTTPServerService::poller_timeout(const string& path)
+    void HTTPServerService::poller_timeout(const string& path, client_request_t cr)
 {
   Log::Detail log;
   log << "Poller timed out on " << path << endl;
@@ -414,10 +419,8 @@ void HTTPServerService::poller_timeout(const string& path)
   // poll
   client_request_map.touch(path);
 
-  // If there is a client request queue, send an empty message
-  MT::RWReadLock lock(client_request_map.mutex);
-  ClientRequest *cr = client_request_map.lookup(path);
-  if (cr) cr->response_queue->send(string());
+  // Send an empty message on the response queue to unblock it
+  cr->response_queue->send(string());
 }
 
 //==========================================================================
