@@ -1,6 +1,6 @@
 <?php
 // Native PHP implementation of ot-xmlmesh client
-// Cpoyright (c) Paul Clark 2008.  All rights reserved.
+// Copyright (c) Paul Clark 2008.  All rights reserved.
 // This code comes with NO WARRANTY and is subject to licence agreement
 
 // Replaces previous C module
@@ -23,10 +23,10 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
 
   // Open TCP socket to server if not already open
   if (!$xmlmesh_socket)
-    $xmlmesh_socket = fsockopen($xmlmesh_host, $xmlmesh_port, $errno, $errstr, 
+    $xmlmesh_socket = fsockopen($xmlmesh_host, $xmlmesh_port, $errno, $errstr,
 				$xmlmesh_timeout);
   $fp = $xmlmesh_socket;
-  if ($fp) 
+  if ($fp)
   {
     // Set timeout for response
     stream_set_timeout($fp, $xmlmesh_timeout);
@@ -62,13 +62,13 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     // Read OTMP header back
     $header = "";
     $len = 0;
-    while ($len < 12 && !feof($fp)) 
+    while ($len < 12 && !feof($fp))
     {
       $header .= fread($fp, 12-$len);
       $len = strlen($header);
     }
 
-    if ($len < 12) 
+    if ($len < 12)
     {
       $xmlmesh_last_error = "Truncated header in response";
       fclose($fp);
@@ -90,13 +90,13 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
 
     $response = "";
     $len = 0;
-    while ($len < $length && !feof($fp)) 
+    while ($len < $length && !feof($fp))
     {
       $response .= fread($fp, $length-$len);
       $len = strlen($response);
     }
 
-    if ($len < $length) 
+    if ($len < $length)
     {
       $xmlmesh_last_error = "Truncated message in response";
       fclose($fp);
