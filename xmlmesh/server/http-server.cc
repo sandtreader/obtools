@@ -64,7 +64,11 @@ public:
 	     int min_spare, int max_threads, int timeout):
     Web::HTTPServer(port, HTTP_SERVER_VERSION, backlog, min_spare,
                     max_threads, timeout),
-    service(_service) {}
+    service(_service)
+  {
+    // Enable CORS, any origin
+    set_cors_origin();
+  }
 };
 
 //==========================================================================
