@@ -65,11 +65,12 @@
         });
       }
 
-      function poll()
+      function poll(retry)
       {
         console.log("=== Poll ===");
         xmlmesh.poll(
         {
+          retry: retry,
           completion: function(result)
           {
             if (result.success)
@@ -88,7 +89,8 @@
     <button onclick="javascript:simple_send()">Simple send</button>
     <button onclick="javascript:request_response()">Request/response</button>
     <button onclick="javascript:subscribe()">Subscribe</button>
-    <button onclick="javascript:poll()">Poll</button>
+    <button onclick="javascript:poll(false)">Poll</button>
+    <button onclick="javascript:poll(true)">Poll with retry</button>
   </body>
 </html>
 

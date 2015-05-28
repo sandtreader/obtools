@@ -179,11 +179,14 @@
 
     // Poll for a message from an earlier subscribe()
     // {
-    //   ref:  Optional ref from subscribe, otherwise uses last ref subscribed with
+    //   ref:   Optional ref from subscribe, otherwise uses last ref subscribed with
+    //   retry: true to automatically retry timed out polls
     // }
+    //
+    // result.success is false and result.error null if it just times out
     poll: function(params)
     {
-      this.log("Polling");
+      this.log("Polling"+(params.retry?" with retry":""));
       var ref = params.ref || this.last_ref || "unknown";
       var url = this.url_prefix+"/poll/"+ref;
       var self = this;
@@ -197,20 +200,37 @@
           {
             self.log("Poll error: " + textStatus + " " + errorThrown);
             params.completion(
-              {
-                success: false,
-                error: textStatus+" "+errorThrown
-              });
+            {
+              success: false,
+              error: textStatus+" "+errorThrown
+            });
           },
 
           success: function(response)
           {
-            self.log("Polled response: "+response);
-            params.completion(
+            if (response.length)
             {
-              success: true,
-              response: parseSOAP(response)
-            });
+              self.log("Polled response: "+response);
+              params.completion(
+              {
+                success: true,
+                response: parseSOAP(response)
+              });
+            }
+            else
+            {
+              self.log("Poll timed out, no response");
+
+              // Don't tell them if we're retrying anyway
+              if (!params.retry) params.completion(
+              {
+                success: false,
+                error: null
+              });
+            }
+
+            // "Recurse" (not really) to restart if requested
+            if (params.retry) self.poll(params);
           }
         });
     }
