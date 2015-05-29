@@ -60,9 +60,18 @@ public:
   void finalise(unsigned char digest[16]);
 
   //--------------------------------------------------------------------------
+  // C++ friendly version: MD5 sum a string into byte array
+  void sum(const string& text, unsigned char digest[16]);
+
+  //--------------------------------------------------------------------------
   // C++ friendly version: MD5 sum a string (returns hex string)
   // Re-initialises each time, so safe to reuse
   string sum(const string& text);
+
+  //--------------------------------------------------------------------------
+  // C++ friendly version: MD5 sum a string, returning lower 64 bits as
+  // integer
+  uint64_t hash_to_int(const string& text);
 
   //------------------------------------------------------------------------
   // Destructor 
@@ -314,6 +323,58 @@ public:
 //------------------------------------------------------------------------
 // << operator to write PropertyList to ostream
 ostream& operator<<(ostream& s, const PropertyList& pl);
+
+//==========================================================================
+// Hash interpolator.  Takes a PropertyList and generates new properties
+// based on hashes of interpolated strings from the existing ones.  Used to
+// generate pathname / URL rewrites with load-balancing elements
+class HashInterpolator
+{
+  struct Hash
+  {
+    string name;
+    unsigned int modulus;
+    string pattern;
+
+    // Comparator for testing
+    bool operator==(const Hash& o) const
+    { return name==o.name && modulus==o.modulus && pattern==o.pattern; }
+
+    Hash(const string& _name, unsigned int _modulus, const string& _pattern):
+      name(_name), modulus(_modulus), pattern(_pattern) {}
+  };
+
+  list<Hash> hashes;
+
+public:
+  //------------------------------------------------------------------------
+  // Default constructor, no hashes
+  HashInterpolator() {}
+
+  //------------------------------------------------------------------------
+  // Constructor from XML, reads <hash> elements from given root e.g.
+  //  <hash name="foo" modulus="10">$foo</hash>
+  HashInterpolator(const XML::Element& root);
+
+  //------------------------------------------------------------------------
+  // Add a hash generating a property of the given 'name', of hash of
+  // string 'pattern' interpolated with existing values and modded with
+  // 'modulus'
+  void add_hash(const string& name, unsigned int modulus,
+                const string& pattern)
+  {
+    hashes.push_back(Hash(name, modulus, pattern));
+  }
+
+  //------------------------------------------------------------------------
+  // Augment an existing PropertyList with hashes derived from existing
+  // properties
+  void augment(PropertyList& pl) const;
+
+  // Comparator for testing
+  bool operator==(const HashInterpolator& o) const
+  { return hashes == o.hashes; }
+};
 
 //==========================================================================
 //Random string generator

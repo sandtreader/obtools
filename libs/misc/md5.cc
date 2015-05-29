@@ -265,8 +265,8 @@ void MD5::transform(uint32_t buf[4], uint32_t in[16])
 }
 
 //--------------------------------------------------------------------------
-// C++ friendly version: MD5 sum a string (returns hex string)
-string MD5::sum(const string& text)
+// C++ friendly version: MD5 sum a string into byte array
+void MD5::sum(const string& text, unsigned char digest[16])
 {
   char buf[64];
 
@@ -290,15 +290,33 @@ string MD5::sum(const string& text)
     update(buf, size-n);
   }
 
+  finalise(digest);
+}
+
+//--------------------------------------------------------------------------
+// C++ friendly version: MD5 sum a string (returns hex string)
+string MD5::sum(const string& text)
+{
   // Get the digest
   unsigned char digest[16];
-  finalise(digest);
+  sum(text, digest);
 
   // Turn it back into a hex string
   ostringstream oss;
   for(int i=0; i<16; i++)
     oss << hex << setfill('0') << setw(2) << static_cast<unsigned>(digest[i]);
   return oss.str();
+}
+
+//--------------------------------------------------------------------------
+// C++ friendly version: MD5 sum a string, returning lower 64 bits as
+// integer
+uint64_t MD5::hash_to_int(const string& text)
+{
+  // Get the digest
+  unsigned char digest[16];
+  sum(text, digest);
+  return *reinterpret_cast<uint64_t *>(digest+8);
 }
 
 //------------------------------------------------------------------------
