@@ -373,10 +373,10 @@ class MessageTransportSubscriber: public Subscriber
     SSL::ClientDetails ssl(ep, "#xmlmesh");  // Fake
 
     // Get handler to deal with message
-    string error = message_handler.handle_message(context, request,
-                                                  ssl, response);
-    if (error.empty())
+    try
     {
+      message_handler.handle_message(context, request, ssl, response);
+
       if (message_handler.complex_result)
       {
         // Change .request to .response
@@ -393,8 +393,10 @@ class MessageTransportSubscriber: public Subscriber
         client.respond(msg);
       }
     }
-    else
-      client.respond(SOAP::Fault::CODE_SENDER, error, msg);
+    catch (const ObTools::Message::Exception& me)
+    {
+      client.respond(SOAP::Fault::CODE_SENDER, me.what(), msg);
+    }
   }
 };
 

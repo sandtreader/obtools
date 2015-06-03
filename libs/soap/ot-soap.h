@@ -472,16 +472,16 @@ class MessageTransportURLHandler: public URLHandler
                             message_handler.ns_url);
 
     // Get handler to deal with message
-    string error = message_handler.handle_message(context, body, client, *re);
-    if (error.empty())
+    try
     {
+      message_handler.handle_message(context, body, client, *re);
       response.add_body(re);
       return true;
     }
-    else
+    catch (const ObTools::Message::Exception& me)
     {
       delete re;
-      return fault(response, SOAP::Fault::CODE_SENDER, error);
+      return fault(response, SOAP::Fault::CODE_SENDER, me.what());
     }
   }
 };

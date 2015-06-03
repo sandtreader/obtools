@@ -15,11 +15,19 @@
 #include "ot-init.h"
 #include "ot-ssl.h"
 #include "ot-log.h"
+#include <stdexcept>
 
 namespace ObTools { namespace Message {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
+
+//==========================================================================
+// Generic exception
+struct Exception: public runtime_error
+{
+  Exception(const string& _error): runtime_error(_error) {}
+};
 
 //==========================================================================
 // Unified message handler interface (abstract template)
@@ -49,12 +57,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Call to handle message and respond
-  // Returns error string or "" if OK, in which case response is filled in
+  // throws Exception on any error, otherwise fills in response
   // Response document will be pre-created with document_name-response, if set
-  virtual string handle_message(CONTEXT& context,
-                                const XML::Element& request,
-                                SSL::ClientDetails& client,
-                                XML::Element& response) = 0;
+  virtual void handle_message(CONTEXT& context,
+                              const XML::Element& request,
+                              const SSL::ClientDetails& client,
+                              XML::Element& response) = 0;
 
   //--------------------------------------------------------------------------
   // Virtual destructor (probably not needed)
