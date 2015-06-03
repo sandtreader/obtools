@@ -69,8 +69,8 @@ public:
   string sum(const string& text);
 
   //--------------------------------------------------------------------------
-  // C++ friendly version: MD5 sum a string, returning lower 64 bits as
-  // integer
+  // C++ friendly version: MD5 sum a string, returning combination of digest
+  // as an integer (read as two big-endian ints and XOR'ed)
   uint64_t hash_to_int(const string& text);
 
   //------------------------------------------------------------------------

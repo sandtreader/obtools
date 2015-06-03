@@ -309,14 +309,17 @@ string MD5::sum(const string& text)
 }
 
 //--------------------------------------------------------------------------
-// C++ friendly version: MD5 sum a string, returning lower 64 bits as
-// integer
+// C++ friendly version: MD5 sum a string, returning combination of digest
+// as an integer (read as two big-endian ints and XOR'ed)
 uint64_t MD5::hash_to_int(const string& text)
 {
   // Get the digest
   unsigned char digest[16];
   sum(text, digest);
-  return *reinterpret_cast<uint64_t *>(digest+8);
+  uint64_t hash = 0;
+  for(int i=0; i<8; i++)
+    hash = (hash << 8) | (digest[i] ^ digest[8+i]);
+  return hash;
 }
 
 //------------------------------------------------------------------------
