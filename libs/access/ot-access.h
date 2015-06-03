@@ -143,7 +143,7 @@ public:
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given SSL client
   // Checks using CN as user, or #anonymous if not identified
-  bool check(const string& resource, SSL::ClientDetails& client)
+  bool check(const string& resource, const SSL::ClientDetails& client)
   {
     return check(resource, client.address.host, 
 		 client.cert_cn.empty()?"#anonymous":client.cert_cn);
