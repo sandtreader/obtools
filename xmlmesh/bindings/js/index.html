@@ -75,13 +75,25 @@
           {
             if (result.success)
             {
-              var rtext = (new XMLSerializer()).serializeToString(result.response[0]);
+              var rtext =
+                new XMLSerializer().serializeToString(result.response[0]);
               console.log("Success!\n"+rtext);
             }
             else
               console.log("FAILED: "+result.error);
           }
         });
+      }
+
+      function subscribe_and_poll()
+      {
+        console.log("=== Subscribe and poll ===");
+        xmlmesh.subscribe_and_poll("test.*",
+          function(xml)
+          {
+            console.log("Polled:");
+            console.log(new XMLSerializer().serializeToString(xml[0]));
+          });
       }
 
     </script>
@@ -91,6 +103,7 @@
     <button onclick="javascript:subscribe()">Subscribe</button>
     <button onclick="javascript:poll(false)">Poll</button>
     <button onclick="javascript:poll(true)">Poll with retry</button>
+    <button onclick="javascript:subscribe_and_poll()">Subscribe and poll</button>
   </body>
 </html>
 

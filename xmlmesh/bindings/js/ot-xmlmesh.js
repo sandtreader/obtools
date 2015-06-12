@@ -22,7 +22,7 @@
 
 (function($)
 {
-  // --------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   // Constructor with server URL prefix (without trailing /)
   // Optional console for debugging (which implements log("..."))
   $.xmlmesh = function(url_prefix, console)
@@ -32,7 +32,7 @@
     this.log("Created new client interface on "+url_prefix);
   }
 
-  // --------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   // Internals
 
   // Generate a random request ID
@@ -76,7 +76,7 @@
     return body.children();
   }
 
-  // --------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // Public interface
   $.extend($.xmlmesh.prototype,
   {
@@ -94,7 +94,8 @@
     // }
     send: function(params)
     {
-      this.log("Sending "+params.subject+", "+(params.rsvp?"with":"no")+" response:");
+      this.log("Sending "+params.subject+", "
+               +(params.rsvp?"with":"no")+" response:");
 
       var soap = makeSOAP(params.subject, params.rsvp, params.message);
       this.log(soap);
@@ -179,7 +180,8 @@
 
     // Poll for a message from an earlier subscribe()
     // {
-    //   ref:   Optional ref from subscribe, otherwise uses last ref subscribed with
+    //   ref:   Optional ref from subscribe, otherwise uses last ref
+    //          subscribed with
     //   retry: true to automatically retry timed out polls
     // }
     //
@@ -233,6 +235,48 @@
             if (params.retry) self.poll(params);
           }
         });
+    },
+
+    // Subscribe-and-poll - simple interface which sets up a subscribe,
+    // polls it and calls back to callback function with each received
+    // message ($ on XML), logging any errors and retrying automatically
+    subscribe_and_poll: function(pattern, callback)
+    {
+      var self=this;
+      this.subscribe({
+        pattern: pattern,
+        completion: function(sub_result)
+        {
+          if (sub_result.success)
+          {
+            self.poll({
+              ref: sub_result.ref,
+              retry: true,
+              completion: function(poll_result)
+              {
+                if (poll_result.success)
+                  callback(poll_result.response);
+                else
+                {
+                  self.log("Poll failed: "+poll_result.error);
+
+                  // Resubscribe and restart
+                  self.subscribe_and_poll(pattern, callback);
+                }
+              }
+            });
+          }
+          else
+          {
+            self.log("Subscription failed: "+sub_result.error);
+
+            // Try again after a reasonable timeout
+            setTimeout(function()
+                       { self.subscribe_and_poll(pattern, callback); },
+                       5000); // ? make optional parameter?
+          }
+        }
+      });
     }
   });
 }(jQuery));
