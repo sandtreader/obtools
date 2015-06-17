@@ -124,7 +124,7 @@ struct Message
 
   //------------------------------------------------------------------------
   // Get a friendly string version of the tag
-  string stag() { return "'"+tag_to_string(tag)+"'"; }
+  string stag() const { return "'"+tag_to_string(tag)+"'"; }
 };
 
 //==========================================================================
@@ -167,11 +167,11 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port) and optional name
-  Client(Net::EndPoint _server, const string& _name="Tube");
+  Client(const Net::EndPoint& _server, const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Constructor with SSL
-  Client(Net::EndPoint _server, SSL::Context *_ctx, 
+  Client(const Net::EndPoint& _server, SSL::Context *_ctx, 
 	 const string& _name="Tube");
 
   //------------------------------------------------------------------------
@@ -425,7 +425,7 @@ struct ClientSession
 // message;  it's safer to re-lookup the endpoint each time.
 struct ClientMessage
 {
-  SSL::ClientDetails client;
+  const SSL::ClientDetails client;
   Message msg;
 
   enum Action
@@ -435,15 +435,15 @@ struct ClientMessage
     FINISHED
   };
 
-  Action action;
+  const Action action;
 
   // Constructor for message
-  ClientMessage(SSL::ClientDetails& _client, tag_t _tag, 
+  ClientMessage(const SSL::ClientDetails& _client, tag_t _tag, 
 		const string& _data="", flags_t _flags=0):
     client(_client), msg(_tag, _data,_flags), action(MESSAGE_DATA) {}
 
   // Constructor for other action
-  ClientMessage(SSL::ClientDetails& _client, Action _action):
+  ClientMessage(const SSL::ClientDetails& _client, Action _action):
     client(_client), msg(), action(_action) {}
 };
 

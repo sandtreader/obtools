@@ -293,6 +293,10 @@ public:
   {}
 
   //------------------------------------------------------------------------
+  // Get ID
+  const string& get_id() const { return id; }
+
+  //------------------------------------------------------------------------
   // Check the service is happy
   // Override to close down startup if initialisation failed
   virtual bool started() const { return true; }

@@ -57,11 +57,11 @@ public:
 class OTMPServer: public Service
 {
 private:
-  int port;
-  int backlog;
-  int min_spare_threads;
-  int max_threads;
-  int timeout;
+  const int port;
+  const int backlog;
+  const int min_spare_threads;
+  const int max_threads;
+  const int timeout;
 
   OTMP::Server otmp;
   OTMPServerThread  server_thread;
@@ -75,7 +75,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check the service is happy
-  bool started();
+  bool started() const;
 
   //--------------------------------------------------------------------------
   // OTMP Message dispatcher
@@ -134,12 +134,9 @@ OTMPServer::OTMPServer(const XML::Element& cfg):
 //------------------------------------------------------------------------
 // Check the service is happy
 // Override to close down startup if initialisation failed
-bool OTMPServer::started()
+bool OTMPServer::started() const
 {
-  if (!!otmp && !!server_thread) return true;
-  Log::Error log;
-  log << "OTMP server failed to start\n";
-  return false;
+  return (!!otmp && !!server_thread);
 }
 
 //--------------------------------------------------------------------------
@@ -147,7 +144,7 @@ bool OTMPServer::started()
 // Fetch OTMP messages and send into the system
 void OTMPServer::dispatch()
 {
-  OTMP::ClientMessage otmp_msg = receive_q.wait();
+  const OTMP::ClientMessage otmp_msg = receive_q.wait();
 
   // Create path for this client = endpoint
   MessagePath path;
@@ -204,8 +201,8 @@ bool OTMPServer::handle(RoutingMessage& msg)
       }
 
       // Pop off the port and host from the path
-      int port = msg.path.popi();
-      string hosts = msg.path.pop();
+      const int port = msg.path.popi();
+      const string hosts = msg.path.pop();
 
       if (!port || !hosts.size())
       {
@@ -213,7 +210,7 @@ bool OTMPServer::handle(RoutingMessage& msg)
         return false;
       }
 
-      Net::IPAddress host(hosts);
+      const Net::IPAddress host(hosts);
       if (!host)
       {
         log.error << "OTMP Server can't lookup reverse path host: "
@@ -221,8 +218,8 @@ bool OTMPServer::handle(RoutingMessage& msg)
         return false;
       }
 
-      Net::EndPoint address(host, port);
-      SSL::ClientDetails client(address, "");
+      const Net::EndPoint address(host, port);
+      const SSL::ClientDetails client(address, "");
 
       OBTOOLS_LOG_IF_DEBUG(log.debug << "OTMP Server: responding to "
                            << client << endl;)
@@ -237,7 +234,7 @@ bool OTMPServer::handle(RoutingMessage& msg)
     }
     break;
 
-    default:;
+    default: break;
   }
 
   return false;  // Nowhere else to go

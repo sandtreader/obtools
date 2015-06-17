@@ -80,7 +80,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Test if it has stopped
-  bool operator!() { return !valid || !running; }
+  bool operator!() const { return !valid || !running; }
 
   //--------------------------------------------------------------------------
   // Destructor - ask it to cancel if started

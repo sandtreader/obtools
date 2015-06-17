@@ -35,7 +35,7 @@ public:
 class OTMPClientService: public Service
 {
 private:
-  Net::EndPoint host;
+  const Net::EndPoint host;
   OTMPClient client;
   OTMPClientThread  client_thread;
 
@@ -71,7 +71,7 @@ OTMPClientService::OTMPClientService(const XML::Element& cfg):
   for(XML::Element::const_iterator p(cfg.get_children("subscription")); p; ++p)
   {
     const XML::Element& sube = *p;
-    string subject = sube["subject"];
+    const string& subject = sube["subject"];
     if (client.subscribe(subject))
       log.summary << "  Subscribed to " << subject << " at " << host << endl;
     else

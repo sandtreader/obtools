@@ -22,8 +22,8 @@ class Correlator;   // Forward
 struct Correlation: public MessageTracker
 {
   Correlator& correlator;        // Ref back to owning correlator
-  string id;                     // Request message ID
-  string source_path;            // Original path for the request
+  const string id;               // Request message ID
+  const string source_path;      // Original path for the request
   list<RoutingMessage *> copies; // List of copies of message
   bool forwarded;                // Whether forwarded
   bool replied;                  // Whether replied
@@ -153,7 +153,7 @@ bool Correlator::handle(RoutingMessage& msg)
     case RoutingMessage::MESSAGE:
     {
       // Work out if it's a response or not
-      string our_ref = msg.message.get_ref();
+      const string our_ref = msg.message.get_ref();
 
       // Look at responses going in either direction - they may be generated
       // by external clients with forward routing, or our own services with
@@ -169,7 +169,7 @@ bool Correlator::handle(RoutingMessage& msg)
           log.detail << "Correlator: Found correlation:\n  " << *cr << endl;
 
           // Create new copy message to be re-originated here
-          MessagePath path(cr->source_path);
+          const MessagePath path(cr->source_path);
           RoutingMessage newmsg(msg.message, path);
           originate(newmsg);
 
@@ -198,7 +198,7 @@ bool Correlator::handle(RoutingMessage& msg)
         if (msg.message.get_rsvp())
         {
           // Grab ID
-          string id = msg.message.get_id();
+          const string id = msg.message.get_id();
 
           // Create correlated request and enter in the cache
           Correlation *cr = new Correlation(*this, id, msg.path.to_string());
@@ -219,7 +219,7 @@ bool Correlator::handle(RoutingMessage& msg)
     {
       // Check cache for any with this path, and delete them
       // Note we need write lock even for scan because we may need to convert
-      string msg_path = msg.path.to_string();
+      const string msg_path = msg.path.to_string();
       MT::RWWriteLock lock(request_cache.mutex);
       for(CacheType::iterator p = request_cache.begin();
 	  p!=request_cache.end();
@@ -254,9 +254,9 @@ void Correlator::handle_orphan(const string& id, Correlation *cr)
   Log::Error log;
   log << "Correlation " << *cr << " orphaned with no response\n";
 
-  FaultMessage response(id, SOAP::Fault::CODE_RECEIVER,
-			"Nothing to handle this request");
-  MessagePath path(cr->source_path);
+  const FaultMessage response(id, SOAP::Fault::CODE_RECEIVER,
+                              "Nothing to handle this request");
+  const MessagePath path(cr->source_path);
   RoutingMessage newmsg(response, path);
   originate(newmsg);
 }

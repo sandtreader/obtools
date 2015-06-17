@@ -20,11 +20,10 @@ class PublishService;  // forward
 
 //==========================================================================
 // Subscription record
-class Subscription
+struct Subscription
 {
-public:
-  string subject;          // Subject pattern
-  string path;             // Client return path
+  const string subject;          // Subject pattern
+  const string path;             // Client return path
 
   Subscription(const string& _subject, const string& _path):
     subject(_subject), path(_path)
@@ -36,8 +35,8 @@ public:
 class Publisher: public Service
 {
 private:
-  string subject_pattern;            // Pattern of allowed subjects
-  MT::RWMutex mutex;                 // On subscriptions list
+  const string subject_pattern;            // Pattern of allowed subjects
+  MT::RWMutex mutex;                       // On subscriptions list
   list<Subscription> subscriptions;
 
   bool handle_subscription(RoutingMessage& msg);
@@ -79,7 +78,7 @@ bool Publisher::handle(RoutingMessage& msg)
 
     case RoutingMessage::MESSAGE:
     {
-      string subject = msg.message.get_subject();
+      const string subject = msg.message.get_subject();
       log.detail << "Publish service received message subject " << subject
                  << " from " << msg.path.to_string() << endl;
 
@@ -91,17 +90,17 @@ bool Publisher::handle(RoutingMessage& msg)
 
       // Try each subscription in turn to see if it wants it
       MT::RWReadLock lock(mutex);
-      for(list<Subscription>::iterator p = subscriptions.begin();
+      for(list<Subscription>::const_iterator p = subscriptions.begin();
           p!=subscriptions.end();
           p++)
       {
-        Subscription& sub = *p;
+        const Subscription& sub = *p;
         if (Text::pattern_match(sub.subject, subject))
         {
           // Create new RoutingMessage from the inbound one, with us
           // as originator, and with the same path, but set as response
           // Note however that the message isn't modified - no ref set
-          MessagePath path(sub.path);
+          const MessagePath path(sub.path);
           RoutingMessage submsg(msg.message, path);
 
           // If old message was being tracked, attach new one as well
@@ -131,8 +130,8 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
   Log::Streams log;
 
   // Unpack it
-  SubscriptionMessage smsg(msg.message);
-  string path = msg.path.to_string();
+  const SubscriptionMessage smsg(msg.message);
+  const string path = msg.path.to_string();
 
   if (!smsg)
   {
@@ -181,7 +180,7 @@ bool Publisher::subscribe(const string& subject,
     unsubscribe(subject, path);
 
     // (Re)subscribe
-    Subscription sub(subject, path);
+    const Subscription sub(subject, path);
 
     Log::Detail log;
     log << "Client " << path << " subscribed to " << subject << endl;
@@ -206,7 +205,7 @@ void Publisher::unsubscribe(const string& subject,
      )
   {
     list<Subscription>::iterator q = p++;  // Move safely before deletion
-    Subscription& sub = *q;
+    const Subscription& sub = *q;
 
     if (sub.path == path
 	&& Text::pattern_match(subject, sub.subject))
@@ -228,7 +227,7 @@ void Publisher::unsubscribe_all(const string& path)
       )
   {
     list<Subscription>::iterator q = p++;  // Move safely before deletion
-    Subscription& sub = *q;
+    const Subscription& sub = *q;
     if (sub.path == path)
     {
       Log::Detail log;

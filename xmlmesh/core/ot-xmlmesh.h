@@ -187,7 +187,7 @@ public:
 
   //--------------------------------------------------------------------------
   //Test for badness
-  bool operator!() { return code == SOAP::Fault::CODE_UNKNOWN; }
+  bool operator!() const { return code == SOAP::Fault::CODE_UNKNOWN; }
 };
 
 //------------------------------------------------------------------------
@@ -221,7 +221,7 @@ public:
 
   //--------------------------------------------------------------------------
   //Test for badness
-  bool operator!() { return operation == BOGUS; }
+  bool operator!() const { return operation == BOGUS; }
 };
 
 //------------------------------------------------------------------------

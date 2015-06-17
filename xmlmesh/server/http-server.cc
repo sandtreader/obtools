@@ -97,9 +97,9 @@ private:
   {
     HTTPServerService& service;
 
-    // Implementation of delete_allowed, called when an item is about to
+    // Implementation of prepare_to_die, called when an item is about to
     // get aged out
-    bool delete_allowed(const string& path, ResponseQueuePtr&)
+    bool prepare_to_die(const string& path, ResponseQueuePtr&)
     {
       service.client_request_timeout(path);
       return true;
@@ -121,9 +121,9 @@ private:
   {
     HTTPServerService& service;
 
-    // Implementation of delete_allowed, called when an item is about to
+    // Implementation of prepare_to_die, called when an item is about to
     // get aged out
-    bool delete_allowed(const string& path, ResponseQueuePtr& response_queue)
+    bool prepare_to_die(const string& path, ResponseQueuePtr& response_queue)
     {
       service.poller_timeout(path, response_queue);
       return true;
@@ -145,7 +145,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check the service is happy
-  bool started();
+  bool started() const;
 
   //------------------------------------------------------------------------
   // Handle an incoming message POST request
@@ -270,12 +270,9 @@ HTTPServerService::HTTPServerService(const XML::Element& cfg):
 //------------------------------------------------------------------------
 // Check the service is happy
 // Override to close down startup if initialisation failed
-bool HTTPServerService::started()
+bool HTTPServerService::started() const
 {
-  if (!!http_server) return true;
-  Log::Error log;
-  log << "HTTP server failed to start\n";
-  return false;
+  return !!http_server;
 }
 
 //------------------------------------------------------------------------
@@ -293,8 +290,8 @@ bool HTTPServerService::handle_request(const Web::HTTPMessage& request,
   // If subscription, announce our (persistent) presence
   if (is_subscribe)
   {
-    RoutingMessage rmsg(RoutingMessage::CONNECTION, path);
-    originate(rmsg);
+    RoutingMessage crmsg(RoutingMessage::CONNECTION, path);
+    originate(crmsg);
   }
 
   // If RSVP, register into a map based on our source path as above

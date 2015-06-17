@@ -49,7 +49,7 @@ bool Server::create_service(const XML::Element& xml)
   services.push_back(s);
 
   // Map its id, only if it has one
-  string id = xml.get_attr("id");
+  const string id = xml.get_attr("id");
   if (id.size()) service_ids[id] = s;
 
   return true;
@@ -61,7 +61,7 @@ bool Server::create_service(const XML::Element& xml)
 bool Server::create_route(const XML::Element& xml)
 {
   Log::Streams log;
-  string from = xml["from"];
+  const string from = xml["from"];
   if (!from.size())
   {
     log.error << "No 'from' quoted in route\n";
@@ -75,7 +75,7 @@ bool Server::create_route(const XML::Element& xml)
     return false;
   }
 
-  string to = xml["to"];
+  const string to = xml["to"];
   if (!to.size())
   {
     log.error << "No 'to' quoted in route\n";
@@ -89,7 +89,7 @@ bool Server::create_route(const XML::Element& xml)
     return false;
   }
 
-  string subject = xml.get_attr("subject", "*");
+  const string subject = xml.get_attr("subject", "*");
 
   // Add route to 'from' side
   from_s->add_route(subject, *to_s);
@@ -129,7 +129,8 @@ void Server::run()
       else
       {
         Log::Error log;
-	log << "Service failed to start - shutting down\n";
+	log << "Service " << s->get_id()
+            << " failed to start - shutting down\n";
 	return;
       }
     }

@@ -275,7 +275,7 @@ bool Client::send_messages(Log::Streams& log)
 
 //------------------------------------------------------------------------
 // Constructor - no SSL
-Client::Client(Net::EndPoint _server, const string& _name): 
+Client::Client(const Net::EndPoint& _server, const string& _name): 
   server(_server), ctx(0), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
   alive(true), name(_name)
 {
@@ -293,7 +293,7 @@ Client::Client(Net::EndPoint _server, const string& _name):
 
 //------------------------------------------------------------------------
 // Constructor with SSL
-Client::Client(Net::EndPoint _server, SSL::Context *_ctx, 
+Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx, 
 	       const string& _name): 
   server(_server), ctx(_ctx), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
   alive(true), name(_name)

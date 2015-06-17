@@ -16,13 +16,16 @@
 #include <unistd.h>
 #endif
 
-#define DEFAULT_LOGFILE "/var/log/obtools/xmlmesh.log"
-#define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
-#define PID_FILE        "/var/run/ot-xmlmesh.pid"
-
 using namespace std;
 using namespace ObTools;
 using namespace ObTools::XMLMesh;
+
+namespace
+{
+  static const string DEFAULT_LOGFILE = "/var/log/obtools/xmlmesh.log";
+  static const string DEFAULT_TIMESTAMP = "%a %d %b %H:%M:%*S [%*L]: ";
+  static const string PID_FILE = "/var/run/ot-xmlmesh.pid";
+};
 
 // Global server instance
 Server ObTools::XMLMesh::server;
@@ -58,7 +61,7 @@ int main(int argc, char **argv)
 
   // Set up logging
 #if defined(DAEMON)
-  string logfile = config.get_value("log/@file", DEFAULT_LOGFILE);
+  const string logfile = config.get_value("log/@file", DEFAULT_LOGFILE);
   ofstream logstream(logfile.c_str(),ios::app);
   if (!logstream)
   {
@@ -71,7 +74,7 @@ int main(int argc, char **argv)
 #endif
   Log::TimestampFilter tsfilter(config.get_value("log/@timestamp", 
 						 DEFAULT_TIMESTAMP), chan_out);
-  int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
+  const int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
   Log::logger.connect(level_out);
   Log::Streams log;
@@ -98,13 +101,13 @@ int main(int argc, char **argv)
   // Drop privileges if root
   if (!getuid())
   {
-    string username = config["security/@user"];
-    string groupname = config["security/@group"];
+    const string username = config["security/@user"];
+    const string groupname = config["security/@group"];
 
     // Set group first - needs to still be root
     if (!groupname.empty())
     {
-      int gid = File::Path::group_name_to_id(groupname);
+      const int gid = File::Path::group_name_to_id(groupname);
 
       if (gid >= 0)
       {
@@ -125,7 +128,7 @@ int main(int argc, char **argv)
 
     if (!username.empty())
     {
-      int uid = File::Path::user_name_to_id(username);
+      const int uid = File::Path::user_name_to_id(username);
 
       if (uid >= 0)
       {
@@ -133,23 +136,23 @@ int main(int argc, char **argv)
         if (setuid(static_cast<uid_t>(uid)))
 	{
 	  log.error << "Can't change user: " << strerror(errno) << endl;
-	  goto shutdown;
+          return 4;
 	}
       }
       else 
       {
 	log.error << "Can't find user " << username << "\n";
-	goto shutdown;
+        return 4;
       }
     }
   }
 #endif
-  
+
   // Run server (never returns)
   server.run();
 
 shutdown:
-  return 0;  
+  return 0;
 }
 
 

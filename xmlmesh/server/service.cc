@@ -68,7 +68,7 @@ bool Service::forward(RoutingMessage& msg)
     case RoutingMessage::MESSAGE:
     {
       // Get subject
-      string subject = msg.message.get_subject();
+      const string subject = msg.message.get_subject();
 
       // Loop over all routes to see if they want it
       for(list<MessageRoute>::iterator p=routes.begin();
@@ -113,7 +113,7 @@ bool Service::forward(RoutingMessage& msg)
 bool Service::reverse(RoutingMessage& msg)
 {
   // Pop a service ID off the stack
-  string rid = msg.path.pop();
+  const string rid = msg.path.pop();
 
   // Look it up
   Service *rs = server.lookup_service(rid);

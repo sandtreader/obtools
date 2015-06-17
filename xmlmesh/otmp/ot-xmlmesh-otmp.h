@@ -42,7 +42,7 @@ struct Message: public Tube::Message
 struct ClientMessage: public Tube::ClientMessage
 {
   // Constructor for message
-  ClientMessage(SSL::ClientDetails& _client, 
+  ClientMessage(const SSL::ClientDetails& _client,
 		const string& _data="", Tube::flags_t _flags=0):
     Tube::ClientMessage(_client, TAG_MESSAGE, _data, _flags) {}
 };
@@ -60,7 +60,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port)
-  Client(Net::EndPoint _server): Tube::Client(_server, "OTMP") {}
+  Client(const Net::EndPoint& _server): Tube::Client(_server, "OTMP") {}
 };
 
 //==========================================================================
@@ -80,7 +80,8 @@ private:
   //------------------------------------------------------------------------
   // Overridable function to filter message tags - return true if tag
   // is recognised.  Only allows 'OTMS'
-  virtual bool tag_recognised(Tube::tag_t tag) { return tag == TAG_MESSAGE; }
+  virtual bool tag_recognised(Tube::tag_t tag) const
+  { return tag == TAG_MESSAGE; }
 
   //------------------------------------------------------------------------
   // Abstract function to handle an incoming client message

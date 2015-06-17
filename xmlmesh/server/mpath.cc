@@ -18,36 +18,23 @@ namespace ObTools { namespace XMLMesh {
 // String is '|' separated, top last
 MessagePath::MessagePath(const string& s)
 {
-  string seg;
-  // Split into segments on '|', top last
-  for(string::const_iterator p = s.begin(); p!=s.end(); p++)
-  {
-    char c=*p;
-    if (c=='|')
-    {
-      push(seg);
-      seg="";
-    }
-    else seg+=c;
-  }
-
-  if (seg.size()) push(seg);
+  const vector<string> segs = Text::split(s, '|');
+  for(vector<string>::const_iterator p = segs.begin(); p!=segs.end(); ++p)
+    push(*p);
 }
 
 //------------------------------------------------------------------------
 // Push a path level integer
 void MessagePath::push(int n)
 {
-  ostringstream oss;
-  oss << n;
-  push(oss.str());
+  push(Text::itos(n));
 }
 
 //------------------------------------------------------------------------
 // Pop a path level integer
 int MessagePath::popi()
 {
-  return atoi(pop().c_str());
+  return Text::stoi(pop());
 }
 
 //------------------------------------------------------------------------
