@@ -48,7 +48,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  Publisher(XML::Element& cfg);
+  Publisher(const XML::Element& cfg);
 
   //------------------------------------------------------------------------
   // Handle any message
@@ -57,7 +57,7 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor - take subject and transport to attach to
-Publisher::Publisher(XML::Element& cfg):
+Publisher::Publisher(const XML::Element& cfg):
   Service(cfg),
   subject_pattern(cfg.get_attr("subject", "*"))
 {

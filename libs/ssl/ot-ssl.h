@@ -167,7 +167,7 @@ struct ClientDetails
   string mac;              // Local MAC address, empty if not known
 
   ClientDetails() {}
-  ClientDetails(Net::EndPoint _addr, const string& _cn="",
+  ClientDetails(const Net::EndPoint& _addr, const string& _cn="",
                 const string& _mac=""):
     address(_addr), cert_cn(_cn), mac(_mac) {}
 };
@@ -189,8 +189,9 @@ private:
   //--------------------------------------------------------------------------
   // Virtual process method (see ot-net.h), but taking ClientDetails
   // Note: Not abstract here to allow override of just the non-SSL process(),
-  //       as with a plain Net::TCPServer 
-  virtual void process(SSL::TCPSocket &/*s*/, ClientDetails& /* client */) {}
+  //       as with a plain Net::TCPServer
+  virtual void process(SSL::TCPSocket &/*s*/,
+                       const ClientDetails& /* client */) {}
 
   //--------------------------------------------------------------------------
   // Override of normal process method to call the above - can be overridden
@@ -200,20 +201,20 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
-  TCPServer(Context *_ctx, int _port, int _backlog=5, 
+  TCPServer(Context *_ctx, int _port, int _backlog=5,
 	    int min_spare=1, int max_threads=10):
     Net::TCPServer(_port, _backlog, min_spare, max_threads),
     ctx(_ctx) {}
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
-  TCPServer(Context *_ctx, Net::EndPoint _address, int _backlog=5, 
+  TCPServer(Context *_ctx, Net::EndPoint _address, int _backlog=5,
 	    int min_spare=1, int max_threads=10):
     Net::TCPServer(_address, _backlog, min_spare, max_threads),
     ctx(_ctx) {}
 
   //--------------------------------------------------------------------------
-  // Override of factory for creating a client socket 
+  // Override of factory for creating a client socket
   virtual Net::TCPSocket *create_client_socket(int client_fd);
 };
 

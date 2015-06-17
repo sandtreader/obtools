@@ -71,7 +71,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - default to standard OTMP port
-  OTMPServer(XML::Element& cfg);
+  OTMPServer(const XML::Element& cfg);
 
   //------------------------------------------------------------------------
   // Check the service is happy
@@ -89,7 +89,7 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor
-OTMPServer::OTMPServer(XML::Element& cfg):
+OTMPServer::OTMPServer(const XML::Element& cfg):
   Service(cfg),
   port(cfg.get_attr_int("port", OTMP::DEFAULT_PORT)),
   backlog(cfg.get_attr_int("backlog", DEFAULT_BACKLOG)),
@@ -109,14 +109,16 @@ OTMPServer::OTMPServer(XML::Element& cfg):
   if (timeout)
     log.summary << "Timeout: " << timeout << endl;
 
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(filter, cfg, "filter")
+  for(XML::Element::const_iterator p(cfg.get_children("filter")); p; ++p)
+  {
+    const XML::Element& filter = *p;
     string addr = filter["address"];
     Net::MaskedAddress ma(addr);
 
     log.summary << "  Connections allowed from " << ma << endl;
     otmp.allow(ma);
     filtered = true;
-  OBTOOLS_XML_ENDFOR
+  }
 
   // Add localhost-only filter if none specified
   if (!filtered)

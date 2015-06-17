@@ -11,10 +11,10 @@
 #include "ot-log.h"
 #include <sstream>
 
-namespace ObTools { namespace XMLMesh { 
+namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
-// Constructor from string 
+// Constructor from string
 // String is '|' separated, top last
 MessagePath::MessagePath(const string& s)
 {
@@ -35,7 +35,7 @@ MessagePath::MessagePath(const string& s)
 }
 
 //------------------------------------------------------------------------
-// Push a path level integer 
+// Push a path level integer
 void MessagePath::push(int n)
 {
   ostringstream oss;
@@ -52,18 +52,18 @@ int MessagePath::popi()
 
 //------------------------------------------------------------------------
 // Generate a | delimited string (top last)
-string MessagePath::to_string()
+string MessagePath::to_string() const
 {
   string s;
   bool first=true;
-  for(deque<string>::iterator p=path.begin(); 
-      p!=path.end(); 
+  for(deque<string>::const_iterator p=path.begin();
+      p!=path.end();
       p++, first=false)
   {
     if (!first) s+='|';
     s+=*p;
   }
-    
+
   return s;
 }
 

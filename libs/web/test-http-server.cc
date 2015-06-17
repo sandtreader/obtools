@@ -30,8 +30,9 @@ class TestURLHandler: public Web::URLHandler
 public:
   TestURLHandler(): URLHandler("/test*") {}
 
-  bool handle_request(Web::HTTPMessage& request, Web::HTTPMessage& response,
-		      SSL::ClientDetails& client)
+  bool handle_request(const Web::HTTPMessage& request,
+                      Web::HTTPMessage& response,
+		      const SSL::ClientDetails& client)
   {
     ostringstream oss;
     oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
@@ -40,7 +41,7 @@ public:
     oss << "<P>URL: " << request.url << endl;
     oss << "<P>Body: " << request.body << endl;
     response.body = oss.str();
-    
+
     return true;
   }
 };
@@ -52,9 +53,9 @@ class DefaultURLHandler: public Web::URLHandler
 public:
   DefaultURLHandler(): URLHandler("*") {}
 
-  bool handle_request(Web::HTTPMessage& /*request*/, 
+  bool handle_request(const Web::HTTPMessage& /*request*/,
 		      Web::HTTPMessage& response,
-		      SSL::ClientDetails& /*client*/)
+		      const SSL::ClientDetails& /*client*/)
   {
     ostringstream oss;
     oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
@@ -62,7 +63,7 @@ public:
     oss << "<P>Nothing registered for this url\n";
     oss << "<P>Please try <A HREF='/test/foo'>/test</A>\n";
     response.body = oss.str();
-    
+
     return true;
   }
 };

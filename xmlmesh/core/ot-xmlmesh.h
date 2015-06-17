@@ -31,10 +31,11 @@ protected:
   // Two forms of message - either XML, or text, or both.  get_xml and
   // get_text will convert if necessary, but holding both saves work
   // when just passing things through
-  SOAP::Message *soap_message;  // SOAP message
-  string textual_message;       // Textual message (<message ...>)
+  mutable MT::Mutex cached_bits_mutex;  // Mutex on...
+  mutable SOAP::Message *soap_message;  // SOAP message
+  mutable string textual_message;       // Textual message (<message ...>)
 
-  const XML::Element& get_routing_header();
+  const XML::Element& get_routing_header() const;
 
 public:
   //--------------------------------------------------------------------------
@@ -99,12 +100,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Get <message> text and cache it
-  string get_text();
+  string get_text() const;
 
   //--------------------------------------------------------------------------
   //Get SOAP Message, still owned by Message, will be destroyed with it
   //Check for validity with !
-  const SOAP::Message& get_soap();
+  const SOAP::Message& get_soap() const;
 
   //--------------------------------------------------------------------------
   //Get SOAP message for modification - clears textual copy if any
@@ -114,28 +115,28 @@ public:
   //--------------------------------------------------------------------------
   //Get XML Body content, still owned by Message, will be destroyed with it
   //Check for validity with !
-  XML::Element& get_body();
+  XML::Element& get_body() const;
 
   //--------------------------------------------------------------------------
   //Ditto, but specifying a particular element name
   //Check for validity with !
-  XML::Element& get_body(const string& name);
+  XML::Element& get_body(const string& name) const;
 
   //--------------------------------------------------------------------------
   //Get subject of a message
-  string get_subject();
+  string get_subject() const;
 
   //--------------------------------------------------------------------------
   //Get id of a message
-  string get_id();
+  string get_id() const;
 
   //--------------------------------------------------------------------------
   //Get whether the message requires a response
-  bool get_rsvp();
+  bool get_rsvp() const;
 
   //--------------------------------------------------------------------------
   //Get reference of a message
-  string get_ref();
+  string get_ref() const;
 
   //--------------------------------------------------------------------------
   //Destructor - kills xml data if not detached

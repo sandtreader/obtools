@@ -51,7 +51,7 @@ Fault::Fault(Code code, const string& reason): Message()
 }
 
 //------------------------------------------------------------------------
-// Set a subcode 
+// Set a subcode
 // According to SOAP 1.2: 5.4.1.3, the value should be a qualified name
 // We only allow one level here!
 void Fault::set_subcode(const string& value)
@@ -99,7 +99,7 @@ void Fault::add_detail(XML::Element *detail)
 //------------------------------------------------------------------------
 // Get code string from incoming fault
 // Returns empty string if no code found
-string Fault::get_code_string()
+string Fault::get_code_string() const
 {
   return get_body("env:Fault").get_child("env:Code").get_child("env:Value").
     get_content();
@@ -107,7 +107,7 @@ string Fault::get_code_string()
 
 //------------------------------------------------------------------------
 // Get code from incoming fault
-Fault::Code Fault::get_code()
+Fault::Code Fault::get_code() const
 {
   string cs = get_code_string();
   if (cs == "env:VersionMismatch")
@@ -126,7 +126,7 @@ Fault::Code Fault::get_code()
 
 //------------------------------------------------------------------------
 // Get reason from incoming fault with language code given
-string Fault::get_reason(const string& lang)
+string Fault::get_reason(const string& lang) const
 {
   XML::Element& re = get_body("env:Fault").get_child("env:Reason");
   OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(te, re, "env:Text")
@@ -143,7 +143,7 @@ string Fault::get_reason(const string& lang)
 
 //------------------------------------------------------------------------
 // Constructor for outgoing faults
-VersionMismatchFault::VersionMismatchFault(): 
+VersionMismatchFault::VersionMismatchFault():
   Fault(CODE_VERSION_MISMATCH, "Version Mismatch")
 {
   add_header("env:Upgrade")
@@ -158,7 +158,7 @@ VersionMismatchFault::VersionMismatchFault():
 
 //------------------------------------------------------------------------
 // Constructor for outgoing faults
-MustUnderstandFault::MustUnderstandFault(): 
+MustUnderstandFault::MustUnderstandFault():
   Fault(CODE_MUST_UNDERSTAND, "Mandatory header blocks not understood")
 {
 }
@@ -166,7 +166,7 @@ MustUnderstandFault::MustUnderstandFault():
 //------------------------------------------------------------------------
 // Add a NotUnderstood block
 // attr/value indicate a namespace
-void MustUnderstandFault::add_not_understood(const string& qname, 
+void MustUnderstandFault::add_not_understood(const string& qname,
 					     const string& attr,
 					     const string& value)
 {

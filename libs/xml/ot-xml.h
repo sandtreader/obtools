@@ -366,6 +366,13 @@ public:
   Element& get_descendant(const string& ename);
 
   //--------------------------------------------------------------------------
+  // Find all child elements in a list of const elements (so it can be used
+  // with a const_iterator)
+  // For non-const use 'children' directly
+  // Returns copy list of pointers
+  list<const Element *> get_children() const;
+
+  //--------------------------------------------------------------------------
   // Find all child elements of given name
   // Returns list of pointers
   list<const Element *> get_children(const string& ename) const;

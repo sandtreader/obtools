@@ -14,19 +14,21 @@
 #include <unistd.h>
 #include <sstream>
 
-#define HTTP_SERVER_VERSION "ObTools XMLMesh HTTP Server"
+namespace
+{
+  const std::string& HTTP_SERVER_VERSION = "ObTools XMLMesh HTTP Server";
+  const int DEFAULT_PORT        = 29180;
+  const int DEFAULT_BACKLOG     = 5;
+  const int DEFAULT_MAX_THREADS = 25;
+  const int DEFAULT_MIN_THREADS = 1;
+  const int DEFAULT_TIMEOUT     = 0;
 
-#define DEFAULT_PORT 29180
-#define DEFAULT_BACKLOG 5
-#define DEFAULT_MAX_THREADS 25
-#define DEFAULT_MIN_THREADS 1
-#define DEFAULT_TIMEOUT 0
-
-// Default subscription timeout is set to be longer than the client poll
-// timeout, so that new polls refresh it, otherwise a subscription can finish
-// while a poll is still waiting
-#define DEFAULT_SUBSCRIPTION_TIMEOUT 90
-#define DEFAULT_POLL_TIMEOUT 60
+  // Default subscription timeout is set to be longer than the client poll
+  // timeout, so that new polls refresh it, otherwise a subscription can finish
+  // while a poll is still waiting
+  const int DEFAULT_SUBSCRIPTION_TIMEOUT = 90;
+  const int DEFAULT_POLL_TIMEOUT = 60;
+}
 
 namespace ObTools { namespace XMLMesh {
 
@@ -50,9 +52,9 @@ class HTTPServer: public Web::HTTPServer
   HTTPServerService& service;
 
   // Implementation of HTTPServer downcalls
-  bool handle_request(Web::HTTPMessage& request,
+  bool handle_request(const Web::HTTPMessage& request,
                       Web::HTTPMessage& response,
-                      SSL::ClientDetails& client,
+                      const SSL::ClientDetails& client,
                       SSL::TCPSocket& socket,
                       Net::TCPStream& stream);
 
@@ -76,35 +78,28 @@ public:
 class HTTPServerService: public Service
 {
 private:
-  int port;
-  int backlog;
-  int min_spare_threads;
-  int max_threads;
-  int timeout;
+  const int port;
+  const int backlog;
+  const int min_spare_threads;
+  const int max_threads;
+  const int timeout;
 
   HTTPServer http_server;
   Net::TCPServerThread http_server_thread;
 
   // Map of active requests/subscriptions based on source path, containing
   // a message queue for that client
-  struct ClientRequest
-  {
-    typedef Gen::SharedPointer<MT::MQueue<string> > response_queue_t;
-    response_queue_t response_queue;
-    ClientRequest(const response_queue_t& q): response_queue(q) {}
-    ClientRequest() {}
-  };
-
-  typedef Gen::SharedPointer<ClientRequest> client_request_t;
+  typedef MT::MQueue<string> ResponseQueue;
+  typedef Gen::SharedPointer<ResponseQueue> ResponseQueuePtr;
 
   class ClientRequestMap:
-    public Cache::UseTimeoutCache<string, client_request_t>
+    public Cache::UseTimeoutCache<string, ResponseQueuePtr>
   {
     HTTPServerService& service;
 
     // Implementation of delete_allowed, called when an item is about to
     // get aged out
-    bool delete_allowed(const string& path, client_request_t&)
+    bool delete_allowed(const string& path, ResponseQueuePtr&)
     {
       service.client_request_timeout(path);
       return true;
@@ -112,7 +107,7 @@ private:
 
   public:
     ClientRequestMap(HTTPServerService& _service, int timeout):
-      ObTools::Cache::UseTimeoutCache<string, client_request_t>(timeout),
+      ObTools::Cache::UseTimeoutCache<string, ResponseQueuePtr>(timeout),
       service(_service) {}
   };
 
@@ -122,21 +117,21 @@ private:
   // Set of currently active polls, by message path, pointing to client request
   // for that path
   class ActivePollerMap:
-    public Cache::AgeTimeoutCache<string, client_request_t>
+    public Cache::AgeTimeoutCache<string, ResponseQueuePtr>
   {
     HTTPServerService& service;
 
     // Implementation of delete_allowed, called when an item is about to
     // get aged out
-    bool delete_allowed(const string& path, client_request_t& cr)
+    bool delete_allowed(const string& path, ResponseQueuePtr& response_queue)
     {
-      service.poller_timeout(path, cr);
+      service.poller_timeout(path, response_queue);
       return true;
     }
 
   public:
     ActivePollerMap(HTTPServerService& _service, int timeout):
-      ObTools::Cache::AgeTimeoutCache<string, client_request_t>(timeout),
+      ObTools::Cache::AgeTimeoutCache<string, ResponseQueuePtr>(timeout),
       service(_service) {}
   };
 
@@ -146,7 +141,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - default to standard HTTP port
-  HTTPServerService(XML::Element& cfg);
+  HTTPServerService(const XML::Element& cfg);
 
   //------------------------------------------------------------------------
   // Check the service is happy
@@ -154,7 +149,7 @@ public:
 
   //------------------------------------------------------------------------
   // Handle an incoming message POST request
-  bool handle_request(Web::HTTPMessage& request,
+  bool handle_request(const Web::HTTPMessage& request,
                       Web::HTTPMessage& response,
                       const string& path,
                       bool rsvp=false,
@@ -175,7 +170,7 @@ public:
 
   //------------------------------------------------------------------------
   // Callback from active_poller_map when a poller is timed out
-  void poller_timeout(const string& path, client_request_t cr);
+  void poller_timeout(const string& path, ResponseQueuePtr& response_queue);
 };
 
 //==========================================================================
@@ -183,9 +178,9 @@ public:
 
 //--------------------------------------------------------------------------
 // Handle HTTP request (downcall from HTTP::Server)
-bool HTTPServer::handle_request(Web::HTTPMessage& request,
+bool HTTPServer::handle_request(const Web::HTTPMessage& request,
                                 Web::HTTPMessage& response,
-                                SSL::ClientDetails& client,
+                                const SSL::ClientDetails& client,
                                 SSL::TCPSocket& /*socket*/,
                                 Net::TCPStream& /*stream*/)
 {
@@ -197,7 +192,7 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
   const string& path = request.url.get_path();
   vector<string> bits = Text::split(path, '/');
   if (bits.size() < 2) return error(response, 403, "Forbidden");
-  string command = bits[1];
+  const string& command = bits[1];
 
   MessagePath mpath;
   if (bits.size() > 2)
@@ -213,7 +208,7 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
     mpath.push(client.address.host.get_dotted_quad());
     mpath.push(client.address.port);
   }
-  string mpaths = mpath.to_string();
+  const string& mpaths = mpath.to_string();
 
   // Split on command
   if (command == "send")
@@ -244,7 +239,7 @@ bool HTTPServer::handle_request(Web::HTTPMessage& request,
 
 //------------------------------------------------------------------------
 // Constructor
-HTTPServerService::HTTPServerService(XML::Element& cfg):
+HTTPServerService::HTTPServerService(const XML::Element& cfg):
   Service(cfg),
   port(cfg.get_attr_int("port", DEFAULT_PORT)),
   backlog(cfg.get_attr_int("backlog", DEFAULT_BACKLOG)),
@@ -285,7 +280,7 @@ bool HTTPServerService::started()
 
 //------------------------------------------------------------------------
 // Handle an incoming message POST request
-bool HTTPServerService::handle_request(Web::HTTPMessage& request,
+bool HTTPServerService::handle_request(const Web::HTTPMessage& request,
                                        Web::HTTPMessage& response,
                                        const string& path,
                                        bool rsvp, bool is_subscribe)
@@ -303,12 +298,11 @@ bool HTTPServerService::handle_request(Web::HTTPMessage& request,
   }
 
   // If RSVP, register into a map based on our source path as above
-  ClientRequest::response_queue_t response_queue;
+  ResponseQueuePtr response_queue;
   if (rsvp)
   {
-    response_queue.reset(new MT::MQueue<string>());
-    client_request_t cr(new ClientRequest(response_queue));
-    client_request_map.add(path, cr);
+    response_queue.reset(new ResponseQueue());
+    client_request_map.add(path, response_queue);
   }
 
   // Send it into the system
@@ -335,16 +329,14 @@ bool HTTPServerService::handle_poll(Web::HTTPMessage& response,
   client_request_map.touch(path);
 
   // Look up the client request record and get its queue
-  ClientRequest::response_queue_t response_queue;
-  client_request_t cr;
+  ResponseQueuePtr response_queue;
   {
     MT::RWReadLock lock(client_request_map.mutex);
-    if (!client_request_map.lookup(path, cr)) return false;
-    response_queue = cr->response_queue;
+    if (!client_request_map.lookup(path, response_queue)) return false;
   }
 
   // Add to active pollers
-  active_poller_map.add(path, cr);
+  active_poller_map.add(path, response_queue);
 
   // Wait for the response
   response.body = response_queue->wait();
@@ -378,9 +370,9 @@ bool HTTPServerService::handle(RoutingMessage& msg)
 
       // Post response to worker thread that is waiting for it
       MT::RWReadLock lock(client_request_map.mutex);
-      client_request_t cr;
-      if (client_request_map.lookup(path, cr))
-        cr->response_queue->send(msg.message.get_text());
+      ResponseQueuePtr response_queue;
+      if (client_request_map.lookup(path, response_queue))
+        response_queue->send(msg.message.get_text());
       else
         log.error << "Orphan reverse message received to " << path << endl;
     }
@@ -414,7 +406,8 @@ void HTTPServerService::client_request_timeout(const string& path)
 
 //------------------------------------------------------------------------
 // Callback from active_poller_map when a poller is timed out
-    void HTTPServerService::poller_timeout(const string& path, client_request_t cr)
+void HTTPServerService::poller_timeout(const string& path,
+                                       ResponseQueuePtr& response_queue)
 {
   Log::Detail log;
   log << "Poller timed out on " << path << endl;
@@ -424,7 +417,7 @@ void HTTPServerService::client_request_timeout(const string& path)
   client_request_map.touch(path);
 
   // Send an empty message on the response queue to unblock it
-  cr->response_queue->send(string());
+  response_queue->send(string());
 }
 
 //==========================================================================

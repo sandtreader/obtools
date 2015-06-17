@@ -622,7 +622,7 @@ private:
 
   //--------------------------------------------------------------------------
   // Implementation of worker process method
-  void process(SSL::TCPSocket &s, SSL::ClientDetails& client);
+  void process(SSL::TCPSocket &s, const SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------
@@ -641,8 +641,9 @@ protected:
   // response is pre-initialised with 200 OK, no body
   // If the cost of generating a body is not too great, handlers may treat
   // HEAD requests just like GET, and the server will suppress the body
-  virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
-			      SSL::ClientDetails& client,
+  virtual bool handle_request(const HTTPMessage& request,
+                              HTTPMessage& response,
+			      const SSL::ClientDetails& client,
 			      SSL::TCPSocket& socket,
 			      Net::TCPStream& stream) = 0;
 
@@ -651,16 +652,16 @@ protected:
   // and initial body (if any)
   // Simply continue sending data to the socket or stream until done
   // Does nothing by default
-  virtual void generate_progressive(HTTPMessage& /*request*/,
+  virtual void generate_progressive(const HTTPMessage& /*request*/,
                                     HTTPMessage& /*response*/,
-				    SSL::ClientDetails& /*client*/,
+				    const SSL::ClientDetails& /*client*/,
 				    SSL::TCPSocket& /*socket*/,
         		            Net::TCPStream& /*stream*/) {}
 
   //--------------------------------------------------------------------------
   // Interface to clear per-connection state
   // Does nothing by default
-  virtual void handle_close(SSL::ClientDetails& /*client*/,
+  virtual void handle_close(const SSL::ClientDetails& /*client*/,
                             SSL::TCPSocket& /*socket*/) {}
 
 public:
@@ -728,8 +729,9 @@ public:
   // Return whether handled - fill in response for normal errors, only
   // return false if things are really bad, and we'll return 500
   // response is pre-initialised with 200 OK, no body
-  virtual bool handle_request(HTTPMessage& request, HTTPMessage& response,
-			      SSL::ClientDetails& client) = 0;
+  virtual bool handle_request(const HTTPMessage& request,
+                              HTTPMessage& response,
+			      const SSL::ClientDetails& client) = 0;
 
   //--------------------------------------------------------------------------
   // Virtual destructor
@@ -746,8 +748,8 @@ class SimpleHTTPServer: public HTTPServer
   list<URLHandler *> handlers;
 
   // Implementation of general request handler
-  bool handle_request(HTTPMessage& request, HTTPMessage& response,
-		      SSL::ClientDetails& client, SSL::TCPSocket& socket,
+  bool handle_request(const HTTPMessage& request, HTTPMessage& response,
+		      const SSL::ClientDetails& client, SSL::TCPSocket& socket,
 		      Net::TCPStream& stream);
 
 public:

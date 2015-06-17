@@ -64,7 +64,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  Correlator(XML::Element& cfg);
+  Correlator(const XML::Element& cfg);
 
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
@@ -131,7 +131,7 @@ Correlation::~Correlation()
 
 //------------------------------------------------------------------------
 // Default Constructor
-Correlator::Correlator(XML::Element& cfg):
+Correlator::Correlator(const XML::Element& cfg):
     Service(cfg),
     request_cache(cfg.get_attr_int("timeout", DEFAULT_TIMEOUT))
 {

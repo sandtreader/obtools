@@ -38,10 +38,10 @@ static void _add_routing_header(SOAP::Message *soap,
 				const string& ref)
 {
   // Add routing header - role 'Next', must_understand, relay
-  XML::Element& rh = soap->add_header("x:routing", 
-				      SOAP::Header::ROLE_NEXT, 
+  XML::Element& rh = soap->add_header("x:routing",
+				      SOAP::Header::ROLE_NEXT,
 				      true, true);
-    
+
   // Add our routing parameters
   rh.set_attr("x:id", _allocate_id());
   rh.set_attr("x:subject", subject);
@@ -144,7 +144,7 @@ Message::Message(const string& subject, const string& body_text,
   catch (XML::ParseFailed)
   {
     error_log << "XMLMesh Message creation: "
-	      << "can't parse supplied body text:\n" 
+	      << "can't parse supplied body text:\n"
 	      << body_text << endl;
   }
 }
@@ -165,25 +165,27 @@ string Message::to_text() const
 
   // If XML exists, get the textual form
   if (soap_message) return soap_message->to_string();
-  
+
   return "";
 }
 
 //--------------------------------------------------------------------------
 // Get <message> text and cache it
-string Message::get_text()
+string Message::get_text() const
 {
+  MT::Lock lock(cached_bits_mutex);
   if (!textual_message.size()) textual_message = to_text();
-  
+
   return textual_message;
 }
 
 //--------------------------------------------------------------------------
 //Get SOAP Message, still owned by Message, will be destroyed with it
 //Check for validity with !
-const SOAP::Message& Message::get_soap()
+const SOAP::Message& Message::get_soap() const
 {
   // If we've already got it, return immediately
+  MT::Lock lock(cached_bits_mutex);
   if (soap_message) return *soap_message;
 
   // Create parser with fixed namespace in case someone's being clever
@@ -221,7 +223,7 @@ SOAP::Message& Message::get_modifiable_soap()
 //--------------------------------------------------------------------------
 //Get XML Body content, still owned by Message, will be destroyed with it
 //Check for validity with !
-XML::Element& Message::get_body()
+XML::Element& Message::get_body() const
 {
   get_soap();  // Ensure soap_message exists
   return soap_message->get_body();
@@ -230,7 +232,7 @@ XML::Element& Message::get_body()
 //--------------------------------------------------------------------------
 //Ditto, but specifying a particular element name
 //Check for validity with !
-XML::Element& Message::get_body(const string& name)
+XML::Element& Message::get_body(const string& name) const
 {
   get_soap();  // Ensure soap_message exists
   return soap_message->get_body(name);
@@ -238,7 +240,7 @@ XML::Element& Message::get_body(const string& name)
 
 //--------------------------------------------------------------------------
 //Get routing header of the message
-const XML::Element& Message::get_routing_header()
+const XML::Element& Message::get_routing_header() const
 {
   const SOAP::Message& soap = get_soap();
   SOAP::Header h;
@@ -250,7 +252,7 @@ const XML::Element& Message::get_routing_header()
 
 //--------------------------------------------------------------------------
 //Get subject of a message
-string Message::get_subject()
+string Message::get_subject() const
 {
   const XML::Element& routing = get_routing_header();
   return routing["x:subject"];
@@ -258,7 +260,7 @@ string Message::get_subject()
 
 //--------------------------------------------------------------------------
 //Get id of a message
-string Message::get_id()
+string Message::get_id() const
 {
   const XML::Element& routing = get_routing_header();
   return routing["x:id"];
@@ -266,7 +268,7 @@ string Message::get_id()
 
 //--------------------------------------------------------------------------
 //Get whether the message requires a response
-bool Message::get_rsvp()
+bool Message::get_rsvp() const
 {
   const XML::Element& routing = get_routing_header();
   return routing.get_attr_bool("x:rsvp");
@@ -274,7 +276,7 @@ bool Message::get_rsvp()
 
 //--------------------------------------------------------------------------
 //Get reference of a message
-string Message::get_ref()
+string Message::get_ref() const
 {
   const XML::Element& routing = get_routing_header();
   return routing["x:ref"];

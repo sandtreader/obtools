@@ -71,11 +71,11 @@ struct Header
 
   //------------------------------------------------------------------------
   // Constructors
-  Header(): content(0), role(ROLE_NONE), must_understand(false), relay(false) 
+  Header(): content(0), role(ROLE_NONE), must_understand(false), relay(false)
   {}
 
   Header(const XML::Element *_content, Role _role, bool _mu, bool _relay):
-    content(_content), role(_role), must_understand(_mu), relay(_relay) 
+    content(_content), role(_role), must_understand(_mu), relay(_relay)
   {}
 };
 
@@ -287,15 +287,15 @@ public:
   //------------------------------------------------------------------------
   // Get code string from incoming fault
   // Returns empty string if no code found
-  string get_code_string();
+  string get_code_string() const;
 
   //------------------------------------------------------------------------
   // Get code from incoming fault
-  Code get_code();
+  Code get_code() const;
 
   //------------------------------------------------------------------------
   // Get reason from incoming fault with language code given
-  string get_reason(const string& lang="en");
+  string get_reason(const string& lang="en") const;
 };
 
 //==========================================================================
@@ -386,19 +386,19 @@ private:
 
   //--------------------------------------------------------------------------
   // Implementation of standard HTTP handler
-  bool handle_request(Web::HTTPMessage& http_request,
+  bool handle_request(const Web::HTTPMessage& http_request,
 		      Web::HTTPMessage& http_response,
-		      SSL::ClientDetails& client);
+		      const SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------
   // Abstract interface to handle SOAP messages
   // http_request, http_response and client are made available for complex
   // use, but can be ignored
-  virtual bool handle_message(Message& request, Message& response,
-			      Web::HTTPMessage& http_request,
+  virtual bool handle_message(const Message& request, Message& response,
+			      const Web::HTTPMessage& http_request,
 			      Web::HTTPMessage& http_response,
-			      SSL::ClientDetails& client) = 0;
+			      const SSL::ClientDetails& client) = 0;
 
   //--------------------------------------------------------------------------
   // Handy support for generating faults - fills in response with fault
@@ -445,9 +445,9 @@ class MessageTransportURLHandler: public URLHandler
 
   //--------------------------------------------------------------------------
   // Handle a SOAP message
-  bool handle_message(Message& request, Message& response,
-                      Web::HTTPMessage&, Web::HTTPMessage&,
-                      SSL::ClientDetails& client)
+  bool handle_message(const Message& request, Message& response,
+                      const Web::HTTPMessage&, Web::HTTPMessage&,
+                      const SSL::ClientDetails& client)
   {
     Log::Streams log;
     const XML::Element& body = request.get_body();
@@ -503,7 +503,7 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
   //--------------------------------------------------------------------------
   // Register a handler with the given config element
   void register_handler(ObTools::Message::Handler<CONTEXT>& handler,
-                        XML::Element& config)
+                        const XML::Element& config)
   {
     // Get URL
     string url = config["url"];
@@ -532,7 +532,7 @@ class MessageInterface
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  MessageInterface(CONTEXT& context, XML::Element& config,
+  MessageInterface(CONTEXT& context, const XML::Element& config,
                    ObTools::Message::Broker<CONTEXT>& broker,
                    const string& server_name, SSL::Context *ssl_ctx=0):
     http_server(0), http_server_thread(0),

@@ -42,7 +42,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  OTMPClientService(XML::Element& cfg);
+  OTMPClientService(const XML::Element& cfg);
 
   //--------------------------------------------------------------------------
   // OTMP Message dispatcher
@@ -56,7 +56,7 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor
-OTMPClientService::OTMPClientService(XML::Element& cfg):
+OTMPClientService::OTMPClientService(const XML::Element& cfg):
   Service(cfg),
   host(Net::IPAddress(cfg["server"]),
        cfg.get_attr_int("port", OTMP::DEFAULT_PORT)),
@@ -68,14 +68,16 @@ OTMPClientService::OTMPClientService(XML::Element& cfg):
 
   log.summary << "OTMP Client '" << id << "' to " << host << " started\n";
 
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(sube, cfg, "subscription")
+  for(XML::Element::const_iterator p(cfg.get_children("subscription")); p; ++p)
+  {
+    const XML::Element& sube = *p;
     string subject = sube["subject"];
     if (client.subscribe(subject))
       log.summary << "  Subscribed to " << subject << " at " << host << endl;
     else
       log.error << "OTMP Client to " << host << " can't subscribe to "
 		<< subject << endl;
-  OBTOOLS_XML_ENDFOR
+  }
 }
 
 //--------------------------------------------------------------------------

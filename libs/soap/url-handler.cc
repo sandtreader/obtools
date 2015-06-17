@@ -13,16 +13,16 @@ namespace ObTools { namespace SOAP {
 
 //--------------------------------------------------------------------------
 // Implementation of general request handler
-bool URLHandler::handle_request(Web::HTTPMessage& http_request, 
+bool URLHandler::handle_request(const Web::HTTPMessage& http_request,
 				Web::HTTPMessage& http_response,
-				SSL::ClientDetails& client)
+				const SSL::ClientDetails& client)
 {
   Log::Streams log;
 
   // Request must be POST
   if (http_request.method != "POST")
   {
-    log.error << "SOAP server received bad request method: " 
+    log.error << "SOAP server received bad request method: "
 	      << http_request.method << endl;
     http_response.code = 405;
     http_response.reason = "Method not allowed";
@@ -38,7 +38,7 @@ bool URLHandler::handle_request(Web::HTTPMessage& http_request,
 
   // Parse into message
   Message request(http_request.body, parser);
-  
+
   // Make sure it's valid
   if (!request)
   {
@@ -62,7 +62,7 @@ bool URLHandler::handle_request(Web::HTTPMessage& http_request,
 // Handy support for generating faults - fills in response with fault
 // Always returns true - use in return statements in handler
 // e.g. return fault(SOAP::Fault::CODE_SENDER, "In your dreams, mate");
-bool URLHandler::fault(Message& response, Fault::Code code, 
+bool URLHandler::fault(Message& response, Fault::Code code,
 		       const string& reason)
 {
   Log::Streams log;

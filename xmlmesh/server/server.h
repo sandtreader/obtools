@@ -34,13 +34,13 @@ struct ServiceClient
   Net::EndPoint client;
 
   // Constructor
-  ServiceClient(Service *_service, Net::EndPoint _client):
+  ServiceClient(Service *_service, const Net::EndPoint& _client):
     service(_service), client(_client) {}
 
   // Comparators
-  bool operator==(const ServiceClient& o)
+  bool operator==(const ServiceClient& o) const
   { return service==o.service && client==o.client; }
-  bool operator!=(const ServiceClient& o)
+  bool operator!=(const ServiceClient& o) const
   { return service!=o.service || client!=o.client; }
 };
 
@@ -55,6 +55,10 @@ class MessagePath
   // Constructors
   MessagePath() {}  // empty
   MessagePath(const string& s);  // From | delimited string (top last)
+
+  //------------------------------------------------------------------------
+  // Check whether empty
+  bool empty() const { return path.empty(); }
 
   //------------------------------------------------------------------------
   // Push a path level
@@ -74,7 +78,7 @@ class MessagePath
 
   //------------------------------------------------------------------------
   // Generate a | delimited string (top last)
-  string to_string();
+  string to_string() const;
 };
 
 //==========================================================================
@@ -123,13 +127,13 @@ struct RoutingMessage
 
   //------------------------------------------------------------------------
   // Constructor for inbound messages with empty path
-  RoutingMessage(Message _message):
+  RoutingMessage(const Message& _message):
     type(MESSAGE), message(_message), reversing(false), tracker(0)
   {}
 
   //------------------------------------------------------------------------
   // Constructor for returned messages, with reverse path
-  RoutingMessage(Message _message, MessagePath& _path):
+  RoutingMessage(const Message& _message, const MessagePath& _path):
     type(MESSAGE), message(_message), reversing(true), path(_path), tracker(0)
   {}
 
@@ -203,12 +207,20 @@ struct MessageRoute
 // Service thread for multi-threaded services
 class ServiceThread: public MT::PoolThread
 {
-public:
   Service *service;
   RoutingMessage *msg;
 
+public:
   ServiceThread(ObTools::MT::PoolReplacer<ServiceThread>& _rep):
     PoolThread(_rep) {}
+
+  //------------------------------------------------------------------------
+  // Set up parameters for run
+  void setup(Service *_s, RoutingMessage *_m)
+  {
+    service = _s;
+    msg = _m;
+  }
 
   //------------------------------------------------------------------------
   // Run function - pass msg to service
@@ -248,17 +260,17 @@ protected:
   //------------------------------------------------------------------------
   // Return a message as a response to an existing one
   // Returns whether successul
-  bool respond(Message& response, RoutingMessage& request);
+  bool respond(const Message& response, const RoutingMessage& request);
 
   //------------------------------------------------------------------------
   // Return OK to an existing request
   // Returns whether successul
-  bool respond(RoutingMessage& request);
+  bool respond(const RoutingMessage& request);
 
   //------------------------------------------------------------------------
   // Return a fault to an existing request
   // Returns whether successul
-  bool respond(RoutingMessage& request,
+  bool respond(const RoutingMessage& request,
 	       SOAP::Fault::Code code,
 	       const string& reason);
 
@@ -273,7 +285,7 @@ public:
   {}
 
   // From XML config
-  Service(XML::Element& cfg):
+  Service(const XML::Element& cfg):
     multithreaded(cfg.get_attr_int("minthreads", 1) > 1),
     threads(cfg.get_attr_int("minthreads", 1),
 	    cfg.get_attr_int("maxthreads", 1)),
@@ -283,7 +295,7 @@ public:
   //------------------------------------------------------------------------
   // Check the service is happy
   // Override to close down startup if initialisation failed
-  virtual bool started() { return true; }
+  virtual bool started() const { return true; }
 
   //------------------------------------------------------------------------
   // Add a new route on the given subject pattern
@@ -315,8 +327,8 @@ private:
   map<string, Service *> service_ids;       // Map of service ids
 
   // Internal functions
-  bool create_service(XML::Element& xml);
-  bool create_route(XML::Element& xml);
+  bool create_service(const XML::Element& xml);
+  bool create_route(const XML::Element& xml);
 
 public:
   // Factories for use during configuration
@@ -328,11 +340,11 @@ public:
 
   //------------------------------------------------------------------------
   // Look up a service by id
-  Service *lookup_service(const string& id);
+  Service *lookup_service(const string& id) const;
 
   //------------------------------------------------------------------------
   // Load modules etc. from XML config
-  void configure(XML::Configuration& config);
+  void configure(const XML::Configuration& config);
 
   //------------------------------------------------------------------------
   // Run method - never returns

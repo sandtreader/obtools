@@ -15,32 +15,32 @@ namespace ObTools { namespace XMLMesh {
 
 //------------------------------------------------------------------------
 // Load modules etc. from XML config
-void Server::configure(XML::Configuration& config)
+void Server::configure(const XML::Configuration& config)
 {
   Log::Error log;
-  XML::Element& root = config.get_root();
+  const XML::Element& root = config.get_root();
 
   // Read all services
-  XML::Element& services = root.get_child("services");
-
-  OBTOOLS_XML_FOREACH_CHILD(se, services)
-    if (!create_service(se))
-      log << "Failed to create service from XML:\n" << se;
-  OBTOOLS_XML_ENDFOR
+  const XML::Element& services = root.get_child("services");
+  for(XML::Element::iterator p(services.children); p; ++p)
+  {
+    if (!create_service(*p))
+      log << "Failed to create service from XML:\n" << *p;
+  }
 
   // Read all routes
-  XML::Element& routes = root.get_child("routes");
-
-  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG(re, routes, "route")
-    if (!create_route(re))
-      log << "Failed to create route from XML:\n" << re;
-  OBTOOLS_XML_ENDFOR
+  const XML::Element& routes = root.get_child("routes");
+  for(XML::Element::const_iterator p(services.get_children("route")); p; ++p)
+  {
+    if (!create_route(*p))
+      log << "Failed to create route from XML:\n" << *p;
+  }
 }
 
 //------------------------------------------------------------------------
 // Create a new service from the given XML
 // Returns whether successful
-bool Server::create_service(XML::Element& xml)
+bool Server::create_service(const XML::Element& xml)
 {
   Service *s = server.service_registry.create(xml.name, xml);
   if (!s) return false;
@@ -58,7 +58,7 @@ bool Server::create_service(XML::Element& xml)
 //------------------------------------------------------------------------
 // Create a new route from the given XML
 // Returns whether successful
-bool Server::create_route(XML::Element& xml)
+bool Server::create_route(const XML::Element& xml)
 {
   Log::Streams log;
   string from = xml["from"];
@@ -101,9 +101,9 @@ bool Server::create_route(XML::Element& xml)
 
 //------------------------------------------------------------------------
 // Look up a service by name
-Service *Server::lookup_service(const string& name)
+Service *Server::lookup_service(const string& name) const
 {
-  map<string, Service *>::iterator p = service_ids.find(name);
+  map<string, Service *>::const_iterator p = service_ids.find(name);
   if (p!=service_ids.end())
     return p->second;
   else

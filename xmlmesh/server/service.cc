@@ -25,8 +25,7 @@ void Service::accept(RoutingMessage& msg)
     ServiceThread *t = threads.remove();
     if (t)
     {
-      t->service = this;
-      t->msg = &msg;
+      t->setup(this, &msg);
       t->kick();  // This will handle back in work() in the worker thread
       return;
     }
@@ -146,7 +145,7 @@ bool Service::originate(RoutingMessage& msg)
 //------------------------------------------------------------------------
 // Return a message as a response to an existing one
 // Returns whether successul
-bool Service::respond(Message& response, RoutingMessage& request)
+bool Service::respond(const Message& response, const RoutingMessage& request)
 {
   // Create a new routing message from us, but with the same path as
   // that received
@@ -157,7 +156,7 @@ bool Service::respond(Message& response, RoutingMessage& request)
 //------------------------------------------------------------------------
 // Return OK to an existing request
 // Returns whether successul
-bool Service::respond(RoutingMessage& request)
+bool Service::respond(const RoutingMessage& request)
 {
   OKMessage response(request.message.get_id());
   return respond(response, request);
@@ -166,7 +165,7 @@ bool Service::respond(RoutingMessage& request)
 //------------------------------------------------------------------------
 // Return a fault to an existing request
 // Returns whether successul
-bool Service::respond(RoutingMessage& request,
+bool Service::respond(const RoutingMessage& request,
 		      SOAP::Fault::Code code,
 		      const string& reason)
 {

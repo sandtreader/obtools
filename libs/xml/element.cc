@@ -477,6 +477,22 @@ Element& Element::get_descendant(const string& ename)
 }
 
 //--------------------------------------------------------------------------
+// Find all child elements in a list of const elements (so it can be used
+// with a const_iterator)
+// Returns list of pointers
+list<const Element *> Element::get_children() const
+{
+  list<const Element *>l;
+  for(list<Element *>::const_iterator p=children.begin();
+      p!=children.end();
+      p++)
+  {
+    l.push_back(*p);
+  }
+  return l;
+}
+
+//--------------------------------------------------------------------------
 // Find all child elements of given name
 // Returns list of pointers
 // Const and non-const implementations
