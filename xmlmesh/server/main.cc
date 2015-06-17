@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     log.error << "Can't become daemon: " << strerror(errno) << endl;
 
   // Create pid file
-  ofstream pidfile(PID_FILE);
+  ofstream pidfile(PID_FILE.c_str());
   pidfile << getpid() << endl;
   pidfile.close();
 #endif
