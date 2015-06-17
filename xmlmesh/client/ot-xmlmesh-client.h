@@ -419,7 +419,7 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
   //--------------------------------------------------------------------------
   // Register a handler with the given config element
   virtual void register_handler(ObTools::Message::Handler<CONTEXT>& handler,
-                                XML::Element& config)
+                                const XML::Element& config)
   {
     // Get subject
     string subject = config["subject"];

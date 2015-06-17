@@ -45,7 +45,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Default constructor - the above filled in in subclass constructors
-  Handler(XML::Element& cfg, const string& _doc_name="",
+  Handler(const XML::Element& cfg, const string& _doc_name="",
 	  const string& _ns_prefix="", const string& _ns_url="",
 	  bool _complex_result = false):
     name(cfg.name),
@@ -86,7 +86,7 @@ class Transport
   //--------------------------------------------------------------------------
   // Register a handler with the given config element
   virtual void register_handler(Handler<CONTEXT>& handler,
-                                XML::Element& config) = 0;
+                                const XML::Element& config) = 0;
 
   //--------------------------------------------------------------------------
   // Virtual destructor
@@ -110,7 +110,7 @@ class Broker
   Init::Registry<Handler<CONTEXT> > &handler_registry;
 
   // Internals
-  bool create_handler(XML::Element& xml)
+  bool create_handler(const XML::Element& xml)
   {
     Handler<CONTEXT> *mh = handler_registry.create(xml.name, xml);
     if (!mh) return false;
@@ -170,12 +170,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Configure from XML configuration (<message> element)
-  void configure(XML::Element& config)
+  void configure(const XML::Element& config)
   {
     // Create all message handler modules in order
     for(XML::Element::iterator p(config.children); p; ++p)
     {
-      XML::Element& mhe = *p;
+      const XML::Element& mhe = *p;
       if (!mhe.name.empty() && !create_handler(mhe))
       {
         Log::Error log;

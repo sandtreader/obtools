@@ -538,7 +538,7 @@ public:
     http_server(0), http_server_thread(0),
     https_server(0), https_server_thread(0)
   {
-    XML::XPathProcessor xpath(config);
+    XML::ConstXPathProcessor xpath(config);
     Log::Streams log;
 
     // Start HTTP server

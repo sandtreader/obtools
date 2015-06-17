@@ -322,7 +322,7 @@ void HTTPMessage::set_cookie(const string& name,
 
 //--------------------------------------------------------------------------
 // Get a map of all cookies, name value pairs in values_p
-void HTTPMessage::get_cookies(map<string, string>& values_p)
+void HTTPMessage::get_cookies(map<string, string>& values_p) const
 {
   list<string> cookie_headers = headers.get_all("cookie");
   for(list<string>::iterator p = cookie_headers.begin();
@@ -345,7 +345,7 @@ void HTTPMessage::get_cookies(map<string, string>& values_p)
 
 //--------------------------------------------------------------------------
 // Get a single cookie value, or empty if not set
-string HTTPMessage::get_cookie(const string& name)
+string HTTPMessage::get_cookie(const string& name) const
 {
   map<string, string> values;
   get_cookies(values);

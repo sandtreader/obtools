@@ -360,11 +360,11 @@ public:
 
   //--------------------------------------------------------------------------
   // Get a map of all cookies, name value pairs in values_p
-  void get_cookies(map<string, string>& values_p);
+  void get_cookies(map<string, string>& values_p) const;
 
   //--------------------------------------------------------------------------
   // Get a single cookie value, or empty if not set
-  string get_cookie(const string& name);
+  string get_cookie(const string& name) const;
 };
 
 //------------------------------------------------------------------------

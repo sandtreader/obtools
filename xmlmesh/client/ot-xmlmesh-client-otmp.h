@@ -93,12 +93,12 @@ class OTMPMessageInterface
 public:
   //--------------------------------------------------------------------------
   // Constructor, taking 'xmlmesh' element
-  OTMPMessageInterface(CONTEXT& context, XML::Element& config,
+  OTMPMessageInterface(CONTEXT& context, const XML::Element& config,
                        ObTools::Message::Broker<CONTEXT>& broker):
     client(0)
   {
     Log::Streams log;
-    XML::XPathProcessor xpath(config);
+    XML::ConstXPathProcessor xpath(config);
 
     // Set up mesh connection - note, no default here, so if not present,
     // we disable it
