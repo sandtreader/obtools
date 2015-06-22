@@ -45,7 +45,7 @@ public:
 class TestServer: public Tube::BiSyncServer
 {
 private:
-  bool handle_request(Tube::ClientMessage& msg, Tube::Message& response)
+  bool handle_request(const Tube::ClientMessage& msg, Tube::Message& response)
   {
     response = msg.msg;  // Reflect it once
     client_details = msg.client;       // Capture to send back

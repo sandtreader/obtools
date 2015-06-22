@@ -73,10 +73,10 @@ public:
 
 //--------------------------------------------------------------------------
 // TCPServer verify method
-bool Server::verify(Net::EndPoint ep)
+bool Server::verify(Net::EndPoint ep) const
 {
   // Check host against filters
-  for(list<Net::MaskedAddress>::iterator p = filters.begin();
+  for(list<Net::MaskedAddress>::const_iterator p = filters.begin();
       p!=filters.end();
       p++)
     if (*p == ep.host) return true;
@@ -88,8 +88,8 @@ bool Server::verify(Net::EndPoint ep)
 
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
-void Server::process(SSL::TCPSocket& socket, 
-		     SSL::ClientDetails& client)
+void Server::process(SSL::TCPSocket& socket,
+		     const SSL::ClientDetails& client)
 {
   Log::Streams log;  // Our private log
 

@@ -86,7 +86,7 @@ private:
   //------------------------------------------------------------------------
   // Abstract function to handle an incoming client message
   // Whether connection should be allowed to continue
-  virtual bool handle_message(Tube::ClientMessage& msg);
+  virtual bool handle_message(const Tube::ClientMessage& msg);
 
 public:
   //------------------------------------------------------------------------

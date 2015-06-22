@@ -74,7 +74,8 @@ retry:
 //------------------------------------------------------------------------
 // Block waiting for a response to the given request
 // Returns whether valid response received
-bool SyncRequestCache::wait_response(Message& request, Message& response)
+bool SyncRequestCache::wait_response(const Message& request,
+                                     Message& response)
 {
   // Lock mutex - wait will unlock it then relock on exit
   MT::Lock lock(request_mutex); 
@@ -98,7 +99,8 @@ bool SyncRequestCache::wait_response(Message& request, Message& response)
 //------------------------------------------------------------------------
 // Handle a response - returns true if it was recognised as a response
 // to one of our requests, false if it is a new message from the other side
-bool SyncRequestCache::handle_response(Message& response, const string& name)
+bool SyncRequestCache::handle_response(const Message& response,
+                                       const string& name)
 {
   Log::Streams log;
 

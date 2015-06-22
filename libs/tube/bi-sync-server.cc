@@ -135,7 +135,7 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
 
 //------------------------------------------------------------------------
 // Handle asynchronous messages, which includes responses
-bool BiSyncServer::handle_async_message(ClientMessage& msg)
+bool BiSyncServer::handle_async_message(const ClientMessage& msg)
 {
   // Check it's a response before going to the trouble of
   // looking up the session
@@ -157,7 +157,7 @@ bool BiSyncServer::handle_async_message(ClientMessage& msg)
 
 //------------------------------------------------------------------------
 // Handle asynchronous messages which aren't responses
-bool BiSyncServer::handle_client_async_message(ClientMessage& msg)
+bool BiSyncServer::handle_client_async_message(const ClientMessage& msg)
 {
   // Call SyncServer's original handle_async_message which just logs it
   return SyncServer::handle_async_message(msg);

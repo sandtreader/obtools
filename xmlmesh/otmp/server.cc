@@ -30,11 +30,11 @@ Server::Server(ClientMessageQueue& receive_queue,
 //------------------------------------------------------------------------
 // Function to handle an incoming client message
 // Whether connection should be allowed to continue
-bool Server::handle_message(Tube::ClientMessage& msg)
+bool Server::handle_message(const Tube::ClientMessage& msg)
 {
   // We need to cast it to our own type to satisfy typing - but we don't
   // add anything to it, so this is safe
-  receive_q.send(static_cast<ClientMessage&>(msg));
+  receive_q.send(static_cast<const ClientMessage&>(msg));
   return true;
 }
 

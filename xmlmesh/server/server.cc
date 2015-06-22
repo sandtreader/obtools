@@ -30,7 +30,7 @@ void Server::configure(const XML::Configuration& config)
 
   // Read all routes
   const XML::Element& routes = root.get_child("routes");
-  for(XML::Element::const_iterator p(services.get_children("route")); p; ++p)
+  for(XML::Element::const_iterator p(routes.get_children("route")); p; ++p)
   {
     if (!create_route(*p))
       log << "Failed to create route from XML:\n" << *p;

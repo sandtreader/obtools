@@ -872,7 +872,7 @@ public:
   // the worker thread.  This function operates in the dispatcher thread
   // and should be fast!
   // Defaults to allowing anything
-  virtual bool verify(EndPoint) { return true; }
+  virtual bool verify(EndPoint) const { return true; }
 
   //--------------------------------------------------------------------------
   // Virtual function to process a single connection on the given socket.  

@@ -18,7 +18,8 @@ using namespace ObTools;
 class TestServer: public Tube::SyncServer
 {
 private:
-  bool handle_request(Tube::ClientMessage& msg, Tube::Message& response)
+  bool handle_request(const Tube::ClientMessage& msg,
+                      Tube::Message& response)
   {
     // Send it back as response
     response = msg.msg;

@@ -264,12 +264,12 @@ private:
   // Block waiting for a response to the given request
   // (call after sending message)
   // Returns whether valid response received
-  bool wait_response(Message& request, Message& response);
+  bool wait_response(const Message& request, Message& response);
 
   //------------------------------------------------------------------------
   // Handle a response - returns true if it was recognised as a response
   // to one of our requests, false if it is a new message from the other side
-  bool handle_response(Message& response, const string& name);
+  bool handle_response(const Message& response, const string& name);
 
   //------------------------------------------------------------------------
   // Shut down cleanly for a specific client
@@ -463,12 +463,12 @@ private:
   //------------------------------------------------------------------------
   // Overridable function to filter message tags - return true if tag
   // is recognised.  By default, allows any tag
-  virtual bool tag_recognised(tag_t /*tag*/) { return true; }
+  virtual bool tag_recognised(tag_t /*tag*/) const { return true; }
 
   //------------------------------------------------------------------------
   // Abstract function to handle an incoming client message
   // Whether connection should be allowed to continue
-  virtual bool handle_message(ClientMessage& msg)=0;
+  virtual bool handle_message(const ClientMessage& msg)=0;
 
 protected:
   SessionMap client_sessions;        // Map of sessions (used by BiSyncServer)
@@ -518,7 +518,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check it hasn't been killed
-  bool is_alive() { return alive; }
+  bool is_alive() const { return alive; }
 
   //------------------------------------------------------------------------
   // Set maximum send queue
@@ -534,12 +534,12 @@ public:
 
   //--------------------------------------------------------------------------
   // TCPServer verify method
-  bool verify(Net::EndPoint ep);
+  bool verify(Net::EndPoint ep) const;
 
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
-  void process(SSL::TCPSocket& s, 
-	       SSL::ClientDetails& client);
+  void process(SSL::TCPSocket& s,
+	       const SSL::ClientDetails& client);
 
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
@@ -565,12 +565,13 @@ class SyncServer: public Server
 private:
   //------------------------------------------------------------------------
   // Function to handle an incoming client message, called from parent
-  bool handle_message(ClientMessage& msg);
+  bool handle_message(const ClientMessage& msg);
 
   //------------------------------------------------------------------------
   // Abstract function to handle a request - implement in subclass
   // Return whether request handled OK, and fill in response
-  virtual bool handle_request(ClientMessage& request, Message& response) = 0;
+  virtual bool handle_request(const ClientMessage& request,
+                              Message& response) = 0;
 
 protected:
   //------------------------------------------------------------------------
@@ -579,7 +580,7 @@ protected:
   // still need to receive async messages
   // Also called for STARTED and FINISHED psuedo-messages
   // Return whether connection should be allowed to continue
-  virtual bool handle_async_message(ClientMessage& msg);
+  virtual bool handle_async_message(const ClientMessage& msg);
 
 public:
   //------------------------------------------------------------------------
@@ -685,7 +686,7 @@ class BiSyncServer: public SyncServer
   SyncRequestCache requests;
 
   // Handle asynchronous messages, which includes responses
-  bool handle_async_message(ClientMessage& msg);
+  bool handle_async_message(const ClientMessage& msg);
 
  public:
   static const int DEFAULT_REQUEST_TIMEOUT = 5;
@@ -741,7 +742,7 @@ class BiSyncServer: public SyncServer
   // handle_async_message and only call this if it's not a response
   // Also called for STARTED and FINISHED psuedo-messages
   // Return whether connection should be allowed to continue
-  virtual bool handle_client_async_message(ClientMessage& msg);
+  virtual bool handle_client_async_message(const ClientMessage& msg);
 
   //------------------------------------------------------------------------
   // Shut down server cleanly

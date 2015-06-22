@@ -18,10 +18,14 @@ using namespace ObTools;
 class TestServer: public Tube::Server
 {
 private:
-  bool handle_message(Tube::ClientMessage& msg)
+  bool handle_message(const Tube::ClientMessage& msg)
   {
     // Send it back
-    if (msg.action == Tube::ClientMessage::MESSAGE_DATA) send(msg);
+    if (msg.action == Tube::ClientMessage::MESSAGE_DATA)
+    {
+      Tube::ClientMessage response(msg);
+      send(response);
+    }
 
     return true;
   }
