@@ -113,6 +113,10 @@ public:
   // Get path as C-string (for fopen etc.)
   const char *c_str() const { return path.c_str(); }
 
+  //--------------------------------------------------------------------------
+  // Extend a path
+  Path& extend(const string& leaf);
+
   // Methods to split paths --------------------------------------------------
   //--------------------------------------------------------------------------
   // Find whether it's an absolute path

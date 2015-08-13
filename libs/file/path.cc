@@ -160,6 +160,14 @@ string Path::basename() const
 }
 
 //--------------------------------------------------------------------------
+// Extend a path
+Path& Path::extend(const string& leaf)
+{
+  path += SEPCHAR + leaf;
+  return *this;
+}
+
+//--------------------------------------------------------------------------
 // Resolve one path against another:
 //   If new path is absolute, return new path
 //   If relative, make absolute path relative to dirname of old path
