@@ -330,6 +330,7 @@ ostream& operator<<(ostream& s, const PropertyList& pl);
 // generate pathname / URL rewrites with load-balancing elements
 class HashInterpolator
 {
+public:
   struct Hash
   {
     string name;
@@ -344,6 +345,7 @@ class HashInterpolator
       name(_name), modulus(_modulus), pattern(_pattern) {}
   };
 
+private:
   list<Hash> hashes;
 
 public:
@@ -374,6 +376,11 @@ public:
   // Comparator for testing
   bool operator==(const HashInterpolator& o) const
   { return hashes == o.hashes; }
+
+  //------------------------------------------------------------------------
+  // Get hashes
+  list<Hash> get_hashes() const
+  { return hashes; }
 };
 
 //==========================================================================
