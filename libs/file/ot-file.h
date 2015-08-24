@@ -101,8 +101,8 @@ public:
   Path(const Path& _path, const string& leaf);
 
   //--------------------------------------------------------------------------
-  // Validity check 
-  bool operator!() { return path.empty(); }
+  // Validity check
+  bool operator!() const { return path.empty(); }
 
   // Accessors ---------------------------------------------------------------
   //--------------------------------------------------------------------------
