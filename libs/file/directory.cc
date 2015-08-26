@@ -175,4 +175,23 @@ bool Directory::empty() const
   return result;
 }
 
+//--------------------------------------------------------------------------
+// Extend a path
+Directory& Directory::extend(const string& leaf)
+{
+  path += SEPCHAR + leaf;
+  return *this;
+}
+
+//--------------------------------------------------------------------------
+// Extend a path
+Directory& Directory::extend(const Path& p)
+{
+  if (p.is_absolute())
+    path += p.str();
+  else
+    path += SEPCHAR + p.str();
+  return *this;
+}
+
 }} // namespaces

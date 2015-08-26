@@ -168,6 +168,17 @@ Path& Path::extend(const string& leaf)
 }
 
 //--------------------------------------------------------------------------
+// Extend a path
+Path& Path::extend(const Path& p)
+{
+  if (p.is_absolute())
+    path += p.str();
+  else
+    path += SEPCHAR + p.str();
+  return *this;
+}
+
+//--------------------------------------------------------------------------
 // Resolve one path against another:
 //   If new path is absolute, return new path
 //   If relative, make absolute path relative to dirname of old path
