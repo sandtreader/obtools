@@ -275,6 +275,13 @@ public:
 #endif
 
   //------------------------------------------------------------------------
+  // Equality operator
+  bool operator==(const Path& b) const
+  {
+    return path == b.path;
+  }
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Path() {}
 };
