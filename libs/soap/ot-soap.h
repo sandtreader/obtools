@@ -334,6 +334,8 @@ public:
 // Extends Web::HTTPClient to provide SOAP interface
 class HTTPClient: public Web::HTTPClient
 {
+  map<string, string> ns_map;  // NS name/URI to prefix for response parser
+
 public:
   //--------------------------------------------------------------------------
   // Constructor from server, no SSL
@@ -359,6 +361,12 @@ public:
   HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua="",
 	     int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, ctx, _ua, _connection_timeout, _operation_timeout) {}
+
+  //--------------------------------------------------------------------------
+  // Map a namespace URI to a fixed prefix in the response parser, to make
+  // access easier
+  void fix_namespace(const string& uri, const string& prefix)
+  { ns_map[uri] = prefix; }
 
   //--------------------------------------------------------------------------
   // Simple request POST operation on a specified URL and optional SOAP action

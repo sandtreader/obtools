@@ -36,6 +36,12 @@ int HTTPClient::post(Web::URL& url, const string& soap_action,
 
   // Parse out SOAP result from response_body
   Parser parser(log.error);
+
+  // Add namespace mappings
+  for(map<string, string>::const_iterator p = ns_map.begin();
+      p!=ns_map.end(); ++p)
+    parser.fix_namespace(p->first, p->second);
+
   Message soap_response(http_response.body, parser);
 
   // Make sure it's valid
