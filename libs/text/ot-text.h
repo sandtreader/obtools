@@ -4,7 +4,7 @@
 // Public definitions for ObTools::Text
 // Generally useful text/matching extensions to standard C++ library:
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2015 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -51,6 +51,10 @@ string remove_indent(const string& text, int indent);
 //  Remove leading and trailing whitespace
 //  Translate intervening whitespace strings into single space
 string canonicalise_space(const string& text);
+
+//--------------------------------------------------------------------------
+// Remove all whitespace from a string
+string remove_space(const string& text);
 
 //--------------------------------------------------------------------------
 // Split a string into first word and remaining

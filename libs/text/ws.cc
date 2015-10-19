@@ -241,6 +241,32 @@ string canonicalise_space(const string& text)
 }
 
 //--------------------------------------------------------------------------
+// Remove all whitespace from a string
+string remove_space(const string& text)
+{
+  string fixed;
+
+  for(string::const_iterator p = text.begin(); p!=text.end(); p++)
+  {
+    char c = *p;
+    switch (c)
+    {
+      case ' ':
+      case '\t':
+      case '\r':
+      case '\n':
+        break;
+
+      default:
+        fixed+=c;
+        break;
+    }
+  }
+
+  return fixed;
+}
+
+//--------------------------------------------------------------------------
 // Split a string into first word and remaining
 // Text must be canonical (see above)
 // Returns first word, removes it and space from text

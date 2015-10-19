@@ -172,12 +172,13 @@ namespace
   const int OT_BAD_DATA = -2;
 
   // Read an integer field in length characters, modifying pos
-  int read_part(const string& text, string::size_type& pos, int length)
+  int read_part(const string& text, string::size_type size,
+                string::size_type& pos, int length)
   {
-    if (text.size() == pos)
+    if (size == pos)
       return OT_NO_DATA;
 
-    if (text.size() < pos + length)
+    if (size < pos + length)
       return OT_BAD_DATA;
 
     string s(text, pos, length);
@@ -190,23 +191,19 @@ namespace
   }
 
   // Read a floating field in length characters, modifying pos
-  // not general - specific for float seconds with optional Z at end
-  double read_part_f(const string& text, string::size_type& pos, int length)
+  double read_part_f(const string& text, string::size_type size,
+                     string::size_type& pos, int length)
   {
-    if (text.size() == pos)
+    if (pos == size)
       return OT_NO_DATA;
 
     if (length < 2)
       return OT_BAD_DATA;
 
-    if (text.size() < pos + length)
+    if (pos + length > size)
       return OT_BAD_DATA;
 
     string s(text, pos, length);
-
-    if (s.size() > 2 && *s.rbegin() == 'Z')
-      s.erase(s.size() - 1, 1);
-
     int dp_count = 0;
     for (string::const_iterator it = s.begin(); it != s.end(); ++it)
     {
@@ -224,9 +221,10 @@ namespace
   }
 
   // Read an optional filler character
-  bool read_filler(const string& text, string::size_type& pos, char c)
+  bool read_filler(const string& text, string::size_type size,
+                   string::size_type& pos, char c)
   {
-    if (text.size() > pos)
+    if (pos < size)
     {
       if (text[pos] == c)
       {
@@ -238,33 +236,34 @@ namespace
   }
 
   // Read HH[:]MM[:]SS into time portion of a split, returns whether successful
-  // If float_secs is set, accepts floating point seconds with optional Z
-  bool read_time(const string& text, string::size_type& pos, bool lenient,
+  // If float_secs is set, accepts floating point seconds
+  bool read_time(const string& text, string::size_type size,
+                 string::size_type& pos, bool lenient,
                  bool float_secs, Split& split)
   {
     // Read hour
-    int h = read_part(text, pos, 2);
+    int h = read_part(text, size, pos, 2);
     if (h == OT_BAD_DATA || (h == OT_NO_DATA && !lenient)) return false;
     if (h >= 0)
     {
       split.hour = h;
 
       // Check for colon
-      read_filler(text, pos, ':');
+      read_filler(text, size, pos, ':');
 
       // Read minute
-      int mi = read_part(text, pos, 2);
+      int mi = read_part(text, size, pos, 2);
       if (mi == OT_BAD_DATA || (h == OT_NO_DATA && !lenient)) return false;
       if (mi >= 0)
       {
         split.min = mi;
 
         // Check for colon
-        read_filler(text, pos, ':');
+        read_filler(text, size, pos, ':');
 
         // Read seconds as float for all the rest
-        double s = float_secs?read_part_f(text, pos, text.size() - pos)
-                             :read_part(text, pos, 2);
+        double s = float_secs?read_part_f(text, size, pos, size - pos)
+                             :read_part(text, size, pos, 2);
         if (s == OT_BAD_DATA || (s == OT_NO_DATA && !lenient)) return false;
         if (s >= 0) split.sec = s;
       }
@@ -273,39 +272,94 @@ namespace
     return true;
   }
 
+  // Read a timezone offset {+|-}[hh[[:]mm]]
+  bool read_timezone_offset(const string& text, string::size_type size,
+                            string::size_type pos, Duration& tz_offset)
+  {
+    int sign = 1;
+    if (pos >= size) return false;
+    if (text[pos++] == '-') sign = -1;
+
+    // Get hour
+    int h = read_part(text, size, pos, 2);
+    if (h<0) return false;
+
+    // Check for optional colon
+    bool colon = read_filler(text, size, pos, ':');
+
+    // Look for minutes - must be there if colon present
+    int m = read_part(text, size, pos, 2);
+    if (m<0)
+    {
+      if (colon) return false;
+      m=0;
+    }
+
+    tz_offset = Duration(sign*(h*3600.0+m*60));
+    return pos == size;  // Must be all used up
+  }
+
   // Read an ISO timestamp into split, returns whether successful
-  bool read_iso(const string& text, bool lenient, Split& split)
+  // Sets timezone offset of input text if any
+  bool read_iso(const string& text, bool lenient, Split& split,
+                Duration& tz_offset)
   {
     string::size_type pos=0;
+    string::size_type size = text.size();
 
     // Read year
-    int y = read_part(text, pos, 4);
+    int y = read_part(text, size, pos, 4);
     if (y < 0) return false;
     split.year = y;
 
     // Check for dash
-    read_filler(text, pos, '-');
+    read_filler(text, size, pos, '-');
 
     // Read month
-    int m = read_part(text, pos, 2);
+    int m = read_part(text, size, pos, 2);
     if (m < 0) return false;
     split.month = m;
 
     // Check for dash
-    read_filler(text, pos, '-');
+    read_filler(text, size, pos, '-');
 
     // Read day
-    int d = read_part(text, pos, 2);
+    int d = read_part(text, size, pos, 2);
     if (d < 0) return false;
     split.day = d;
 
     // Check for space or 'T', otherwise fail if not lenient
-    if (!read_filler(text, pos, ' ') && !read_filler(text, pos, 'T') &&
+    if (!read_filler(text, size, pos, ' ') &&
+        !read_filler(text, size, pos, 'T') &&
         !lenient)
       return false;
 
-    // Read ISO time with optional Z
-    return read_time(text, pos, lenient, true, split);
+    // Look for timezone - we accept Z or [hh[[:]mm]
+    tz_offset = Duration(0);
+    for(string::size_type p = pos; p<size; p++)
+    {
+      switch (text[p])
+      {
+        case '-':
+        case '+':
+          if (!read_timezone_offset(text, size, p, tz_offset))
+            return false;
+
+          // Falling!
+
+        case 'Z':    // Offset is still 0
+          size = p;  // Truncate time and stop
+          break;
+
+        default:;
+      }
+    }
+
+    // Read ISO time
+    if (!read_time(text, size, pos, lenient, true, split)) return false;
+
+    // Make sure we've read everything
+    return (pos == size);
   }
 
   // Get a month number (1-12) from a 3-character word, or 0 if invalid
@@ -346,7 +400,8 @@ namespace
 
     // Read time
     string::size_type pos=0;
-    if (!read_time(words[4], pos, false, false, split)) return false;
+    if (!read_time(words[4], words[4].size(), pos, false, false, split))
+      return false;
 
     // Last word must be GMT
     // ! Check for time zone modifier?
@@ -383,7 +438,8 @@ namespace
 
     // Read time
     string::size_type pos=0;
-    if (!read_time(words[2], pos, false, false, split)) return false;
+    if (!read_time(words[2], words[2].size(), pos, false, false, split))
+      return false;
 
     // Last word must be GMT
     // ! Check for time zone modifier?
@@ -406,7 +462,8 @@ namespace
 
     // Read time
     string::size_type pos=0;
-    if (!read_time(words[3], pos, false, false, split)) return false;
+    if (!read_time(words[3], words[3].size(), pos, false, false, split))
+      return false;
 
     // Year
     split.year = Text::stoi(words[4]);
@@ -445,17 +502,23 @@ Stamp::Stamp(const string& text, bool lenient)
 {
   t=0; // Clear stamp incase we fail
   Split split;
+  Duration tz_offset;
 
   // If the first part is a digit, assume it's ISO
   if (isdigit(text[0]))
   {
-    if (!read_iso(text, lenient, split)) return;
+    if (!read_iso(text, lenient, split, tz_offset)) return;
   }
   else // assume it's an HTTP text format
   {
     if (!read_http(text, split)) return;
   }
+
+  // Combined to NTP timestamp
   t = combine(split);
+
+  // Modify for timezone - positive timezones are subtracted
+  *this -= tz_offset;
 }
 
 //------------------------------------------------------------------------
