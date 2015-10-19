@@ -13,7 +13,7 @@ DEPENDS = text
 TESTS 	= test-split test-exhaustive-dates test-parse \
           test-duration test-stamp test-date-stamp
 TESTLIB = -lgtest
-TESTCMD	=  ./test-split \
+TESTCMD	= ./test-split \
        && ./test-exhaustive-dates \
        && ./test-parse \
        && ./test-stamp < ../test.stamps.txt \

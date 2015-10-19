@@ -92,6 +92,48 @@ TEST(ParseTests, TestParseISO8601LenientBadSeconds)
   ASSERT_TRUE(!stamp);
 }
 
+TEST(ParseTests, TestParseISO8601WithPositiveTimezoneWithColon)
+{
+  const string iso8601 = "2015-10-19T14:10:30+01:00";
+  Time::Stamp stamp(iso8601, true);
+  ASSERT_EQ("2015-10-19T13:10:30Z", stamp.iso());
+}
+
+TEST(ParseTests, TestParseISO8601WithPositiveTimezoneWithoutColon)
+{
+  const string iso8601 = "2015-10-19T14:10:30+0100";
+  Time::Stamp stamp(iso8601, true);
+  ASSERT_EQ("2015-10-19T13:10:30Z", stamp.iso());
+}
+
+TEST(ParseTests, TestParseISO8601WithNegativeTimezoneWithColon)
+{
+  const string iso8601 = "2015-10-19T08:40:30-04:30";
+  Time::Stamp stamp(iso8601, true);
+  ASSERT_EQ("2015-10-19T13:10:30Z", stamp.iso());
+}
+
+TEST(ParseTests, TestParseISO8601WithNegativeTimezoneWithNoMinutes)
+{
+  const string iso8601 = "2015-10-19T08:10:30-05";
+  Time::Stamp stamp(iso8601, true);
+  ASSERT_EQ("2015-10-19T13:10:30Z", stamp.iso());
+}
+
+TEST(ParseTests, TestParseISO8601WithTimezoneWithColonButNoMinutesFails)
+{
+  const string iso8601 = "2015-10-19T08:10:30+05:";
+  Time::Stamp stamp(iso8601, true);
+  ASSERT_TRUE(!stamp);
+}
+
+TEST(ParseTests, TestParseISO8601WithWeirdCombinedTimezoneFails)
+{
+  const string iso8601 = "2015-10-19T08:10:30+05Z";
+  Time::Stamp stamp(iso8601, true);
+  ASSERT_TRUE(!stamp);
+}
+
 TEST(ParseTests, TestParseRFC822)
 {
   const string rfc822 = "Sun, 06 Nov 1994 08:49:37 GMT";
