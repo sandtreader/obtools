@@ -278,16 +278,9 @@ else
 ifeq ($(CROSS), centos)
 CC = gcc
 CXX = g++
-EXTRALIBS += -lrt
+EXTRALIBS += -lrt -lm
 CPPFLAGS += -pthread
 LDFLAGS += -pthread
-
-CENTOS_7_AND_ABOVE=$(shell /usr/bin/lsb_release -r -s |cut -d\. -f1|sed s/[1-6]//)
-ifdef CENTOS_7_AND_ABOVE
-ifneq ($(CENTOS_7_AND_ABOVE),)
-EXTRALIBS += -lm
-endif
-endif
 
 else
 
