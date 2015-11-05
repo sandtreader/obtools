@@ -94,6 +94,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Less than operator
+  bool operator<(const SharedPointer<T>& shared_pointer) const
+  {
+    return pointer < shared_pointer.pointer;
+  }
+
+  //------------------------------------------------------------------------
   // Assignment operator
   SharedPointer& operator=(const SharedPointer<T>& shared_pointer)
   {
@@ -206,6 +213,13 @@ public:
   bool operator!() const
   {
     return !pointer;
+  }
+
+  //------------------------------------------------------------------------
+  // Less than operator
+  bool operator<(const UniquePointer<T>& unique_pointer) const
+  {
+    return pointer < unique_pointer.pointer;
   }
 
   //------------------------------------------------------------------------
