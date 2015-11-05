@@ -107,6 +107,9 @@ if [ -s $DEB_DIR/DEBIAN/conffiles ]; then
   sed 's/^/%config(noreplace) %verify(not mtime) "/g;s/$/"/g' $DEB_DIR/DEBIAN/conffiles  >> $RPM_SPEC
 fi
 
+. $ROOT/build/build_functions.sh
+fix_spec_centos7
+
 fakeroot -- rpmbuild --buildroot ${DEB_DIR} -bb  $RPM_SPEC
 
 mv ../${NAME}${VARIANT}${RPM_DEVEL}-$VERSION-${REV}.${TARGARCH}.rpm $RELEASE_DIR
