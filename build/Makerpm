@@ -84,8 +84,12 @@ echo "%files" >>  $RPM_SPEC
 #get length of directory name
 NUMCHAR=`echo ${DEB_DIR}|wc -c `
 
-# all dirs first
-tar cvf /dev/null $DEB_DIR |grep  "/$" |cut -c ${NUMCHAR}- |grep -v "^/DEBIAN/" |sed -e 's/^/%dir \"/' -e 's/$/\"/' >> $RPM_SPEC
+if [ "$OUR_DIRECTORIES" ]; then
+  for directory in $OUR_DIRECTORIES
+  do
+    echo "%dir \"${directory}\"" >> $RPM_SPEC
+  done
+fi
 
 # any conf files?
 if [ -s $DEB_DIR/DEBIAN/conffiles ]; then
@@ -106,9 +110,6 @@ if [ -s $DEB_DIR/DEBIAN/conffiles ]; then
    cat $DEB_DIR/DEBIAN/conffiles| 
   sed 's/^/%config(noreplace) %verify(not mtime) "/g;s/$/"/g' $DEB_DIR/DEBIAN/conffiles  >> $RPM_SPEC
 fi
-
-. $ROOT/build/build_functions.sh
-fix_spec_centos7
 
 fakeroot -- rpmbuild --buildroot ${DEB_DIR} -bb  $RPM_SPEC
 
