@@ -494,6 +494,12 @@ protected:
   // Put character on overflow
   int overflow(int c = EOF);
 
+  //------------------------------------------------------------------------
+  // Set internal position pointer to relative position
+  // Implemented for sake of MultiOutStream::tellp() functionality
+  streampos seekoff(streamoff off, ios_base::seekdir way,
+                    ios_base::openmode which = ios_base::in | ios_base::out);
+
 public:
   //------------------------------------------------------------------------
   // Constructor

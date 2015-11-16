@@ -37,6 +37,10 @@ class StreamTest: public ::testing::Test
   }
 };
 
+class MultiStreamTest: public StreamTest
+{
+};
+
 TEST_F(StreamTest, TestBufferedWrite)
 {
   const string test_file(test_dir + "/buffered-write");
@@ -154,6 +158,17 @@ TEST_F(StreamTest, TestTellpReturnsAmountWritten)
   bos.write(data, 10);
   bos.write(&data[10], sizeof(data) - 10);
   ASSERT_EQ(sizeof(data), bos.tellp());
+}
+
+TEST_F(MultiStreamTest, TestTellpReturnsAmountWritten)
+{
+  const string test_file(test_dir + "/tellp");
+  const char data[] = "some-text-as-a-test";
+
+  File::MultiOutStream mos;
+  mos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  mos.write(data, sizeof(data));
+  ASSERT_EQ(sizeof(data), mos.tellp());
 }
 
 } // anonymous namespace

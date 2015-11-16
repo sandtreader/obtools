@@ -114,7 +114,7 @@ streamsize MultiOutFileBuf::xsputn(const char *s, streamsize n)
   return result;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Put character on overflow
 int MultiOutFileBuf::overflow(int c)
 {
@@ -124,6 +124,21 @@ int MultiOutFileBuf::overflow(int c)
     (*it)->sputn(reinterpret_cast<const char *>(&c), 1);
   }
   return c;
+}
+
+//--------------------------------------------------------------------------
+// Set internal position pointer to relative position
+// Implemented for sake of MultiOutStream::tellp() functionality
+streampos MultiOutFileBuf::seekoff(streamoff off, ios_base::seekdir way,
+                                   ios_base::openmode which)
+{
+  streampos result(-1);
+  for (vector<Gen::UniquePointer<filebuf> >::iterator
+       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  {
+    result = (*it)->pubseekoff(off, way, which);
+  }
+  return result;
 }
 
 //==========================================================================
