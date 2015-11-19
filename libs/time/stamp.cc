@@ -175,10 +175,10 @@ namespace
   int read_part(const string& text, string::size_type size,
                 string::size_type& pos, int length)
   {
-    if (size == pos)
+    if (pos == size)
       return OT_NO_DATA;
 
-    if (size < pos + length)
+    if (pos + length > size)
       return OT_BAD_DATA;
 
     string s(text, pos, length);
