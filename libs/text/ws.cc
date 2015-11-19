@@ -249,18 +249,7 @@ string remove_space(const string& text)
   for(string::const_iterator p = text.begin(); p!=text.end(); p++)
   {
     char c = *p;
-    switch (c)
-    {
-      case ' ':
-      case '\t':
-      case '\r':
-      case '\n':
-        break;
-
-      default:
-        fixed+=c;
-        break;
-    }
+    if (!isspace(c)) fixed+=c;
   }
 
   return fixed;
