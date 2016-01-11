@@ -114,13 +114,6 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
     $xpath->registerNamespace( "x",  "http://obtools.com/ns/xmlmesh");
 
-    // check for presence of xmlmesh.ok
-    $ok = $xpath->query("//x:routing[@x:subject='xmlmesh.ok']");
-    if ($ok->length)
-    {
-      return true;
-    }
-
     // Look for a Fault response
     $nodes = $xpath->query("//env:Fault/env:Reason/env:Text");
     if ($nodes->length)
