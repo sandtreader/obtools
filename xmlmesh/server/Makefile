@@ -12,8 +12,8 @@ OBJS 	= main.o server.o service.o mpath.o otmp-server.o otmp-client.o \
 	  correlator.o publisher.o http-server.o
 
 DEBIAN-NAME    = ot-xmlmesh
-DEBIAN-VERSION = 3.0.0
-DEBIAN-REVISION = dev1
+DEBIAN-VERSION = 3.2.0
+DEBIAN-REVISION = 1~dev1
 
 DEPENDS = xmlmesh-client xmlmesh-core xmlmesh-otmp \
           net log mt xml soap web text cache init misc tube file

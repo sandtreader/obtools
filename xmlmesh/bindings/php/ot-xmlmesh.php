@@ -21,6 +21,8 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
   global $xmlmesh_host, $xmlmesh_port, $xmlmesh_timeout, $xmlmesh_last_error;
   global $xmlmesh_socket;
 
+  $xmlmesh_last_error = "";
+
   // Open TCP socket to server if not already open
   if (!$xmlmesh_socket)
     $xmlmesh_socket = fsockopen($xmlmesh_host, $xmlmesh_port, $errno, $errstr,
@@ -113,13 +115,6 @@ function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
     $xpath = new DOMXPath( $dom );
     $xpath->registerNamespace( "env","http://www.w3.org/2003/05/soap-envelope");
     $xpath->registerNamespace( "x",  "http://obtools.com/ns/xmlmesh");
-
-    // check for presence of xmlmesh.ok
-    $ok = $xpath->query("//x:routing[@x:subject='xmlmesh.ok']");
-    if ($ok->length)
-    {
-      return true;
-    }
 
     // Look for a Fault response
     $nodes = $xpath->query("//env:Fault/env:Reason/env:Text");

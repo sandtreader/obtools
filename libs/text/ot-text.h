@@ -81,6 +81,8 @@ vector<string> split_words(const string& text);
 // multiple internal whitespace into one) if canonicalise is set
 // If max is set, stops after 'max-1' fields have been read, and drops the
 // rest of the string into the last one
+// If there are no delimiters, the whole string (even if empty) goes into
+// the first result element
 vector<string> split(const string& text, char delim=',',
 		     bool canonicalise = true, int max=0);
 
