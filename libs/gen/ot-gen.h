@@ -11,6 +11,7 @@
 #ifndef __OBTOOLS_GEN_H
 #define __OBTOOLS_GEN_H
 
+#include <string>
 #include <iostream>
 
 namespace ObTools { namespace Gen {
@@ -24,6 +25,33 @@ enum Tristate
   UNSET,
   ON,
   OFF,
+};
+
+//==========================================================================
+// Id class
+// Basically a restricted version of string
+// Put anything in for T as long as it's unique
+template<class T>
+class Id: public string
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  Id()
+  {}
+  Id(const Id<T>& id):
+    string(id)
+  {}
+  explicit Id(const string& id):
+    string(id)
+  {}
+
+private:
+  //------------------------------------------------------------------------
+  // hide string modification functions
+  string& operator+= (const string&) { return *this; }
+  string& operator+= (const char*) { return *this; }
+  string& operator+= (char) { return *this; }
 };
 
 //==========================================================================
