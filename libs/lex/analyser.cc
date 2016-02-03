@@ -14,8 +14,15 @@ namespace ObTools { namespace Lex {
 
 //------------------------------------------------------------------------
 // Read a token from the input
-Token Analyser::read_token() const throw (Exception)
+Token Analyser::read_token() throw (Exception)
 {
+  if (pending_token.type != Token::UNKNOWN)
+  {
+    Token result = pending_token;
+    pending_token = Token();
+    return result;
+  }
+
   if (!input) return Token(Token::END);
   char c = get();
 

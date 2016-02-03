@@ -58,6 +58,7 @@ class Analyser
 {
   istream& input;
   list<string> symbols;
+  Token pending_token;
 
   // Tidied up get/peek - returns 0 for EOF
   char get() const { char c; return input.get(c)?c:0; }
@@ -74,8 +75,12 @@ public:
   void add_symbol(const string& symbol) { symbols.push_back(symbol); }
 
   //------------------------------------------------------------------------
+  // Put back a token to be read next time (lookahead)
+  void put_back(const Token& token) { pending_token = token; }
+
+  //------------------------------------------------------------------------
   // Read a token from the input
-  Token read_token() const throw (Exception);
+  Token read_token() throw (Exception);
 };
 
 //==========================================================================

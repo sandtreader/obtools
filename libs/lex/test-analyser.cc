@@ -375,6 +375,27 @@ TEST(Analyser, TestRandomCrapFailsCleanly)
   ASSERT_EQ(Token::END, token.type);
 }
 
+TEST(Analyser, TestPutBack)
+{
+  string s("1");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("1", token.value);
+
+  analyser.put_back(token);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("1", token.value);
+
+  // and it's cleared again
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+
+}
 
 int main(int argc, char **argv)
 {
