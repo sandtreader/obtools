@@ -24,7 +24,7 @@ void UTF8::append(string& utf8, wchar_t unicode)
   }
   else if (unicode < 0x00010000)
   {
-    utf8 += (0xe0 | (0xf0 & (unicode >> 12)));
+    utf8 += (0xe0 | (0x0f & (unicode >> 12)));
     utf8 += (0x80 | (0x3f & (unicode >> 6)));
     utf8 += (0x80 | (0x3f & unicode));
   }
