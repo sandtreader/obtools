@@ -25,8 +25,13 @@ using namespace std;
 
 //==========================================================================
 // JSON value
-struct Value
+class Value
 {
+  void write_string_to(ostream& out) const;
+  void write_object_to(ostream& out, bool pretty, int indent) const;
+  void write_array_to(ostream& out, bool pretty, int indent) const;
+
+public:
   enum Type
   {
     NULL_,   // Not set
@@ -48,7 +53,25 @@ struct Value
   Value(Type _type): type(_type), n(0) {}
   Value(double _n): type(NUMBER), n(_n) {}
   Value(const string& _s): type(STRING), n(0), s(_s) {}
+  Value(const char *_s): type(STRING), n(0), s(_s) {}
+
+  //------------------------------------------------------------------------
+  // Set a property on an object value
+  void set(const string& name, const Value& v) { o[name] = v; }
+
+  //------------------------------------------------------------------------
+  // Add an element to an array value
+  void add(const Value& v) { a.push_back(v); }
+
+  //------------------------------------------------------------------------
+  // Write the value to the given stream
+  // Set 'pretty' for multi-line, indented pretty-print, clear for optimal
+  void write_to(ostream& s, bool pretty=false, int indent=0) const;
 };
+
+//------------------------------------------------------------------------
+// >> operator to write to ostream
+ostream& operator<<(ostream& s, const Value& v);
 
 //==========================================================================
 // Parser exception

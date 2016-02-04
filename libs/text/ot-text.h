@@ -303,6 +303,10 @@ public:
   //------------------------------------------------------------------------
   // Encode a vector of unicode characters to a UTF8 string
   static string encode(const vector<wchar_t>& unicode);
+
+  //------------------------------------------------------------------------
+  // Decode a UTF8 string into a wide char vector
+  static void decode(const string& utf8, vector<wchar_t>& unicode);
 };
 
 //==========================================================================

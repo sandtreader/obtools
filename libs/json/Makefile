@@ -9,10 +9,10 @@ TYPE    = lib
 NAME    = ot-json
 HEADERS = ot-json.h
 DEPENDS = text lex
-OBJS    = parser.o
-TESTS   = test-parser
+OBJS    = parser.o value.o
+TESTS   = test-parser test-value
 TESTLIB = -lgtest
-TESTCMD = ./test-parser
+TESTCMD = ./test-parser && ./test-value
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

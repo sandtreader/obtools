@@ -65,4 +65,33 @@ string UTF8::encode(const vector<wchar_t>& unicode)
   return utf8;
 }
 
+//------------------------------------------------------------------------
+// Decode a UTF8 string into a wide char vector
+void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
+{
+  for(string::const_iterator p=utf8.begin(); p!=utf8.end(); ++p)
+  {
+    wchar_t c = static_cast<wchar_t>(*p);
+    int extra = 0;
+    wchar_t mask = 0xff;
+
+    // Work out how many extra characters follow, and mask for first
+    // Note extra is cumulative and mask keeps shifting the deeper we get
+    if ((c & 0xC0) == 0xC0) { extra++; mask=0x1f; }
+    if ((c & 0xE0) == 0xE0) { extra++; mask>>=1; }
+    if ((c & 0xF0) == 0xF0) { extra++; mask>>=1; }
+    if ((c & 0xF8) == 0xF8) { extra++; mask>>=1; }
+    if ((c & 0xFC) == 0xFC) { extra++; mask>>=1; }
+
+    // First character
+    c &= mask;
+
+    // Extras, 6 bits each
+    for(int i=0; i<extra && p!=utf8.end(); ++i)
+      c = (c<<6) | (*++p & 0x3f);
+
+    unicode.push_back(c);
+  }
+}
+
 }} // namespaces
