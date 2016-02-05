@@ -212,13 +212,13 @@ TEST(Analyser, TestQuotedStringGivesStringThenEND)
 
 TEST(Analyser, TestQuotedStringWithEscapes)
 {
-  string s("\"\\\\\\\"\\b\\f\\n\\r\\t\\u00Ff\\uabCD\"");
+  string s("\"\\\\\\\"\\/\\b\\f\\n\\r\\t\\u00Ff\\uabCD\"");
   istringstream input(s);
   Analyser analyser(input);
   Token token;
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::STRING, token.type);
-  ASSERT_EQ("\\\"\b\f\n\r\t\u00ff\uabcd", token.value);
+  ASSERT_EQ("\\\"/\b\f\n\r\t\u00ff\uabcd", token.value);
 }
 
 TEST(Analyser, TestUnclosedStringFails)

@@ -65,6 +65,12 @@ class Analyser
   char peek() const
   { int c = input.peek(); return c==EOF?0:static_cast<char>(c); }
 
+  // Internals
+  Token read_name_token(char c) throw (Exception);
+  Token read_number_token(char c) throw (Exception);
+  Token read_string_token() throw (Exception);
+  Token read_symbol_token(char c) throw (Exception);
+
 public:
   //------------------------------------------------------------------------
   // Constructor on an istream
