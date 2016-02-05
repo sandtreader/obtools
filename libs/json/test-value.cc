@@ -14,15 +14,46 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::JSON;
 
+TEST(Value, TestValidity)
+{
+  Value nv;
+  ASSERT_TRUE(!nv);
+  Value v(Value::NULL_);
+  ASSERT_FALSE(!v);
+}
+
+TEST(Value, TestIsTrue)
+{
+  Value nv;
+  ASSERT_FALSE(nv.is_true());
+  Value tv(Value::TRUE);
+  ASSERT_TRUE(tv.is_true());
+  Value fv(Value::FALSE);
+  ASSERT_FALSE(fv.is_true());
+  Value v1(1);
+  ASSERT_TRUE(v1.is_true());
+  Value v0(0);
+  ASSERT_FALSE(v0.is_true());
+}
+
+TEST(Value, TestStr)
+{
+  Value v("foo");
+  ASSERT_EQ("foo", v.str());
+
+  Value nv;
+  ASSERT_EQ("bar", nv.str("bar"));
+}
+
 TEST(Value, TestObjectSetter)
 {
   Value value(Value::OBJECT);
-  value.set("foo", 1);
+  value.set("foo", 0);
   value.set("bar", "hello");
   ASSERT_EQ(2, value.o.size());
   Value& v1 = value.o["foo"];
   EXPECT_EQ(Value::INTEGER, v1.type);
-  EXPECT_EQ(1, v1.n);
+  EXPECT_EQ(0, v1.n);
   Value& v2 = value.o["bar"];
   EXPECT_EQ(Value::STRING, v2.type);
   EXPECT_EQ("hello", v2.s);
@@ -42,9 +73,43 @@ TEST(Value, TestArrayAdder)
   EXPECT_EQ("hello", v2.s);
 }
 
-TEST(Value, TestWritingNull)
+TEST(Value, TestObjectGetter)
+{
+  Value value(Value::OBJECT);
+  value.set("foo", 1);
+  const Value& v = value["foo"];
+  EXPECT_EQ(Value::INTEGER, v.type);
+  EXPECT_EQ(1, v.n);
+
+  const Value& nv = value["bar"];
+  EXPECT_TRUE(!nv);
+}
+
+TEST(Value, TestArrayGetter)
+{
+  Value value(Value::ARRAY);
+  value.add(1);
+  const Value& v = value[0];
+  EXPECT_EQ(Value::INTEGER, v.type);
+  EXPECT_EQ(1, v.n);
+
+  const Value& nv1 = value[-1];
+  EXPECT_TRUE(!nv1);
+  const Value& nv2 = value[1];
+  EXPECT_TRUE(!nv2);
+}
+
+TEST(Value, TestWritingUnset)
 {
   Value value;
+  ostringstream out;
+  out << value;
+  ASSERT_EQ("?", out.str());
+}
+
+TEST(Value, TestWritingNull)
+{
+  Value value(Value::NULL_);
   ostringstream out;
   out << value;
   ASSERT_EQ("null", out.str());

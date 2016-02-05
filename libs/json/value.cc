@@ -12,6 +12,9 @@
 
 namespace ObTools { namespace JSON {
 
+// Invalid marker value
+Value Value::none;
+
 //------------------------------------------------------------------------
 // Escape the string and write to the output
 void Value::write_string_to(ostream& out) const
@@ -139,6 +142,7 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
 {
   switch (type)
   {
+    case UNSET:   out << "?";                           break;
     case NULL_:   out << "null";                        break;
     case NUMBER:  out << f;                             break;
     case INTEGER: out << n;                             break;
@@ -148,6 +152,27 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
     case TRUE:    out << "true";                        break;
     case FALSE:   out << "false";                       break;
   }
+}
+
+//------------------------------------------------------------------------
+// Get a value from the given object property
+// Returns Value::none if this is not an object or property doesn't exist
+const Value& Value::get(const string& property) const
+{
+  if (type != OBJECT) return none;
+  map<string, Value>::const_iterator p = o.find(property);
+  if (p != o.end()) return p->second;
+  return none;
+}
+
+//------------------------------------------------------------------------
+// Get a value from the given array index
+// Returns Value::none if this is not an array or index doesn't exist
+const Value& Value::get(unsigned int index) const
+{
+  if (type != ARRAY) return none;
+  if (index >= a.size()) return none;
+  return a[index];
 }
 
 //------------------------------------------------------------------------
