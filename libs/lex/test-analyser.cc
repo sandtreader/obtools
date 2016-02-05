@@ -48,6 +48,17 @@ TEST(Analyser, TestNameGivesNameThenEND)
   ASSERT_EQ(Token::END, token.type);
 }
 
+TEST(Analyser, TestNameBeginningUnderscore)
+{
+  string s("_fred");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NAME, token.type);
+  ASSERT_EQ("_fred", token.value);
+}
+
 TEST(Analyser, TestWhitespaceAndNameGivesName)
 {
   string s(" \n\tfred");
