@@ -139,13 +139,14 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
 {
   switch (type)
   {
-    case NULL_:  out << "null";        break;
-    case NUMBER: out << n;             break;
-    case STRING: write_string_to(out); break;
-    case OBJECT: write_object_to(out, pretty, indent); break;
-    case ARRAY:  write_array_to(out, pretty, indent);  break;
-    case TRUE:   out << "true";        break;
-    case FALSE:  out << "false";       break;
+    case NULL_:   out << "null";                        break;
+    case NUMBER:  out << f;                             break;
+    case INTEGER: out << n;                             break;
+    case STRING:  write_string_to(out);                 break;
+    case OBJECT:  write_object_to(out, pretty, indent); break;
+    case ARRAY:   write_array_to(out, pretty, indent);  break;
+    case TRUE:    out << "true";                        break;
+    case FALSE:   out << "false";                       break;
   }
 }
 

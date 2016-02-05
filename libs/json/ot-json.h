@@ -36,6 +36,7 @@ public:
   {
     NULL_,   // Not set
     NUMBER,  // Floating point number
+    INTEGER, // Integer number - added for precision
     STRING,  // Quoted string
     OBJECT,  // Object with properties
     ARRAY,   // Array of values
@@ -43,7 +44,8 @@ public:
     FALSE    // Boolean value
   } type;
 
-  double n;
+  double f;
+  uint64_t n;
   string s;
   map <string, Value> o;
   vector<Value> a;
@@ -51,7 +53,8 @@ public:
   // Constructors
   Value(): type(NULL_), n(0) {}
   Value(Type _type): type(_type), n(0) {}
-  Value(double _n): type(NUMBER), n(_n) {}
+  Value(Type, double _f): type(NUMBER), f(_f) {} // note type included so not..
+  Value(uint64_t _n): type(INTEGER), n(_n) {}    // ..ambiguous with this
   Value(const string& _s): type(STRING), n(0), s(_s) {}
   Value(const char *_s): type(STRING), n(0), s(_s) {}
 

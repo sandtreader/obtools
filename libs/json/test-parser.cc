@@ -14,7 +14,7 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::JSON;
 
-TEST(Analyser, TestEmptyStringGivesNULL)
+TEST(Parser, TestEmptyStringGivesNULL)
 {
   string s;
   istringstream input(s);
@@ -24,7 +24,18 @@ TEST(Analyser, TestEmptyStringGivesNULL)
   ASSERT_EQ(Value::NULL_, value.type);
 }
 
-TEST(Analyser, TestNumberGivesNumber)
+TEST(Parser, TestIntegerGivesInteger)
+{
+  string s("12345678901234567890");
+  istringstream input(s);
+  Parser parser(input);
+  Value value;
+  ASSERT_NO_THROW(value = parser.read_value());
+  ASSERT_EQ(Value::INTEGER, value.type);
+  ASSERT_EQ(12345678901234567890ULL, value.n);
+}
+
+TEST(Parser, TestNumberGivesNumber)
 {
   string s("3.14");
   istringstream input(s);
@@ -32,10 +43,10 @@ TEST(Analyser, TestNumberGivesNumber)
   Value value;
   ASSERT_NO_THROW(value = parser.read_value());
   ASSERT_EQ(Value::NUMBER, value.type);
-  ASSERT_EQ(3.14, value.n);
+  ASSERT_EQ(3.14, value.f);
 }
 
-TEST(Analyser, TestStringGivesString)
+TEST(Parser, TestStringGivesString)
 {
   string s("\"Hello, world!\"");
   istringstream input(s);
@@ -46,7 +57,7 @@ TEST(Analyser, TestStringGivesString)
   ASSERT_EQ("Hello, world!", value.s);
 }
 
-TEST(Analyser, TestnullGivesNULL)
+TEST(Parser, TestnullGivesNULL)
 {
   string s("null");
   istringstream input(s);
@@ -56,7 +67,7 @@ TEST(Analyser, TestnullGivesNULL)
   ASSERT_EQ(Value::NULL_, value.type);
 }
 
-TEST(Analyser, TesttrueGivesTRUE)
+TEST(Parser, TesttrueGivesTRUE)
 {
   string s("true");
   istringstream input(s);
@@ -66,7 +77,7 @@ TEST(Analyser, TesttrueGivesTRUE)
   ASSERT_EQ(Value::TRUE, value.type);
 }
 
-TEST(Analyser, TestfalseGivesFALSE)
+TEST(Parser, TestfalseGivesFALSE)
 {
   string s("false");
   istringstream input(s);
@@ -76,7 +87,7 @@ TEST(Analyser, TestfalseGivesFALSE)
   ASSERT_EQ(Value::FALSE, value.type);
 }
 
-TEST(Analyser, TestRandomBarewordFails)
+TEST(Parser, TestRandomBarewordFails)
 {
   string s("foo");
   istringstream input(s);
@@ -85,7 +96,7 @@ TEST(Analyser, TestRandomBarewordFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
-TEST(Analyser, TestEmptyObjectIsEmpty)
+TEST(Parser, TestEmptyObjectIsEmpty)
 {
   string s("{}");
   istringstream input(s);
@@ -96,7 +107,7 @@ TEST(Analyser, TestEmptyObjectIsEmpty)
   ASSERT_EQ(0, value.o.size());
 }
 
-TEST(Analyser, TestObjectWithSingleProperty)
+TEST(Parser, TestObjectWithSingleProperty)
 {
   string s("{ foo: 1 }");
   istringstream input(s);
@@ -106,11 +117,11 @@ TEST(Analyser, TestObjectWithSingleProperty)
   ASSERT_EQ(Value::OBJECT, value.type);
   ASSERT_EQ(1, value.o.size());
   Value v1 = value.o["foo"];
-  ASSERT_EQ(Value::NUMBER, v1.type);
+  ASSERT_EQ(Value::INTEGER, v1.type);
   ASSERT_EQ(1, v1.n);
 }
 
-TEST(Analyser, TestObjectWithTwoProperties)
+TEST(Parser, TestObjectWithTwoProperties)
 {
   string s("{ foo: \"FOO\", bar: true }");
   istringstream input(s);
@@ -126,7 +137,7 @@ TEST(Analyser, TestObjectWithTwoProperties)
   ASSERT_EQ(Value::TRUE, v2.type);
 }
 
-TEST(Analyser, TestUnclosedObjectFails)
+TEST(Parser, TestUnclosedObjectFails)
 {
   string s("{");
   istringstream input(s);
@@ -135,7 +146,7 @@ TEST(Analyser, TestUnclosedObjectFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
-TEST(Analyser, TestObjectMissingColonFails)
+TEST(Parser, TestObjectMissingColonFails)
 {
   string s("{ foo bar }");
   istringstream input(s);
@@ -144,7 +155,7 @@ TEST(Analyser, TestObjectMissingColonFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
-TEST(Analyser, TestObjectMissingValueFails)
+TEST(Parser, TestObjectMissingValueFails)
 {
   string s("{ foo: }");
   istringstream input(s);
@@ -153,7 +164,7 @@ TEST(Analyser, TestObjectMissingValueFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
-TEST(Analyser, TestObjectMissingCommaFails)
+TEST(Parser, TestObjectMissingCommaFails)
 {
   string s("{ foo:1 bar:2 }");
   istringstream input(s);
@@ -162,7 +173,7 @@ TEST(Analyser, TestObjectMissingCommaFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
-TEST(Analyser, TestEmptyArrayIsEmpty)
+TEST(Parser, TestEmptyArrayIsEmpty)
 {
   string s("[]");
   istringstream input(s);
@@ -173,7 +184,7 @@ TEST(Analyser, TestEmptyArrayIsEmpty)
   ASSERT_EQ(0, value.a.size());
 }
 
-TEST(Analyser, TestArrayWithSingleElement)
+TEST(Parser, TestArrayWithSingleElement)
 {
   string s("[ 1 ]");
   istringstream input(s);
@@ -183,11 +194,11 @@ TEST(Analyser, TestArrayWithSingleElement)
   ASSERT_EQ(Value::ARRAY, value.type);
   ASSERT_EQ(1, value.a.size());
   Value v1 = value.a[0];
-  ASSERT_EQ(Value::NUMBER, v1.type);
+  ASSERT_EQ(Value::INTEGER, v1.type);
   ASSERT_EQ(1, v1.n);
 }
 
-TEST(Analyser, TestArrayWithTwoElements)
+TEST(Parser, TestArrayWithTwoElements)
 {
   string s("[ \"foo\", true ]");
   istringstream input(s);
@@ -203,7 +214,7 @@ TEST(Analyser, TestArrayWithTwoElements)
   ASSERT_EQ(Value::TRUE, v2.type);
 }
 
-TEST(Analyser, TestArrayMissingCommaFails)
+TEST(Parser, TestArrayMissingCommaFails)
 {
   string s("[ 1 2 ]");
   istringstream input(s);
@@ -212,7 +223,7 @@ TEST(Analyser, TestArrayMissingCommaFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
-TEST(Analyser, TestUnclosedArrayFails)
+TEST(Parser, TestUnclosedArrayFails)
 {
   string s("[");
   istringstream input(s);

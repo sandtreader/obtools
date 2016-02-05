@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-json.h"
+#include <math.h>
 
 namespace ObTools { namespace JSON {
 
@@ -37,7 +38,10 @@ Value Parser::read_value() throw(Exception)
         return Value(Value::NULL_);
 
       case Lex::Token::NUMBER:
-        return Value(Text::stof(token.value));
+        if (token.value.find('.') != string::npos)
+          return Value(Value::NUMBER, Text::stof(token.value));
+        else
+          return Value(Text::stoi64(token.value));
 
       case Lex::Token::STRING:
         return Value(token.value);

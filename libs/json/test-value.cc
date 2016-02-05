@@ -21,7 +21,7 @@ TEST(Value, TestObjectSetter)
   value.set("bar", "hello");
   ASSERT_EQ(2, value.o.size());
   Value& v1 = value.o["foo"];
-  EXPECT_EQ(Value::NUMBER, v1.type);
+  EXPECT_EQ(Value::INTEGER, v1.type);
   EXPECT_EQ(1, v1.n);
   Value& v2 = value.o["bar"];
   EXPECT_EQ(Value::STRING, v2.type);
@@ -35,7 +35,7 @@ TEST(Value, TestArrayAdder)
   value.add("hello");
   ASSERT_EQ(2, value.a.size());
   Value& v1 = value.a[0];
-  EXPECT_EQ(Value::NUMBER, v1.type);
+  EXPECT_EQ(Value::INTEGER, v1.type);
   EXPECT_EQ(1, v1.n);
   Value& v2 = value.a[1];
   EXPECT_EQ(Value::STRING, v2.type);
@@ -68,10 +68,18 @@ TEST(Value, TestWritingFalse)
 
 TEST(Value, TestWritingNumber)
 {
-  Value value(3.1415);
+  Value value(Value::NUMBER, 3.1415);
   ostringstream out;
   out << value;
   ASSERT_EQ("3.1415", out.str());
+}
+
+TEST(Value, TestWritingBigIntegerStaysIntegral)
+{
+  Value value(12345678901234567890ULL);
+  ostringstream out;
+  out << value;
+  ASSERT_EQ("12345678901234567890", out.str());
 }
 
 TEST(Value, TestWritingString)
