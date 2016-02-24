@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-netlink.h"
+#include <errno.h>
 
 namespace ObTools { namespace Netlink {
 
@@ -173,7 +174,7 @@ GenericResponse::~GenericResponse()
 // Constructor
 GenericNetlink::GenericNetlink(const string& _family)
 {
-  socket = nl_handle_alloc();
+  socket = nl_socket_alloc();
 
   if (!socket)
     return;
@@ -184,7 +185,7 @@ GenericNetlink::GenericNetlink(const string& _family)
 
   if (family < 0)
   {
-    nl_handle_destroy(socket);
+    nl_socket_free(socket);
     socket = 0;
   }
 }
@@ -207,7 +208,7 @@ bool GenericNetlink::send(GenericRequest &request)
 // Get last netlink error
 const char* GenericNetlink::get_last_error()
 {
-  return nl_geterror();
+  return nl_geterror(errno);
 }
 
 //------------------------------------------------------------------------
@@ -216,7 +217,7 @@ GenericNetlink::~GenericNetlink()
 {
   if (socket)
   {
-    nl_handle_destroy(socket);
+    nl_socket_free(socket);
     socket = 0;
   }
 }

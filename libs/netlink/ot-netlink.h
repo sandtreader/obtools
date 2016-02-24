@@ -132,7 +132,7 @@ int generic_netlink_callback(struct nl_msg *response, void *arg);
 class GenericNetlink
 {
 private:
-  struct nl_handle *socket;
+  struct nl_sock *socket;
   int family;
 
 public:
