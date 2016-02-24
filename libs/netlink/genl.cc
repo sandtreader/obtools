@@ -208,7 +208,11 @@ bool GenericNetlink::send(GenericRequest &request)
 // Get last netlink error
 const char* GenericNetlink::get_last_error()
 {
+#ifdef NETLINK1_COMPAT
+  return nl_geterror();
+#else
   return nl_geterror(errno);
+#endif
 }
 
 //------------------------------------------------------------------------

@@ -18,6 +18,13 @@
 #include <vector>
 #include <stack>
 
+// Netlink1 backwards compatibility
+#ifdef NETLINK1_COMPAT
+#define nl_sock nl_handle
+#define nl_socket_alloc nl_handle_alloc
+#define nl_socket_free nl_handle_destroy
+#endif
+
 namespace ObTools { namespace Netlink {
 
 using namespace std;
