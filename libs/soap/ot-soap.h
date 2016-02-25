@@ -457,7 +457,6 @@ class MessageTransportURLHandler: public URLHandler
                       const Web::HTTPMessage&, Web::HTTPMessage&,
                       const SSL::ClientDetails& client)
   {
-    Log::Streams log;
     const XML::Element& body = request.get_body();
 
     // Check body document name, if specified
@@ -489,6 +488,8 @@ class MessageTransportURLHandler: public URLHandler
     catch (const ObTools::Message::Exception& me)
     {
       delete re;
+      Log::Error log;
+      log << "SOAP request failed: " << me.what() << endl;
       return fault(response, SOAP::Fault::CODE_SENDER, me.what());
     }
   }

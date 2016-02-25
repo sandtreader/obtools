@@ -350,7 +350,6 @@ class MessageTransportSubscriber: public Subscriber
   // Handle a message
   void handle(Message& msg)
   {
-    Log::Streams log;
     const XML::Element& request = msg.get_body();
 
     // Check body document name, if specified
@@ -395,6 +394,8 @@ class MessageTransportSubscriber: public Subscriber
     }
     catch (const ObTools::Message::Exception& me)
     {
+      Log::Error log;
+      log << "XMLMesh request failed: " << me.what() << endl;
       client.respond(SOAP::Fault::CODE_SENDER, me.what(), msg);
     }
   }
