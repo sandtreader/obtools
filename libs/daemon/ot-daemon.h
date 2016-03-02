@@ -83,6 +83,9 @@ class Shell
   string default_log_file;     // Default log file path
   string default_pid_file;     // Default PID file path
 
+  // Internal
+  int drop_privileges();
+
 protected:
   bool shut_down;              // Shut down requested
   int slave_pid;               // PID of slave or 0 if we are the slave
