@@ -14,7 +14,7 @@ namespace ObTools { namespace Lex {
 
 //------------------------------------------------------------------------
 // Read a name token
-Token Analyser::read_name_token(char c) throw (Exception)
+Token Analyser::read_name_token(char c)
 {
   string name;
   name += c;
@@ -33,7 +33,7 @@ Token Analyser::read_name_token(char c) throw (Exception)
 
 //------------------------------------------------------------------------
 // Read a number token
-Token Analyser::read_number_token(char c) throw (Exception)
+Token Analyser::read_number_token(char c)
 {
   // Read a string value
   string value;
@@ -107,7 +107,7 @@ Token Analyser::read_number_token(char c) throw (Exception)
 
 //------------------------------------------------------------------------
 // Read a string token
-Token Analyser::read_string_token() throw (Exception)
+Token Analyser::read_string_token()
 {
   string value;
   for(;;)
@@ -166,7 +166,7 @@ Token Analyser::read_string_token() throw (Exception)
 
 //------------------------------------------------------------------------
 // Read a symbol token
-Token Analyser::read_symbol_token(char c) throw (Exception)
+Token Analyser::read_symbol_token(char c)
 {
   string symbol;
   symbol += c;
@@ -208,7 +208,7 @@ Token Analyser::read_symbol_token(char c) throw (Exception)
 
 //------------------------------------------------------------------------
 // Read a token from the input
-Token Analyser::read_token() throw (Exception)
+Token Analyser::read_token()
 {
   if (pending_token.type != Token::UNKNOWN)
   {

@@ -99,12 +99,11 @@ TEST(Value, TestArrayGetter)
   EXPECT_TRUE(!nv2);
 }
 
-TEST(Value, TestWritingUnset)
+TEST(Value, TestWritingUnsetThrows)
 {
   Value value;
   ostringstream out;
-  out << value;
-  ASSERT_EQ("?", out.str());
+  ASSERT_THROW(out << value, JSON::Exception);
 }
 
 TEST(Value, TestWritingNull)

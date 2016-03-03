@@ -130,6 +130,9 @@ class Parser
 {
   Lex::Analyser lex;
 
+  Value read_rest_of_array();
+  Value read_rest_of_object();
+
 public:
   //------------------------------------------------------------------------
   // Constructor on an istream
@@ -137,10 +140,10 @@ public:
 
   //------------------------------------------------------------------------
   // Read a value
-  Value read_value() throw(Exception);
+  Value read_value();
 };
 
 //==========================================================================
 }} // namespaces
 
-#endif // !__OBTOOLS_EXPR_H
+#endif // !__OBTOOLS_JSON_H

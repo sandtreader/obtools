@@ -142,7 +142,7 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
 {
   switch (type)
   {
-    case UNSET:   out << "?";                           break;
+    case UNSET:   throw Exception("Value is unset");
     case NULL_:   out << "null";                        break;
     case NUMBER:  out << f;                             break;
     case INTEGER: out << n;                             break;

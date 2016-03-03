@@ -26,8 +26,91 @@ Parser::Parser(istream& input): lex(input)
 }
 
 //------------------------------------------------------------------------
+// Read the rest of an object (after reading the {)
+Value Parser::read_rest_of_object()
+{
+  // Read an object
+  Value object(Value::OBJECT);
+
+  // Read properties
+  for(;;)
+  {
+    Lex::Token token = lex.read_token();
+    if (token.type == Lex::Token::SYMBOL
+        && token.value == "}")
+      break;
+    else if (token.type == Lex::Token::NAME
+             || token.type == Lex::Token::STRING)
+    {
+      string name = token.value;
+      token = lex.read_token();
+
+      if (token.type != Lex::Token::SYMBOL
+          || token.value != ":")
+        throw Exception("Expected :");
+
+      // Recurse for value
+      Value value = read_value();
+      object.o[name] = value;
+    }
+    else throw Exception(string("Bad property name ")+token.value);
+
+    // The next symbol must be , or }
+    token = lex.read_token();
+    if (token.type == Lex::Token::SYMBOL)
+    {
+      if (token.value == "}")
+        break;
+      else if (token.value != ",")
+        throw Exception("Expected , or }");
+    }
+    else throw Exception("Expected , or }");
+  }
+
+  return object;
+}
+
+//------------------------------------------------------------------------
+// Read the rest of an array (after reading the [)
+Value Parser::read_rest_of_array()
+{
+  // Read an array
+  Value array(Value::ARRAY);
+
+  // Read elements
+  for(;;)
+  {
+    Lex::Token token = lex.read_token();
+    if (token.type == Lex::Token::SYMBOL
+        && token.value == "]")
+      break;
+
+    // Put the token back for value
+    lex.put_back(token);
+
+    // Recurse for value
+    Value value = read_value();
+    array.a.push_back(value);
+
+    // The next symbol must be , or ]
+    token = lex.read_token();
+    if (token.type == Lex::Token::SYMBOL)
+    {
+      if (token.value == "]")
+        break;
+      else if (token.value != ",")
+        throw Exception("Expected , or ]");
+    }
+    else throw Exception("Expected , or ]");
+  }
+
+  return array;
+}
+
+
+//------------------------------------------------------------------------
 // Read a value
-Value Parser::read_value() throw(Exception)
+Value Parser::read_value()
 {
   try
   {
@@ -58,81 +141,9 @@ Value Parser::read_value() throw(Exception)
 
       case Lex::Token::SYMBOL:
         if (token.value == "{")
-        {
-          // Read an object
-          Value object(Value::OBJECT);
-
-          // Read properties
-          for(;;)
-          {
-            token = lex.read_token();
-            if (token.type == Lex::Token::SYMBOL
-                && token.value == "}")
-              break;
-            else if (token.type == Lex::Token::NAME
-                  || token.type == Lex::Token::STRING)
-            {
-              string name = token.value;
-              token = lex.read_token();
-
-              if (token.type != Lex::Token::SYMBOL
-                || token.value != ":")
-                throw Exception("Expected :");
-
-              // Recurse for value
-              Value value = read_value();
-              object.o[name] = value;
-            }
-            else throw Exception(string("Bad property name ")+token.value);
-
-            // The next symbol must be , or }
-            token = lex.read_token();
-            if (token.type == Lex::Token::SYMBOL)
-            {
-              if (token.value == "}")
-                break;
-              else if (token.value != ",")
-                throw Exception("Expected , or }");
-            }
-            else throw Exception("Expected , or }");
-          }
-
-          return object;
-        }
+          return read_rest_of_object();
         else if (token.value == "[")
-        {
-          // Read an array
-          Value array(Value::ARRAY);
-
-          // Read elements
-          for(;;)
-          {
-            token = lex.read_token();
-            if (token.type == Lex::Token::SYMBOL
-                && token.value == "]")
-              break;
-
-            // Put the token back for value
-            lex.put_back(token);
-
-            // Recurse for value
-            Value value = read_value();
-            array.a.push_back(value);
-
-            // The next symbol must be , or ]
-            token = lex.read_token();
-            if (token.type == Lex::Token::SYMBOL)
-            {
-              if (token.value == "]")
-                break;
-              else if (token.value != ",")
-                throw Exception("Expected , or ]");
-            }
-            else throw Exception("Expected , or ]");
-          }
-
-          return array;
-        }
+          return read_rest_of_array();
         else
           throw Exception(string("Misplaced symbol ")+token.value);
 
