@@ -66,10 +66,10 @@ class Analyser
   { int c = input.peek(); return c==EOF?0:static_cast<char>(c); }
 
   // Internals
-  Token read_name_token(char c) throw (Exception);
-  Token read_number_token(char c) throw (Exception);
-  Token read_string_token() throw (Exception);
-  Token read_symbol_token(char c) throw (Exception);
+  Token read_name_token(char c);
+  Token read_number_token(char c);
+  Token read_string_token();
+  Token read_symbol_token(char c);
 
 public:
   //------------------------------------------------------------------------
@@ -86,7 +86,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read a token from the input
-  Token read_token() throw (Exception);
+  Token read_token();
 };
 
 //==========================================================================

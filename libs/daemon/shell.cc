@@ -239,59 +239,12 @@ int Shell::start(int argc, char **argv)
       else
       {
 	// SLAVE PROCESS
-	// Run subclass prerun before dropping priviledges
+	// Run subclass prerun before dropping privileges
 	int rc = application.run_priv();
 	if (rc) return rc;
 
-	// Drop privileges if root
-	if (!getuid())
-	{
-	  string username = config["security/@user"];
-	  string groupname = config["security/@group"];
-
-	  // Set group first - needs to still be root
-	  if (!groupname.empty())
-	  {
-	    int gid = File::Path::group_name_to_id(groupname);
-
-	    if (gid >= 0)
-	    {
-	      log.summary << "Changing to group " << groupname
-			  << " (" << gid << ")\n";
-              if (setgid(static_cast<gid_t>(gid)))
-	      {
-		log.error << "Can't change group: " << strerror(errno) << endl;
-		exit(2);
-	      }
-	    }
-	    else
-	    {
-	      log.error << "Can't find group " << groupname << "\n";
-	      exit(2);
-	    }
-	  }
-
-	  if (!username.empty())
-	  {
-	    int uid = File::Path::user_name_to_id(username);
-
-	    if (uid >= 0)
-	    {
-	      log.summary << "Changing to user " << username
-			  << " (" << uid << ")\n";
-              if (setuid(static_cast<uid_t>(uid)))
-	      {
-		log.error << "Can't change user: " << strerror(errno) << endl;
-		exit(2);
-	      }
-	    }
-	    else
-	    {
-	      log.error << "Can't find user " << username << "\n";
-	      exit(2);
-	    }
-	  }
-	}
+        rc = drop_privileges();
+        if (rc) return rc;
 
 	// Run subclass full startup
 	rc = run();
@@ -308,12 +261,73 @@ int Shell::start(int argc, char **argv)
     // Just run directly
     rc = application.run_priv();
     if (rc) return rc;
+    rc = drop_privileges();
+    if (rc) return rc;
     rc = run();
     application.cleanup();
     return rc;
   }
 }
 #pragma GCC diagnostic pop
+
+//--------------------------------------------------------------------------
+// Drop privileges if required
+// Returns 0 on success, rc if not
+int Shell::drop_privileges()
+{
+  // Drop privileges if root
+  if (!getuid())
+  {
+    Log::Streams log;
+    string username = config["security/@user"];
+    string groupname = config["security/@group"];
+
+    // Set group first - needs to still be root
+    if (!groupname.empty())
+    {
+      int gid = File::Path::group_name_to_id(groupname);
+
+      if (gid >= 0)
+      {
+        log.summary << "Changing to group " << groupname
+                    << " (" << gid << ")\n";
+        if (setgid(static_cast<gid_t>(gid)))
+        {
+          log.error << "Can't change group: " << strerror(errno) << endl;
+          return 2;
+        }
+      }
+      else
+      {
+        log.error << "Can't find group " << groupname << "\n";
+        return 2;
+      }
+    }
+
+    if (!username.empty())
+    {
+      int uid = File::Path::user_name_to_id(username);
+
+      if (uid >= 0)
+      {
+        log.summary << "Changing to user " << username
+                    << " (" << uid << ")\n";
+        if (setuid(static_cast<uid_t>(uid)))
+        {
+          log.error << "Can't change user: " << strerror(errno) << endl;
+          return 2;
+        }
+      }
+      else
+      {
+        log.error << "Can't find user " << username << "\n";
+        return 2;
+      }
+    }
+  }
+
+  return 0;
+}
 
 //--------------------------------------------------------------------------
 // Signal to shut down - called from SIGTERM handler first in master and then
