@@ -332,12 +332,10 @@ ifdef PROFILED
 TARGETS += $(patsubst %,%$(EXE-SUFFIX),$(TESTS))
 endif
 
-ifdef RELEASE
 ifndef MINGW
 ifndef OSX
 CPPFLAGS += -fpic
 
-endif
 endif
 endif
 endif
