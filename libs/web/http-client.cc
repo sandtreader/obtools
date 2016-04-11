@@ -328,7 +328,8 @@ int HTTPClient::put(const URL& url, const string& content_type,
 {
   HTTPMessage request("PUT", url);
   request.headers.put("Content-Type", content_type);
-  request.headers.put("Transfer-Encoding", "chunked");
+  if (progressive_write)
+    request.headers.put("Transfer-Encoding", "chunked");
 
   HTTPMessage response;
 
