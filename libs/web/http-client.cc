@@ -321,48 +321,51 @@ int HTTPClient::post(const URL& url, const string& request_body,
 
 //--------------------------------------------------------------------------
 // Simple PUT operation on a URL
-// total_length is sent as Content-Length if not zero
 // Returns result code, fills in response_body if provided,
 // reason code if not
 int HTTPClient::put(const URL& url, const string& content_type,
-                    istream& is, uint64_t total_length,
-                    string& response_body)
+                    istream& is, string& response_body)
 {
   HTTPMessage request("PUT", url);
   request.headers.put("Content-Type", content_type);
   request.headers.put("Transfer-Encoding", "chunked");
-  if (total_length > 0)
-    request.headers.put("Content-Length", Text::i64tos(total_length));
 
   HTTPMessage response;
 
-  bool old_progressive_write = progressive_write;
-  progressive_write = true;
+  // If not progressive, create the entire body from the stream in advance
+  if (!progressive_write)
+  {
+    vector<char> data(65536);
+    while (uint64_t length = is.read(&data[0], data.size()).gcount())
+      request.body.append(&data[0], length);
+  }
+
   int result = do_fetch(request, response);
-  progressive_write = old_progressive_write;
-
   if (result)
   {
     response_body = "Connection failed";
     return -result;
   }
 
-  // Write data from input stream
-  vector<char> data(write_chunk_length);
-  while (uint64_t length = is.read(&data[0], data.size()).gcount())
+  if (progressive_write)
   {
-    if (write(reinterpret_cast<unsigned char *>(&data[0]), length) != length)
-      break;
-  }
+    // Write data from input stream
+    vector<char> data(write_chunk_length);
+    while (uint64_t length = is.read(&data[0], data.size()).gcount())
+    {
+      if (write(reinterpret_cast<unsigned char *>(&data[0]), length) != length)
+        break;
+    }
 
-  // Terminated chunked data
-  write(0, 0);
+    // Terminated chunked data
+    write(0, 0);
 
-  result = do_receive(request, response);
-  if (result)
-  {
-    response_body = "Connection failed";
-    return -result;
+    result = do_receive(request, response);
+    if (result)
+    {
+      response_body = "Connection failed";
+      return -result;
+    }
   }
 
   // Now extract body, if any

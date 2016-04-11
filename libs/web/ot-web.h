@@ -585,11 +585,10 @@ public:
 
   //--------------------------------------------------------------------------
   // Simple PUT operation on a URL
-  // total_length is sent as Content-Length if not zero
   // Returns result code, fills in response_body if provided,
   // reason code if not
   int put(const URL& url, const string& content_type,
-          istream& is, uint64_t total_length, string& response_body);
+          istream& is, string& response_body);
 
   //--------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
