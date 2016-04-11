@@ -321,14 +321,18 @@ int HTTPClient::post(const URL& url, const string& request_body,
 
 //--------------------------------------------------------------------------
 // Simple PUT operation on a URL
+// total_length is sent as Content-Length if not zero
 // Returns result code, fills in response_body if provided,
 // reason code if not
 int HTTPClient::put(const URL& url, const string& content_type,
-                    istream& is, string& response_body)
+                    istream& is, uint64_t total_length,
+                    string& response_body)
 {
   HTTPMessage request("PUT", url);
   request.headers.put("Content-Type", content_type);
   request.headers.put("Transfer-Encoding", "chunked");
+  if (total_length > 0)
+    request.headers.put("Content-Length", Text::i64tos(total_length));
 
   HTTPMessage response;
 

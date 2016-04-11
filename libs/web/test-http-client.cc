@@ -129,7 +129,7 @@ int main(int argc, char **argv)
         result = client->post(url, in, body);
         break;
       case put:
-        result = client->put(url, "text/plain", cin, body);
+        result = client->put(url, "text/plain", cin, 0, body);
         break;
       case del:
         result = client->del(url, body);
