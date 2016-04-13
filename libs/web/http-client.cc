@@ -243,6 +243,18 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
 }
 
 //--------------------------------------------------------------------------
+// Get a response body from a response
+// Uses just the HTTP reason for errors because servers have a habit of
+// dressing up error responses in HTML
+string HTTPClient::get_response_body(HTTPMessage& response)
+{
+  if (response.code < 300 && !response.body.empty())
+    return response.body;
+  else
+    return response.reason;
+}
+
+//--------------------------------------------------------------------------
 // Simple GET operation on a URL
 // Returns result code, fills in body if provided, reason code if not
 int HTTPClient::get(const URL& url, string& body)
@@ -257,12 +269,7 @@ int HTTPClient::get(const URL& url, string& body)
     return -result;
   }
 
-  // Now extract body, if any
-  if (response.body.size())
-    body = response.body;
-  else
-    body = response.reason;
-
+  body = get_response_body(response);
   return response.code;
 }
 
@@ -281,12 +288,7 @@ int HTTPClient::del(const URL& url, string& body)
     return -result;
   }
 
-  // Now extract body, if any
-  if (response.body.size())
-    body = response.body;
-  else
-    body = response.reason;
-
+  body = get_response_body(response);
   return response.code;
 }
 
@@ -310,12 +312,7 @@ int HTTPClient::post(const URL& url, const string& request_body,
     return -result;
   }
 
-  // Now extract body, if any
-  if (response.body.size())
-    response_body = response.body;
-  else
-    response_body = response.reason;
-
+  response_body = get_response_body(response);
   return response.code;
 }
 
@@ -369,12 +366,7 @@ int HTTPClient::put(const URL& url, const string& content_type,
     }
   }
 
-  // Now extract body, if any
-  if (response.body.size())
-    response_body = response.body;
-  else
-    response_body = response.reason;
-
+  response_body = get_response_body(response);
   return response.code;
 }
 

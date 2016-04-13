@@ -483,6 +483,9 @@ private:
   // Cookie support
   CookieJar *cookie_jar;
 
+  // Internals
+  string get_response_body(HTTPMessage& response);
+
 protected:
   Net::EndPoint server;
 
