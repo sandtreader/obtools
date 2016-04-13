@@ -415,6 +415,8 @@ public:
   // Constructor
   BlockReader(const unsigned char *_data, size_t _length):
     data(_data), length(_length) {}
+  BlockReader(const vector<unsigned char>& v):
+    data(&v[0]), length(v.size()) {}
 
   // Read implementations
   virtual size_t basic_read(void *buf, size_t count);
@@ -436,6 +438,8 @@ public:
   // Constructor.  _length is max length - fails after this
   BlockWriter(unsigned char *_data, size_t _length):
     data(_data), length(_length) {}
+  BlockWriter(vector<unsigned char>& v):
+    data(&v[0]), length(v.size()) {}
 
   // Write implementation
   virtual void basic_write(const void *buf, size_t count);
