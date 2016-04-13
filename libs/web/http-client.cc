@@ -328,37 +328,45 @@ int HTTPClient::put(const URL& url, const string& content_type,
 {
   HTTPMessage request("PUT", url);
   request.headers.put("Content-Type", content_type);
-  request.headers.put("Transfer-Encoding", "chunked");
+  if (progressive_write)
+    request.headers.put("Transfer-Encoding", "chunked");
 
   HTTPMessage response;
 
-  bool old_progressive_write = progressive_write;
-  progressive_write = true;
+  // If not progressive, create the entire body from the stream in advance
+  if (!progressive_write)
+  {
+    vector<char> data(65536);
+    while (uint64_t length = is.read(&data[0], data.size()).gcount())
+      request.body.append(&data[0], length);
+  }
+
   int result = do_fetch(request, response);
-  progressive_write = old_progressive_write;
-
   if (result)
   {
     response_body = "Connection failed";
     return -result;
   }
 
-  // Write data from input stream
-  vector<char> data(write_chunk_length);
-  while (uint64_t length = is.read(&data[0], data.size()).gcount())
+  if (progressive_write)
   {
-    if (write(reinterpret_cast<unsigned char *>(&data[0]), length) != length)
-      break;
-  }
+    // Write data from input stream
+    vector<char> data(write_chunk_length);
+    while (uint64_t length = is.read(&data[0], data.size()).gcount())
+    {
+      if (write(reinterpret_cast<unsigned char *>(&data[0]), length) != length)
+        break;
+    }
 
-  // Terminated chunked data
-  write(0, 0);
+    // Terminated chunked data
+    write(0, 0);
 
-  result = do_receive(request, response);
-  if (result)
-  {
-    response_body = "Connection failed";
-    return -result;
+    result = do_receive(request, response);
+    if (result)
+    {
+      response_body = "Connection failed";
+      return -result;
+    }
   }
 
   // Now extract body, if any
