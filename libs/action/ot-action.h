@@ -73,7 +73,6 @@ private:
     MT::Condition condition;
     Action<T> *action;
     Handler *handler;
-    MT::Mutex mutex;
 
   public:
     //----------------------------------------------------------------------
@@ -89,25 +88,12 @@ private:
     {
       while (is_running())
       {
-        condition.wait(false);
+        condition.wait(true);
 
-        Action<T> *a(0);
-        Handler *h(0);
-        {
-          MT::Lock lock(mutex);
-          a = action;
-          h = handler;
-        }
-        if (a)
-        {
-          h->handle(*a);
-          {
-            MT::Lock lock(mutex);
-            action = 0;
-            handler = 0;
-          }
-          condition.signal(true);
-        }
+        if (handler && action)
+          handler->handle(*action);
+
+        condition.signal(false);
       }
     }
 
@@ -124,19 +110,16 @@ private:
     // Set the action to work upon
     void set_action(Action<T> *new_action, Handler *new_handler)
     {
-      {
-        MT::Lock lock(mutex);
-        action = new_action;
-        handler = new_handler;
-      }
-      condition.signal(false);
+      action = new_action;
+      handler = new_handler;
+      condition.signal(true);
     }
 
     //---------------------------------------------------------------------
     // Wait on action being used
     void wait()
     {
-      condition.wait(true);
+      condition.wait(false);
     }
   };
 
