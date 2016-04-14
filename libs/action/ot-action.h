@@ -87,7 +87,7 @@ private:
     virtual void run()
     {
       bool quit(false);
-      while (is_running() && !quit)
+      while (!quit)
       {
         condition.wait(true);
 
@@ -146,15 +146,6 @@ private:
         (**it)->set_action(0, 0);
         (**it)->wait();
       }
-    }
-
-    //----------------------------------------------------------------------
-    // Virtual shutdown
-    virtual void shutdown()
-    {
-      MT::Task::shutdown();
-      // Wake up thread with empty action
-      manager.queue(0);
     }
   };
 
@@ -231,6 +222,14 @@ public:
   {
     MT::Lock lock(handlers_mutex);
     return handlers;
+  }
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Manager()
+  {
+    // Wake up thread with empty action
+    queue(0);
   }
 };
 
