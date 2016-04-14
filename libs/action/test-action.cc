@@ -46,7 +46,7 @@ public:
 
 //--------------------------------------------------------------------------
 // Handler for ActionOne
-class HandlerOne: public Action::Manager<ActionType>::Handler
+class Handler: public Action::Manager<ActionType>::Handler
 {
 public:
   vector<int> nums;
@@ -68,7 +68,7 @@ public:
 // Tests
 TEST(ActionTest, TestRegistration)
 {
-  HandlerOne handler;
+  Handler handler;
 
   {
     Action::Manager<ActionType> manager;
@@ -86,6 +86,31 @@ TEST(ActionTest, TestRegistration)
   expected.push_back(3);
   ASSERT_EQ(expected, handler.nums);
 }
+
+TEST(ActionTest, TestMultipleHandlers)
+{
+  Handler handler1;
+  Handler handler2;
+
+  {
+    Action::Manager<ActionType> manager;
+    manager.add_handler(one, handler1);
+    manager.add_handler(one, handler2);
+    manager.queue(new ActionOne(1));
+    manager.queue(new ActionOne(2));
+    manager.queue(new ActionOne(3));
+    // Allow actions to be handled
+    MT::Thread::usleep(100000);
+  }
+
+  vector<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  expected.push_back(3);
+  ASSERT_EQ(expected, handler1.nums);
+  ASSERT_EQ(expected, handler2.nums);
+}
+
 
 } // anonymous namespace
 

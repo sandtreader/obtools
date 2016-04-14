@@ -91,8 +91,8 @@ private:
       {
         condition.wait(false);
 
-        Action<T> *a;
-        Handler *h;
+        Action<T> *a(0);
+        Handler *h(0);
         {
           MT::Lock lock(mutex);
           a = action;
@@ -196,14 +196,14 @@ private:
       {
         unsigned i(0);
         for (typename vector<Handler *>::iterator
-             it = h->second.begin(); it != h->second.end(); ++it)
+             it = h->second.begin(); it != h->second.end(); ++it, ++i)
         {
-          if (i++ >= threads.size())
+          if (i >= threads.size())
           {
             threads.push_back(new MT::TaskThread<ActionTask>(new ActionTask()));
           }
-          (*threads.back())->set_action(action.get(), *it);
-          active.push_back(threads.back());
+          (*threads[i])->set_action(action.get(), *it);
+          active.push_back(threads[i]);
         }
       }
     }
