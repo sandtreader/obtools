@@ -86,24 +86,17 @@ private:
     // Run routine
     virtual void run()
     {
-      while (is_running())
+      bool quit(false);
+      while (is_running() && !quit)
       {
         condition.wait(true);
 
-        if (handler && action)
+        quit = !(handler && action);
+        if (!quit)
           handler->handle(*action);
 
         condition.signal(false);
       }
-    }
-
-    //---------------------------------------------------------------------
-    // Virtual shutdown
-    void shutdown()
-    {
-      MT::Task::shutdown();
-      // Call with empty action to wake
-      set_action(0, 0);
     }
 
     //---------------------------------------------------------------------
@@ -144,6 +137,15 @@ private:
     {
       while (is_running())
         manager.next_action();
+
+      // Trigger threads shut down
+      for (typename vector<Gen::SharedPointer<MT::TaskThread<ActionTask> > >
+                    ::iterator
+           it = manager.threads.begin(); it != manager.threads.end(); ++it)
+      {
+        (**it)->set_action(0, 0);
+        (**it)->wait();
+      }
     }
 
     //----------------------------------------------------------------------
