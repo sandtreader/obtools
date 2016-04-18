@@ -19,6 +19,8 @@
 //   error:    Error message if failed
 //   response: Response XML JQuery if any
 // }
+//
+// For poll(), the completion can return 'false' if it wants polling to stop
 
 (function($)
 {
@@ -210,10 +212,11 @@
 
           success: function(response)
           {
+            var retry = params.retry || false;
             if (response.length)
             {
               self.log("Polled response: "+response);
-              params.completion(
+              retry = params.completion(
               {
                 success: true,
                 response: parseSOAP(response)
@@ -224,7 +227,7 @@
               self.log("Poll timed out, no response");
 
               // Don't tell them if we're retrying anyway
-              if (!params.retry) params.completion(
+              if (!retry) retry = params.completion(
               {
                 success: false,
                 error: null
@@ -232,7 +235,9 @@
             }
 
             // "Recurse" (not really) to restart if requested
-            if (params.retry) self.poll(params);
+            // Note backwards compatibility for completions that don't return
+            // anything
+            if (retry !== false) self.poll(params);
           }
         });
     },
@@ -240,6 +245,7 @@
     // Subscribe-and-poll - simple interface which sets up a subscribe,
     // polls it and calls back to callback function with each received
     // message ($ on XML), logging any errors and retrying automatically
+    // If callback returns false (specifically) it will stop polling
     subscribe_and_poll: function(pattern, callback)
     {
       var self=this;
@@ -255,13 +261,17 @@
               completion: function(poll_result)
               {
                 if (poll_result.success)
-                  callback(poll_result.response);
+                {
+                  return callback(poll_result.response);
+                }
                 else
                 {
                   self.log("Poll failed: "+poll_result.error);
 
                   // Resubscribe and restart
                   self.subscribe_and_poll(pattern, callback);
+
+                  return false;  // Don't continue this poll
                 }
               }
             });

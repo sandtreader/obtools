@@ -28,6 +28,24 @@
         });
       }
 
+      function send_stop()
+      {
+        console.log("=== Simple notification ===");
+        xmlmesh.send(
+        {
+          subject: "test.foo",
+          message: "<foo stop='true'/>",
+          completion: function(result)
+          {
+            if (result.success)
+              console.log("Success!");
+            else
+              console.log("FAILED: "+result.error);
+          }
+        });
+      }
+
+
       function request_response()
       {
         console.log("=== Request / response ===");
@@ -75,9 +93,11 @@
           {
             if (result.success)
             {
+              var stop = result.response.attr("stop");
               var rtext =
                 new XMLSerializer().serializeToString(result.response[0]);
               console.log("Success!\n"+rtext);
+              return stop != "true";
             }
             else
               console.log("FAILED: "+result.error);
@@ -91,14 +111,17 @@
         xmlmesh.subscribe_and_poll("test.*",
           function(xml)
           {
+            var stop = xml.attr("stop");
             console.log("Polled:");
             console.log(new XMLSerializer().serializeToString(xml[0]));
+            return stop != "true";
           });
       }
 
     </script>
 
     <button onclick="javascript:simple_send()">Simple send</button>
+    <button onclick="javascript:send_stop()">Send stop</button>
     <button onclick="javascript:request_response()">Request/response</button>
     <button onclick="javascript:subscribe()">Subscribe</button>
     <button onclick="javascript:poll(false)">Poll</button>
