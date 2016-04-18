@@ -1,7 +1,7 @@
 //==========================================================================
 /// \file obtools/libs/xml/ot-xml.h
 /// Public definitions for ObTools XML parser
-/// 
+///
 /// Copyright (c) 2003-2007 Paul Clark.  All rights reserved
 /// This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -16,7 +16,7 @@
 #include <iostream>
 #include <stdint.h>
 
-namespace ObTools { 
+namespace ObTools {
 
 /// %XML parser/DOM/XPath library.
 /// Provides fairly complete but non-standard DOM
@@ -47,7 +47,7 @@ struct ElementIterator
 
   //------------------------------------------------------------------------
   /// Constructor from element list
-  ElementIterator(const list<Element *>& l): 
+  ElementIterator(const list<Element *>& l):
     elements(l), it(elements.begin()) {}
 
   /// Copy constructor
@@ -76,7 +76,7 @@ struct ConstElementIterator
 {
   list<const Element *> elements;
   list<const Element *>::const_iterator it;
-  ConstElementIterator(const list<const Element *>& l): 
+  ConstElementIterator(const list<const Element *>& l):
     elements(l), it(elements.begin()) {}
   ConstElementIterator(const ConstElementIterator& o):
     elements(o.elements), it(elements.begin()) {}
@@ -90,7 +90,7 @@ struct ConstElementIterator
 
 //==========================================================================
 /// %XML %Parser flags
-enum 
+enum
 {
   /// Snap single text content elements back to parent-element.content.
   /// Makes simple grammars a lot easier to access
@@ -107,9 +107,9 @@ enum
 
   /// Be lenient with & and < in contexts in which they couldn't be
   /// %XML syntax.
-  /// i.e., not followed by a name character, '#' (for &), 
+  /// i.e., not followed by a name character, '#' (for &),
   /// '!', '?' or '/' (for <) - and consider them just normal character data.
-  /// This makes it more pleasant to include code, particularly C++ code, 
+  /// This makes it more pleasant to include code, particularly C++ code,
   /// in %XML
   ///
   /// \note This mimics the behaviour of SGML (hooray!) (ISO 8879:B.7.3), but
@@ -129,10 +129,10 @@ private:
   void write_attrs(ostream &s) const;
   void write_indented(int indent, ostream &s) const;
   string escape(const string &v, bool escquote) const;
-  void append_descendants(const string& name, const string& prune, 
-			  list<const Element *>& l) const;
-  void append_descendants(const string& name, const string& prune, 
-			  list<Element *>& l);
+  void append_descendants(const string& name, const string& prune,
+                          list<const Element *>& l) const;
+  void append_descendants(const string& name, const string& prune,
+                          list<Element *>& l);
 
 public:
   /// %Element name ('tag') - empty for data 'elements'
@@ -177,7 +177,7 @@ public:
   bool operator!() const { return !valid(); }  ///< Invalidity check
 
   //------------------------------------------------------------------------
-  // Constructors 
+  // Constructors
   /// Default constructor - no name, no content, for later filling in
   Element():parent(0), line(0) { }
 
@@ -189,7 +189,7 @@ public:
     name(n), content(c), parent(0), line(0) {  }
 
   /// Constructor with three strings: name and one attribute - e.g. namespace
-  Element(const string& n, const string& a, const string& v): 
+  Element(const string& n, const string& a, const string& v):
     name(n), parent(0), line(0){ set_attr(a,v); }
 
   /// Constructor with four strings: name, one attribute and content
@@ -222,13 +222,13 @@ public:
 
   //--------------------------------------------------------------------------
   /// Copy constructor.  Does a deep copy
-  Element(const Element& src): parent(0), line(0) 
+  Element(const Element& src): parent(0), line(0)
   { src.deep_copy_to(*this); }
 
   //--------------------------------------------------------------------------
   /// Assignment operator.  Does a deep copy, deleting any existing children
-  const Element& operator=(const Element& src) 
-  { parent=0; line=src.line; 
+  const Element& operator=(const Element& src)
+  { parent=0; line=src.line;
     clear_children(); src.deep_copy_to(*this); return src; }
 
   //------------------------------------------------------------------------
@@ -249,12 +249,12 @@ public:
 
   //------------------------------------------------------------------------
   /// Add a child element, taking ownership
-  Element& add(Element *child) 
+  Element& add(Element *child)
   { children.push_back(child); child->parent = this; return *child; }
- 
+
   //------------------------------------------------------------------------
   /// Add a child element from a reference, copying
-  Element& add(Element &child) 
+  Element& add(const Element &child)
   { return add(child.deep_copy()); }
 
   //------------------------------------------------------------------------
@@ -264,18 +264,18 @@ public:
 
   /// Add with two strings: name and textual content
   /// \return New element
-  Element& add(const string& n, const string& c) 
+  Element& add(const string& n, const string& c)
   { return add(new Element(n, c)); }
 
   /// Add with three strings: name and one attribute - e.g. namespace
   /// \return New element
-  Element& add(const string& n, const string& a, const string& v) 
+  Element& add(const string& n, const string& a, const string& v)
   { return add(new Element(n, a, v)); }
 
   /// Add with four strings: name, one attribute and content
   /// \return New element
-  Element& add(const string& n, const string& a, 
-	       const string& v, const string& c) 
+  Element& add(const string& n, const string& a,
+               const string& v, const string& c)
   { return add(new Element(n, a, v, c)); }
 
   //------------------------------------------------------------------------
@@ -283,7 +283,7 @@ public:
   /// root as a child element.  ostream & parse_flags as Parser() below
   /// \return Added child, or 'none' if parse failed
   Element& add_xml(const string& xml, ostream& serr = cerr,
-		   int parse_flags = PARSER_OPTIMISE_CONTENT);
+                   int parse_flags = PARSER_OPTIMISE_CONTENT);
 
   //------------------------------------------------------------------------
   // Merge from XML text - reparses text and merges resulting element
@@ -291,19 +291,19 @@ public:
   // Parsed element must be the same name as this one
   // Parser ostream & flags as Parser() below
   // Returns whether parse succeeded and element was the same name
-  bool merge_xml(const string& xml, ostream& serr = cerr, 
-		 int parse_flags = PARSER_OPTIMISE_CONTENT);
+  bool merge_xml(const string& xml, ostream& serr = cerr,
+                 int parse_flags = PARSER_OPTIMISE_CONTENT);
 
   //------------------------------------------------------------------------
   /// Dump to given output stream.
   /// \param s stream to output to
   /// \param with_pi controls whether to including the standard-compliant
   /// <?xml .. ?>
-  void write_to(ostream& s, bool with_pi=false) const; 
+  void write_to(ostream& s, bool with_pi=false) const;
 
   //--------------------------------------------------------------------------
   /// Convert to a string.
-  /// \param with_pi controls whether to including the standard-compliant 
+  /// \param with_pi controls whether to including the standard-compliant
   /// <?xml .. ?>
   string to_string(bool with_pi=false) const;
 
@@ -386,9 +386,9 @@ public:
   // Ename and prune can be the same - then returns only first level of
   // <ename>s, not <ename>s within <ename>s
   list<const Element *> get_descendants(const string& ename,
-					const string& prune="") const;
+                                        const string& prune="") const;
   list<Element *> get_descendants(const string& ename,
-				  const string& prune="");
+                                  const string& prune="");
 
   //--------------------------------------------------------------------------
   // Get an attribute of the given name
@@ -452,7 +452,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Set an attribute (string)
-  // Note:  All set_attr_xxx methods return *this, to allow chaining 
+  // Note:  All set_attr_xxx methods return *this, to allow chaining
   Element& set_attr(const string& attname, const string& value);
 
   //--------------------------------------------------------------------------
@@ -514,13 +514,13 @@ public:
 
   //--------------------------------------------------------------------------
   // Translate name using given map:
-  //   If not present, leave it and return true 
+  //   If not present, leave it and return true
   //   If present but mapped to "", leave it & return false (=> delete me)
   //   If present and mapped to non empty, change to mapped string
-  // 
+  //
   // Recurses to sub-elements and deletes them if they return false -
   // net effect being that names mapped to "" are (deep) deleted from
-  // the document.  
+  // the document.
   bool translate(map<string, string>& trans_map);
 
   //--------------------------------------------------------------------------
@@ -548,7 +548,7 @@ public:
 };
 
 //==========================================================================
-// XML syntactic support macros 
+// XML syntactic support macros
 
 // DEPRECATED:  Use ElementIterators directly in new code, and convert old!
 // NOTE: Const versions of these are not provided - use const_iterators
@@ -579,7 +579,7 @@ public:
   { ObTools::XML::Element& _childvar=*_p;
 
 // Do block for every descendant with a given tag, but pruned at given tag
-// (Read as 'for each descendant <v> of parent <p> with tag <tag>, 
+// (Read as 'for each descendant <v> of parent <p> with tag <tag>,
 //  pruned at <prune>s')
 #define OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(_childvar, _parent,\
                                                         _tag, _prune)     \
@@ -609,7 +609,7 @@ private:
   deque<map<string, string> > ns_maps; //Stack of maps of prefix->full name
 
   //--------------------------------------------------------------------------
-  //Inline character classification functions 
+  //Inline character classification functions
   //Note: Only allows strict ascii
   bool is_name_start(xmlchar c)
   { return (isascii(c) && isalnum(c))||c==':'||c=='_'; }
@@ -626,7 +626,7 @@ private:
   // Existing character can be passed in for counting, too
   xmlchar skip_ws(istream &s, xmlchar c=0)
   { if (c=='\n') line++;
-    for(;;) { c=0; s.get(c); 
+    for(;;) { c=0; s.get(c);
               if (!is_ascii_space(c)) return c; if (c=='\n') line++; } }
 
   //--------------------------------------------------------------------------
@@ -659,8 +659,8 @@ public:
   // s is output stream for parsing errors
   Parser(ostream &s, int f = PARSER_OPTIMISE_CONTENT):
     root(0),
-    serr(s), 
-    flags(f), 
+    serr(s),
+    flags(f),
     errors(0),
     line(1)
   {}
@@ -668,7 +668,7 @@ public:
   // Default - use cerr
   Parser(int f = PARSER_OPTIMISE_CONTENT):
     root(0),
-    serr(cerr), 
+    serr(cerr),
     flags(f),
     errors(0),
     line(1)
@@ -687,12 +687,12 @@ public:
   // Parse from given input stream
   // Throws ParseFailed if parse fails for any fatal reason
   // See also istream operator >> below, which is nicer
-  void read_from(istream& s) throw (ParseFailed); 
+  void read_from(istream& s) throw (ParseFailed);
 
   //------------------------------------------------------------------------
   // Parse from given string
   // Throws ParseFailed if parse fails for any fatal reason
-  void read_from(const string& s) throw (ParseFailed); 
+  void read_from(const string& s) throw (ParseFailed);
 
   //------------------------------------------------------------------------
   // Get root element
@@ -703,7 +703,7 @@ public:
   // Get root element detached from parser, so you can keep it after the
   // parser has died
   // Returns 0 if not valid
-  Element *detach_root(); 
+  Element *detach_root();
 
   //------------------------------------------------------------------------
   // Detach and delete the old root (if any) and replace with a new one
@@ -837,7 +837,7 @@ public:
   // Set value, either attribute or content of single (first) element
   // Returns whether value was settable
   // Can only set content or attributes of existing elements - use add_element
-  // to create new ones. 
+  // to create new ones.
   bool set_value(const string& path, const string& value);
 
   //--------------------------------------------------------------------------
@@ -917,12 +917,12 @@ public:
 
   // Single filename
   Configuration(const string& fn, ostream& _serr=cerr,
-		int parse_flags=PARSER_OPTIMISE_CONTENT)
+                int parse_flags=PARSER_OPTIMISE_CONTENT)
     :parser(_serr, parse_flags), serr(_serr) { filenames.push_back(fn); }
 
   // List of filenames - front() is tried first
   Configuration(list<string>& fns, ostream& _serr=cerr,
-		int parse_flags=PARSER_OPTIMISE_CONTENT)
+                int parse_flags=PARSER_OPTIMISE_CONTENT)
     :filenames(fns), parser(_serr, parse_flags), serr(_serr) {}
 
   //------------------------------------------------------------------------
@@ -1026,13 +1026,13 @@ public:
   // Returns string->string map of all element matching given XPath,
   // using given attribute name as key, content as value
   map<string, string> get_map(const string& path,
-			      const char *name_attr = "name");
+                              const char *name_attr = "name");
 
   //------------------------------------------------------------------------
   // XPath value set - either attribute or content of single (first) element
   // Returns whether value was settable
   // Can only set content or attributes of existing elements - use add_element
-  // to create new ones. 
+  // to create new ones.
   bool set_value(const string& path, const string& value);
 
   //--------------------------------------------------------------------------
@@ -1097,7 +1097,7 @@ public:
   //------------------------------------------------------------------------
   // Move to a different location - use after renaming the file underneath
   // it, to ensure write() works on the new location
-  void move_file(const string& fn) 
+  void move_file(const string& fn)
   { filenames.clear(); filenames.push_back(fn); }
 
   //------------------------------------------------------------------------
@@ -1114,31 +1114,31 @@ public:
 // expansion values
 // 'value's are XPath expressions in the value document
 
-//   <expand:replace value|var="xxx"/> 
+//   <expand:replace value|var="xxx"/>
 //     Expands to value of XPath or variable 'xxx' or "" if not present
 
-//   <expand:if value|var="xxx">  
-//     Expands children if XPath or variable 'xxx' is present and begins 
+//   <expand:if value|var="xxx">
+//     Expands children if XPath or variable 'xxx' is present and begins
 //     with [YyTt1]
 
-//   <expand:unless value|var="xxx"> 
-//     Expands children unless XPath or variable 'xxx' is present and begins 
+//   <expand:unless value|var="xxx">
+//     Expands children unless XPath or variable 'xxx' is present and begins
 //     with [YyTt1]
 
-//   <expand:ifeq value|var="xxx" to="yyy">  
+//   <expand:ifeq value|var="xxx" to="yyy">
 //     Expands children if XPath or variable 'xxx' is equal (cased) to 'yyy'
 
-//   <expand:ifne value|var="xxx" to="yyy">  
+//   <expand:ifne value|var="xxx" to="yyy">
 //     Expands children if XPath or variable 'xxx' is !equal (cased) to 'yyy'
 
 //   <expand:each element="xxx">
-//     Expands children for every XPath 'xxx', making the element the new 
+//     Expands children for every XPath 'xxx', making the element the new
 //     context
 
 //   <expand:index [from="1"]/>
 //     Expands to loop index value, optionally from a given base (default 1)
 
-//   <expand:set var="xxx"> 
+//   <expand:set var="xxx">
 //     Sets variable 'xxx' to the content of the element (expanded)
 //     Variables have scope within the local 'each' context
 
@@ -1150,9 +1150,9 @@ class Expander
 
   // Internal
   string expand_recursive(const XML::Element& templ,
-			  XML::Element& values,
-			  int index,
-			  map<string, string>& vars);
+                          XML::Element& values,
+                          int index,
+                          map<string, string>& vars);
 
 public:
   //--------------------------------------------------------------------------
