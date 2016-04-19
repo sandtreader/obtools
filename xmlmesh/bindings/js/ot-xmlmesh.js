@@ -276,7 +276,7 @@
                   self.log("Poll failed: "+poll_result.error);
 
                   // Resubscribe and restart
-                  self.subscribe_and_poll(pattern, callback);
+                  self.subscribe_and_poll(pattern, callback, id);
 
                   return false;  // Don't continue this poll
                 }
