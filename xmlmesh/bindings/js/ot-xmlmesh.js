@@ -18,6 +18,7 @@
 //   success:  true/false
 //   error:    Error message if failed
 //   response: Response XML JQuery if any
+//   id:       Poll ID for polls
 // }
 //
 // For poll(), the completion can return 'false' if it wants polling to stop
@@ -186,12 +187,14 @@
     //   ref:   Optional ref from subscribe, otherwise uses last ref
     //          subscribed with
     //   retry: true to automatically retry polls
+    //   id:    poll ID returned to callback
     // }
     //
     // result.success is false and result.error null if it just times out
     poll: function(params)
     {
-      this.log("Polling"+(params.retry?" with retry":""));
+      this.log("Polling"+(params.id?" ID "+params.id:"")
+                        +(params.retry?" with retry":""));
       var ref = params.ref || this.last_ref || "unknown";
       var url = this.url_prefix+"/poll/"+ref;
       var self = this;
@@ -219,8 +222,9 @@
               self.log("Polled response: "+response);
               if (params.completion(
                 {
-                  success: true,
-                  response: parseSOAP(response)
+                  success:  true,
+                  response: parseSOAP(response),
+                  id:       params.id
                 }) === false) retry = false;
             }
             else
@@ -229,7 +233,8 @@
               if (params.completion(
                 {
                   success: false,
-                  error: null
+                  error:   null,
+                  id:      params.id
                 }) === false) retry = false;
             }
 
@@ -247,7 +252,8 @@
     // If callback returns false (specifically) it will stop polling
     // callback is called with null when poll times out, to give it the
     // chance to cancel it
-    subscribe_and_poll: function(pattern, callback)
+    // id is passed back to callback
+    subscribe_and_poll: function(pattern, callback, id)
     {
       var self=this;
       this.subscribe({
@@ -263,7 +269,7 @@
               {
                 if (poll_result.success)
                 {
-                  return callback(poll_result.response);
+                  return callback(poll_result.response, id);
                 }
                 else if (poll_result.error)
                 {
@@ -276,7 +282,7 @@
                 }
                 else // Poll timed out
                 {
-                  return callback(null);
+                  return callback(null, id);
                 }
               }
             });
@@ -287,7 +293,7 @@
 
             // Try again after a reasonable timeout
             setTimeout(function()
-                       { self.subscribe_and_poll(pattern, callback); },
+                       { self.subscribe_and_poll(pattern, callback, id); },
                        5000); // ? make optional parameter?
           }
         }

@@ -89,6 +89,7 @@
         xmlmesh.poll(
         {
           retry: retry,
+          id: 5678,
           completion: function(result)
           {
             if (result.success)
@@ -96,17 +97,17 @@
               var stop = result.response.attr("stop");
               var rtext =
                 new XMLSerializer().serializeToString(result.response[0]);
-              console.log("Success!\n"+rtext);
+              console.log("Success! "+result.id+"\n"+rtext);
               return stop != "true";
             }
             else if (result.error)
             {
-              console.log("FAILED: "+result.error);
+              console.log("FAILED "+result.id+": "+result.error);
               return false;
             }
             else
             {
-              console.log("Timed out");
+              console.log("Timed out "+result.id);
               return true;
             }
           }
@@ -117,21 +118,21 @@
       {
         console.log("=== Subscribe and poll ===");
         xmlmesh.subscribe_and_poll("test.*",
-          function(xml)
+          function(xml, id)
           {
             if (xml)
             {
               var stop = xml.attr("stop");
-              console.log("Polled:");
+              console.log("Polled "+id+":");
               console.log(new XMLSerializer().serializeToString(xml[0]));
               return stop != "true";
             }
             else
             {
-              console.log("Timed out");
+              console.log("Timed out "+id);
               return true;
             }
-          });
+          }, 1234);
       }
 
     </script>
