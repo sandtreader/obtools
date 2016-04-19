@@ -99,8 +99,16 @@
               console.log("Success!\n"+rtext);
               return stop != "true";
             }
-            else
+            else if (result.error)
+            {
               console.log("FAILED: "+result.error);
+              return false;
+            }
+            else
+            {
+              console.log("Timed out");
+              return true;
+            }
           }
         });
       }
@@ -111,10 +119,18 @@
         xmlmesh.subscribe_and_poll("test.*",
           function(xml)
           {
-            var stop = xml.attr("stop");
-            console.log("Polled:");
-            console.log(new XMLSerializer().serializeToString(xml[0]));
-            return stop != "true";
+            if (xml)
+            {
+              var stop = xml.attr("stop");
+              console.log("Polled:");
+              console.log(new XMLSerializer().serializeToString(xml[0]));
+              return stop != "true";
+            }
+            else
+            {
+              console.log("Timed out");
+              return true;
+            }
           });
       }
 
