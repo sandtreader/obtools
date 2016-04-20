@@ -288,7 +288,7 @@ public:
 };
 
 //==========================================================================
-// UTF8 encoder
+// UTF8 encoder/decoder
 class UTF8
 {
 public:
@@ -307,6 +307,13 @@ public:
   //------------------------------------------------------------------------
   // Decode a UTF8 string into a wide char vector
   static void decode(const string& utf8, vector<wchar_t>& unicode);
+
+  //------------------------------------------------------------------------
+  // Squash diacritics (accents) from a UTF8 string
+  // Only works in ISO-Latin1 range, replacing with approximate ASCII base
+  // character.  Any other non-ASCII printable characters are replaced with
+  // the fallback character given
+  static string strip_diacritics(const string& utf8, char fallback='_');
 };
 
 //==========================================================================

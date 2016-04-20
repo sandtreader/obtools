@@ -57,7 +57,37 @@ TEST(UTF8Test, TestUTF8Decode)
   EXPECT_EQ(0x4000000,  unicode[11]);
   EXPECT_EQ(0x7fffffff, unicode[12]);
 }
- 
+
+TEST(UTF8Test, TestUTF8StripDiacritics)
+{
+  vector<wchar_t> unicode;
+
+  // All Latin1 printables
+  for(wchar_t i=32; i<=255; i++)
+    if (i!=127) unicode.push_back(i);  // Skip DEL
+
+  string utf8 = Text::UTF8::encode(unicode);
+  string stripped = Text::UTF8::strip_diacritics(utf8);
+  ASSERT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?"
+            "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+            "`abcdefghijklmnopqrstuvwxyz{|}~"
+            "________________________________"
+            "________________________________"
+            "AAAAAAECEEEEIIIIDNOOOOOxOUUUUYPs"
+            "aaaaaaeceeeeiiiidnooooo/ouuuuypy",
+            stripped);
+}
+
+TEST(UTF8Test, TestUTF8StripDiacriticsFallback)
+{
+  vector<wchar_t> unicode;
+  unicode.push_back(0x3456);  // God knows
+
+  string utf8 = Text::UTF8::encode(unicode);
+  string stripped = Text::UTF8::strip_diacritics(utf8, '?');
+  ASSERT_EQ("?", stripped);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

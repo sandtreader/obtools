@@ -94,4 +94,31 @@ void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
   }
 }
 
+//------------------------------------------------------------------------
+// Squash diacritics (accents) from a UTF8 string
+// Only works in ISO-Latin1 range, replacing with approximate ASCII base
+// character.  Any other non-ASCII printable characters are replaced with
+// the fallback character given
+string UTF8::strip_diacritics(const string& utf8, char fallback)
+{
+  const char *latin1_mapping =
+    "AAAAAAECEEEEIIIIDNOOOOOxOUUUUYPsaaaaaaeceeeeiiiidnooooo/ouuuuypy";
+ // "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
+
+  vector<wchar_t> unicode;
+  decode(utf8, unicode);
+  for (vector<wchar_t>::iterator it = unicode.begin();
+       it != unicode.end(); ++it)
+  {
+    wchar_t c = *it;
+    if (c >= 0xC0 && c<=0xFF) // Latin 1 accent range
+      *it = latin1_mapping[c-0xC0];
+    else if (c > 127)
+      *it = (wchar_t)fallback;
+  }
+
+  return encode(unicode);
+}
+
+
 }} // namespaces
