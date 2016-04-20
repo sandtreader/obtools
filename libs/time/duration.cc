@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-time.h"
+#include "ot-text.h"
 #include <sstream>
 #include <iomanip>
 #include <math.h>
@@ -24,7 +25,7 @@ Duration::UnitDictionary::UnitDictionary()
   multiples["secs"]    = 1;
   multiples["second"]  = 1;
   multiples["seconds"] = 1;
- 
+
   multiples["m"]       = MINUTE;
   multiples["min"]     = MINUTE;
   multiples["mins"]    = MINUTE;
@@ -32,16 +33,21 @@ Duration::UnitDictionary::UnitDictionary()
   multiples["minutes"] = MINUTE;
 
   multiples["h"]       = HOUR;
+  multiples["hr"]      = HOUR;
   multiples["hour"]    = HOUR;
   multiples["hours"]   = HOUR;
+  multiples["hrs"]     = HOUR;
 
   multiples["d"]       = DAY;
   multiples["day"]     = DAY;
   multiples["days"]    = DAY;
+  multiples["dt"]      = DAY; // For ISO P1DT12H form
 
   multiples["w"]       = WEEK;
   multiples["week"]    = WEEK;
+  multiples["wk"]      = WEEK;
   multiples["weeks"]   = WEEK;
+  multiples["wks"]     = WEEK;
 
   fractions["ns"]      = NANO;
   fractions["us"]      = MICRO;
@@ -58,10 +64,27 @@ Duration::Duration(const string& text)
 {
   istringstream iss(text);
   int shift=0;
-
+  char c=0;
+  bool iso = false;
   t = 0;
+
+  // Check for ISO format with P, and ignore it (note u/c only)
+  iss >> c;
+  if (c=='P')
+    iso = true;
+  else
+    iss.putback(c);
+
+  // Loop over multiple units
   while (!iss.fail() && !iss.eof())
   {
+    // In ISO we might see a 'T' separator (which is redundant)
+    if (iso)
+    {
+      iss >> c;
+      if (c!='T') iss.putback(c);
+    }
+
     // One way or another, we need a number, which might be a float
     double f=0;
     iss >> f;
@@ -69,7 +92,6 @@ Duration::Duration(const string& text)
     if (!iss.eof())
     {
       // Check next character
-      char c=0;
       iss >> c;  // NB - WS stripped
 
       if (c==':')
@@ -77,7 +99,7 @@ Duration::Duration(const string& text)
 	// Add as seconds (for now)
 	t+=f;
 
-	// Check shift number 
+	// Check shift number
 	switch (++shift)
 	{
 	  case 1:
@@ -101,8 +123,14 @@ Duration::Duration(const string& text)
 	// Time unit - read a word
 	iss.putback(c);
 
+        // Read an alpha word
 	string word;
-	iss >> word;
+        while (isalpha(c = iss.get()))
+          word += c;
+        iss.putback(c);
+
+        // We accept upper but test lower case
+        word = Text::tolower(word);
 
 	// Look up word in units dictionary
 	map<string, int>::const_iterator p;
@@ -169,8 +197,9 @@ string Duration::hms() const
 
 //------------------------------------------------------------------------
 // Convert to ISO duration string
-// Generates P[n]Y[n]M[n]DT[n]H[n]M[n]S form or empty if invalid
+// Generates P[n]DT[n]H[n]M[n]S form or empty if invalid
 // This format is also compatible with XML
+// Note: Never generates months or years because they are variable
 string Duration::iso() const
 {
   // Round seconds to milliseconds, to avoid unfortunate combinations

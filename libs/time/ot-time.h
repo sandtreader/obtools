@@ -98,10 +98,12 @@ public:
   //               cs - centiseconds
   //               s(ec(ond)(s)) - seconds
   //               m(in(ute)(s)) - minutes
-  //               h(our(s))     - hours
+  //               h((ou)r(s))   - hours
   //               d(ay(s))      - calendar days
-  //               w(eek(s))     - weeks
-  //
+  //               w((ee)k(s))   - weeks
+  //  1 x 2 y    Combined units
+  //  P1DT12H30M ISO with days
+  //  PT5S       ISO without days
   //             Note:  months and years are NOT accepted, because their
   //             duration depends on when you ask
   Duration(const string& text);
@@ -135,8 +137,9 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to ISO duration string
-  // Generates P[n]Y[n]M[n]DT[n]H[n]M[n]S form or empty if invalid
+  // Generates P[n]DT[n]H[n]M[n]S form or empty if invalid
   // This format is also compatible with XML
+  // Note: Never generates months or years because they are variable
   string iso() const;
 
   //------------------------------------------------------------------------
