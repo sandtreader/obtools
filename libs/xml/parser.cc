@@ -754,7 +754,7 @@ Parser::~Parser()
 
 //--------------------------------------------------------------------------
 // Parse from given stream
-void Parser::read_from(istream q&s) throw (ParseFailed)
+void Parser::read_from(istream &s) throw (ParseFailed)
 {
   parse_stream(s);
 }
