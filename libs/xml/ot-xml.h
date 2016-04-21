@@ -636,6 +636,7 @@ private:
   void read_end_tag(xmlchar c, istream &s) throw(ParseFailed);
   void read_content(xmlchar c, istream &s) throw(ParseFailed);
   void read_ref(string& text, istream &s) throw (ParseFailed);
+  void read_rest_of_name(xmlchar& c, istream& s, string& name);
   string read_rest_of_name(xmlchar& c, istream& s);
   void skip_comment(istream &s) throw (ParseFailed);
   void skip_to_gt(istream &s) throw (ParseFailed);

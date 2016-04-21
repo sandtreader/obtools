@@ -135,10 +135,10 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
 // Returns whether element read is empty
 bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
 {
-  string name = read_rest_of_name(c, s);
+  Element *e = new Element();
+  read_rest_of_name(c, s, e->name);
 
   //OK, now we have a valid new element
-  Element *e = new Element(name);
   e->line = line;
 
   //Now loop looking for attributes or >
@@ -169,7 +169,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
     if (!is_name_start(c)) fatal("Illegal attribute name");
 
     //Get attribute name
-    string aname = read_rest_of_name(c, s);
+    const string& aname = read_rest_of_name(c, s);
 
     //This must be unique
     if (e->attrs.find(aname) != e->attrs.end())
@@ -200,6 +200,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       else
 	aval+=c;
     }
+    aval.reserve();
 
     //Add this attribute to the map
     e->attrs[aname]=aval;
@@ -233,7 +234,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
 // c is first character already read
 void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
 {
-  string name = read_rest_of_name(c, s);
+  const string& name = read_rest_of_name(c, s);
 
   //Skip optional whitespace
   if (is_ascii_space(c)) c=skip_ws(s, c);
@@ -321,6 +322,8 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
     s.get(c);
     first = false;
   }
+
+  content.reserve();
 
   //Create sub-element with content, and add it to currently open element
   if (!elements.empty())
@@ -411,7 +414,7 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
   }
   else if (isalpha(c)) //Entity name - alphabetic only
   {
-    string ent = read_rest_of_name(c, s);
+    const string& ent = read_rest_of_name(c, s);
     //Must have ; terminator
     if (c!=';') fatal("Malformed entity reference");
 
@@ -444,12 +447,11 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
 }
 
 //--------------------------------------------------------------------------
-// Read the rest of a name (while name chars)
+// Read the rest of a name (while name chars) into the given string
 // c is initially first character read
-// Returns name, modifies 'c' to first non-name character read
-string Parser::read_rest_of_name(xmlchar& c, istream& s)
+// Modifies 'c' to first non-name character read
+void Parser::read_rest_of_name(xmlchar& c, istream& s, string& name)
 {
-  string name;
   name.reserve(16);
   name+=c;
 
@@ -464,6 +466,17 @@ string Parser::read_rest_of_name(xmlchar& c, istream& s)
       break;
   }
 
+  name.reserve();
+}
+
+//--------------------------------------------------------------------------
+// Read the rest of a name (while name chars)
+// c is initially first character read
+// Returns name, modifies 'c' to first non-name character read
+string Parser::read_rest_of_name(xmlchar& c, istream& s)
+{
+  string name;
+  read_rest_of_name(c, s, name);
   return name;
 }
 
@@ -697,12 +710,12 @@ void Parser::substitute_name(string& name, bool usedef)
   if (topmap.find(prefix)!=topmap.end())
   {
     string rest(name,pos);
-    string& nsname=topmap[prefix];
+    const string& nsname=topmap[prefix];
 
     //Look up nsname in user_ns_map and substitute prefix
     if (user_ns_map.find(nsname)!=user_ns_map.end())
     {
-      string& newprefix=user_ns_map[nsname];
+      const string& newprefix=user_ns_map[nsname];
 
       //Rebuild name in place
       if (newprefix.empty())
@@ -741,7 +754,7 @@ Parser::~Parser()
 
 //--------------------------------------------------------------------------
 // Parse from given stream
-void Parser::read_from(istream &s) throw (ParseFailed)
+void Parser::read_from(istream q&s) throw (ParseFailed)
 {
   parse_stream(s);
 }
