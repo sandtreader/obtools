@@ -246,7 +246,7 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
 // Get a response body from a response
 // Uses just the HTTP reason for errors because servers have a habit of
 // dressing up error responses in HTML
-string HTTPClient::get_response_body(HTTPMessage& response)
+string HTTPClient::get_response_body(const HTTPMessage& response) const
 {
   if (response.code < 300 && !response.body.empty())
     return response.body;

@@ -484,7 +484,7 @@ private:
   CookieJar *cookie_jar;
 
   // Internals
-  string get_response_body(HTTPMessage& response);
+  string get_response_body(const HTTPMessage& response) const;
 
 protected:
   Net::EndPoint server;
