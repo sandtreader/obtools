@@ -135,8 +135,8 @@ private:
     // Run routine
     virtual void run()
     {
-      while (is_running())
-        manager.next_action();
+      while (is_running() && manager.next_action())
+        ;
 
       // Trigger threads shut down
       for (typename vector<Gen::SharedPointer<MT::TaskThread<ActionTask> > >
@@ -156,12 +156,12 @@ private:
   //------------------------------------------------------------------------
   // Handle next action on queue
   // Returns whether more to process
-  void next_action()
+  bool next_action()
   {
     auto_ptr<Action<T> > action(actions.wait());
 
     if (!action.get())
-      return;
+      return false;
 
     vector<Gen::SharedPointer<MT::TaskThread<ActionTask > > > active;
     {
@@ -191,6 +191,8 @@ private:
     {
       (**it)->wait();
     }
+
+    return true;
   }
 
 public:
