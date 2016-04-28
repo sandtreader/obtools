@@ -73,8 +73,8 @@ TEST(UTF8Test, TestUTF8StripDiacritics)
             "`abcdefghijklmnopqrstuvwxyz{|}~"
             "________________________________"
             "________________________________"
-            "AAAAAAECEEEEIIIIDNOOOOOxOUUUUYPs"
-            "aaaaaaeceeeeiiiidnooooo/ouuuuypy",
+            "AAAAAAAECEEEEIIIITHNOOOOOxOUUUUYTHss"
+            "aaaaaaaeceeeeiiiithnooooo/ouuuuythy",
             stripped);
 }
 
