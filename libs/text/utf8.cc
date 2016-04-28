@@ -110,7 +110,7 @@ string UTF8::strip_diacritics(const string& utf8, char fallback)
   decode(utf8, unicode);
 
   vector<wchar_t> unicode_stripped;
-  for (vector<wchar_t>::iterator it = unicode.begin();
+  for (vector<wchar_t>::const_iterator it = unicode.begin();
        it != unicode.end(); ++it)
   {
     wchar_t c = *it;
