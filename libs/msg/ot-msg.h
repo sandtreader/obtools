@@ -124,8 +124,6 @@ class Broker
       XML::Element& te = *p;
       if (!te.name.empty())
       {
-        bool matched = false;
-
         // Look for all matching transports
         for(typename map<string, list<Transport<CONTEXT>*> >::iterator
             p = transports.begin(); p!=transports.end(); ++p)
@@ -138,15 +136,8 @@ class Broker
             {
               Transport<CONTEXT> *trans = *q;
               trans->register_handler(*mh, te);
-              matched = true;
             }
           }
-        }
-
-        if (!matched)
-        {
-          Log::Error log;
-          log << "No matching message transport: " << te.name << endl;
         }
       }
     }
