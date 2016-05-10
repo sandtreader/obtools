@@ -97,7 +97,8 @@ void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
 //------------------------------------------------------------------------
 // Squash diacritics (accents) from a UTF8 string
 // Only works in ISO-Latin1 range, replacing with approximate ASCII base
-// character.  Any other non-ASCII printable characters are replaced with
+// character, or digraph
+// Any other non-ASCII printable characters are replaced with
 // the fallback character given
 string UTF8::strip_diacritics(const string& utf8, char fallback)
 {
@@ -107,17 +108,55 @@ string UTF8::strip_diacritics(const string& utf8, char fallback)
 
   vector<wchar_t> unicode;
   decode(utf8, unicode);
-  for (vector<wchar_t>::iterator it = unicode.begin();
+
+  vector<wchar_t> unicode_stripped;
+  for (vector<wchar_t>::const_iterator it = unicode.begin();
        it != unicode.end(); ++it)
   {
     wchar_t c = *it;
     if (c >= 0xC0 && c<=0xFF) // Latin 1 accent range
-      *it = latin1_mapping[c-0xC0];
+    {
+      switch (c)
+      {
+        // Special cases giving multiple characters
+        case 0xC6: // AE
+          unicode_stripped.push_back(L'A');
+          c = L'E';
+          break;
+
+        case 0xD0: // ETH
+        case 0xDE: // THORN
+          unicode_stripped.push_back(L'T');
+          c = L'H';
+          break;
+
+        case 0xDF: // Sharp S
+          unicode_stripped.push_back(L's');
+          c = L's';
+          break;
+
+        case 0xE6: // ae
+          unicode_stripped.push_back(L'a');
+          c = L'e';
+          break;
+
+        case 0xF0: // eth
+        case 0xFE: // thorn
+          unicode_stripped.push_back(L't');
+          c = L'h';
+          break;
+
+        default:
+          c = latin1_mapping[c-0xC0];
+      }
+    }
     else if (c > 127)
-      *it = (wchar_t)fallback;
+      c = (wchar_t)fallback;
+
+    unicode_stripped.push_back(c);
   }
 
-  return encode(unicode);
+  return encode(unicode_stripped);
 }
 
 

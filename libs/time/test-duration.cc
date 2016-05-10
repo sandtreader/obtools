@@ -31,7 +31,7 @@ int main()
     if (line.empty()) continue;
     if (line[0] == '#') continue;
 
-    vector<string> bits = Text::split(line, '|');
+    const vector<string> bits = Text::split(line, '|');
     if (bits.size() != 2)
     {
       cerr << "Bad line [" << line << "]\n";
@@ -39,8 +39,8 @@ int main()
       continue;
     }
 
-    Time::Duration d(bits[0]);
-    double secs = Text::stof(bits[1]);
+    const Time::Duration d(bits[0]);
+    const double secs = Text::stof(bits[1]);
 
     cout << bits[0] << " -> "
 	 << d.seconds() << "s, NTP: " << d.ntp()

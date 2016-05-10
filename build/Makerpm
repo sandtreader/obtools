@@ -3,10 +3,11 @@
 
 # NAME may have been overridden in calling script
 NAME=${NAME:-$1}
-VERSION=$2
-REV=$3
+VERSION=${VERSION:-$2}
+REV=${REV:-$3}
+REV=${REV/\~/}
 TARGARCH=${TARGARCH:-4}
-VARIANT=$5
+VARIANT=${VARIANT:-$5}
 
 RPM_COPYRIGHT=${RPM_COPYRIGHT:-"xMill Consulting Ltd"}
 RPM_NAMETAG=${RPM_NAMETAG:-Obtools}
