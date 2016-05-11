@@ -529,6 +529,11 @@ public:
                                                            | ios_base::out);
 
   //------------------------------------------------------------------------
+  // Open a file with return of success or not
+  bool open_back(const char *filename, ios_base::openmode mode = ios_base::in
+                                                           | ios_base::out);
+
+  //------------------------------------------------------------------------
   // Close file
   void close();
 };

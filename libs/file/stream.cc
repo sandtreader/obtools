@@ -27,6 +27,7 @@
 #define OPEN ::open
 #endif
 #include <iostream>
+#include <memory>
 
 namespace ObTools { namespace File {
 
@@ -168,11 +169,20 @@ bool MultiOutStream::is_open() const
 // Open a file
 void MultiOutStream::open(const char *filename, ios_base::openmode mode)
 {
-  file_bufs.push_back(new filebuf);
-  if (!file_bufs.back()->open(filename, mode))
-    setstate(ios_base::failbit);
-  else
-    clear();
+  open_back(filename, mode);
+}
+
+//--------------------------------------------------------------------------
+// Open a file
+bool MultiOutStream::open_back(const char *filename, ios_base::openmode mode)
+{
+  auto_ptr<filebuf> buf(new filebuf);
+  if (buf->open(filename, mode))
+  {
+    file_bufs.push_back(buf.release());
+    return true;
+  }
+  return false;
 }
 
 //--------------------------------------------------------------------------
