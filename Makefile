@@ -12,7 +12,6 @@ all:
 	$(MAKE) -C xmlmesh
 	$(MAKE) -C tools
 	$(MAKE) -C obcache
-	$(MAKE) -C angel
 
 mingw: 
 	$(MAKE) -C libs mingw
@@ -33,19 +32,16 @@ clean:
 	$(MAKE) -C xmlmesh clean
 	$(MAKE) -C tools clean
 	$(MAKE) -C obcache clean
-	$(MAKE) -C angel clean
 
 test: 
 	$(MAKE) -C libs test
 	$(MAKE) -C xmlmesh test
 	$(MAKE) -C tools test
 	$(MAKE) -C obcache test
-	$(MAKE) -C angel test
 
 release:
 	$(MAKE) -C libs release
 	$(MAKE) -C xmlmesh release
-	$(MAKE) -C angel release
 
 doc:	all
 	-@rm -rf doc.out
