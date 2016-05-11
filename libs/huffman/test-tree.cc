@@ -89,7 +89,7 @@ TEST(TestMultiTree, TestPopulateFromReader)
   sequence.push_back(true);
   Huffman::Value value;
   ASSERT_TRUE(tree.read_value(Huffman::Value('p'), sequence, value));
-  ASSERT_EQ(Huffman::Value(Huffman::Value::ESCAPE), value);
+  ASSERT_EQ(Huffman::Value(Huffman::Value::Special::escape), value);
 }
 
 TEST(TestMultiTree, TestReadString)

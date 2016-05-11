@@ -17,16 +17,16 @@ ostream& operator<<(ostream& os, const Value& value)
   {
     switch (value.get_special_value())
     {
-      case Value::NONE:
+      case Value::Special::none:
         os << "NONE";
         break;
-      case Value::START:
+      case Value::Special::start:
         os << "START";
         break;
-      case Value::STOP:
+      case Value::Special::stop:
         os << "STOP";
         break;
-      case Value::ESCAPE:
+      case Value::Special::escape:
         os << "ESCAPE";
         break;
     }

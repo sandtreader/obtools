@@ -289,7 +289,7 @@ CC = gcc
 CXX = g++
 EXTRALIBS += -lrt -lm
 STRIP = strip
-CPPFLAGS += -pthread
+CPPFLAGS += -std=c++11 -Werror -pthread
 LDFLAGS += -pthread
 endif
 endif

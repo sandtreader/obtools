@@ -22,7 +22,7 @@ TEST(TreeReader, TestMultiReader)
   Huffman::MultiMapping mm;
 
   ASSERT_TRUE(mr.read_mapping(mm));
-  ASSERT_EQ(Huffman::Value(Huffman::Value::START), mm.index);
+  ASSERT_EQ(Huffman::Value(Huffman::Value::Special::start), mm.index);
   vector<bool> sequence;
   sequence.push_back(false);
   sequence.push_back(false);
@@ -40,7 +40,7 @@ TEST(TreeReader, TestMultiReader)
   ASSERT_EQ(sequence.size(), mm.sequence.size());
   for (size_t i = 0; i < mm.sequence.size(); ++i)
     ASSERT_EQ(sequence[i], mm.sequence[i]);
-  ASSERT_EQ(Huffman::Value(Huffman::Value::ESCAPE), mm.value);
+  ASSERT_EQ(Huffman::Value(Huffman::Value::Special::escape), mm.value);
 
   ASSERT_TRUE(mr.read_mapping(mm));
   ASSERT_EQ(Huffman::Value('x'), mm.index);

@@ -126,14 +126,14 @@ bool MultiTree::read_escaped_char(Channel::BitReader& reader,
 // Read a string from a BitReader
 bool MultiTree::read_string(Channel::BitReader& reader, string& s) const
 {
-  Value value(Huffman::Value::START);
+  Value value(Huffman::Value::Special::start);
   while (read_value(value, reader, value))
   {
     if (!value.is_special())
       s.push_back(value.get_value());
-    else if (value.get_special_value() == Huffman::Value::STOP)
+    else if (value.get_special_value() == Huffman::Value::Special::stop)
       break;
-    else if (value.get_special_value() == Huffman::Value::ESCAPE)
+    else if (value.get_special_value() == Huffman::Value::Special::escape)
     {
       // Escaped data is read 8 bits at a time until an ASCII (0-127)
       // character is read, then huffman decoding begins again

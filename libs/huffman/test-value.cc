@@ -21,14 +21,14 @@ TEST(TreeValue, TestNormalIsNotSpecial)
 
 TEST(TreeValue, TestSpecialIsNotSpecial)
 {
-  Huffman::Value a(Huffman::Value::START);
+  Huffman::Value a(Huffman::Value::Special::start);
   ASSERT_TRUE(a.is_special());
 }
 
 TEST(TreeValue, TestNormalLessThanSpecial)
 {
   Huffman::Value a('a');
-  Huffman::Value b(Huffman::Value::NONE);
+  Huffman::Value b(Huffman::Value::Special::none);
   ASSERT_LT(a, b);
 }
 
@@ -41,8 +41,8 @@ TEST(TreeValue, TestNormalLessThan)
 
 TEST(TreeValue, TestSpecialLessThan)
 {
-  Huffman::Value a(Huffman::Value::START);
-  Huffman::Value b(Huffman::Value::STOP);
+  Huffman::Value a(Huffman::Value::Special::start);
+  Huffman::Value b(Huffman::Value::Special::stop);
   ASSERT_LT(a, b);
 }
 

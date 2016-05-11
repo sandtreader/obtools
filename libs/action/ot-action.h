@@ -116,7 +116,7 @@ private:
     }
   };
 
-  vector<Gen::SharedPointer<MT::TaskThread<ActionTask> > > threads;
+  vector<shared_ptr<MT::TaskThread<ActionTask> > > threads;
 
   class WorkerTask: public MT::Task
   {
@@ -139,9 +139,7 @@ private:
         ;
 
       // Trigger threads shut down
-      for (typename vector<Gen::SharedPointer<MT::TaskThread<ActionTask> > >
-                    ::iterator
-           it = manager.threads.begin(); it != manager.threads.end(); ++it)
+      for (auto it = manager.threads.begin(); it != manager.threads.end(); ++it)
       {
         (**it)->set_action(0, 0);
         (**it)->wait();
@@ -158,25 +156,25 @@ private:
   // Returns whether more to process
   bool next_action()
   {
-    auto_ptr<Action<T> > action(actions.wait());
+    auto action = unique_ptr<Action<T>>{actions.wait()};
 
     if (!action.get())
       return false;
 
-    vector<Gen::SharedPointer<MT::TaskThread<ActionTask > > > active;
+    vector<shared_ptr<MT::TaskThread<ActionTask>>> active;
     {
-      MT::Lock lock(handlers_mutex);
-      typename map<T, vector<Handler *> >::iterator
-               h = handlers.find(action->get_type());
+      MT::Lock lock{handlers_mutex};
+      auto h = handlers.find(action->get_type());
       if (h != handlers.end())
       {
-        unsigned i(0);
-        for (typename vector<Handler *>::iterator
-             it = h->second.begin(); it != h->second.end(); ++it, ++i)
+        auto i = 0u;
+        for (auto it = h->second.begin(); it != h->second.end(); ++it, ++i)
         {
           if (i >= threads.size())
           {
-            threads.push_back(new MT::TaskThread<ActionTask>(new ActionTask()));
+            const auto p = make_shared<MT::TaskThread<ActionTask>>(
+                new ActionTask{});
+            threads.push_back(p);
           }
           (*threads[i])->set_action(action.get(), *it);
           active.push_back(threads[i]);
@@ -185,9 +183,7 @@ private:
     }
 
     // Wait for all active threads to finish
-    for (typename std::vector<Gen::SharedPointer<
-                              MT::TaskThread<ActionTask > > >::iterator
-         it = active.begin(); it != active.end(); ++it)
+    for (auto it = active.begin(); it != active.end(); ++it)
     {
       (**it)->wait();
     }

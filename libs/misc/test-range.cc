@@ -15,31 +15,6 @@ namespace {
 using namespace std;
 using namespace ObTools;
 
-//------------------------------------------------------------------------
-// << operator to write set<Misc::UInt64RangeSet::Range> to ostream
-ostream& operator<<(ostream& s, const set<Misc::UInt64RangeSet::Range>& v)
-{
-  for (set<Misc::UInt64RangeSet::Range>::const_iterator
-       it = v.begin(); it != v.end(); ++it)
-  {
-    s << "{" << it->start << ", " << it->length << "} ";
-  }
-  return s;
-}
-
-//------------------------------------------------------------------------
-// << operator to write set<Misc::RangeSet<double, double>::Range> to ostream
-ostream& operator<<(ostream& s,
-                    const set<Misc::RangeSet<double, double>::Range>& v)
-{
-  for (set<Misc::RangeSet<double, double>::Range>::const_iterator
-       it = v.begin(); it != v.end(); ++it)
-  {
-    s << "{" << it->start << ", " << it->length << "} ";
-  }
-  return s;
-}
-
 TEST(RangeSetTest, TestInsert)
 {
   Misc::UInt64RangeSet rs(5);

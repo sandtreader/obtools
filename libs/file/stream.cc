@@ -38,7 +38,7 @@ namespace ObTools { namespace File {
 // Handle characters one at a time
 streamsize BufferedOutFileBuf::xsputn(const char *s, streamsize n)
 {
-  streamsize avail = this->epptr() - this->pptr();
+  auto avail = this->epptr() - this->pptr();
   if (avail >= n)
     return __streambuf_type::xsputn(s, n);
   else
@@ -107,8 +107,7 @@ uint64_t BufferedOutStream::get_buffer_size() const
 streamsize MultiOutFileBuf::xsputn(const char *s, streamsize n)
 {
   streamsize result;
-  for (vector<Gen::UniquePointer<filebuf> >::iterator
-       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  for (auto it = file_bufs.begin(); it != file_bufs.end(); ++it)
   {
     result = (*it)->sputn(s, n);
   }
@@ -119,8 +118,7 @@ streamsize MultiOutFileBuf::xsputn(const char *s, streamsize n)
 // Put character on overflow
 int MultiOutFileBuf::overflow(int c)
 {
-  for (vector<Gen::UniquePointer<filebuf> >::iterator
-       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  for (auto it = file_bufs.begin(); it != file_bufs.end(); ++it)
   {
     (*it)->sputn(reinterpret_cast<const char *>(&c), 1);
   }
@@ -133,9 +131,8 @@ int MultiOutFileBuf::overflow(int c)
 streampos MultiOutFileBuf::seekoff(streamoff off, ios_base::seekdir way,
                                    ios_base::openmode which)
 {
-  streampos result(-1);
-  for (vector<Gen::UniquePointer<filebuf> >::iterator
-       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  auto result = streampos{-1};
+  for (auto it = file_bufs.begin(); it != file_bufs.end(); ++it)
   {
     result = (*it)->pubseekoff(off, way, which);
   }
@@ -158,8 +155,7 @@ MultiOutStream::MultiOutStream():
 // Test for file being open
 bool MultiOutStream::is_open() const
 {
-  for (vector<Gen::UniquePointer<filebuf> >::const_iterator
-       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  for (auto it = file_bufs.begin(); it != file_bufs.end(); ++it)
     if ((*it)->is_open())
       return true;
   return false;
@@ -176,10 +172,10 @@ void MultiOutStream::open(const char *filename, ios_base::openmode mode)
 // Open a file
 bool MultiOutStream::open_back(const char *filename, ios_base::openmode mode)
 {
-  auto_ptr<filebuf> buf(new filebuf);
+  unique_ptr<filebuf> buf(new filebuf);
   if (buf->open(filename, mode))
   {
-    file_bufs.push_back(buf.release());
+    file_bufs.push_back(move(buf));
     return true;
   }
   return false;
@@ -190,8 +186,7 @@ bool MultiOutStream::open_back(const char *filename, ios_base::openmode mode)
 void MultiOutStream::close()
 {
   file_buf.pubsync();
-  for (vector<Gen::UniquePointer<filebuf> >::iterator
-       it = file_bufs.begin(); it != file_bufs.end(); ++it)
+  for (auto it = file_bufs.cbegin(); it != file_bufs.cend(); ++it)
   {
     (*it)->pubsync();
     if (!(*it)->close())

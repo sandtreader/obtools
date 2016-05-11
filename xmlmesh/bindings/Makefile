@@ -5,9 +5,9 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-SUBS = c php cli
-SUBS_MINGW = c cli
-SUBS_MIPS = c cli
+SUBS = php cli
+SUBS_MINGW = cli
+SUBS_MIPS = cli
 
 RELEASEDIR = ../release
 include ../../build/dir.mk

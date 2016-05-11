@@ -38,7 +38,7 @@ const Node *Node::get_node(const vector<bool>& sequence,
     return this;
 
   // It's not this node so pass it along a place
-  Gen::SharedPointer<Node> next;
+  shared_ptr<Node> next;
   if (*pos)
     next = one;
   else
@@ -65,7 +65,7 @@ Node& Node::ensure_node(const vector<bool>& sequence,
     return *this;
 
   // It's not this node so pass it along a place
-  Gen::SharedPointer<Node>& next(*pos ? one : zero);
+  shared_ptr<Node>& next(*pos ? one : zero);
   ++pos;
   if (!next.get())
     next.reset(new Node());

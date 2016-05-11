@@ -12,6 +12,7 @@
 #define __OBTOOLS_HUFFMAN_H
 
 #include <map>
+#include <memory>
 #include "ot-chan.h"
 #include "ot-gen.h"
 
@@ -25,13 +26,14 @@ using namespace std;
 class Value
 {
 public:
-  enum Special
+  enum class Special
   {
-    NONE,
-    START,
-    STOP,
-    ESCAPE,
+    none,
+    start,
+    stop,
+    escape,
   };
+
 private:
   unsigned char value;
   Special svalue;
@@ -40,11 +42,11 @@ private:
 
 public:
   Value():
-    value(0), svalue(NONE), special(false), valid(false)
+    value(0), svalue(Special::none), special(false), valid(false)
   {}
 
   Value(unsigned char _value):
-    value(_value), svalue(NONE), special(false), valid(true)
+    value(_value), svalue(Special::none), special(false), valid(true)
   {}
 
   Value(Special _svalue):
@@ -103,8 +105,8 @@ class Node
 private:
   bool leaf;
   Value value;
-  Gen::SharedPointer<Node> zero;
-  Gen::SharedPointer<Node> one;
+  shared_ptr<Node> zero;
+  shared_ptr<Node> one;
 
 public:
   //------------------------------------------------------------------------

@@ -178,7 +178,7 @@ void TCPServer::shutdown()
 void TCPWorkerThread::run()
 {
   // Create wrapped socket which will also close on exit
-  auto_ptr<TCPSocket> s(server->create_client_socket(client_fd));
+  unique_ptr<TCPSocket> s(server->create_client_socket(client_fd));
 
   // Just pass them to the server's process function
   if (s.get()) 

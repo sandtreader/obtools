@@ -10,9 +10,8 @@ NAME    = ot-gen
 # No OBJS
 HEADERS = ot-gen.h
 
-TESTS   = test-shared-pointer
 TESTLIB = -lgtest
-TESTCMD = ./test-shared-pointer
+TESTCMD = 
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

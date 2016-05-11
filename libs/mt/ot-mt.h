@@ -990,7 +990,7 @@ template<class T>
 class TaskThread
 {
 private:
-  auto_ptr<T> task;
+  unique_ptr<T> task;
 
   class Thread: public MT::Thread
   {

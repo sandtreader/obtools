@@ -24,6 +24,7 @@
 #include <vector>
 #include <ot-gen.h>
 #include <stdexcept>
+#include <memory>
 
 #ifndef __WIN32__
 #include <glob.h>
@@ -483,7 +484,7 @@ public:
 class MultiOutFileBuf: public streambuf
 {
 private:
-  vector<Gen::UniquePointer<filebuf> >& file_bufs;
+  vector<unique_ptr<filebuf> >& file_bufs;
 
 protected:
   //------------------------------------------------------------------------
@@ -503,7 +504,7 @@ protected:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  MultiOutFileBuf(vector<Gen::UniquePointer<filebuf> >& _file_bufs):
+  MultiOutFileBuf(vector<unique_ptr<filebuf> >& _file_bufs):
     file_bufs(_file_bufs)
   {}
 };
@@ -511,7 +512,7 @@ public:
 class MultiOutStream: public ostream
 {
 private:
-  vector<Gen::UniquePointer<filebuf> > file_bufs;
+  vector<unique_ptr<filebuf> > file_bufs;
   MultiOutFileBuf file_buf;
 
 public:
