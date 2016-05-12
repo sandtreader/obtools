@@ -155,8 +155,9 @@ void MD5::finalise(unsigned char digest[16])
   byte_reverse(ctx_in, 14);
 
   /* Append length in bits and transform */
-  reinterpret_cast<uint32_t *>(ctx_in)[14] = ctx_bits[0];
-  reinterpret_cast<uint32_t *>(ctx_in)[15] = ctx_bits[1];
+  const auto ci = reinterpret_cast<uint32_t *>(ctx_in);
+  ci[14] = ctx_bits[0];
+  ci[15] = ctx_bits[1];
 
   transform(ctx_buf, reinterpret_cast<uint32_t *>(ctx_in));
   byte_reverse((char *)ctx_buf, 4);

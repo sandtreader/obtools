@@ -106,7 +106,7 @@ uint64_t BufferedOutStream::get_buffer_size() const
 // Handle characters one at a time
 streamsize MultiOutFileBuf::xsputn(const char *s, streamsize n)
 {
-  streamsize result;
+  auto result = streamsize{0};
   for (auto it = file_bufs.begin(); it != file_bufs.end(); ++it)
   {
     result = (*it)->sputn(s, n);
