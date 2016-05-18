@@ -100,7 +100,7 @@ void AutoSyncClient::shutdown()
     for(int i=0; i<5; i++)
     {
       if (!*dispatch_thread) break;
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
 
     // If still not dead, cancel it

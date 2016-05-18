@@ -41,7 +41,7 @@ bool ThreadAction::tick(Context& con)
 void ThreadAction::run_thread(Context& con)
 {
   while (SequenceAction::tick(con))
-    MT::Thread::usleep(sleep_time);
+    this_thread::sleep_for(chrono::microseconds{sleep_time});
 }
 
 //------------------------------------------------------------------------

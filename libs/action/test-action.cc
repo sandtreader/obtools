@@ -9,6 +9,7 @@
 
 #include "ot-action.h"
 #include <gtest/gtest.h>
+#include <chrono>
 
 namespace {
 
@@ -33,7 +34,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   ActionOne(int _num):
-    num(_num)
+    num{_num}
   {}
 
   //------------------------------------------------------------------------
@@ -73,11 +74,11 @@ TEST(ActionTest, TestRegistration)
   {
     Action::Manager<ActionType> manager;
     manager.add_handler(one, handler);
-    manager.queue(new ActionOne(1));
-    manager.queue(new ActionOne(2));
-    manager.queue(new ActionOne(3));
+    manager.push(new ActionOne(1));
+    manager.push(new ActionOne(2));
+    manager.push(new ActionOne(3));
     // Allow actions to be handled
-    MT::Thread::usleep(100000);
+    this_thread::sleep_for(chrono::milliseconds{100});
   }
 
   vector<int> expected;
@@ -96,11 +97,11 @@ TEST(ActionTest, TestMultipleHandlers)
     Action::Manager<ActionType> manager;
     manager.add_handler(one, handler1);
     manager.add_handler(one, handler2);
-    manager.queue(new ActionOne(1));
-    manager.queue(new ActionOne(2));
-    manager.queue(new ActionOne(3));
+    manager.push(new ActionOne(1));
+    manager.push(new ActionOne(2));
+    manager.push(new ActionOne(3));
     // Allow actions to be handled
-    MT::Thread::usleep(100000);
+    this_thread::sleep_for(chrono::milliseconds{100});
   }
 
   vector<int> expected;

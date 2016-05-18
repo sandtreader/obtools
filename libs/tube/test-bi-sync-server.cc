@@ -32,7 +32,7 @@ class TestThread: public MT::Thread
 	Tube::Message response;
 	server.request(request, response);
       }
-      MT::Thread::sleep(1);
+      this_thread::sleep_for(chrono::seconds{1});
     }
   }
 
@@ -51,7 +51,7 @@ private:
     client_details = msg.client;       // Capture to send back
 
     // Delay
-    MT::Thread::sleep(3);
+    this_thread::sleep_for(chrono::seconds{3});
 
     return true;
   }

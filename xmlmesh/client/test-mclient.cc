@@ -76,13 +76,13 @@ int main(int argc, char **argv)
   // Loop for a while sending out messages
   for(int i=0; i<10; i++)
   {
-    MT::Thread::sleep(1);
+    this_thread::sleep_for(chrono::seconds{1});
     XMLMesh::Message msg("info.foo", "<info>Boo!</info>");
     client.send(msg);
   }
 
   // Sleep while stuff comes back
-  MT::Thread::sleep(5);
+  this_thread::sleep_for(chrono::seconds{5});
 
   // Disconnect, rather than delete
   infosub->disconnect();

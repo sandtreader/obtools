@@ -63,12 +63,7 @@ int main(int argc, char **argv)
   // Loop for a while sending and receiving
   for(int i=0; i<10; i++)
   {
-#if defined(__WIN32__)
-    // Can't use MT::Thread::sleep because may not have MT
-    Sleep(1000);
-#else
-    sleep(1);
-#endif
+    this_thread::sleep_for(chrono::seconds{1});
 
     XMLMesh::OTMP::Message msg("This is a test message");
 

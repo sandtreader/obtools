@@ -22,7 +22,7 @@
 #define DEFAULT_MAX_SEND_QUEUE 1024
 
 // Time to wait (us) if send queue full
-#define SEND_BUSY_WAIT_TIME 10000
+#define SEND_BUSY_WAIT_TIME 10
 
 namespace ObTools { namespace Tube {
 
@@ -53,7 +53,7 @@ class ClientReceiveThread: public MT::Thread
 	
 	// Sleep, checking for shutdown
 	for(int i=0; client.is_alive() && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
-	  MT::Thread::usleep(10000);
+          this_thread::sleep_for(chrono::milliseconds{10});
       }
     }
 
@@ -168,7 +168,7 @@ bool Client::receive_messages(Log::Streams& log)
 
       // Sleep, checking for shutdown
       for(int i=0; alive && i<100*RESTART_SOCKET_SLEEP_TIME; i++)
-	  MT::Thread::usleep(10000);
+        this_thread::sleep_for(chrono::milliseconds{10});
 
       // Restart if not shut down
       if (alive)
@@ -220,7 +220,7 @@ bool Client::send_messages(Log::Streams& log)
   {
     log.detail << name <<" (send): Socket is dead - waiting for improvement\n";
     for(int i=0; alive && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     if (!alive) return false;
   }
 
@@ -254,7 +254,7 @@ bool Client::send_messages(Log::Streams& log)
 
       // Sleep, checking for shutdown
       for(int i=0; alive && i<100*RESTART_SOCKET_SLEEP_TIME; i++)
-	  MT::Thread::usleep(10000);
+        this_thread::sleep_for(chrono::milliseconds{10});
 
       // Try to restart socket if not shut down
       if (alive)
@@ -326,7 +326,7 @@ void Client::start()
 void Client::send(Message& msg)
 {
   while (send_q.waiting() > max_send_queue)  // Must allow zero to work
-    MT::Thread::usleep(SEND_BUSY_WAIT_TIME);
+    this_thread::sleep_for(chrono::milliseconds{SEND_BUSY_WAIT_TIME});
 
   send_q.send(msg);
 }
@@ -369,7 +369,7 @@ void Client::shutdown()
     for(int i=0; i<SOCKET_CONNECT_TIMEOUT*100+50; i++)
     {
       if (!*receive_thread && !*send_thread) break;
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
 
     // If still not dead, cancel them

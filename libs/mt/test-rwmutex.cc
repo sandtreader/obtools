@@ -1,124 +1,93 @@
 //==========================================================================
 // ObTools::MT: test-rwmutex.cc
 //
-// Test harness for readers/writer mutex functions
+// Test harness for reader/writer mutex functions
 //
-// Copyright (c) 2007 Paul Clark.  All rights reserved
+// Copyright (c) 2007-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
+#include <gtest/gtest.h>
 #include "ot-mt.h"
-#include <cstdlib>
-#include <iostream>
+#include "ot-gen.h"
 #include <vector>
 
 using namespace std;
 using namespace ObTools;
 
 //--------------------------------------------------------------------------
-// Mutex and global state
-MT::RWMutex mutex;
-int n;  
-int n_reads, n_writes;
-int n_bad_reads;
-int n_bad_writes;
-
-//--------------------------------------------------------------------------
-// Reader thread class
-class ReaderThread: public MT::Thread
+// Tests
+TEST(RWMutexTest, TestSafe)
 {
-  virtual void run();
+  static MT::RWMutex m;
+  static auto bad = false;
+  static auto reads = int{0};
+  static auto writes = int{0};
+  static auto bad_reads = int{0};
+  static auto bad_writes = int{0};
 
-public:
-  ReaderThread() { start(); }
-};
-
-void ReaderThread::run()
-{
-  for(;;)
+  class ReaderThread: public MT::Thread
   {
-    MT::RWReadLock lock(mutex);
-
-    // Lock again to test recursion on reads 
+  private:
+    void run() override
     {
-      MT::RWReadLock lock2(mutex);
+      while (running)
+      {
+        MT::RWReadLock lock{m};
+        if (bad)
+          ++bad_reads;
+        ++reads;
+      }
     }
-    
-    // Check if we see its inconsistent state
-    if (n) n_bad_reads++;
-    n_reads++;
-  }
-}
+  public:
+    ReaderThread()
+    {
+      start();
+    }
+  };
 
-//--------------------------------------------------------------------------
-// Writer thread class
-class WriterThread: public MT::Thread
-{
-  virtual void run();
-
-public:
-  WriterThread() { start(); }
-};
-
-void WriterThread::run()
-{
-  for(;;)
+  class WriterThread: public MT::Thread
   {
+  private:
+    void run() override
     {
-      MT::RWWriteLock lock(mutex);
-
-      // Lock it again to test recursion on writes
+      while (running)
       {
-	MT::RWWriteLock lock2(mutex);
+        {
+          MT::RWWriteLock lock{m};
+          if (bad)
+            ++bad_writes;
+
+          bad = true;
+          this_thread::sleep_for(chrono::microseconds{10});
+          bad = false;
+        }
+        ++writes;
+        this_thread::sleep_for(chrono::microseconds{10});
       }
-
-      // And again to test recursion on reads within writes
-      {
-	MT::RWReadLock lock3(mutex);
-      }
-
-      // Make sure it's not inconsistent already (another writer is here)
-      if (n) n_bad_writes++;
-
-      // Set to 'inconsistent' value
-      n = 1;
-      for(volatile int i=0; i<1000; i++)
-	;
-      n = 0;
     }
+  public:
+    WriterThread()
+    {
+      start();
+    }
+  };
 
-    n_writes++;
-    for(volatile int i=0; i<1000; i++)
-      ;
+  {
+    auto readers = vector<ReaderThread>{2};
+    auto writers = vector<WriterThread>{2};
+    this_thread::sleep_for(chrono::seconds{1});
   }
+  EXPECT_GT(reads, 5000);
+  EXPECT_GT(writes, 5000);
+  EXPECT_EQ(0, bad_reads);
+  EXPECT_EQ(0, bad_writes);
 }
 
 //--------------------------------------------------------------------------
 // Main
-int main()
+int main(int argc, char **argv)
 {
-  n=0;
-  n_reads=0;
-  n_writes=0;
-  n_bad_reads = 0;
-  n_bad_writes = 0;
-
-  ReaderThread r1;
-  ReaderThread r2;
-
-  WriterThread w1;
-  WriterThread w2;
-
-  for(;;)
-  {
-    cout << n_writes << " writes, " << n_bad_writes << " inconsistent; "
-	 << n_reads << " reads, " << n_bad_reads << " inconsistent\n";
-    MT::Thread::sleep(1);
-  }
-
-  return 0;  
+  ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-
-
-

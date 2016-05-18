@@ -245,7 +245,7 @@ void ConnectionPool::run_background()
       fill_to_minimum();
     }
 
-    MT::Thread::sleep(BACKGROUND_SLEEP_TIME);
+    this_thread::sleep_for(chrono::seconds{BACKGROUND_SLEEP_TIME});
   }
 }
 

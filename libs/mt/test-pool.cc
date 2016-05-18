@@ -3,71 +3,59 @@
 //
 // Test harness for thread pools
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
+#include <gtest/gtest.h>
 #include "ot-mt.h"
-#include <cstdlib>
-#include <iostream>
 
 using namespace std;
-using namespace ObTools::MT;
+using namespace ObTools;
 
 //--------------------------------------------------------------------------
-// Test thread class
-class TestThread: public ObTools::MT::PoolThread
+// Tests
+TEST(ThreadPoolTest, TestPoolLimit)
 {
-public:
-  int n;
-
-  virtual void run();
-  TestThread(ObTools::MT::PoolReplacer<TestThread>& _rep):
-    PoolThread(_rep) {}
-};
-
-void TestThread::run()
-{
-  int i;
-  for(i=0; i<10; i++)
+  class TestThread: public MT::PoolThread
   {
-    cout << n << ": " << i << endl;
-    sleep(1);
+  public:
+    int n;
+
+    void run() override
+    {
+      for (auto i = 0; i < 10; ++i)
+      {
+        this_thread::sleep_for(chrono::microseconds{10});
+      }
+    }
+
+    TestThread(MT::PoolReplacer<TestThread>& _rep):
+      PoolThread(_rep)
+    {}
+  };
+
+  MT::ThreadPool<TestThread> pool{1, 10};
+
+  for (auto i = 0; i < 20; ++i)
+  {
+    TestThread *t = pool.remove();
+    if (i < 10)
+    {
+      EXPECT_NE(nullptr, t);
+    }
+    else
+    {
+      EXPECT_EQ(nullptr, t);
+      break;
+    }
   }
-  cout << n << " finished" << endl;
 }
 
 //--------------------------------------------------------------------------
 // Main
-
-int main()
+int main(int argc, char **argv)
 {
-  ObTools::MT::ThreadPool<TestThread> pool(1,10);
-
-  // Keep pulling spare threads off the pool and kicking them
-  for(int i=0; i<20; )
-  {
-    TestThread *t = pool.remove();
-    if (t)
-    {
-      t->n = ++i;
-      cout << "Kicking thread " << t->n << endl;
-      t->kick();
-    }
-    else
-    {
-      cout << "No spare threads" << endl;
-      ObTools::MT::Thread::sleep(1);
-    }
-  }
-
-  cout << "Shutting down" << endl;
-  pool.shutdown();
-  cout << "Done" << endl;
-
-  return 0;  
+  ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-
-
-

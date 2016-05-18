@@ -15,9 +15,11 @@
 
 #include <map>
 #include <vector>
-
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
 #include "ot-gen.h"
-#include "ot-mt.h"
 
 namespace ObTools { namespace Action {
 
@@ -62,17 +64,20 @@ public:
   };
 
 private:
-  map<T, vector<Handler *> > handlers;
-  MT::Mutex handlers_mutex;
+  map<T, vector<Handler *>> handlers;
+  mutex handlers_mutex;
 
-  MT::MQueue<Action<T> *> actions;
+  queue<unique_ptr<Action<T>>> actions;
+  mutex queue_mutex;
+  condition_variable queue_condition;
 
-  class ActionTask: public MT::Task
+  class ActionTask
   {
   private:
-    MT::Condition condition;
-    Action<T> *action;
-    Handler *handler;
+    mutex condition_mutex;
+    condition_variable condition;
+    Action<T> *action = nullptr;
+    Handler *handler = nullptr;
 
   public:
     //----------------------------------------------------------------------
@@ -84,18 +89,21 @@ private:
 
     //----------------------------------------------------------------------
     // Run routine
-    virtual void run()
+    void operator()()
     {
-      bool quit(false);
+      auto quit = false;
       while (!quit)
       {
-        condition.wait(true);
+        cout << "a run wait" << endl;
+        unique_lock<mutex> lock{condition_mutex};
+        condition.wait(lock);
 
         quit = !(handler && action);
         if (!quit)
           handler->handle(*action);
 
-        condition.signal(false);
+        cout << "a run done" << endl;
+        condition.notify_one();
       }
     }
 
@@ -103,51 +111,57 @@ private:
     // Set the action to work upon
     void set_action(Action<T> *new_action, Handler *new_handler)
     {
+      unique_lock<mutex> lock{condition_mutex};
       action = new_action;
       handler = new_handler;
-      condition.signal(true);
+      cout << "a set" << endl;
+      condition.notify_one();
     }
 
     //---------------------------------------------------------------------
     // Wait on action being used
     void wait()
     {
-      condition.wait(false);
+      cout << "a wait" << endl;
+      unique_lock<mutex> lock{condition_mutex};
+      condition.wait(lock);
     }
   };
 
-  vector<shared_ptr<MT::TaskThread<ActionTask> > > threads;
+  vector<thread> threads;
+  vector<unique_ptr<ActionTask>> tasks;
 
-  class WorkerTask: public MT::Task
+  class WorkerTask
   {
   private:
     Manager& manager;
+    bool quit;
 
   public:
     //----------------------------------------------------------------------
     // Constructor
     WorkerTask(Manager& _manager):
-      manager(_manager)
+      manager(_manager), quit(false)
     {
     }
 
     //----------------------------------------------------------------------
     // Run routine
-    virtual void run()
+    void operator()()
     {
-      while (is_running() && manager.next_action())
+      while (!quit && manager.next_action())
         ;
-
-      // Trigger threads shut down
-      for (auto it = manager.threads.begin(); it != manager.threads.end(); ++it)
-      {
-        (**it)->set_action(0, 0);
-        (**it)->wait();
-      }
     }
-  };
 
-  MT::TaskThread<WorkerTask> worker_thread;
+    //----------------------------------------------------------------------
+    // Signal task to stop
+    void stop()
+    {
+      quit = true;
+    }
+  } worker_task;
+
+  thread worker_thread;
 
   friend class WorkerThread;
 
@@ -156,14 +170,18 @@ private:
   // Returns whether more to process
   bool next_action()
   {
-    auto action = unique_ptr<Action<T>>{actions.wait()};
+    unique_lock<mutex> lock{queue_mutex};
+    queue_condition.wait(lock);
 
-    if (!action.get())
+    auto& action = actions.front();
+    if (!action)
       return false;
 
-    vector<shared_ptr<MT::TaskThread<ActionTask>>> active;
+    cout << "action time: " << action.get() << endl;
+
+    vector<ActionTask *> active;
     {
-      MT::Lock lock{handlers_mutex};
+      unique_lock<mutex> lock{handlers_mutex};
       auto h = handlers.find(action->get_type());
       if (h != handlers.end())
       {
@@ -172,21 +190,21 @@ private:
         {
           if (i >= threads.size())
           {
-            const auto p = make_shared<MT::TaskThread<ActionTask>>(
-                new ActionTask{});
-            threads.push_back(p);
+            tasks.push_back(make_unique<ActionTask>());
+            threads.push_back(thread{ref(*tasks.back())});
           }
-          (*threads[i])->set_action(action.get(), *it);
-          active.push_back(threads[i]);
+          tasks[i]->set_action(action.get(), *it);
+          active.push_back(tasks[i].get());
         }
       }
     }
 
     // Wait for all active threads to finish
-    for (auto it = active.begin(); it != active.end(); ++it)
+    for (auto& it : active)
     {
-      (**it)->wait();
+      it->wait();
     }
+    cout << "done action time" << endl;
 
     return true;
   }
@@ -195,7 +213,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Manager():
-    worker_thread(new WorkerTask(*this))
+    worker_task(*this), worker_thread(ref(worker_task))
   {
   }
 
@@ -203,22 +221,24 @@ public:
   // Register a handler
   void add_handler(T type, Handler &handler)
   {
-    MT::Lock lock(handlers_mutex);
+    unique_lock<mutex> lock{handlers_mutex};
     handlers[type].push_back(&handler);
   }
 
   //------------------------------------------------------------------------
   // Queue an action
-  void queue(Action<T> *action)
+  void push(Action<T> *action)
   {
-    actions.send(action);
+    unique_lock<mutex> lock{queue_mutex};
+    actions.push(unique_ptr<Action<T>>(action));
+    queue_condition.notify_one();
   }
 
   //------------------------------------------------------------------------
   // Get configuration
   map<T, vector<Handler *> > get_config()
   {
-    MT::Lock lock(handlers_mutex);
+    unique_lock<mutex> lock{queue_mutex};
     return handlers;
   }
 
@@ -227,7 +247,20 @@ public:
   virtual ~Manager()
   {
     // Wake up thread with empty action
-    queue(0);
+    cout << "push null" << endl;
+    push(nullptr);
+
+    // Trigger threads shut down
+    for (auto& it : tasks)
+    {
+      it->set_action(0, 0);
+      it->wait();
+    }
+
+    for (auto& t : threads)
+      t.join();
+    worker_task.stop();
+    worker_thread.join();
   }
 };
 

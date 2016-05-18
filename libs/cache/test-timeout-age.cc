@@ -20,8 +20,8 @@ int main()
   AgeTimeoutCache<string, string> cache(5);
 
   cache.add("foo", "FOO");
-  cache.dump(cout, true); 
-  MT::Thread::sleep(2);
+  cache.dump(cout, true);
+  this_thread::sleep_for(chrono::seconds{2});
 
   cache.add("bar", "BAR");
   cache.dump(cout, true);
@@ -31,12 +31,8 @@ int main()
     cache.tidy();
     cache.touch("foo");
     cache.dump(cout, true);
-    MT::Thread::sleep(1);
+    this_thread::sleep_for(chrono::seconds{1});
   }
 
-  return 0;  
+  return 0;
 }
-
-
-
-

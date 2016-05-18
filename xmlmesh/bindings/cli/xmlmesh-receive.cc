@@ -351,7 +351,7 @@ int main(int argc, char **argv)
   } while (!oneshot);
 
   // Sleep to ensure messages sent
-  MT::Thread::sleep(1);
+  this_thread::sleep_for(chrono::seconds{1});
 
   return 0;
 }

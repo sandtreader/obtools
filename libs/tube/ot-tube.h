@@ -141,11 +141,11 @@ protected:
   MT::Mutex mutex;             // Global client mutex used for socket
                                // creation and restart
   MT::Thread *send_thread;
-  MT::MQueue<Message> send_q;
-  int max_send_queue;          // Maximum send queue before we block send()
+  MT::Queue<Message> send_q;
+  unsigned max_send_queue;     // Maximum send queue before we block send()
 
   MT::Thread *receive_thread;
-  MT::MQueue<Message> receive_q;
+  MT::Queue<Message> receive_q;
 
   bool alive;                  // Not being killed
 
@@ -403,7 +403,7 @@ struct ClientSession
   bool alive;
 
   // Thread and queue stuff
-  MT::MQueue<Message> send_q;  
+  MT::Queue<Message> send_q;  
 
   // Constructor
   // Adds this session to the given map - destructor removes it again
@@ -471,8 +471,8 @@ private:
   virtual bool handle_message(const ClientMessage& msg)=0;
 
 protected:
-  SessionMap client_sessions;        // Map of sessions (used by BiSyncServer)
-  int max_send_queue;          // Maximum send queue before we block send()
+  SessionMap client_sessions;   // Map of sessions (used by BiSyncServer)
+  unsigned max_send_queue;      // Maximum send queue before we block send()
 
 public:
   static const int DEFAULT_BACKLOG           = 5;

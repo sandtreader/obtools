@@ -85,11 +85,11 @@ int main(int argc, char **argv)
   TestServer server(local_ep);
   Net::TCPServerThread server_thread(server);
 
-    MT::Thread::sleep(1);
+    this_thread::sleep_for(chrono::seconds{1});
 
   for(;;)
   {
-    MT::Thread::sleep(1);
+    this_thread::sleep_for(chrono::seconds{1});
 #if 0
     cout << "Starting outgoing connection to " << peer_ep << endl;
 

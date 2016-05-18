@@ -43,7 +43,7 @@ OT-LIBS = access:libs/access:text,xml,ssl	\
 	  log:libs/log:text,time,mt 		\
 	  misc:libs/misc:xml,chan		\
 	  msg:libs/msg:xml,init,ssl:NOLIB	\
-	  mt:libs/mt       			\
+	  mt:libs/mt:gen       			\
 	  net:libs/net:mt     			\
           netlink:libs/netlink                  \
 	  regen:libs/regen 			\

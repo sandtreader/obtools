@@ -15,7 +15,7 @@
 #define DEFAULT_MAX_SEND_QUEUE 1024
 
 // Time to wait (us) if send queue full
-#define SEND_BUSY_WAIT_TIME 10000
+#define SEND_BUSY_WAIT_TIME 10
 
 namespace ObTools { namespace Tube {
 
@@ -191,10 +191,10 @@ void Server::process(SSL::TCPSocket& socket,
     while (!!send_thread)
     {
       session.send_q.send(Message());  // Wake up thread with bogus message
-      MT::Thread::usleep(50000);
+      this_thread::sleep_for(chrono::milliseconds{50});
       if (!send_thread) break;
       log.error << "Send thread won't die - waiting\n";
-      MT::Thread::usleep(250000);
+      this_thread::sleep_for(chrono::milliseconds{250});
     }
   }
   else
@@ -269,7 +269,7 @@ bool Server::send(ClientMessage& msg)
     ClientSession *cs = p->second;
 
     while (cs->send_q.waiting() > max_send_queue) // Zero must work
-      MT::Thread::usleep(SEND_BUSY_WAIT_TIME);
+      this_thread::sleep_for(chrono::milliseconds{SEND_BUSY_WAIT_TIME});
 
     cs->send_q.send(msg.msg);
     return true;  

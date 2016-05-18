@@ -90,7 +90,7 @@ private:
 
   // Map of active requests/subscriptions based on source path, containing
   // a message queue for that client
-  typedef MT::MQueue<string> ResponseQueue;
+  typedef MT::Queue<string> ResponseQueue;
   typedef shared_ptr<ResponseQueue> ResponseQueuePtr;
 
   class ClientRequestMap:

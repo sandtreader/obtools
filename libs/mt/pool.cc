@@ -3,61 +3,61 @@
 //
 // Thread pool implementation (mostly in templates in ot-mt.h, actually)
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #include "ot-mt.h"
+#include "ot-gen.h"
 
 namespace ObTools { namespace MT {
 
 //--------------------------------------------------------------------------
-// C thread start function
+// Start
 // Modified version for pool threads which sleep and return - q.v. thread.cc
 // Takes 'self' as argument and bounces on to (virtual) run()
-static void *_pool_start(void *arg)
+bool PoolThread::start()
 {
-  PoolThread *self = *static_cast<PoolThread **>(arg);
+  running = true;
+  mythread = make_unique<thread>([this](){
+    while (true)
+    {
+      // Wait for inuse CV
+      this->in_use.wait();
 
-  for(;;)
-  {
-    // Wait for inuse CV
-    self->in_use.wait();
+      // Check for die request
+      if (this->dying)
+        break;
 
-    // Check for die request
-    if (self->dying) break;
+      // Call virtual run() in subclass
+      this->run();
 
-    // Call virtual run() in subclass
-    self->run();
+      if (this->dying)
+        break;
 
-    if (self->dying) break;
+      // Make myself out of use again
+      this->in_use.clear();
 
-    // Make myself out of use again
-    self->in_use.clear();
-
-    // Return to pool
-    self->replacer.replace(self);
-  }
-
-  // Dying
-  self->running = false;
-  pthread_exit(NULL);
-  return NULL;
+      // Return to pool
+      this->replacer.replace(this);
+    }
+    this->running = false;
+  });
+  if (!mythread)
+    running = false;
+  return running;
 }
 
 //--------------------------------------------------------------------------
 // Constructor - automatically starts thread in !in_use state
-PoolThread::PoolThread(IPoolReplacer& _replacer): 
-  Thread(), replacer(_replacer), in_use(false), dying(false) 
+PoolThread::PoolThread(IPoolReplacer& _replacer):
+  replacer{_replacer}, in_use{false}, dying{false}
 {
-  self = this;
-  pthread_create(&thread, NULL, _pool_start, &self);
-  valid = true;
-  running = true;
+  start();
 }
 
 //--------------------------------------------------------------------------
-// Kick thread into life  
+// Kick thread into life
 void PoolThread::kick()
 {
   in_use.signal();  // Tell myself to start
@@ -67,20 +67,16 @@ void PoolThread::kick()
 // Request it to die.  If 'wait' is set, waits for thread to exit
 void PoolThread::die(bool wait)
 {
-  if (valid && running)
+  if (mythread && running)
   {
     dying = true;
     in_use.signal();  // Release from wait
     if (wait)
     {
-      if (!joined) pthread_join(thread, NULL);  // Wait for it to die
-      joined = true;
+      if (mythread->joinable())
+        mythread->join();
     }
   }
 }
 
-
 }} // namespaces
-
-
-

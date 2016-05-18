@@ -108,7 +108,8 @@ void Clock::TimerTask::run()
 {
   while (is_running())
   {
-    MT::Thread::nanosleep(resolution.seconds() * 1000000000);
+    this_thread::sleep_for(
+        chrono::milliseconds{static_cast<int>(1000 * resolution.seconds())});
     MT::Lock lock(mutex);
     if (alarm_time.valid() && alarm_time < Time::Stamp::now())
       alarm_time = clock.trigger_alarm(alarm_time);

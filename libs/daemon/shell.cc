@@ -82,7 +82,7 @@ int Shell::run()
       return result;
     int wait = application.tick_wait();
     if (wait)
-      MT::Thread::usleep(wait);
+      this_thread::sleep_for(chrono::microseconds{wait});
   }
 
   return 0;
@@ -187,7 +187,7 @@ int Shell::start(int argc, char **argv)
       if (!first)
       {
 	log.detail << "Waiting for " << sleep_time << "s\n";
-	MT::Thread::sleep(sleep_time);
+        this_thread::sleep_for(chrono::seconds(sleep_time));
 
 	// Exponential backoff, up to a max
 	sleep_time *= 2;

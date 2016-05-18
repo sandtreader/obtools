@@ -2,41 +2,44 @@
 // ObTools::MT: ot-mt.h
 //
 // Public definitions for ObTools::MT
-// C++ wrapping of pthreads and useful multithreading bits - queues, etc.
+// C++ wrapping of standard thread library and useful multithreading bits -
+// queues, etc.
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
 #ifndef __OBTOOLS_MT_H
 #define __OBTOOLS_MT_H
 
-#include <pthread.h>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <queue>
 #include <list>
 #include <memory>
 #include <signal.h>
 #include <stdint.h>
+#include <ot-gen.h>
 
 namespace ObTools { namespace MT {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
 
+using Mutex = mutex;
+using RMutex = recursive_mutex;
+using Lock = unique_lock<mutex>;
+using RLock = unique_lock<recursive_mutex>;
+using BasicCondVar = condition_variable;
+
 //==========================================================================
 // Abstract Thread class
 class Thread
 {
 public:
-  bool valid;            // True if thread created and thread handle valid
-  bool running;          // True if thread still running
-  bool joined;           // True if thread joined or detached
-  pthread_t thread;      // thread handle - not necessarily an integer type!
-  Thread *self;          // Used as start argument; must outlive thread
-
-  //--------------------------------------------------------------------------
-  // Default Constructor - does nothing
-  Thread(): valid(false), running(false), joined(false) {}
+  bool running = false;         // True if thread still running
+  unique_ptr<thread> mythread;  // thread
 
   //--------------------------------------------------------------------------
   // Virtual run routine - called once thread has started by start()
@@ -47,23 +50,29 @@ public:
   // Start - note separate from default constructor to allow you time to create
   // parameters in subclass constructors
   // Returns whether successful
-  bool start();
+  virtual bool start();
 
   //--------------------------------------------------------------------------
   // Set priority - higher numbers have higher priority
   // realtime sets SCHED_RR if set
   // Whether successful (may fail if realtime requested when not root)
-  bool set_priority(int priority, bool realtime=false);
+  bool set_priority(int priority, bool realtime = false);
 
   //--------------------------------------------------------------------------
   // Join - caller waits for this thread to end
   void join()
-  { if (valid && !joined) pthread_join(thread, NULL); joined=true; }
+  {
+    if (mythread && mythread->joinable())
+      mythread->join();
+  }
 
   //--------------------------------------------------------------------------
   // Detach - let it die silently when it ends, we aren't going to join with it
   void detach()
-  { if (valid && !joined) pthread_detach(thread); joined=true; }
+  {
+    if (mythread)
+      mythread->detach();
+  }
 
   //--------------------------------------------------------------------------
   // Cancel - ask it to stop
@@ -72,158 +81,18 @@ public:
   //------------------------------------------------------------------------
   // Kill a thread (or send another signal)
   void kill(int signal = SIGTERM)
-  { if (valid && !joined) pthread_kill(thread, signal); }
-
-  //--------------------------------------------------------------------------
-  // Allow Cancel - allow it to stop if asked
-  void allow_cancel() { pthread_testcancel(); }
+  {
+    if (mythread)
+      pthread_kill(mythread->native_handle(), signal);
+  }
 
   //--------------------------------------------------------------------------
   // Test if it has stopped
-  bool operator!() const { return !valid || !running; }
+  bool operator!() const { return !mythread || !running; }
 
   //--------------------------------------------------------------------------
   // Destructor - ask it to cancel if started
   virtual ~Thread();
-
-  //--------------------------------------------------------------------------
-  // Portable sleep()/usleep() functions - this is a convenient place to
-  // put these, since thread implementations often need to do this
-
-  // Sleep for given number of seconds
-  static void sleep(int secs);
-
-  // Sleep for given number of microseconds
-  static void usleep(int usecs);
-
-  // Sleep for given number of nanoseconds
-  static void nanosleep(uint64_t usecs);
-};
-
-//==========================================================================
-// Mutex class
-// Note:  These mutexes are NOT recursive - PTHREAD_MUTEX_RECURSIVE is not
-// portable.  Use RMutex if you need to lock it multiple times within
-// the same thread
-class Mutex
-{
-private:
-  pthread_mutex_t mutex;
-  friend class BasicCondVar;
-  friend class Condition;   // So they can use my mutex for cond_wait
-
-  // Block copying
-  Mutex(const Mutex&) {}
-  Mutex& operator=(const Mutex&) { return *this; }
-
-public:
-  //--------------------------------------------------------------------------
-  // Default Constructor - initialises mutex
-  Mutex() { pthread_mutex_init(&mutex, NULL); }
-
-  //--------------------------------------------------------------------------
-  // Destructor - destroys mutex
-  ~Mutex() { pthread_mutex_destroy(&mutex); }
-
-  //--------------------------------------------------------------------------
-  // Lock the mutex, block if locked
-  void lock() { pthread_mutex_lock(&mutex); }
-
-  //--------------------------------------------------------------------------
-  // Try to lock the mutex, return false if it fails
-  bool trylock() { return pthread_mutex_trylock(&mutex)==0; }
-
-  //--------------------------------------------------------------------------
-  // Unlock the mutex
-  void unlock() { pthread_mutex_unlock(&mutex); }
-};
-
-//==========================================================================
-// Lock class - use to hold mutexes while in scope, thereby giving
-// correct exception behaviour
-// e.g.
-// {
-//   Lock lock(mutex);
-//     ... do critical section stuff
-// } // lock goes out of scope and unlocks automatically
-
-class Lock
-{
-private:
-  Mutex& mutex;
-
-  //--------------------------------------------------------------------------
-  // Block copying and assignment;  that way lies insanity
-  // These are here only to be private, and hence inaccessible
-  // Initialisation of mutex is just to keep the compiler happy
-  Lock(const Lock& x): mutex(x.mutex) { }
-  void operator=(const Lock&) { }
-
-public:
-  //--------------------------------------------------------------------------
-  // Constructor - locks mutex
-  Lock(Mutex &m): mutex(m) { mutex.lock(); }
-
-  //--------------------------------------------------------------------------
-  // Destructor - unlocks mutex
-  ~Lock() { mutex.unlock(); }
-};
-
-//==========================================================================
-// BasicCondVar class - basic condition variable like pthread_condvar
-// Uses caller's mutex to allow mutex to extend beyond the wait() call
-
-// NB All wait(), signal() and broadcast() calls must be made with
-// mutex locked
-
-// Cancellation handler to unlock a mutex
-extern "C" void _unlock_mutex(void *m);
-
-class BasicCondVar
-{
-private:
-  pthread_cond_t cv;
-
-public:
-  //--------------------------------------------------------------------------
-  // Default Constructor - initialises condvar
-  BasicCondVar()
-  {
-    pthread_cond_init(&cv, NULL);
-  }
-
-  //--------------------------------------------------------------------------
-  // Destructor - destroys condvar
-  ~BasicCondVar()
-  {
-    pthread_cond_destroy(&cv);
-  }
-
-  //--------------------------------------------------------------------------
-  // Wait on the condvar using caller's mutex
-  // Note mutex should already be locked, will be unlocked during wait
-  // and then relocked again
-  void wait(Mutex& mutex)
-  {
-    // Handle unlock of mutex should cond_wait be cancelled
-    pthread_cleanup_push(_unlock_mutex, &mutex.mutex);
-    pthread_cond_wait(&cv, &mutex.mutex);
-    pthread_cleanup_pop(0);
-  }
-
-  //--------------------------------------------------------------------------
-  // Signal the condition
-  void signal()
-  {
-    pthread_cond_signal(&cv);
-  }
-
-  //--------------------------------------------------------------------------
-  // Broadcast the condition to multiple waiters
-  void broadcast()
-  {
-    pthread_cond_broadcast(&cv);
-  }
 };
 
 //==========================================================================
@@ -233,62 +102,47 @@ class Condition
 {
 private:
   volatile bool flag;
-  pthread_cond_t cv;
-  Mutex mutex;
+  condition_variable cv;
+  mutex m;
 
 public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises condvar and mutex
-  Condition(bool initial=false): flag(initial)
-  {
-    pthread_cond_init(&cv, NULL);
-  }
-
-  //--------------------------------------------------------------------------
-  // Destructor - destroys condvar and mutex
-  ~Condition()
-  {
-    pthread_cond_destroy(&cv);
-  }
+  Condition(bool initial = false):
+    flag{initial}
+  {}
 
   //--------------------------------------------------------------------------
   // Wait on the condition to become as desired
   void wait(bool desired=true)
   {
-    Lock lock(mutex);       // Use locks to ensure exception safety
-
-    // But also, because C++ exceptions and thread cancellation isn't
-    // integrated yet (grr), make sure that if the cond_wait is cancelled
-    // the mutex gets unlocked again
-    pthread_cleanup_push(_unlock_mutex, &mutex.mutex);
+    unique_lock<mutex> lock{m};       // Use locks to ensure exception safety
 
     while (flag!=desired)
-      pthread_cond_wait(&cv, &mutex.mutex);
-
-    pthread_cleanup_pop(0);
+      cv.wait(lock);
   }
 
   //--------------------------------------------------------------------------
   // Signal the condition to become as stated
-  void signal(bool value=true)
+  void signal(bool value = true)
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock{m};
     if (flag != value)
     {
       flag = value;
-      pthread_cond_signal(&cv);
+      cv.notify_one();
     }
   }
 
   //--------------------------------------------------------------------------
   // Broadcast the condition to become as stated (multiple waiters)
-  void broadcast(bool value=true)
+  void broadcast(bool value = true)
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock{m};
     if (flag != value)
     {
       flag = value;
-      pthread_cond_broadcast(&cv);
+      cv.notify_all();
     }
   }
 
@@ -298,75 +152,6 @@ public:
   // to implement 'rising-edge-only' synchronisation.  If you want both edges
   // synchronised, manually wait/signal/broadcast for 'false' too
   void clear() { flag = false; }
-};
-
-//==========================================================================
-// Recursive Mutex class
-// You can use these recursively - i.e. hold them locked in one function
-// while you call another one which locks it again
-class RMutex
-{
-private:
-  Mutex mutex;
-  Condition available;
-  volatile int count;
-  volatile bool owned;
-  pthread_t owner;
-
-public:
-  //--------------------------------------------------------------------------
-  // Default Constructor - initialises mutex
-  RMutex(): mutex(), available(true), count(0), owned(false) {}
-
-  //--------------------------------------------------------------------------
-  // Lock the mutex, block if locked
-  void lock()
-  {
-    pthread_t self = pthread_self();
-    for(;;) // May loop if we lose the race after wait()
-    {
-      {
-        Lock lock(mutex);
-        bool am_owner = (owned && pthread_equal(owner, self));
-        if (!count || am_owner)
-        {
-          ++count;
-          owned=true;
-          owner=self;
-          available.clear();
-          return;
-        }
-      }
-      available.wait();
-    }
-  }
-
-  //--------------------------------------------------------------------------
-  // Unlock the mutex
-  void unlock()
-  {
-    Lock lock(mutex);
-
-    if (!--count)
-    {
-      owned = false;
-      available.signal();    // Wake up waiters
-    }
-  }
-};
-
-//==========================================================================
-// Recursive Lock class - as Lock, but usable recursively (see Lock for detail)
-class RLock
-{
-private:
-  RMutex& mutex;
-  RLock(const RLock& x): mutex(x.mutex) { }
-  void operator=(const RLock&) { }
-
-public:
-  RLock(RMutex &m): mutex(m) { mutex.lock(); }
-  ~RLock() { mutex.unlock(); }
 };
 
 //==========================================================================
@@ -388,38 +173,36 @@ class RWMutex
 {
 private:
   // Internal mutex, only locked transiently
-  Mutex mutex;
+  mutex mymutex;
 
   // Count and condition for readers
-  volatile int readers_active;
-  BasicCondVar no_readers;
+  volatile unsigned readers_active;
+  condition_variable no_readers;
 
   // Count and condition for writers
-  volatile int writers_waiting;
+  volatile unsigned writers_waiting;
   volatile bool writer_active;
-  BasicCondVar no_writer;
+  condition_variable no_writer;
 
   // Support for recursive locks
-  volatile int count;
-  pthread_t writer;
+  volatile unsigned count;
+  thread::id writer;
 
 public:
   //--------------------------------------------------------------------------
   // Default Constructor - initialises mutex
   RWMutex():
-    mutex(), readers_active(0), no_readers(),
-    writers_waiting(0), writer_active(false), no_writer(),
-    count(0)
-    {}
+    readers_active{0}, writers_waiting{0}, writer_active{false}
+  {}
 
   //--------------------------------------------------------------------------
   // Lock the mutex for read
-  void lock_reader() 
+  void lock_reader()
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock{mymutex};
 
     // Check if we already own this as a writer
-    if (!writer_active || !pthread_equal(writer, pthread_self()))
+    if (!writer_active || writer != this_thread::get_id())
     {
       // If I'm the first reader in, wait until there are no writers,
       // either queued or active - after that, my presence will protect
@@ -428,11 +211,11 @@ public:
       // writer has started waiting for the lock will deadlock with it
       if (!readers_active)
       {
-	while (writers_waiting || writer_active) no_writer.wait(mutex);
+        while (writers_waiting || writer_active) no_writer.wait(lock);
       }
 
       // Claim it and block writers
-      readers_active++;
+      ++readers_active;
     }
   }
 
@@ -440,13 +223,13 @@ public:
   // Unlock the mutex for read
   void unlock_reader()
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock{mymutex};
 
     // Check if we already own this as a writer
-    if (!writer_active || !pthread_equal(writer, pthread_self()))
+    if (!writer_active || writer != this_thread::get_id())
     {
       // Wake up all writers so they can proceed through the no-readers gate
-      if (!--readers_active) no_readers.broadcast();
+      if (!--readers_active) no_readers.notify_all();
     }
   }
 
@@ -454,11 +237,11 @@ public:
   // Lock the mutex for write
   void lock_writer()
   {
-    Lock lock(mutex);
-    pthread_t self = pthread_self();
+    unique_lock<mutex> lock{mymutex};
+    const auto self = this_thread::get_id();
 
     // Check if we already own this
-    if (writer_active && pthread_equal(writer, self))
+    if (writer_active && writer == self)
     {
       // Accumulate another one, but don't lock again
       count++;
@@ -469,10 +252,10 @@ public:
       writers_waiting++;
 
       // Wait until there are no readers
-      while (readers_active) no_readers.wait(mutex);
+      while (readers_active) no_readers.wait(lock);
 
       // Wait until there are no other writers using it
-      while (writer_active) no_writer.wait(mutex);
+      while (writer_active) no_writer.wait(lock);
 
       // We're not waiting any more, we're active
       writers_waiting--;
@@ -488,7 +271,7 @@ public:
   // Unlock the mutex for write
   void unlock_writer()
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock{mymutex};
 
     // Check we've bottomed out any recursion
     if (!--count)
@@ -497,7 +280,7 @@ public:
 
       // Wake up all writers and readers - note reader may be ahead of a
       // writer in the queue, and we must ensure the writer gets woken up
-      no_writer.broadcast();
+      no_writer.notify_all();
     }
   }
 };
@@ -508,11 +291,11 @@ class RWReadLock
 {
 private:
   RWMutex& mutex;
-  RWReadLock(const RWReadLock& x): mutex(x.mutex) { }
-  void operator=(const RWReadLock&) { }
+  RWReadLock(const RWReadLock& x): mutex{x.mutex} { }
+  void operator=(const RWReadLock&) = delete;
 
 public:
-  RWReadLock(RWMutex &m): mutex(m) { mutex.lock_reader(); }
+  RWReadLock(RWMutex &m): mutex{m} { mutex.lock_reader(); }
   ~RWReadLock() { mutex.unlock_reader(); }
 };
 
@@ -522,30 +305,24 @@ class RWWriteLock
 {
 private:
   RWMutex& mutex;
-  RWWriteLock(const RWWriteLock& x): mutex(x.mutex) { }
-  void operator=(const RWWriteLock&) { }
+  RWWriteLock(const RWWriteLock& x): mutex{x.mutex} { }
+  void operator=(const RWWriteLock&) = delete;
 
 public:
-  RWWriteLock(RWMutex &m): mutex(m) { mutex.lock_writer(); }
+  RWWriteLock(RWMutex &m): mutex{m} { mutex.lock_writer(); }
   ~RWWriteLock() { mutex.unlock_writer(); }
 };
 
 //==========================================================================
 // Queue template - send any message between threads safety
-// !!! NOTE:  Deprecated, use only for single-reader
-// With multiple readers and messages being sent in bursts, the messages
-// are likely to be serialised on one thread, because the Condition is not
-// signalled after the first time, and the other threads will not get
-// woken from their condition wait.
-
-// For all new code and multiple-reader scenarios, use MQueue below
-// Likely to be replaced and typedef'ed to MQueue at next major release
+// Uses the non-emptiness of the queue as the condition variable, and
+// signals on every send, to guarantee any waiters are woken
 template<class T> class Queue
 {
 private:
   queue<T> q;
-  Mutex mutex;
-  Condition available;
+  mutex mymutex;
+  condition_variable available;
 
 public:
   //--------------------------------------------------------------------------
@@ -554,80 +331,28 @@ public:
 
   //--------------------------------------------------------------------------
   // Get current length
-  int waiting() { Lock lock(mutex); return q.size(); }
-
-  //--------------------------------------------------------------------------
-  // Send a message (never blocks)
-  void send(T msg)
+  typename queue<T>::size_type waiting()
   {
-    Lock lock(mutex);
-    q.push(msg);
-    available.signal();
+    unique_lock<mutex> lock{mymutex};
+    return q.size();
   }
-
-  //--------------------------------------------------------------------------
-  // See if any message is available before potentially blocking on wait()
-  bool poll() { Lock lock(mutex); return (!q.empty()); }
-
-  //--------------------------------------------------------------------------
-  // Wait to receive a message (blocking)
-  T wait()
-  {
-    // Can loop if someone else gets it
-    for(;;)
-    {
-      // Wait for availability signal
-      available.wait();
-
-      // May be something if we get there first - lock it and check again
-      Lock lock(mutex);
-      if (!q.empty()) 
-      {
-	T msg = q.front();
-	q.pop();
-
-	// Clear flag if now empty
-	if (q.empty()) available.clear();
-
-	return msg;
-      }
-    }
-  }
-};
-
-//==========================================================================
-// Queue template - send any message between threads safety
-// Simpler and works for multiple readers - use in all new code
-// Uses the non-emptiness of the queue as the condition variable, and
-// signals on every send, to guarantee any waiters are woken
-template<class T> class MQueue
-{
-private:
-  queue<T> q;
-  Mutex mutex;
-  BasicCondVar available;
-
-public:
-  //--------------------------------------------------------------------------
-  // Constructor
-  MQueue() {}
-
-  //--------------------------------------------------------------------------
-  // Get current length
-  int waiting() { Lock lock(mutex); return q.size(); }
 
   //--------------------------------------------------------------------------
   // Send a message (never blocks)
   void send(const T msg)
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock{mymutex};
     q.push(msg);
-    available.signal();
+    available.notify_one();
   }
 
   //--------------------------------------------------------------------------
   // See if any message is available before potentially blocking on wait()
-  bool poll() { Lock lock(mutex); return (!q.empty()); }
+  bool poll()
+  {
+    unique_lock<mutex> lock{mymutex};
+    return (!q.empty());
+  }
 
   //--------------------------------------------------------------------------
   // Wait to receive a message (blocking)
@@ -636,34 +361,43 @@ public:
     // Can loop if someone else gets it
     for(;;)
     {
-      Lock lock(mutex);
+      unique_lock<mutex> lock{mymutex};
 
       // If nothing there, wait for availability signal
-      if (q.empty()) available.wait(mutex);
+      if (q.empty())
+        available.wait(lock);
 
       // Check again in case someone else got there first
       if (!q.empty())
       {
-	T msg = q.front();
-	q.pop();
+        T msg = q.front();
+        q.pop();
 
-	return msg;
+        return msg;
       }
     }
   }
 
   //--------------------------------------------------------------------------
   // Get count of messages left in queue
-  int count() { Lock lock(mutex); return q.size(); }
+  typename queue<T>::size_type count()
+  {
+    unique_lock<mutex> lock{mymutex};
+    return q.size();
+  }
 
   //--------------------------------------------------------------------------
   // Flush the queue
-  void flush() { Lock lock(mutex); q = queue<T>(); }
+  void flush()
+  {
+    unique_lock<mutex> lock{mymutex};
+    q = queue<T>();
+  }
 };
 
 //==========================================================================
 // Data queue class (dqueue.cc)
-// Specific MQueue for data blocks, with read/write support
+// Specific Queue for data blocks, with read/write support
 // Provides a generic cross-thread data buffer with blocking on the read
 // side - see also Channel::DataQueueReader/Writer
 struct DataBlock
@@ -671,14 +405,14 @@ struct DataBlock
   typedef unsigned char data_t;
   typedef unsigned long size_t;
 
-  data_t *data;        // 0 = EOF marker
+  data_t *data;        // nullptr = EOF marker
   size_t length;
-  DataBlock(): data(0), length(0) {}
+  DataBlock(): data{nullptr}, length{0} {}
   DataBlock(data_t *_data, size_t _length):
     data(_data), length(_length) {}
 };
 
-class DataQueue: public MQueue<DataBlock>
+class DataQueue: public Queue<DataBlock>
 {
   DataBlock working_block;
   DataBlock::size_t working_block_used;
@@ -687,7 +421,7 @@ class DataQueue: public MQueue<DataBlock>
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  DataQueue(): MQueue<DataBlock>(), working_block_used(0), eof(false) {}
+  DataQueue(): working_block_used{0}, eof{false} {}
 
   //-------------------------------------------------------------------------
   // Write a block to the queue
@@ -704,7 +438,7 @@ public:
   // If data is 0, just skips it
   // Returns amount of data read
   DataBlock::size_t read(DataBlock::data_t *data, DataBlock::size_t length,
-			 bool block = true);
+                         bool block = true);
 
   //--------------------------------------------------------------------------
   // Destructor
@@ -723,7 +457,7 @@ class PoolThread;                    //forward
 class IPoolReplacer
 {
 public:
-  virtual void replace(PoolThread *t)=0;
+  virtual void replace(PoolThread *t) = 0;
   virtual ~IPoolReplacer() {}  // Keeps compiler happy
 };
 
@@ -734,17 +468,21 @@ public:
   Condition in_use;
   bool dying;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor - automatically starts thread in !in_use state
   PoolThread(IPoolReplacer& _replacer);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
+  // Start - overriden for pooling
+  bool start() override;
+
+  //------------------------------------------------------------------------
   // Kick thread after being given parameters (members of subclasses)
   void kick();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Request it to die.  If 'wait' is set, waits for thread to exit
-  virtual void die(bool wait=false);
+  virtual void die(bool wait = false);
 };
 
 //==========================================================================
@@ -767,7 +505,7 @@ public:
 template<class T> class ThreadPool
 {
 private:
-  Mutex mutex;
+  mutex mymutex;
   unsigned int min_spares;
   unsigned int max_threads;
   bool realtime;
@@ -779,10 +517,11 @@ private:
   // Add another spare thread to the pool
   void add_spare()
   {
-    T *t = new T(replacer);
+    auto t = new T(replacer);
     // Set realtime if requested
-    if (realtime) t->set_priority(10, true);
-    spares.push_back(t);
+    if (realtime)
+      t->set_priority(10, true);
+    spares.push_back(move(t));
   }
 
   // Fill pool to provide 'min' spares, but not more than 'max' in all
@@ -791,7 +530,7 @@ private:
   void fill()
   {
     while (spares.size() < (min_spares?min_spares:1)
-	   && (!max_threads || spares.size()+actives.size() < max_threads))
+           && (!max_threads || spares.size()+actives.size() < max_threads))
       add_spare();
   }
 
@@ -799,16 +538,19 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   // min-max is range of number of threads the pool will keep alive
-  ThreadPool(unsigned int min=1, unsigned int max=10, bool _realtime=false):
-    min_spares(min), max_threads(max), realtime(_realtime),
-    replacer(*this), shutting_down(false)
-  { fill(); }
+  ThreadPool(unsigned int _min_spares = 1, unsigned int _max_threads = 10,
+             bool _realtime = false):
+    min_spares{_min_spares}, max_threads{_max_threads}, realtime{_realtime},
+    replacer{*this}, shutting_down{false}
+  {
+    fill();
+  }
 
   //--------------------------------------------------------------------------
   // Check if any threads available
   bool available()
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock(mymutex);
     return !spares.empty();
   }
 
@@ -816,25 +558,31 @@ public:
   // Check if any threads active
   bool active()
   {
-    Lock lock(mutex);
+    unique_lock<mutex> lock(mymutex);
     return !actives.empty();
   }
 
   //--------------------------------------------------------------------------
   // Get active threads
-  list<T *>& get_actives() { return actives; }
+  list<T *>& get_actives()
+  {
+    return actives;
+  }
 
   //--------------------------------------------------------------------------
   // Remove a thread from the pool
-  // 0 if none available
+  // nullptr if none available
   T *remove()
   {
-    if (shutting_down) return 0;
-    Lock lock(mutex);
-    fill();  // Try and make spares
-    if (!spares.size()) return 0;
+    if (shutting_down)
+      return nullptr;
 
-    T *t = spares.front();
+    unique_lock<mutex> lock(mymutex);
+    fill();  // Try and make spares
+    if (!spares.size())
+      return nullptr;
+
+    auto t = spares.front();
     spares.pop_front();
     actives.push_back(t);
     return t;
@@ -849,9 +597,10 @@ public:
     // !!! Should provide a CondVar to allow us to block here
     for(;;)
     {
-      T *t = remove();
-      if (t) return t;
-      Thread::usleep(10000);
+      auto t = remove();
+      if (t)
+        return t;
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
   }
 
@@ -860,7 +609,7 @@ public:
   void replace(T *t)
   {
     if (shutting_down) return;  // Just lose it
-    Lock lock(mutex);
+    unique_lock<mutex> lock(mymutex);
 
     // Remove from actives
     actives.remove(t);
@@ -869,7 +618,7 @@ public:
     // to replace
     while (spares.size() && spares.size() > min_spares-1)
     {
-      T *ts = spares.back();  // Kill last one entered
+      auto ts = spares.back();  // Kill last one entered
       spares.pop_back();
       ts->die(true);  // Wait for it to die before deletion
       delete ts;
@@ -888,38 +637,36 @@ public:
     if (!shutting_down)
     {
       shutting_down = true;
-      Lock lock(mutex);
+      unique_lock<mutex> lock(mymutex);
 
       // Kill actives
-      for(typename list<T *>::iterator p=actives.begin(); p!=actives.end();p++)
+      for (auto t : actives)
       {
-	T* t = *p;
-	// Ask it nicely
-	t->die();
+        // Ask it nicely
+        t->die();
 
-	// Wait for a bit while it's still running
-	for(int i=0; i<5; i++)
-	{
-	  if (!*t) break;
-	  Thread::usleep(10000);
-	}
+        // Wait for a bit while it's still running
+        for (auto i = 0; i < 5; ++i)
+        {
+          if (!*t) break;
+          this_thread::sleep_for(chrono::milliseconds{10});
+        }
 
-	// Then kill it with cancel if it hasn't already died
-	delete t;
+        // Then kill it with cancel if it hasn't already died
+        delete t;
       }
       actives.clear();
 
       // Kill spares - same again
-      for(typename list<T *>::iterator p=spares.begin(); p!=spares.end();p++)
+      for (auto t : spares)
       {
-	T* t = *p;
-	t->die();
-	for(int i=0; i<5; i++)
-	{
-	  if (!*t) break;
-	  Thread::usleep(10000);
-	}
-	delete t;
+        t->die();
+        for (auto i = 0; i < 5; ++i)
+        {
+          if (!*t) break;
+          this_thread::sleep_for(chrono::milliseconds{10});
+        }
+        delete t;
       }
 
       spares.clear();
@@ -948,7 +695,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Task():
-    running(true)
+    running{true}
   {}
 
   //------------------------------------------------------------------------
@@ -999,28 +746,21 @@ private:
 
   public:
     Thread (Task *_task):
-      task(_task)
+      task{_task}
     {
     }
-    void run()
+    void run() override
     {
       task->run();
     }
   } thread;
-
-  //------------------------------------------------------------------------
-  // Virtual run() method from Thread
-  void run()
-  {
-    task->run();
-  }
 
 public:
   //------------------------------------------------------------------------
   // Constructor
   // Takes ownership of passed in Task
   TaskThread(T *_task):
-    task(_task), thread(_task)
+    task{_task}, thread{_task}
   {
     thread.start();
   }

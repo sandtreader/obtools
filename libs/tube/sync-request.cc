@@ -28,7 +28,7 @@ void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
     {
       log.summary << name << ": Request " << static_cast<int>(p->first)
                   << " timed out\n";
-      req.ready.signal();  // Response is still invalid
+      req.ready.notify_one();  // Response is still invalid
     }
   }
 }
@@ -64,7 +64,8 @@ retry:
                                  << " - " << request.stag() << endl;)
 
   // Start the clock
-  requests[id] = Request(client);
+  requests.emplace(piecewise_construct, forward_as_tuple(id),
+                   forward_as_tuple(client));
 
   // Fix the flags on the request
   request.flags |= FLAG_RESPONSE_REQUIRED;
@@ -84,7 +85,7 @@ bool SyncRequestCache::wait_response(const Message& request,
   Request& req = requests[id];
 
   // Wait for signal, unlocking and then relocking mutex
-  req.ready.wait(request_mutex);
+  req.ready.wait(lock);
 
   // Copy response 
   response = req.response;
@@ -125,7 +126,7 @@ bool SyncRequestCache::handle_response(const Message& response,
 
       // Copy message into response and signal readiness
       req.response = response;
-      req.ready.signal();
+      req.ready.notify_one();
     }
     else
     {
@@ -149,7 +150,7 @@ void SyncRequestCache::shutdown(Net::EndPoint client)
       p!=requests.end(); ++p)
   {
     Request& req = p->second;
-    if (req.client == client) req.ready.signal();  // Leaving empty response
+    if (req.client == client) req.ready.notify_one();  // Leaving empty response
 
     // The waiting thread will delete the request
   }
@@ -166,7 +167,7 @@ void SyncRequestCache::shutdown()
 	p!=requests.end(); ++p)
     {
       Request& req = p->second;
-      req.ready.signal();  // Leaving empty response
+      req.ready.notify_one();  // Leaving empty response
       
       // The waiting thread will delete the request
     }
@@ -181,7 +182,8 @@ SyncRequestCache::~SyncRequestCache()
 
   // Now wait for all requests to be deleted before finally deleting myself,
   // to ensure nothing is waiting for the shutdown
-  while (requests.size()) MT::Thread::usleep(10000);
+  while (requests.size())
+    this_thread::sleep_for(chrono::milliseconds{10});
 }
 
 }} // namespaces

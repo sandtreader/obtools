@@ -56,7 +56,7 @@ private:
 
     // Sleep for 30 seconds unless shut down
     for(int i=0; i<30 && !shut_down; i++)
-      MT::Thread::sleep(1);
+      this_thread::sleep_for(chrono::seconds{1});
 
     // Cause bad failure unless shut down
     if (!shut_down) abort();

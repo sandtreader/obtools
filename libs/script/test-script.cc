@@ -42,7 +42,7 @@ int main(int argc, char **argv)
   {
     log.detail << "--- tick ---\n";
     if (!script.tick()) break;
-    MT::Thread::sleep(1);
+    this_thread::sleep_for(chrono::seconds{1});
   }
   log.summary << "Script finished\n";
 

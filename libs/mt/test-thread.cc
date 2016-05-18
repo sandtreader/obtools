@@ -3,72 +3,92 @@
 //
 // Test harness for thread functions
 //
-// Copyright (c) 2003 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
+#include <gtest/gtest.h>
 #include "ot-mt.h"
-#include <cstdlib>
-#include <iostream>
+#include "ot-gen.h"
 #include <vector>
-#include <stdlib.h>
 
 using namespace std;
 using namespace ObTools;
 
 //--------------------------------------------------------------------------
-// Test thread class
-class TestThread: public MT::Thread
+// Tests
+TEST(ThreadTest, TestRuns)
 {
-  int n;
-  virtual void run();
-
-public:
-  TestThread(int _n): n(_n) { start(); }
-};
-
-void TestThread::run()
-{
-  int i;
-  for(i=0; i<10; i++)
+  class TestThread: public MT::Thread
   {
-    cout << n << ": " << i << endl;
-    sleep(1);
-  }
-  cout << n << " finished" << endl;
+  private:
+    bool ran;
+
+    void run() override
+    {
+      ran = true;
+    }
+
+  public:
+    TestThread():
+      ran{false}
+    {
+      start();
+    }
+
+    bool has_run()
+    {
+      return ran;
+    }
+  };
+
+  auto threads = vector<TestThread>{10};
+  this_thread::sleep_for(chrono::seconds{1});
+  for (auto& t : threads)
+    EXPECT_EQ(true, t.has_run());
+}
+
+TEST(ThreadTest, TestLocking)
+{
+  const auto num_threads = int{100};
+  const auto num_iterations = int{1000};
+
+  class TestThread: public MT::Thread
+  {
+  private:
+    MT::Mutex& m;
+    unsigned& counter;
+
+    void run() override
+    {
+      for (auto i = 0; i < num_iterations; ++i)
+      {
+        MT::Lock lock(m);
+        counter = counter + 1; // do not change to ++counter !!
+      }
+    }
+
+  public:
+    TestThread(MT::Mutex &_m, unsigned& _counter):
+      m{_m}, counter{_counter}
+    {
+      start();
+    }
+  };
+
+  MT::Mutex m;
+  auto counter = unsigned{0};
+  auto threads = vector<unique_ptr<TestThread>>{};
+  for (auto i = 0; i < num_threads; ++i)
+    threads.push_back(make_unique<TestThread>(m, counter));
+  this_thread::sleep_for(chrono::seconds{1});
+  EXPECT_EQ(num_threads * num_iterations, counter);
 }
 
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)
 {
-  int numthreads = 10;
-  if (argc > 1) numthreads = atoi(argv[1]);
-
-  cout << numthreads << " threads:" << endl;
-
-  vector<TestThread *> threads(numthreads);
-
-  int i;
-  cout << "Starting:" << endl;
-  for(i=0; i<numthreads; i++)
-    threads[i] = new TestThread(i);
-
-  cout << "Started:" << endl;
-  MT::Thread::sleep(5);
-
-  cout << "Cancelling half:" << endl;
-  for(i=0; i<numthreads/2; i++)
-    threads[i]->cancel();
-
-  cout << "Joining:" << endl;
-  for(i=0; i<numthreads; i++)
-    threads[i]->join();
-
-  cout << "Done" << endl;
-  return 0;  
+  ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-
-
-

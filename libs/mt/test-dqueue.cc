@@ -1,69 +1,70 @@
 //==========================================================================
-// ObTools::MT: test-qqueue.cc
+// ObTools::MT: test-dqueue.cc
 //
 // Test harness for data queue
 //
-// Copyright (c) 2010 Paul Clark.  All rights reserved
+// Copyright (c) 2010-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
+#include <gtest/gtest.h>
 #include "ot-mt.h"
-#include <cstdlib>
-#include <iostream>
 
 using namespace std;
-
-ObTools::MT::DataQueue dq;
+using namespace ObTools;
 
 //--------------------------------------------------------------------------
-// Receiver thread class
-class ReceiveThread: public ObTools::MT::Thread
+// Tests
+TEST(DataQueueTest, TestReceivingFromMultipleWriters)
 {
-  virtual void run();
+  static MT::DataQueue dq;
+  static const auto num_writers = int{10};
+  static const auto num_sends = int{1000};
+  static const unsigned char message[] = "Hello, world!";
 
-public:
-  ReceiveThread() { start(); }
-};
-
-void ReceiveThread::run()
-{
-  // Just pull numbers off the queue
-  for(;;)
+  class WriterThread: public ObTools::MT::Thread
   {
-    unsigned char buf[16];
-    int n = dq.read(buf, 16);
-    cout << "RX: " << string(reinterpret_cast<char *>(buf), n) << endl;
-    if (n<16) break;
+  private:
+    void run() override
+    {
+      for (auto i = 0; i < num_sends; ++i)
+      {
+        dq.write(message, sizeof(message));
+      }
+    }
+
+  public:
+    WriterThread()
+    {
+      start();
+    }
+  };
+
+  vector<WriterThread> writers{num_writers};
+  this_thread::sleep_for(chrono::seconds{1});
+  dq.close();
+
+  vector<unsigned char> received(num_writers * num_sends * sizeof(message));
+  auto read = dq.read(&received[0], received.size(), true);
+
+  ASSERT_EQ(num_writers * num_sends * sizeof(message), read);
+  for (auto i = 0u; i < num_writers; ++i)
+  {
+    for (auto j = 0u; j < num_sends; ++j)
+    {
+      for (auto k = 0u; k < sizeof(message); ++k)
+      {
+        EXPECT_EQ(message[k], received[i * sizeof(message) +
+                                       j * sizeof(message) + k]);
+      }
+    }
   }
-  
-  cout << "EOF\n";
 }
 
 //--------------------------------------------------------------------------
 // Main
-
-int main()
+int main(int argc, char **argv)
 {
-  // Start receiver
-  ReceiveThread receiver;
-
-  // Transmit for a while
-  for(int i=0; i<1000; i++)
-  {
-    dq.write(reinterpret_cast<const unsigned char *>("Hello, world!"), 13);
-    ObTools::MT::Thread::usleep(10000);
-  }
-
-  // Mark EOF and let it react
-  dq.close();
-  ObTools::MT::Thread::sleep(1);
-
-  // Send one more to make sure destructor cleans up
-  dq.write(reinterpret_cast<const unsigned char *>("Goodbye, world!"), 15);
-
-  return 0;  
+  ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-
-
-

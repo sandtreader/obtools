@@ -186,7 +186,7 @@ int main(int argc, char **argv)
   {
     XMLMesh::Message msg(subject, xml);
     if (!client.send(msg)) return 2;
-    MT::Thread::sleep(1);  // Wait for it to go out
+    this_thread::sleep_for(chrono::seconds{1});  // Wait for it to go out
   }
 
   return 0;  

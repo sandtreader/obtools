@@ -28,7 +28,7 @@ class TimeoutThread: public MT::Thread
     while (client.is_alive())
     {
       client.do_timeouts(log);
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << client.name
@@ -118,7 +118,7 @@ void SyncClient::shutdown()
     for(int i=0; i<5; i++)
     {
       if (!*timeout_thread) break;
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
 
     // If still not dead, cancel it

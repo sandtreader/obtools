@@ -13,7 +13,7 @@
 #include <sstream>
 
 // Time to wait (us) if send queue full
-#define SEND_BUSY_WAIT_TIME 10000
+#define SEND_BUSY_WAIT_TIME 10
 
 namespace ObTools { namespace Tube {
 
@@ -33,7 +33,7 @@ class TimeoutThread: public MT::Thread
     while (server.is_alive())
     {
       server.do_timeouts(log);
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << server.name
@@ -123,7 +123,7 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
       // Send it (this duplicates code in Server::send but we've got the
       // session already so this saves looking it up again)
       while (cs->send_q.waiting() > max_send_queue) // Zero must work
-	MT::Thread::usleep(SEND_BUSY_WAIT_TIME);
+        this_thread::sleep_for(chrono::milliseconds{SEND_BUSY_WAIT_TIME});
       
       cs->send_q.send(request.msg);
     }
@@ -178,7 +178,7 @@ void BiSyncServer::shutdown()
     for(int i=0; i<5; i++)
     {
       if (!*timeout_thread) break;
-      MT::Thread::usleep(10000);
+      this_thread::sleep_for(chrono::milliseconds{10});
     }
 
     // If still not dead, cancel it

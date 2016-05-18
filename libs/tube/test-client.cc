@@ -174,7 +174,7 @@ int main(int argc, char **argv)
     // Loop for a while sending and receiving
     for(int i=0; i<n ; i++)
     {
-      if (i) MT::Thread::sleep(1);
+      if (i) this_thread::sleep_for(chrono::seconds{1});
       Tube::Message msg(tag, data);
       Tube::Message response;
 
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
     // Loop for a while just sending 
     for(int i=0; i<n; i++)
     {
-      if (i) MT::Thread::sleep(1);
+      if (i) this_thread::sleep_for(chrono::seconds{1});
       Tube::Message msg(tag, data);
 
       client.send(msg);

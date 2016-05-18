@@ -33,7 +33,7 @@ bool Script::tick()
 //Run the script to the end
 void Script::run()
 {
-  while (tick()) MT::Thread::usleep(10000);
+  while (tick()) this_thread::sleep_for(chrono::milliseconds{10});
 }
 
 
