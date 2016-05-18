@@ -94,7 +94,6 @@ private:
       auto quit = false;
       while (!quit)
       {
-        cout << "a run wait" << endl;
         unique_lock<mutex> lock{condition_mutex};
         condition.wait(lock);
 
@@ -102,7 +101,6 @@ private:
         if (!quit)
           handler->handle(*action);
 
-        cout << "a run done" << endl;
         condition.notify_one();
       }
     }
@@ -114,7 +112,6 @@ private:
       unique_lock<mutex> lock{condition_mutex};
       action = new_action;
       handler = new_handler;
-      cout << "a set" << endl;
       condition.notify_one();
     }
 
@@ -122,7 +119,6 @@ private:
     // Wait on action being used
     void wait()
     {
-      cout << "a wait" << endl;
       unique_lock<mutex> lock{condition_mutex};
       condition.wait(lock);
     }
@@ -177,8 +173,6 @@ private:
     if (!action)
       return false;
 
-    cout << "action time: " << action.get() << endl;
-
     vector<ActionTask *> active;
     {
       unique_lock<mutex> lock{handlers_mutex};
@@ -204,7 +198,6 @@ private:
     {
       it->wait();
     }
-    cout << "done action time" << endl;
 
     return true;
   }
@@ -247,7 +240,6 @@ public:
   virtual ~Manager()
   {
     // Wake up thread with empty action
-    cout << "push null" << endl;
     push(nullptr);
 
     // Trigger threads shut down
