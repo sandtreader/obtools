@@ -239,6 +239,7 @@ public:
   // Virtual destructor
   virtual ~Manager()
   {
+    worker_task.stop();
     // Wake up thread with empty action
     push(nullptr);
 
@@ -251,7 +252,6 @@ public:
 
     for (auto& t : threads)
       t.join();
-    worker_task.stop();
     worker_thread.join();
   }
 };
