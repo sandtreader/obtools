@@ -11,9 +11,8 @@ HEADERS = ot-file.h
 OBJS    = path.o directory.o stream.o glob.o
 DEPENDS = text gen
 TESTLIB = -lgtest
-TESTS   = test-path test-dir test-mkdir test-stream test-glob
+TESTS   = test-path test-stream test-glob
 TESTCMD = ./test-path && \
-          ./test-dir /usr/bin/ && \
           ./test-stream && \
           ./test-glob
 

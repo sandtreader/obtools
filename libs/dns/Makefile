@@ -14,8 +14,6 @@ SOCKET = 1
 RESOLVER = 1
 
 DEPENDS = text log chan misc
-TESTS 	= test-resolver
-TESTCMD	= ./test-resolver carrot.org
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

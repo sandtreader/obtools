@@ -1,9 +1,0 @@
-Package: libot-general2-dev
-Priority: optional
-Section: libs
-Maintainer: Paul Clark <debian@obtools.com>
-Description: ObTools general-purpose libraries (development files)
- The ObTools libraries provide a range of useful interfaces and objects for
- multithreaded & network applications in C++
- .
- This package provides files for building applications which use the libraries

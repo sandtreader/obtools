@@ -10,8 +10,6 @@ NAME   	= ot-log
 HEADERS = ot-log.h
 OBJS  	= distributor.o filter.o logstream.o channel.o logger.o
 DEPENDS = text time mt
-TESTS 	= test-log
-TESTCMD	= ./test-log
 MT-VARIANTS = 1
 
 ROOT    = ../..

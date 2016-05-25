@@ -18,8 +18,6 @@ EXTINCS = /usr/include/postgresql/
 endif
 
 EXTLIBS = -lpq
-TESTS 	= test-pgsql
-TESTCMD	= ./test-pgsql
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

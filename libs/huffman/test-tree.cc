@@ -12,6 +12,19 @@
 #include <vector>
 #include <fstream>
 
+const auto mapping = R"(START:00:T:
+p:101:ESCAPE:
+x:01:0x3a:
+START:01:a:
+a:0110:b:
+b:1011:c:
+c:00:STOP:
+c:01:d:
+d:1:ESCAPE:
+f:011:g:
+g:0:STOP:
+)";
+
 using namespace std;
 using namespace ObTools;
 
@@ -78,9 +91,8 @@ TEST(TreeTest, TestGetChar)
 
 TEST(TestMultiTree, TestPopulateFromReader)
 {
-  ifstream ifs("../tests/mapping.txt");
-  ASSERT_TRUE(ifs.is_open()) << "Failed to open test mapping file" << endl;
-  Huffman::MultiReader mr(ifs);
+  istringstream is(mapping);
+  Huffman::MultiReader mr(is);
   Huffman::MultiTree tree;
   tree.populate_from(mr);
   vector<bool> sequence;
@@ -95,9 +107,8 @@ TEST(TestMultiTree, TestPopulateFromReader)
 TEST(TestMultiTree, TestReadString)
 {
   // Set up tree
-  ifstream ifs("../tests/mapping.txt");
-  ASSERT_TRUE(ifs.is_open()) << "Failed to open test mapping file" << endl;
-  Huffman::MultiReader mr(ifs);
+  istringstream is(mapping);
+  Huffman::MultiReader mr(is);
   Huffman::MultiTree tree;
   tree.populate_from(mr);
 
@@ -115,9 +126,8 @@ TEST(TestMultiTree, TestReadString)
 TEST(TestMultiTree, TestReadStringWithEscaping)
 {
   // Set up tree
-  ifstream ifs("../tests/mapping.txt");
-  ASSERT_TRUE(ifs.is_open()) << "Failed to open test mapping file" << endl;
-  Huffman::MultiReader mr(ifs);
+  istringstream is(mapping);
+  Huffman::MultiReader mr(is);
   Huffman::MultiTree tree;
   tree.populate_from(mr);
 

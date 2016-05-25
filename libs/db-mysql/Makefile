@@ -30,8 +30,6 @@ endif
 endif
 
 EXTLIBS = -lmysqlclient_r -lz
-TESTS 	= test-mysql
-TESTCMD	= ./test-mysql
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

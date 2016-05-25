@@ -12,16 +12,13 @@ DEPENDS = net mt
 OBJS    = reader.o writer.o error.o tcp-chan.o block-chan.o stream-chan.o \
           string-chan.o dq-chan.o bits.o
 TESTLIB = -lgtest
-TESTS   = test-block test-stream test-string test-dq test-bits test-limited
-TESTCMD = ./test-block && ./test-stream && ./test-string && ./test-dq \
-          && ./test-bits && ./test-limited
+TESTS   = test-limited
+TESTCMD = ./test-limited
 SOCKET  = 1
 
 # FD-chan is Unix/Mac only
 ifndef MINGW
 OBJS += fd-chan.o
-TESTS += test-fd
-TESTCMD += && ./test-fd
 endif
 
 ROOT    = ../..

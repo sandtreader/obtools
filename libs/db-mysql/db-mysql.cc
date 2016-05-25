@@ -9,7 +9,7 @@
 
 #include "ot-db-mysql.h"
 #include "ot-log.h"
-#include "mysql.h"
+#include <mysql/mysql.h>
 
 namespace ObTools { namespace DB { namespace MySQL {
 

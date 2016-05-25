@@ -5,7 +5,7 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-SUBS = core otmp client superlibs server bindings
+SUBS = core otmp client server bindings
 include ../build/dir.mk
 
 

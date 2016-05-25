@@ -10,9 +10,9 @@ NAME   	= ot-ring
 # No OBJS
 HEADERS = ot-ring.h
 DEPENDS = mt
-TESTS 	= test-ring test-ring-gtest
+TESTS 	= test-ring-gtest
 TESTLIB = -lgtest
-TESTCMD	= ./test-ring-gtest && ./test-ring
+TESTCMD	= ./test-ring-gtest
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

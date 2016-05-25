@@ -10,7 +10,7 @@ NAME    = ot-expr
 HEADERS = ot-expr.h
 DEPENDS = text misc
 OBJS    = token.o eval.o
-TESTS   = test-token test-eval test-calc
+TESTS   = test-token test-eval
 TESTLIB = -lgtest
 TESTCMD = ./test-token && ./test-eval
 

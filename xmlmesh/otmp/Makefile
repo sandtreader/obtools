@@ -12,9 +12,6 @@ HEADERS = ot-xmlmesh-otmp.h
 DEPENDS = net log text mt tube
 SOCKET  = 1
 
-TESTS 	= test-client test-server
-TESTCMD = ./test-client localhost
-
 ROOT    = ../..
 include $(ROOT)/build/std.mk
 

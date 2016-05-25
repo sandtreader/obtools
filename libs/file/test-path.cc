@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <thread>
 
 namespace {
 
@@ -27,14 +28,16 @@ private:
 public:
   PathTest()
   {
-    close(open("../tests/no-access", O_CREAT, 0000));
-    close(open("../tests/read-only", O_CREAT, 0444));
+    close(open("no-access", O_CREAT, 0000));
+    close(open("read-only", O_CREAT, 0444));
+    close(open("read-writeable", O_CREAT, 0644));
   }
 
   ~PathTest()
   {
-    unlink("../tests/read-only");
-    unlink("../tests/no-access");
+    unlink("no-access");
+    unlink("read-only");
+    unlink("read-writeable");
   }
 };
 
@@ -87,55 +90,59 @@ TEST_F(PathTest, TestBasename)
 
 TEST_F(PathTest, TestExists)
 {
-  EXPECT_TRUE(File::Path("../tests").exists());
-  EXPECT_TRUE(File::Path("../tests/").exists());
-  EXPECT_TRUE(File::Path("/").exists());
   EXPECT_TRUE(File::Path(".").exists());
-  EXPECT_FALSE(File::Path("../tests/non-existant").exists());
+  EXPECT_TRUE(File::Path("./").exists());
+  EXPECT_TRUE(File::Path("/").exists());
+  EXPECT_FALSE(File::Path("non-existant").exists());
 }
 
 TEST_F(PathTest, TestIsDir)
 {
-  EXPECT_TRUE(File::Path("../tests").is_dir());
-  EXPECT_TRUE(File::Path("../tests/").is_dir());
+  EXPECT_TRUE(File::Path(".").is_dir());
+  EXPECT_TRUE(File::Path("./").is_dir());
   EXPECT_TRUE(File::Path("/").is_dir());
-  EXPECT_FALSE(File::Path("../tests/not-a-dir").is_dir());
-  EXPECT_FALSE(File::Path("../tests/non-existant").is_dir());
+  EXPECT_FALSE(File::Path("read-only").is_dir());
+  EXPECT_FALSE(File::Path("non-existant").is_dir());
 }
 
 TEST_F(PathTest, TestReadable)
 {
-  EXPECT_TRUE(File::Path("../tests").readable());
-  EXPECT_TRUE(File::Path("../tests/").readable());
-  EXPECT_TRUE(File::Path("../tests/read-only").readable());
+  EXPECT_TRUE(File::Path(".").readable());
+  EXPECT_TRUE(File::Path("./").readable());
+  EXPECT_TRUE(File::Path("read-only").readable());
   EXPECT_TRUE(File::Path("/").readable());
-  EXPECT_FALSE(File::Path("../tests/no-access").readable());
-  EXPECT_FALSE(File::Path("../tests/non-existant").readable());
+  EXPECT_FALSE(File::Path("no-access").readable());
+  EXPECT_FALSE(File::Path("non-existant").readable());
 }
 
 TEST_F(PathTest, TestWritable)
 {
-  EXPECT_TRUE(File::Path("../tests").writeable());
-  EXPECT_TRUE(File::Path("../tests/").writeable());
-  EXPECT_TRUE(File::Path("../tests/read-writeable").writeable());
-  EXPECT_TRUE(File::Path("../tests/non-existant").writeable());
-  EXPECT_FALSE(File::Path("../tests/read-only").writeable());
-  EXPECT_FALSE(File::Path("../tests/no-access").writeable());
-  EXPECT_FALSE(File::Path("../tests/nowhere/non-existant").writeable());
+  EXPECT_TRUE(File::Path(".").writeable());
+  EXPECT_TRUE(File::Path("./").writeable());
+  EXPECT_TRUE(File::Path("read-writeable").writeable());
+  EXPECT_TRUE(File::Path("non-existant").writeable());
+  EXPECT_TRUE(File::Path("./non-existant").writeable());
+  EXPECT_FALSE(File::Path("read-only").writeable());
+  EXPECT_FALSE(File::Path("no-access").writeable());
+  EXPECT_FALSE(File::Path("nowhere/non-existant").writeable());
 }
 
 TEST_F(PathTest, TestLength)
 {
-  EXPECT_EQ(8, File::Path("../tests/eight-bytes").length());
-  EXPECT_EQ(0, File::Path("../tests/non-existant").length());
+  int f = open("eight-bytes", O_CREAT | O_WRONLY, 0644);
+  write(f, "01234567", 8);
+  close(f);
+  EXPECT_EQ(8, File::Path("eight-bytes").length());
+  EXPECT_EQ(0, File::Path("non-existant").length());
+  unlink("eight-bytes");
 }
 
 TEST_F(PathTest, TestMode)
 {
-  EXPECT_EQ(0100000, File::Path("../tests/no-access").mode());
-  EXPECT_EQ(0000000, File::Path("../tests/non-existant").mode());
-  EXPECT_EQ(0100444, File::Path("../tests/read-only").mode());
-  EXPECT_EQ(0100644, File::Path("../tests/read-writeable").mode());
+  EXPECT_EQ(0100000, File::Path("no-access").mode());
+  EXPECT_EQ(0000000, File::Path("non-existant").mode());
+  EXPECT_EQ(0100444, File::Path("read-only").mode());
+  EXPECT_EQ(0100644, File::Path("read-writeable").mode());
 }
 
 TEST_F(PathTest, TestGetNameFromUserID)
@@ -164,23 +171,27 @@ TEST_F(PathTest, TestGetIDFromGroupName)
 
 TEST_F(PathTest, TestTouchCreate)
 {
-  string p = "../tests/touch-create";
+  string p = "touch-create";
 
   File::Path path(p);
 
-  if ( path.exists() )
-    unlink(p.data());
-  EXPECT_FALSE(path.exists());
+  ASSERT_FALSE(path.exists());
 
   int touchsuccess = path.touch();
   int new_length = path.length();
   EXPECT_EQ(0, new_length);
   EXPECT_EQ(true, touchsuccess);
+  unlink(p.c_str());
 }
 
 TEST_F(PathTest, TestTouch)
 {
-  string p = "../tests/touch";
+  string p = "touch";
+
+  int f = open(p.c_str(), O_CREAT | O_WRONLY, 0644);
+  write(f, "0123456789", 10);
+  close(f);
+  this_thread::sleep_for(chrono::seconds(1));
 
   File::Path path(p);
 
@@ -194,6 +205,7 @@ TEST_F(PathTest, TestTouch)
   EXPECT_EQ(10, new_length);
   EXPECT_EQ(true, touchsuccess);
   EXPECT_GT(new_last_modified, old_last_modified);
+  unlink(p.c_str());
 }
 
 } // anonymous namespace

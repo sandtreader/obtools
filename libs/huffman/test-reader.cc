@@ -11,13 +11,25 @@
 #include <fstream>
 #include "ot-huffman.h"
 
+const auto mapping = R"(START:00:T:
+p:101:ESCAPE:
+x:01:0x3a:
+START:01:a:
+a:0110:b:
+b:1011:c:
+c:00:STOP:
+c:01:d:
+d:1:ESCAPE:
+f:011:g:
+g:0:STOP:
+)";
+
 using namespace std;
 using namespace ObTools;
 
 TEST(TreeReader, TestMultiReader)
 {
-  ifstream is("../tests/mapping.txt");
-  ASSERT_TRUE(is.is_open()) << "Failed to open test mapping file" << endl;
+  istringstream is(mapping);
   Huffman::MultiReader mr(is);
   Huffman::MultiMapping mm;
 

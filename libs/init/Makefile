@@ -10,8 +10,6 @@ NAME   	= ot-init
 HEADERS = ot-init.h
 OBJS  	= init.o
 DEPENDS = xml
-TESTS 	= test-init
-TESTCMD	= ./test-init
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
