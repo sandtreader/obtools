@@ -239,8 +239,13 @@ bool Path::writeable() const
 {
   if (exists())
     return !ACCESS(CPATH, 02);
+
+  // The file is non-existant so check the directory is writeable instead
+  const auto& d = dirname();
+  if (d.empty())
+    return !ACCESS(".", 02);
   else
-    return !ACCESS(dirname().CPATH, 02);
+    return !ACCESS(d.CPATH, 02);
 }
 
 //--------------------------------------------------------------------------
