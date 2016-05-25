@@ -22,16 +22,11 @@ TEST(SplitTests, TestExhaustiveDates)
 
   // Number of days from 1900 to 2036 end of NTP time we can test
   int ndays = UINT_MAX / Time::DAY;
-  cout << "Testing " << ndays << " days\n";
 
   for(int i=0; i<ndays; i++)
   {
     Time::Split split;
     original.split(split);
-
-    // Log every year
-    if (split.month == 1 && split.day == 1)
-      cout << original.iso() << endl;
 
     EXPECT_EQ(split.hour, 0);
     EXPECT_EQ(split.min,  0);
