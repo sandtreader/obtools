@@ -7,10 +7,7 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
-#if !defined(__WIN32__)
-#error Do not use this except in Windows builds
-#endif
-
+#if defined(__WIN32__)
 #include "ot-net.h"
 
 //--------------------------------------------------------------------------
@@ -34,3 +31,4 @@ bool winsock_initialise()
   return true;
 }
 
+#endif
