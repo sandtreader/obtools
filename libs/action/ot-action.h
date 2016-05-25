@@ -15,11 +15,9 @@
 
 #include <map>
 #include <vector>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <queue>
+
 #include "ot-gen.h"
+#include "ot-mt.h"
 
 namespace ObTools { namespace Action {
 
@@ -64,20 +62,17 @@ public:
   };
 
 private:
-  map<T, vector<Handler *>> handlers;
-  mutex handlers_mutex;
+  map<T, vector<Handler *> > handlers;
+  MT::Mutex handlers_mutex;
 
-  queue<unique_ptr<Action<T>>> actions;
-  mutex queue_mutex;
-  condition_variable queue_condition;
+  MT::Queue<Action<T> *> actions;
 
-  class ActionTask
+  class ActionTask: public MT::Task
   {
   private:
-    mutex condition_mutex;
-    condition_variable condition;
-    Action<T> *action = nullptr;
-    Handler *handler = nullptr;
+    MT::Condition condition;
+    Action<T> *action;
+    Handler *handler;
 
   public:
     //----------------------------------------------------------------------
@@ -89,19 +84,18 @@ private:
 
     //----------------------------------------------------------------------
     // Run routine
-    void operator()()
+    virtual void run()
     {
-      auto quit = false;
+      bool quit(false);
       while (!quit)
       {
-        unique_lock<mutex> lock{condition_mutex};
-        condition.wait(lock);
+        condition.wait(true);
 
         quit = !(handler && action);
         if (!quit)
           handler->handle(*action);
 
-        condition.notify_one();
+        condition.signal(false);
       }
     }
 
@@ -109,55 +103,51 @@ private:
     // Set the action to work upon
     void set_action(Action<T> *new_action, Handler *new_handler)
     {
-      unique_lock<mutex> lock{condition_mutex};
       action = new_action;
       handler = new_handler;
-      condition.notify_one();
+      condition.signal(true);
     }
 
     //---------------------------------------------------------------------
     // Wait on action being used
     void wait()
     {
-      unique_lock<mutex> lock{condition_mutex};
-      condition.wait(lock);
+      condition.wait(false);
     }
   };
 
-  vector<thread> threads;
-  vector<unique_ptr<ActionTask>> tasks;
+  vector<shared_ptr<MT::TaskThread<ActionTask> > > threads;
 
-  class WorkerTask
+  class WorkerTask: public MT::Task
   {
   private:
     Manager& manager;
-    bool quit;
 
   public:
     //----------------------------------------------------------------------
     // Constructor
     WorkerTask(Manager& _manager):
-      manager(_manager), quit(false)
+      manager(_manager)
     {
     }
 
     //----------------------------------------------------------------------
     // Run routine
-    void operator()()
+    virtual void run()
     {
-      while (!quit && manager.next_action())
+      while (is_running() && manager.next_action())
         ;
-    }
 
-    //----------------------------------------------------------------------
-    // Signal task to stop
-    void stop()
-    {
-      quit = true;
+      // Trigger threads shut down
+      for (auto it = manager.threads.begin(); it != manager.threads.end(); ++it)
+      {
+        (**it)->set_action(0, 0);
+        (**it)->wait();
+      }
     }
-  } worker_task;
+  };
 
-  thread worker_thread;
+  MT::TaskThread<WorkerTask> worker_thread;
 
   friend class WorkerThread;
 
@@ -166,16 +156,14 @@ private:
   // Returns whether more to process
   bool next_action()
   {
-    unique_lock<mutex> lock{queue_mutex};
-    queue_condition.wait(lock);
+    auto action = unique_ptr<Action<T>>{actions.wait()};
 
-    auto& action = actions.front();
-    if (!action)
+    if (!action.get())
       return false;
 
-    vector<ActionTask *> active;
+    vector<shared_ptr<MT::TaskThread<ActionTask>>> active;
     {
-      unique_lock<mutex> lock{handlers_mutex};
+      MT::Lock lock{handlers_mutex};
       auto h = handlers.find(action->get_type());
       if (h != handlers.end())
       {
@@ -184,19 +172,20 @@ private:
         {
           if (i >= threads.size())
           {
-            tasks.push_back(make_unique<ActionTask>());
-            threads.push_back(thread{ref(*tasks.back())});
+            const auto p = make_shared<MT::TaskThread<ActionTask>>(
+                new ActionTask{});
+            threads.push_back(p);
           }
-          tasks[i]->set_action(action.get(), *it);
-          active.push_back(tasks[i].get());
+          (*threads[i])->set_action(action.get(), *it);
+          active.push_back(threads[i]);
         }
       }
     }
 
     // Wait for all active threads to finish
-    for (auto& it : active)
+    for (auto it = active.begin(); it != active.end(); ++it)
     {
-      it->wait();
+      (**it)->wait();
     }
 
     return true;
@@ -206,7 +195,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Manager():
-    worker_task(*this), worker_thread(ref(worker_task))
+    worker_thread(new WorkerTask(*this))
   {
   }
 
@@ -214,24 +203,22 @@ public:
   // Register a handler
   void add_handler(T type, Handler &handler)
   {
-    unique_lock<mutex> lock{handlers_mutex};
+    MT::Lock lock(handlers_mutex);
     handlers[type].push_back(&handler);
   }
 
   //------------------------------------------------------------------------
   // Queue an action
-  void push(Action<T> *action)
+  void queue(Action<T> *action)
   {
-    unique_lock<mutex> lock{queue_mutex};
-    actions.push(unique_ptr<Action<T>>(action));
-    queue_condition.notify_one();
+    actions.send(action);
   }
 
   //------------------------------------------------------------------------
   // Get configuration
   map<T, vector<Handler *> > get_config()
   {
-    unique_lock<mutex> lock{queue_mutex};
+    MT::Lock lock(handlers_mutex);
     return handlers;
   }
 
@@ -239,20 +226,8 @@ public:
   // Virtual destructor
   virtual ~Manager()
   {
-    worker_task.stop();
     // Wake up thread with empty action
-    push(nullptr);
-
-    // Trigger threads shut down
-    for (auto& it : tasks)
-    {
-      it->set_action(0, 0);
-      it->wait();
-    }
-
-    for (auto& t : threads)
-      t.join();
-    worker_thread.join();
+    queue(0);
   }
 };
 
