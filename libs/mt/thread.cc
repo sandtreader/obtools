@@ -23,8 +23,8 @@ bool Thread::start()
                    // Set before trying to create the thread in order to avoid
                    // race condition with _thread_start
   mythread = make_unique<thread>([this](){
-    this->run();
-    this->running = false;
+    if (this->running)
+      this->run();
   });
   if (!mythread)
     running = false;

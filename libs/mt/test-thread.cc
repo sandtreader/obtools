@@ -85,6 +85,55 @@ TEST(ThreadTest, TestLocking)
   EXPECT_EQ(num_threads * num_iterations, counter);
 }
 
+TEST(ThreadTest, TestSafeAtPointOfRunning)
+{
+  class TestThread: public MT::Thread
+  {
+  private:
+    void run() override
+    {
+      this_thread::sleep_for(chrono::seconds(1));
+    }
+
+  public:
+    TestThread()
+    {
+      start();
+    }
+  };
+
+  ASSERT_NO_THROW(TestThread());
+}
+
+TEST(ThreadTest, TestWaitForJoinOnDestruct)
+{
+  class TestThread: public MT::Thread
+  {
+  private:
+    bool& waited;
+
+    void run() override
+    {
+      this_thread::sleep_for(chrono::seconds(1));
+      waited = true;
+    }
+
+  public:
+    TestThread(bool& _waited):
+      waited{_waited}
+    {
+      start();
+    }
+  };
+
+  auto waited = false;
+  {
+    TestThread t{waited};
+    this_thread::sleep_for(chrono::milliseconds(10));
+  }
+  EXPECT_TRUE(waited);
+}
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)
