@@ -291,7 +291,7 @@ class RWReadLock
 {
 private:
   RWMutex& mutex;
-  RWReadLock(const RWReadLock& x): mutex{x.mutex} { }
+  RWReadLock(const RWReadLock& x) = delete;
   void operator=(const RWReadLock&) = delete;
 
 public:
@@ -305,7 +305,7 @@ class RWWriteLock
 {
 private:
   RWMutex& mutex;
-  RWWriteLock(const RWWriteLock& x): mutex{x.mutex} { }
+  RWWriteLock(const RWWriteLock& x) = delete;
   void operator=(const RWWriteLock&) = delete;
 
 public:
