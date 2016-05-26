@@ -12,7 +12,7 @@ OBJS    = thread.o pool.o dqueue.o
 DEPENDS = gen
 TESTLIB = -lgtest
 TESTS   = test-thread test-rwmutex test-dqueue test-pool
-TESTCMD = ./test-thread && ./test-rwmutex && test-dqueue && ./test-pool
+TESTCMD = ./test-thread && ./test-rwmutex && ./test-dqueue && ./test-pool
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk
