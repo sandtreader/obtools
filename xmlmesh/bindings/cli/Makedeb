@@ -23,8 +23,8 @@ install -m 0644 $SRC_DIR/DEBIAN/control $DEB_DIR/DEBIAN/control
 echo "Version: $DEB_VERSION" >> $DEB_DIR/DEBIAN/control
 echo "Architecture: $TARGARCH" >> $DEB_DIR/DEBIAN/control
 
-install -s -m 0755 xmlmesh-send $DEB_DIR/usr/bin/ot-xmlmesh-send
-install -s -m 0755 xmlmesh-receive $DEB_DIR/usr/bin/ot-xmlmesh-receive
+install -s -m 0755 ../send/build-release/xmlmesh-send $DEB_DIR/usr/bin/ot-xmlmesh-send
+install -s -m 0755 ../send/build-release/xmlmesh-receive $DEB_DIR/usr/bin/ot-xmlmesh-receive
 
 if [ $CENTOS ]; then
   . $ROOT/build/Makerpm
