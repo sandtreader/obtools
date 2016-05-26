@@ -22,9 +22,6 @@ using namespace ObTools;
 
 class PathTest: public ::testing::Test
 {
-private:
-  int no_access_fd;
-
 public:
   PathTest()
   {

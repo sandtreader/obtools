@@ -20,6 +20,7 @@
 // For forthcoming functions that we'd like now
 namespace std {
 
+#ifndef __cpp_lib_make_unique
 //--------------------------------------------------------------------------
 // Make a unique pointer from target class' constructor arguments
 template<typename T, typename ...Args>
@@ -27,6 +28,7 @@ std::unique_ptr<T> make_unique(Args&& ...args)
 {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
+#endif
 
 } // std namespace
 

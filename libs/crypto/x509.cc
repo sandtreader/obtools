@@ -49,7 +49,6 @@ void Certificate::write(ostream& sout) const
 
 //------------------------------------------------------------------------
 // Read from string - reads PEM or DER format
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 void Certificate::read(const string& text)
 {
   int length = text.size();
@@ -103,11 +102,9 @@ void Certificate::read(const string& text)
   // Clean up
   BIO_free(bio);
 }
-#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------
 // Convert to PEM format string 
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 string Certificate::str() const
 {
   if (!x509) return "INVALID!";
@@ -128,7 +125,6 @@ string Certificate::str() const
   BIO_free(bio);  // buf goes too
   return pem;
 }
-#pragma GCC diagnostic pop
 
 //------------------------------------------------------------------------
 // Get common name

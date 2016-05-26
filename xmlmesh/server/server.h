@@ -108,8 +108,9 @@ public:
 
 //==========================================================================
 // Message to be routed through the system
-struct RoutingMessage
+class RoutingMessage
 {
+public:
   enum Type
   {
     CONNECTION,   // New connection from a given client path

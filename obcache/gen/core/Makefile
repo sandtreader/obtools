@@ -5,11 +5,12 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-TYPE	= exes
-NAME   	= ot-generate-core-cpp 
-OBJS 	= 
-DEPENDS = xmi regen text misc
-TESTCMD = 
+# Supressed because warns in clang
+#TYPE	= exes
+#NAME   	= ot-generate-core-cpp 
+#OBJS 	= 
+#DEPENDS = xmi regen text misc
+#TESTCMD = 
 
 ROOT    = ../../..
 include $(ROOT)/build/std.mk

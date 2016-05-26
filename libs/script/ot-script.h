@@ -124,11 +124,11 @@ public:
   //------------------------------------------------------------------------
   // Tick action
   // Returns whether still active
-  virtual bool tick(Context& con);
+  bool tick(Context& con) override;
 
   //------------------------------------------------------------------------
   // Stop action - when finished or being killed
-  virtual void stop(Context&);
+  void stop(Context&) override;
 
   //------------------------------------------------------------------------
   // Restart sequence
@@ -437,6 +437,11 @@ public:
 // Top-level script 
 class Script: public SequenceAction
 {
+private:
+  //------------------------------------------------------------------------
+  // Bring in tick from base class
+  using SequenceAction::tick;
+
 public:
   Language& language;       // Language in use
   Misc::PropertyList vars;  // Global variables for script actions

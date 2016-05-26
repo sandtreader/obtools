@@ -32,10 +32,8 @@ namespace ObTools { namespace Daemon {
 // Signal handlers for both processes
 static Shell *the_shell = 0;
 
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 const sighandler_t sig_ign(SIG_IGN);
 const sighandler_t sig_dfl(SIG_DFL);
-#pragma GCC diagnostic pop
 
 // SIGTERM:  Clean shutdown
 void sigterm(int)
@@ -91,8 +89,6 @@ int Shell::run()
 //--------------------------------------------------------------------------
 // Start process, with arguments
 // Returns process exit code
-// pragma for WIFEXITED and WEXITSTATUS macros
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 int Shell::start(int argc, char **argv)
 {
   // Run initialisation sequence (auto-registration of modules etc.)
@@ -268,7 +264,6 @@ int Shell::start(int argc, char **argv)
     return rc;
   }
 }
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------
 // Drop privileges if required

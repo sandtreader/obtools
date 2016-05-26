@@ -5,11 +5,12 @@
 # This code comes with NO WARRANTY and is subject to licence agreement
 #==========================================================================
 
-TYPE	= exe
-NAME   	= obdoc-html
-OBJS 	= _obdoc-html.o
-DEPENDS = xml regen text misc
-TESTCMD = ./obdoc-html < ../test.obdoc.xml
+# Surpressed because warns in clang
+#TYPE	= exe
+#NAME   	= obdoc-html
+#OBJS 	= _obdoc-html.o
+#DEPENDS = xml regen text misc
+#TESTCMD = ./obdoc-html < ../test.obdoc.xml
 
 ROOT    = ../..
 include $(ROOT)/build/std.mk

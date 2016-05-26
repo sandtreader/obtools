@@ -484,6 +484,11 @@ protected:
   typedef map<ID, MCType> MapType;
   typedef typename MapType::iterator MapIterator;
 
+  //------------------------------------------------------------------------
+  // Unused base prepare_to_die()
+  using Cache<ID, PointerContent<CONTENT>, TIDY_POLICY, EVICTOR_POLICY>
+    ::prepare_to_die;
+
 public:
   //--------------------------------------------------------------------------
   // Constructor

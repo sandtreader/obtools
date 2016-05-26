@@ -285,11 +285,11 @@ LDFLAGS += -pthread
 else
 
 #Normal native build
-CC = gcc
-CXX = g++
+CC = clang
+CXX = clang++
 EXTRALIBS += -lrt -lm
 STRIP = strip
-CPPFLAGS += -std=c++11 -Werror -pthread
+CPPFLAGS += -std=c++14 -Werror -pthread
 LDFLAGS += -pthread
 endif
 endif

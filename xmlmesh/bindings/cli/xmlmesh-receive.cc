@@ -57,8 +57,6 @@ void usage(char *pname)
 
 //--------------------------------------------------------------------------
 // Main
-// pragma for WIFEXITED and WEXITSTATUS
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 int main(int argc, char **argv)
 {
   if (argc < 3)
@@ -355,4 +353,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-#pragma GCC diagnostic pop
