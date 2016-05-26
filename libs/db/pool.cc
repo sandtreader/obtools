@@ -11,7 +11,7 @@
 #include "ot-log.h"
 #include <algorithm>
 
-#define BACKGROUND_SLEEP_TIME 10
+#define BACKGROUND_SLEEP_TIME 1
 
 namespace ObTools { namespace DB {
 
@@ -20,7 +20,7 @@ namespace ObTools { namespace DB {
 class BackgroundThread: public MT::Thread
 {
   ConnectionPool& pool;
-  virtual void run() { pool.run_background(); }
+  virtual void run() { pool.run_background(running); }
 
 public:
   BackgroundThread(ConnectionPool& _pool): pool(_pool) { start(); }
@@ -45,7 +45,6 @@ ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
 
   // Start background thread
   background_thread = new BackgroundThread(*this);
-  background_thread->detach();
 }
 
 //------------------------------------------------------------------------
@@ -179,11 +178,11 @@ void ConnectionPool::release(Connection *conn)
 
 //------------------------------------------------------------------------
 // Run background timeout loop (called from internal thread)
-void ConnectionPool::run_background()
+void ConnectionPool::run_background(bool& running)
 {
   Log::Streams log;
 
-  for(;;)
+  while (running)
   {
     { // Not inside sleep
       MT::Lock lock(mutex);

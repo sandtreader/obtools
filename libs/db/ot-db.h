@@ -801,7 +801,7 @@ public:
 
   //------------------------------------------------------------------------
   // Run background timeout loop (called from internal thread)
-  void run_background();
+  void run_background(bool& running);
 
   //------------------------------------------------------------------------
   // Destructor
