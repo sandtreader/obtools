@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Msg library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-msg
+TYPE    = headers
+DEPENDS = ot-xml ot-init ot-ssl
+
+include_rules

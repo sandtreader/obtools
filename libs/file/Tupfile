@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::File library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-file
+TYPE    = lib
+DEPENDS = ot-gen ot-text
+
+include_rules

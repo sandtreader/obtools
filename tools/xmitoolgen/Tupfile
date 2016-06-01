@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools XMI Tool Generator
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = xmitoolgen
+TYPE    = exe
+DEPENDS = ot-toolgen
+
+include_rules

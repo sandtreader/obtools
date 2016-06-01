@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Alarm library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-alarm
+TYPE    = lib
+DEPENDS = ot-mt ot-time
+
+include_rules

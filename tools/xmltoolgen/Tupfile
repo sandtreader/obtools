@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools XML Tool Generator
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = xmltoolgen
+TYPE    = exe
+DEPENDS = ot-toolgen
+
+include_rules

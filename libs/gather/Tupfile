@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Gather library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-gather
+TYPE    = lib
+DEPENDS = ot-chan ot-misc
+
+include_rules

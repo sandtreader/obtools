@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Cache library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-cache
+TYPE    = headers
+DEPENDS = ot-mt
+
+include_rules

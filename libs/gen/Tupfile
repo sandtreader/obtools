@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Gen library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME = ot-gen
+TYPE = headers
+
+include_rules

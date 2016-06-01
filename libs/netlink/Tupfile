@@ -1,0 +1,12 @@
+#===========================================================================
+# Tupfile for ObTools::XML library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME        = ot-netlink
+TYPE        = lib
+DEPENDS     = ext-nl-3 ext-nl-genl-3
+EXTINCLUDES = -I/usr/include/libnl3
+
+include_rules

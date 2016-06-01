@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for XMLMesh OTMP library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-xmlmesh-otmp
+TYPE    = lib
+DEPENDS = ot-tube
+
+include_rules

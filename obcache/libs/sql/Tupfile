@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools ObCache SQL library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-obcache-sql
+TYPE    = lib
+DEPENDS = ot-obcache-core ot-db ot-xml
+
+include_rules

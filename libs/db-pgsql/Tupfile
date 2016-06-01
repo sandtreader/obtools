@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::DB::PG library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-db-pgsql
+TYPE    = lib
+DEPENDS = ot-db ext-pq
+
+include_rules

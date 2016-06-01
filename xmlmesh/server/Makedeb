@@ -41,7 +41,7 @@ if [ $RPM ]; then
 else
   #Build debs
   fakeroot -- dpkg -b $DEB_DIR $PACKAGE
-  cp $PACKAGE $SRC_DIR/../release/
+#  cp $PACKAGE $SRC_DIR/../release/
 fi
 
 # clean up

@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for XMLMesh core library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-xmlmesh
+TYPE    = lib
+DEPENDS = ot-net ot-soap
+
+include_rules

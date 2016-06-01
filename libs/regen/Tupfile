@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Regen library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME = ot-regen
+TYPE = lib
+
+include_rules

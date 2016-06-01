@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::DB::MySQL library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-db-mysql
+TYPE    = lib
+DEPENDS = ot-db ext-mysqlclient_r
+
+include_rules

@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools Toolgen core library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-toolgen
+TYPE    = lib
+DEPENDS = ot-xml ot-cppt
+
+include_rules

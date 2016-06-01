@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::MT library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-mt
+TYPE    = lib
+DEPENDS = ot-gen ext-pthread
+
+include_rules

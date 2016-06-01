@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for XMLMesh client library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-xmlmesh-client
+TYPE    = lib
+DEPENDS = ot-net ot-log ot-msg ot-xmlmesh ot-xmlmesh-otmp
+
+include_rules

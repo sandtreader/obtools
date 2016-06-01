@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for XMLMesh Receive CLI
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = xmlmesh-receive
+TYPE    = exe
+DEPENDS = ot-xmlmesh-client
+
+include_rules

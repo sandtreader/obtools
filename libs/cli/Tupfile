@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::CLI library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-cli
+TYPE    = lib
+DEPENDS = ot-net ot-text
+
+include_rules

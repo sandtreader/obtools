@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Daemon library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-daemon
+TYPE    = lib
+DEPENDS = ot-net ot-log ot-xml ot-misc ot-init
+
+include_rules

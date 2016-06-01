@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::CPPT library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME = ot-cppt
+TYPE = lib
+
+include_rules

@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::XML library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-xml
+TYPE    = lib
+DEPENDS = ot-file
+
+include_rules

@@ -1,0 +1,63 @@
+#===========================================================================
+# Tuprules.tup for ObTools build system
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+# Tools
+COMPILER = clang++
+ARCHIVER = ar
+LINKER = $(COMPILER)
+
+# Basic compiler options
+CFLAGS = --std=c++14 -Wall -Werror
+LFLAGS = --std=c++14
+
+# Get sources variables
+# SOURCES, TESTSOURCES
+include Tupsources.lua
+
+# Get dependency variables
+# DEPINCLUDES, DEPLINKS, DEPGROUPS
+include Tupdepends.lua
+
+# Debug settings
+ifdef DEBUG
+  CFLAGS += -ggdb
+endif
+
+# Release settings
+ifdef RELEASE
+  CFLAGS += -O2
+endif
+
+# Define commands
+!cc = |> ^ CC %f^ $(COMPILER) $(CFLAGS) $(EXTINCLUDES) $(DEPINCLUDES) -c %f -o %o |> %B.o
+!liblink = |> ^ AR %o^ $(ARCHIVER) crs %o %f |> $(NAME).a <$(NAME)>
+!exelink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,-\( %f $(DEPLINKS) -Wl,-\) -o %o |> $(NAME) <$(NAME)>
+!testlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,-\( %f %<$(NAME)> $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %B
+!runtest = |> ^ TEST %f^ %f |>
+!package = |> ^ PACKAGE %o^ ./Makedeb $(PACKAGE-NAME) $(PACKAGE-VERSION) $(PACKAGE-REVISION) amd64 |> $(PACKAGE-NAME)_$(PACKAGE-VERSION)-$(PACKAGE-REVISION)_amd64.deb
+
+# Let's build!
+: foreach $(SOURCES) |> !cc |> {objs}
+ifeq ($(TYPE),lib)
+  : {objs} | $(DEPGROUPS) |> !liblink |> {lib}
+endif
+ifeq ($(TYPE),exe)
+  : {objs} | $(DEPGROUPS) |> !exelink |> {exe}
+endif
+
+ifdef TEST
+  : foreach $(TESTSOURCES) |> !cc |> {testobjs}
+  : foreach {testobjs} | <$(NAME)> $(DEPGROUPS) |> !testlink |> {tests}
+  : foreach {tests} |> !runtest |>
+endif
+
+ifneq ($(PACKAGE-NAME)empty,empty)
+  ifeq ($(NAME)empty,empty)
+    : | $(DEPGROUPS) |> !package |>
+  else
+    : | <$(NAME)> $(DEPGROUPS) |> !package |>
+  endif
+endif

@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools ObCache core library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-obcache-core
+TYPE    = headers
+DEPENDS = ot-mt ot-cache
+
+include_rules

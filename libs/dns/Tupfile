@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::XML library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-dns
+TYPE    = lib
+DEPENDS = ot-log ot-chan
+
+include_rules

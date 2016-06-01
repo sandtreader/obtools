@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Expr library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-expr
+TYPE    = lib
+DEPENDS = ot-misc
+
+include_rules

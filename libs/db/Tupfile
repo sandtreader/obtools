@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::DB library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-db
+TYPE    = lib
+DEPENDS = ot-time ot-mt ot-log
+
+include_rules

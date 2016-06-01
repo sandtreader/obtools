@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Net library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-net
+TYPE    = lib
+DEPENDS = ot-mt
+
+include_rules

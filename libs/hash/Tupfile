@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Hash library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME = ot-hash
+TYPE = headers
+
+include_rules

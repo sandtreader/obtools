@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::XML library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-tube
+TYPE    = lib
+DEPENDS = ot-chan ot-cache ot-log ot-ssl-openssl ot-misc
+
+include_rules

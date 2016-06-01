@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Web library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-web
+TYPE    = lib
+DEPENDS = ot-xml ot-misc ot-ssl
+
+include_rules

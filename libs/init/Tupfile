@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Init library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-init
+TYPE    = lib
+DEPENDS = ot-xml
+include_rules

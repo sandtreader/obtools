@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::SOAP library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-soap
+TYPE    = lib
+DEPENDS = ot-web ot-msg ot-init
+
+include_rules

@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Chan library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-chan
+TYPE    = lib
+DEPENDS = ot-net
+
+include_rules

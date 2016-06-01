@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Access library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-access
+TYPE    = lib
+DEPENDS = ot-xml ot-ssl
+
+include_rules

@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::SSL library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-ssl
+TYPE    = lib
+DEPENDS = ot-net ot-xml ot-log
+
+include_rules

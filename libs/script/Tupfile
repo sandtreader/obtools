@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Script library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-script
+TYPE    = lib
+DEPENDS = ot-xml ot-init ot-misc ot-time ot-log
+
+include_rules

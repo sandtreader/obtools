@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Huffman library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-huffman
+TYPE    = lib
+DEPENDS = ot-chan ot-text
+
+include_rules

@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Ring library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME = ot-ring
+TYPE = headers
+
+include_rules
