@@ -12,4 +12,8 @@ PACKAGE  = ot-xmlmesh
 VERSION  = 3.2.0
 REVISION = 1~dev1
 
+ifdef RELEASE
+  CFLAGS += -DDAEMON
+endif
+
 include_rules
