@@ -9,7 +9,7 @@
 
 #include "ot-db-pgsql.h"
 #include "ot-log.h"
-#include <postgresql/libpq-fe.h>
+#include <libpq-fe.h>
 
 namespace ObTools { namespace DB { namespace PG {
 

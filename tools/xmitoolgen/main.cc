@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMITools: xmitoolgen.cc
+// ObTools::XMITools: xmitoolgen/main.cc
 //
 // Tool to read an <xt:tool> specification and generate C++ source for an XMI
 // tool that implements it

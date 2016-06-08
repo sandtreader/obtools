@@ -6,7 +6,6 @@
 
 NAME        = ot-netlink
 TYPE        = lib
-DEPENDS     = ext-nl-3 ext-nl-genl-3
-EXTINCLUDES = -I/usr/include/libnl3
+DEPENDS     = ext-pkg-libnl-3.0 ext-pkg-libnl-genl-3.0
 
 include_rules

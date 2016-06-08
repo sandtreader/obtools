@@ -6,6 +6,6 @@
 
 NAME    = ot-ssl-openssl
 TYPE    = lib
-DEPENDS = ot-ssl ot-crypto ext-ssl
+DEPENDS = ot-ssl ot-crypto ext-pkg-openssl
 
 include_rules

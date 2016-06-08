@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 #define FURKLE2(_x) #_x
 #define FURKLE(_x) FURKLE2(_x)
   log.summary << "ObTools XMLMesh server '" << argv[0] << "' version " 
-	      << FURKLE(OT_XMLMESH_VERSION) << " starting\n";
+	      << FURKLE(VERSION) << " starting\n";
   
   // Configure server 
   server.configure(config);

@@ -1,5 +1,5 @@
 // =======================================================================
-// ObTools::XMLMesh: xmlmesh-receive.cc
+// ObTools::XMLMesh: receive/main.cc
 //
 // Command-line interface to receive XMLMesh messages and spawn script to
 // accept it

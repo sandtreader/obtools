@@ -1,5 +1,5 @@
 // =======================================================================
-// ObTools::XMLMesh: xmlmesh-send.cc
+// ObTools::XMLMesh: send/main.cc
 //
 // Command-line interface to XMLMesh messaging
 //

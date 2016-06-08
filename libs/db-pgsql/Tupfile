@@ -6,6 +6,6 @@
 
 NAME    = ot-db-pgsql
 TYPE    = lib
-DEPENDS = ot-db ext-pq
+DEPENDS = ot-db ext-pkg-libpq
 
 include_rules

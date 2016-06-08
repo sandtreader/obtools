@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMLTools: xmltoolgen.cc
+// ObTools::XMLTools: xmltoolgen/main.cc
 //
 // Tool to read an <xt:tool> specification and generate C++ source for an XML
 // tool that implements it

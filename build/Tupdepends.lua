@@ -23,11 +23,24 @@ function get_deps(name)
       if f == nil then
         error("Could not open Tupfile in " .. libdir)
       end
+      local cont = false
       for line in f:lines() do
-        local d = line:match('DEPENDS[ ]*=(.*)')
-        if d ~= nil then
-          for n in string.gmatch(d, '([^ ]+)') do
+        if cont then
+          for n in string.gmatch(line, '([^\\ ]+)') do
             get_deps(n)
+          end
+          if string.sub(line, -1) ~= '\\' then
+            cont = false
+          end
+        else
+          local d = line:match('DEPENDS[ ]*=(.*)')
+          if d ~= nil then
+            for n in string.gmatch(d, '([^\\ ]+)') do
+              get_deps(n)
+            end
+            if string.sub(d, -1) == '\\' then
+              cont = true
+            end
           end
         end
       end
@@ -57,8 +70,15 @@ DEPLINKS = {};
 DEPGROUPS = {}
 for index, dep in ipairs(FULLDEPS) do
   if string.sub(dep, 1, 4) == 'ext-' then
-    -- external, so just link libs
-    DEPLINKS += '-l' .. string.sub(dep, 5)
+    if string.sub(dep, 5, 8) == 'pkg-' then
+      -- get info from pkg-config
+      local pkg = string.sub(dep, 9)
+      DEPINCLUDES += '`pkg-config --cflags-only-I ' .. pkg .. '`'
+      DEPLINKS += '`pkg-config --libs ' .. pkg .. '`'
+    else
+      -- external, so just link libs
+      DEPLINKS += '-l' .. string.sub(dep, 5)
+    end
   else
     local libdir = tup.getcwd() .. '/' .. get_dependency_path(dep)
     if libdir ~= nil then

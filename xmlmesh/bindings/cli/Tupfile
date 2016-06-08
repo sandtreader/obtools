@@ -6,8 +6,8 @@
 
 include_rules
 
-PACKAGE-NAME     = ot-xmlmesh-cli
-PACKAGE-VERSION  = 2.2.1
-PACKAGE-REVISION = 1
+PACKAGE  = ot-xmlmesh-cli
+VERSION  = 2.2.1
+REVISION = 1
 
 : send/<xmlmesh-send> receive/<xmlmesh-receive> |> !package |>
