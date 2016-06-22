@@ -4,11 +4,11 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME     = xmlmesh-server
+NAME     = ot-xmlmesh
 TYPE     = exe
 DEPENDS  = ot-net ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
 
-PACKAGE  = ot-xmlmesh
+PACKAGE  = $(NAME)
 VERSION  = 3.2.0
 REVISION = 1~dev1
 

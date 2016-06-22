@@ -1,7 +1,14 @@
-Package: ot-xmlmesh
+Source: ot-xmlmesh
+Section: Video
 Priority: optional
-Maintainer: Paul Clark <debian@obtools.com>
-Depends: libc6 (>= 2.3.2), libstdc++6 (>= 3.4.3)
+Maintainer: PacketShip Support <support@packetship.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: http://www.packetship.com/
+
+Package: ot-xmlmesh
+Architecture: any
+Depends: ${misc:Depends}
 Description: ObTools XMLMesh message bus server
  XMLMesh is a SOAP-based XML message bus for integration of distributed
  components using simple XML messages

@@ -24,6 +24,8 @@ ifdef RELEASE
   LFLAGS += -s
 endif
 
+PACKAGEDIR=DEBIAN
+
 # Get sources variables
 # SOURCES, TESTSOURCES
 include Tupsources.lua
@@ -33,14 +35,15 @@ include Tupsources.lua
 include Tupdepends.lua
 
 # Define commands
+TUP_TOP=$(TUP_CWD)
 !cc = |> ^ CC %f^ $(COMPILER) $(CFLAGS) $(DEPINCLUDES) -c %f -o %o |> %F.o
 !liblink = |> ^ AR %o^ $(ARCHIVER) crs %o %f |> $(NAME).a <$(NAME)>
-!sharedlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,-\( %f $(DEPLINKS) -Wl,-\) -shared -rdynamic -o %o |> $(NAME).so <$(NAME)>
-!exelink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,-\( %f $(DEPLINKS) -Wl,-\) -o %o |> $(NAME) <$(NAME)>
-!libtestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)> -Wl,-\( $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %F
-!exetestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)-non-main> -Wl,-\( $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %F
+!sharedlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,--as-needed -Wl,-\( %f $(DEPLINKS) -Wl,-\) -shared -rdynamic -o %o |> $(NAME).so <$(NAME)>
+!exelink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,--as-needed -Wl,-\( %f $(DEPLINKS) -Wl,-\) -o %o |> $(NAME) <$(NAME)>
+!libtestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)> -Wl,--as-needed -Wl,-\( $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %F
+!exetestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)-non-main> -Wl,--as-needed -Wl,-\( $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %F
 !runtest = |> ^ TEST %f^ %f |>
-!package = |> ^ PACKAGE %o^ ./Makedeb $(PACKAGE) $(VERSION) $(REVISION) amd64 |> $(PACKAGE)_$(VERSION)-$(REVISION)_amd64.deb
+!package = |> ^ PACKAGE %o^ $(TUP_TOP)/create-deb.sh $(PACKAGE) $(VERSION) $(REVISION) $(ARCH) |> $(PACKAGE)_$(VERSION)-$(REVISION)_$(ARCH).deb
 
 # Let's build!
 ifneq ($(VERSION)empty,empty)
@@ -71,11 +74,15 @@ ifdef TEST
 endif
 
 ifdef RELEASE
+  ifeq ($(ARCH)empty,empty)
+    ARCH = @(ARCH)
+  endif
   ifneq ($(PACKAGE)empty,empty)
+    : foreach $(PACKAGEDIR)/* |> |> <PACKAGE-FILES>
     ifeq ($(NAME)empty,empty)
-      : | $(DEPGROUPS) |> !package |>
+      : <PACKAGE-FILES> | $(DEPGROUPS) |> !package |>
     else
-      : | <$(NAME)> $(DEPGROUPS) |> !package |>
+      : <PACKAGE-FILES> | <$(NAME)> $(DEPGROUPS) |> !package |>
     endif
   endif
 endif

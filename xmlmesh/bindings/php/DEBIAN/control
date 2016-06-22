@@ -1,7 +1,13 @@
-Package: ot-xmlmesh-php-native
+Source: ot-xmlmesh-php-native
+Section: Video
 Priority: optional
+Maintainer: PacketShip Support <support@packetship.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: http://www.packetship.com/
+
+Package: ot-xmlmesh-php-native
 Architecture: all
-Maintainer: Paul Clark <debian@obtools.com>
 Depends: php5-common
 Description: ObTools XMLMesh message bus PHP interface
  XMLMesh is a SOAP-based XML message bus for integration of distributed

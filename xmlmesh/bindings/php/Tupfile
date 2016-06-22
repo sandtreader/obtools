@@ -1,15 +1,12 @@
 #===========================================================================
-# Tupfile for XMLMesh CLI Package
+# Tupfile for XMLMesh PHP Package
 #
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
+PACKAGE  = ot-xmlmesh-php-native
+VERSION  = 0.3.1
+REVISION = 2
+ARCH     = all
+
 include_rules
-
-PACKAGE  = ot-xmlmesh-cli
-VERSION  = 2.2.1
-REVISION = 1
-
-ifdef RELEASE
-  : send/<xmlmesh-send> receive/<xmlmesh-receive> |> !package |>
-endif
