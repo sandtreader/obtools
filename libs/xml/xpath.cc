@@ -13,6 +13,7 @@
 #include <sstream>
 #include <cstdio>
 #include <stdlib.h>
+#include <iomanip>
 
 using namespace ObTools::XML;
 
@@ -388,7 +389,7 @@ bool XPathProcessor::set_value_hex64(const string& path, uint64_t value)
 bool XPathProcessor::set_value_real(const string& path, double value)
 {
   ostringstream oss;
-  oss << value;
+  oss << setprecision(17) << value;
   return set_value(path, oss.str());
 }
 

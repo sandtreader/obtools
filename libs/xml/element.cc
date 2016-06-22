@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 using namespace ObTools::XML;
 
@@ -831,7 +832,7 @@ Element& Element::set_attr_bool(const string& attname, bool value)
 Element& Element::set_attr_real(const string& attname, double value)
 {
   ostringstream oss;
-  oss << value;
+  oss << setprecision(17) << value;
   attrs[attname] = oss.str();
   return *this;
 }
