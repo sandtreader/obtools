@@ -31,17 +31,17 @@ PACKAGEDIR=DEBIAN
 include Tupsources.lua
 
 # Get dependency variables
-# DEPINCLUDES, DEPLINKS, DEPGROUPS
+# DEPINCLUDES, DEPLIBS, DEPARCHIVES, DEPGROUPS
 include Tupdepends.lua
 
 # Define commands
 TUP_TOP=$(TUP_CWD)
 !cc = |> ^ CC %f^ $(COMPILER) $(CFLAGS) $(DEPINCLUDES) -c %f -o %o |> %F.o
 !liblink = |> ^ AR %o^ $(ARCHIVER) crs %o %f |> $(NAME).a <$(NAME)>
-!sharedlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,--as-needed -Wl,-\( %f $(DEPLINKS) -Wl,-\) -shared -rdynamic -o %o |> $(NAME).so <$(NAME)>
-!exelink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) -Wl,--as-needed -Wl,-\( %f $(DEPLINKS) -Wl,-\) -o %o |> $(NAME) <$(NAME)>
-!libtestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)> -Wl,--as-needed -Wl,-\( $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %F
-!exetestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)-non-main> -Wl,--as-needed -Wl,-\( $(DEPLINKS) -Wl,-\) -lgtest -lpthread -o %o |> %F
+!sharedlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -shared -rdynamic -o %o |> $(NAME).so <$(NAME)>
+!exelink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -o %o |> $(NAME) <$(NAME)>
+!libtestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)> -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -lgtest -lpthread -o %o |> %F
+!exetestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)-non-main> -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -lgtest -lpthread -o %o |> %F
 !runtest = |> ^ TEST %f^ %f |>
 !package = |> ^ PACKAGE %o^ $(TUP_TOP)/create-deb.sh $(PACKAGE) $(VERSION) $(REVISION) $(ARCH) |> $(PACKAGE)_$(VERSION)-$(REVISION)_$(ARCH).deb
 

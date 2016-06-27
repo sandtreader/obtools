@@ -66,7 +66,8 @@ table.sort(FULLDEPS)
 
 -- Finally, create the output variables
 DEPINCLUDES = {};
-DEPLINKS = {};
+DEPARCHIVES = {};
+DEPLIBS = {};
 DEPGROUPS = {}
 for index, dep in ipairs(FULLDEPS) do
   if string.sub(dep, 1, 4) == 'ext-' then
@@ -74,16 +75,16 @@ for index, dep in ipairs(FULLDEPS) do
       -- get info from pkg-config
       local pkg = string.sub(dep, 9)
       DEPINCLUDES += '`pkg-config --cflags-only-I ' .. pkg .. '`'
-      DEPLINKS += '`pkg-config --libs ' .. pkg .. '`'
+      DEPLIBS += '`pkg-config --libs ' .. pkg .. '`'
     else
       -- external, so just link libs
-      DEPLINKS += '-l' .. string.sub(dep, 5)
+      DEPLIBS += '-l' .. string.sub(dep, 5)
     end
   else
     local libdir = tup.getcwd() .. '/' .. get_dependency_path(dep)
     if libdir ~= nil then
       DEPINCLUDES += '-I' .. libdir
-      DEPLINKS += '%<' .. dep .. '>'
+      DEPARCHIVES += '%<' .. dep .. '>'
       DEPGROUPS += libdir .. '/<' .. dep .. '>'
     end
   end
