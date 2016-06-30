@@ -16,7 +16,7 @@ namespace ObTools { namespace DB {
 
 //------------------------------------------------------------------------
 //Get value of field of given name, or default if not found
-string Row::get(string fieldname, const string& def) const
+string Row::get(const string& fieldname, const string& def) const
 {
   map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())
@@ -27,7 +27,7 @@ string Row::get(string fieldname, const string& def) const
 
 //------------------------------------------------------------------------
 //Get integer value of field of given name, or default if not found
-int Row::get_int(string fieldname, int def) const
+int Row::get_int(const string& fieldname, int def) const
 {
   map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())
@@ -38,7 +38,7 @@ int Row::get_int(string fieldname, int def) const
 
 //------------------------------------------------------------------------
 //Get 64-bit value of field of given name, or default if not found
-uint64_t Row::get_int64(string fieldname, uint64_t def) const
+uint64_t Row::get_int64(const string& fieldname, uint64_t def) const
 {
   map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())
@@ -49,7 +49,7 @@ uint64_t Row::get_int64(string fieldname, uint64_t def) const
 
 //------------------------------------------------------------------------
 //Get boolean value of field of given name, or default if not found
-bool Row::get_bool(string fieldname, bool def) const
+bool Row::get_bool(const string& fieldname, bool def) const
 {
   map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())
@@ -60,7 +60,7 @@ bool Row::get_bool(string fieldname, bool def) const
 
 //------------------------------------------------------------------------
 //Get real value of field of given name, or default if not found
-double Row::get_real(string fieldname, double def) const
+double Row::get_real(const string& fieldname, double def) const
 {
   map<string, FieldValue>::const_iterator p=fields.find(fieldname);
   if (p!=fields.end())

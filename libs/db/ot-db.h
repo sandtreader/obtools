@@ -212,12 +212,12 @@ public:
 
   //------------------------------------------------------------------------
   // Add integer value to row
-  void add(string fieldname, int value)
+  void add(const string& fieldname, int value)
   { fields[fieldname] = FieldValue(value); }
 
   //------------------------------------------------------------------------
   // Add integer value to row (NULL if zero)
-  void add_or_null(string fieldname, int value)
+  void add_or_null(const string& fieldname, int value)
   {
     if (value)
       fields[fieldname] = FieldValue(value);
@@ -227,12 +227,12 @@ public:
 
   //------------------------------------------------------------------------
   // Add a 64-bit integer value to row
-  void add_int64(string fieldname, uint64_t value)
+  void add_int64(const string& fieldname, uint64_t value)
   { fields[fieldname] = FieldValue(value); }
 
   //------------------------------------------------------------------------
   // Add a 64-bit integer value to row (NULL if zero)
-  void add_int64_or_null(string fieldname, uint64_t value)
+  void add_int64_or_null(const string& fieldname, uint64_t value)
   {
     if (value)
       fields[fieldname] = FieldValue(value);
@@ -242,17 +242,17 @@ public:
 
   //------------------------------------------------------------------------
   // Add boolean value to row
-  void add(string fieldname, bool value)
+  void add(const string& fieldname, bool value)
   { fields[fieldname] = FieldValue(value); }
 
   //------------------------------------------------------------------------
   // Add real value to row
-  void add(string fieldname, double value)
+  void add(const string& fieldname, double value)
   { fields[fieldname] = FieldValue(value); }
 
   //------------------------------------------------------------------------
   // Add real value to row (NULL if zero)
-  void add_or_null(string fieldname, double value)
+  void add_or_null(const string& fieldname, double value)
   {
     if (value)
       fields[fieldname] = FieldValue(value);
@@ -284,34 +284,34 @@ public:
 
   //------------------------------------------------------------------------
   //Finds whether the row contains a value for the given fieldname
-  bool has(string fieldname) const
+  bool has(const string& fieldname) const
   { return fields.find(fieldname) != fields.end(); }
 
   //------------------------------------------------------------------------
   //Get value of field of given name, or default if not found
-  string get(string fieldname, const string& def="") const;
+  string get(const string& fieldname, const string& def="") const;
 
   //------------------------------------------------------------------------
   //Handy [] operator
   // e.g. foo = row["id"];
-  string operator[](string fieldname) const
+  string operator[](const string& fieldname) const
   { return get(fieldname); }
 
   //------------------------------------------------------------------------
   //Get integer value of field of given name, or default if not found
-  int get_int(string fieldname, int def=0) const;
+  int get_int(const string& fieldname, int def=0) const;
 
   //------------------------------------------------------------------------
   //Get 64-bit value of field of given name, or default if not found
-  uint64_t get_int64(string fieldname, uint64_t def=0) const;
+  uint64_t get_int64(const string& fieldname, uint64_t def=0) const;
 
   //------------------------------------------------------------------------
   //Get boolean value of field of given name, or default if not found
-  bool get_bool(string fieldname, bool def=false) const;
+  bool get_bool(const string& fieldname, bool def=false) const;
 
   //------------------------------------------------------------------------
   //Get real value of field of given name, or default if not found
-  double get_real(string fieldname, double def=0) const;
+  double get_real(const string& fieldname, double def=0) const;
 
   //------------------------------------------------------------------------
   // Get string with field names in order, separated by commas and spaces
