@@ -10,6 +10,7 @@
 #include "ot-db-sqlite.h"
 #include "ot-log.h"
 #include <sqlite3.h>
+#include <cmath>
 
 namespace ObTools { namespace DB { namespace SQLite {
 
@@ -38,7 +39,7 @@ int ResultSet::count()
 // Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
 {
-  if (sqlite3_step(stmt.get()) != SQLITE_OK)
+  if (sqlite3_step(stmt.get()) != SQLITE_ROW)
       return false;
 
   row.clear();
@@ -82,6 +83,7 @@ Connection::Connection(const string& file):
   conn{nullptr, sqlite3_close}
 {
   sqlite3 *c{nullptr};
+  Log::Streams log;
 
   auto e = sqlite3_open(file.c_str(), &c);
   conn.reset(c);
@@ -95,6 +97,16 @@ Connection::Connection(const string& file):
   // OK, we have a connection
   log.detail << "SQLite connection opened to " << file << endl;
   valid = true;
+
+  // Set up a busy handler
+  sqlite3_busy_handler(c, [](void *, int attempts)
+      {
+        if (attempts > 8)
+          return 0;
+        this_thread::sleep_for(chrono::milliseconds{
+                               static_cast<uint64_t>(pow(2, attempts))});
+        return 1;
+      }, nullptr);
 }
 
 //--------------------------------------------------------------------------
@@ -109,17 +121,18 @@ bool Connection::ok()
 // Returns whether successful
 bool Connection::exec(const string& sql)
 {
-  OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec: " << sql << endl;)
+  OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBexec: " << sql << endl;})
 
   char *err{nullptr};
   auto e = sqlite3_exec(conn.get(), sql.c_str(), nullptr, nullptr, &err);
   if (e != SQLITE_OK)
   {
-    log.error << "SQLite exec failed: " << err << endl;
+    Log::Error log;
+    log << "SQLite exec failed: " << err << endl;
     return false;
   }
 
-  OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec OK" << endl;)
+  OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBexec OK" << endl;})
   return true;
 }
 
@@ -128,7 +141,7 @@ bool Connection::exec(const string& sql)
 // Returns result - check this for validity
 Result Connection::query(const string& sql)
 {
-  OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery: " << sql << endl;)
+  OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBquery: " << sql << endl;})
 
   char *err{nullptr};
   sqlite3_stmt *stmt{0};
@@ -136,11 +149,12 @@ Result Connection::query(const string& sql)
                               nullptr);
   if (e == SQLITE_OK)
   {
-    OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery OK" << endl;)
+    OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBquery OK" << endl;})
   }
   else
   {
-    log.error << "SQLite query failed: " << err << endl;
+    Log::Error log;
+    log << "SQLite query failed: " << err << endl;
   }
   return Result(new ResultSet{stmt});
 }

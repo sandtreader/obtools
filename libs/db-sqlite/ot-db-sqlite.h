@@ -55,8 +55,6 @@ class Connection: public DB::Connection
 {
 private:
   unique_ptr<sqlite3, decltype(&sqlite3_close)> conn;
-  Log::Streams log; // Private (therefore per-thread, assuming connections
-                    // are not shared) log streams
 
 public:
   //------------------------------------------------------------------------
@@ -100,7 +98,6 @@ public:
   }
 };
 
-
 //==========================================================================
 }}} //namespaces
-#endif // !__OBTOOLS_DB_MYSQL_H
+#endif // !__OBTOOLS_DB_SQLITE_H
