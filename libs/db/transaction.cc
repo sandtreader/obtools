@@ -15,15 +15,15 @@ namespace ObTools { namespace DB {
 // Constructor from plain connection
 Transaction::Transaction(Connection& _conn): conn(&_conn), committed(false)
 {
-  if (!conn->exec("START TRANSACTION")) committed = true;  // Make commit fail
+  if (!conn->exec("BEGIN")) committed = true;  // Make commit fail
 }
 
 //------------------------------------------------------------------------
 // Constructor from AutoConnection
-Transaction::Transaction(AutoConnection& _autoconn): 
+Transaction::Transaction(AutoConnection& _autoconn):
   conn(_autoconn.conn), committed(false)
 {
-  if (!conn || !conn->exec("START TRANSACTION")) 
+  if (!conn || !conn->exec("BEGIN"))
     committed = true;  // Make commit fail
 }
 
