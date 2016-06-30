@@ -23,7 +23,7 @@ $NAME ($VERSION-$REVISION) stable; urgency=low
 
   * See documentation.
 
- -- Paul Clark <paul@packetship.com>  `date -R`
+ -- PacketShip Support <support@packetship.com>  `date -R`
 EOF
 fi
 
