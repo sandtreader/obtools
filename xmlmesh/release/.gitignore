@@ -1,8 +1,0 @@
-*.deb
-*.so*
-*.a
-*.h
-*.xml
-xmlmesh-receive
-xmlmesh-send
-xmlmesh-server
