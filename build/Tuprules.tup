@@ -42,7 +42,7 @@ TUP_TOP=$(TUP_CWD)
 !exelink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -o %o |> $(NAME) <$(NAME)>
 !libtestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)> -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -lgtest -lpthread -o %o |> %F
 !exetestlink = |> ^ LINK %o^ $(LINKER) $(LFLAGS) %f %<$(NAME)-non-main> -Wl,-\( $(DEPARCHIVES) -Wl,-\) -Wl,--as-needed $(DEPLIBS) -lgtest -lpthread -o %o |> %F
-!runtest = |> ^ TEST %f^ %f |>
+!runtest = |> ^ TEST %f^ ./%f |>
 !package = |> ^ PACKAGE %o^ $(TUP_TOP)/create-deb.sh $(PACKAGE) $(VERSION) $(REVISION) $(ARCH) |> $(PACKAGE)_$(VERSION)-$(REVISION)_$(ARCH).deb
 
 # Let's build!
