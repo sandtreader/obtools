@@ -166,6 +166,7 @@ void TCPServer::shutdown()
   if (alive)
   {
     alive = false;
+    Socket::shutdown();  // Force accept() to exit
     close();  // Close listen socket
   }
 
