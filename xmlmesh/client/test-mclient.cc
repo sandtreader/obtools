@@ -9,13 +9,12 @@
 
 #include <gtest/gtest.h>
 #include "ot-xmlmesh-client-otmp.h"
-#include "ot-log.h"
 #include <unistd.h>
 
 using namespace std;
 using namespace ObTools;
 
-TEST(MClientTests, TestMClientExitsReasonablyQuickly)
+TEST(XMLMeshMultiClientTests, TestMultiClientExitsReasonablyQuickly)
 {
   const auto host = "localhost";
   int port = XMLMesh::OTMP::DEFAULT_PORT;
@@ -36,11 +35,6 @@ TEST(MClientTests, TestMClientExitsReasonablyQuickly)
 // Main
 int main(int argc, char **argv)
 {
-  Log::StreamChannel   chan_out(cout);
-  Log::TimestampFilter tsfilter("%H:%M:%S %a %d %b %Y [%*L]: ", chan_out);
-  Log::LevelFilter     level_out(Log::LEVEL_DETAIL, tsfilter);
-  Log::logger.connect(level_out);
-
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
