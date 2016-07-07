@@ -24,6 +24,15 @@ ifdef RELEASE
   LFLAGS += -s
 endif
 
+# Version
+ifneq ($(VERSION)empty,empty)
+  ifdef DEBUG
+    CFLAGS += -DVERSION='"$(VERSION) (debug)"'
+  else
+    CFLAGS += -DVERSION='"$(VERSION)"'
+  endif
+endif
+
 PACKAGEDIR=DEBIAN
 
 # Get sources variables
@@ -46,9 +55,6 @@ TUP_TOP=$(TUP_CWD)
 !package = |> ^ PACKAGE %o^ $(TUP_TOP)/create-deb.sh $(PACKAGE) $(VERSION) $(REVISION) $(ARCH) |> $(PACKAGE)_$(VERSION)-$(REVISION)_$(ARCH).deb
 
 # Let's build!
-ifneq ($(VERSION)empty,empty)
-  CFLAGS += -DVERSION=$(VERSION)
-endif
 : foreach $(SOURCES) |> !cc |> | <$(NAME)-non-main> {objs}
 ifeq ($(TYPE),lib)
   : {objs} | $(DEPGROUPS) |> !liblink |> {lib}
