@@ -134,6 +134,36 @@ TEST(ThreadTest, TestWaitForJoinOnDestruct)
   EXPECT_TRUE(waited);
 }
 
+TEST(ThreadTest, TestRepeatedStarts)
+{
+  class TestThread: public MT::Thread
+  {
+  public:
+    int count;
+
+  private:
+    void run() override
+    {
+      count++;
+      // Exits immediately
+    }
+
+  public:
+    TestThread(): count(0)
+    {
+    }
+  };
+
+  TestThread thread;
+  for(auto i=0; i<10; i++)
+  {
+    thread.start();
+    this_thread::sleep_for(chrono::milliseconds(10));
+  }
+
+  ASSERT_EQ(10, thread.count);
+}
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)
