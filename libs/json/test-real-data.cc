@@ -57,17 +57,17 @@ void roundtrip(const char *fn)
 
 TEST(RealData, TestRoundTripOfTwitterData)
 {
-  roundtrip("../tests/twitter.json");
+  roundtrip("tests/twitter.json");
 }
 
 TEST(RealData, TestRoundTripOfFacebookData)
 {
-  roundtrip("../tests/facebook.json");
+  roundtrip("tests/facebook.json");
 }
 
 TEST(RealData, TestRoundTripOfJSONDotOrgData)
 {
-  roundtrip("../tests/json.org.json");
+  roundtrip("tests/json.org.json");
 }
 
 int main(int argc, char **argv)

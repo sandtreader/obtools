@@ -85,10 +85,6 @@ public:
   bool is_true() const { return type == TRUE || (type == INTEGER && n); }
 
   //------------------------------------------------------------------------
-  // Get a string value with the given default
-  const string& str(const string& def="") { return (type==STRING)?s:def; }
-
-  //------------------------------------------------------------------------
   // Get a value from the given object property
   // Returns Value(NULL) if this is not an object or property doesn't exist
   const Value& get(const string& property) const;
@@ -107,9 +103,17 @@ public:
   { return get(index); }
 
   //------------------------------------------------------------------------
+  // Get a string value with the given default
+  string get_str(const string& def="") const { return (type==STRING)?s:def; }
+
+  //------------------------------------------------------------------------
   // Write the value to the given stream
   // Set 'pretty' for multi-line, indented pretty-print, clear for optimal
   void write_to(ostream& s, bool pretty=false, int indent=0) const;
+
+  //------------------------------------------------------------------------
+  // Output value as a string, with optional prettiness
+  string str(bool pretty=false);
 };
 
 //------------------------------------------------------------------------

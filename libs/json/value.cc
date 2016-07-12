@@ -9,6 +9,7 @@
 
 #include "ot-json.h"
 #include <iomanip>
+#include <sstream>
 
 namespace ObTools { namespace JSON {
 
@@ -152,6 +153,15 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
     case TRUE:    out << "true";                        break;
     case FALSE:   out << "false";                       break;
   }
+}
+
+//------------------------------------------------------------------------
+// Output value as a string, with optional prettiness
+string Value::str(bool pretty)
+{
+  ostringstream oss;
+  write_to(oss, pretty);
+  return oss.str();
 }
 
 //------------------------------------------------------------------------

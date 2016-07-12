@@ -36,13 +36,13 @@ TEST(Value, TestIsTrue)
   ASSERT_FALSE(v0.is_true());
 }
 
-TEST(Value, TestStr)
+TEST(Value, TestGetStr)
 {
   Value v("foo");
-  ASSERT_EQ("foo", v.str());
+  ASSERT_EQ("foo", v.get_str());
 
   Value nv;
-  ASSERT_EQ("bar", nv.str("bar"));
+  ASSERT_EQ("bar", nv.get_str("bar"));
 }
 
 TEST(Value, TestObjectSetter)
@@ -109,74 +109,56 @@ TEST(Value, TestWritingUnsetThrows)
 TEST(Value, TestWritingNull)
 {
   Value value(Value::NULL_);
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("null", out.str());
+  ASSERT_EQ("null", value.str());
 }
 
 TEST(Value, TestWritingTrue)
 {
   Value value(Value::TRUE);
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("true", out.str());
+  ASSERT_EQ("true", value.str());
 }
 
 TEST(Value, TestWritingFalse)
 {
   Value value(Value::FALSE);
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("false", out.str());
+  ASSERT_EQ("false", value.str());
 }
 
 TEST(Value, TestWritingNumber)
 {
   Value value(Value::NUMBER, 3.1415);
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("3.1415", out.str());
+  ASSERT_EQ("3.1415", value.str());
 }
 
 TEST(Value, TestWritingBigIntegerStaysIntegral)
 {
   Value value(12345678901234567890ULL);
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("12345678901234567890", out.str());
+  ASSERT_EQ("12345678901234567890", value.str());
 }
 
 TEST(Value, TestWritingString)
 {
   Value value("foo");
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("\"foo\"", out.str());
+  ASSERT_EQ("\"foo\"", value.str());
 }
 
 TEST(Value, TestWritingStringEncoding)
 {
   Value value("\\\"\b\f\n\r\t\uabcd");
-  ostringstream out;
-  out << value;
-  ASSERT_EQ("\"\\\\\\\"\\b\\f\\n\\r\\t\\uabcd\"", out.str());
+  ASSERT_EQ("\"\\\\\\\"\\b\\f\\n\\r\\t\\uabcd\"", value.str());
 }
 
 TEST(Value, TestWritingEmptyObject)
 {
   Value value(Value::OBJECT);
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("{}", out.str());
+  ASSERT_EQ("{}", value.str());
 }
 
 TEST(Value, TestWritingSinglePropertyObject)
 {
   Value value(Value::OBJECT);
   value.set("foo", 1);
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("{\"foo\":1}", out.str());
+  ASSERT_EQ("{\"foo\":1}", value.str());
 }
 
 TEST(Value, TestWritingTwoPropertyObject)
@@ -184,9 +166,7 @@ TEST(Value, TestWritingTwoPropertyObject)
   Value value(Value::OBJECT);
   value.set("foo", 1);
   value.set("bar", 2);
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("{\"bar\":2,\"foo\":1}", out.str());
+  ASSERT_EQ("{\"bar\":2,\"foo\":1}", value.str());
 }
 
 TEST(Value, TestWritingNestedObject)
@@ -194,26 +174,20 @@ TEST(Value, TestWritingNestedObject)
   Value value(Value::OBJECT);
   value.set("foo", 1);
   value.set("bar", Value(Value::OBJECT));
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("{\"bar\":{},\"foo\":1}", out.str());
+  ASSERT_EQ("{\"bar\":{},\"foo\":1}", value.str());
 }
 
 TEST(Value, TestWritingEmptyArray)
 {
   Value value(Value::ARRAY);
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("[]", out.str());
+  ASSERT_EQ("[]", value.str());
 }
 
 TEST(Value, TestWritingSingleElementArray)
 {
   Value value(Value::ARRAY);
   value.add(1);
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("[1]", out.str());
+  ASSERT_EQ("[1]", value.str());
 }
 
 TEST(Value, TestWritingTwoElementArray)
@@ -221,27 +195,20 @@ TEST(Value, TestWritingTwoElementArray)
   Value value(Value::ARRAY);
   value.add(1);
   value.add(2);
-  ostringstream out;
-  value.write_to(out);  // Not pretty
-  ASSERT_EQ("[1,2]", out.str());
+  ASSERT_EQ("[1,2]", value.str());
 }
 
 TEST(Value, TestWritingPrettyEmptyObject)
 {
   Value value(Value::OBJECT);
-  ostringstream out;
-  out << value;  // pretty
-  ASSERT_EQ("{}", out.str());
+  ASSERT_EQ("{}", value.str(true)); // pretty
 }
 
 TEST(Value, TestWritingPrettySinglePropertyObject)
 {
   Value value(Value::OBJECT);
   value.set("foo", 1);
-  ostringstream out;
-  out << value;  // pretty
-  cout << out.str() << endl;
-  ASSERT_EQ("{\n  \"foo\": 1\n}\n", out.str());
+  ASSERT_EQ("{\n  \"foo\": 1\n}\n", value.str(true)); // pretty
 }
 
 TEST(Value, TestWritingPrettyTwoPropertyObject)
@@ -249,10 +216,7 @@ TEST(Value, TestWritingPrettyTwoPropertyObject)
   Value value(Value::OBJECT);
   value.set("foo", 1);
   value.set("bar", 2);
-  ostringstream out;
-  out << value;  // pretty
-  cout << out.str() << endl;
-  ASSERT_EQ("{\n  \"bar\": 2,\n  \"foo\": 1\n}\n", out.str());
+  ASSERT_EQ("{\n  \"bar\": 2,\n  \"foo\": 1\n}\n", value.str(true)); // pretty
 }
 
 TEST(Value, TestWritingPrettyNestedEmptyObject)
@@ -260,10 +224,7 @@ TEST(Value, TestWritingPrettyNestedEmptyObject)
   Value value(Value::OBJECT);
   value.set("foo", 1);
   value.set("bar", Value(Value::OBJECT));
-  ostringstream out;
-  out << value;  // pretty
-  cout << out.str() << endl;
-  ASSERT_EQ("{\n  \"bar\": {},\n  \"foo\": 1\n}\n", out.str());
+  ASSERT_EQ("{\n  \"bar\": {},\n  \"foo\": 1\n}\n", value.str(true)); // pretty
 }
 
 TEST(Value, TestWritingPrettyNestedNonEmptyObject)
@@ -275,27 +236,20 @@ TEST(Value, TestWritingPrettyNestedNonEmptyObject)
   Value value(Value::OBJECT);
   value.set("foo", 1);
   value.set("bar", inner);
-  ostringstream out;
-  out << value;  // pretty
-  cout << out.str() << endl;
-  ASSERT_EQ("{\n  \"bar\":\n  {\n    \"splat\": 3,\n    \"wombat\": 4\n  },\n  \"foo\": 1\n}\n", out.str());
+  ASSERT_EQ("{\n  \"bar\":\n  {\n    \"splat\": 3,\n    \"wombat\": 4\n  },\n  \"foo\": 1\n}\n", value.str(true)); // pretty
 }
 
 TEST(Value, TestWritingPrettyEmptyArray)
 {
   Value value(Value::ARRAY);
-  ostringstream out;
-  out << value;  // pretty
-  ASSERT_EQ("[]", out.str());
+  ASSERT_EQ("[]", value.str(true));  // pretty
 }
 
 TEST(Value, TestWritingPrettySingleElementArray)
 {
   Value value(Value::ARRAY);
   value.add(1);
-  ostringstream out;
-  out << value;  // pretty
-  ASSERT_EQ("[ 1 ]", out.str());
+  ASSERT_EQ("[ 1 ]", value.str(true));  // pretty
 }
 
 TEST(Value, TestWritingPrettyTwoElementArray)
@@ -303,9 +257,7 @@ TEST(Value, TestWritingPrettyTwoElementArray)
   Value value(Value::ARRAY);
   value.add(1);
   value.add(2);
-  ostringstream out;
-  out << value;  // pretty
-  ASSERT_EQ("[ 1, 2 ]", out.str());
+  ASSERT_EQ("[ 1, 2 ]", value.str(true));  // pretty
 }
 
 TEST(Value, TestWritingPrettyNestedArray)
@@ -320,10 +272,8 @@ TEST(Value, TestWritingPrettyNestedArray)
   Value value(Value::ARRAY);
   value.add(inner);
   value.add(1);
-  ostringstream out;
-  out << value;  // pretty
-  cout << out.str() << endl;
-  ASSERT_EQ("[\n  [\n    2,\n    {\n      \"foo\": 3\n    }\n  ],\n  1\n]\n", out.str());
+  ASSERT_EQ("[\n  [\n    2,\n    {\n      \"foo\": 3\n    }\n  ],\n  1\n]\n",
+            value.str(true));  // pretty
 }
 
 int main(int argc, char **argv)
