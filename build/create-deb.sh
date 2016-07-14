@@ -51,7 +51,7 @@ if [ -f /usr/local/bin/pseudo ]; then
   FAKEROOT=-rpseudo
 fi
 
-if [ $UID -eq 0 ]; then
+if [ `id -u` -eq 0 ]; then
   FAKEROOT=
 fi
 
