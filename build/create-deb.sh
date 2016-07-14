@@ -45,7 +45,17 @@ EOF
   chmod a+x $DEBDIR/rules
 fi
 
-dpkg-buildpackage -uc -b -rfakeroot-ng -tc
+FAKEROOT=-rfaketroot-ng
+if [ -f /usr/local/bin/pseudo ]; then
+  export PSEUDO_PREFIX=/usr/local
+  FAKEROOT=-rpseudo
+fi
+
+if [ $EUID -eq 0 ]; then
+  FAKEROOT=
+fi
+
+dpkg-buildpackage -uc -b $FAKEROOT -tc
 mv ../${NAME}_${VERSION}-${REVISION}_${ARCH}.deb ./
 rm ../${NAME}_${VERSION}-${REVISION}_*.changes
 rm -rf $DEBDIR
