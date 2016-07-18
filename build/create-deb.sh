@@ -45,7 +45,7 @@ EOF
   chmod a+x $DEBDIR/rules
 fi
 
-FAKEROOT=-rfaketroot-ng
+FAKEROOT=-rfakeroot-ng
 if [ -f /usr/local/bin/pseudo ]; then
   export PSEUDO_PREFIX=/usr/local
   FAKEROOT=-rpseudo
