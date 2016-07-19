@@ -66,6 +66,7 @@ private:
   MT::Mutex handlers_mutex;
 
   MT::Queue<Action<T> *> actions;
+  int queue_limit;
 
   class ActionTask: public MT::Task
   {
@@ -207,10 +208,15 @@ public:
     handlers[type].push_back(&handler);
   }
 
+  //----------------------------------------------------------------------
+  // Set limit on queue length
+  void set_queue_limit(int n) { queue_limit = n; }
+
   //------------------------------------------------------------------------
   // Queue an action
   void queue(Action<T> *action)
   {
+    if (queue_limit) actions.limit(queue_limit-1);
     actions.send(action);
   }
 

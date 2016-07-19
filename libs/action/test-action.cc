@@ -87,6 +87,27 @@ TEST(ActionTest, TestRegistration)
   ASSERT_EQ(expected, handler.nums);
 }
 
+TEST(ActionTest, TestQueueLimit)
+{
+  Handler handler;
+
+  {
+    Action::Manager<ActionType> manager;
+    manager.add_handler(one, handler);
+    manager.set_queue_limit(2);
+    manager.queue(new ActionOne(1));
+    manager.queue(new ActionOne(2));
+    manager.queue(new ActionOne(3));
+    // Allow actions to be handled
+    this_thread::sleep_for(chrono::milliseconds{100});
+  }
+
+  vector<int> expected;
+  expected.push_back(2);
+  expected.push_back(3);
+  ASSERT_EQ(expected, handler.nums);
+}
+
 TEST(ActionTest, TestMultipleHandlers)
 {
   Handler handler1;

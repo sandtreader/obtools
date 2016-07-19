@@ -387,6 +387,16 @@ public:
   }
 
   //--------------------------------------------------------------------------
+  // Limit the number of messages in the queue, popping off the oldest
+  // if too many
+  void limit(typename queue<T>::size_type n)
+  {
+    unique_lock<mutex> lock{mymutex};
+    while (q.size() > n)
+      q.pop();
+  }
+
+  //--------------------------------------------------------------------------
   // Flush the queue
   void flush()
   {
