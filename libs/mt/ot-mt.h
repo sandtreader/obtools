@@ -388,12 +388,17 @@ public:
 
   //--------------------------------------------------------------------------
   // Limit the number of messages in the queue, popping off the oldest
-  // if too many
-  void limit(typename queue<T>::size_type n)
+  // if too many.  Returns true if the limit was applied.
+  bool limit(typename queue<T>::size_type n)
   {
     unique_lock<mutex> lock{mymutex};
+    bool result = false;
     while (q.size() > n)
+    {
       q.pop();
+      result = true;
+    }
+    return result;
   }
 
   //--------------------------------------------------------------------------

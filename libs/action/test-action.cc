@@ -95,9 +95,9 @@ TEST(ActionTest, TestQueueLimit)
     Action::Manager<ActionType> manager;
     manager.add_handler(one, handler);
     manager.set_queue_limit(2);
-    manager.queue(new ActionOne(1));
-    manager.queue(new ActionOne(2));
-    manager.queue(new ActionOne(3));
+    ASSERT_FALSE(manager.queue(new ActionOne(1)));
+    ASSERT_FALSE(manager.queue(new ActionOne(2)));
+    ASSERT_TRUE(manager.queue(new ActionOne(3)));
     // Allow actions to be handled
     this_thread::sleep_for(chrono::milliseconds{100});
   }

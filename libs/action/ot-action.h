@@ -214,10 +214,14 @@ public:
 
   //------------------------------------------------------------------------
   // Queue an action
-  void queue(Action<T> *action)
+  // Returns whether any limit was applied
+  bool queue(Action<T> *action)
   {
-    if (queue_limit) actions.limit(queue_limit-1);
+    bool limited = false;
+    if (queue_limit)
+      limited = actions.limit(queue_limit-1);
     actions.send(action);
+    return limited;
   }
 
   //------------------------------------------------------------------------
