@@ -84,7 +84,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from data block
-  AESKey(const unsigned char *data, Size _size):
+  AESKey(const unsigned char *data, Size _size = BITS_128):
     size(_size), is_key(true)
   {
     read(data);
@@ -92,7 +92,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from string - requires hex characters
-  AESKey(const string& text, Size _size):
+  AESKey(const string& text, Size _size = BITS_128):
     size(_size), is_key(true)
   {
     read(text);

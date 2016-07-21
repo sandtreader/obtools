@@ -59,9 +59,8 @@ void AESKey::write(unsigned char *data) const
 // Read from stream - reads hex characters
 void AESKey::read(istream& sin)
 {
-  int i;
-
-  for (i = 0; i < size / 4; ++i)
+  memset(&key, 0, sizeof(key));  // In case string is too short
+  for (int i = 0; i < size / 4; ++i)
   {
     int n = sin.get();
     if (n < 0) break;
