@@ -72,22 +72,15 @@ private:
   {
   private:
     MT::Condition condition;
-    Action<T> *action;
-    Handler *handler;
+    Action<T> *action = nullptr;
+    Handler *handler = nullptr;
 
   public:
     //----------------------------------------------------------------------
-    // Constructor
-    ActionTask():
-      action(0), handler(0)
-    {
-    }
-
-    //----------------------------------------------------------------------
     // Run routine
-    virtual void run()
+    void run() override
     {
-      bool quit(false);
+      auto quit = false;
       while (!quit)
       {
         condition.wait(true);
@@ -134,16 +127,16 @@ private:
 
     //----------------------------------------------------------------------
     // Run routine
-    virtual void run()
+    void run() override
     {
       while (is_running() && manager.next_action())
         ;
 
       // Trigger threads shut down
-      for (auto it = manager.threads.begin(); it != manager.threads.end(); ++it)
+      for (auto t: manager.threads)
       {
-        (**it)->set_action(0, 0);
-        (**it)->wait();
+        (*t)->set_action(nullptr, nullptr);
+        (*t)->wait();
       }
     }
   };
@@ -169,7 +162,7 @@ private:
       if (h != handlers.end())
       {
         auto i = 0u;
-        for (auto it = h->second.begin(); it != h->second.end(); ++it, ++i)
+        for (auto handler: h->second)
         {
           if (i >= threads.size())
           {
@@ -177,16 +170,17 @@ private:
                 new ActionTask{});
             threads.push_back(p);
           }
-          (*threads[i])->set_action(action.get(), *it);
+          (*threads[i])->set_action(action.get(), handler);
           active.push_back(threads[i]);
+          ++i;
         }
       }
     }
 
     // Wait for all active threads to finish
-    for (auto it = active.begin(); it != active.end(); ++it)
+    for (auto t: active)
     {
-      (**it)->wait();
+      (*t)->wait();
     }
 
     return true;
@@ -208,20 +202,28 @@ public:
     handlers[type].push_back(&handler);
   }
 
-  //----------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set limit on queue length
   void set_queue_limit(int n) { queue_limit = n; }
 
   //------------------------------------------------------------------------
+  // Queue Result
+  enum class QueueResult
+  {
+    ok,
+    replaced_old,
+  };
+
+  //------------------------------------------------------------------------
   // Queue an action
   // Returns whether any limit was applied
-  bool queue(Action<T> *action)
+  QueueResult queue(Action<T> *action)
   {
-    bool limited = false;
+    auto limited = false;
     if (queue_limit)
       limited = actions.limit(queue_limit-1);
     actions.send(action);
-    return limited;
+    return limited ? QueueResult::replaced_old : QueueResult::ok;
   }
 
   //------------------------------------------------------------------------
@@ -233,11 +235,11 @@ public:
   }
 
   //------------------------------------------------------------------------
-  // Virtual destructor
-  virtual ~Manager()
+  // Destructor
+  ~Manager()
   {
     // Wake up thread with empty action
-    queue(0);
+    queue(nullptr);
   }
 };
 
