@@ -139,7 +139,7 @@ TEST(ThreadTest, TestRepeatedStarts)
   class TestThread: public MT::Thread
   {
   public:
-    int count;
+    int& count;
 
   private:
     void run() override
@@ -149,19 +149,23 @@ TEST(ThreadTest, TestRepeatedStarts)
     }
 
   public:
-    TestThread(): count(0)
+    TestThread(int& _count): count(_count)
     {
     }
   };
 
-  TestThread thread;
-  for(auto i=0; i<10; i++)
+  auto count = int{0};
+
   {
-    thread.start();
-    this_thread::sleep_for(chrono::milliseconds(10));
+    TestThread thread(count);
+    for(auto i=0; i<10; i++)
+    {
+      thread.start();
+      this_thread::sleep_for(chrono::milliseconds(10));
+    }
   }
 
-  ASSERT_EQ(10, thread.count);
+  ASSERT_EQ(10, count);
 }
 
 //--------------------------------------------------------------------------
