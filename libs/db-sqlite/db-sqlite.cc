@@ -14,6 +14,10 @@
 
 namespace ObTools { namespace DB { namespace SQLite {
 
+namespace {
+const auto pow2_timeout_ms = 8;
+}
+
 //==========================================================================
 // SQLite result class
 
@@ -40,7 +44,7 @@ int ResultSet::count()
 bool ResultSet::fetch(Row& row)
 {
   if (sqlite3_step(stmt.get()) != SQLITE_ROW)
-      return false;
+    return false;
 
   row.clear();
 
@@ -62,10 +66,10 @@ bool ResultSet::fetch(Row& row)
 // Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
-  if (sqlite3_step(stmt.get()) != SQLITE_ROW)
-      return false;
-
   if (!num_fields)
+    return false;
+
+  if (sqlite3_step(stmt.get()) != SQLITE_ROW)
     return false;
 
   auto v = sqlite3_column_text(stmt.get(), 0);
@@ -100,13 +104,17 @@ Connection::Connection(const string& file):
 
   // Set up a busy handler
   sqlite3_busy_handler(c, [](void *, int attempts)
-      {
-        if (attempts > 8)
-          return 0;
-        this_thread::sleep_for(chrono::milliseconds{
-                               static_cast<uint64_t>(pow(2, attempts))});
-        return 1;
-      }, nullptr);
+  {
+    if (attempts > pow2_timeout_ms)
+    {
+      Log::Error log;
+      log << "SQLite query timed out" << endl;
+      return 0;
+    }
+    this_thread::sleep_for(chrono::milliseconds{
+                           static_cast<uint64_t>(pow(2, attempts))});
+    return 1;
+  }, nullptr);
 }
 
 //--------------------------------------------------------------------------

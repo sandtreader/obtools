@@ -21,6 +21,7 @@ using namespace std;
 
 //==========================================================================
 // SQLite result class
+// Note: Writes will be locked out until this is freed!!!
 class ResultSet: public DB::ResultSet
 {
 private:
