@@ -17,7 +17,7 @@ using namespace ObTools;
 class DBSQLiteTest: public ::testing::Test
 {
 protected:
-  static constexpr const auto dbfile = "/tmp/test.sqlite";
+  static constexpr const auto dbfile = "test.sqlite";
 
 public:
   ~DBSQLiteTest()
