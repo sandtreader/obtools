@@ -9,7 +9,6 @@
 
 #include "ot-db-pgsql.h"
 #include "ot-log.h"
-#include <libpq-fe.h>
 
 namespace ObTools { namespace DB { namespace PG {
 
@@ -20,7 +19,6 @@ namespace ObTools { namespace DB { namespace PG {
 //Get number of rows in result set
 int ResultSet::count()
 {
-  PGresult *res = static_cast<PGresult *>(pgres);
   return PQntuples(res);
 }
 
@@ -29,8 +27,6 @@ int ResultSet::count()
 //Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
 {
-  PGresult *res = static_cast<PGresult *>(pgres);
-
   if (row_cursor < PQntuples(res))
   {
     // Load all the fields by name into the row
@@ -51,7 +47,6 @@ bool ResultSet::fetch(Row& row)
 //Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
-  PGresult *res = static_cast<PGresult *>(pgres);
   if (row_cursor < PQntuples(res) && PQnfields(res) > 0)
   {
     value = FieldValue::unescape(PQgetvalue(res, row_cursor++, 0));
@@ -62,9 +57,8 @@ bool ResultSet::fetch(string& value)
 
 //------------------------------------------------------------------------
 //Destructor
-ResultSet::~ResultSet() 
+ResultSet::~ResultSet()
 {
-  PGresult *res = static_cast<PGresult *>(pgres);
   PQclear(res);
 }
 
@@ -74,10 +68,9 @@ ResultSet::~ResultSet()
 //------------------------------------------------------------------------
 //Constructor - takes Postgres connection string
 //e.g. "host=localhost dbname=foo user=prc password=secret"
-Connection::Connection(const string& conninfo): 
-  DB::Connection(), pgconn(0)
+Connection::Connection(const string& conninfo)
 {
-  PGconn *conn = PQconnectdb(conninfo.c_str());
+  conn = PQconnectdb(conninfo.c_str());
   if (!conn || PQstatus(conn) == CONNECTION_BAD)
   {
     log.error << "DB: Cannot connect to PostgresQL at:\n";
@@ -93,15 +86,14 @@ Connection::Connection(const string& conninfo):
 
   // OK, we have a connection
   log.detail << "PostgresQL connected\n";
-  pgconn = conn;
-  valid = true;
 }
 
 //------------------------------------------------------------------------
-//Check whether connection is OK
-bool Connection::ok()
+// Check whether connection is OK
+Connection::operator bool()
 {
-  PGconn *conn = static_cast<PGconn *>(pgconn);
+  if (!conn)
+    return false;
   if (PQstatus(conn) == CONNECTION_OK) return true;
 
   log.error << "Postgres connection failed: " << PQerrorMessage(conn) << endl;
@@ -113,8 +105,6 @@ bool Connection::ok()
 //Returns whether successful
 bool Connection::exec(const string& sql)
 {
-  PGconn *conn = static_cast<PGconn *>(pgconn);
-
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec: " << sql << endl;)
 
   PGresult *res = PQexec(conn, sql.c_str());
@@ -147,8 +137,6 @@ bool Connection::exec(const string& sql)
 //Returns result - check this for validity
 Result Connection::query(const string& sql)
 {
-  PGconn *conn = static_cast<PGconn *>(pgconn);
-
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery: " << sql << endl;)
 
   PGresult *res = PQexec(conn, sql.c_str());
@@ -162,8 +150,8 @@ Result Connection::query(const string& sql)
   ExecStatusType status = PQresultStatus(res);
   if (status == PGRES_TUPLES_OK)
   {
-    OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery OK: " 
-			 << PQntuples(res) << " rows\n";)
+    OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery OK: "
+                         << PQntuples(res) << " rows\n";)
     return Result(new ResultSet(res));
   }
   else
@@ -178,13 +166,9 @@ Result Connection::query(const string& sql)
 
 //------------------------------------------------------------------------
 //Destructor
-Connection::~Connection() 
+Connection::~Connection()
 {
-  PGconn *conn = static_cast<PGconn *>(pgconn);
-  if (valid && conn) PQfinish(conn);
+  if (conn) PQfinish(conn);
 }
 
 }}} // namespaces
-
-
-

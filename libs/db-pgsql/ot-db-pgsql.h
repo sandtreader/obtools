@@ -2,7 +2,7 @@
 // ObTools::DB: ot-db-pgsql.h
 //
 // Definition of Postgres-specific database driver
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -12,44 +12,43 @@
 
 #include "ot-db.h"
 #include "ot-log.h"
+#include <libpq-fe.h>
 
-namespace ObTools { namespace DB { namespace PG {  
+namespace ObTools { namespace DB { namespace PG {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
-// Note we use void *'s here to avoid forcing our uses to include libpq.h
-
 //==========================================================================
-//Postgres result class
+// Postgres result class
 class ResultSet: public DB::ResultSet
-{ 
+{
 private:
-  void *pgres;     // PGresult structure
-  int row_cursor;  // Row cursor
+  PGresult *res = nullptr;  // PGresult structure
+  int row_cursor = 0;       // Row cursor
 
 public:
   //------------------------------------------------------------------------
-  //Constructor
-  ResultSet(void *res): pgres(res), row_cursor(0) {}
+  // Constructor
+  ResultSet(PGresult *_res): res{_res} {}
 
   //------------------------------------------------------------------------
-  //Get number of rows in result set
-  int count();
+  // Get number of rows in result set
+  int count() override;
 
   //------------------------------------------------------------------------
-  //Get next row from result set
-  //Whether another was found - if so, writes into row
-  bool fetch(Row& row);
+  // Get next row from result set
+  // Whether another was found - if so, writes into row
+  bool fetch(Row& row) override;
 
   //------------------------------------------------------------------------
-  //Get first value of next row from result set
-  //Value is unescaped
-  //Whether another was found - if so, writes into value
-  bool fetch(string& value);
+  // Get first value of next row from result set
+  // Value is unescaped
+  // Whether another was found - if so, writes into value
+  bool fetch(string& value) override;
 
   //------------------------------------------------------------------------
-  //Destructor
+  // Destructor
   ~ResultSet();
 };
 
@@ -58,37 +57,45 @@ public:
 class Connection: public DB::Connection
 {
 private:
-  void *pgconn;   // PGconn structure
+  PGconn *conn = nullptr; // PGconn structure
   Log::Streams log; // Private (therefore per-thread, assuming connections
                     // are not shared) log streams
 
 public:
   //------------------------------------------------------------------------
-  //Constructor - takes Postgres connection string
-  //e.g. "host=localhost dbname=foo user=prc password=secret"
+  // Constructor - takes Postgres connection string
+  // e.g. "host=localhost dbname=foo user=prc password=secret"
   Connection(const string& conninfo);
 
   //------------------------------------------------------------------------
-  //Check if connection is really OK
-  bool ok();
+  // Check if connection is really OK
+  operator bool() override;
 
   //------------------------------------------------------------------------
-  //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
-  //Returns whether successful
-  bool exec(const string& sql);
+  // Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
+  // Returns whether successful
+  bool exec(const string& sql) override;
 
   //------------------------------------------------------------------------
-  //Execute a query and get result (e.g. SELECT)
-  //Returns result - check this for validity
-  Result query(const string& sql);
+  // Execute a query and get result (e.g. SELECT)
+  // Returns result - check this for validity
+  Result query(const string& sql) override;
 
   //------------------------------------------------------------------------
-  //Destructor
+  // Prepare a statement
+  // Returns result - check this for validity
+  Statement prepare(const string& sql) override
+  {
+    throw runtime_error("Prepare not implemented for PGSQL");
+  }
+
+  //------------------------------------------------------------------------
+  // Destructor
   ~Connection();
 };
 
 //==========================================================================
-//PostgreSQL connection factory
+// PostgreSQL connection factory
 class ConnectionFactory: public DB::ConnectionFactory
 {
   // Connection details
@@ -100,14 +107,11 @@ public:
   ConnectionFactory(const string& _conninfo):  conninfo(_conninfo) {}
 
   //------------------------------------------------------------------------
-  // Interface to create a new connection 
-  DB::Connection *create() 
+  // Interface to create a new connection
+  DB::Connection *create()
   { return new PG::Connection(conninfo); }
 };
 
 //==========================================================================
-}}} //namespaces
+}}} // namespaces
 #endif // !__OBTOOLS_DB_PGSQL_H
-
-
-

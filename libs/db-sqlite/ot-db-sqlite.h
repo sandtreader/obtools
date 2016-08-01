@@ -20,9 +20,9 @@ namespace ObTools { namespace DB { namespace SQLite {
 using namespace std;
 
 //==========================================================================
-// SQLite result class
+// Prepared Statement
 // Note: Writes will be locked out until this is freed!!!
-class ResultSet: public DB::ResultSet
+class PreparedStatement: public DB::PreparedStatement
 {
 private:
   unique_ptr<sqlite3_stmt, decltype(&sqlite3_finalize)> stmt;
@@ -32,22 +32,59 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  ResultSet(sqlite3_stmt *stmt);
+  PreparedStatement(sqlite3_stmt *stmt);
 
   //------------------------------------------------------------------------
-  // Get number of rows in result set
-  int count();
+  // Bind a parameter (integer)
+  bool bind(int index, int64_t value) override;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (text)
+  bool bind(int index, const string& value) override;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (null)
+  bool bind(int index) override;
+
+  //------------------------------------------------------------------------
+  // Reset statement
+  void reset() override;
+
+  //------------------------------------------------------------------------
+  // Execute statement
+  bool execute() override;
+
+  //------------------------------------------------------------------------
+  // Get row count
+  int count() override;
 
   //------------------------------------------------------------------------
   // Get next row from result set
-  // Whether another was found - if so, writes into row
-  bool fetch(Row& row);
+  bool fetch(Row& row) override;
 
   //------------------------------------------------------------------------
   // Get first value of next row from result set
-  // Value is unescaped
-  // Whether another was found - if so, writes into value
-  bool fetch(string& value);
+  bool fetch(string& value) override;
+
+  //------------------------------------------------------------------------
+  // Is valid?
+  operator bool() const override
+  {
+    return stmt.get();
+  }
+};
+
+//==========================================================================
+// SQLite result class
+// Note: in SQLite, queries are done using prepared statements
+class ResultSet: public PreparedStatement
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ResultSet(sqlite3_stmt *stmt):
+    PreparedStatement{stmt}
+  {}
 };
 
 //==========================================================================
@@ -64,17 +101,22 @@ public:
 
   //------------------------------------------------------------------------
   // Check if connection is really OK
-  bool ok();
+  operator bool() override;
 
   //------------------------------------------------------------------------
   // Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
   // Returns whether successful
-  bool exec(const string& sql);
+  bool exec(const string& sql) override;
 
   //------------------------------------------------------------------------
   // Execute a query and get result (e.g. SELECT)
   // Returns result - check this for validity
-  Result query(const string& sql);
+  Result query(const string& sql) override;
+
+  //------------------------------------------------------------------------
+  // Prepare a statement
+  // Returns result - check this for validity
+  Statement prepare(const string& sql) override;
 };
 
 //==========================================================================

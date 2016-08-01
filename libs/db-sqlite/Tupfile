@@ -6,6 +6,6 @@
 
 NAME    = ot-db-sqlite
 TYPE    = lib
-DEPENDS = ot-db ext-pkg-sqlite3
+DEPENDS = ot-db ot-file ext-pkg-sqlite3
 
 include_rules

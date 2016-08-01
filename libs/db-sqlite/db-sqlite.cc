@@ -19,11 +19,11 @@ const auto pow2_timeout_ms = 8;
 }
 
 //==========================================================================
-// SQLite result class
+// SQLite prepare statement class
 
 //--------------------------------------------------------------------------
 // Constructor
-ResultSet::ResultSet(sqlite3_stmt *_stmt):
+PreparedStatement::PreparedStatement(sqlite3_stmt *_stmt):
   stmt{_stmt, sqlite3_finalize},
   num_fields{sqlite3_column_count(stmt.get())}
 {
@@ -32,8 +32,44 @@ ResultSet::ResultSet(sqlite3_stmt *_stmt):
 }
 
 //--------------------------------------------------------------------------
+// Bind a parameter (integer)
+bool PreparedStatement::bind(int index, int64_t value)
+{
+  return sqlite3_bind_int64(stmt.get(), index, value) == SQLITE_OK;
+}
+
+//--------------------------------------------------------------------------
+// Bind a parameter (text)
+bool PreparedStatement::bind(int index, const string& value)
+{
+  return sqlite3_bind_text(stmt.get(), index, value.c_str(),
+                           value.size(), SQLITE_STATIC) == SQLITE_OK;
+}
+
+//--------------------------------------------------------------------------
+// Bind a parameter (null)
+bool PreparedStatement::bind(int index)
+{
+  return sqlite3_bind_null(stmt.get(), index) == SQLITE_OK;
+}
+
+//--------------------------------------------------------------------------
+// Reset statement
+void PreparedStatement::reset()
+{
+  sqlite3_reset(stmt.get());
+}
+
+//--------------------------------------------------------------------------
+// Execute statement
+bool PreparedStatement::execute()
+{
+  return sqlite3_step(stmt.get()) == SQLITE_DONE;
+}
+
+//--------------------------------------------------------------------------
 // Get number of rows in result set
-int ResultSet::count()
+int PreparedStatement::count()
 {
   throw runtime_error("count() not supported for SQLite");
 }
@@ -41,7 +77,7 @@ int ResultSet::count()
 //--------------------------------------------------------------------------
 // Get next row from result set
 // Whether another was found - if so, clears and writes into row
-bool ResultSet::fetch(Row& row)
+bool PreparedStatement::fetch(Row& row)
 {
   if (sqlite3_step(stmt.get()) != SQLITE_ROW)
     return false;
@@ -64,7 +100,7 @@ bool ResultSet::fetch(Row& row)
 // Get first value of next row from result set
 // Value is unescaped
 // Whether another was found - if so, writes into value
-bool ResultSet::fetch(string& value)
+bool PreparedStatement::fetch(string& value)
 {
   if (!num_fields)
     return false;
@@ -100,7 +136,6 @@ Connection::Connection(const string& file):
 
   // OK, we have a connection
   log.detail << "SQLite connection opened to " << file << endl;
-  valid = true;
 
   // Set up a busy handler
   sqlite3_busy_handler(c, [](void *, int attempts)
@@ -119,9 +154,9 @@ Connection::Connection(const string& file):
 
 //--------------------------------------------------------------------------
 // Check whether connection is OK
-bool Connection::ok()
+Connection::operator bool()
 {
-  return valid;
+  return conn.get();
 }
 
 //--------------------------------------------------------------------------
@@ -165,6 +200,29 @@ Result Connection::query(const string& sql)
     log << "SQLite query failed: " << err << endl;
   }
   return Result(new ResultSet{stmt});
+}
+
+//--------------------------------------------------------------------------
+// Prepare a statement
+// Returns result - check this for validity
+Statement Connection::prepare(const string& sql)
+{
+  OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBprepare: " << sql << endl;})
+
+  char *err{nullptr};
+  sqlite3_stmt *stmt{0};
+  auto e = sqlite3_prepare_v2(conn.get(), sql.c_str(), sql.size(), &stmt,
+                              nullptr);
+  if (e == SQLITE_OK)
+  {
+    OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBprepare OK" << endl;})
+  }
+  else
+  {
+    Log::Error log;
+    log << "SQLite prepare failed: " << err << endl;
+  }
+  return Statement(new PreparedStatement{stmt});
 }
 
 }}} // namespaces

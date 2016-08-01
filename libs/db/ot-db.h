@@ -20,7 +20,7 @@
 #include "ot-mt.h"
 #endif
 
-namespace ObTools { namespace DB { 
+namespace ObTools { namespace DB {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -58,7 +58,7 @@ private:
   union
   {
     int int_val;
-    uint64_t int64_val;
+    uint64_t int64_val = 0;
     bool bool_val;
     double real_val;
   };
@@ -68,22 +68,22 @@ public:
   //------------------------------------------------------------------------
   // Constructors
   FieldValue():
-    type(NULLTYPE) {}
+    type{NULLTYPE} {}
 
   FieldValue(const string& value):
-    str_val(value), real_val(0), type(STRING) {}
+    str_val{value}, type{STRING} {}
 
   FieldValue(int value):
-    int_val(value), type(INT) {}
+    int_val{value}, type{INT} {}
 
   FieldValue(uint64_t value):
-    int64_val(value), type(INT64) {}
+    int64_val{value}, type{INT64} {}
 
   FieldValue(bool value):
-    bool_val(value), type(BOOL) {}
+    bool_val{value}, type{BOOL} {}
 
   FieldValue(double value):
-    real_val(value), type(REAL) {}
+    real_val{value}, type{REAL} {}
 
   //------------------------------------------------------------------------
   // Constructor from string but convert to specified type
@@ -171,27 +171,27 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  //Clear the row
-  void clear() 
+  // Clear the row
+  void clear()
   { fields.clear(); }
 
   //------------------------------------------------------------------------
-  //Add name/value pair (from a FieldValue)
+  // Add name/value pair (from a FieldValue)
   Row& add(const string& fieldname, const FieldValue& value)
   { fields[fieldname] = value; return *this; }
 
   //------------------------------------------------------------------------
   // Handy operator to add null values to a row, for select()
-  Row& operator<<(const string& fieldname) 
+  Row& operator<<(const string& fieldname)
   { fields[fieldname] = FieldValue(); return *this; }
 
   //------------------------------------------------------------------------
-  //Add name/value pair
+  // Add name/value pair
   void add(const string& fieldname, const string& value)
   { fields[fieldname] = FieldValue(value); }
 
   //------------------------------------------------------------------------
-  //Add name/value pair (NULL if empty)
+  // Add name/value pair (NULL if empty)
   void add_or_null(const string& fieldname, const string& value)
   {
     if (value.size())
@@ -206,7 +206,7 @@ public:
   { fields[fieldname] = FieldValue(); }
 
   //------------------------------------------------------------------------
-  //Add name/value pair, unescaping value (for use by drivers only)
+  // Add name/value pair, unescaping value (for use by drivers only)
   void add_unescaped(const string& fieldname, const string& value)
   { fields[fieldname] = FieldValue(FieldValue::unescape(value)); }
 
@@ -262,8 +262,7 @@ public:
 
   //------------------------------------------------------------------------
   // Add a timestamp to a row, NULL if invalid
-  void add_time_or_null(const string& fieldname, 
-			const Time::Stamp& value)
+  void add_time_or_null(const string& fieldname, const Time::Stamp& value)
   {
     if (value.valid())
       fields[fieldname] = FieldValue(value.iso());
@@ -273,8 +272,8 @@ public:
 
   //------------------------------------------------------------------------
   // Add a date to a row, NULL if invalid
-  void add_date_or_null(const string& fieldname, 
-			const Time::DateStamp& value)
+  void add_date_or_null(const string& fieldname,
+                        const Time::DateStamp& value)
   {
     if (value.valid())
       fields[fieldname] = FieldValue(value.iso());
@@ -283,34 +282,34 @@ public:
   }
 
   //------------------------------------------------------------------------
-  //Finds whether the row contains a value for the given fieldname
+  // Finds whether the row contains a value for the given fieldname
   bool has(const string& fieldname) const
   { return fields.find(fieldname) != fields.end(); }
 
   //------------------------------------------------------------------------
-  //Get value of field of given name, or default if not found
+  // Get value of field of given name, or default if not found
   string get(const string& fieldname, const string& def="") const;
 
   //------------------------------------------------------------------------
-  //Handy [] operator
+  // Handy [] operator
   // e.g. foo = row["id"];
   string operator[](const string& fieldname) const
   { return get(fieldname); }
 
   //------------------------------------------------------------------------
-  //Get integer value of field of given name, or default if not found
+  // Get integer value of field of given name, or default if not found
   int get_int(const string& fieldname, int def=0) const;
 
   //------------------------------------------------------------------------
-  //Get 64-bit value of field of given name, or default if not found
+  // Get 64-bit value of field of given name, or default if not found
   uint64_t get_int64(const string& fieldname, uint64_t def=0) const;
 
   //------------------------------------------------------------------------
-  //Get boolean value of field of given name, or default if not found
+  // Get boolean value of field of given name, or default if not found
   bool get_bool(const string& fieldname, bool def=false) const;
 
   //------------------------------------------------------------------------
-  //Get real value of field of given name, or default if not found
+  // Get real value of field of given name, or default if not found
   double get_real(const string& fieldname, double def=0) const;
 
   //------------------------------------------------------------------------
@@ -323,8 +322,8 @@ public:
   string get_escaped_values() const;
 
   //------------------------------------------------------------------------
-  // Get string with field names and values in order with '=', 
-  // separated by commas and spaces, values delimited with single quotes 
+  // Get string with field names and values in order with '=',
+  // separated by commas and spaces, values delimited with single quotes
   // (e.g. for UPDATE)
   string get_escaped_assignments() const;
 
@@ -341,22 +340,22 @@ class ResultSet
 {
 public:
   //------------------------------------------------------------------------
-  //Get number of rows in result set
-  virtual int count()=0;
+  // Get number of rows in result set
+  virtual int count() = 0;
 
   //------------------------------------------------------------------------
   //Get next row from result set
   //Whether another was found - if so, clears and writes into row
-  virtual bool fetch(Row& row)=0;
+  virtual bool fetch(Row& row) = 0;
 
   //------------------------------------------------------------------------
-  //Get first value of next row from result set
-  //Value is unescaped
-  //Whether another was found - if so, writes into value
-  virtual bool fetch(string& value)=0;
+  // Get first value of next row from result set
+  // Value is unescaped
+  // Whether another was found - if so, writes into value
+  virtual bool fetch(string& value) = 0;
 
   //------------------------------------------------------------------------
-  //Virtual destructor
+  // Virtual destructor
   virtual ~ResultSet() {}
 };
 
@@ -366,154 +365,217 @@ public:
 class Result
 {
 private:
-  ResultSet *rset;
-
-  // Helper to allow copy-by-value (see auto_ptr for source of this hack)
-  struct Ref
-  {
-    ResultSet *rset;
-    explicit Ref(ResultSet *r): rset(r) {}
-  };
+  unique_ptr<ResultSet> rset;
 
 public:
   //------------------------------------------------------------------------
-  //Constructors 
-  Result(): rset(0) {}               // Invalid result
-  Result(ResultSet *r): rset(r) {}   // Valid result
+  // Constructors
+  Result() = default;                // Invalid result
+  Result(ResultSet *r): rset{r} {}   // Valid result
 
   //------------------------------------------------------------------------
-  //Copy constructor and assignment operators
-  // - detach rset from old one - note non-const
-  Result(Result& r): rset(r.rset) { r.rset=0; }
-  Result& operator=(Result& r) 
-  { 
-    if (rset && rset!=r.rset) delete rset;
-    rset=r.rset; r.rset=0;
-    return *this; 
+  // Handy bool cast to check for (in)validity
+  operator bool() const { return rset.get(); }
+
+  //------------------------------------------------------------------------
+  // Get number of rows in result set
+  int count() { return rset ? rset->count() : 0; }
+
+  //------------------------------------------------------------------------
+  // Get next row from result set
+  // Whether another was found - if so, clears writes into row
+  bool fetch(Row& row) { return rset && rset->fetch(row); }
+
+  //------------------------------------------------------------------------
+  // Get first value of next row from result set
+  // Whether another was found - if so, writes into value
+  bool fetch(string& value) { return rset && rset->fetch(value); }
+};
+
+//==========================================================================
+// Abstract Prepared Statement
+class PreparedStatement: public ResultSet
+{
+public:
+  //------------------------------------------------------------------------
+  // Bind a parameter (integer)
+  virtual bool bind(int index, int64_t value) = 0;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (text)
+  virtual bool bind(int index, const string& value) = 0;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (null)
+  virtual bool bind(int index) = 0;
+
+  //------------------------------------------------------------------------
+  // Reset statement
+  virtual void reset() = 0;
+
+  //------------------------------------------------------------------------
+  // Execute statement
+  virtual bool execute() = 0;
+
+  //------------------------------------------------------------------------
+  // Is valid?
+  virtual operator bool() const = 0;
+};
+
+//==========================================================================
+// Prepared Statement Wrapper
+class Statement
+{
+private:
+  unique_ptr<PreparedStatement> statement;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Statement(PreparedStatement *_statement):
+    statement{_statement}
+  {}
+
+  //------------------------------------------------------------------------
+  // Is valid
+  operator bool() const
+  {
+    return *statement;
   }
 
   //------------------------------------------------------------------------
-  //Ditto from 'Ref' helper - combination of the two is claimed to allow
-  //assignment by value - e.g.
-  // Result res = my_func_returning_result();
-  Result(Ref r): rset(r.rset) { }
-  Result& operator=(Ref& r) 
-  { 
-    if (rset && rset!=r.rset) delete rset;
-    rset=r.rset; 
-    return *this; 
+  // Bind a parameter (integer)
+  bool bind(int index, int64_t value)
+  {
+    return statement && statement->bind(index, value);
   }
-  operator Ref() { ResultSet *t = rset; rset=0; return Ref(t); }
 
   //------------------------------------------------------------------------
-  //Handy ! operator to check for (in)validity
-  bool operator!() const { return !rset; }
+  // Bind a parameter (text)
+  bool bind(int index, const string& value)
+  {
+    return statement && statement->bind(index, value);
+  }
 
   //------------------------------------------------------------------------
-  //Get number of rows in result set
-  int count() { return rset?rset->count():0; }
+  // Bind a parameter (null)
+  bool bind(int index)
+  {
+    return statement && statement->bind(index);
+  }
 
   //------------------------------------------------------------------------
-  //Get next row from result set
-  //Whether another was found - if so, clears writes into row
-  bool fetch(Row& row) { return rset?rset->fetch(row):false; }
+  // Reset statement
+  void reset()
+  {
+    if (statement) statement->reset();
+  }
 
   //------------------------------------------------------------------------
-  //Get first value of next row from result set
-  //Whether another was found - if so, writes into value
-  bool fetch(string& value) { return rset?rset->fetch(value):false; }
+  // Execture statement
+  bool execute()
+  {
+    return statement && statement->execute();
+  }
 
   //------------------------------------------------------------------------
-  //Destructor - delete result set
-  ~Result() { if (rset) delete rset; }
+  // Get next row from result set
+  // Whether another was found - if so, clears writes into row
+  bool fetch(Row& row)
+  {
+    return statement && statement->fetch(row);
+  }
+
+  //------------------------------------------------------------------------
+  // Get first value of next row from result set
+  // Whether another was found - if so, writes into value
+  bool fetch(string& value)
+  {
+    return statement && statement->fetch(value);
+  }
+
 };
 
 //==========================================================================
 // Database connection (abstract)
 class Connection
 {
-protected:
-  bool valid;
-
 public:
-  //------------------------------------------------------------------------
-  //Constructor
-  Connection(): valid(false) {}
-
-  //------------------------------------------------------------------------
-  //Handy ! operator to check for (in)validity
-  bool operator!() const { return !valid; }
-
-  //==========================================================================
+  //========================================================================
   // Virtual functions implemented by driver subclass
 
   //------------------------------------------------------------------------
-  //Check if connection is really OK
-  virtual bool ok()=0;
+  // Check if connection is really OK
+  virtual operator bool() = 0;
 
   //------------------------------------------------------------------------
-  //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
-  //Returns whether successful
-  virtual bool exec(const string& sql)=0;
+  // Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
+  // Returns whether successful
+  virtual bool exec(const string& sql) = 0;
 
   //------------------------------------------------------------------------
-  //Execute a query and get result (e.g. SELECT)
-  //Returns result - check this for validity
-  virtual Result query(const string& sql)=0;
+  // Execute a query and get result (e.g. SELECT)
+  // Returns result - check this for validity
+  virtual Result query(const string& sql) = 0;
 
   //------------------------------------------------------------------------
-  //Virtual destructor
+  // Prepare a statement
+  // Returns result - check this for validity
+  virtual Statement prepare(const string& sql) = 0;
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
   virtual ~Connection() {}
 
-  //==========================================================================
+  //========================================================================
   // Helper functions implemented in connection.cc
 
   //------------------------------------------------------------------------
-  //Execute a query and get first (only) row
-  //Returns whether successful - row is cleared and filled in if so
+  // Execute a query and get first (only) row
+  // Returns whether successful - row is cleared and filled in if so
   bool query(const string& sql, Row& row);
 
   //------------------------------------------------------------------------
-  //Execute a query and get single (only) value from first (only) row
-  //Returns whether successful - value is filled in if so
+  // Execute a query and get single (only) value from first (only) row
+  // Returns whether successful - value is filled in if so
   bool query(const string& sql, string& value);
 
   //------------------------------------------------------------------------
-  //Execute a query and get single (only) value from first (only) row
-  //Returns value or default if not found
+  // Execute a query and get single (only) value from first (only) row
+  // Returns value or default if not found
   string query_string(const string& sql, const string& def="");
 
   //------------------------------------------------------------------------
-  //Execute a query and get single (only) integer value from first (only) row
-  //Returns value or default if not found
+  // Execute a query and get single (only) integer value from first (only) row
+  // Returns value or default if not found
   int query_int(const string& sql, int def=0);
 
   //------------------------------------------------------------------------
-  //Execute a query and get single (only) 64-bit integer value from first 
-  //(only) row
-  //Returns value or default if not found
+  // Execute a query and get single (only) 64-bit integer value from first
+  // (only) row
+  // Returns value or default if not found
   uint64_t query_int64(const string& sql, uint64_t def=0);
 
   //------------------------------------------------------------------------
-  //Execute a query and get single (only) integer value from first (only) row
-  //Returns value or default if not found
+  // Execute a query and get single (only) integer value from first (only) row
+  // Returns value or default if not found
   bool query_bool(const string& sql, bool def=false);
 
   //------------------------------------------------------------------------
-  //Do an INSERT and retrieve the last inserted (max) automatic ID
-  //Returns ID, or 0 if failed
-  //Fetches max(<id_field>) inside a transaction, unless id_field is ""
-  //If id_field is "", does a normal insert and returns 1
-  //Set in_transaction only if you're already doing a transaction; by
-  //default this function may create its own
-  int insert(const string& sql, 
-	     const string& table, const string& id_field="id",
-	     bool in_transaction=false);
+  // Do an INSERT and retrieve the last inserted (max) automatic ID
+  // Returns ID, or 0 if failed
+  // Fetches max(<id_field>) inside a transaction, unless id_field is ""
+  // If id_field is "", does a normal insert and returns 1
+  // Set in_transaction only if you're already doing a transaction; by
+  // default this function may create its own
+  int insert(const string& sql,
+             const string& table, const string& id_field="id",
+             bool in_transaction=false);
 
   // Ditto, with 64-bit ID
-  uint64_t insert64(const string& sql, 
-		    const string& table, const string& id_field="id",
-		    bool in_transaction=false);
+  uint64_t insert64(const string& sql,
+                    const string& table, const string& id_field="id",
+                    bool in_transaction=false);
 
   //------------------------------------------------------------------------
   // Do an INSERT and retrieve the last inserted serial ID, from row data
@@ -521,56 +583,56 @@ public:
   // id_field can be "", as above
   // Returns ID, or 0 if failed
   int insert(const string& table, Row& row, const string& id_field="id",
-	     bool in_transaction=false);
+             bool in_transaction=false);
 
   // Ditto with 64-bit ID
   uint64_t insert64(const string& table, Row& row, const string& id_field="id",
-		    bool in_transaction=false);
+                    bool in_transaction=false);
 
   //------------------------------------------------------------------------
   // INSERT into a join table with two foreign ID fields
   // Returns whether successful
   bool insert_join(const string& table, const string& field1, int id1,
-		   const string& field2, int id2);
+                   const string& field2, int id2);
 
   // Ditto with 64-bit IDs
   bool insert_join64(const string& table, const string& field1, uint64_t id1,
-		     const string& field2, uint64_t id2);
+                     const string& field2, uint64_t id2);
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // with the given WHERE clause
   // If where is empty, doesn't add a WHERE at all
   // Returns query result as query()
   Result select(const string& table, const Row& row, const string& where="");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // matching the list of values in where_row
   // Returns query result as query()
   Result select(const string& table, const Row& row, const Row& where_row);
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // matching the given integer ID
   // Returns query result as query()
-  Result select_by_id(const string& table, const Row& row,  
-		      int id, const string& id_field = "id");
+  Result select_by_id(const string& table, const Row& row,
+                      int id, const string& id_field = "id");
 
   // Ditto, with 64-bit ID
-  Result select_by_id64(const string& table, const Row& row,  
-			uint64_t id, const string& id_field = "id");
+  Result select_by_id64(const string& table, const Row& row,
+                        uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // matching the given string ID
   // ID value is escaped
   // Returns query result as query()
-  Result select_by_id(const string& table, const Row& row,  
-		      const string& id, const string& id_field = "id");
+  Result select_by_id(const string& table, const Row& row,
+                      const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // with the given WHERE clause, and return the single (first) row as
   // the values in the row (unescaped)
   // If where is empty, doesn't add a WHERE at all
@@ -578,23 +640,23 @@ public:
   bool select_row(const string& table, Row& row, const string& where="");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
-  // with a WHERE clause constructed from where_row, and return the single 
+  // Do a SELECT for all fields in the given row in the given table
+  // with a WHERE clause constructed from where_row, and return the single
   // (first) row as the values in the row
   // Returns whether row fetched
   bool select_row(const string& table, Row& row, const Row& where_row);
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // with the given integer ID, and return the single (first) row as
   // the values in the row (unescaped)
   // Returns whether row fetched
-  bool select_row_by_id(const string& table, Row& row, 
-			int id, const string& id_field = "id");
+  bool select_row_by_id(const string& table, Row& row,
+                        int id, const string& id_field = "id");
 
   // Ditto, with 64-bit ID
-  bool select_row_by_id64(const string& table, Row& row, 
-			  uint64_t id, const string& id_field = "id");
+  bool select_row_by_id64(const string& table, Row& row,
+                          uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table 
@@ -602,45 +664,45 @@ public:
   // the values in the row (unescaped)
   // ID value is escaped
   // Returns whether row fetched
-  bool select_row_by_id(const string& table, Row& row, 
-			const string& id, const string& id_field = "id");
+  bool select_row_by_id(const string& table, Row& row,
+                        const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for a single field in the given table 
+  // Do a SELECT for a single field in the given table
   // with the given WHERE clause, and return the (unescaped) value
   // If where is empty, doesn't add a WHERE at all
   // Returns value or empty string if not found
   string select_value(const string& table, const string& field,
-		      const string& where = "");
+                      const string& where = "");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for a single field in the given table 
-  // with a WHERE clause constructed from where_row, and return the 
+  // Do a SELECT for a single field in the given table
+  // with a WHERE clause constructed from where_row, and return the
   // (unescaped) value
   // Returns value or empty string if not found
   string select_value(const string& table, const string& field,
-		      const Row& where_row);
+                      const Row& where_row);
 
   //------------------------------------------------------------------------
-  // Do a SELECT for a single field in the given table 
+  // Do a SELECT for a single field in the given table
   // with the given integer ID, and return the (unescaped) value
   // Returns value or empty string if not found
-  string select_value_by_id(const string& table, 
-			    const string& field,
-			    int id, const string& id_field = "id");
+  string select_value_by_id(const string& table,
+                            const string& field,
+                            int id, const string& id_field = "id");
 
   // Ditto, with 64-bit ID
-  string select_value_by_id64(const string& table, 
-			      const string& field,
-			      uint64_t id, const string& id_field = "id");
+  string select_value_by_id64(const string& table,
+                              const string& field,
+                              uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for a single field in the given table 
+  // Do a SELECT for a single field in the given table
   // with the given string ID, and return the (unescaped) value
   // ID value is escaped
   // Returns value or empty string if not found
   string select_value_by_id(const string& table, const string& field,
-			    const string& id, const string& id_field = "id");
+                            const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Count rows in the given table with the given WHERE clause
@@ -657,26 +719,26 @@ public:
   bool exists_id(const string& table, int id, const string& id_field = "id");
 
   // Ditto, with 64-bit ID
-  bool exists_id64(const string& table, uint64_t id, 
-		   const string& id_field = "id");
+  bool exists_id64(const string& table, uint64_t id,
+                   const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Check if a row exists with the given string ID
   // ID value is escaped
   // Returns whether the row exists
-  bool exists_id(const string& table, const string& id, 
-		 const string& id_field = "id");
+  bool exists_id(const string& table, const string& id,
+                 const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do an UPDATE for all fields in the given row in the given table 
+  // Do an UPDATE for all fields in the given row in the given table
   // with the given WHERE clause.  Values are escaped automatically
   // If where is empty, doesn't add a WHERE at all
   // Returns whether successful
   bool update(const string& table, const Row& row, const string& where="");
 
   //------------------------------------------------------------------------
-  // Do an UPDATE for all fields in the given row in the given table 
-  // with a WHERE clause created from where_row.  
+  // Do an UPDATE for all fields in the given row in the given table
+  // with a WHERE clause created from where_row.
   // Values are escaped automatically
   // Returns whether successful
   bool update(const string& table, const Row& row, const Row& where_row);
@@ -685,20 +747,20 @@ public:
   // Do an UPDATE for all fields in the given row in the given table 
   // matching the given integer ID
   // Returns whether successful
-  bool update_id(const string& table, const Row& row, 
-		 int id, const string& id_field = "id");
+  bool update_id(const string& table, const Row& row,
+                 int id, const string& id_field = "id");
 
   // Ditto with 64-bit ID
-  bool update_id64(const string& table, const Row& row, 
-		   uint64_t id, const string& id_field = "id");
+  bool update_id64(const string& table, const Row& row,
+                   uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do an UPDATE for all fields in the given row in the given table 
+  // Do an UPDATE for all fields in the given row in the given table
   // matching the given string ID
   // ID value is escaped
   // Returns whether successful
-  bool update_id(const string& table, const Row& row, 
-		 const string& id, const string& id_field = "id");
+  bool update_id(const string& table, const Row& row,
+                 const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Do a DELETE in the given table with the given WHERE clause
@@ -714,31 +776,31 @@ public:
   //------------------------------------------------------------------------
   // Do an DELETE in the given table matching the given integer ID
   // Returns whether successful
-  bool delete_id(const string& table, 
-		 int id, const string& id_field = "id");
+  bool delete_id(const string& table,
+                 int id, const string& id_field = "id");
 
   // Ditto with 64-bit ID
-  bool delete_id64(const string& table, 
-		   uint64_t id, const string& id_field = "id");
+  bool delete_id64(const string& table,
+                   uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // Do a DELETE in the given table matching the given string ID
   // ID value is escaped
   // Returns whether successful
-  bool delete_id(const string& table, 
-		 const string& id, const string& id_field = "id");
+  bool delete_id(const string& table,
+                 const string& id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
   // DELETE from a join table with two foreign ID fields
   // Returns whether successful
-  bool delete_join(const string& table, 
-		   const string& field1, int id1,
-		   const string& field2, int id2);
+  bool delete_join(const string& table,
+                   const string& field1, int id1,
+                   const string& field2, int id2);
 
   // Ditto with 64-bit ID
-  bool delete_join64(const string& table, 
-		     const string& field1, uint64_t id1,
-		     const string& field2, uint64_t id2);
+  bool delete_join64(const string& table,
+                     const string& field1, uint64_t id1,
+                     const string& field2, uint64_t id2);
 
 };
 
@@ -754,7 +816,7 @@ public:
   ConnectionFactory() {}
 
   //------------------------------------------------------------------------
-  // Interface to create a new connection 
+  // Interface to create a new connection
   virtual Connection *create() = 0;
 
   //------------------------------------------------------------------------
@@ -788,7 +850,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   ConnectionPool(ConnectionFactory& _factory, unsigned _min, unsigned _max,
-		 Time::Duration _max_inactivity);
+                 Time::Duration _max_inactivity);
 
   //------------------------------------------------------------------------
   // Claim a connection
@@ -829,8 +891,7 @@ struct AutoConnection
 
   //------------------------------------------------------------------------
   // Check if connection is valid
-  bool ok() { return conn!=0; }
-  bool operator!() { return !conn; }
+  operator bool() const { return conn; }
 
   //------------------------------------------------------------------------
   // Stub functions for every connection operation - see above
@@ -838,7 +899,7 @@ struct AutoConnection
 
   Result query(const string& sql) { return conn?conn->query(sql):Result(); }
 
-  bool query(const string& sql, Row& row) 
+  bool query(const string& sql, Row& row)
   { return conn?conn->query(sql, row):false; }
 
   bool query(const string& sql, string& value)
@@ -856,26 +917,26 @@ struct AutoConnection
   bool query_bool(const string& sql, bool def=false)
   { return conn?conn->query_bool(sql, def):def; }
 
-  int insert(const string& sql, 
-	     const string& table, const string& id_field="id",
-	     bool in_transaction=false)
+  int insert(const string& sql,
+             const string& table, const string& id_field="id",
+             bool in_transaction=false)
   { return conn?conn->insert(sql, table, id_field, in_transaction):0; }
 
-  uint64_t insert64(const string& sql, 
-		    const string& table, const string& id_field="id",
-		    bool in_transaction=false)
+  uint64_t insert64(const string& sql,
+                    const string& table, const string& id_field="id",
+                    bool in_transaction=false)
   { return conn?conn->insert64(sql, table, id_field, in_transaction):0; }
 
   int insert(const string& table, Row& row, const string& id_field="id",
-	     bool in_transaction=false)
+             bool in_transaction=false)
   { return conn?conn->insert(table, row, id_field, in_transaction):0; }
 
   bool insert_join(const string& table, const string& field1, int id1,
-		   const string& field2, int id2)
+                   const string& field2, int id2)
   { return conn?conn->insert_join(table, field1, id1, field2, id2):false; }
 
   bool insert_join64(const string& table, const string& field1, uint64_t id1,
-		     const string& field2, uint64_t id2)
+                     const string& field2, uint64_t id2)
   { return conn?conn->insert_join64(table, field1, id1, field2, id2):false; }
 
   Result select(const string& table, const Row& row, const string& where="")
@@ -884,16 +945,16 @@ struct AutoConnection
   Result select(const string& table, const Row& row, const Row& where_row)
   { return conn?conn->select(table, row, where_row):Result(); }
 
-  Result select_by_id(const string& table, const Row& row,  
-		      int id, const string& id_field = "id")
+  Result select_by_id(const string& table, const Row& row,
+                      int id, const string& id_field = "id")
   { return conn?conn->select_by_id(table, row, id, id_field):Result(); }
 
-  Result select_by_id64(const string& table, const Row& row,  
-			uint64_t id, const string& id_field = "id")
+  Result select_by_id64(const string& table, const Row& row,
+                        uint64_t id, const string& id_field = "id")
   { return conn?conn->select_by_id64(table, row, id, id_field):Result(); }
 
-  Result select_by_id(const string& table, const Row& row,  
-		      const string& id, const string& id_field = "id")
+  Result select_by_id(const string& table, const Row& row,
+                      const string& id, const string& id_field = "id")
   { return conn?conn->select_by_id(table, row, id, id_field):Result(); }
 
   bool select_row(const string& table, Row& row, const string& where="")
@@ -902,38 +963,38 @@ struct AutoConnection
   bool select_row(const string& table, Row& row, const Row& where_row)
   { return conn?conn->select_row(table, row, where_row):false; }
 
-  bool select_row_by_id(const string& table, Row& row, 
-			int id, const string& id_field = "id")
+  bool select_row_by_id(const string& table, Row& row,
+                        int id, const string& id_field = "id")
   { return conn?conn->select_row_by_id(table, row, id, id_field):false; }
 
-  bool select_row_by_id64(const string& table, Row& row, 
-			  uint64_t id, const string& id_field = "id")
+  bool select_row_by_id64(const string& table, Row& row,
+                          uint64_t id, const string& id_field = "id")
   { return conn?conn->select_row_by_id64(table, row, id, id_field):false; }
 
-  bool select_row_by_id(const string& table, Row& row, 
-			const string& id, const string& id_field = "id")
+  bool select_row_by_id(const string& table, Row& row,
+                        const string& id, const string& id_field = "id")
   { return conn?conn->select_row_by_id(table, row, id, id_field):false; }
 
   string select_value(const string& table, const string& field,
-		      const string& where = "")
+                      const string& where = "")
   { return conn?conn->select_value(table, field, where):""; }
 
   string select_value(const string& table, const string& field,
-		      const Row& where_row)
+                      const Row& where_row)
   { return conn?conn->select_value(table, field, where_row):""; }
 
-  string select_value_by_id(const string& table, 
-			    const string& field,
-			    int id, const string& id_field = "id")
+  string select_value_by_id(const string& table,
+                            const string& field,
+                            int id, const string& id_field = "id")
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
 
-  string select_value_by_id64(const string& table, 
-			      const string& field,
-			      uint64_t id, const string& id_field = "id")
+  string select_value_by_id64(const string& table,
+                              const string& field,
+                              uint64_t id, const string& id_field = "id")
   { return conn?conn->select_value_by_id64(table, field, id, id_field):""; }
 
   string select_value_by_id(const string& table, const string& field,
-			    const string& id, const string& id_field = "id")
+                            const string& id, const string& id_field = "id")
   { return conn?conn->select_value_by_id(table, field, id, id_field):""; }
 
   int count(const string& table, const string& where="")
@@ -945,12 +1006,12 @@ struct AutoConnection
   bool exists_id(const string& table, int id, const string& id_field = "id")
   { return conn?conn->exists_id(table, id, id_field):false; }
 
-  bool exists_id64(const string& table, uint64_t id, 
-		   const string& id_field = "id")
+  bool exists_id64(const string& table, uint64_t id,
+                   const string& id_field = "id")
   { return conn?conn->exists_id64(table, id, id_field):false; }
 
-  bool exists_id(const string& table, const string& id, 
-		 const string& id_field = "id")
+  bool exists_id(const string& table, const string& id,
+                 const string& id_field = "id")
   { return conn?conn->exists_id(table, id, id_field):false; }
 
   bool update(const string& table, const Row& row, const string& where="")
@@ -959,16 +1020,16 @@ struct AutoConnection
   bool update(const string& table, const Row& row, const Row& where_row)
   { return conn?conn->update(table, row, where_row):false; }
 
-  bool update_id(const string& table, const Row& row, 
-		 int id, const string& id_field = "id")
+  bool update_id(const string& table, const Row& row,
+                 int id, const string& id_field = "id")
   { return conn?conn->update_id(table, row, id, id_field):false; }
 
-  bool update_id64(const string& table, const Row& row, 
-		   uint64_t id, const string& id_field = "id")
+  bool update_id64(const string& table, const Row& row,
+                   uint64_t id, const string& id_field = "id")
   { return conn?conn->update_id64(table, row, id, id_field):false; }
 
-  bool update_id(const string& table, const Row& row, 
-		 const string& id, const string& id_field = "id")
+  bool update_id(const string& table, const Row& row,
+                 const string& id, const string& id_field = "id")
   { return conn?conn->update_id(table, row, id, id_field):false; }
 
   bool delete_all(const string& table, const string& where = "")
@@ -977,24 +1038,24 @@ struct AutoConnection
   bool delete_all(const string& table, const Row& where_row)
   { return conn?conn->delete_all(table, where_row):false; }
 
-  bool delete_id(const string& table, 
-		 int id, const string& id_field = "id")
+  bool delete_id(const string& table,
+                 int id, const string& id_field = "id")
   { return conn?conn->delete_id(table, id, id_field):false; }
 
-  bool delete_id64(const string& table, 
-		   uint64_t id, const string& id_field = "id")
+  bool delete_id64(const string& table,
+                   uint64_t id, const string& id_field = "id")
   { return conn?conn->delete_id64(table, id, id_field):false; }
 
-  bool delete_id(const string& table, 
-		 const string& id, const string& id_field = "id")
+  bool delete_id(const string& table,
+                 const string& id, const string& id_field = "id")
   { return conn?conn->delete_id(table, id, id_field):false; }
 
   bool delete_join(const string& table, const string& field1, int id1,
-		   const string& field2, int id2)
+                   const string& field2, int id2)
   { return conn?conn->delete_join(table, field1, id1, field2, id2):false; }
 
   bool delete_join64(const string& table, const string& field1, uint64_t id1,
-		   const string& field2, uint64_t id2)
+                   const string& field2, uint64_t id2)
   { return conn?conn->delete_join64(table, field1, id1, field2, id2):false; }
 
   static string escape(const string& s) { return FieldValue::escape(s); }
@@ -1032,10 +1093,6 @@ public:
   ~Transaction();
 };
 
-
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_DB_H
-
-
-

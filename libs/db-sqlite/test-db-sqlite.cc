@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 #include "ot-db-sqlite.h"
 #include "ot-text.h"
+#include "ot-file.h"
 
 using namespace std;
 using namespace ObTools;
@@ -93,6 +94,57 @@ TEST_F(DBSQLiteTest, TestCanReadWhilstWriteLocked)
   auto result2 = conn->query("select max(id) from test");
   ASSERT_TRUE(result2.fetch(value));
   EXPECT_EQ("1009", value);
+}
+
+TEST_F(DBSQLiteTest, TestPreparedStatement)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto conn = unique_ptr<DB::Connection>(factory.create());
+  ASSERT_TRUE(conn->exec("create table test (id int, name text)"));
+  ASSERT_TRUE(conn->exec("insert into test (id, name) values (123, 'foo')"));
+
+  auto statement = conn->prepare("select name from test where id = ?");
+  ASSERT_TRUE(statement);
+  ASSERT_TRUE(statement.bind(1, 123));
+  auto value = string{};
+  ASSERT_TRUE(statement.fetch(value));
+  EXPECT_EQ("foo", value);
+}
+
+TEST_F(DBSQLiteTest, TestPreparedStatementReuse)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto conn = unique_ptr<DB::Connection>(factory.create());
+  ASSERT_TRUE(conn->exec("create table test (id int, name text)"));
+  ASSERT_TRUE(conn->exec("insert into test (id, name) values (123, 'foo')"));
+  ASSERT_TRUE(conn->exec("insert into test (id, name) values (456, 'bar')"));
+
+  auto statement = conn->prepare("select name from test where id = ?");
+  ASSERT_TRUE(statement);
+  ASSERT_TRUE(statement.bind(1, 123));
+  auto value = string{};
+  ASSERT_TRUE(statement.fetch(value));
+  ASSERT_EQ("foo", value);
+  statement.reset();
+  ASSERT_TRUE(statement.bind(1, 456));
+  ASSERT_TRUE(statement.fetch(value));
+  EXPECT_EQ("bar", value);
+}
+
+TEST_F(DBSQLiteTest, TestHeldPreparedStatementDoesNotHoldLock)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto conn = unique_ptr<DB::Connection>(factory.create());
+  ASSERT_TRUE(conn->exec("create table test (id int, name text)"));
+
+  auto trans = DB::Transaction{*conn};
+  auto statement = conn->prepare("insert into test(id, name) values (?, ?)");
+  ASSERT_TRUE(statement);
+  ASSERT_TRUE(statement.bind(1, 123));
+  ASSERT_TRUE(statement.bind(1, "foo"));
+  ASSERT_TRUE(statement.execute());
+  trans.commit();
+  ASSERT_FALSE(File::Path(string{dbfile} + "-journal").exists());
 }
 
 //--------------------------------------------------------------------------

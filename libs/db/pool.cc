@@ -63,7 +63,7 @@ void ConnectionPool::fill_to_minimum()
       Connection *conn = factory.create();
       if (conn)
       {
-	if (!!*conn && conn->ok())
+	if (*conn)
 	{
 	  connections.push_back(conn);
 	  available.push_back(conn);
@@ -101,7 +101,7 @@ Connection *ConnectionPool::claim()
     available.pop_front();
 
     // Check it's OK
-    if (!!*conn && conn->ok())
+    if (*conn)
     {
       last_used[conn] = Time::Stamp::now();
       OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
@@ -128,7 +128,7 @@ Connection *ConnectionPool::claim()
     conn = factory.create();
     if (conn)
     {
-      if (!!*conn && conn->ok())
+      if (*conn)
       {
 	connections.push_back(conn);
 	last_used[conn] = Time::Stamp::now();
@@ -198,7 +198,7 @@ void ConnectionPool::run_background(bool& running)
 	list<Connection *>::iterator q = p++;
         Connection *conn = *q;
 
-	if (!*conn || !conn->ok())
+	if (!*conn)
 	{
 	  log.error<< "Idle database connection failed - removing from pool\n";
 	  
