@@ -342,7 +342,7 @@ class MessageTransportSubscriber: public Subscriber
                              const string& _subject,
                              MultiClient& client,
                              ObTools::Message::Handler<CONTEXT>& _handler):
-    Subscriber(client, _subject+".request"), context(_context),
+    Subscriber(client, _subject+".request*"), context(_context),
     message_handler(_handler)
   {}
 
