@@ -52,7 +52,7 @@ SubscriptionMessage::SubscriptionMessage(Message& msg):
   subject = body.get_attr("subject", "*");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write SubscriptionMessage to ostream
 ostream& operator<<(ostream& s, const SubscriptionMessage& m)
 {

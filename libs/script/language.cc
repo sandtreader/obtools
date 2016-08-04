@@ -12,14 +12,14 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Register a language construct
 void Language::register_action(const string& name, factory_t& factory)
 {
   action_registry.add(name, factory);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Instantiate an action from the given XML element
 //Returns 0 if it fails
 Action *Language::create_action(Script& script, XML::Element& xml)

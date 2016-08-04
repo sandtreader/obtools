@@ -30,7 +30,7 @@ namespace ObTools { namespace Time {
 static const int monthdays[] = {   0,  31,  59,  90, 120, 151,
                                  181, 212, 243, 273, 304, 334 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Helper function to convert a split time into an internal timestamp
 ntp_stamp_t Stamp::combine(const Split& split)
 {
@@ -81,7 +81,7 @@ ntp_stamp_t Stamp::combine(const Split& split)
   return ts;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Helper function to split an internal timestamp into a split time
 Split Stamp::split(ntp_stamp_t ts)
 {
@@ -161,7 +161,7 @@ Split Stamp::split(ntp_stamp_t ts)
   return sp;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from string
 // See ot-time.h for details
 
@@ -521,7 +521,7 @@ Stamp::Stamp(const string& text, bool lenient)
   *this -= tz_offset;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to ISO timestamp string
 // Generates YYYY:MM:DDTHH:MM:SS.sssZ form or empty if invalid
 // This format is also compatible with XML
@@ -551,7 +551,7 @@ string Stamp::iso() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to minimal (and URL-safe) ISO-compatible timestamp string
 // Generates YYYYMMDDTHHMMSS form or empty if invalid
 string Stamp::iso_minimal() const
@@ -571,7 +571,7 @@ string Stamp::iso_minimal() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to numeric-only ISO-compatible timestamp string
 // May not be considered valid by all parsers - including ours if non-lenient
 // Generates YYYYMMDDHHMMSS form or empty if invalid
@@ -592,7 +592,7 @@ string Stamp::iso_numeric() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to ISO date
 // Generates YYYY-MM-DD form or empty if invalid
 // sep can be specified, defaults to '-' - set to 0 to leave out
@@ -613,7 +613,7 @@ string Stamp::iso_date(char sep) const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to HH:MM with optional (:SS)
 // sep can be specified, defaults to ':' - set to 0 to leave out
 // Generates HH:MM:SS form or empty if invalid
@@ -634,28 +634,28 @@ string Stamp::iso_time(char sep, bool with_secs) const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get the locale-specific date format
 string Stamp::locale_date() const
 {
   return format("%x");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get the locale-specific time format
 string Stamp::locale_time() const
 {
   return format("%X");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get the locale-specific date and time format
 string Stamp::locale_date_time() const
 {
   return format("%x %H:%M");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to RFC822 string
 // Generates Wdy, DD-Mon-YYYY HH:MM:SS GMT, empty if invalid
 string Stamp::rfc822() const
@@ -664,7 +664,7 @@ string Stamp::rfc822() const
   return format("%a, %d %b %Y %T GMT");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Format according to strftime format (max 40 chars)
 string Stamp::format(const char *format) const
 {
@@ -675,7 +675,7 @@ string Stamp::format(const char *format) const
   return string(buf, len);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get the day of the week (Monday=1, Sunday=7)
 int Stamp::weekday() const
 {
@@ -687,7 +687,7 @@ int Stamp::weekday() const
   return 1+(days % 7);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a timestamp in local time (according to TZ) from a normal UTC one
 Stamp Stamp::localise() const
 {
@@ -716,7 +716,7 @@ Stamp Stamp::localise() const
   return Stamp(sp);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Fill a struct tm
 void Stamp::get_tm(struct tm& tm) const
 {
@@ -733,7 +733,7 @@ void Stamp::get_tm(struct tm& tm) const
   tm.tm_wday = weekday() % 7;  // Move Sunday=7 back to Sunday=0
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a timestamp in UTC time from a localised one
 Stamp Stamp::globalise() const
 {
@@ -744,7 +744,7 @@ Stamp Stamp::globalise() const
   return Stamp(mktime(&tm));
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Static constructor-like function for time now
 Stamp Stamp::now()
 {
@@ -777,7 +777,7 @@ Stamp Stamp::now()
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Stamp to ostream
 ostream& operator<<(ostream& s, const Stamp& st)
 {

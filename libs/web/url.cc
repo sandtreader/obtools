@@ -167,7 +167,7 @@ bool URL::split(XML::Element& xml) const
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Quick access to scheme of URL
 // Returns host or "" if there isn't one
 string URL::get_scheme() const
@@ -177,7 +177,7 @@ string URL::get_scheme() const
   return xml.get_child("scheme").content;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Quick access to host of URL
 // Returns host or "" if can't read it
 string URL::get_host() const
@@ -187,7 +187,7 @@ string URL::get_host() const
   return xml.get_child("host").content;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Quick access to path of URL
 // Returns path or "" if can't read it
 string URL::get_path() const
@@ -197,7 +197,7 @@ string URL::get_path() const
   return xml.get_child("path").content;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Quick access to query of URL
 // Returns query or "" if can't read it
 string URL::get_query() const
@@ -207,7 +207,7 @@ string URL::get_query() const
   return xml.get_child("query").content;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get query as a property list
 // Returns whether query was available, fills props if so
 // Note: Handles + for space and % decode in values
@@ -221,7 +221,7 @@ bool URL::get_query(Misc::PropertyList& props) const
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get an individual parameter from query
 // Returns parameter value or "" if not present
 string URL::get_query_parameter(const string& name) const
@@ -231,7 +231,7 @@ string URL::get_query_parameter(const string& name) const
   return params[name];
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Quick access to fragment of URL
 // Returns fragment or "" if can't read it
 string URL::get_fragment() const
@@ -241,7 +241,7 @@ string URL::get_fragment() const
   return xml.get_child("fragment").content;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Resolve against a base URL
 // Returns the resolved URL
 // Handles absolute, relative and .. forms
@@ -280,7 +280,7 @@ URL URL::resolve(const URL& base) const
   return URL(base_xml);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write URL to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const URL& u)
@@ -289,7 +289,7 @@ ostream& operator<<(ostream& s, const URL& u)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Static function to URL-encode (percent-encode) a string
 // Escapes space as '+' if 'space_as_plus' is set (the default)
 string URL::encode(const string& s, bool space_as_plus)
@@ -336,7 +336,7 @@ string URL::encode(const string& s, bool space_as_plus)
   return r;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Static function to URL-encode (percent-encode) a set of variables
 // (expressed as a PropertyList)
 // Escapes space as '+' if 'space_as_plus' is set (the default)
@@ -354,7 +354,7 @@ string URL::encode(const Misc::PropertyList& props, bool space_as_plus)
   return r;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Static function to URL-decode (percent-encode) a string
 // Decodes '+' as space if 'space_as_plus' is set (the default)
 string URL::decode(const string& s, bool space_as_plus)
@@ -392,7 +392,7 @@ string URL::decode(const string& s, bool space_as_plus)
   return r;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Static function to URL-decode (percent-encode) a multi-valued string
 // (x-www-form-urlencoded) into a property list
 // Decodes '+' as space if 'space_as_plus' is set (the default)

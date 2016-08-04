@@ -47,26 +47,26 @@ class URL
 public:
   string text;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructors
   URL() {}
   URL(const string& s): text(s) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from XML format
   // Pass in any element with above sub-elements
   URL(XML::Element& xml);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the text of the URL
   string get_text() const { return text; }
   string str() const { return text; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Clear the URL
   void clear() { text.clear(); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Split text into XML
   // Pass in an empty element, and this will fill it up as above
   // Name of element is set to 'url'
@@ -141,7 +141,7 @@ public:
 
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write URL to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const URL& u);
@@ -170,31 +170,31 @@ private:
 public:
   XML::Element xml;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   MIMEHeaders(): xml("headers") {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check for presence of a header
   bool has(const string& name) const
   { return !!xml.get_child(name); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a specific header (first of that name)
   string get(const string& name) const
   { return xml.get_child(name).content; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Insert a header
   void put(const string& name, const string& value)
   { xml.add(name, value); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Remove all headers of the given name
   void remove(const string& name)
   { xml.remove_children(name); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Replace a header
   void replace(const string& name, const string& value)
   { remove(name); xml.add(name, value); }
@@ -203,17 +203,17 @@ public:
   // Add a current date header to RFC 822 standard
   void put_date(const string& header="date");
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get all headers of name 'name'
   list<string> get_all(const string& name) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Split multi-value headers at commas
   // Reads all headers of name 'name', and splits at delimiter to give a
   // flattened list of values
   list<string> get_all_splitting(const string& name, char delimiter=',') const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Split a header value (e.g. from get or get_all) into a prime value
   // and parameters delineated by ';'
   // Parameters without a value are given the value '1'
@@ -228,33 +228,33 @@ public:
   //   pure        1
   static Misc::PropertyList split_parameters(string& value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Parse headers from a stream
   // Returns whether successful
   // Skips the blank line delimiter, leaving stream ready to read message
   // body (if any)
   bool read(istream& in);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generates headers to a stream
   // Returns whether successful (can only fail if stream fails)
   // Includes the blank line delimiter, leaving stream ready to write message
   // body (if any)
   bool write(ostream& out) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a line from a stream
   // Returns true if read OK - even if blank
   // Exported for the convenience of HTTP reader - see below
   static bool getline(istream& in, string& s);
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read MIMEHeaders from istream
 // e.g. cin >> url;
 istream& operator>>(istream& s, MIMEHeaders& mh);
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write MIMEHeaders to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const MIMEHeaders& mh);
@@ -297,11 +297,11 @@ public:
   MIMEHeaders headers;
   string body;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Basic constructor
   HTTPMessage() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructors for requests
   HTTPMessage(const string& _method, const URL& _url,
               const string& _version = "HTTP/1.0"):
@@ -311,23 +311,23 @@ public:
               const string& _version = "HTTP/1.0"):
     method(_method), url(_url), version(_version) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor for responses
   HTTPMessage(int _code, const string& _reason,
               const string& _version = "HTTP/1.0"):
     code(_code), reason(_reason), version(_version) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check for request (not response)
   bool is_request() { return !method.empty(); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read request/response and headers from a stream
   // Leave stream ready to read body (if any)
   // Returns whether successful
   bool read_headers(istream &in);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read from a stream
   // Returns whether successful
   // If read_to_eof is set, it will try to read a body up to EOF if there
@@ -336,12 +336,12 @@ public:
   // means lack of body
   bool read(istream &in, bool read_to_eof = false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write request/response and headers to a stream
   // Returns whether successful
   bool write_headers(ostream &out) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write to a stream
   // Returns whether successful
   bool write(ostream &out, bool headers_only = false) const;
@@ -349,7 +349,7 @@ public:
   // The following cookie support is for server-side use - for client side
   // see CookieJar below
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set a cookie with the given optional domain, path and expiry time
   void set_cookie(const string& name, const string& value,
                   const string& path = "",
@@ -358,21 +358,21 @@ public:
                   bool secure = false,
                   bool http_only = false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a map of all cookies, name value pairs in values_p
   void get_cookies(map<string, string>& values_p) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a single cookie value, or empty if not set
   string get_cookie(const string& name) const;
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read HTTPMessage from istream
 // e.g. cin >> url;
 istream& operator>>(istream& s, HTTPMessage& msg);
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write HTTPMessage to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const HTTPMessage& msg);
@@ -396,23 +396,23 @@ struct Cookie
   Time::Stamp created;
   Web::URL origin;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructors
   Cookie(): http_only(false), secure(false) {}
   Cookie(const string& _name, const string& _value):
     name(_name), value(_value), http_only(false), secure(false) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Comparison (for evicting existing)
   bool operator==(const Cookie& c)
   { return name==c.name && domain==c.domain && path==c.path; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read from a Set-Cookie header value
   // Returns whether valid cookie read
   bool read_from(const string& header_value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Output as a string, including attributes if attrs is set
   string str(bool attrs=false) const;
 };
@@ -425,28 +425,28 @@ class CookieJar
   list<Cookie> cookies;
 
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   CookieJar() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get number of cookies available
   int count() { return cookies.size(); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Take cookies from the given server response
   void take_cookies_from(const HTTPMessage& response, const URL& origin);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add cookies to the given client request
   void add_cookies_to(HTTPMessage& request);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Prune expired cookies from the jar, including session cookies if session
   // ended
   void prune(bool session_ended=false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Dump the cookie jar to the given stream
   void dump(ostream& sout);
 };
@@ -490,7 +490,7 @@ protected:
   Net::EndPoint server;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from server
   HTTPClient(Net::EndPoint _server, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0):
@@ -502,7 +502,7 @@ public:
     cookie_jar(0),
     server(_server) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor for SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *_ctx, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0):
@@ -514,30 +514,30 @@ public:
     cookie_jar(0),
     server(_server) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from URL - extracts server from host/port parts
   // Handles https if ctx is set
   HTTPClient(const URL& url, SSL::Context *_ctx=0, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Enable HTTP/1.1 persistent connections
   void enable_persistence() { http_1_1 = true; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Force close on next request on persistent connections
   void close_persistence() { http_1_1_close = true; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Enable progressive download - initial fetch is just for headers, then
   // call read() to get data
   void enable_progressive() { progressive=true; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Disable progressive download
   void disable_progressive() { progressive=false; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Enable progressive upload - initial fetch is just for headers, then
   // call write() to get data
   void enable_progressive_upload(unsigned long chunk_length
@@ -547,67 +547,67 @@ public:
     progressive_write = true;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Disable progressive upload
   void disable_progressive_upload() { progressive_write = false; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set cookie jar (referenced, not taken) = 0 to disable cookies
   void set_cookie_jar(CookieJar *jar) { cookie_jar = jar; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
   // Returns detailed status code
   int do_fetch(HTTPMessage& request, HTTPMessage& response);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
   // Returns whether successfully sent (even if error received)
   bool fetch(HTTPMessage& request, HTTPMessage& response);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Basic operation - just receive HTTP response
   // Returns detailed status code
   int do_receive(HTTPMessage& request, HTTPMessage& response);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Simple GET operation on a URL
   // Returns result code, fills in body if provided, reason code if not
   int get(const URL& url, string& body);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Simple DELETE operation on a URL
   // Returns result code, fills in body if provided, reason code if not
   int del(const URL& url, string& body);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Simple POST operation on a URL
   // Returns result code, fills in response_body if provided,
   // reason code if not
   int post(const URL& url, const string& request_body, string& response_body);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Simple PUT operation on a URL
   // Returns result code, fills in response_body if provided,
   // reason code if not
   int put(const URL& url, const string& content_type,
           istream& is, string& response_body);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
   // Returns the actual amount read
   unsigned long read(unsigned char *data, unsigned long length);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a block of data to a progressive upload
   // Returns the actual amount written
   unsigned long write(unsigned char *data, unsigned long length);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the local address we last connected from (for P2P)
   Net::EndPoint get_last_local_address() { return last_local_address; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~HTTPClient();
 };
@@ -623,12 +623,12 @@ private:
   string version; // Version reported in Server: header
   string cors_origin;  // Pattern for Access-Control-Allow-Origin header
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Implementation of worker process method
   void process(SSL::TCPSocket &s, const SSL::ClientDetails& client);
 
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Helper to generate error in response, and log it
   bool error(Web::HTTPMessage& response, int code, const string& reason)
   {
@@ -637,7 +637,7 @@ protected:
     response.code = code; response.reason = reason; return true;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Abstract interface to handle requests
   // Return whether handled - fill in response for normal errors, only
   // return false if things are really bad, and we'll return 500
@@ -650,7 +650,7 @@ protected:
                               SSL::TCPSocket& socket,
                               Net::TCPStream& stream) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Interface to generate progressive data after initial response headers
   // and initial body (if any)
   // Simply continue sending data to the socket or stream until done
@@ -661,14 +661,14 @@ protected:
                                     SSL::TCPSocket& /*socket*/,
                                     Net::TCPStream& /*stream*/) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Interface to clear per-connection state
   // Does nothing by default
   virtual void handle_close(const SSL::ClientDetails& /*client*/,
                             SSL::TCPSocket& /*socket*/) {}
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor to bind to any interface (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(int port=80, const string& _version="", int backlog=5,
@@ -676,7 +676,7 @@ public:
     SSL::TCPServer(0, port, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor to bind to specific address (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(Net::EndPoint address, const string& _version="", int backlog=5,
@@ -684,7 +684,7 @@ public:
     SSL::TCPServer(0, address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor to bind to any interface, with SSL
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(SSL::Context *ctx,
@@ -693,7 +693,7 @@ public:
     SSL::TCPServer(ctx, port, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor to bind to specific address, with SSL
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(SSL::Context *ctx,
@@ -702,7 +702,7 @@ public:
     SSL::TCPServer(ctx, address, backlog, min_spare, max_threads),
     timeout(_timeout), version(_version) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set origin pattern for CORS (Access-Control-Allow-Origin header)
   // pattern defaults to '*' = any origin
   void set_cors_origin(const string& pattern = "*")
@@ -710,7 +710,7 @@ public:
     cors_origin = pattern;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~HTTPServer() {}
 };
@@ -723,11 +723,11 @@ class URLHandler
 public:
   string url;   // URL (patterns allowed)
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   URLHandler(const string& _url): url(_url) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Abstract interface to handle requests
   // Return whether handled - fill in response for normal errors, only
   // return false if things are really bad, and we'll return 500
@@ -736,7 +736,7 @@ public:
                               HTTPMessage& response,
                               const SSL::ClientDetails& client) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~URLHandler() {}
 };
@@ -756,14 +756,14 @@ class SimpleHTTPServer: public HTTPServer
                       Net::TCPStream& stream);
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor on all interfaces, basic TCP
   SimpleHTTPServer(int port=80, const string& _version="", int backlog=5,
                    int min_spare=1, int max_threads=10, int _timeout=90):
     HTTPServer(port, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor for specific address, basic TCP
   SimpleHTTPServer(Net::EndPoint address, const string& _version="",
                    int backlog=5,
@@ -771,7 +771,7 @@ public:
     HTTPServer(address, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor on all interfaces, with SSL
   SimpleHTTPServer(SSL::Context *ctx,
                    int port=80, const string& _version="", int backlog=5,
@@ -779,7 +779,7 @@ public:
     HTTPServer(ctx, port, _version, backlog, min_spare, max_threads, _timeout),
     mutex() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor for specific address, with SSL
   SimpleHTTPServer(SSL::Context *ctx,
                    Net::EndPoint address, const string& _version="",
@@ -788,17 +788,17 @@ public:
     HTTPServer(ctx, address, _version, backlog, min_spare, max_threads,
                _timeout), mutex() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a handler - will be deleted on destruction of server
   void add(URLHandler *h)
   { MT::RWWriteLock lock(mutex); handlers.push_back(h); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Remove a handler
   void remove(URLHandler *h)
   { MT::RWWriteLock lock(mutex); handlers.remove(h); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~SimpleHTTPServer();
 };
@@ -819,35 +819,35 @@ class Cache
                  File::Path& file_path_p, File::Path& status_path_p);
 
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   // UA is used if specified, otherwise a default is used
   Cache(const File::Directory& _dir, SSL::Context *_ssl_ctx = 0,
         const string& _ua="");
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Fetch a file from the given URL, or from cache
   // If check_for_updates is set, uses conditional GET to check whether a
   // new version exists, if the item's update-time has passed since last check
   // Returns whether file is available, writes file location to path_p if so
   bool fetch(const URL& url, File::Path& path_p, bool check_for_updates=false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Fetch an object from the given URL, or from cache, as a string
   // Returns whether file was fetched, writes file contents to contents_p if so
   bool fetch(const URL& url, string& contents_p, bool check_for_updates=false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set the update check interval for a given URL
   // interval is in Time::Duration constructor format
   // (URL must already have been fetched)
   bool set_update_interval(const URL& url, const string& interval);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Clear any cached file for a given URL
   void forget(const URL& url);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Update the cache in background
   // Runs a single time through the entire cache, checking for updates on files
   // with update intervals set

@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace CLI {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Process a connection
 void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
 {

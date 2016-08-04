@@ -26,14 +26,14 @@ Reader::Reader(ostream&s):
   xml_parser.fix_namespace("org.omg/UML1.3", "UML");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Warning handler
 void Reader::warning(const char *warn, const string& detail)
 {
   serr << warn << detail << endl;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Fatal error handler
 void Reader::error(const char *err, const string& detail)
      throw (ParseFailed)
@@ -42,14 +42,14 @@ void Reader::error(const char *err, const string& detail)
   throw ParseFailed();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Record an ID to UML element mappimg
 void Reader::record_uml_element(const string& id, UML::Element *e)
 {
   uml_element_map[id]=e;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Lookup an element in the UML element map by ID
 // Returns 0 if failed
 UML::Element *Reader::lookup_uml_element(const string& id)
@@ -61,7 +61,7 @@ UML::Element *Reader::lookup_uml_element(const string& id)
   return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Gather XML element IDs from this element, and recurse
 void Reader::gather_xml_element_ids(XML::Element& e)
 {
@@ -76,7 +76,7 @@ void Reader::gather_xml_element_ids(XML::Element& e)
     gather_xml_element_ids(*p);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Lookup an element in the XML element map by ID
 // Returns 0 if failed
 XML::Element *Reader::lookup_xml_element(const string& id)
@@ -88,7 +88,7 @@ XML::Element *Reader::lookup_xml_element(const string& id)
   return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Translate XMI 1.0 fully qualified elements into XMI 1.1+ namespace ones
 void Reader::upgrade_xmi_to_1_1(XML::Element &root)
 {
@@ -192,7 +192,7 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
   root.translate(upgrade);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Parse from given input stream
 void Reader::read_from(istream& s) throw (ParseFailed)
 {
@@ -248,7 +248,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   model = new UML::Model(*this, modele, uml_version);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read from istream
 istream& ObTools::XMI::operator>>(istream& s, Reader& p) throw (ParseFailed)
 {

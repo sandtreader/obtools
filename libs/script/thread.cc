@@ -17,14 +17,14 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 ThreadAction::ThreadAction(const CP& cp): SequenceAction(cp), thread(0)
 {
   sleep_time = xml.get_attr_int("sleep", DEFAULT_SLEEP_TIME);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool ThreadAction::tick(Context& con)
@@ -36,7 +36,7 @@ bool ThreadAction::tick(Context& con)
   return !!*thread;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Run thread
 void ThreadAction::run_thread(Context& con)
 {
@@ -44,7 +44,7 @@ void ThreadAction::run_thread(Context& con)
     this_thread::sleep_for(chrono::microseconds{sleep_time});
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 ThreadAction::~ThreadAction()
 {

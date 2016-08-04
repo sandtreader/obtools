@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace DB {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert a DB boolean represented as a string to a bool
 bool db_str_to_bool(const string& value)
 {
@@ -32,7 +32,7 @@ bool db_str_to_bool(const string& value)
     return false;
   }
 }
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from string but convert to specified type
 FieldValue::FieldValue(const string& value, FieldType _type):
   type(_type)
@@ -64,7 +64,7 @@ FieldValue::FieldValue(const string& value, FieldType _type):
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get value as string
 string FieldValue::as_string() const
 {
@@ -93,7 +93,7 @@ string FieldValue::as_string() const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get value as int
 int FieldValue::as_int() const
 {
@@ -122,7 +122,7 @@ int FieldValue::as_int() const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get value as int64
 uint64_t FieldValue::as_int64() const
 {
@@ -151,7 +151,7 @@ uint64_t FieldValue::as_int64() const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get value as bool
 bool FieldValue::as_bool() const
 {
@@ -180,7 +180,7 @@ bool FieldValue::as_bool() const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get value as real
 double FieldValue::as_real() const
 {
@@ -209,7 +209,7 @@ double FieldValue::as_real() const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Escape a string, doubling single quotes and backslashes
 string FieldValue::escape(const string& s)
 {
@@ -217,7 +217,7 @@ string FieldValue::escape(const string& s)
   return Text::subst(s2, "'", "''");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Unescape a string, singling double quotes and backslashes
 string FieldValue::unescape(const string& s)
 {

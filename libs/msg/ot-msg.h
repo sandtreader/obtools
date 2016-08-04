@@ -43,7 +43,7 @@ public:
   string ns_prefix;             // Namespace prefix
   string ns_url;                // Namespace URL
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Default constructor - the above filled in in subclass constructors
   Handler(const XML::Element& cfg, const string& _doc_name="",
           const string& _ns_prefix="", const string& _ns_url="",
@@ -55,7 +55,7 @@ public:
     ns_url(_ns_url)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Call to handle message and respond
   // throws Exception on any error, otherwise fills in response
   // Response document will be pre-created with document_name-response, if set
@@ -64,7 +64,7 @@ public:
                               const SSL::ClientDetails& client,
                               XML::Element& response) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor (probably not needed)
   virtual ~Handler() {}
 };
@@ -79,16 +79,16 @@ class Transport
  public:
   string name;  // Short name for config
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Transport(const string& _name): name(_name) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Register a handler with the given config element
   virtual void register_handler(Handler<CONTEXT>& handler,
                                 const XML::Element& config) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Transport() {}
 };
@@ -146,20 +146,20 @@ class Broker
   }
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Broker(Init::Registry<Handler<CONTEXT> >& _handler_registry):
     handler_registry(_handler_registry)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a transport
   void add_transport(Transport<CONTEXT> *trans)
   {
     transports[trans->name].push_back(trans);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Configure from XML configuration (<message> element)
   void configure(const XML::Element& config)
   {
@@ -175,7 +175,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Shutdown cleanly
   void shutdown()
   {
@@ -197,7 +197,7 @@ public:
     handlers.clear();
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~Broker()
   {

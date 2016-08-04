@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace Web {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a current date header to RFC 822 standard
 void MIMEHeaders::put_date(const string& header)
 {
@@ -318,7 +318,7 @@ bool MIMEHeaders::write(ostream& out) const
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read MIMEHeaders from istream
 // e.g. cin >> url;
 istream& operator>>(istream& s, MIMEHeaders& mh)
@@ -327,7 +327,7 @@ istream& operator>>(istream& s, MIMEHeaders& mh)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write MIMEHeaders to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const MIMEHeaders& mh)

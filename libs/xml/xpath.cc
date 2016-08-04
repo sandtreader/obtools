@@ -24,7 +24,7 @@ using namespace ObTools::XML;
 //==========================================================================
 // Base template functions
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
 // Only first (or n'th) element of intermediate steps is used -
 // cousins are not merged!
@@ -112,7 +112,7 @@ list<ELEMENT *>
   return el;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Single element fetch - first of list, if any, or 0
 template Element *
   BaseXPathProcessor<Element>::get_element(const string& path) const;
@@ -129,7 +129,7 @@ ELEMENT *BaseXPathProcessor<ELEMENT>::get_element(const string& path) const
     return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
 template string
@@ -302,7 +302,7 @@ double BaseXPathProcessor<ELEMENT>::get_value_real(const string& path,
 //==========================================================================
 // Full read-write functions
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set value either attribute or content of single (first) element
 // Returns whether value was settable
 // Can only set content or attributes of existing elements - use add_element

@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace Tube {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle timeouts
 void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
                                    const string& name)
@@ -33,7 +33,7 @@ void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set up a request entry to wait for a response
 // (call before actually sending message, in case response is instant)
 void SyncRequestCache::start_request(Message& request,
@@ -72,7 +72,7 @@ retry:
   request.flags |= id << SHIFT_REQUEST_ID;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Block waiting for a response to the given request
 // Returns whether valid response received
 bool SyncRequestCache::wait_response(const Message& request,
@@ -97,7 +97,7 @@ bool SyncRequestCache::wait_response(const Message& request,
   return response.is_valid();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle a response - returns true if it was recognised as a response
 // to one of our requests, false if it is a new message from the other side
 bool SyncRequestCache::handle_response(const Message& response,
@@ -140,7 +140,7 @@ bool SyncRequestCache::handle_response(const Message& response,
   else return false;  // Let caller handle it
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shut down cleanly for a specific client
 void SyncRequestCache::shutdown(Net::EndPoint client)
 {
@@ -156,7 +156,7 @@ void SyncRequestCache::shutdown(Net::EndPoint client)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shut down cleanly for all clients
 void SyncRequestCache::shutdown()
 {
@@ -174,7 +174,7 @@ void SyncRequestCache::shutdown()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 SyncRequestCache::~SyncRequestCache()
 {

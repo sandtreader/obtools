@@ -83,7 +83,7 @@ public:
 //==========================================================================
 // Correlation implementation
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Correlation stream operator
 ostream& operator<<(ostream&s, const Correlation& c)
 {
@@ -91,7 +91,7 @@ ostream& operator<<(ostream&s, const Correlation& c)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Detach a copy of a message (before it dies)
 void Correlation::detach(RoutingMessage *msg)
 {
@@ -109,7 +109,7 @@ void Correlation::detach(RoutingMessage *msg)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 Correlation::~Correlation()
 {
@@ -129,7 +129,7 @@ Correlation::~Correlation()
 //==========================================================================
 // Correlator implementation
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Default Constructor
 Correlator::Correlator(const XML::Element& cfg):
     Service(cfg),
@@ -139,7 +139,7 @@ Correlator::Correlator(const XML::Element& cfg):
   log << "Correlator Service '" << id << "' started\n";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
 bool Correlator::handle(RoutingMessage& msg)
 {
@@ -240,14 +240,14 @@ bool Correlator::handle(RoutingMessage& msg)
   return true;  // Allow it to be forwarded/reversed
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick function - times out correlations
 void Correlator::tick()
 {
   request_cache.tidy();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle orphan messages (messages that cannot now be replied to)
 void Correlator::handle_orphan(const string& id, Correlation *cr)
 {

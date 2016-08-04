@@ -26,7 +26,7 @@ public:
   BackgroundThread(ConnectionPool& _pool): pool(_pool) { start(); }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
                                unsigned _min, unsigned _max,
@@ -47,7 +47,7 @@ ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
   background_thread = new BackgroundThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create connections to minimum level (call within mutex)
 void ConnectionPool::fill_to_minimum()
 {
@@ -86,7 +86,7 @@ void ConnectionPool::fill_to_minimum()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Claim a connection
 // Returns connection, or 0 if one could not be created or all are active
 Connection *ConnectionPool::claim()
@@ -154,7 +154,7 @@ Connection *ConnectionPool::claim()
   return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Release a connection after use
 void ConnectionPool::release(Connection *conn)
 {
@@ -176,7 +176,7 @@ void ConnectionPool::release(Connection *conn)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Run background timeout loop (called from internal thread)
 void ConnectionPool::run_background(bool& running)
 {
@@ -248,7 +248,7 @@ void ConnectionPool::run_background(bool& running)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 ConnectionPool::~ConnectionPool()
 {

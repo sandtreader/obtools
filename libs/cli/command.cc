@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace CLI {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Handle a command
 void Command::handle(string args, istream& sin, ostream& sout)
 {
@@ -25,7 +25,7 @@ void Command::handle(string args, istream& sin, ostream& sout)
     handler->handle(args, sin, sout);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Show command usage
 void Command::show_usage(ostream& sout)
 {

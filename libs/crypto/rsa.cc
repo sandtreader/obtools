@@ -12,14 +12,14 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get ciphertext size
 int RSA::cipher_size()
 {
   return key.valid?RSA_size(key.rsa):0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get maximum plaintext size
 int RSA::max_plaintext()
 {
@@ -27,7 +27,7 @@ int RSA::max_plaintext()
   return key.valid?RSA_size(key.rsa)-11:0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Encrypt a block
 // Length may be up to max_plaintext() bytes
 // Returns whether successful (key set up correctly)
@@ -46,7 +46,7 @@ bool RSA::encrypt(const unsigned char *from, int length,
   return res>=0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Decrypt a block
 // Returns decrypted length of block
 // Assumes 'from' data is always cipher_size() bytes

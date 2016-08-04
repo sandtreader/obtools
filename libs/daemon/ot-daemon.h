@@ -27,45 +27,45 @@ using namespace std;
 class Application
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read configuration
   virtual void read_config(const XML::Configuration&) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Preconfigure function
   // Return exit code or 0 to continue
   virtual int preconfigure() { return 0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Called before privileges are dropped
   // Return exit code or 0 to continue
   virtual int run_priv() { return 0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Reconfigure function
   virtual void reconfigure() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Prerun function
   // Called before main loop (tick()s)
   // Return exit code or 0 to continue
   virtual int pre_run() { return 0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Time to sleep until next tick
   // Return value in microseconds
   virtual int tick_wait() { return 10000; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Main function iteration
   // Return exit code or 0 to continue
   virtual int tick() { return 0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Clean up function
   virtual void cleanup() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Application() {}
 };
@@ -90,7 +90,7 @@ protected:
   bool shut_down;              // Shut down requested
   int slave_pid;               // PID of slave or 0 if we are the slave
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Main run function for child process
   // Return child exit code
   virtual int run();
@@ -98,7 +98,7 @@ protected:
 public:
   XML::Configuration config;  // Daemon-wide configuration
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
  Shell(Application& _application, const string& _name, const string& _version,
        const string& _default_config_file, const string& _config_element,
@@ -114,24 +114,24 @@ public:
            | XML::PARSER_PRESERVE_WHITESPACE)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Start process, with arguments
   // Returns process exit code
   int start(int argc, char **argv);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Signal to shut down
   void shutdown();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Signal to reload config
   void reload();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Handle a failure signal
   void log_evil(int sig);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Shell() {}
 };
@@ -143,31 +143,31 @@ public:
 class Process: public Shell, public Application
 {
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Preconfigure function for child process, called before daemon()
   // Does nothing by default - override to implement
   // Return exit code or 0 to continue
   virtual int preconfigure() { return 0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Prerun function for child process
   // Called before privileges dropped
   // Does nothing by default - override to implement
   // Return exit code or 0 to continue
   virtual int run_priv() { return 0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Reconfigure function for child process
   // Does nothing by default - override to implement
   // Called on reception of SIGHUP by master or child
   virtual void reconfigure() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Optional cleanup function, called after run() exits
   virtual void cleanup() {};
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
  Process(const string& _name, const string& _version,
          const string& _default_config_file, const string& _config_element,
@@ -176,7 +176,7 @@ public:
           _default_log_file, _default_pid_file)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Process() {}
 };

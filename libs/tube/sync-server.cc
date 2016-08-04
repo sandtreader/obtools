@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace Tube {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Function to handle an incoming client message, called from parent
 bool SyncServer::handle_message(const ClientMessage& msg)
 {
@@ -57,7 +57,7 @@ bool SyncServer::handle_message(const ClientMessage& msg)
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Function to handle asynchronous messages (not requiring a response)
 // Implemented here just to log an error
 bool SyncServer::handle_async_message(const ClientMessage& msg)

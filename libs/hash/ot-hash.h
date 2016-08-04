@@ -61,7 +61,7 @@ template<class HASH_ID_T, class HASH_INDEX_T, class INDEX_T> struct Entry
          // Also, set to INVALID_HASH_INDEX indicates an item being deleted
   INDEX_T index;      // Index into main table, or INVALID_INDEX if unused
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check whether used
   bool used() { return index != INVALID_INDEX; }
 };
@@ -98,7 +98,7 @@ private:
 
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Block(int _size, HELPER_T& _helper): size(_size), helper(_helper)
 #if !defined(_SINGLE)
@@ -121,12 +121,12 @@ public:
     freelist = 0;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check constructed OK
   bool ok() { return table!=0; }
   bool operator!() { return !ok(); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an ID (bottom bits only) mapped to the given index
   // Whether successful (can only fail if table is full)
   bool add(HASH_ID_T id, INDEX_T index)
@@ -190,7 +190,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Lookup the bottom bits of an ID
   // Returns main table index, or INVALID_INDEX if not found
   INDEX_T lookup(HASH_ID_T id)
@@ -220,7 +220,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Delete an ID (bottom bits only)
   // Returns old index if found, otherwise INVALID_INDEX
   INDEX_T remove(HASH_ID_T id)
@@ -334,7 +334,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Validate internal consistency, dumping errors to given stream
   // Returns whether valid
   bool check(ostream& sout)
@@ -484,7 +484,7 @@ public:
     return ok;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get statistics on hash block
   void get_stats(Stats& stats_p)
   {
@@ -525,7 +525,7 @@ public:
     stats_p.max_fullness = 100*stats_p.entries/size;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Dump block to given output stream
   void dump(ostream& sout)
   {
@@ -562,7 +562,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~Block()
   {
@@ -601,7 +601,7 @@ private:
   HELPER_T helper;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   // _nbits gives number of bits to chop off at top level
   // _block_size gives number of entries to create at each second-level block
@@ -629,25 +629,25 @@ public:
     built = true;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check constructed OK
   bool ok() { return built; }
   bool operator!() { return !built; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get maximum ID bits we can support
   int max_id_bits() { return nbits+sizeof(HASH_ID_T)*8; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get total capacity
   unsigned long capacity() { return (1<<nbits)*block_size; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get total memory used
   unsigned long memory()
   { return (1<<nbits)*(sizeof(block_t)+block_size*sizeof(entry_t)); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an ID mapped to the given index
   // Whether successful (can only fail if table is full)
   bool add(ID_T id, INDEX_T index)
@@ -663,7 +663,7 @@ public:
     return block->add(hash_id, index);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Lookup an ID
   // Returns main table index, or INVALID_INDEX if not found
   INDEX_T lookup(ID_T id)
@@ -679,7 +679,7 @@ public:
     return block->lookup(hash_id);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Lookup and remove an ID
   // Returns previous main table index, or INVALID_INDEX if not found
   INDEX_T lookup_and_remove(ID_T id)
@@ -695,13 +695,13 @@ public:
     return block->remove(hash_id);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Delete an ID (bottom bits only)
   // Returns whether found and deleted
   bool remove(ID_T id)
   { return lookup_and_remove(id) != INVALID_INDEX; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Validate internal consistency, dumping errors to given stream
   // Returns whether valid
   bool check(ostream& sout)
@@ -724,7 +724,7 @@ public:
     return ok;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get statistics on entire hash table
   void get_stats(Stats& stats_p)
   {
@@ -745,7 +745,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Dump table to given output stream
   void dump(ostream& sout)
   {
@@ -762,7 +762,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~GeneralTable()
   {
@@ -793,7 +793,7 @@ private:
   int block_mask;           // Mask of bottom bits to get block no
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   IntegerIDHelper(int _nbits, int _block_size):
     nbits(_nbits), block_size(_block_size)
@@ -801,15 +801,15 @@ public:
     block_mask = (1<<nbits)-1;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get block array index from ID
   int get_block_no(ID_T id) { return static_cast<int>(id & block_mask); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get hash ID within block from full ID
   HASH_ID_T get_hash_id(ID_T id) { return static_cast<HASH_ID_T>(id >> nbits); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get start offset in hash block from hash ID
   HASH_INDEX_T get_start(HASH_ID_T id)
   { return static_cast<HASH_INDEX_T>(id % block_size); }
@@ -836,7 +836,7 @@ template<class ID_T         = uint32_t,
                       IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> >
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   // _nbits gives number of bits to chop off at top level
   // _block_size gives number of entries to create at each second-level block

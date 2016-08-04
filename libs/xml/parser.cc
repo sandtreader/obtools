@@ -558,7 +558,7 @@ void Parser::fatal(const string& s) throw (ParseFailed)
   throw ParseFailed();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get root element
 // Returns Element::none if not valid
 Element& Parser::get_root() const
@@ -569,7 +569,7 @@ Element& Parser::get_root() const
     return Element::none;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get root element detached from parser, so you can keep it after the
 // parser has died
 // Returns 0 if not valid
@@ -584,7 +584,7 @@ Element *Parser::detach_root()
   else return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Detach and delete the old root (if any) and replace with a new one
 // Element is taken and will be deleted by parser if not detached/replaced
 // itself
@@ -594,7 +594,7 @@ void Parser::replace_root(Element *e)
   root = e;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do initial processing on an element (after attributes read)
 // Handles namespace map building - actual processing of namespace is
 // done in final_processing
@@ -640,7 +640,7 @@ void Parser::initial_processing(Element *e)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do final processing on an element
 void Parser::final_processing(Element *e)
 {
@@ -681,7 +681,7 @@ void Parser::final_processing(Element *e)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Substitute a name (element or attribute) according to the current
 //namespace map (assumed non empty)
 //Replaces the name in place if necessary
@@ -730,7 +730,7 @@ void Parser::substitute_name(string& name, bool usedef)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add namespace to prefix mapping
 // Any prefix used for this namespace in the document will be replaced
 // for the given prefix.  This allows you to normalise the tags you
@@ -767,7 +767,7 @@ void Parser::read_from(const string &s) throw (ParseFailed)
   parse_stream(iss);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read from istream
 istream& ObTools::XML::operator>>(istream& s, Parser& p) throw (ParseFailed)
 {

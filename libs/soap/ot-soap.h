@@ -220,7 +220,7 @@ public:
   virtual ~Message() { if (doc) delete doc; }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Message to ostream
 ostream& operator<<(ostream& s, const Message& m);
 
@@ -337,44 +337,44 @@ class HTTPClient: public Web::HTTPClient
   map<string, string> ns_map;  // NS name/URI to prefix for response parser
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from server, no SSL
   HTTPClient(Net::EndPoint _server, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(_server, _ua, _connection_timeout, _operation_timeout) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from server, with SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *ctx, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(_server, ctx, _ua, _connection_timeout, _operation_timeout)
     {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from URL, no SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, 0, _ua, _connection_timeout, _operation_timeout) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from URL, with SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua="",
              int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, ctx, _ua, _connection_timeout, _operation_timeout) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Map a namespace URI to a fixed prefix in the response parser, to make
   // access easier
   void fix_namespace(const string& uri, const string& prefix)
   { ns_map[uri] = prefix; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Simple request POST operation on a specified URL and optional SOAP action
   // Returns result code, fills in response
   int post(Web::URL& url, const string& soap_action,
            Message& request, Message& response);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Simple request POST operation to root URL
   // Returns result code, fills in response
   int post(const string& soap_action, Message& request, Message& response)
@@ -392,14 +392,14 @@ private:
   // Namespace map for Parser
   map<string, string> ns_map;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Implementation of standard HTTP handler
   bool handle_request(const Web::HTTPMessage& http_request,
                       Web::HTTPMessage& http_response,
                       const SSL::ClientDetails& client);
 
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Abstract interface to handle SOAP messages
   // http_request, http_response and client are made available for complex
   // use, but can be ignored
@@ -408,23 +408,23 @@ protected:
                               Web::HTTPMessage& http_response,
                               const SSL::ClientDetails& client) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Handy support for generating faults - fills in response with fault
   // Always returns true - use in return statements in handler
   // e.g. return fault(SOAP::Fault::CODE_SENDER, "In your dreams, mate");
   bool fault(Message& response, Fault::Code code, const string& reason);
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor - takes URL pattern
   URLHandler(const string& _url): Web::URLHandler(_url) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Register namespace translation (see ot-xml.h)
   void fix_namespace(const string& name, const string& prefix)
   { ns_map[name] = prefix; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~URLHandler() {}
 };
@@ -442,7 +442,7 @@ class MessageTransportURLHandler: public URLHandler
 
  public:
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor - takes URL pattern
   MessageTransportURLHandler(CONTEXT& _context, const string& _url,
                              ObTools::Message::Handler<CONTEXT>& _handler):
@@ -451,7 +451,7 @@ class MessageTransportURLHandler: public URLHandler
     fix_namespace(_handler.ns_url, _handler.ns_prefix);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Handle a SOAP message
   bool handle_message(const Message& request, Message& response,
                       const Web::HTTPMessage&, Web::HTTPMessage&,
@@ -504,12 +504,12 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
   Web::SimpleHTTPServer& server;
 
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   MessageTransport(CONTEXT& _context, Web::SimpleHTTPServer& _server):
     ObTools::Message::Transport<CONTEXT>("soap"), context(_context),
     server(_server) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Register a handler with the given config element
   void register_handler(ObTools::Message::Handler<CONTEXT>& handler,
                         const XML::Element& config)
@@ -523,7 +523,7 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
     server.add(th);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~MessageTransport() {}
 };
@@ -539,7 +539,7 @@ class MessageInterface
   Net::TCPServerThread *https_server_thread;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   MessageInterface(CONTEXT& context, const XML::Element& config,
                    ObTools::Message::Broker<CONTEXT>& broker,

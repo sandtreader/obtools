@@ -10,7 +10,7 @@
 #include "ot-uml.h"
 using namespace ObTools::UML;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor - build from XML element
 ModelElement::ModelElement(XMI::Reader& rdr, XML::Element& xe):
   Element(rdr, xe), stereotype(0)

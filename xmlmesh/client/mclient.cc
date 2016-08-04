@@ -62,7 +62,7 @@ public:
     client(_client), transport(_transport) { }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle a message (background thread)
 void MultiClient::handle(Message &msg, Log::Streams& log)
 {
@@ -109,7 +109,7 @@ void MultiClient::handle(Message &msg, Log::Streams& log)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Dispatch a message (worker thread)
 void MultiClient::dispatch(Message *msg)
 {
@@ -197,7 +197,7 @@ void MultiClient::dispatch(Message *msg)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Resubscribe for all subjects we should be subscribed to
 void MultiClient::resubscribe(Log::Streams& log)
 {
@@ -256,7 +256,7 @@ retry:
 //==========================================================================
 // MultiClientWorker worker thread
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Run function - pass msg to subscriber
 void MultiClientWorker::run()
 {
@@ -266,7 +266,7 @@ void MultiClientWorker::run()
 //==========================================================================
 // Foreground stuff
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - attach transport
 MultiClient::MultiClient(ClientTransport& _transport,
                          int _min_spare_workers, int _max_workers):
@@ -276,7 +276,7 @@ MultiClient::MultiClient(ClientTransport& _transport,
   dispatch_thread = new DispatchThread(*this, transport);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Start - allows transport-specific child class to ensure transport
 // is initialised before doing anything with it
 void MultiClient::start()
@@ -284,7 +284,7 @@ void MultiClient::start()
   dispatch_thread->start();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full
 // Whether message queued
 bool MultiClient::send(Message& msg)
@@ -293,7 +293,7 @@ bool MultiClient::send(Message& msg)
   return transport.send(data);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return OK to request given
 // Returns whether successul
 bool MultiClient::respond(Message& request)
@@ -302,7 +302,7 @@ bool MultiClient::respond(Message& request)
   return send(okm);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return an error to request given
 // Returns whether successul
 bool MultiClient::respond(SOAP::Fault::Code code,
@@ -313,7 +313,7 @@ bool MultiClient::respond(SOAP::Fault::Code code,
   return send(errm);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message and get a response (blocking)
 // Returns whether successful, fills in response if so
 bool MultiClient::request(Message& req, Message& response)
@@ -362,7 +362,7 @@ bool MultiClient::request(Message& req, Message& response)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message and confirm receipt or error
 // Returns whether successful.  Handles errors itself
 bool MultiClient::request(Message& req)
@@ -389,7 +389,7 @@ bool MultiClient::request(Message& req)
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Register a subscriber functor
 void MultiClient::register_subscriber(Subscriber *sub)
 {
@@ -418,7 +418,7 @@ void MultiClient::register_subscriber(Subscriber *sub)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Deregister a subscriber functor
 void MultiClient::deregister_subscriber(Subscriber *sub)
 {
@@ -436,14 +436,14 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
   sub->dead = true;  // Trigger deletion in dispatch() when safe
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Prepare for shutdown
 void MultiClient::prepare_shutdown()
 {
   shutting_down = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Clean shutdown
 void MultiClient::shutdown()
 {
@@ -456,7 +456,7 @@ void MultiClient::shutdown()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 MultiClient::~MultiClient()
 {
@@ -466,7 +466,7 @@ MultiClient::~MultiClient()
 //==========================================================================
 // Subscriber stuff
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - register into client
 Subscriber::Subscriber(MultiClient& _client, const string& _subject):
   client(_client), subject(_subject), active(0), dead(false)
@@ -474,7 +474,7 @@ Subscriber::Subscriber(MultiClient& _client, const string& _subject):
   client.register_subscriber(this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Manual unsubscription.  Always use this to unsubscribe and delete a
 // dynamic subscription in preference to the destructor.  If you call this,
 // don't delete the Subscriber yourself - it will be done when it is safe
@@ -484,7 +484,7 @@ void Subscriber::disconnect()
   client.deregister_subscriber(this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor - deregister from client
 Subscriber::~Subscriber()
 {

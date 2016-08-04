@@ -96,7 +96,7 @@ bool PreparedStatement::fetch(Row& row)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get first value of next row from result set
 // Value is unescaped
 // Whether another was found - if so, writes into value
@@ -179,7 +179,7 @@ bool Connection::exec(const string& sql)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Execute a query and get result (e.g. SELECT)
 // Returns result - check this for validity
 Result Connection::query(const string& sql)

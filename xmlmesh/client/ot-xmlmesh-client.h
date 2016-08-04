@@ -336,7 +336,7 @@ class MessageTransportSubscriber: public Subscriber
 
  public:
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor - takes URL pattern
   MessageTransportSubscriber(CONTEXT& _context,
                              const string& _subject,
@@ -346,7 +346,7 @@ class MessageTransportSubscriber: public Subscriber
     message_handler(_handler)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Handle a message
   void handle(Message& msg)
   {
@@ -411,13 +411,13 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
   list<XMLMesh::Subscriber *> subscribers;
 
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   MessageTransport(CONTEXT& _context, MultiClient& _client):
     ObTools::Message::Transport<CONTEXT>("xmlmesh"), context(_context),
     client(_client)
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Register a handler with the given config element
   virtual void register_handler(ObTools::Message::Handler<CONTEXT>& handler,
                                 const XML::Element& config)
@@ -432,7 +432,7 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
     subscribers.push_back(sub);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~MessageTransport()
   {

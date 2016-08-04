@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 ReplicatedAction::ReplicatedAction(const CP& cp): Action(cp), started(0)
 {
@@ -22,7 +22,7 @@ ReplicatedAction::ReplicatedAction(const CP& cp): Action(cp), started(0)
   spread = Time::Duration(xml.get_attr("spread","0"));
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool ReplicatedAction::tick(Context& con)
@@ -66,7 +66,7 @@ bool ReplicatedAction::tick(Context& con)
   return started < copies || !actions.empty();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Stop action
 void ReplicatedAction::stop(Context& con)
 {
@@ -74,7 +74,7 @@ void ReplicatedAction::stop(Context& con)
     p->second->stop(con);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 ReplicatedAction::~ReplicatedAction()
 {

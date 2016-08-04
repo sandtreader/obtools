@@ -20,7 +20,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create a new key from random data
 // Must seed PRNG first
 void RSAKey::create(int size, int exponent)
@@ -29,7 +29,7 @@ void RSAKey::create(int size, int exponent)
   if (rsa) valid = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from stream - reads PEM format to EOF
 // If force_private is set, reads a private key PEM block even if a
 // public key is wanted (use for testing both ends with a single key)
@@ -46,7 +46,7 @@ void RSAKey::read(istream& sin, const string& pass_phrase,
 void RSAKey::read(istream& sin, bool force_private)
 { read(sin, "", force_private); }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to stream - writes PEM format
 // If force_public is set, writes a public key PEM block even if
 // a private key is held - use to generate new public/private pairs
@@ -60,7 +60,7 @@ void RSAKey::write(ostream& sout, const string& pass_phrase,
 void RSAKey::write(ostream& sout, bool force_public) const
 { write(sout, "", force_public); }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from string - reads PEM format, with pass phrase
 // If force_private is set, reads a private key even if public (see above)
 void RSAKey::read(const string& text,
@@ -98,7 +98,7 @@ void RSAKey::read(const string& text,
   if (rsa) valid = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from DER
 // If force_private is set, reads a private key even if public (see above)
 void RSAKey::read_der(const unsigned char *der, int length, bool force_private)
@@ -132,7 +132,7 @@ void RSAKey::read_der(const unsigned char *der, int length, bool force_private)
 void RSAKey::read(const string& text, bool force_private)
 { read(text, "", force_private); }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to PEM format string with pass phrase
 // force_public forces public key output from private key (see above)
 string RSAKey::str(const string& pass_phrase, bool force_public) const
@@ -174,7 +174,7 @@ string RSAKey::str(const string& pass_phrase, bool force_public) const
 string RSAKey::str(bool force_public) const
 { return str("", force_public); }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read key from istream
 istream& operator>>(istream& s, RSAKey& k)
 {
@@ -182,7 +182,7 @@ istream& operator>>(istream& s, RSAKey& k)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write key to ostream
 ostream& operator<<(ostream& s, const RSAKey& k)
 {
@@ -190,7 +190,7 @@ ostream& operator<<(ostream& s, const RSAKey& k)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 RSAKey::~RSAKey()
 {

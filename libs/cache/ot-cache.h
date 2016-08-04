@@ -61,7 +61,7 @@ template<class ID, class CONTENT> class TidyPolicy
 public:
   TidyPolicy() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Background check whether to keep an entry
   // Returns true if the entry should be kept
   // Only called for unlocked entries
@@ -81,7 +81,7 @@ template<class ID, class CONTENT> class EvictorPolicy
 public:
   EvictorPolicy() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Eviction policy - find the worst entry
   // Called for every unlocked cache entry with current policy data
   // and 'worst' policy data so far.  Return true if the current one is
@@ -165,13 +165,13 @@ template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY>
   class Cache
 {
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Useful internal typedefs
   typedef MapContent<CONTENT> MCType;
   typedef map<ID, MCType> MapType;
   typedef typename MapType::iterator MapIterator;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Internal state
 
   // Limit on entries, 0 if unlimited
@@ -188,14 +188,14 @@ public:
   // Overall readers/writer mutex
   MT::RWMutex mutex;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Cache(const TIDY_POLICY& _tpol,
         const EVICTOR_POLICY& _epol,
         unsigned int _limit=0):
     limit(_limit), tidy_policy(_tpol), evictor_policy(_epol), mutex() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set the limit - may evict if more than limit in cache
   void set_limit(unsigned int _limit)
   {
@@ -203,11 +203,11 @@ public:
     evict();
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the limit
   int get_limit() { return limit; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an item of content to the cache
   // item is COPIED
   // Any existing content under this ID is deleted
@@ -221,7 +221,7 @@ public:
     return true;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check (without copying) whether a given ID exists in the cache
   bool contains(const ID& id)
   {
@@ -229,14 +229,14 @@ public:
     return (cachemap.find(id) != cachemap.end());
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get current size of map
   unsigned int size()
   {
     return cachemap.size();
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Returns copy of content of a given ID in the map
   // Whether found - if not, result is not changed
   bool lookup(const ID& id, CONTENT& result)
@@ -251,7 +251,7 @@ public:
     else return false;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Touches an entry, renewing its use-time and incrementing use-count
   /// \return whether ID exists - ignored if not
   bool touch(const ID& id)
@@ -271,7 +271,7 @@ public:
     else return false;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Remove content of given ID
   virtual void remove(const ID& id)
   {
@@ -280,7 +280,7 @@ public:
     if (p != cachemap.end()) cachemap.erase(p);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Warning and decision whether to allow deletion from tidy or eviction
   // Always OK here - override to prevent deletion of active objects
   // Getting this call indicates the cache thinks the object is a candidate
@@ -288,7 +288,7 @@ public:
   // a good idea
   virtual bool prepare_to_die(const ID&, CONTENT&) { return true; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Run background evictor policy
   virtual void tidy()
   {
@@ -306,7 +306,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Run emergency evictor policy
   // Evicts until map size is less than limit (room to add one)
   // Returns whether there is now room
@@ -350,7 +350,7 @@ public:
     return true; // Got enough
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Dump contents to given stream
   void dump(ostream& s, bool show_content=false)
   {
@@ -373,7 +373,7 @@ public:
     }
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterators
   // NB! If you use these in a MT environment you must manually lock the mutex
   // This is also the reason there is no const_iterator - it is never safe
@@ -382,7 +382,7 @@ public:
   iterator begin() { return iterator(cachemap.begin()); }
   iterator end() { return iterator(cachemap.end()); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Clear all content
   virtual void clear()
   {
@@ -390,7 +390,7 @@ public:
     cachemap.clear();
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   // (does nothing here, but PointerCache uses it to free pointers)
   virtual ~Cache() {}
@@ -478,7 +478,7 @@ template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY>
   public Cache<ID, PointerContent<CONTENT>, TIDY_POLICY, EVICTOR_POLICY>
 {
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Useful internal typedefs
   typedef MapContent<PointerContent<CONTENT> > MCType;
   typedef map<ID, MCType> MapType;
@@ -490,7 +490,7 @@ protected:
     ::prepare_to_die;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   PointerCache(const TIDY_POLICY& _tpol,
                const EVICTOR_POLICY& _epol,
@@ -498,7 +498,7 @@ public:
     Cache<ID, PointerContent<CONTENT>,
           TIDY_POLICY, EVICTOR_POLICY>(_tpol, _epol, _limit) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an item of content to the cache by pointer
   // item is TAKEN, and will be deleted on exit from the cache
   // Any existing content under this ID is deleted
@@ -513,7 +513,7 @@ public:
       add(id, PointerContent<CONTENT>(content));
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Returns pointer to content of a given ID in the map
   // Pointer found, or 0 if not in cache
   // Pointer returned is owned by cache and will be deleted by it
@@ -527,7 +527,7 @@ public:
       return 0;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Detaches pointer to content of a given ID in the map
   // Pointer found, or 0 if not in cache
   // Pointer returned is detached from cache and should be disposed by caller
@@ -544,7 +544,7 @@ public:
     else return 0;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Remove content of given ID
   virtual void remove(const ID& id)
   {
@@ -565,7 +565,7 @@ public:
     if (to_delete) delete(to_delete);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Warning and decision whether to allow deletion from tidy or eviction
   // Always OK here - override to prevent deletion of active objects
   // Getting this call indicates the cache thinks the object is a candidate
@@ -573,7 +573,7 @@ public:
   // a good idea
   virtual bool prepare_to_die(const ID&, CONTENT *) { return true; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Run background evictor policy
   virtual void tidy()
   {
@@ -604,7 +604,7 @@ public:
       delete(*p);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Run emergency evictor policy
   // Evicts until map size is less than limit (room to add one)
   // Returns whether there is now room
@@ -659,13 +659,13 @@ public:
   }
 
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterators
   typedef PointerCacheIterator<ID, CONTENT> iterator;
   iterator begin() { return iterator(this->cachemap.begin()); }
   iterator end() { return iterator(this->cachemap.end()); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Clear all content
   virtual void clear()
   {
@@ -675,7 +675,7 @@ public:
     this->cachemap.clear();
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor to clear all entries
   // Has to be here to ensure the right clear() gets called
   ~PointerCache() { clear(); }

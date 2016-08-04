@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace Misc {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Polynomials expressed as a bitmap with D<n> = x^n, top term left off
 #define CRC_CCITT ((1U<<12) + (1<<5) + 1)
 #define CRC_16    ((1U<<15) + (1<<2) + 1)
@@ -23,7 +23,7 @@ namespace ObTools { namespace Misc {
 #define CRC_CCITT_REV ((1U<<15) + (1<<10) + (1<<3))
 #define CRC_16_REV    ((1U<<15) + (1<<13) + 1)
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 CRC::CRC(Algorithm _alg, bool _reflected, bool _flip):
   algorithm(_alg), reflected(_reflected), flip(_flip)
@@ -66,7 +66,7 @@ CRC::CRC(Algorithm _alg, bool _reflected, bool _flip):
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Calculate new CRC for a block
 CRC::crc_t CRC::calculate(const unsigned char *data, size_t length)
 {
@@ -115,7 +115,7 @@ CRC::crc_t CRC::calculate(const unsigned char *data, size_t length)
   return crc;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Calculate a CRC for a string (can be binary)
 CRC::crc_t CRC::calculate(const string& data)
 {

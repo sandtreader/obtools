@@ -43,14 +43,14 @@ protected:
 
   // === Generic functions independent of input syntax ==
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Process a script to cout, using given tags
   // Limit common indent removal to max_ci.  If not yet set (<0), sets it to
   // common indent of this script
   void process_script(const string& script, CPPT::Tags& tags,
                       const string& streamname, int& max_ci);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate use of a predefined 'macro' template
   void generate_use(XML::Element& use_e,
                     XML::Element& define_e,
@@ -60,7 +60,7 @@ protected:
                     const string& countname,
                     const string& streamname);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate code for a particular template element
   // e is the current element, te is the most locally enclosing template
   //  (which may be the same)
@@ -74,26 +74,26 @@ protected:
                          const string& streamname,
                          string& script);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Output code to read configuration items
   void generate_config_reader();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate code to call root templates
   void generate_roots();
 
   // === Abstract virtual functions to be implemented by subclass ==
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Obtain an element parameter name to use to in the function generated
   // by the given template
   virtual string get_parameter_name(XML::Element &te) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Obtain the type of the element parameter for the function
   virtual string get_parameter_type(XML::Element &te) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterate over child elements, expanding template inline
   // Accumulates expanded script in 'script'
   virtual void expand_inline(XML::Element& te, XML::Element& parent,
@@ -103,7 +103,7 @@ protected:
                              string& script,
                              bool is_root = false) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
   virtual void expand_use(XML::Element& use_e,
                           XML::Element& define_e,
@@ -112,16 +112,16 @@ protected:
                           const string& streamname,
                           bool is_root = false) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate includes / file-level code
   virtual void generate_includes();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
   // templates (use generate_roots() for the latter)
   virtual void generate_main() = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Generator() {}
 
@@ -136,7 +136,7 @@ public:
   // Validity check
   bool operator!() { return !ok; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Overall tool generator
   void generate();
 };

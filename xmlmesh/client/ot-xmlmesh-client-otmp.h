@@ -91,7 +91,7 @@ class OTMPMessageInterface
   OTMPMultiClient *client;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor, taking 'xmlmesh' element
   OTMPMessageInterface(CONTEXT& context, const XML::Element& config,
                        ObTools::Message::Broker<CONTEXT>& broker):
@@ -135,7 +135,7 @@ public:
   bool send(Message& req)
   { return client?client->send(req):false; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor - destroys message interface
   ~OTMPMessageInterface()
   {

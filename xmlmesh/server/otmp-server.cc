@@ -77,7 +77,7 @@ public:
   // Check the service is happy
   bool started() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // OTMP Message dispatcher
   // Fetch OTMP messages and send them up as internal messages
   void dispatch();
@@ -87,7 +87,7 @@ public:
   bool handle(RoutingMessage& msg);
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 OTMPServer::OTMPServer(const XML::Element& cfg):
   Service(cfg),
@@ -131,7 +131,7 @@ OTMPServer::OTMPServer(const XML::Element& cfg):
   message_thread.start();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check the service is happy
 // Override to close down startup if initialisation failed
 bool OTMPServer::started() const
@@ -183,7 +183,7 @@ void OTMPServer::dispatch()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
 // Note this only gets called for reversing messages coming back out
 bool OTMPServer::handle(RoutingMessage& msg)

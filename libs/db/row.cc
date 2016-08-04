@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace DB {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get value of field of given name, or default if not found
 string Row::get(const string& fieldname, const string& def) const
 {
@@ -25,7 +25,7 @@ string Row::get(const string& fieldname, const string& def) const
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get integer value of field of given name, or default if not found
 int Row::get_int(const string& fieldname, int def) const
 {
@@ -36,7 +36,7 @@ int Row::get_int(const string& fieldname, int def) const
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get 64-bit value of field of given name, or default if not found
 uint64_t Row::get_int64(const string& fieldname, uint64_t def) const
 {
@@ -47,7 +47,7 @@ uint64_t Row::get_int64(const string& fieldname, uint64_t def) const
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get boolean value of field of given name, or default if not found
 bool Row::get_bool(const string& fieldname, bool def) const
 {
@@ -58,7 +58,7 @@ bool Row::get_bool(const string& fieldname, bool def) const
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get real value of field of given name, or default if not found
 double Row::get_real(const string& fieldname, double def) const
 {
@@ -69,7 +69,7 @@ double Row::get_real(const string& fieldname, double def) const
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get string with field names in order, separated by commas and spaces
 string Row::get_fields() const
 {
@@ -84,7 +84,7 @@ string Row::get_fields() const
   return result;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get string with field values in order, separated by commas and spaces,
 // each delimited with single quotes (e.g. for INSERT)
 string Row::get_escaped_values() const
@@ -100,7 +100,7 @@ string Row::get_escaped_values() const
   return result;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get string with field names and values in order with '=',
 // separated by commas and spaces, values delimited with single quotes
 // (e.g. for UPDATE)
@@ -117,7 +117,7 @@ string Row::get_escaped_assignments() const
   return result;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get string with field names and values in order with '=', separated
 // by AND, values delimited with single quotes
 // (e.g. for WHERE)

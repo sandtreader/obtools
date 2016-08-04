@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace Misc {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Polynomials expressed as a bitmap with D<n> = x^n, top term left off
 #define POLY_CRC32  ((1U<<26) + (1U<<23) + (1U<<22) + (1U<<16) + \
                      (1U<<12) + (1U<<11) + (1U<<10) + (1U<<8) + \
@@ -37,7 +37,7 @@ namespace ObTools { namespace Misc {
                          (1U<<8) + (1U<<6) + (1U<<5) + (1U<<4) + \
                          (1U<<3))
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 CRC32::CRC32(Algorithm _alg, bool _reflected, bool _flip):
   algorithm(_alg), reflected(_reflected), flip(_flip)
@@ -80,7 +80,7 @@ CRC32::CRC32(Algorithm _alg, bool _reflected, bool _flip):
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Calculate new CRC for a block
 CRC32::crc_t CRC32::calculate(const unsigned char *data, size_t length)
 {
@@ -89,7 +89,7 @@ CRC32::crc_t CRC32::calculate(const unsigned char *data, size_t length)
   return finalise(crc);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Calculate a CRC for a string (can be binary)
 CRC32::crc_t CRC32::calculate(const string& data)
 {

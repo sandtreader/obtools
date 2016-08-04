@@ -420,7 +420,7 @@ set<string> Socket::get_host_macs()
 //==========================================================================
 // Socket exceptions
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get error string
 string SocketError::get_string()
 {
@@ -430,7 +430,7 @@ string SocketError::get_string()
     return string("EOF");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write SocketError to ostream
 // e.g. cout << e;
 ostream& operator<<(ostream& s, const SocketError& e)

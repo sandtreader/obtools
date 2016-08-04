@@ -18,7 +18,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 // Trashes the key!
 AESKey::~AESKey()
@@ -31,7 +31,7 @@ AESKey::~AESKey()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create a new key from random data
 // Must seed PRNG first
 void AESKey::create()
@@ -40,7 +40,7 @@ void AESKey::create()
   valid = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from data block
 void AESKey::read(const unsigned char *data)
 {
@@ -48,14 +48,14 @@ void AESKey::read(const unsigned char *data)
   valid = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to data block - writes 8 bytes of data
 void AESKey::write(unsigned char *data) const
 {
   memcpy(data, key, size / 8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from stream - reads hex characters
 void AESKey::read(istream& sin)
 {
@@ -78,7 +78,7 @@ void AESKey::read(istream& sin)
   valid = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from stream as binary
 void AESKey::read_binary(istream& sin)
 {
@@ -87,7 +87,7 @@ void AESKey::read_binary(istream& sin)
 }
 
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to stream - write hex characters
 void AESKey::write(ostream& sout) const
 {
@@ -96,14 +96,14 @@ void AESKey::write(ostream& sout) const
   sout << dec << setw(0) << setfill(' ');
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to stream as binary
 void AESKey::write_binary(ostream& sout) const
 {
   sout.write(reinterpret_cast<const char *>(key), size/8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from string - reads hex characters
 void AESKey::read(const string& text)
 {
@@ -111,7 +111,7 @@ void AESKey::read(const string& text)
   read(iss);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set from passphrase
 void AESKey::set_from_passphrase(const string& text)
 {
@@ -129,7 +129,7 @@ void AESKey::set_from_passphrase(const string& text)
   read(sha1);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set from integer - big-endian, zero padded
 void AESKey::set_from_int(uint64_t n)
 {
@@ -145,7 +145,7 @@ void AESKey::set_from_int(uint64_t n)
 }
 
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to string
 string AESKey::str() const
 {
@@ -154,21 +154,21 @@ string AESKey::str() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from channel (binary bytes)
 void AESKey::read(Channel::Reader& reader) throw (Channel::Error)
 {
   reader.read(key, size / 8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to channel (binary bytes)
 void AESKey::write(Channel::Writer& writer) const throw (Channel::Error)
 {
   writer.write(key, size / 8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from string as base64
 // Returns whether successful
 bool AESKey::set_from_base64(const string& s)
@@ -179,7 +179,7 @@ bool AESKey::set_from_base64(const string& s)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to a base64 string
 string AESKey::str_base64() const
 {
@@ -187,7 +187,7 @@ string AESKey::str_base64() const
   return base64.encode(key, size/8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read key from istream
 istream& operator>>(istream& s, AESKey& k)
 {
@@ -195,7 +195,7 @@ istream& operator>>(istream& s, AESKey& k)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write key to ostream
 ostream& operator<<(ostream& s, const AESKey& k)
 {

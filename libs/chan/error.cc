@@ -11,7 +11,7 @@
 
 namespace ObTools { namespace Channel {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Error to ostream
 // e.g. cout << e;
 ostream& operator<<(ostream& s, const Error& e)

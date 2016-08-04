@@ -16,7 +16,7 @@
 
 namespace ObTools { namespace Time {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor (static initialiser) of unit dictionary
 Duration::UnitDictionary::UnitDictionary()
 {
@@ -57,7 +57,7 @@ Duration::UnitDictionary::UnitDictionary()
 // Actual static variable
 Duration::UnitDictionary Duration::units;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from string
 // See ot-time.h for details
 Duration::Duration(const string& text)
@@ -165,7 +165,7 @@ Duration::Duration(const string& text)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to HH:MM:SS string - never goes into days or higher
 // Can output fractional seconds - rounds to nearest millisecond
 string Duration::hms() const
@@ -195,7 +195,7 @@ string Duration::hms() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to ISO duration string
 // Generates P[n]DT[n]H[n]M[n]S form or empty if invalid
 // This format is also compatible with XML
@@ -242,7 +242,7 @@ string Duration::iso() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor-like static function to return monotonic clock - baseline
 // unknown, but guaranteed never to get mangled by ntpd, DST et al.
 // Returns Duration(0.0) if clock not available
@@ -260,7 +260,7 @@ Duration Duration::clock()
   return Duration();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Duration to ostream
 ostream& operator<<(ostream& s, const Duration& d)
 {

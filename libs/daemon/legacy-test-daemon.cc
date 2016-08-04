@@ -19,7 +19,7 @@ using namespace ObTools;
 class TestDaemon: public Daemon::Process
 {
 private:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Preconfigure function for child process
   int preconfigure()
   {
@@ -28,7 +28,7 @@ private:
     return 0;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Prerun function for child process
   int run_priv()
   {
@@ -37,7 +37,7 @@ private:
     return 0;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Reconfigure process
   void reconfigure()
   {
@@ -45,7 +45,7 @@ private:
     log.summary << "This is the reconfigure function\n";
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Main run function for child process
   // Return child exit code
   int run()

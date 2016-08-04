@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace Tube {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a friendly string version of a tag
 string tag_to_string(tag_t tag)
 {
@@ -34,7 +34,7 @@ non_print:
   return Text::itox(tag);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a tag from a string
 tag_t string_to_tag(const string& str)
 {

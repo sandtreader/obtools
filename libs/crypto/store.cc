@@ -16,7 +16,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor:
 // ca_file should refer to a PEM format containing a list of trusted CAs
 // ca_dir should refer to a directory containing certificate files with
@@ -35,7 +35,7 @@ CertificateStore::CertificateStore(const string& ca_file,
   if (file || dir) X509_STORE_load_locations(store, file, dir);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a pre-loaded certificateb
 // Note: certicate must remain alive during lifetime of store
 bool CertificateStore::add(Certificate *cert)
@@ -44,7 +44,7 @@ bool CertificateStore::add(Certificate *cert)
   return X509_STORE_add_cert(store, cert->get_x509())?true:false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a CRL file and enable CRL checking in the store
 // If 'all' is set, the entire chain is checked against the CRL
 bool CertificateStore::add_crl(const string& crl_file, bool all)
@@ -60,7 +60,7 @@ bool CertificateStore::add_crl(const string& crl_file, bool all)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Verify a certificate
 bool CertificateStore::verify(const Certificate& cert)
 {
@@ -75,7 +75,7 @@ bool CertificateStore::verify(const Certificate& cert)
   return result;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 CertificateStore::~CertificateStore()
 {

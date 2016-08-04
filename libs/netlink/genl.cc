@@ -15,7 +15,7 @@ namespace ObTools { namespace Netlink {
 //========================================================================
 // Generic Request
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 GenericRequest::GenericRequest(const GenericNetlink& netlink,
                                uint8_t command, uint8_t version,
@@ -27,7 +27,7 @@ GenericRequest::GenericRequest(const GenericNetlink& netlink,
               command, version);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set attributes
 void GenericRequest::set_string(int attr, const string& s)
 {
@@ -71,7 +71,7 @@ void GenericRequest::end_nest()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 GenericRequest::~GenericRequest()
 {
@@ -82,7 +82,7 @@ GenericRequest::~GenericRequest()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Message callback hookup
 int generic_netlink_callback(struct nl_msg *msg, void *arg)
 {
@@ -98,7 +98,7 @@ int generic_netlink_callback(struct nl_msg *msg, void *arg)
 //========================================================================
 // Generic Response
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 GenericResponse::GenericResponse(struct nl_msg *_msg, int attr_max,
                                  struct nla_policy *policy):
@@ -109,7 +109,7 @@ GenericResponse::GenericResponse(struct nl_msg *_msg, int attr_max,
     parse_error = genlmsg_parse(nlh, 0, &default_attrs[0], attr_max, policy);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Fetch attributes
 uint16_t GenericResponse::get_uint16(int attr,
                                      const vector<struct nlattr *>& attrs)
@@ -161,7 +161,7 @@ bool GenericResponse::get_nested_attrs(int attr,
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 GenericResponse::~GenericResponse()
 {
@@ -170,7 +170,7 @@ GenericResponse::~GenericResponse()
 //========================================================================
 // Generic Netlink
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 GenericNetlink::GenericNetlink(const string& _family)
 {
@@ -190,7 +190,7 @@ GenericNetlink::GenericNetlink(const string& _family)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Make request
 bool GenericNetlink::send(GenericRequest &request)
 {
@@ -204,7 +204,7 @@ bool GenericNetlink::send(GenericRequest &request)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get last netlink error
 const char* GenericNetlink::get_last_error()
 {
@@ -215,7 +215,7 @@ const char* GenericNetlink::get_last_error()
 #endif
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 GenericNetlink::~GenericNetlink()
 {

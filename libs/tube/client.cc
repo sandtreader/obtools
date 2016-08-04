@@ -65,7 +65,7 @@ public:
   ClientReceiveThread(Client &_client): client(_client) {}
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Restart a dead or non-existent socket
 // Note:  Ensure this is called only in one thread (the receive thread)
 bool Client::restart_socket(Log::Streams& log)
@@ -111,7 +111,7 @@ bool Client::restart_socket(Log::Streams& log)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Receive some messages, if any
 // Blocks waiting for incoming messages, returns whether everything OK
 bool Client::receive_messages(Log::Streams& log)
@@ -203,7 +203,7 @@ public:
   ClientSendThread(Client &_client): client(_client) {}
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send out some messages, if any
 // Blocks waiting for outgoing messages, returns whether everything OK
 bool Client::send_messages(Log::Streams& log)
@@ -273,7 +273,7 @@ bool Client::send_messages(Log::Streams& log)
 //==========================================================================
 // Foreground stuff
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - no SSL
 Client::Client(const Net::EndPoint& _server, const string& _name):
   server(_server), ctx(0), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
@@ -291,7 +291,7 @@ Client::Client(const Net::EndPoint& _server, const string& _name):
   send_thread    = new ClientSendThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor with SSL
 Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx,
                const string& _name):
@@ -310,7 +310,7 @@ Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx,
   send_thread    = new ClientSendThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Start send and receive threads
 void Client::start()
 {
@@ -320,7 +320,7 @@ void Client::start()
     send_thread->start();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message
 // Can busy-wait if send queue is more than max_send_queue
 void Client::send(Message& msg)
@@ -331,14 +331,14 @@ void Client::send(Message& msg)
   send_q.send(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check whether a message is available before blocking in wait()
 bool Client::poll()
 {
   return receive_q.poll();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
 // Returns false if the connection was restarted
 bool Client::wait(Message& msg)
@@ -347,7 +347,7 @@ bool Client::wait(Message& msg)
   return msg.is_valid();     // Empty message on restart
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shut down client cleanly
 void Client::shutdown()
 {
@@ -378,7 +378,7 @@ void Client::shutdown()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 Client::~Client()
 {

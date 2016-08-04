@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 RandomAction::RandomAction(const CP& cp):
   SequenceAction(cp)
@@ -24,7 +24,7 @@ RandomAction::RandomAction(const CP& cp):
   running = rand() < static_cast<int>(probability * RAND_MAX);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool RandomAction::tick(Context& con)

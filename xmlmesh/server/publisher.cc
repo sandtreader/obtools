@@ -54,7 +54,7 @@ public:
   bool handle(RoutingMessage& msg);
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - take subject and transport to attach to
 Publisher::Publisher(const XML::Element& cfg):
   Service(cfg),
@@ -65,7 +65,7 @@ Publisher::Publisher(const XML::Element& cfg):
       << subject_pattern << "'\n";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle any message
 bool Publisher::handle(RoutingMessage& msg)
 {
@@ -123,7 +123,7 @@ bool Publisher::handle(RoutingMessage& msg)
   return true;  // Not likely to have forward routing, but possible
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle an xmlmesh.subscription message
 bool Publisher::handle_subscription(RoutingMessage& msg)
 {
@@ -168,7 +168,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Subscribe a client
 bool Publisher::subscribe(const string& subject,
                           const string& path)
@@ -192,7 +192,7 @@ bool Publisher::subscribe(const string& subject,
   else return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Unsubscribe a client from a particular (set of) subject(s)
 // Uses pattern match to allow general unsubscribe
 // E.g. foo.* unsubscribes foo.blah.*, foo.splat as well as foo.*
@@ -217,7 +217,7 @@ void Publisher::unsubscribe(const string& subject,
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Unsubscribe a client entirely
 void Publisher::unsubscribe_all(const string& path)
 {

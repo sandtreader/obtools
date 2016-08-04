@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Pad a block of data to given length multiple
 // Returns copied and padded malloc'ed data block, and modifies length
 // to length of padded block (deprecated)
@@ -32,7 +32,7 @@ unsigned char *PKCS5::pad(const unsigned char *data, int& length,
   return new_data;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Pad a block of data to given length multiple
 // Updates data vector in place
 void PKCS5::pad(vector<unsigned char>& data, int multiple)
@@ -45,7 +45,7 @@ void PKCS5::pad(vector<unsigned char>& data, int multiple)
   data.insert(data.end(), extra, extra);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Pad a block of data to given length multiple, in place
 // Data must be at least multiple bytes longer than length
 // Returns length of padded data
@@ -61,7 +61,7 @@ int PKCS5::pad_in_place(unsigned char *data, int length, int multiple)
   return new_length;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Unpad a block of data
 // Returns original length of block - data is not copied or modified
 int PKCS5::original_length(const unsigned char *data, int length)
@@ -72,7 +72,7 @@ int PKCS5::original_length(const unsigned char *data, int length)
   return length-pad;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Unpad a block of data
 // Updates data vector in place
 void PKCS5::unpad(vector<unsigned char>& data)

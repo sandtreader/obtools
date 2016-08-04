@@ -26,7 +26,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from stream - reads PEM or DER format to EOF
 void Certificate::read(istream& sin)
 {
@@ -40,14 +40,14 @@ void Certificate::read(istream& sin)
   read(text);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to stream - writes PEM format
 void Certificate::write(ostream& sout) const
 {
   sout << str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from string - reads PEM or DER format
 void Certificate::read(const string& text)
 {
@@ -103,7 +103,7 @@ void Certificate::read(const string& text)
   BIO_free(bio);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to PEM format string
 string Certificate::str() const
 {
@@ -126,7 +126,7 @@ string Certificate::str() const
   return pem;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get common name
 string Certificate::get_cn() const
 {
@@ -139,7 +139,7 @@ string Certificate::get_cn() const
   return string(buf);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get RSA public key into the given RSAKey
 // Returns whether successful, also sets key validity
 bool Certificate::get_public_key(RSAKey& key) const
@@ -160,7 +160,7 @@ bool Certificate::get_public_key(RSAKey& key) const
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read cert from istream
 istream& operator>>(istream& s, Certificate& c)
 {
@@ -168,7 +168,7 @@ istream& operator>>(istream& s, Certificate& c)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write certificate to ostream
 ostream& operator<<(ostream& s, const Certificate& c)
 {
@@ -176,7 +176,7 @@ ostream& operator<<(ostream& s, const Certificate& c)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 Certificate::~Certificate()
 {

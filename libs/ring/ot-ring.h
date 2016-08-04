@@ -39,17 +39,17 @@ private:
   // Therefore queue is full at (length-1) items, and we allocate one
   // more than asked for
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Modular increment - increments the value given, mod length
   int inc(int n) { return (++n>=length)?0:n; }
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Buffer(int _length): items(new ITEM_T[_length+1]), length(_length+1),
     in_index(0), out_index(0) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write an item - returns whether successfully written (buffer wasn't full)
   bool put(const ITEM_T& item)
   {
@@ -60,7 +60,7 @@ public:
     return true;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read an item - returns whether successfully fetched (buffer wasn't
   // empty) and sets item_p if so
   bool get(ITEM_T& item_p)
@@ -75,25 +75,25 @@ public:
   // you must call the right one depending whether you are the putter or
   // getter, otherwise there is a race condition
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Flush the queue, called from putter side
   void flush_from_put() { in_index = out_index; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Flush the queue, called from getter side
   void flush_from_get() { out_index = in_index; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get array size
   int size() const { return length-1; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get number of items used
   int used() const { return out_index<=in_index?
                               in_index-out_index:
                               in_index+length-out_index; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~Buffer()
   {

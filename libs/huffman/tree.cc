@@ -14,7 +14,7 @@ namespace ObTools { namespace Huffman {
 //========================================================================
 // Tree
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read an individual character from a BitReader
 bool Tree::read_value(Channel::BitReader& reader, Value& value) const
 {
@@ -40,7 +40,7 @@ bool Tree::read_value(Channel::BitReader& reader, Value& value) const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read an individual value by sequence
 bool Tree::read_value(const vector<bool>& sequence, Value& value) const
 {
@@ -52,7 +52,7 @@ bool Tree::read_value(const vector<bool>& sequence, Value& value) const
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a mapping. Will create any necessary nodes for it
 bool Tree::add_mapping(const Mapping& m)
 {
@@ -64,7 +64,7 @@ bool Tree::add_mapping(const Mapping& m)
 //========================================================================
 // MultiTree
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read an individual value by sequence
 bool MultiTree::read_value(const Value& index, const vector<bool>& sequence,
                            Value& value) const
@@ -77,7 +77,7 @@ bool MultiTree::read_value(const Value& index, const vector<bool>& sequence,
   return tree->second.read_value(sequence, value);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read an individual value from a BitReader
 bool MultiTree::read_value(const Value& index,
                            Channel::BitReader& reader, Value& value) const
@@ -90,7 +90,7 @@ bool MultiTree::read_value(const Value& index,
   return tree->second.read_value(reader, value);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Populate trees from a Huffman reader
 bool MultiTree::populate_from(MultiReader& reader)
 {
@@ -106,7 +106,7 @@ bool MultiTree::populate_from(MultiReader& reader)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read an escaped character from a BitReader
 bool MultiTree::read_escaped_char(Channel::BitReader& reader,
                                   unsigned char& c) const
@@ -122,7 +122,7 @@ bool MultiTree::read_escaped_char(Channel::BitReader& reader,
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a string from a BitReader
 bool MultiTree::read_string(Channel::BitReader& reader, string& s) const
 {

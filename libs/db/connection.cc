@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace DB {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get first (only) row
 //Returns whether successful - row is cleared and filled in if so
 bool Connection::query(const string& sql, Row& row)
@@ -25,7 +25,7 @@ bool Connection::query(const string& sql, Row& row)
   return result.fetch(row);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get single (only) value from first (only) row
 //Returns whether successful - value is filled in if so
 bool Connection::query(const string& sql, string& value)
@@ -35,7 +35,7 @@ bool Connection::query(const string& sql, string& value)
   return result.fetch(value);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get single (only) value from first (only) row
 //Returns value or default if not found
 string Connection::query_string(const string& sql, const string& def)
@@ -47,7 +47,7 @@ string Connection::query_string(const string& sql, const string& def)
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get single (only) integer value from first (only) row
 //Returns value or default if not found
 int Connection::query_int(const string& sql, int def)
@@ -59,7 +59,7 @@ int Connection::query_int(const string& sql, int def)
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get single (only) 64-bit integer value from first (only)
 //row
 //Returns value or default if not found
@@ -72,7 +72,7 @@ uint64_t Connection::query_int64(const string& sql, uint64_t def)
     return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get single (only) boolean value from first (only) row
 //Returns value or default if not found
 bool Connection::query_bool(const string& sql, bool def)
@@ -96,7 +96,7 @@ bool Connection::query_bool(const string& sql, bool def)
   else return def;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Do an INSERT and retrieve the last inserted serial ID
 //Fetches max(<id_field>) inside a transaction, unless id_field is ""
 //If id_field is "", does a normal insert and returns 1
@@ -128,7 +128,7 @@ int Connection::insert(const string& sql,
   return id;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Ditto for 64-bit
 uint64_t Connection::insert64(const string& sql,
                               const string& table, const string& id_field,
@@ -157,7 +157,7 @@ uint64_t Connection::insert64(const string& sql,
   return id;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do an INSERT and retrieve the last inserted serial ID, from row data
 // Each field in the row is inserted by name
 // Note: All fields are escaped on insertion
@@ -184,7 +184,7 @@ uint64_t Connection::insert64(const string& table, Row& row,
   return insert64(oss.str(), table, id_field, in_transaction);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // INSERT into a join table with two foreign ID fields
 // Returns whether successful
 bool Connection::insert_join(const string& table,
@@ -210,7 +210,7 @@ bool Connection::insert_join64(const string& table,
   return exec(oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // with the given WHERE clause
 // If where is empty, doesn't add a WHERE at all
@@ -224,7 +224,7 @@ Result Connection::select(const string& table, const Row& row,
   return query(oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // matching the list of values in where_row
 // Returns query result as query()
@@ -234,7 +234,7 @@ Result Connection::select(const string& table, const Row& row,
   return select(table, row, where_row.get_where_clause());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // matching the given integer ID
 // Returns query result as query()
@@ -255,7 +255,7 @@ Result Connection::select_by_id64(const string& table, const Row& row,
   return select(table, row, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // matching the given string ID
 // ID value is escaped
@@ -268,7 +268,7 @@ Result Connection::select_by_id(const string& table, const Row& row,
   return select(table, row, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // with the given WHERE clause, and return the single (first) row as
 // the values in the row
@@ -284,7 +284,7 @@ bool Connection::select_row(const string& table, Row& row,
   return result.fetch(row);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // with a WHERE clause constructed from where_row, and return the single
 // (first) row as the values in the row
@@ -295,7 +295,7 @@ bool Connection::select_row(const string& table, Row& row,
   return select_row(table, row, where_row.get_where_clause());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // with the given integer ID, and return the single (first) row as
 // the values in the row
@@ -317,7 +317,7 @@ bool Connection::select_row_by_id64(const string& table, Row& row,
   return select_row(table, row, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // with the given string ID, and return the single (first) row as
 // the values in the row
@@ -331,7 +331,7 @@ bool Connection::select_row_by_id(const string& table, Row& row,
   return select_row(table, row, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for a single field in the given table
 // with the given WHERE clause, and return the (unescaped) value
 // If where is empty, doesn't add a WHERE at all
@@ -346,7 +346,7 @@ string Connection::select_value(const string& table, const string& field,
   return query_string(oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for a single field in the given table
 // with a WHERE clause constructed from where_row, and return the
 // (unescaped) value
@@ -357,7 +357,7 @@ string Connection::select_value(const string& table, const string& field,
   return select_value(table, field, where_row.get_where_clause());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for a single field in the given table
 // with the given integer ID, and return the (unescaped) value
 // Returns value or empty string if not found
@@ -380,7 +380,7 @@ string Connection::select_value_by_id64(const string& table,
   return select_value(table, field, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a SELECT for a single field in the given table
 // with the given integer ID, and return the (unescaped) value
 // ID value is escaped
@@ -394,7 +394,7 @@ string Connection::select_value_by_id(const string& table,
   return select_value(table, field, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Count rows in the given table with the given WHERE clause
 // If where is empty, doesn't add a WHERE at all
 int Connection::count(const string& table, const string& where)
@@ -405,14 +405,14 @@ int Connection::count(const string& table, const string& where)
   return query_int(oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Count rows in the given table matching the list of values in where_row
 int Connection::count(const string& table, const Row& where_row)
 {
   return count(table, where_row.get_where_clause());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check if a row exists with the given integer ID
 // Returns whether the row exists
 bool Connection::exists_id(const string& table,
@@ -428,7 +428,7 @@ bool Connection::exists_id64(const string& table,
   return !select_value_by_id64(table, id_field, id, id_field).empty();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check if a row exists with the given string ID
 // ID value is escaped
 // Returns whether the row exists
@@ -438,7 +438,7 @@ bool Connection::exists_id(const string& table,
   return !select_value_by_id(table, id_field, id, id_field).empty();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do an UPDATE for all fields in the given row in the given table
 // with the given WHERE clause.  Values are escaped automatically
 // If where is empty, doesn't add a WHERE at all
@@ -452,7 +452,7 @@ bool Connection::update(const string& table, const Row& row,
   return exec(oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do an UPDATE for all fields in the given row in the given table
 // with a WHERE clause created from where_row.
 // Values are escaped automatically
@@ -463,7 +463,7 @@ bool Connection::update(const string& table, const Row& row,
   return update(table, row, where_row.get_where_clause());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do an UPDATE for all fields in the given row in the given table
 // matching the given integer ID
 // Returns whether successful
@@ -484,7 +484,7 @@ bool Connection::update_id64(const string& table, const Row& row,
   return update(table, row,  oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do an UPDATE for all fields in the given row in the given table
 // matching the given string ID
 // ID value is escaped
@@ -497,7 +497,7 @@ bool Connection::update_id(const string& table, const Row& row,
   return update(table, row,  oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a DELETE in the given table with the given WHERE clause
 // If where is empty, doesn't add a WHERE at all
 // Returns whether successful
@@ -509,7 +509,7 @@ bool Connection::delete_all(const string& table, const string& where)
   return exec(oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a DELETE in the given table with a WHERE clause created from where_row
 // Returns whether successful
 bool Connection::delete_all(const string& table, const Row& where_row)
@@ -517,7 +517,7 @@ bool Connection::delete_all(const string& table, const Row& where_row)
   return delete_all(table, where_row.get_where_clause());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do an DELETE in the given table matching the given integer ID
 // Returns whether successful
 bool Connection::delete_id(const string& table,
@@ -537,7 +537,7 @@ bool Connection::delete_id64(const string& table,
   return delete_all(table, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Do a DELETE in the given table matching the given string ID
 // ID value is escaped
 // Returns whether successful
@@ -549,7 +549,7 @@ bool Connection::delete_id(const string& table,
   return delete_all(table, oss.str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // DELETE from a join table with two foreign ID fields
 // Returns whether successful
 bool Connection::delete_join(const string& table,

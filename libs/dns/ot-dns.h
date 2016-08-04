@@ -33,21 +33,21 @@ enum Type
 class Resolver
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Default constructor
   Resolver();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Query for a domain RR of the given type and return raw RDATA from the
   // first answer section
   string query(const string& domain, Type type, const string& type_name="");
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Query for a TXT record
   // Returns repacked TXT data, or "" if it fails
   string query_txt(const string& domain);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Query for a CERT record
   // Returns DER format (binary) certificate data, or "" if it fails
   string query_cert(const string& domain);

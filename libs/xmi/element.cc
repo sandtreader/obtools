@@ -12,7 +12,7 @@
 
 using namespace ObTools::UML;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor - build from XML element
 Element::Element(XMI::Reader& rdr, XML::Element& xe):
   reader(rdr),
@@ -50,7 +50,7 @@ void Element::read_subelements(const char *name, ElementFactoryFunc factory,
   OBTOOLS_XML_ENDFOR
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Function to build things that need valid references (second pass)
 //We just pass it down to children
 void Element::build_refs()
@@ -61,7 +61,7 @@ void Element::build_refs()
     (*p)->build_refs();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Gets UML element 'property' either from given attribute of source
 // or 'xmi.value' attribute, or content, of given sub-element of source
 //
@@ -98,7 +98,7 @@ string Element::get_property(const string& attr_name,
   else return "";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Gets UML element boolean 'property' as above
 // Anything other than 'true' is considered 'false'
 bool Element::get_bool_property(const string& attr_name,
@@ -107,7 +107,7 @@ bool Element::get_bool_property(const string& attr_name,
   return get_property(attr_name, subelement_name) == "true";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Gets UML element integer 'property' as above
 // Returns default if not available, 0 if not a number
 bool Element::get_int_property(const string& attr_name,
@@ -119,7 +119,7 @@ bool Element::get_int_property(const string& attr_name,
   return atoi(v.c_str());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Gets a reference 'property', either from given attribute of source
 // or 'xmi.idref' attribute of given sub-sub-element of given sub-element of
 // source (phew!)

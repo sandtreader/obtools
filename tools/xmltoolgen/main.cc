@@ -19,7 +19,7 @@ using namespace std;
 class XMLGenerator: public Generator
 {
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Obtain an element parameter name to use to in the function generated
   // by the given template - use name of element requested, or 'child' if none
   // Overridable by 'var' attribute
@@ -30,12 +30,12 @@ protected:
     return var;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Obtain the type of the element parameter for the function
   virtual string get_parameter_type(XML::Element &)
   { return "ObTools::XML::Element&"; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterate over child elements, expanding template inline
   // Accumulates expanded script in 'script'
   virtual void expand_inline(XML::Element& te, XML::Element& parent,
@@ -45,7 +45,7 @@ protected:
                              string& script,
                              bool is_root = false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
   virtual void expand_use(XML::Element& use_e,
                           XML::Element& define_e,
@@ -54,7 +54,7 @@ protected:
                           const string& streamname,
                           bool is_root = false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
   // templates (use generate_roots() for the latter)
   virtual void generate_main();

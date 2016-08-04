@@ -25,23 +25,23 @@ using namespace std;
 class Connection
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Connection() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Raw stream read wrapper
   virtual ssize_t cread(void *buf, size_t count)=0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Raw stream write wrapper
   virtual ssize_t cwrite(const void *buf, size_t count)=0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get peer's X509 common name
   virtual string get_peer_cn()=0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Connection() {}
 };
@@ -52,25 +52,25 @@ public:
 class Context
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Context() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd
   // and accept() it
   virtual Connection *accept_connection(int fd) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd
   // and connect() it
   virtual Connection *connect_connection(int fd) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Context() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Static:  Log SSL errors - only logs 'text' here
   static void log_errors(const string& text);
 };
@@ -83,27 +83,27 @@ protected:
    Connection *ssl;  // SSL connection, or 0 if basic TCP
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Default constructor, invalid socket
   TCPSocket(): Net::TCPSocket(Net::Socket::INVALID_FD), ssl(0) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Explicit constructor from existing fd and SSL object
   TCPSocket(int _fd, Connection *_ssl = 0): Net::TCPSocket(_fd), ssl(_ssl) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Raw stream read wrapper override
   ssize_t cread(void *buf, size_t count);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Raw stream write wrapper override
   ssize_t cwrite(const void *buf, size_t count);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get peer's X509 common name
   string get_peer_cn();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   virtual ~TCPSocket();
 };
@@ -120,40 +120,40 @@ private:
   void attach_ssl(Context *ctx);
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   TCPClient(Context *ctx, Net::EndPoint endpoint);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor with a timeout on connection (in seconds)
   TCPClient(Context *ctx, Net::EndPoint endpoint, int timeout);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor, binding specific local address/port
   // port can be zero if you only want to bind address
   TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor, binding specific local address/port and with timeout
   // port can be zero if you only want to bind address
   TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
             int timeout);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor, binding specific local address/port and with timeout and TTL
   // port can be zero if you only want to bind address
   TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
             int timeout, int ttl);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from existing fd
   TCPClient(Context *ctx, int fd, Net::EndPoint remote);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get server endpoint
   Net::EndPoint get_server() const { return server; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !connected; }
 };
@@ -172,7 +172,7 @@ struct ClientDetails
     address(_addr), cert_cn(_cn), mac(_mac) {}
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write ClientDetails to ostream (server.cc)
 ostream& operator<<(ostream& s, const ClientDetails& cd);
 
@@ -186,34 +186,34 @@ class TCPServer: public Net::TCPServer
 private:
   Context *ctx;     // Optional SSL context
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Virtual process method (see ot-net.h), but taking ClientDetails
   // Note: Not abstract here to allow override of just the non-SSL process(),
   //       as with a plain Net::TCPServer
   virtual void process(SSL::TCPSocket &/*s*/,
                        const ClientDetails& /* client */) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Override of normal process method to call the above - can be overridden
   // again if you don't need the SSL parts
   virtual void process(Net::TCPSocket &s, Net::EndPoint client);
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
   TCPServer(Context *_ctx, int _port, int _backlog=5,
             int min_spare=1, int max_threads=10):
     Net::TCPServer(_port, _backlog, min_spare, max_threads),
     ctx(_ctx) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
   TCPServer(Context *_ctx, Net::EndPoint _address, int _backlog=5,
             int min_spare=1, int max_threads=10):
     Net::TCPServer(_address, _backlog, min_spare, max_threads),
     ctx(_ctx) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Override of factory for creating a client socket
   virtual Net::TCPSocket *create_client_socket(int client_fd);
 };

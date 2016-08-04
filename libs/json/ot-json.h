@@ -116,7 +116,7 @@ public:
   string str(bool pretty=false);
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to write to ostream
 ostream& operator<<(ostream& s, const Value& v);
 

@@ -54,7 +54,7 @@ void UTF8::append(string& utf8, wchar_t unicode)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Encode a wide char vector to a UTF8 string
 string UTF8::encode(const vector<wchar_t>& unicode)
 {
@@ -65,7 +65,7 @@ string UTF8::encode(const vector<wchar_t>& unicode)
   return utf8;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Decode a UTF8 string into a wide char vector
 void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
 {
@@ -94,7 +94,7 @@ void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Squash diacritics (accents) from a UTF8 string
 // Only works in ISO-Latin1 range, replacing with approximate ASCII base
 // character, or digraph

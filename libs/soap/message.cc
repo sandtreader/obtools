@@ -11,7 +11,7 @@
 
 namespace ObTools { namespace SOAP {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Default constructor - empty header and body
 Message::Message(const string& ns)
 {
@@ -21,7 +21,7 @@ Message::Message(const string& ns)
   doc->add("env:Body");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from XML text, using the given parser
 Message::Message(const string& text, Parser& p): doc(0)
 {
@@ -34,7 +34,7 @@ Message::Message(const string& text, Parser& p): doc(0)
   {}
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from input stream, using the given parser
 Message::Message(istream& in_s, Parser& p): doc(0)
 {
@@ -47,7 +47,7 @@ Message::Message(istream& in_s, Parser& p): doc(0)
   {}
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Replace with another message - like a copy constructor, but explicit
 // and destroys the original
 void Message::take(Message& original)
@@ -57,14 +57,14 @@ void Message::take(Message& original)
   original.doc=0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a namespace attribute to the envelope
 void Message::add_namespace(const string& attr, const string& value)
 {
   if (doc) doc->set_attr(attr, value);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add standard namespaces for WSDL-style SOAP
 void Message::add_wsdl_namespaces()
 {
@@ -75,7 +75,7 @@ void Message::add_wsdl_namespaces()
   add_namespace("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a header element
 // header is taken and will be deleted with message
 // Returns reference to 'header'
@@ -85,7 +85,7 @@ XML::Element& Message::add_header(XML::Element *header)
   return *header;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a header element with given role string
 // header is taken and will be deleted with message
 // Element is modified with role, mustUnderstand and relay attributes
@@ -108,7 +108,7 @@ XML::Element& Message::add_header(const string &name, const string& role,
   return add_header(header);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a header element with given standard role
 // header is taken and will be deleted with message
 // Element is modified with role, mustUnderstand and relay attributes
@@ -134,7 +134,7 @@ XML::Element& Message::add_header(const string& name, Header::Role role,
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a body element
 // body is taken and will be deleted with message
 XML::Element& Message::add_body(XML::Element *body)
@@ -143,7 +143,7 @@ XML::Element& Message::add_body(XML::Element *body)
   return *body;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a WSDL-style body element with a given name and namespace, plus
 // a standard SOAP encodingStyle attribute
 // body is taken and will be deleted with message
@@ -163,7 +163,7 @@ XML::Element& Message::add_wsdl_body(const string& name,
   return *body;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Dump to given output stream
 void Message::write_to(ostream& s) const
 {
@@ -173,7 +173,7 @@ void Message::write_to(ostream& s) const
     s << "INVALID SOAP!\n";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Output to XML text
 string Message::to_string() const
 {
@@ -183,7 +183,7 @@ string Message::to_string() const
     return "INVALID SOAP!\n";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Message to ostream
 ostream& operator<<(ostream& s, const Message& m)
 {
@@ -191,7 +191,7 @@ ostream& operator<<(ostream& s, const Message& m)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Flatten any href/id (SOAP1.1) reference structure, taking copies of
 // referenced elements and replacing referencing elements with them, thus
 // creating the inline equivalent document.
@@ -214,7 +214,7 @@ void Message::flatten_bodies()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Recurse a (sub)-document looking for id attributes and filling in the
 // given map
 void Message::fill_id_map(XML::Element& e, map<string, XML::Element *>& ids)
@@ -227,7 +227,7 @@ void Message::fill_id_map(XML::Element& e, map<string, XML::Element *>& ids)
     fill_id_map(*p, ids);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Fix up a (sub)-document looking for href attributes and replacing the
 // element containing it with a copy of the element referred to
 void Message::fix_hrefs(XML::Element& e, map<string, XML::Element *>& ids)
@@ -270,7 +270,7 @@ void Message::fix_hrefs(XML::Element& e, map<string, XML::Element *>& ids)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get first (or only) body element
 // Returns Element::none if none
 XML::Element& Message::get_body() const
@@ -284,7 +284,7 @@ XML::Element& Message::get_body() const
   return XML::Element::none;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get first (or only) body element of the given name
 // Returns Element::none if none
 XML::Element& Message::get_body(const string& name) const
@@ -298,7 +298,7 @@ XML::Element& Message::get_body(const string& name) const
   return XML::Element::none;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get list of body elements
 list<XML::Element *> Message::get_bodies() const
 {
@@ -312,7 +312,7 @@ list<XML::Element *> Message::get_bodies() const
   return empty;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert a header element into a Header structure
 static Header _read_header(const XML::Element& he)
 {
@@ -335,7 +335,7 @@ static Header _read_header(const XML::Element& he)
   return Header(&he, role, must_understand, relay);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get list of header elements
 list<Header> Message::get_headers() const
 {
@@ -354,7 +354,7 @@ list<Header> Message::get_headers() const
   return headers;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a single header of a particular name
 // Returns whether successful;  fills in h if so
 bool Message::get_header(const string& name, Header& h) const

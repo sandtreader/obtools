@@ -44,7 +44,7 @@ public:
   TimeoutThread(BiSyncServer &_server): server(_server) { start(); }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle timeouts
 void BiSyncServer::do_timeouts(Log::Streams& log)
 {
@@ -54,7 +54,7 @@ void BiSyncServer::do_timeouts(Log::Streams& log)
 //==========================================================================
 // Foreground stuff
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructors - as Server but with timeout
 BiSyncServer::BiSyncServer(int port, int _request_timeout,
                            const string& _name,
@@ -101,7 +101,7 @@ BiSyncServer::BiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
   timeout_thread = new TimeoutThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Request/response - blocks waiting for a response, or timeout/failure
 // Returns whether a response was received, fills in response if so
 bool BiSyncServer::request(ClientMessage& request, Message& response)
@@ -133,7 +133,7 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
   return requests.wait_response(request.msg, response);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle asynchronous messages, which includes responses
 bool BiSyncServer::handle_async_message(const ClientMessage& msg)
 {
@@ -155,7 +155,7 @@ bool BiSyncServer::handle_async_message(const ClientMessage& msg)
   return handle_client_async_message(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle asynchronous messages which aren't responses
 bool BiSyncServer::handle_client_async_message(const ClientMessage& msg)
 {
@@ -163,7 +163,7 @@ bool BiSyncServer::handle_client_async_message(const ClientMessage& msg)
   return SyncServer::handle_async_message(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shut down server cleanly
 void BiSyncServer::shutdown()
 {
@@ -186,7 +186,7 @@ void BiSyncServer::shutdown()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 BiSyncServer::~BiSyncServer()
 {

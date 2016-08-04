@@ -179,7 +179,7 @@ string MaskedAddress::get_cidr() const
   return s.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write MaskedAddress to ostream
 // e.g. cout << addr;
 // Always outputs in CIDR /N form
@@ -211,7 +211,7 @@ ostream& operator<<(ostream& s, const EndPoint& ep)
 //==========================================================================
 // Protocol
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from string
 Protocol::Protocol(const string& ps)
 {
@@ -223,7 +223,7 @@ Protocol::Protocol(const string& ps)
     proto = PROTO_UNKNOWN;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Output to ostream
 void Protocol::output(ostream& s) const
 {
@@ -243,7 +243,7 @@ void Protocol::output(ostream& s) const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Protocol to ostream
 // e.g. cout << proto;
 ostream& operator<<(ostream& s, const Protocol& p)
@@ -252,7 +252,7 @@ ostream& operator<<(ostream& s, const Protocol& p)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Standard protocols
 Protocol Protocol::TCP(Protocol::PROTO_TCP);
 Protocol Protocol::UDP(Protocol::PROTO_UDP);

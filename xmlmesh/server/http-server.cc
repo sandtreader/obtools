@@ -60,7 +60,7 @@ class HTTPServer: public Web::HTTPServer
                       Net::TCPStream& stream);
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor to bind to any interface (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(HTTPServerService& _service, int port, int backlog,
@@ -238,7 +238,7 @@ bool HTTPServer::handle_request(const Web::HTTPMessage& request,
 //==========================================================================
 // HTTP Server Service implementation
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 HTTPServerService::HTTPServerService(const XML::Element& cfg):
   Service(cfg),
@@ -268,7 +268,7 @@ HTTPServerService::HTTPServerService(const XML::Element& cfg):
   log.summary << "Poll timeout: " << active_poller_map_timeout << endl;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check the service is happy
 // Override to close down startup if initialisation failed
 bool HTTPServerService::started() const
@@ -276,7 +276,7 @@ bool HTTPServerService::started() const
   return !!http_server;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle an incoming message POST request
 bool HTTPServerService::handle_request(const Web::HTTPMessage& request,
                                        Web::HTTPMessage& response,
@@ -318,7 +318,7 @@ bool HTTPServerService::handle_request(const Web::HTTPMessage& request,
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle a poll GET request
 bool HTTPServerService::handle_poll(Web::HTTPMessage& response,
                                     const string& path)
@@ -345,7 +345,7 @@ bool HTTPServerService::handle_poll(Web::HTTPMessage& response,
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
 // Note this only gets called for reversing messages coming back out
 bool HTTPServerService::handle(RoutingMessage& msg)
@@ -382,7 +382,7 @@ bool HTTPServerService::handle(RoutingMessage& msg)
   return false;  // Nowhere else to go
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick function
 void HTTPServerService::tick()
 {
@@ -390,7 +390,7 @@ void HTTPServerService::tick()
   active_poller_map.tidy();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Callback from client_request_map when an item is timed out
 void HTTPServerService::client_request_timeout(const string& path)
 {
@@ -402,7 +402,7 @@ void HTTPServerService::client_request_timeout(const string& path)
   originate(rmsg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Callback from active_poller_map when a poller is timed out
 void HTTPServerService::poller_timeout(const string& path,
                                        ResponseQueuePtr& response_queue)

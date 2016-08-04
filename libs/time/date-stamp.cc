@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace Time {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from string
 // See ot-time.h for details
 DateStamp::DateStamp(const string& text)
@@ -57,7 +57,7 @@ DateStamp::DateStamp(const string& text)
   t = combine(split);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write DateStamp to ostream
 ostream& operator<<(ostream& s, const DateStamp& dst)
 {

@@ -11,14 +11,14 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 ParallelAction::ParallelAction(const CP& cp, bool _race):
   Action(cp), race(_race)
 {
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Start action
 bool ParallelAction::start(Context& con)
 {
@@ -38,7 +38,7 @@ bool ParallelAction::start(Context& con)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool ParallelAction::tick(Context& con)
@@ -61,7 +61,7 @@ bool ParallelAction::tick(Context& con)
   return (race?(actions.size() == xml.children.size()):(!actions.empty()));
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Stop action
 // Stop any still active
 void ParallelAction::stop(Context& con)
@@ -70,7 +70,7 @@ void ParallelAction::stop(Context& con)
     (*p)->stop(con);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 ParallelAction::~ParallelAction()
 {

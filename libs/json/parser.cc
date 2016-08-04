@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace JSON {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor on an istream
 Parser::Parser(istream& input): lex(input)
 {
@@ -25,7 +25,7 @@ Parser::Parser(istream& input): lex(input)
   lex.add_symbol("]");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read the rest of an object (after reading the {)
 Value Parser::read_rest_of_object()
 {
@@ -70,7 +70,7 @@ Value Parser::read_rest_of_object()
   return object;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read the rest of an array (after reading the [)
 Value Parser::read_rest_of_array()
 {
@@ -108,7 +108,7 @@ Value Parser::read_rest_of_array()
 }
 
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a value
 Value Parser::read_value()
 {

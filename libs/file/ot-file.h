@@ -80,162 +80,162 @@ protected:
 
 public:
   // Constructors-------------------------------------------------------------
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Default constructor (empty)
   Path() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Copy constructor
   Path(const Path& _o): path(_o.path) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from string
   Path(const string& _path): path(_path) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from directory and leaf
   // If directory is empty or ends with slash already, doesn't add a slash
   Path(const string& dir, const string& leaf);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor from existing path and leaf (combines as above)
   Path(const Path& _path, const string& leaf);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Validity check
   bool operator!() const { return path.empty(); }
 
   // Accessors ---------------------------------------------------------------
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get path as string
   const string& str() const { return path; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get path as C-string (for fopen etc.)
   const char *c_str() const { return path.c_str(); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Extend a path
   Path& extend(const string& leaf);
   Path& extend(const Path& path);
 
   // Methods to split paths --------------------------------------------------
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Find whether it's an absolute path
   bool is_absolute() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get directory: everything before last slash, if any, not including
   // trailing slash.  If no slashes, returns empty path
   string dirname() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get leafname: everything after last slash, if any, otherwise everything
   string leafname() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get extension: Part of leafname following dot, if any
   string extension() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get basename: leafname with extension (if any) removed
   string basename() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Fix a path to local directory separator type
   // Use to convert '/'-separated paths (e.g. URLs) to local separator
   void fix_slashes();
 
   // Methods to resolve paths ------------------------------------------------
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Resolve one path against another:
   //   If new path is absolute, return new path
   //   If relative, make absolute path relative to dirname of old path
   Path resolve(const Path& new_path) const;
 
   // Methods to get file information -----------------------------------------
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Does the file exist?
   virtual bool exists() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Is it a directory?
   bool is_dir() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Is the file readable (by me)?
   bool readable() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Is the file writable (by me)?
   bool writeable() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the file's length
   uint64_t length() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the file's last-modified time (mtime)
   time_t last_modified() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set the file's last-modified time (mtime)
   // Also sets access time to now
   // Returns whether successful
   bool set_last_modified(time_t t) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the file's mode
   mode_t mode() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set file permissions mode (chmod)
   bool set_mode(mode_t mode) const;
 
   // String version
   bool set_mode(const string& mode) const { return set_mode(otoi(mode)); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the file's owner
   uid_t owner() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the file's group
   gid_t group() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the file's owner & group
   bool set_ownership(uid_t owner, uid_t group) const;
 
   // String version
   bool set_ownership(const string& owner, const string& group) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Delete the file/directory (directories are always deleted recursively)
   // Returns whether successful
   bool erase() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Touch the file, creating it if not already existing, setting mtime if so
   // Returns whether successful
   bool touch(mode_t mode=0644) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Rename file to new path
   // Note: You probably can't rename between filing systems
   bool rename(const Path& new_path) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read the entire file into a string
   // Returns whether successful.  If not, the string contains the error
   bool read_all(string& s);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Replace the entire file with a string
   // Returns error string, or "" if successful
   string write_all(const string& s);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   //Handy octal conversion functions for file modes
   //Convert integer to octal string
   static string itoo(int mode_i);
@@ -243,7 +243,7 @@ public:
   //Convert octal string to integer
   static int otoi(const string& mode_s);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   //Handy user/group id functions for ownership
   // Get user name from uid
   static string user_id_to_name(uid_t uid);
@@ -287,7 +287,7 @@ public:
   virtual ~Path() {}
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Path to ostream
 ostream& operator<<(ostream& s, const Path& p);
 
@@ -297,7 +297,7 @@ ostream& operator<<(ostream& s, const Path& p);
 class Directory: public Path
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructors, as Path (q.v.)
   Directory(): Path() {}
   Directory(const Path& _o): Path(_o) {}
@@ -305,13 +305,13 @@ public:
   Directory(const string& dir, const string& leaf): Path(dir, leaf) {}
   Directory(const Path& _path, const string& leaf): Path(_path, leaf) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Ensure a directory path exists
   // With parents set, acts like 'mkdir -p' and creates full path if required
   // Returns whether successful
   bool ensure(bool parents=false, int mode=0777) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get list of directory contents, as leaf strings
   // pattern takes a glob pattern (see Text::pattern_match)
   // If all is set, hidden/dotfiles are returned (including . and ..)
@@ -320,14 +320,14 @@ public:
   bool inspect(list<string>& leaves, const string& pattern="*",
                bool all=false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get list of directory contents, as full paths prefixed by directory path
   // Other parameters as above
   // Returns whether successful (directory readable)
   // Fills in paths if so
   bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Does the directory exist and is it actually dir?
   bool exists() const;
 
@@ -335,7 +335,7 @@ public:
   // Is the directory empty?
   bool empty() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Extend a path
   Directory& extend(const string& leaf);
   Directory& extend(const Path& path);
@@ -352,7 +352,7 @@ class InStream: public istream
   __gnu_cxx::stdio_filebuf<char> filebuf;
 
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   InStream(const string& fn,
            ios::openmode mode = ios::in | ios::binary):
@@ -361,7 +361,7 @@ class InStream: public istream
     filebuf(fd, mode)
   { if (fd>=0) istream::init(&filebuf); else setstate(failbit); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Extra close method to make it look like an ifstream
   void close() { ::close(fd); }
 };
@@ -372,7 +372,7 @@ class OutStream: public ostream
   __gnu_cxx::stdio_filebuf<char> filebuf;
 
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   OutStream(const string& fn,
            ios::openmode mode = ios::out | ios::trunc | ios::binary):
@@ -384,7 +384,7 @@ class OutStream: public ostream
     filebuf(fd, mode)
   { if (fd>=0) ostream::init(&filebuf); else setstate(failbit); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Extra close method to make it look like an ifstream
   void close() { ::close(fd); }
 };
@@ -394,7 +394,7 @@ class OutStream: public ostream
 class InStream: public ifstream
 {
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   InStream(const string& fn,
            ios::openmode mode = ios::in | ios::binary):
@@ -404,7 +404,7 @@ class InStream: public ifstream
 class OutStream: public ofstream
 {
  public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   OutStream(const string& fn,
            ios::openmode mode = ios::out | ios::trunc | ios::binary):

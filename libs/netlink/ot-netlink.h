@@ -129,7 +129,7 @@ public:
   ~GenericResponse();
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Message callback hookup
 int generic_netlink_callback(struct nl_msg *response, void *arg);
 

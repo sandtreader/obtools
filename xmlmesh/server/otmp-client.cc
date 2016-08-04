@@ -44,7 +44,7 @@ public:
   // Constructor
   OTMPClientService(const XML::Element& cfg);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // OTMP Message dispatcher
   // Fetch OTMP messages and send them up as internal messages
   void dispatch();
@@ -54,7 +54,7 @@ public:
   bool handle(RoutingMessage& msg);
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 OTMPClientService::OTMPClientService(const XML::Element& cfg):
   Service(cfg),
@@ -102,7 +102,7 @@ void OTMPClientService::dispatch()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Implementation of Service virtual interface - q.v. server.h
 bool OTMPClientService::handle(RoutingMessage& msg)
 {

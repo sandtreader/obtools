@@ -11,7 +11,7 @@
 
 namespace ObTools { namespace SOAP {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor for outgoing faults
 // Reason is the English (xml:lang="en") version - use add_reason for more
 Fault::Fault(Code code, const string& reason): Message()
@@ -50,7 +50,7 @@ Fault::Fault(Code code, const string& reason): Message()
     .add("env:Text", "xml:lang", "en", reason);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set a subcode
 // According to SOAP 1.2: 5.4.1.3, the value should be a qualified name
 // We only allow one level here!
@@ -60,7 +60,7 @@ void Fault::set_subcode(const string& value)
     .add("env:Value", value);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a reason
 // Use this for non-English reasons - pass the English reason in the
 // constructor, above
@@ -69,7 +69,7 @@ void Fault::add_reason(const string& text, const string& lang)
   get_body().make_child("env:Reason").add("env:Text", "xml:lang", lang, text);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set the Node value
 // According to SOAP 1.2: 5.4.3, this should be a URI identifying the node
 // There should only be one (but this routine doesn't check this)
@@ -78,7 +78,7 @@ void Fault::set_node(const string& uri)
   get_body().add("env:Node", uri);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Set the Role value
 // According to SOAP 1.2: 5.4.4, this should be a URI identifying the role
 // the node was operating in when the fault occurred
@@ -88,7 +88,7 @@ void Fault::set_role(const string& uri)
   get_body().add("env:Role", uri);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a detail entry
 // Detail entries can be more or less anything
 void Fault::add_detail(XML::Element *detail)
@@ -96,7 +96,7 @@ void Fault::add_detail(XML::Element *detail)
   get_body().make_child("env:Detail").add(detail);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get code string from incoming fault
 // Returns empty string if no code found
 string Fault::get_code_string() const
@@ -105,7 +105,7 @@ string Fault::get_code_string() const
     get_content();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get code from incoming fault
 Fault::Code Fault::get_code() const
 {
@@ -124,7 +124,7 @@ Fault::Code Fault::get_code() const
     return CODE_UNKNOWN;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get reason from incoming fault with language code given
 string Fault::get_reason(const string& lang) const
 {
@@ -141,7 +141,7 @@ string Fault::get_reason(const string& lang) const
 // Adds recommended headers (SOAP1.2: 5.4.7), indicating support for
 // ONLY SOAP1.2
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor for outgoing faults
 VersionMismatchFault::VersionMismatchFault():
   Fault(CODE_VERSION_MISMATCH, "Version Mismatch")
@@ -156,14 +156,14 @@ VersionMismatchFault::VersionMismatchFault():
 // Adds recommended headers (SOAP1.2: 5.4.8), indicating non-understood
 // elements
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor for outgoing faults
 MustUnderstandFault::MustUnderstandFault():
   Fault(CODE_MUST_UNDERSTAND, "Mandatory header blocks not understood")
 {
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add a NotUnderstood block
 // attr/value indicate a namespace
 void MustUnderstandFault::add_not_understood(const string& qname,

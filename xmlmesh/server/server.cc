@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace XMLMesh {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Load modules etc. from XML config
 void Server::configure(const XML::Configuration& config)
 {
@@ -37,7 +37,7 @@ void Server::configure(const XML::Configuration& config)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create a new service from the given XML
 // Returns whether successful
 bool Server::create_service(const XML::Element& xml)
@@ -55,7 +55,7 @@ bool Server::create_service(const XML::Element& xml)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create a new route from the given XML
 // Returns whether successful
 bool Server::create_route(const XML::Element& xml)
@@ -99,7 +99,7 @@ bool Server::create_route(const XML::Element& xml)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Look up a service by name
 Service *Server::lookup_service(const string& name) const
 {
@@ -137,7 +137,7 @@ void Server::run()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 Server::~Server()
 {

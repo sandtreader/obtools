@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace AMF {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Comparator
 bool Value::operator==(const Value& o) const
 {
@@ -50,7 +50,7 @@ bool Value::operator==(const Value& o) const
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Pretty print the message
 ostream& Value::log(ostream& sout, const string& indent) const
 {
@@ -129,7 +129,7 @@ ostream& Value::log(ostream& sout, const string& indent) const
   return sout;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from a channel in the given format
 void Value::read(Channel::Reader& chan, Format format)
   throw (Exception, Channel::Error)
@@ -254,7 +254,7 @@ void Value::read(Channel::Reader& chan, Format format)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a value from an associative array/object
 Value Value::get(const string& name) throw (Exception)
 {
@@ -268,7 +268,7 @@ Value Value::get(const string& name) throw (Exception)
   return p->second;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a value from an associative array/object, checking for a specific type
 Value Value::get(const string& name, Type type, const string& type_name)
   throw (Exception)
@@ -280,7 +280,7 @@ Value Value::get(const string& name, Type type, const string& type_name)
   return v;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a boolean value from an associative array/object
 bool Value::get_boolean(const string& name) throw (Exception)
 {
@@ -290,7 +290,7 @@ bool Value::get_boolean(const string& name) throw (Exception)
   throw Exception("Object/array property "+name+" is not TRUE or FALSE");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to a channel in the given format
 void Value::write(Channel::Writer& chan, Format format)
   throw (Exception, Channel::Error)
@@ -402,7 +402,7 @@ void Value::write(Channel::Writer& chan, Format format)
   else throw Exception("AMF3 writing not yet supported!");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write a value to ostream
 ostream& operator<<(ostream& s, const Value& v)
 {

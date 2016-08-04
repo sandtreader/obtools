@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace XMLMesh { namespace OTMP {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 Server::Server(ClientMessageQueue& receive_queue,
                int port, int backlog,
@@ -27,7 +27,7 @@ Server::Server(ClientMessageQueue& receive_queue,
 
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Function to handle an incoming client message
 // Whether connection should be allowed to continue
 bool Server::handle_message(const Tube::ClientMessage& msg)

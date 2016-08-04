@@ -16,7 +16,7 @@
 
 namespace ObTools { namespace ToolGen {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - read configuration from config file, output code
 // to given stream, errors to other given stream
 Generator::Generator(const string& _config_file,

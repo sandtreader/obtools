@@ -46,7 +46,7 @@ SOAP::Fault& FaultMessage::get_fault() const
   return *dynamic_cast<SOAP::Fault *>(soap_message);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write FaultMessage to ostream
 ostream& operator<<(ostream& s, const FaultMessage& m)
 {

@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 ScopeAction::ScopeAction(const CP& cp):
   SequenceAction(cp), ticked(false)
@@ -23,7 +23,7 @@ ScopeAction::ScopeAction(const CP& cp):
 
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool ScopeAction::tick(Context& con)

@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace XMLMesh {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Accept a message - implementation of MessageAcceptor
 // Performs local processing on messages (optionally in a worker thread)
 // and then forwards it to routes (also optionally in worker threads)
@@ -42,7 +42,7 @@ void Service::accept(RoutingMessage& msg)
   work(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Work function - do work on given message within (optional) worker thread
 void Service::work(RoutingMessage& msg)
 {
@@ -56,7 +56,7 @@ void Service::work(RoutingMessage& msg)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Forward message to ongoing routes
 bool Service::forward(RoutingMessage& msg)
 {
@@ -108,7 +108,7 @@ bool Service::forward(RoutingMessage& msg)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Reverse message back to inbound routes
 bool Service::reverse(RoutingMessage& msg)
 {
@@ -131,7 +131,7 @@ bool Service::reverse(RoutingMessage& msg)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Originate a new message
 bool Service::originate(RoutingMessage& msg)
 {
@@ -142,7 +142,7 @@ bool Service::originate(RoutingMessage& msg)
     return forward(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return a message as a response to an existing one
 // Returns whether successul
 bool Service::respond(const Message& response, const RoutingMessage& request)
@@ -153,7 +153,7 @@ bool Service::respond(const Message& response, const RoutingMessage& request)
   return originate(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return OK to an existing request
 // Returns whether successul
 bool Service::respond(const RoutingMessage& request)
@@ -162,7 +162,7 @@ bool Service::respond(const RoutingMessage& request)
   return respond(response, request);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return a fault to an existing request
 // Returns whether successul
 bool Service::respond(const RoutingMessage& request,
@@ -176,7 +176,7 @@ bool Service::respond(const RoutingMessage& request,
 //==========================================================================
 // ServiceThread worker thread
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Run function - pass msg to service
 void ServiceThread::run()
 {

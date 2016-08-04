@@ -292,7 +292,7 @@ void Element::optimise()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Add child elements from XML text - reparses text and adds resulting
 // root as a child element.  Parser ostream & flags as Parser() below
 // Returns added child, or 'none' if parse failed
@@ -316,7 +316,7 @@ Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Merge from XML text - reparses text and merges resulting element
 // with this one (see merge() for details)
 // Parser ostream & flags as Parser() below
@@ -994,7 +994,7 @@ Element::~Element()
   clear_children();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to write to ostream
 ostream& ObTools::XML::operator<<(ostream& s, const Element& e)
 {

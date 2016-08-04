@@ -57,7 +57,7 @@ void TCPServer::process(Net::TCPSocket &s, Net::EndPoint client)
   process(ss, cd);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write ClientDetails to ostream
 ostream& operator<<(ostream& s, const ClientDetails& cd)
 {

@@ -20,7 +20,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Encrypt/decrypt a block in place
 // If block is not padded to 8 bytes, the remainder (up to 7) bytes
 // WILL NOT BE ENCRYPTED

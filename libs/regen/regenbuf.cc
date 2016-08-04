@@ -22,7 +22,7 @@ using namespace ObTools::ReGen;
 //regenbuf - a streambuf which just captures everything into a string, then
 //uses the rest of the ReGen package to modify the file on close
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // regenbuf Constructor
 regenbuf::regenbuf(string _fn, const char *_marker, int _flags):
   streambuf(), fn(_fn), closed(false), marker(_marker), flags(_flags)
@@ -32,14 +32,14 @@ regenbuf::regenbuf(string _fn, const char *_marker, int _flags):
   setg(0,0,0);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // regenbuf Destructor - force close
 regenbuf::~regenbuf()
 {
   close();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // regenbuf close() function
 // Does all the real work here!
 void regenbuf::close()
@@ -86,7 +86,7 @@ void regenbuf::close()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // regenbuf overflow() function
 // Handles characters one at a time, since streambuf is unbuffered
 int regenbuf::overflow(int c)

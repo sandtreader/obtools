@@ -22,7 +22,7 @@ struct CRYPTO_dynlock_value
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // OpenSSL locking callbacks - required for multithreaded code
 // See: threads(3)
 
@@ -82,7 +82,7 @@ static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l,
 
 } // extern "C"
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 Library::Library()
 {
@@ -107,7 +107,7 @@ Library::Library()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 Library::~Library()
 {

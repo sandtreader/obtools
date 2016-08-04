@@ -15,14 +15,14 @@ namespace ObTools { namespace DB { namespace PG {
 //==========================================================================
 //Postgres result class
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get number of rows in result set
 int ResultSet::count()
 {
   return PQntuples(res);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get next row from result set
 //Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
@@ -41,7 +41,7 @@ bool ResultSet::fetch(Row& row)
   else return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get first value of next row from result set
 //Value is unescaped
 //Whether another was found - if so, writes into value
@@ -55,7 +55,7 @@ bool ResultSet::fetch(string& value)
   else return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Destructor
 ResultSet::~ResultSet()
 {
@@ -65,7 +65,7 @@ ResultSet::~ResultSet()
 //==========================================================================
 //Postgres connection class
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor - takes Postgres connection string
 //e.g. "host=localhost dbname=foo user=prc password=secret"
 Connection::Connection(const string& conninfo)
@@ -88,7 +88,7 @@ Connection::Connection(const string& conninfo)
   log.detail << "PostgresQL connected\n";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check whether connection is OK
 Connection::operator bool()
 {
@@ -100,7 +100,7 @@ Connection::operator bool()
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
 //Returns whether successful
 bool Connection::exec(const string& sql)
@@ -132,7 +132,7 @@ bool Connection::exec(const string& sql)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get result (e.g. SELECT)
 //Returns result - check this for validity
 Result Connection::query(const string& sql)
@@ -164,7 +164,7 @@ Result Connection::query(const string& sql)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Destructor
 Connection::~Connection()
 {

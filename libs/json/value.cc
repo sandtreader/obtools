@@ -16,7 +16,7 @@ namespace ObTools { namespace JSON {
 // Invalid marker value
 Value Value::none;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Escape the string and write to the output
 void Value::write_string_to(ostream& out) const
 {
@@ -52,7 +52,7 @@ void Value::write_string_to(ostream& out) const
   out << '"';
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write an object value to the output
 void Value::write_object_to(ostream& out, bool pretty, int indent) const
 {
@@ -89,7 +89,7 @@ void Value::write_object_to(ostream& out, bool pretty, int indent) const
   if (multiline && !indent) out << '\n';  // Tidy last line
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write an array value to the output
 void Value::write_array_to(ostream& out, bool pretty, int indent) const
 {
@@ -136,7 +136,7 @@ void Value::write_array_to(ostream& out, bool pretty, int indent) const
   if (multiline && !indent) out << '\n';  // Tidy last line
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write the value to the given stream
 // Set 'pretty' for multi-line, indented pretty-print, clear for optimal
 void Value::write_to(ostream& out, bool pretty, int indent) const
@@ -155,7 +155,7 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Output value as a string, with optional prettiness
 string Value::str(bool pretty)
 {
@@ -164,7 +164,7 @@ string Value::str(bool pretty)
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a value from the given object property
 // Returns Value::none if this is not an object or property doesn't exist
 const Value& Value::get(const string& property) const
@@ -175,7 +175,7 @@ const Value& Value::get(const string& property) const
   return none;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get a value from the given array index
 // Returns Value::none if this is not an array or index doesn't exist
 const Value& Value::get(unsigned int index) const
@@ -185,7 +185,7 @@ const Value& Value::get(unsigned int index) const
   return a[index];
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to write to ostream
 ostream& operator<<(ostream& s, const Value& v)
 {

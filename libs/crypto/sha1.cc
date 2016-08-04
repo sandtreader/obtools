@@ -15,14 +15,14 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 SHA1::SHA1(): finished(false)
 {
   SHA1_Init(&sha_ctx);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Update digest with a block of data
 void SHA1::update(const void *data, size_t length)
 {
@@ -30,7 +30,7 @@ void SHA1::update(const void *data, size_t length)
                              static_cast<unsigned long>(length));
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get result - writes DIGEST_LENGTH bytes to result
 void SHA1::get_result(unsigned char *result)
 {
@@ -38,7 +38,7 @@ void SHA1::get_result(unsigned char *result)
   finished = true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get result as a hex string
 string SHA1::get_result()
 {
@@ -52,7 +52,7 @@ string SHA1::get_result()
   else return "REUSED SHA1!";
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 SHA1::~SHA1()
 {
@@ -64,7 +64,7 @@ SHA1::~SHA1()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Static: Get hash of block of data.  Writes DIGEST_LENGTH bytes to result
 void SHA1::digest(const void *data, size_t length, unsigned char *result)
 {
@@ -72,7 +72,7 @@ void SHA1::digest(const void *data, size_t length, unsigned char *result)
          static_cast<unsigned long>(length), result);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Ditto, but returning hex string
 string SHA1::digest(const void *data, size_t length)
 {

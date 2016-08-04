@@ -12,7 +12,7 @@
 #include "ot-cppt.h"
 using namespace ObTools::CPPT;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Process a character
 //Returns whether a token is available - note this will happen on the
 //character _after_ the end of the token

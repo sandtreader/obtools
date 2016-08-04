@@ -19,7 +19,7 @@ using namespace std;
 class XMIGenerator: public Generator
 {
 private:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Scope type
   enum Scope
   {
@@ -41,7 +41,7 @@ private:
   string scope_var(Scope scope);
 
 protected:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Obtain an element parameter name to use to in the function generated
   // by the given template - use shortened scope requested
   // Overridable by 'var' attribute
@@ -55,7 +55,7 @@ protected:
     return scope_var(scope);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Obtain the type of the element parameter for the function
   virtual string get_parameter_type(XML::Element &te)
   {
@@ -64,7 +64,7 @@ protected:
     return scope_nstype(scope) + "&";
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterate over child elements, expanding template inline
   // Accumulates expanded script in 'script'
   virtual void expand_inline(XML::Element& te, XML::Element& parent,
@@ -74,7 +74,7 @@ protected:
                              string& script,
                              bool is_root = false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
   virtual void expand_use(XML::Element& use_e,
                           XML::Element& define_e,
@@ -83,11 +83,11 @@ protected:
                           const string& streamname,
                           bool is_root = false);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate includes / file-level code
   virtual void generate_includes();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
   // templates (use generate_roots() for the latter)
   virtual void generate_main();

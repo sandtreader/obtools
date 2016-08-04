@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace Misc {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from XML, reads <hash> elements from given root e.g.
 //  <hash name="foo" modulus="10">$foo</hash>
 HashInterpolator::HashInterpolator(const XML::Element& root)
@@ -25,7 +25,7 @@ HashInterpolator::HashInterpolator(const XML::Element& root)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Augment an existing PropertyList with hashes derived from existing
 // properties
 void HashInterpolator::augment(PropertyList& pl) const

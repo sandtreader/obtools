@@ -142,7 +142,7 @@ struct Value
   ostream& log(ostream& sout, const string& indent="") const;
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write a Value to ostream
 ostream& operator<<(ostream& s, const Value& c);
 

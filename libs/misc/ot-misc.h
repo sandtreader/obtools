@@ -59,16 +59,16 @@ public:
   // Fills 'digest' with 16 binary bytes representing the MD5 sum
   void finalise(unsigned char digest[16]);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // C++ friendly version: MD5 sum a string into byte array
   void sum(const string& text, unsigned char digest[16]);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // C++ friendly version: MD5 sum a string (returns hex string)
   // Re-initialises each time, so safe to reuse
   string sum(const string& text);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // C++ friendly version: MD5 sum a string, returning combination of digest
   // as an integer (read as two big-endian ints and XOR'ed)
   uint64_t hash_to_int(const string& text);
@@ -207,12 +207,12 @@ public:
   PropertyList& operator=(const map<string, string>& o)
   { map<string, string>::operator=(o); return *this; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a value
   void add(const string& name, const string& value)
   { erase(name); insert(make_pair(name,value)); }  //Note, not using []
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a integer value
   void add(const string& name, int value)
   {
@@ -227,21 +227,21 @@ public:
     add(name, oss.str());
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a boolean value
   // Note: Explicitly typed to avoid horror where literal strings are cast
   // to bool rather than std::string
   void add_bool(const string& name, bool value)
   { add(name, value?"true":"false"); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Check if a named property exists
   bool has(const string& name) const
   {
     return find(name) != end();
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a value, with default
   string get(const string& name, const string& def="") const
   {
@@ -250,7 +250,7 @@ public:
     return def;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get an integer value, with default
   int get_int(const string& name, int def=0) const
   {
@@ -259,7 +259,7 @@ public:
     return def;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a boolean value, with default
   // Anything beginning [TtYy] is assumed to be 'true', anything else 'false'
   bool get_bool(const string& name, bool def=false) const
@@ -281,7 +281,7 @@ public:
     return def;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get an real value, with default
   double get_real(const string& name, double def=0.0) const
   {
@@ -290,7 +290,7 @@ public:
     return def;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Overridden read-only [] operator
   // Unlike standard [], doesn't create a blank value if it doesn't exist
   string operator[](const string& name) const { return get(name); }
@@ -309,18 +309,18 @@ public:
   // Unset variables are not substituted
   string interpolate(const string& text) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Dump contents
   void dump(ostream& s, const string& prefix="    ",
             const string& separator=" = ") const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Convert to delimited string
   string str(char sep=',', char quote='"');
 
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write PropertyList to ostream
 ostream& operator<<(ostream& s, const PropertyList& pl);
 
@@ -992,7 +992,7 @@ public:
   void dump(ostream& sout) const;
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write RangeSet to ostream
 ostream& operator<<(ostream& s, const UInt64RangeSet& rs);
 

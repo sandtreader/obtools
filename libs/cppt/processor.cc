@@ -10,7 +10,7 @@
 #include "ot-cppt.h"
 using namespace ObTools::CPPT;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor
 Processor::Processor(istream& instream, ostream& outstream,
                      const Tags& ts, const string& streamname):

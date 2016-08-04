@@ -172,7 +172,7 @@ public:
   static Duration clock();
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Duration to ostream
 ostream& operator<<(ostream& s, const Duration& d);
 
@@ -352,7 +352,7 @@ public:
   bool operator>=(const Stamp& o) const { return t>=o.t; }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Stamp to ostream
 ostream& operator<<(ostream& s, const Stamp& st);
 
@@ -398,7 +398,7 @@ public:
   }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write DateStamp to ostream
 ostream& operator<<(ostream& s, const DateStamp& dst);
 

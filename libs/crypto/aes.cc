@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Encrypt/decrypt a block in place
 bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
 {
@@ -98,7 +98,7 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Sugared version of encrypt with binary strings and PKCS5 padding
 bool AES::encrypt(const string& plaintext, string& ciphertext_p)
 {
@@ -120,7 +120,7 @@ bool AES::encrypt(const string& plaintext, string& ciphertext_p)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Sugared version of encrypt, encrypting and PKCS5 padding in place
 bool AES::encrypt(vector<unsigned char>& data)
 {
@@ -128,7 +128,7 @@ bool AES::encrypt(vector<unsigned char>& data)
   return encrypt(&data[0], data.size());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Sugared version of decrypt with binary  strings and PKCS5 unpadding
 bool AES::decrypt(const string& ciphertext, string& plaintext_p)
 {
@@ -151,7 +151,7 @@ bool AES::decrypt(const string& ciphertext, string& plaintext_p)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Sugared version of decrypt, PKCS5 unpadding and decrypting in place
 bool AES::decrypt(vector<unsigned char>& data)
 {

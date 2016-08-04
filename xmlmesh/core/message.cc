@@ -289,7 +289,7 @@ Message::~Message()
   if (soap_message) delete soap_message;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Message to ostream
 ostream& operator<<(ostream& s, const Message& m)
 {

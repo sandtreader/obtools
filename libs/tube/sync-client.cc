@@ -39,7 +39,7 @@ public:
   TimeoutThread(SyncClient &_client): client(_client) { start(); }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Handle timeouts
 void SyncClient::do_timeouts(Log::Streams& log)
 {
@@ -50,7 +50,7 @@ void SyncClient::do_timeouts(Log::Streams& log)
 //==========================================================================
 // Foreground stuff
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - takes server endpoint (address+port), request timeout
 // (in seconds) and optional name
 SyncClient::SyncClient(Net::EndPoint _server, int _timeout,
@@ -60,7 +60,7 @@ SyncClient::SyncClient(Net::EndPoint _server, int _timeout,
   timeout_thread = new TimeoutThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor with SSL
 SyncClient::SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
                        int _timeout, const string& _name):
@@ -69,7 +69,7 @@ SyncClient::SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
   timeout_thread = new TimeoutThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Request/response - blocks waiting for a response, or timeout/failure
 // Returns whether a response was received, fills in response if so
 bool SyncClient::request(Message& request, Message& response)
@@ -84,7 +84,7 @@ bool SyncClient::request(Message& request, Message& response)
   return requests.wait_response(request, response);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Override of wait() which filters out responses, while leaving async
 // message to be returned normally
 // NB!  poll() will still return true for responses, so wait() may block
@@ -105,7 +105,7 @@ bool SyncClient::wait(Message& msg)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shut down client cleanly
 void SyncClient::shutdown()
 {
@@ -126,7 +126,7 @@ void SyncClient::shutdown()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 SyncClient::~SyncClient()
 {

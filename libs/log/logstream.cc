@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace Log {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // StreamBuf Constructor
 StreamBuf::StreamBuf(Channel& _channel, Level _level):
   closed(false), channel(_channel), level(_level)
@@ -22,7 +22,7 @@ StreamBuf::StreamBuf(Channel& _channel, Level _level):
   setg(0,0,0);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // StreamBuf close() function
 // Does all the real work here!
 void StreamBuf::close()
@@ -35,7 +35,7 @@ void StreamBuf::close()
   channel.log(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // StreamBuf overflow() functitcon
 // Handles characters one at a time, since streambuf is unbuffered
 int StreamBuf::overflow(int c)

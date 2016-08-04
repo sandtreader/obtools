@@ -86,7 +86,7 @@ bool Server::verify(Net::EndPoint ep) const
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
 void Server::process(SSL::TCPSocket& socket,
                      const SSL::ClientDetails& client)
@@ -205,7 +205,7 @@ void Server::process(SSL::TCPSocket& socket,
 }
 
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 Server::Server(int port, const string& _name, int backlog,
                int min_spare_threads, int max_threads, int _client_timeout):
@@ -216,7 +216,7 @@ Server::Server(int port, const string& _name, int backlog,
 
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor with SSL
 Server::Server(SSL::Context *_ctx, int port,
                const string& _name, int backlog,
@@ -229,7 +229,7 @@ Server::Server(SSL::Context *_ctx, int port,
 
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 Server::Server(Net::EndPoint local, const string& _name, int backlog,
                int min_spare_threads, int max_threads,
@@ -241,7 +241,7 @@ Server::Server(Net::EndPoint local, const string& _name, int backlog,
 
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor with SSL
 Server::Server(SSL::Context *_ctx, Net::EndPoint local,
                const string& _name, int backlog,
@@ -254,7 +254,7 @@ Server::Server(SSL::Context *_ctx, Net::EndPoint local,
 
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message
 // Note:  It is safe to call this inside the handle_message() method
 // Whether message queued (client still connected)

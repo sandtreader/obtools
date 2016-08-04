@@ -561,7 +561,7 @@ int Path::group_name_to_id(const string& gname)
 }
 
 #if defined(__WIN32__)
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Windows only - helper function to convert a UTF8 filename into a
 // wide character one
 wstring Path::utf8_to_wide(const string& utf8)
@@ -587,7 +587,7 @@ wstring Path::utf8_to_wide(const string& utf8)
   return wide;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Windows only - helper function to convert a wide character filename
 // (e.g. returned from FindNextFileW) to a UTF8 one
 string Path::wide_to_utf8(const wstring& wide)
@@ -614,7 +614,7 @@ string Path::wide_to_utf8(const wstring& wide)
 }
 #endif
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Path to ostream
 ostream& operator<<(ostream& s, const Path& p)
 {

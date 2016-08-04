@@ -16,7 +16,7 @@
 
 using namespace ObTools::XML;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read configuration file
 // Returns whether successful
 // If specified, ename is the expected root element name - fails if wrong
@@ -61,7 +61,7 @@ bool Configuration::read(const string& ename)
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from XML text
 // If specified, ename is the expected root element name - fails if wrong
 bool Configuration::read_text(const string& text, const string& ename)
@@ -90,7 +90,7 @@ bool Configuration::read_text(const string& text, const string& ename)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Reload configuration file as the same element as before
 // Returns whether successful
 bool Configuration::reload()
@@ -99,7 +99,7 @@ bool Configuration::reload()
   return read(ename);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
 // Only first element of intermediate steps is used - list is not merged!
 list<Element *> Configuration::get_elements(const string& path) const
@@ -108,7 +108,7 @@ list<Element *> Configuration::get_elements(const string& path) const
   return xpath.get_elements(path);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Single element fetch - first of list, if any, or 0
 Element *Configuration::get_element(const string& path) const
 {
@@ -116,7 +116,7 @@ Element *Configuration::get_element(const string& path) const
   return xpath.get_element(path);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // XPath value fetch - either attribute or content of single (first) element
 // Returns def if anything not found
 // Note all get_value methods still work, and return def, if file read fails
@@ -186,7 +186,7 @@ double Configuration::get_value_real(const string& path, double def) const
   return xpath.get_value_real(path, def);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // XPath list-of-values fetch
 // Returns contents of all elements matching XPath
 list<string> Configuration::get_values(const string& path) const
@@ -203,7 +203,7 @@ list<string> Configuration::get_values(const string& path) const
   return strings;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // XPath map fetch
 // Returns string->string map of all element matching given XPath,
 // using given attribute name as key, content as value
@@ -226,7 +226,7 @@ map<string, string> Configuration::get_map(const string& path,
   return values;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // XPath value set - either attribute or content of single (first) element
 // Returns whether value was settable
 // Can only set content or attributes of existing elements - use add_element
@@ -335,7 +335,7 @@ bool Configuration::replace_element(const string& path, Element *ne)
   return xpath.replace_element(path, ne);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Replace the root (if any) with a new one of the given name
 // Returns the new root
 Element *Configuration::replace_root(const string& name)
@@ -345,7 +345,7 @@ Element *Configuration::replace_root(const string& name)
   return e;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Update file from changes made to in-memory document
 // Writes back to first (or only) file in filename list
 // Update is atomic with rename

@@ -30,7 +30,7 @@ public:
   Error(int e, const string& t): error(e), text(t) {}
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Error to ostream
 // e.g. cout << e;
 ostream& operator<<(ostream& s, const Error& e);
@@ -43,39 +43,39 @@ protected:
   uint64_t offset;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Basic constructor, destructor
   Reader(): offset(0) {}
   virtual ~Reader() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read as much data as is available, up to 'count' bytes
   // Returns amount read, also adjusts offset
   // If 'buf' is 0, just skip as much data as possible
   // Throws Error on failure (not EOF)
   virtual size_t basic_read(void *buf, size_t count) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Try to read an exact amount of data from the channel into a binary buffer
   // Returns false if channel goes EOF before anything is read
   // Buf may be 0 to skip data
   // Throws Error on failure, or EOF after a read
   virtual bool try_read(void *buf, size_t count);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read exact amount of data from the channel into a binary buffer
   // Buf may be 0 to skip data
   // Throws Error on failure
   void read(void *buf, size_t count);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Try to read an exact amount of data from the channel into a string
   // Returns false if channel goes EOF before anything is read
   // Buf may be 0 to skip data
   // Throws Error on failure, or EOF after a read
   virtual bool try_read(string& s, size_t count);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read exact amount of data from the channel into a string
   // Throws Error on failure
   void read(string& s, size_t count);
@@ -101,17 +101,17 @@ public:
   // Throws Error on failure
   virtual bool try_read_byte(unsigned char& b);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a single byte from the channel
   // Throws Error on failure or EOF
   unsigned char read_byte();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 2-byte integer from the channel
   // Throws Error on failure or EOF
   uint16_t read_nbo_16();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 3-byte integer from the channel
   // Throws Error on failure or EOF
   uint32_t read_nbo_24();
@@ -121,31 +121,31 @@ public:
   // Throws Error on failure
   virtual bool try_read_nbo_32(uint32_t& n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the channel
   // Throws Error on failure or EOF
   uint32_t read_nbo_32();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Ditto, but allowing the possibility of failure at EOF
   // Throws Error on non-EOF failure
   bool read_nbo_32(uint32_t& n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 8-byte integer from the channel
   // Throws Error on failure or EOF
   uint64_t read_nbo_64();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a network byte order 8-byte double from the socket
   // Throws Error on failure or EOF
   double read_nbo_double();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a fixed-point number from the channel
   double read_nbo_fixed_point(int before_bits, int after_bits);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Little-endian equivalents of the above
   // Used only for external protocols specified that way
   // Throws Error on failure or EOF
@@ -156,35 +156,35 @@ public:
   uint64_t read_le_64();
   double read_le_double();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get current offset
   uint64_t get_offset() { return offset; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Skips to EOF
   // Useful for things using LimitedReader
   virtual void skip_to_eof();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Skip N bytes
   // Throws Error on failure or EOF
   virtual void skip(size_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Skip to given alignment (bytes) from current offset
   // Throws Error on failure or EOF
   void align(size_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Whether rewindable - not by default
   virtual bool rewindable() { return false; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Rewind N bytes - can't do it by default
   // Throws Error on failure or EOF
   virtual void rewind(size_t) { throw Error(2, "Can't rewind"); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Rewind to beginning
   // Throws Error on failure or EOF
   void rewind() { rewind(offset); }
@@ -198,74 +198,74 @@ protected:
   uint64_t offset;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Basic constructor, destructor
   Writer(): offset(0) {}
   virtual ~Writer() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write exact amount of data to the channel from a binary buffer
   // Also adjusts offset
   // Throws Error on failure
   virtual void basic_write(const void *buf, size_t count) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write exact amount of data to the channel from a binary buffer
   // Aliased to match Reader::read()
   void write(const void *buf, size_t count)
   { basic_write(buf, count); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a string to the channel
   // Throws Error on failure
   void write(const string& s);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write the given C string to the channel
   // Throws Error on failure
   void write(const char *p);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a vector of unsigned chars to the channel
   // Throws Error on failure
   void write(const vector<unsigned char>& v);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a single byte to the channel
   // Throws Error on failure
   void write_byte(unsigned char b);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 2-byte integer to the channel
   // Throws Error on failure
   void write_nbo_16(uint16_t i);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 3-byte integer to the channel
   // Throws Error on failure
   void write_nbo_24(uint32_t i);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 4-byte integer to the channel
   // Throws Error on failure
   void write_nbo_32(uint32_t i);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 8-byte integer to the channel
   // Throws Error on failure
   void write_nbo_64(uint64_t i);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a network byte order 8-byte double to the channel
   // Throws Error on failure or EOF
   void write_nbo_double(double f);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a network byte order fixed-point double
   // Throws Error on failure or EOF
   void write_nbo_fixed_point(double f, int before_bits, int after_bits);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Little-endian (LSB first) versions of the above
   // Not recommended for new protocols - only for compatibility with existing
   // little-endian (often by default through using C structures on x86)
@@ -277,30 +277,30 @@ public:
   void write_le_64(uint64_t i);
   void write_le_double(double f);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get current offset
   uint64_t get_offset() { return offset; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Skip N bytes, writing zero
   // Throws Error on failure or EOF
   virtual void skip(size_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Pad to given alignment (bytes) from given current offset
   // Throws Error on failure or EOF
   void align(size_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Whether rewindable - not by default
   virtual bool rewindable() { return false; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Rewind N bytes - can't do it by default
   // Throws Error on failure or EOF
   virtual void rewind(size_t) { throw Error(2, "Can't rewind"); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Rewind to beginning
   // Throws Error on failure or EOF
   void rewind() { rewind(offset); }
@@ -531,22 +531,22 @@ private:
   int current_byte;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   BitReader(Reader& _reader):
     reader(_reader), bits_valid(0), current_byte(0) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a single bit from the channel, returning an integer
   // Throws Error on failure or EOF
   int read_bit();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a single bit from the channel, returning a boolean
   // Throws Error on failure or EOF
   bool read_bool() { return read_bit()?true:false; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read up to 32 bits from the channel
   // Returns bits in LSB of integer returned
   // Throws Error on failure or EOF
@@ -564,28 +564,28 @@ private:
   int current_byte;
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   BitWriter(Writer& _writer):
     writer(_writer), bits_valid(0), current_byte(0) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a single bit to the channel
   // Throws Error on failure or EOF
   void write_bit(int bit);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write a single bit to the channel as a boolean
   // Throws Error on failure or EOF
   void write_bool(bool bit) { write_bit(bit?1:0); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Write up to 32 bits to the channel
   // Writes bits from LSB of integer given
   // Throws Error on failure or EOF
   void write_bits(int n, uint32_t bits);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Flush remaining bits (if any) as a final byte, padding with zeros
   // Throws Error on failure or EOF
   void flush();
@@ -597,12 +597,12 @@ public:
 class BitEGReader: public BitReader
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   BitEGReader(Reader& _reader):
     BitReader(_reader) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read an Exp-Golomb coded value from the channel
   // Throws Error on failure or EOF
   uint32_t read_exp_golomb();
@@ -640,7 +640,7 @@ public:
     return r;
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Try to read an exact amount of data from the channel into a binary buffer
   // Returns false if channel goes EOF before anything is read
   // Buf may be 0 to skip data
@@ -652,7 +652,7 @@ public:
     return Reader::try_read(buf, count);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Try to read an exact amount of data from the channel into a string
   // Returns false if channel goes EOF before anything is read
   // Buf may be 0 to skip data
@@ -712,7 +712,7 @@ public:
     return Reader::try_read_byte(b);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Skips to EOF
   void skip_to_eof()
   {

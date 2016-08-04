@@ -198,12 +198,12 @@ class Base64
   char extra_63;       // Character to use for index 63 ('/')
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Base64(char _pad='=', char _extra_62='+', char _extra_63='/'):
     pad(_pad), extra_62(_extra_62), extra_63(_extra_63) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Encode a binary block
   // Split gives length of line to split at - default (76) is to RFC
   // Set 0 to suppress split altogether
@@ -211,34 +211,34 @@ public:
   string encode(const unsigned char *block, size_t length,
                 int split=76, const string& line_end = "\r\n");
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Encode a 64-bit integer, top byte first (big-endian)
   // Will reduce size to 4 bytes if it fits
   string encode(uint64_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Encode a binary string - options as encode above
   string encode(const string& binary, int split=76,
                 const string& line_end="\r\n");
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get length of binary block required for decode
   // This is a maximum estimate - real length may be less than this, but
   // will never be more
   size_t binary_length(const string& base64);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Decode a base64 string into a binary block.
   // Returns real length decoded if it fitted, max_length+1 if it didn't
   // - but it will never actually write more than max_length bytes
   size_t decode(const string& base64, unsigned char *block, size_t max_length);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Decode a 64-bit integer, top byte first (big-endian)
   // Returns whether successful - if so, sets 'n'
   bool decode(const string& base64, uint64_t& n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Decode base64 text into the given (binary) string
   // Returns whether successful - if so, appends data to binary
   // Requires temporary buffer equal to the binary_length() of the string
@@ -251,16 +251,16 @@ public:
 class Base36
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Default constructor
   Base36() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Encode a 64-bit integer
   // Uses as many characters as required
   static string encode(uint64_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Decode a 64-bit integer
   // Returns whether successful - if so, sets 'n'
   static bool decode(const string& base36, uint64_t& n);
@@ -272,16 +272,16 @@ public:
 class Base16Alpha
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Default constructor
   Base16Alpha() {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Encode a 64-bit integer
   // Uses as many characters as required
   static string encode(uint64_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Decode a 64-bit integer
   // Returns whether successful - if so, sets 'n'
   static bool decode(const string& base16, uint64_t& n);

@@ -158,16 +158,16 @@ public:
   //Error support
   int line;   ///< Line number of our start tag
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Non-element marker
   static Element none;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterator defs
   typedef ElementIterator iterator;            ///< Typedef of element iterator
   typedef ConstElementIterator const_iterator; ///< Typedef of const iterator
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Validity check.
   /// Easy way of checking if you've got Element::none
   /// \note Don't use \code(e!=Element::none)\endcode - that compares values!
@@ -196,36 +196,36 @@ public:
   Element(const string& n, const string& a, const string& v, const string& c):
     name(n), content(c), parent(0), line(0) { set_attr(a,v); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Shallow copy to an existing element.
   /// Copies the name, direct content and attributes into the given element
   /// Children, parent and line are _not_ copied
   void copy_to(Element& dest) const
   { dest.name = name; dest.content = content;  dest.attrs = attrs; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Shallow copy to a new element
   Element *copy() const
   { Element *dest = new Element(); copy_to(*dest); return dest; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Deep copy to an existing element.
   /// Copies the name, direct content and attributes into the given element
   /// and recursively copies children
   // parent pointer of top element is not copied
   void deep_copy_to(XML::Element& dest) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Deep copy to a new element
   Element *deep_copy() const
   { Element *dest = new Element(); deep_copy_to(*dest); return dest; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Copy constructor.  Does a deep copy
   Element(const Element& src): parent(0), line(0)
   { src.deep_copy_to(*this); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Assignment operator.  Does a deep copy, deleting any existing children
   const Element& operator=(const Element& src)
   { parent=0; line=src.line;
@@ -240,7 +240,7 @@ public:
   // left empty, the element name is used.
   void superimpose(const Element& source, const string& identifier);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Merge with another element
   // The attributes and content of the source element are copied into this
   // element, adding to or replacing (attributes only) what was there before
@@ -301,26 +301,26 @@ public:
   /// <?xml .. ?>
   void write_to(ostream& s, bool with_pi=false) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Convert to a string.
   /// \param with_pi controls whether to including the standard-compliant
   /// <?xml .. ?>
   string to_string(bool with_pi=false) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Write start-tag only to a given stream.
   /// \note Always outputs unclosed start tag, even if empty
   void write_start_to(ostream &s) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Convert start-tag to a string
   string start_to_string() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Write end-tag only to a given stream
   void write_end_to(ostream &s) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Convert end-tag to a string
   string end_to_string() const;
 
@@ -328,20 +328,20 @@ public:
   /// 'Optimise' single text sub-elements back to 'content' string here
   void optimise();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Find n'th (first, by default) child element, whatever it is
   /// \return Element::none if there isn't one
   Element& get_child(int n=0);
   const Element& get_child(int n=0) const;      ///< \copydoc get_child(int)
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Find n'th (first, by default) child element, but ignoring text/WS
   /// \return Element::none if there isn't one
   Element& get_child_element(int n=0);
   const Element& get_child_element(int n=0) const;
                                          ///< \copydoc get_child_element(int)
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Find n'th (first, by default) child element of given name.
   /// \return Element::none if there isn't one
   /// \note Use valid() to check which you've got - e.g.:
@@ -353,32 +353,32 @@ public:
   const Element& get_child(const string& ename, int n=0) const;
   Element& get_child(const string& ename, int n=0);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Ensure the existence of a child of the given name, and return it
   // Creates new child element of the given name if one doesn't already exist
   Element& make_child(const string& ename);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Find first (or only) descendant of given name
   // Returns Element::none if there isn't one
   // (Like get_child() but ignoring intervening cruft)
   const Element& get_descendant(const string& ename) const;
   Element& get_descendant(const string& ename);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Find all child elements in a list of const elements (so it can be used
   // with a const_iterator)
   // For non-const use 'children' directly
   // Returns copy list of pointers
   list<const Element *> get_children() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Find all child elements of given name
   // Returns list of pointers
   list<const Element *> get_children(const string& ename) const;
   list<Element *> get_children(const string& ename);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Find all descendant elements of given name - recursive
   // Returns flat list of pointers
   // Prunes tree walk at 'prune' tags if set - use for recursive structures
@@ -390,7 +390,7 @@ public:
   list<Element *> get_descendants(const string& ename,
                                   const string& prune="");
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or "") if not present
@@ -398,39 +398,39 @@ public:
   // when foo doesn't exist - use e["foo"] instead
   string get_attr(const string& attname, const string& def="") const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Handy [] operator to get attribute values
   string operator[](const string& attr) const { return get_attr(attr); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the boolean value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy1] as true, everything else is false
   bool get_attr_bool(const string& attname, bool def=false) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the integer value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_attr_int(const string& attname, int def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the integer value of an attribute of the given name, from hex string
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_attr_hex(const string& attname, int def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the 64-bit integer value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_attr_int64(const string& attname, uint64_t def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the 64-bit integer value of an attribute of the given name, from hex
   // string
   // Returns attribute value
@@ -438,81 +438,81 @@ public:
   // Returns 0 if present but bogus
   uint64_t get_attr_hex64(const string& attname, uint64_t def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get the real value of an attribute of the given name
   // Returns attribute value
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
   double get_attr_real(const string& attname, double def=0.0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Tests whether the element has an attribute of the given name
   // Quicker than !get_attr("foo").empty()
   bool has_attr(const string& attname) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (string)
   // Note:  All set_attr_xxx methods return *this, to allow chaining
   Element& set_attr(const string& attname, const string& value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (integer)
   // (_int qualifier not strictly necessary here, but matches get_attr_int)
   Element& set_attr_int(const string& attname, int value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (integer, hex)
   // (_int qualifier not strictly necessary here, but matches get_attr_int)
   Element& set_attr_hex(const string& attname, int value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (64-bit integer)
   // (_int64 qualifier not strictly necessary here, but matches get_attr_int64)
   Element& set_attr_int64(const string& attname, uint64_t value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (64-bit integer, hex)
   Element& set_attr_hex64(const string& attname, uint64_t value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (bool)
   // (_bool qualifier not strictly necessary here, but matches get_attr_bool)
   Element& set_attr_bool(const string& attname, bool value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Set an attribute (real)
   // (_real qualifier not strictly necessary here, but matches get_attr_real)
   Element& set_attr_real(const string& attname, double value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Remove an attribute
   Element& remove_attr(const string& attname);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get all direct child text content accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements
   // Strings from separate elements are separately with '\n'
   string get_content() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Handy * operator to get content
   string operator*() const { return get_content(); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get all text content from the entire tree accumulated into one string
   // Returns optimised content if available, otherwise iterates children
   // collecting text from data elements, and recursing into subchildren
   // Strings from separate elements are separately with '\n'
   string get_deep_content() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get XPath position relative to root (not including the root itself)
   // Returns an XPath string that can be used to identify this element in
   // the same document
   string get_xpath() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Translate name using given map:
   //   If not present, leave it and return true
   //   If present but mapped to "", leave it & return false (=> delete me)
@@ -523,21 +523,21 @@ public:
   // the document.
   bool translate(map<string, string>& trans_map);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Detach from parent
   void detach();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Replace with the given element at same position in parent
   // Detaches this element and attaches the new one
   void replace_with(Element *e);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Remove children of the given name
   // Recursively destroys children
   void remove_children(const string& name);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Clear children
   // Recursively destroys children
   void clear_children();
@@ -608,7 +608,7 @@ private:
   Element *root;       //0 if not valid
   deque<map<string, string> > ns_maps; //Stack of maps of prefix->full name
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   //Inline character classification functions
   //Note: Only allows strict ascii
   bool is_name_start(xmlchar c)
@@ -620,7 +620,7 @@ private:
   // space when in Windows ANSI locale
   bool is_ascii_space(xmlchar c) { return isascii(c) && isspace(c); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read a character, skipping initial whitespace, and counting lines
   // Equivalent to s >> c, but with line counting
   // Existing character can be passed in for counting, too
@@ -629,7 +629,7 @@ private:
     for(;;) { c=0; s.get(c);
               if (!is_ascii_space(c)) return c; if (c=='\n') line++; } }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Other private functions
   void parse_stream(istream &s) throw (ParseFailed);
   bool read_tag(xmlchar c, istream &s) throw(ParseFailed);
@@ -717,7 +717,7 @@ public:
 //==========================================================================
 // XML stream operators
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to parse from istream
 //
 // e.g. cin >> parser;
@@ -725,7 +725,7 @@ public:
 // Throws ParseFailed if bad XML received
 istream& operator>>(istream& s, Parser& p) throw (ParseFailed);
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write Element to ostream
 //
 // e.g. cout << parser.get_root();
@@ -740,7 +740,7 @@ ostream& operator<<(ostream& s, const Element& e);
 // e.g. /config/foo/@width
 // Paths can be absolute or relative - always rooted at 'root'
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Base template which can be specialised either as const or non-const
 // Because we only need the two specialisations these are done in xpath.cc
 // which allows us to put the implementation in there too
@@ -774,44 +774,44 @@ public:
   // e.g. xpath["foo/bar"]
   string operator[](const string& path) const { return get_value(path); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Boolean value fetch
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy] as true, everything else is false
   bool get_value_bool(const string& path, bool def=false) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_int(const string& path, int def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_hex(const string& path, int def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_value_int64(const string& path, uint64_t def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value fetch from hex
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_value_hex64(const string& path, uint64_t def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Real value fetch
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
   double get_value_real(const string& path, double def=0.0) const;
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Const XPathProcessor which only provides read functionality
 class ConstXPathProcessor: public BaseXPathProcessor<const Element>
 {
@@ -823,7 +823,7 @@ public:
     BaseXPathProcessor<const Element>(_root) {}
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read-write XPathProcessor which offers set methods etc. as well
 class XPathProcessor: public BaseXPathProcessor<Element>
 {
@@ -841,56 +841,56 @@ public:
   // to create new ones.
   bool set_value(const string& path, const string& value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Boolean value set
   // Sets value to 'yes' or 'no'
   bool set_value_bool(const string& path, bool value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Integer value set
   bool set_value_int(const string& path, int value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Integer value set to hex
   bool set_value_hex(const string& path, int value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value set
   bool set_value_int64(const string& path, uint64_t value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value set to hex
   bool set_value_hex64(const string& path, uint64_t value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Real value set
   bool set_value_real(const string& path, double value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Delete the element(s) at the given path
   // Returns whether any such element existed
   bool delete_elements(const string& path);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an element below the given path
   // Takes the element and attaches to given path
   // Returns whether the parent element existed
   bool add_element(const string& path, Element *ne);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an element below the given path with given name
   // Creates empty element of given name below path
   // Returns new element if created, or 0 if parent didn't exist
   Element *add_element(const string& path, const string& name);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Ensure the given element path exists
   // Creates empty elements to fulfill the entire path if they don't already
   // exist.  Uses the first of any given name for path if more than one
   // Returns pointer to eventual child element (cannot fail)
   Element *ensure_path(const string& path);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Replace an element at the given path with the new one
   // Takes the element and attaches to given path, detachs and deletes the old
   // Returns whether the old element existed
@@ -981,37 +981,37 @@ public:
   // e.g. config["foo/bar"]
   string operator[](const string& path) { return get_value(path); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // XPath Boolean value fetch
   // Defaults to default value given (or false) if not present
   // Recognises words beginning [TtYy] as true, everything else is false
   bool get_value_bool(const string& path, bool def=false) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // XPath Integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_int(const string& path, int def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Integer hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   int get_value_hex(const string& path, int def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_value_int64(const string& path, uint64_t def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
   uint64_t get_value_hex64(const string& path, uint64_t def=0) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // XPath Real value fetch
   // Defaults to default value given (or 0.0) if not present
   // Returns 0.0 if present but bogus
@@ -1036,55 +1036,55 @@ public:
   // to create new ones.
   bool set_value(const string& path, const string& value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // XPath Boolean value set - sets to 'yes' or 'no'
   bool set_value_bool(const string& path, bool value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Integer value set
   bool set_value_int(const string& path, int value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Integer value set to hex
   bool set_value_hex(const string& path, int value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value set
   bool set_value_int64(const string& path, uint64_t value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // 64-bit integer value set to hex
   bool set_value_hex64(const string& path, uint64_t value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Real value set
   bool set_value_real(const string& path, double value);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Delete the element(s) at the given path
   // Returns whether any such element existed
   bool delete_elements(const string& path);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an element below the given path
   // Takes the element and attaches to given path
   // Returns whether the parent element existed
   bool add_element(const string& path, Element *ne);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add an element below the given path with given name
   // Creates empty element of given name below path
   // Returns new element if created, or 0 if parent didn't exist
   Element *add_element(const string& path, const string& name);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Ensure the given element path exists
   // Creates empty elements to fulfill the entire path if they don't already
   // exist.  Uses the first of any given name for path if more than one
   // Returns pointer to eventual child element (cannot fail)
   Element *ensure_path(const string& path);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Replace an element at the given path with the new one
   // Takes the element and attaches to given path, detachs and deletes the old
   // Returns whether the old element existed
@@ -1156,11 +1156,11 @@ class Expander
                           map<string, string>& vars);
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor - takes template XML document
   Expander(const XML::Element& _templ): templ(_templ) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Expand the template with the given value document
   // \return the expanded string
   string expand(XML::Element& values);

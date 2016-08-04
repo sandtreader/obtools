@@ -16,7 +16,7 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 DelayAction::DelayAction(const CP& cp): Action(cp)
 {
@@ -30,7 +30,7 @@ DelayAction::DelayAction(const CP& cp): Action(cp)
 }
 
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool DelayAction::tick(Context&)

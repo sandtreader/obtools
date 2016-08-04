@@ -24,7 +24,7 @@
 
 namespace ObTools { namespace Misc {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from a comma-delimited range string
 // e.g. 1-100,110,120,200-1000
 // Total length is not set
@@ -51,7 +51,7 @@ void UInt64RangeSet::read(const string& text)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to a comma-delimited string
 // e.g. 1-100,110,120,200-1000
 // Total length is not recorded
@@ -76,7 +76,7 @@ string UInt64RangeSet::str() const
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from XML - reads <range start="x" length="y"/> elements
 // (or other element name if provided) from given parent element.
 // Ranges may overlap and will be optimised
@@ -92,7 +92,7 @@ void UInt64RangeSet::read_from_xml(const XML::Element& parent,
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to XML
 // Adds <range start="x" length="y"/> elements to the given XML element
 // or other element name if provided
@@ -111,7 +111,7 @@ void UInt64RangeSet::add_to_xml(XML::Element& parent,
   parent.set_attr_int64("end_offset", end_offset);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read as binary from a channel;  format as below
 void UInt64RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
 {
@@ -125,7 +125,7 @@ void UInt64RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write as binary to a channel
 // Format is 64-bit total length, then 4-byte count of entries,
 // then alternating 64-bit offset, length
@@ -142,7 +142,7 @@ void UInt64RangeSet::write(Channel::Writer& chan) const throw(Channel::Error)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Dump the set to the given output, one line per range, in form
 // start, length
 void UInt64RangeSet::dump(ostream& sout) const
@@ -154,7 +154,7 @@ void UInt64RangeSet::dump(ostream& sout) const
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write RangeSet to ostream, in short text form
 ostream& operator<<(ostream& s, const UInt64RangeSet& rs)
 {

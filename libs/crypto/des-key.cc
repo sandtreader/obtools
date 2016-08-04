@@ -16,7 +16,7 @@
 
 namespace ObTools { namespace Crypto {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Copy constructor - just copies base key and rebuilds schedule
 DESKey::DESKey(const DESKey& k):
   is_key(k.is_key)
@@ -25,7 +25,7 @@ DESKey::DESKey(const DESKey& k):
   load();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Assignment operator - ditto
 DESKey& DESKey::operator=(const DESKey& k)
 {
@@ -35,7 +35,7 @@ DESKey& DESKey::operator=(const DESKey& k)
   return *this;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check and load the key from base data - sets valid true or false
 // after checking it
 void DESKey::load()
@@ -44,7 +44,7 @@ void DESKey::load()
   valid = is_key?!DES_set_key_checked(&key, &schedule):true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create a new key from random data
 // Must seed PRNG first
 void DESKey::create()
@@ -58,7 +58,7 @@ void DESKey::create()
   load();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from data block - requires 8 bytes of data
 void DESKey::read(const unsigned char *data)
 {
@@ -66,14 +66,14 @@ void DESKey::read(const unsigned char *data)
   load();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to data block - writes 8 bytes of data
 void DESKey::write(unsigned char *data) const
 {
   memcpy(data, key, 8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from stream - reads 16 hex characters
 void DESKey::read(istream& sin)
 {
@@ -99,7 +99,7 @@ void DESKey::read(istream& sin)
   if (i==16) load();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to stream - write 16 hex characters
 void DESKey::write(ostream& sout) const
 {
@@ -108,7 +108,7 @@ void DESKey::write(ostream& sout) const
   sout << dec << setw(0) << setfill(' ');
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from string - reads 16 hex characters
 void DESKey::read(const string& text)
 {
@@ -116,7 +116,7 @@ void DESKey::read(const string& text)
   read(iss);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Convert to string
 string DESKey::str() const
 {
@@ -125,7 +125,7 @@ string DESKey::str() const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read from channel (8 binary bytes)
 void DESKey::read(Channel::Reader& reader) throw (Channel::Error)
 {
@@ -133,14 +133,14 @@ void DESKey::read(Channel::Reader& reader) throw (Channel::Error)
   load();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Write to channel (8 binary bytes)
 void DESKey::write(Channel::Writer& writer) const throw (Channel::Error)
 {
   writer.write(key, 8);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read key from istream
 istream& operator>>(istream& s, DESKey& k)
 {
@@ -148,7 +148,7 @@ istream& operator>>(istream& s, DESKey& k)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write key to ostream
 ostream& operator<<(ostream& s, const DESKey& k)
 {

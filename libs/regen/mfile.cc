@@ -15,7 +15,7 @@ using namespace ObTools::ReGen;
 #define MARK_USTART '^'
 #define MARK_UEND   'v'
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a line - returns whether successful
 bool MarkedFile::read_line()
 {
@@ -26,7 +26,7 @@ bool MarkedFile::read_line()
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Find type of last read line
 LineType MarkedFile::line_type()
 {
@@ -51,7 +51,7 @@ LineType MarkedFile::line_type()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Get tag of last read line
 // Tag is remainder of line after marker and open char, with leading and
 // trailing WS removed

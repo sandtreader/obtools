@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace XMLMesh {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message - can block if the queue is full
 // Whether message queued
 bool Client::send(Message& msg)
@@ -24,7 +24,7 @@ bool Client::send(Message& msg)
   return transport.send(data);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Receive a message - never blocks, returns whether one was received
 bool Client::poll(Message& msg)
 {
@@ -43,7 +43,7 @@ bool Client::poll(Message& msg)
   return wait(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
 // Returns whether one was read - will only return false if the transport
 // was restarted, and messages might have been missed
@@ -71,7 +71,7 @@ bool Client::wait(Message& msg)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return OK to request given
 // Returns whether successul
 bool Client::respond(Message& request)
@@ -80,7 +80,7 @@ bool Client::respond(Message& request)
   return send(okm);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Return an error to request given
 // Returns whether successul
 bool Client::respond(SOAP::Fault::Code code,
@@ -91,7 +91,7 @@ bool Client::respond(SOAP::Fault::Code code,
   return send(errm);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message and get a response (blocking)
 // Returns whether successful, fills in response if so
 bool Client::request(Message& req, Message& response)
@@ -146,7 +146,7 @@ bool Client::request(Message& req, Message& response)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message and confirm receipt or error
 // Returns whether successful.  Handles errors itself
 bool Client::request(Message& req)
@@ -172,7 +172,7 @@ bool Client::request(Message& req)
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Resubscribe for all subjects we should be subscribed to
 void Client::resubscribe()
 {
@@ -185,7 +185,7 @@ void Client::resubscribe()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Subscribe for messages of a given subject - expressed as a pattern match
 // e.g. client.subscribe("info.*");
 // Returns whether successful
@@ -196,7 +196,7 @@ bool Client::subscribe(const string& subject)
   return request(msg);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Unsubscribe for messages of a given subject
 // Subject is a pattern - can use more general pattern to unsubscribe
 // more specific ones

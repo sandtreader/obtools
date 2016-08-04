@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace XMLMesh {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Send a message - can block if the queue is full
 // Whether message queued
 bool OTMPClientTransport::send(const string& data)
@@ -25,7 +25,7 @@ bool OTMPClientTransport::send(const string& data)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Check for message available
 bool OTMPClientTransport::poll()
 {
@@ -37,7 +37,7 @@ bool OTMPClientTransport::poll()
 #endif
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
 // Returns false if the transport was restarted and subscriptions
 // (and messages) may have been lost
@@ -49,7 +49,7 @@ bool OTMPClientTransport::wait(string &data)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shutdown cleanly
 void OTMPClientTransport::shutdown()
 {

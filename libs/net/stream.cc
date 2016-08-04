@@ -11,7 +11,7 @@
 
 namespace ObTools { namespace Net {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf Constructor
 TCPStreamBuf::TCPStreamBuf(TCPSocket& _s, int _in_buf_size, int _out_buf_size):
   s(_s),
@@ -31,7 +31,7 @@ TCPStreamBuf::TCPStreamBuf(TCPSocket& _s, int _in_buf_size, int _out_buf_size):
   setp(out_buf, out_buf+out_buf_size-1);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf overflow() function
 // Sends out and clears buffer, plus character given
 int TCPStreamBuf::overflow(int c)
@@ -53,7 +53,7 @@ int TCPStreamBuf::overflow(int c)
   return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf sync() function
 // Synchronises output
 int TCPStreamBuf::sync()
@@ -63,7 +63,7 @@ int TCPStreamBuf::sync()
   return 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf underflow() function
 // Refill buffers and return next character (but do not remove it)
 int TCPStreamBuf::underflow()
@@ -79,7 +79,7 @@ int TCPStreamBuf::underflow()
   else return traits_type::eof();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf uflow() function
 int TCPStreamBuf::uflow()
 {
@@ -88,14 +88,14 @@ int TCPStreamBuf::uflow()
   return c;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf showmanyc() function
 streamsize TCPStreamBuf::showmanyc()
 {
   return egptr()-gptr();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // TCPStreamBuf Destructor
 TCPStreamBuf::~TCPStreamBuf()
 {

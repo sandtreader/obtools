@@ -15,20 +15,20 @@ namespace ObTools { namespace DB { namespace MySQL {
 //==========================================================================
 //MySQL result class
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor
 ResultSet::ResultSet(MYSQL_RES *_res): res{_res},
   num_fields{mysql_num_fields(res)}, fields{mysql_fetch_fields(res)}
 {}
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get number of rows in result set
 int ResultSet::count()
 {
   return mysql_num_rows(res);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get next row from result set
 //Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
@@ -49,7 +49,7 @@ bool ResultSet::fetch(Row& row)
   else return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Get first value of next row from result set
 //Value is unescaped
 //Whether another was found - if so, writes into value
@@ -66,7 +66,7 @@ bool ResultSet::fetch(string& value)
   else return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Destructor
 ResultSet::~ResultSet()
 {
@@ -76,7 +76,7 @@ ResultSet::~ResultSet()
 //==========================================================================
 //MySQL connection class
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor
 Connection::Connection(const string& host, const string& user,
                        const string& passwd, const string& dbname,
@@ -104,7 +104,7 @@ Connection::Connection(const string& host, const string& user,
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Check whether connection is OK
 Connection::operator bool()
 {
@@ -116,7 +116,7 @@ Connection::operator bool()
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
 //Returns whether successful
 bool Connection::exec(const string& sql)
@@ -134,7 +134,7 @@ bool Connection::exec(const string& sql)
   return true;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Execute a query and get result (e.g. SELECT)
 //Returns result - check this for validity
 Result Connection::query(const string& sql)
@@ -162,7 +162,7 @@ Result Connection::query(const string& sql)
   return Result(new ResultSet(res));
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Destructor
 Connection::~Connection()
 {

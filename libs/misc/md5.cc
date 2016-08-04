@@ -29,7 +29,7 @@
 
 namespace ObTools { namespace Misc {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Byte reverse a block of 4-byte integers
 // Note: this code is harmless on little-endian machines.
 void MD5::byte_reverse(char *buf, unsigned longs)
@@ -52,7 +52,7 @@ void MD5::byte_reverse(char *buf, unsigned longs)
 #define byte_reverse(a,b)
 #endif
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Initialise (taken from MD5Init())
 // Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
 // initialization constants.
@@ -67,7 +67,7 @@ void MD5::initialise()
   ctx_bits[1] = 0;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Update to reflect the concatenation of another buffer full
 // of bytes. (taken from MD5Update())
 void MD5::update(const char *buf, unsigned len)
@@ -114,7 +114,7 @@ void MD5::update(const char *buf, unsigned len)
   memcpy(ctx_in, buf, len);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Final wrapup - pad to 64-byte boundary with the bit pattern
 // 1 0* (64-bit count of bits processed, MSB-first)
 // Taken from MD5Final()
@@ -176,7 +176,7 @@ void MD5::finalise(unsigned char digest[16])
 #define MD5STEP(f, w, x, y, z, data, s) \
         ( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x )
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // MD5 Transform
 // The core of the MD5 algorithm, this alters an existing MD5 hash to
 // reflect the addition of 16 longwords of new data.  'update' blocks
@@ -323,7 +323,7 @@ uint64_t MD5::hash_to_int(const string& text)
   return hash;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor - like the original, nukes the input 'in case it's sensitive'
 MD5::~MD5()
 {

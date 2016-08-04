@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 RepeatAction::RepeatAction(const CP& cp):
   SequenceAction(cp), index(0)
@@ -20,7 +20,7 @@ RepeatAction::RepeatAction(const CP& cp):
   times = xml.get_attr_int("times");
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool RepeatAction::tick(Context& con)

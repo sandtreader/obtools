@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace XMLMesh {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from string
 // String is '|' separated, top last
 MessagePath::MessagePath(const string& s)
@@ -23,21 +23,21 @@ MessagePath::MessagePath(const string& s)
     push(*p);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Push a path level integer
 void MessagePath::push(int n)
 {
   push(Text::itos(n));
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Pop a path level integer
 int MessagePath::popi()
 {
   return Text::stoi(pop());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Generate a | delimited string (top last)
 string MessagePath::to_string() const
 {

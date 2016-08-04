@@ -43,7 +43,7 @@ public:
   DispatchThread(AutoSyncClient &_client): client(_client) { start(); }
 };
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Overrideable function to handle an asynchronous message - by default
 // just errors and (if response required), sends back WHAT
 void AutoSyncClient::handle_async_message(Message& msg)
@@ -65,7 +65,7 @@ void AutoSyncClient::handle_async_message(Message& msg)
 //==========================================================================
 // Foreground stuff
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor - takes server endpoint (address+port), request timeout
 // (in seconds) and optional name
 AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout,
@@ -75,7 +75,7 @@ AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout,
   dispatch_thread = new DispatchThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor with SSL
 AutoSyncClient::AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
                                int _timeout, const string& _name):
@@ -84,7 +84,7 @@ AutoSyncClient::AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
   dispatch_thread = new DispatchThread(*this);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Shut down client cleanly
 void AutoSyncClient::shutdown()
 {
@@ -108,7 +108,7 @@ void AutoSyncClient::shutdown()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 AutoSyncClient::~AutoSyncClient()
 {

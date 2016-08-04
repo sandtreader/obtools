@@ -279,7 +279,7 @@ bool HTTPMessage::write(ostream &out, bool headers_only) const
   return !out.fail();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // >> operator to read HTTPMessage from istream
 // e.g. cin >> msg;
 istream& operator>>(istream& s, HTTPMessage& msg)
@@ -288,7 +288,7 @@ istream& operator>>(istream& s, HTTPMessage& msg)
   return s;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write HTTPMessage to ostream
 // e.g. cout << msg;
 ostream& operator<<(ostream& s, const HTTPMessage& msg)

@@ -11,7 +11,7 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Factories for standard controls
 
 static Init::NewFactory<Action, SequenceAction, Action::CP> sequence_factory;
@@ -27,7 +27,7 @@ static Init::NewFactory<Action, SetAction,      Action::CP> set_factory;
 static Init::NewFactory<Action, ThreadAction,   Action::CP> thread_factory;
 static Init::NewFactory<Action, RandomAction,   Action::CP> random_factory;
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Constructor
 BaseLanguage::BaseLanguage(): Language()
 {

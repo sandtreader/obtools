@@ -34,22 +34,22 @@ class Storage: public ObCache::Storage
   map<type_id_t, Storer *> storers;  ///< Map of type ID to storer for it
 
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Constructor
   Storage(DB::ConnectionPool& _db_pool        ///< Database connection pool
           ):
     db_pool(_db_pool) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Register a type storer
   void register_storer(type_id_t type, Storer *storer)
   { storers[type] = storer; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Load an object
   Object *load(object_id_t id) throw (Exception);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Save an object
   void save(Object *ob) throw (Exception);
 };
@@ -59,12 +59,12 @@ public:
 class Storer
 {
 public:
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Interface to load an object from the given DB connection
   virtual Object *load(object_id_t id, DB::AutoConnection& db)
     throw (Exception) = 0;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   /// Interface to save an object to the given DB connection
   virtual void save(Object *ob, DB::AutoConnection& db) throw (Exception) = 0;
 

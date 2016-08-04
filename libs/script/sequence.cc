@@ -12,14 +12,14 @@
 
 namespace ObTools { namespace Script {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor
 SequenceAction::SequenceAction(const CP& cp):
   Action(cp), it(xml.children.begin()), current(0)
 {
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Create new current action
 // Returns whether created
 bool SequenceAction::create_current()
@@ -34,7 +34,7 @@ bool SequenceAction::create_current()
   return (current != 0);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Tick action
 // Returns whether still active
 bool SequenceAction::tick(Context& con)
@@ -61,7 +61,7 @@ bool SequenceAction::tick(Context& con)
   return (it != xml.children.end());
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Restart sequence
 void SequenceAction::restart()
 {
@@ -73,14 +73,14 @@ void SequenceAction::restart()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Stop - stop any already running
 void SequenceAction::stop(Context& con)
 {
   if (current) current->stop(con);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Destructor
 SequenceAction::~SequenceAction()
 {

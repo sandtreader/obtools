@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace CLI {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Add a command
 void CommandGroup::add(Command *command)
 {
@@ -50,7 +50,7 @@ void CommandGroup::add(Command *command)
   else commands[word] = command;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Handle a command
 void CommandGroup::handle(string args, istream& sin, ostream& sout)
 {
@@ -78,7 +78,7 @@ void CommandGroup::handle(string args, istream& sin, ostream& sout)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //List help for the group
 void CommandGroup::show_help(ostream& sout)
 {
@@ -106,7 +106,7 @@ void CommandGroup::show_help(ostream& sout)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Destructor
 CommandGroup::~CommandGroup()
 {

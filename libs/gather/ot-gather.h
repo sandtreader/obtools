@@ -48,7 +48,7 @@ class Segment
   data_t *data;            // Unconsumed data start
   length_t length;         // Unconsumed data length
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructors
   // Default
   Segment(): owned_data(0), data(0), length(0) {}
@@ -61,31 +61,31 @@ class Segment
   Segment(length_t _length):
     owned_data(new data_t[_length]), data(owned_data), length(_length) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Consume N bytes from the beginning
   void consume(length_t n) { data+=n; length-=n; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Reset to new length
   void reset(length_t n=0);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destroy - note, explicit call, not destructor
   void destroy() { if (owned_data) delete[] owned_data; owned_data=0; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Take the data from another segment, clearing any owned_data in the
   // original
   Segment& take(Segment& s)
   { owned_data = s.owned_data; s.owned_data = 0;
     data = s.data; length = s.length; return *this; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Copy data from another segment - does a deep copy of the owned_data of
   // the other segment, returns *this
   Segment& copy(const Segment& s);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor - check no owned data left
 #if defined(DEBUG)
   ~Segment()
@@ -289,110 +289,110 @@ public:
 
   static const int DEFAULT_SIZE = 4;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Constructor
   Buffer(unsigned int _size = DEFAULT_SIZE):
     size(_size), count(0), segments(new Segment[_size]) {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get count of used segments
   unsigned int get_count() const { return count; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get total number of segments allocated
   unsigned int get_size() const { return size; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get segment list
   const Segment *get_segments() const { return segments; }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get total length of data in buffer
   length_t get_length() const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Resize the buffer to the given number of segments
   void resize(unsigned int new_size);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Reset the buffer to be empty
   void reset();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Limit the buffer to hold at most a particular length of data
   length_t limit(length_t length);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a segment at the end, extending if required
   // Segment is shallow copied (owned_data not copied)
   // Returns the added segment
   Segment& add(Segment& seg);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a segment from external data to the end of the buffer
   // Returns the added segment
   Segment& add(data_t *data, length_t length)
   { Segment seg(data, length); return add(seg); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add a segment with allocated data to the end of the buffer
   // Returns the added segment
   Segment& add(length_t length)
   { Segment seg(length); return add(seg); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add another buffer to the end of this one, copying any owned_data
   void add(const Buffer& buffer);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Add references to a run of data from another buffer
   void add(const Buffer& buffer, length_t offset, length_t len);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Insert a segment at the given index (default 0, the beginning),
   // extending if required
   // Takes the data from seg and clears it
   // Returns the added segment
   Segment& insert(Segment& seg, unsigned int pos);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Insert a segment from external data at a given position (default 0, start)
   // Returns the inserted segment
   Segment& insert(data_t *data, length_t length, unsigned int pos=0)
   { Segment seg(data, length); return insert(seg, pos); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Insert a segment with allocated data at a given position (default 0,start)
   // Returns the inserted segment
   Segment& insert(length_t length, unsigned int pos=0)
   { Segment seg(length); return insert(seg, pos); }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Consume N bytes of data from the front of the buffer
   void consume(length_t n);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Tidy up a buffer, shuffling occupied segments back over empty ones
   void tidy();
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Copy some data to a contiguous buffer
   length_t copy(data_t *data, length_t offset, length_t len) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Copy some data to a contiguous buffer from an iterator position
   length_t copy(data_t *data, const BufferIterator& offset,
                 length_t len) const;
 
 #if !defined(__WIN32__)
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Fill an iovec array with the data
   // iovec must be pre-allocated to the maximum segments of the buffer (size)
   // Returns the number of segments filled in, or size+1 if it overflowed
   unsigned int fill(struct iovec *iovec, unsigned int size);
 #endif
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Get a flattened data pointer at the given offset and length, either
   // returning direct pointer into buffer's data segments if it doesn't
   // cross a boundary, or copying into the given temporary buffer if it does.
@@ -413,16 +413,16 @@ public:
     return get_flat_data_multi(offset, length, temp_buf);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Replace data from a flat buffer at the given offset
   // Data must already exist, otherwise it just stops at end of existing data
   void replace(length_t offset, const data_t *buf, length_t length);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Dump the buffer to the given stream, optionally with data as well
   void dump(ostream& sout, bool show_data=false) const;
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Iterator functions
   iterator begin() const
   {
@@ -439,7 +439,7 @@ public:
                           0, 0);
   }
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Destructor
   ~Buffer();
 };
@@ -459,7 +459,7 @@ public:
     buffer(_buffer), it(_buffer.begin())
   {}
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Read implementations - see ot-chan.h for details
   virtual size_t basic_read(void *buf, size_t count) throw (Channel::Error);
   virtual void skip(size_t n) throw (Channel::Error);

@@ -12,7 +12,7 @@
 
 namespace ObTools { namespace Lex {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a name token
 Token Analyser::read_name_token(char c)
 {
@@ -31,7 +31,7 @@ Token Analyser::read_name_token(char c)
   return Token(Token::NAME, name);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a number token
 Token Analyser::read_number_token(char c)
 {
@@ -105,7 +105,7 @@ Token Analyser::read_number_token(char c)
   return Token(Token::NUMBER, value);
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a string token
 Token Analyser::read_string_token()
 {
@@ -164,7 +164,7 @@ Token Analyser::read_string_token()
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a symbol token
 Token Analyser::read_symbol_token(char c)
 {
@@ -206,7 +206,7 @@ Token Analyser::read_symbol_token(char c)
   }
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Read a token from the input
 Token Analyser::read_token()
 {

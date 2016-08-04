@@ -13,7 +13,7 @@
 
 namespace ObTools { namespace CLI {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Read a line into given string
 //Returns false if ctrl-D read
 //May be overridden for (e.g.) network read
@@ -49,7 +49,7 @@ bool CommandLine::readline(string& line)
   return false;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //Run command line
 //Returns when exited
 void CommandLine::run()

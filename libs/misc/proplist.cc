@@ -14,7 +14,7 @@
 
 namespace ObTools { namespace Misc {
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Constructor from delimited string - e.g. foo=1,bar=2 and optional
 // quote character, in which the delimiter is ignored and whitespace
 // preserved - quotes are removed from values
@@ -92,7 +92,7 @@ void PropertyList::dump(ostream& s, const string& prefix,
     s << prefix << p->first << separator << p->second << endl;
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // << operator to write PropertyList to ostream
 ostream& operator<<(ostream& s, const PropertyList& pl)
 {
@@ -118,7 +118,7 @@ string PropertyList::str(char sep, char quote)
   return oss.str();
 }
 
-//------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Variable interpolation of property list into a string
 // Replaces (e.g.) $var with value from property list
 // Variables are terminated by non-alphanum or ";"
