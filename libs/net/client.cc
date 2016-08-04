@@ -95,7 +95,7 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout):
     if (bind(local) && !connect(fd,
                                 reinterpret_cast<struct sockaddr *>(&saddr),
                                 sizeof(saddr)))
-	connected = true;
+        connected = true;
 
     set_timeout(0);  // Cancel timeout for operation
   }
@@ -124,7 +124,7 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl):
     if (bind(local) && !connect(fd,
                                 reinterpret_cast<struct sockaddr *>(&saddr),
                                 sizeof(saddr)))
-	connected = true;
+        connected = true;
 
     set_timeout(0);  // Cancel timeout for operation
   }

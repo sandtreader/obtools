@@ -182,15 +182,15 @@ int Shell::start(int argc, char **argv)
     {
       if (!first)
       {
-	log.detail << "Waiting for " << sleep_time << "s\n";
+        log.detail << "Waiting for " << sleep_time << "s\n";
         this_thread::sleep_for(chrono::seconds(sleep_time));
 
-	// Exponential backoff, up to a max
-	sleep_time *= 2;
-	if (sleep_time > MAX_WATCHDOG_SLEEP_TIME)
-	  sleep_time = MAX_WATCHDOG_SLEEP_TIME;
+        // Exponential backoff, up to a max
+        sleep_time *= 2;
+        if (sleep_time > MAX_WATCHDOG_SLEEP_TIME)
+          sleep_time = MAX_WATCHDOG_SLEEP_TIME;
 
-	log.error << "*** RESTARTING SLAVE ***\n";
+        log.error << "*** RESTARTING SLAVE ***\n";
       }
       first = false;
 
@@ -199,53 +199,53 @@ int Shell::start(int argc, char **argv)
 
       if (slave_pid < 0)
       {
-	log.error << "Can't fork slave process: " << strerror(errno) << endl;
-	continue;
+        log.error << "Can't fork slave process: " << strerror(errno) << endl;
+        continue;
       }
 
       if (slave_pid)
       {
-	// PARENT PROCESS
-	log.detail << "Slave process pid " << slave_pid << " forked\n";
+        // PARENT PROCESS
+        log.detail << "Slave process pid " << slave_pid << " forked\n";
 
-	// Wait for it to exit
-	int status;
-	int died = waitpid(slave_pid, &status, 0);
+        // Wait for it to exit
+        int status;
+        int died = waitpid(slave_pid, &status, 0);
 
-	// Check for fatal failure
-	if (died && !WIFEXITED(status))
-	{
-	  log.error << "*** Slave process " << slave_pid << " died ***\n";
-	}
-	else
-	{
-	  int rc = WEXITSTATUS(status);
-	  if (rc)
+        // Check for fatal failure
+        if (died && !WIFEXITED(status))
+        {
+          log.error << "*** Slave process " << slave_pid << " died ***\n";
+        }
+        else
+        {
+          int rc = WEXITSTATUS(status);
+          if (rc)
           {
-	    log.error << "*** Slave process " << slave_pid
-		      << " exited with code " << rc << " ***\n";
+            log.error << "*** Slave process " << slave_pid
+                      << " exited with code " << rc << " ***\n";
           }
           else
           {
-	    log.summary << "Slave process exited OK\n";  // Expected
+            log.summary << "Slave process exited OK\n";  // Expected
             shut_down = true;
           }
-	}
+        }
       }
       else
       {
-	// SLAVE PROCESS
-	// Run subclass prerun before dropping privileges
-	int rc = application.run_priv();
-	if (rc) return rc;
+        // SLAVE PROCESS
+        // Run subclass prerun before dropping privileges
+        int rc = application.run_priv();
+        if (rc) return rc;
 
         rc = drop_privileges();
         if (rc) return rc;
 
-	// Run subclass full startup
-	rc = run();
-	application.cleanup();
-	return rc;
+        // Run subclass full startup
+        rc = run();
+        application.cleanup();
+        return rc;
       }
     }
 
@@ -378,7 +378,7 @@ void Shell::log_evil(int sig)
 
   Log::Streams log;
   log.error << "*** Signal received in " << (slave_pid?"master":"slave")
-	    << ": " << what << " (" << sig << ") ***\n";
+            << ": " << what << " (" << sig << ") ***\n";
 
   // Do a backtrace
 #define MAXTRACE 100

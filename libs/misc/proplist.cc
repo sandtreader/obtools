@@ -55,16 +55,16 @@ PropertyList::PropertyList(const string& str, char sep, char quote)
       string::size_type qp2 = str.find(quote, qp+1);
       if (qp2 != string::npos)
       {
-	// That's the value between them - use it, unmodified
-	add(name, string(str, qp+1, qp2-qp-1));
+        // That's the value between them - use it, unmodified
+        add(name, string(str, qp+1, qp2-qp-1));
 
-	// Check for next separator after closing quote for next go
-	sp = str.find(sep, qp2+1);
+        // Check for next separator after closing quote for next go
+        sp = str.find(sep, qp2+1);
       }
       else
       {
-	// Unclosed quote - assume it stops at sep to recover
-	add(name, string(str, qp+1, spf-qp-1));
+        // Unclosed quote - assume it stops at sep to recover
+        add(name, string(str, qp+1, spf-qp-1));
       }
     }
     else
@@ -86,7 +86,7 @@ PropertyList::PropertyList(const string& str, char sep, char quote)
 //--------------------------------------------------------------------------
 // Dump contents
 void PropertyList::dump(ostream& s, const string& prefix,
-			const string& separator) const
+                        const string& separator) const
 {
   for(const_iterator p = begin(); p!=end(); ++p)
     s << prefix << p->first << separator << p->second << endl;
@@ -147,50 +147,50 @@ retry:
       // Read to nonalphanum (or '_')
       while (p!=text.end())
       {
-	c = *p++;
-	if (isalnum(c) || c=='_')
-	{
-	  var += c;
-	  c=0;  // Don't reuse if at end
-	}
-	else break;
+        c = *p++;
+        if (isalnum(c) || c=='_')
+        {
+          var += c;
+          c=0;  // Don't reuse if at end
+        }
+        else break;
       }
 
       // If no word, must be non-alpha at start
       if (var.empty())
       {
-	switch (c)
-	{
-	  case '$':  // Escaped $, or $ at end
-	  case ';':  // Escaped ;
-	    result += c;
-	    break;
+        switch (c)
+        {
+          case '$':  // Escaped $, or $ at end
+          case ';':  // Escaped ;
+            result += c;
+            break;
 
           default:
-	    result += '$';  // Reinsert original
-	    result += c;
-	    break;
-	}
+            result += '$';  // Reinsert original
+            result += c;
+            break;
+        }
       }
       else
       {
-	// Lookup word
-	const_iterator vp = find(var);
-	if (vp!=end())
-	{
-	  // Known word - replace with value
-	  result += vp->second;
-	}
-	else
-	{
-	  // Unknown - replace $ and word, and semi if used
-	  result += '$';
-	  result += var;
-	  if (c==';') result += c;
-	}
+        // Lookup word
+        const_iterator vp = find(var);
+        if (vp!=end())
+        {
+          // Known word - replace with value
+          result += vp->second;
+        }
+        else
+        {
+          // Unknown - replace $ and word, and semi if used
+          result += '$';
+          result += var;
+          if (c==';') result += c;
+        }
 
-	// Retry with this character (may be a $)
-	if (c && c!=';') goto retry;
+        // Retry with this character (may be a $)
+        if (c && c!=';') goto retry;
       }
     }
     else

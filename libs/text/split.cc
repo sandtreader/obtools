@@ -19,7 +19,7 @@ namespace ObTools { namespace Text {
 // If max is set, stops after 'max-1' fields have been read, and drops the
 // rest of the string into the last one
 vector<string> split(const string& text, char delim, bool canonicalise,
-		     int max)
+                     int max)
 {
   string::size_type p = 0;
   vector<string> fields;

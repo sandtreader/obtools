@@ -32,7 +32,7 @@ public:
 
   bool handle_request(const Web::HTTPMessage& request,
                       Web::HTTPMessage& response,
-		      const SSL::ClientDetails& client)
+                      const SSL::ClientDetails& client)
   {
     ostringstream oss;
     oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
@@ -54,8 +54,8 @@ public:
   DefaultURLHandler(): URLHandler("*") {}
 
   bool handle_request(const Web::HTTPMessage& /*request*/,
-		      Web::HTTPMessage& response,
-		      const SSL::ClientDetails& /*client*/)
+                      Web::HTTPMessage& response,
+                      const SSL::ClientDetails& /*client*/)
   {
     ostringstream oss;
     oss << "<TITLE>" << SERVER_VERSION << "</TITLE>\n";
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
   }
 
   Web::SimpleHTTPServer server(ctx_p, port, SERVER_VERSION,
-			       BACKLOG, MIN_SPARE, MAX_THREADS);
+                               BACKLOG, MIN_SPARE, MAX_THREADS);
   server.add(new TestURLHandler());
   server.add(new DefaultURLHandler());
 

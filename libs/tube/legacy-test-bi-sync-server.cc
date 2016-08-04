@@ -28,9 +28,9 @@ class TestThread: public MT::Thread
     {
       if (!!client_details.address.host)
       {
-	Tube::ClientMessage request(client_details, 0x484C4C4F, "Hello!");
-	Tube::Message response;
-	server.request(request, response);
+        Tube::ClientMessage request(client_details, 0x484C4C4F, "Hello!");
+        Tube::Message response;
+        server.request(request, response);
       }
       this_thread::sleep_for(chrono::seconds{1});
     }

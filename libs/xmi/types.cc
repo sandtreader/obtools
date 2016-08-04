@@ -19,7 +19,7 @@ using namespace ObTools::UML;
 // Reads multiplicity from UML:Multiplicity subelement
 // Returns default (1,1) if not found
 Multiplicity Multiplicity::read_from(XML::Element& pare,
-				     XMI::Reader& reader)
+                                     XMI::Reader& reader)
 {
   Multiplicity m;
   XML::Element *real_me;
@@ -41,21 +41,21 @@ Multiplicity Multiplicity::read_from(XML::Element& pare,
     {
       //Look either in attributes or sub-elements
       if (mr.has_attr("lower"))
-	m.lower = mr.get_attr_int("lower");
+        m.lower = mr.get_attr_int("lower");
       else
       {
-	XML::Element &mrl = mr.get_child("UML:MultiplicityRange.lower");
-	if (mrl.valid() && !mrl.content.empty())
-	  m.lower = atoi(mrl.content.c_str());
+        XML::Element &mrl = mr.get_child("UML:MultiplicityRange.lower");
+        if (mrl.valid() && !mrl.content.empty())
+          m.lower = atoi(mrl.content.c_str());
       }
 
       if (mr.has_attr("upper"))
-	m.upper = mr.get_attr_int("upper");
+        m.upper = mr.get_attr_int("upper");
       else
       {
-	XML::Element &mru = mr.get_child("UML:MultiplicityRange.upper");
-	if (mru.valid() && !mru.content.empty())
-	  m.upper = atoi(mru.content.c_str());
+        XML::Element &mru = mr.get_child("UML:MultiplicityRange.upper");
+        if (mru.valid() && !mru.content.empty())
+          m.upper = atoi(mru.content.c_str());
       }
     }
   }
@@ -102,7 +102,7 @@ Expression Expression::read_from(XML::Element &pare)
     {
       XML::Element& lange = expe.get_child("UML:Expression.language");
       if (lange.valid())
-	exp.language = lange.content;
+        exp.language = lange.content;
     }
 
     // Ditto for 'body'
@@ -112,7 +112,7 @@ Expression Expression::read_from(XML::Element &pare)
     {
       XML::Element& bodye = expe.get_child("UML:Expression.body");
       if (bodye.valid())
-	exp.body = bodye.content;
+        exp.body = bodye.content;
     }
   }
 

@@ -22,7 +22,7 @@ namespace ObTools { namespace Web {
 //--------------------------------------------------------------------------
 // Constructor
 Cache::Cache(const File::Directory& _dir, SSL::Context *_ssl_ctx,
-	     const string& _ua):
+             const string& _ua):
   directory(_dir), ssl_ctx(_ssl_ctx), user_agent(_ua)
 {
   if (user_agent.empty()) user_agent = DEFAULT_USER_AGENT;
@@ -73,16 +73,16 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
       // Check if within the interval
       Time::Stamp last_check(status_cfg["update/check/@time"]);
       if (!!last_check)
-	log.detail << "Last checked at " << last_check.iso() << endl;
+        log.detail << "Last checked at " << last_check.iso() << endl;
       else
-	log.detail << "This is the first check\n";
+        log.detail << "This is the first check\n";
 
       // Does it need checking again?
       if (Time::Stamp::now() - last_check < check_interval)
       {
-	log.detail << "Doesn't need checking again until "
-		   << (last_check+check_interval).iso() << endl;
-	check_for_updates = false;
+        log.detail << "Doesn't need checking again until "
+                   << (last_check+check_interval).iso() << endl;
+        check_for_updates = false;
       }
     }
   }
@@ -123,61 +123,61 @@ bool Cache::fetch(const URL& url, File::Path& path_p, bool check_for_updates)
     {
       case 200:
       {
-	log.detail << "File fetched OK, length " << response.body.length()
-		   << endl;
+        log.detail << "File fetched OK, length " << response.body.length()
+                   << endl;
 
-	// Make sure the domain dir exists
-	if (!domain_dir.ensure())
-	{
-	  log.error << "Can't create cache directory " << domain_dir
-		    << ": " << strerror(errno) << endl;
-	  return false;
-	}
+        // Make sure the domain dir exists
+        if (!domain_dir.ensure())
+        {
+          log.error << "Can't create cache directory " << domain_dir
+                    << ": " << strerror(errno) << endl;
+          return false;
+        }
 
-	// Write the file
-	string err = file_path.write_all(response.body);
-	if (!err.empty())
-	{
-	  log.error << "Can't write cache file '" << file_path
-		    << "': " << err << endl;
-	  return false;
-	}
+        // Write the file
+        string err = file_path.write_all(response.body);
+        if (!err.empty())
+        {
+          log.error << "Can't write cache file '" << file_path
+                    << "': " << err << endl;
+          return false;
+        }
 
-	// Capture last-modified and E-tag for the config
-	status_cfg.ensure_path("server/last-modified");
-	status_cfg.set_value("server/last-modified",
-			     response.headers.get("last-modified"));
+        // Capture last-modified and E-tag for the config
+        status_cfg.ensure_path("server/last-modified");
+        status_cfg.set_value("server/last-modified",
+                             response.headers.get("last-modified"));
 
-	status_cfg.ensure_path("server/etag");
-	status_cfg.set_value("server/etag", response.headers.get("etag"));
+        status_cfg.ensure_path("server/etag");
+        status_cfg.set_value("server/etag", response.headers.get("etag"));
 
-	// Update last check time
-	status_cfg.ensure_path("update/check");
-	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso());
+        // Update last check time
+        status_cfg.ensure_path("update/check");
+        status_cfg.set_value("update/check/@time", Time::Stamp::now().iso());
 
-	status_cfg.write();
+        status_cfg.write();
 
-	path_p = file_path;
-	return true;
+        path_p = file_path;
+        return true;
       }
 
       case 301: case 302:  // Moved
-	actual_url = Web::URL(response.headers.get("location"));
-	log.detail << "Redirect to " << actual_url << endl;
-	break;  // Loops to retry fetch
+        actual_url = Web::URL(response.headers.get("location"));
+        log.detail << "Redirect to " << actual_url << endl;
+        break;  // Loops to retry fetch
 
       case 304:  // Not modified
-	// Update last check time only
-	status_cfg.ensure_path("update/check");
-	status_cfg.set_value("update/check/@time", Time::Stamp::now().iso());
-	status_cfg.write();
-	path_p = file_path;
-	return true;
+        // Update last check time only
+        status_cfg.ensure_path("update/check");
+        status_cfg.set_value("update/check/@time", Time::Stamp::now().iso());
+        status_cfg.write();
+        path_p = file_path;
+        return true;
 
       default:
-	log.error << "HTTP cache fetch failed: " << response.code
-		  << " " << response.reason << endl;
-	return false;
+        log.error << "HTTP cache fetch failed: " << response.code
+                  << " " << response.reason << endl;
+        return false;
     }
   }
 
@@ -204,7 +204,7 @@ bool Cache::set_update_interval(const URL& url, const string& interval)
 {
   Log::Streams log;
   log.detail << "Setting update interval for " << url << " to "
-	     << interval << endl;
+             << interval << endl;
 
   File::Directory domain_dir;
   File::Path file_path, status_path;
@@ -238,9 +238,9 @@ void Cache::forget(const URL& url)
 //--------------------------------------------------------------------------
 // Get the cache paths for a given URL
 bool Cache::get_paths(const URL& url,
-		      File::Directory& domain_dir_p,
-		      File::Path& file_path_p,
-		      File::Path& status_path_p)
+                      File::Directory& domain_dir_p,
+                      File::Path& file_path_p,
+                      File::Path& status_path_p)
 {
   XML::Element url_xml;
   if (!url.split(url_xml)) return false;
@@ -310,11 +310,11 @@ void Cache::update()
       string interval = status_cfg["update/check/@interval"];
       if (!interval.empty())
       {
-	log.detail << "Update interval is " << interval << endl;
+        log.detail << "Update interval is " << interval << endl;
 
-	// Try to fetch it, with update check
-	File::Path path;
-	fetch(Web::URL(url), path, true);
+        // Try to fetch it, with update check
+        File::Path path;
+        fetch(Web::URL(url), path, true);
       }
     }
   }

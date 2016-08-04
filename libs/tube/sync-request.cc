@@ -15,7 +15,7 @@ namespace ObTools { namespace Tube {
 //------------------------------------------------------------------------
 // Handle timeouts
 void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
-				   const string& name)
+                                   const string& name)
 {
   MT::Lock lock(request_mutex);
   Time::Stamp now = Time::Stamp::now();
@@ -37,8 +37,8 @@ void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
 // Set up a request entry to wait for a response
 // (call before actually sending message, in case response is instant)
 void SyncRequestCache::start_request(Message& request,
-				     Net::EndPoint client,
-				     const string& name)
+                                     Net::EndPoint client,
+                                     const string& name)
 {
   Log::Streams log;
 
@@ -131,7 +131,7 @@ bool SyncRequestCache::handle_response(const Message& response,
     else
     {
       log.error << name << ": Response for unknown ID " << static_cast<int>(id)
-		<< " - " << response.stag() << endl;
+                << " - " << response.stag() << endl;
     }
 
     // Either way, we handled it
@@ -164,7 +164,7 @@ void SyncRequestCache::shutdown()
   {
     MT::Lock lock(request_mutex);
     for(map<id_t, Request>::iterator p = requests.begin();
-	p!=requests.end(); ++p)
+        p!=requests.end(); ++p)
     {
       Request& req = p->second;
       req.ready.notify_one();  // Leaving empty response

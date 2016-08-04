@@ -31,7 +31,7 @@ struct Correlation: public MessageTracker
   //------------------------------------------------------------------------
   // Constructor
   Correlation(Correlator& _corr, const string& _id,
-	      const string& _source_path):
+              const string& _source_path):
     correlator(_corr), id(_id), source_path(_source_path),
     forwarded(false), replied(false) {}
 
@@ -222,16 +222,16 @@ bool Correlator::handle(RoutingMessage& msg)
       const string msg_path = msg.path.to_string();
       MT::RWWriteLock lock(request_cache.mutex);
       for(CacheType::iterator p = request_cache.begin();
-	  p!=request_cache.end();
-	  )
+          p!=request_cache.end();
+          )
       {
-	CacheType::iterator q = p++;  // Protect while deleting
-	if (msg_path == q->source_path)
-	{
-	  log.summary << "Deleted correlation " << *q
+        CacheType::iterator q = p++;  // Protect while deleting
+        if (msg_path == q->source_path)
+        {
+          log.summary << "Deleted correlation " << *q
                       << " for disconnected client\n";
-	  request_cache.remove(q.id());
-	}
+          request_cache.remove(q.id());
+        }
       }
     }
     break;

@@ -48,11 +48,11 @@ int main()
   CLI::Registry reg;
   reg.add("foo", new FooHandler(), "Launch foos", "foo <options>");
   reg.add("jim",
-	  new CLI::MemberHandler<BigClass>(c, &BigClass::jim_handler),
-	  "Ask jim");
+          new CLI::MemberHandler<BigClass>(c, &BigClass::jim_handler),
+          "Ask jim");
   reg.add("fred",
-	  new CLI::MemberHandler<BigClass>(c, &BigClass::fred_handler),
-	  "Ask fred");
+          new CLI::MemberHandler<BigClass>(c, &BigClass::fred_handler),
+          "Ask fred");
 
   // Create and command line
   CLI::CommandLine cli(reg, cin, cout, "Test>");

@@ -53,7 +53,7 @@ int main(int argc, char **argv)
   }
 
   log.summary << "Host: " << addr
-	      << " (" << addr.get_hostname() << ")" << endl;
+              << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
   Net::EndPoint server(addr, port);

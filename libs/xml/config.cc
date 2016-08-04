@@ -33,22 +33,22 @@ bool Configuration::read(const string& ename)
     {
       try
       {
-	f >> parser;
+        f >> parser;
       }
       catch (ParseFailed)
       {
-	serr << "Bad XML in config file\n";
-	return false;
+        serr << "Bad XML in config file\n";
+        return false;
       }
 
       if (!ename.empty())
       {
-	Element& root = parser.get_root();
-	if (root.name != ename)
-	{
-	  serr << "Bad root in config file - expected <" << ename
-	       << ">, got <" << root.name << ">\n";
-	  return false;
+        Element& root = parser.get_root();
+        if (root.name != ename)
+        {
+          serr << "Bad root in config file - expected <" << ename
+               << ">, got <" << root.name << ">\n";
+          return false;
         }
       }
 
@@ -82,7 +82,7 @@ bool Configuration::read_text(const string& text, const string& ename)
     if (root.name != ename)
     {
       serr << "Bad root in config text - expected <" << ename
-	   << ">, got <" << root.name << ">\n";
+           << ">, got <" << root.name << ">\n";
       return false;
     }
   }
@@ -208,7 +208,7 @@ list<string> Configuration::get_values(const string& path) const
 // Returns string->string map of all element matching given XPath,
 // using given attribute name as key, content as value
 map<string, string> Configuration::get_map(const string& path,
-					   const char *name_attr)
+                                           const char *name_attr)
 {
   XPathProcessor xpath(get_root());
   list<Element *> elems = xpath.get_elements(path);
@@ -366,7 +366,7 @@ bool Configuration::write()
   if (!f)
   {
     serr << "Config: can't create " << tfn << " for update: "
-	 << strerror(errno) << endl;
+         << strerror(errno) << endl;
     return false;
   }
 
@@ -391,7 +391,7 @@ bool Configuration::write()
   if (!tempfile.rename(destfile))
   {
     serr << "Config: Can't rename " << tempfile << " to " << destfile << ": "
-	 << strerror(errno) << endl;
+         << strerror(errno) << endl;
     tempfile.erase();
     return false;
   }

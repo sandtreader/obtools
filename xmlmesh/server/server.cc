@@ -95,7 +95,7 @@ bool Server::create_route(const XML::Element& xml)
   from_s->add_route(subject, *to_s);
 
   log.summary << "Created route from '" << from << "' to '" << to
-	      << "' for subjects '" << subject << "'\n";
+              << "' for subjects '" << subject << "'\n";
   return true;
 }
 
@@ -120,18 +120,18 @@ void Server::run()
 
     // Tick all services
     for(list<Service *>::iterator p=services.begin();
-	p!=services.end();
-	p++)
+        p!=services.end();
+        p++)
     {
       Service *s = *p;
       if (s->started())
-	s->tick();
+        s->tick();
       else
       {
         Log::Error log;
-	log << "Service " << s->get_id()
+        log << "Service " << s->get_id()
             << " failed to start - shutting down\n";
-	return;
+        return;
       }
     }
   }

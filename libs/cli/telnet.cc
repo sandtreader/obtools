@@ -34,27 +34,27 @@ void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
 
       switch (c)
       {
-	case 0:
-	case 4:  // ctrl-D
-	  return;
+        case 0:
+        case 4:  // ctrl-D
+          return;
 
-	case '\r':  // Ignore
-	  break;
+        case '\r':  // Ignore
+          break;
 
-	case '\n':
-	  if (line.size())
-	  {
-	    // Handle this line
-	    registry.handle(line, io, io);
-	    line.erase();
-	  }
+        case '\n':
+          if (line.size())
+          {
+            // Handle this line
+            registry.handle(line, io, io);
+            line.erase();
+          }
 
-	  io << prompt;
-	  io.flush();
-	break;
+          io << prompt;
+          io.flush();
+        break;
 
-	default:
-	  line+=c;
+        default:
+          line+=c;
       }
     }
   }

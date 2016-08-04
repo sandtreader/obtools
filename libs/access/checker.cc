@@ -41,7 +41,7 @@ Checker::Checker(const XML::Element& config, const string& ns)
 //--------------------------------------------------------------------------
 // Check access to a given resource by a given user
 bool Checker::check(const string& resource, Net::IPAddress address,
-		    const string& user)
+                    const string& user)
 {
   bool result;
 
@@ -74,7 +74,7 @@ void Checker::dump(ostream& sout) const
   {
     sout << "Groups:\n";
     for(map<string, Group *>::const_iterator p = groups.begin();
-	p!=groups.end(); ++p)
+        p!=groups.end(); ++p)
     {
       const Group *g = p->second;
       sout << "  " << *g;

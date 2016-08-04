@@ -67,32 +67,32 @@ int main(int argc, char **argv)
     if (opt[0] == '-')
     {
       if (opt == "-c" || opt == "--check")
-	check = true;
+        check = true;
       else if (opt == "-r" || opt == "--response")
-	show_response = true;
+        show_response = true;
       else if (opt == "-s" || opt == "--soap")
-	soap_response = true;
+        soap_response = true;
       else if (opt == "-v" || opt == "--verbose")
       {
-	log_level = Log::LEVEL_DETAIL;
-	OBTOOLS_LOG_IF_DEBUG(log_level = Log::LEVEL_DEBUG;)
+        log_level = Log::LEVEL_DETAIL;
+        OBTOOLS_LOG_IF_DEBUG(log_level = Log::LEVEL_DEBUG;)
       }
       else if (opt == "-q" || opt == "--quiet")
-	log_level = Log::LEVEL_NONE;
+        log_level = Log::LEVEL_NONE;
       else if ((opt == "-h" || opt == "--host") && i<argc-2)
-	host = argv[++i];
+        host = argv[++i];
       else if ((opt == "-p" || opt == "--port") && i<argc-2)
-	port = atoi(argv[++i]);
+        port = atoi(argv[++i]);
       else if (opt == "-?" || opt == "--help")
       {
-	usage(argv[0]);
-	return 0;
+        usage(argv[0]);
+        return 0;
       }
       else
       {
-	cerr << "Unknown option: " << opt << endl;
-	usage(argv[0]);
-	return 2;
+        cerr << "Unknown option: " << opt << endl;
+        usage(argv[0]);
+        return 2;
       }
     }
     else if (subject.empty())
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   }
 
   log.summary << "Host: " << addr
-	      << " (" << addr.get_hostname() << ")" << endl;
+              << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
   Net::EndPoint server(addr, port);
@@ -169,13 +169,13 @@ int main(int argc, char **argv)
       XMLMesh::Message response;
       if (client.request(request, response))
       {
-	if (soap_response)
-	  cout << response.get_text();
-	else
-	  cout << response.get_body();
+        if (soap_response)
+          cout << response.get_text();
+        else
+          cout << response.get_body();
       }
       else
-	return 1;
+        return 1;
     }
     else
     {

@@ -13,7 +13,7 @@ using namespace ObTools::CPPT;
 //------------------------------------------------------------------------
 //Constructor
 Processor::Processor(istream& instream, ostream& outstream,
-		     const Tags& ts, const string& streamname):
+                     const Tags& ts, const string& streamname):
     sin(instream),
     sout(outstream),
     sname(streamname),
@@ -55,17 +55,17 @@ void Processor::output_text(char c)
     switch (c)
     {
       case '\n':
-	sout << "\\n\";" << endl;
-	started_text = false;
-	break;
+        sout << "\\n\";" << endl;
+        started_text = false;
+        break;
 
       case '"':  // Back-slashify quotes and backslashes
       case '\\':
-	sout << "\\" << c;
-	break;
+        sout << "\\" << c;
+        break;
 
       default:
-	sout << c;
+        sout << c;
     }
   }
 }
@@ -154,147 +154,147 @@ void Processor::process()
     switch (state)
     {
       case PS_NORMAL:
-	// Pass to normal TR
-	used_char = tr_normal.process_char(c, tokstate);
+        // Pass to normal TR
+        used_char = tr_normal.process_char(c, tokstate);
 
-	// Check for new tokens
-	switch (tokstate)
-	{
-	  case TOKEN_READING:
-	    // Output this character as text if not used
-	    if (!used_char) output_text(c);
-	    break;
+        // Check for new tokens
+        switch (tokstate)
+        {
+          case TOKEN_READING:
+            // Output this character as text if not used
+            if (!used_char) output_text(c);
+            break;
 
-	  case TOKEN_VALID:
-	  {
-	    string token = tr_normal.get_token();
-	    if (token == tags.start_code)
-	    {
-	      open_code();
-	      state = PS_CODE;
-	      strip_eol();
-	    }
-	    else if (token == tags.start_expr)
-	    {
-	      open_expr();
-	      state = PS_EXPR;
-	    }
-	    else if (token == tags.start_comment)
-	    {
-	      state = PS_COMMENT;
-	    }
+          case TOKEN_VALID:
+          {
+            string token = tr_normal.get_token();
+            if (token == tags.start_code)
+            {
+              open_code();
+              state = PS_CODE;
+              strip_eol();
+            }
+            else if (token == tags.start_expr)
+            {
+              open_expr();
+              state = PS_EXPR;
+            }
+            else if (token == tags.start_comment)
+            {
+              state = PS_COMMENT;
+            }
 
-	    // Retry this character if not used
-	    if (!used_char) goto retry;
-	    break;
-	  }
+            // Retry this character if not used
+            if (!used_char) goto retry;
+            break;
+          }
 
-	  case TOKEN_INVALID:
-	    // Output unwanted characters as text, and retry
-	    output_text(tr_normal.get_token().c_str());
-	    if (!used_char) goto retry;
-	    break;
-	}
-	break;
+          case TOKEN_INVALID:
+            // Output unwanted characters as text, and retry
+            output_text(tr_normal.get_token().c_str());
+            if (!used_char) goto retry;
+            break;
+        }
+        break;
 
-	case PS_CODE:
-	  // Pass to code TR
-	  used_char = tr_code.process_char(c, tokstate);
+        case PS_CODE:
+          // Pass to code TR
+          used_char = tr_code.process_char(c, tokstate);
 
-	  // Check for new tokens
-	  switch (tokstate)
-	  {
-	    case TOKEN_READING:
-	      // Output this character verbatim if not used
-	      if (!used_char) sout << c;
-	      break;
+          // Check for new tokens
+          switch (tokstate)
+          {
+            case TOKEN_READING:
+              // Output this character verbatim if not used
+              if (!used_char) sout << c;
+              break;
 
-	    case TOKEN_VALID:
-	    {
-	      string token = tr_code.get_token();
-	      if (token == tags.end_code)
-	      {
-		close_code();
-		strip_eol();
-		state = PS_NORMAL;
-	      }
-	    }
+            case TOKEN_VALID:
+            {
+              string token = tr_code.get_token();
+              if (token == tags.end_code)
+              {
+                close_code();
+                strip_eol();
+                state = PS_NORMAL;
+              }
+            }
 
-	    // Retry this character if not used
-	    if (!used_char) goto retry;
-	    break;
+            // Retry this character if not used
+            if (!used_char) goto retry;
+            break;
 
-	    case TOKEN_INVALID:
-	      // Pass mistaken token through as normal, retry unused
-	      sout << tr_code.get_token();
-	      if (!used_char) goto retry;
-	      break;
-	  }
+            case TOKEN_INVALID:
+              // Pass mistaken token through as normal, retry unused
+              sout << tr_code.get_token();
+              if (!used_char) goto retry;
+              break;
+          }
 
-	  break;
+          break;
 
-	case PS_EXPR:
-	  // Pass to expr TR
-	  used_char = tr_expr.process_char(c, tokstate);
+        case PS_EXPR:
+          // Pass to expr TR
+          used_char = tr_expr.process_char(c, tokstate);
 
-	  // Check for new tokens
-	  switch (tokstate)
-	  {
-	    case TOKEN_READING:
-	      // Output this character verbatim if not used
-	      if (!used_char) sout << c;
-	      break;
+          // Check for new tokens
+          switch (tokstate)
+          {
+            case TOKEN_READING:
+              // Output this character verbatim if not used
+              if (!used_char) sout << c;
+              break;
 
-	    case TOKEN_VALID:
-	    {
-	      string token = tr_expr.get_token();
-	      if (token == tags.end_expr)
-	      {
-		close_expr();
-		state = PS_NORMAL;
-	      }
-	    }
-	    // Retry this character if not used
-	    if (!used_char) goto retry;
-	    break;
+            case TOKEN_VALID:
+            {
+              string token = tr_expr.get_token();
+              if (token == tags.end_expr)
+              {
+                close_expr();
+                state = PS_NORMAL;
+              }
+            }
+            // Retry this character if not used
+            if (!used_char) goto retry;
+            break;
 
-	    case TOKEN_INVALID:
-	      // Pass mistaken token through verbatim, retry unused
-	      sout << tr_expr.get_token();
-	      if (!used_char) goto retry;
-	      break;
-	  }
-	  break;
+            case TOKEN_INVALID:
+              // Pass mistaken token through verbatim, retry unused
+              sout << tr_expr.get_token();
+              if (!used_char) goto retry;
+              break;
+          }
+          break;
 
-	case PS_COMMENT:
-	  // Pass to comment TR
-	  used_char = tr_comment.process_char(c, tokstate);
+        case PS_COMMENT:
+          // Pass to comment TR
+          used_char = tr_comment.process_char(c, tokstate);
 
-	  // Check for new tokens
-	  switch (tokstate)
-	  {
-	    case TOKEN_READING:
-	      // Swallow it
-	      break;
+          // Check for new tokens
+          switch (tokstate)
+          {
+            case TOKEN_READING:
+              // Swallow it
+              break;
 
-	    case TOKEN_VALID:
-	    {
-	      string token = tr_comment.get_token();
-	      if (token == tags.end_comment)
-	      {
-		state = PS_NORMAL;
-		strip_eol();
-	      }
-	    }
-	    if (!used_char) goto retry;
-	    break;
+            case TOKEN_VALID:
+            {
+              string token = tr_comment.get_token();
+              if (token == tags.end_comment)
+              {
+                state = PS_NORMAL;
+                strip_eol();
+              }
+            }
+            if (!used_char) goto retry;
+            break;
 
-	    case TOKEN_INVALID:
-	      // Swallow mistake, but retry unused
-	      if (!used_char) goto retry;
-	      break;
-	  }
-	  break;
+            case TOKEN_INVALID:
+              // Swallow mistake, but retry unused
+              if (!used_char) goto retry;
+              break;
+          }
+          break;
     }
 
   }

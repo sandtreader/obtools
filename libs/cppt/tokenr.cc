@@ -54,13 +54,13 @@ bool TokenRecogniser::process_char(char c, TokenState& state)
       // If only one possiblity, we're done
       if (npossibles == 1)
       {
-	state = TOKEN_VALID;
-	index = 0;  // Clear for next time
-	longest_valid = 0;
+        state = TOKEN_VALID;
+        index = 0;  // Clear for next time
+        longest_valid = 0;
       }
       else
-	// Remember we had this, in case we have to backtrack
-	longest_valid=index;
+        // Remember we had this, in case we have to backtrack
+        longest_valid=index;
     }
 
     return true;

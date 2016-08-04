@@ -58,14 +58,14 @@ static unsigned long openssl_id_function(void)
 
 // Dynamic lock creation function
 static struct CRYPTO_dynlock_value *openssl_dyn_create_function(const char *,
-								int)
+                                                                int)
 {
   return new struct CRYPTO_dynlock_value();
 }
 
 // Dynamic locking function.
 static void openssl_dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l,
-				      const char *, int)
+                                      const char *, int)
 {
   if (mode & CRYPTO_LOCK)
     l->mutex.lock();
@@ -75,7 +75,7 @@ static void openssl_dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l,
 
 // Destroy dynamic crypto lock function
 static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l,
-					 const char *, int)
+                                         const char *, int)
 {
   delete l;
 }

@@ -110,7 +110,7 @@ int main(int argc, char **argv)
     if (!client)
     {
       client = new Web::HTTPClient(url, &ctx,
-				   "ObTools Test HTTP client", 5, 5);
+                                   "ObTools Test HTTP client", 5, 5);
       if (http_1_1) client->enable_persistence();
       if (progressive) client->enable_progressive();
     }
@@ -139,22 +139,22 @@ int main(int argc, char **argv)
     if (result >= 200 && result < 300)
     {
       log.detail << "We connected from " << client->get_last_local_address()
-		 << endl;
+                 << endl;
 
       if (progressive)
       {
-	// Read progressive data in small chunks
-	unsigned char buf[PROGRESSIVE_BUF_SIZE];
-	unsigned int n;
-	uint64_t total = 0;
-	while ((n = client->read(buf, PROGRESSIVE_BUF_SIZE)) != 0)
-	{
-	  log.detail << "Read buffer " << n << endl;
-	  cout.write(reinterpret_cast<char *>(buf), n);
-	  total += n;
-	}
+        // Read progressive data in small chunks
+        unsigned char buf[PROGRESSIVE_BUF_SIZE];
+        unsigned int n;
+        uint64_t total = 0;
+        while ((n = client->read(buf, PROGRESSIVE_BUF_SIZE)) != 0)
+        {
+          log.detail << "Read buffer " << n << endl;
+          cout.write(reinterpret_cast<char *>(buf), n);
+          total += n;
+        }
 
-	log.detail << "Read total of " << total << " bytes\n";
+        log.detail << "Read total of " << total << " bytes\n";
       }
       else cout << body << endl;
     }

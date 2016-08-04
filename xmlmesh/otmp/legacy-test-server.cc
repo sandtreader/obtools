@@ -31,13 +31,13 @@ class ReflectorThread: public MT::Thread
 
       // Send it back
       if (msg.action == XMLMesh::OTMP::ClientMessage::MESSAGE_DATA)
-	server.send(msg);
+        server.send(msg);
     }
   }
 
 public:
   ReflectorThread(XMLMesh::OTMP::Server &s,
-		  MT::Queue<XMLMesh::OTMP::ClientMessage>& q):
+                  MT::Queue<XMLMesh::OTMP::ClientMessage>& q):
     server(s), receive_q(q) { start(); }
 };
 

@@ -38,7 +38,7 @@ int main()
   {
     ObTools::XML::Element& wombat=**p;
     cout << "  [" << wombat.content << "]"
-	 << " at " << wombat.get_xpath() << endl;
+         << " at " << wombat.get_xpath() << endl;
   }
 
   cout << "/: "             << xpath.get_value("/") << endl;

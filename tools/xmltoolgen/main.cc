@@ -39,20 +39,20 @@ protected:
   // Iterate over child elements, expanding template inline
   // Accumulates expanded script in 'script'
   virtual void expand_inline(XML::Element& te, XML::Element& parent,
-			     CPPT::Tags& tags,
-			     int& max_ci,
-			     const string& streamname,
-			     string& script,
-			     bool is_root = false);
+                             CPPT::Tags& tags,
+                             int& max_ci,
+                             const string& streamname,
+                             string& script,
+                             bool is_root = false);
 
   //--------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
   virtual void expand_use(XML::Element& use_e,
-			  XML::Element& define_e,
-			  XML::Element& parent,
-			  CPPT::Tags& tags,
-			  const string& streamname,
-			  bool is_root = false);
+                          XML::Element& define_e,
+                          XML::Element& parent,
+                          CPPT::Tags& tags,
+                          const string& streamname,
+                          bool is_root = false);
 
   //--------------------------------------------------------------------------
   // Generate code to create 'main' function which reads input and calls
@@ -64,7 +64,7 @@ public:
   // Constructor - read configuration from config file, output code
   // to given output stream, errors to error stream
   XMLGenerator(const string& _config_file,
-	       ostream& _sout=cout, ostream& _serr=cerr):
+               ostream& _sout=cout, ostream& _serr=cerr):
     Generator(_config_file, _sout, _serr) {}
 };
 
@@ -72,11 +72,11 @@ public:
 // Iterate over child elements, expanding template inline
 // Accumulates expanded script in 'script'
 void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
-				 CPPT::Tags& tags,
-				 int& max_ci,
-				 const string& streamname,
-				 string& script,
-				 bool is_root)
+                                 CPPT::Tags& tags,
+                                 int& max_ci,
+                                 const string& streamname,
+                                 string& script,
+                                 bool is_root)
 {
   string child_var = get_parameter_name(te);
 
@@ -84,7 +84,7 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
   {
     sout << "  //Expand root template\n";
     sout<<"  ObTools::XML::Element& " << child_var
-	<< " = _parser.get_root();\n";
+        << " = _parser.get_root();\n";
 
     // Generate directly on the root element
     generate_template(te, te, tags, max_ci, "", "", streamname, script);
@@ -104,18 +104,18 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
     {
       sout << " = " << parent_var << ".children.size();\n";
       sout << "  OBTOOLS_XML_FOREACH_CHILD("
-	   << child_var << ", " << parent_var << ")\n";
+           << child_var << ", " << parent_var << ")\n";
     }
     else
     {
       sout << " = " <<parent_var<<".get_children(\""<<ename<<"\").size();\n";
       sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
-	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
+           << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
     }
 
 
     generate_template(te, te, tags, max_ci, index_var, count_var,
-		      streamname, script);
+                      streamname, script);
     process_script(script, tags, streamname, max_ci);
     script.clear();
 
@@ -127,11 +127,11 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 //--------------------------------------------------------------------------
 // Iterate over child elements, calling predefined template
 void XMLGenerator::expand_use(XML::Element& use_e,
-			      XML::Element& define_e,
-			      XML::Element& parent,
-			      CPPT::Tags& tags,
-			      const string& streamname,
-			      bool is_root)
+                              XML::Element& define_e,
+                              XML::Element& parent,
+                              CPPT::Tags& tags,
+                              const string& streamname,
+                              bool is_root)
 {
   string child_var = get_parameter_name(define_e);
 
@@ -139,7 +139,7 @@ void XMLGenerator::expand_use(XML::Element& use_e,
   {
     sout << "  //Call root template\n";
     sout<<"  ObTools::XML::Element& " << child_var
-	<< " = _parser.get_root();\n";
+        << " = _parser.get_root();\n";
 
     // Generate directly on the root element
     generate_use(use_e, define_e, tags, child_var, "0", "1", streamname);
@@ -165,17 +165,17 @@ void XMLGenerator::expand_use(XML::Element& use_e,
     {
       sout << " = " << parent_var << ".children.size();\n";
       sout << "  OBTOOLS_XML_FOREACH_CHILD("
-	   << child_var << ", " << parent_var << ")\n";
+           << child_var << ", " << parent_var << ")\n";
     }
     else
     {
       sout << " = " <<parent_var<<".get_children(\""<<ename<<"\").size();\n";
       sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
-	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
+           << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
     }
 
     generate_use(use_e, define_e, tags, child_var,
-		 index_var, count_var, streamname);
+                 index_var, count_var, streamname);
 
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_XML_ENDFOR\n";

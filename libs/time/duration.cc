@@ -96,35 +96,35 @@ Duration::Duration(const string& text)
 
       if (c==':')
       {
-	// Add as seconds (for now)
-	t+=f;
+        // Add as seconds (for now)
+        t+=f;
 
-	// Check shift number
-	switch (++shift)
-	{
-	  case 1:
-	  case 2:  // First two are easy:
-	    t*=60;
-	    break;
+        // Check shift number
+        switch (++shift)
+        {
+          case 1:
+          case 2:  // First two are easy:
+            t*=60;
+            break;
 
-	  case 3:  // Third is harder - hours moving to days
-	  {
-	    int hours = static_cast<int>(t/HOUR);
-	    double minsecs = t-hours*HOUR;
-	    t=DAY*hours + MINUTE*minsecs;
-	  }
-	  break;
+          case 3:  // Third is harder - hours moving to days
+          {
+            int hours = static_cast<int>(t/HOUR);
+            double minsecs = t-hours*HOUR;
+            t=DAY*hours + MINUTE*minsecs;
+          }
+          break;
 
-	  default: return; // Too many - stop
-	}
+          default: return; // Too many - stop
+        }
       }
       else
       {
-	// Time unit - read a word
-	iss.putback(c);
+        // Time unit - read a word
+        iss.putback(c);
 
         // Read an alpha word
-	string word;
+        string word;
         while (isalpha(c = iss.get()))
           word += c;
         iss.putback(c);
@@ -132,29 +132,29 @@ Duration::Duration(const string& text)
         // We accept upper but test lower case
         word = Text::tolower(word);
 
-	// Look up word in units dictionary
-	map<string, int>::const_iterator p;
-	p = units.multiples.find(word);
-	if (p!=units.multiples.end())
-	{
-	  // Multiply by value
-	  t+=f*p->second;
-	}
-	else
-	{
-	  p = units.fractions.find(word);
-	  if (p!=units.fractions.end())
-	  {
-	    // Divide by value
-	    t+=f/p->second;
-	  }
-	  else
-	  {
-	    // Unrecognised word - use as seconds and bomb out
-	    t+=f;
-	    return;
-	  }
-	}
+        // Look up word in units dictionary
+        map<string, int>::const_iterator p;
+        p = units.multiples.find(word);
+        if (p!=units.multiples.end())
+        {
+          // Multiply by value
+          t+=f*p->second;
+        }
+        else
+        {
+          p = units.fractions.find(word);
+          if (p!=units.fractions.end())
+          {
+            // Divide by value
+            t+=f/p->second;
+          }
+          else
+          {
+            // Unrecognised word - use as seconds and bomb out
+            t+=f;
+            return;
+          }
+        }
       }
     }
     else

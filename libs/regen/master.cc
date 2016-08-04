@@ -68,9 +68,9 @@ MasterFile::MasterFile(istream &in, const char *mark)
       string tag = line_tag();
       if (tag.size())
       {
-	current_block = new Block;
-	blocks.push_back(current_block);
-	blockmap[tag] = current_block;
+        current_block = new Block;
+        blocks.push_back(current_block);
+        blockmap[tag] = current_block;
       }
     }
 
@@ -120,107 +120,107 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
     switch (ufile.line_type())
     {
       case LINE_NORMAL:
-	// Just spool it if required
-	if (use_lines) sout << ufile.line_text() << endl;
-	break;
+        // Just spool it if required
+        if (use_lines) sout << ufile.line_text() << endl;
+        break;
 
       case LINE_OPEN:
       {
-	// Block starting - get and check tag
-	string tag = ufile.line_tag();
-	if (tag.size())
-	{
-	  b = find_block(tag);
-	  if (b)
-	  {
-	    // Dump out all lines until a USTART or end
-	    for(bp = b->lines.begin(); bp!= b->lines.end(); ++bp)
-	    {
-	      BlockLine *bl = *bp;
-	      if (bl->type == LINE_USER_START) break;
-	      sout << bl->text << endl;
-	    }
+        // Block starting - get and check tag
+        string tag = ufile.line_tag();
+        if (tag.size())
+        {
+          b = find_block(tag);
+          if (b)
+          {
+            // Dump out all lines until a USTART or end
+            for(bp = b->lines.begin(); bp!= b->lines.end(); ++bp)
+            {
+              BlockLine *bl = *bp;
+              if (bl->type == LINE_USER_START) break;
+              sout << bl->text << endl;
+            }
 
-	    // Mark block as used
-	    b->used = true;
+            // Mark block as used
+            b->used = true;
 
-	    // Suppress user lines
-	    use_lines = false;
-	  }
-	  else
-	  {
-	    // Suppress user lines if they want to delete orphans
-	    if (flags & MERGE_DELETE_ORPHANS)
-	      use_lines = false;
-	    else
-	    {
-	      // Copy out all user lines until CLOSE, verbatim
-	      do
-	      {
-		sout << ufile.line_text() << endl;
-	      } while (ufile.read_line() && ufile.line_type() != LINE_CLOSE);
+            // Suppress user lines
+            use_lines = false;
+          }
+          else
+          {
+            // Suppress user lines if they want to delete orphans
+            if (flags & MERGE_DELETE_ORPHANS)
+              use_lines = false;
+            else
+            {
+              // Copy out all user lines until CLOSE, verbatim
+              do
+              {
+                sout << ufile.line_text() << endl;
+              } while (ufile.read_line() && ufile.line_type() != LINE_CLOSE);
 
-	      // Include close as well
-	      sout << ufile.line_text() << endl;
-	    }
-	  }
-	}
-	break;
+              // Include close as well
+              sout << ufile.line_text() << endl;
+            }
+          }
+        }
+        break;
       }
 
       case LINE_CLOSE:
-	// Ensure any remaining master lines are used - for example
-	// if they have deleted a user cutout
-	if (b)
-	{
-	  for(;bp!= b->lines.end(); ++bp)
-	  {
-	    BlockLine *bl = *bp;
-	    sout << bl->text << endl;
-	  }
-	}
+        // Ensure any remaining master lines are used - for example
+        // if they have deleted a user cutout
+        if (b)
+        {
+          for(;bp!= b->lines.end(); ++bp)
+          {
+            BlockLine *bl = *bp;
+            sout << bl->text << endl;
+          }
+        }
 
-	//Clean up
-	b = 0;
-	use_lines = true;
-	break;
+        //Clean up
+        b = 0;
+        use_lines = true;
+        break;
 
       case LINE_USER_START:
-	// User cut-out starting - skip over lines in master until USER_END
-	if (b)
-	{
-	  for(;bp!= b->lines.end() && (*bp)->type != LINE_USER_END; ++bp)
-	    ;
+        // User cut-out starting - skip over lines in master until USER_END
+        if (b)
+        {
+          for(;bp!= b->lines.end() && (*bp)->type != LINE_USER_END; ++bp)
+            ;
 
-	  //Skip USER_END line, too - we'll use their version
-	  if (bp!=b->lines.end()) bp++;
+          //Skip USER_END line, too - we'll use their version
+          if (bp!=b->lines.end()) bp++;
 
-	  // Allow user lines and use their copy of this one
-	  use_lines = true;
-	  sout << ufile.line_text() << endl;
-	}
-	break;
+          // Allow user lines and use their copy of this one
+          use_lines = true;
+          sout << ufile.line_text() << endl;
+        }
+        break;
 
       case LINE_USER_END:
-	// User cut-out ends - continue with master until another USTART
-	if (b)
-	{
-	  // Use their version of this line
-	  sout << ufile.line_text() << endl;
+        // User cut-out ends - continue with master until another USTART
+        if (b)
+        {
+          // Use their version of this line
+          sout << ufile.line_text() << endl;
 
-	  // Dump out all lines until a USTART or end
-	  for(;bp!= b->lines.end(); ++bp)
-	  {
-	    BlockLine *bl = *bp;
-	    sout << bl->text << endl;
-	    if (bl->type == LINE_USER_START)
-	      break;
-	  }
+          // Dump out all lines until a USTART or end
+          for(;bp!= b->lines.end(); ++bp)
+          {
+            BlockLine *bl = *bp;
+            sout << bl->text << endl;
+            if (bl->type == LINE_USER_START)
+              break;
+          }
 
-	  // suppress user lines again
-	  use_lines = false;
-	}
-	break;
+          // suppress user lines again
+          use_lines = false;
+        }
+        break;
     }
   }
 
@@ -228,18 +228,18 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
   if (!(flags & MERGE_SUPPRESS_NEW))
   {
     for(list<Block *>::iterator p = blocks.begin();
-	p!=blocks.end();
-	++p)
+        p!=blocks.end();
+        ++p)
     {
       b = *p;
       if (!b->used)
       {
-	sout << endl;
-	for(bp = b->lines.begin(); bp!= b->lines.end(); ++bp)
-	{
-	  BlockLine *bl = *bp;
-	  sout << bl->text << endl;
-	}
+        sout << endl;
+        for(bp = b->lines.begin(); bp!= b->lines.end(); ++bp)
+        {
+          BlockLine *bl = *bp;
+          sout << bl->text << endl;
+        }
       }
 
       // Reset for next time

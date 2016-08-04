@@ -87,39 +87,39 @@ int main(int argc, char **argv)
     if (opt[0] == '-')
     {
       if (opt == "-o" || opt == "--observe")
-	observe = true;
+        observe = true;
       else if (opt == "-c" || opt == "--check")
-	check = true;
+        check = true;
       else if (opt == "-r" || opt == "--response")
-	get_response = true;
+        get_response = true;
       else if ((opt == "-R" || opt == "--response-subject") && i<argc-2)
-	response_subject = argv[++i];
+        response_subject = argv[++i];
       else if (opt == "-s" || opt == "--soap")
-	soap = true;
+        soap = true;
       else if (opt == "-v" || opt == "--verbose")
-	log_level++;
+        log_level++;
       else if (opt == "-q" || opt == "--quiet")
-	log_level--;
+        log_level--;
       else if ((opt == "-l" || opt == "--log") && i<argc-2)
-	logfile = argv[++i];
+        logfile = argv[++i];
       else if (opt == "-f" || opt == "--foreground")
-	foreground = true;
+        foreground = true;
       else if (opt == "-1" || opt == "--oneshot")
-	oneshot = true;
+        oneshot = true;
       else if ((opt == "-h" || opt == "--host") && i<argc-2)
-	host = argv[++i];
+        host = argv[++i];
       else if ((opt == "-p" || opt == "--port") && i<argc-2)
-	port = atoi(argv[++i]);
+        port = atoi(argv[++i]);
       else if (opt == "-?" || opt == "--help")
       {
-	usage(argv[0]);
-	return 0;
+        usage(argv[0]);
+        return 0;
       }
       else
       {
-	cerr << "Unknown option: " << opt << endl;
-	usage(argv[0]);
-	return 2;
+        cerr << "Unknown option: " << opt << endl;
+        usage(argv[0]);
+        return 2;
       }
     }
     else if (subject.empty())
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
   }
 
   log.summary << "Host: " << addr
-	      << " (" << addr.get_hostname() << ")" << endl;
+              << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
   Net::EndPoint server(addr, port);
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
       text = msg.get_body().to_string();  // Just the first body
 
     log.summary << "Received message, subject " << subject
-		<< (rsvp?", RSVP":"") << endl;
+                << (rsvp?", RSVP":"") << endl;
     log.detail << text;
 
     // Create pipes - named relative to child process
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
       // Send it some stuff!
       ssize_t length = text.size();
       if (write(stdin_pipe[1], text.data(), length) != length)
-	log.error << "Problem writing text to pipe\n";
+        log.error << "Problem writing text to pipe\n";
 
       // Close it to indicate end
       close(stdin_pipe[1]);
@@ -250,11 +250,11 @@ int main(int argc, char **argv)
       string response;
       if (check || get_response)
       {
-	char buf[1024];
-	while ((length = read(stdout_pipe[0], buf, 1024)) > 0)
-	  response.append(buf, length);
+        char buf[1024];
+        while ((length = read(stdout_pipe[0], buf, 1024)) > 0)
+          response.append(buf, length);
 
-	log.detail << "Child response:\n" << response;
+        log.detail << "Child response:\n" << response;
       }
 
       // Close its output
@@ -267,59 +267,59 @@ int main(int argc, char **argv)
       // Check for fatal failure
       if (died && !WIFEXITED(status))
       {
-	log.error << "Child process died\n";
+        log.error << "Child process died\n";
 
-	// Respond with fatal error if requested
-	if (rsvp)
-	  client.respond(SOAP::Fault::CODE_RECEIVER,
-			 "Receiving process failed", msg);
+        // Respond with fatal error if requested
+        if (rsvp)
+          client.respond(SOAP::Fault::CODE_RECEIVER,
+                         "Receiving process failed", msg);
       }
       else
       {
-	int rc = WEXITSTATUS(status);
-	if (rc)
-	{
-	  log.error << "Child process returned code " << rc
-		    << ", response " << response;
+        int rc = WEXITSTATUS(status);
+        if (rc)
+        {
+          log.error << "Child process returned code " << rc
+                    << ", response " << response;
 
-	  // Respond with error, capturing any output as fault
-	  if (rsvp)
-	    client.respond(SOAP::Fault::CODE_RECEIVER, response, msg);
-	}
-	else
-	{
-	  log.summary << "Child process returned OK\n";
+          // Respond with error, capturing any output as fault
+          if (rsvp)
+            client.respond(SOAP::Fault::CODE_RECEIVER, response, msg);
+        }
+        else
+        {
+          log.summary << "Child process returned OK\n";
 
-	  // Respond OK or with response
-	  if (rsvp)
-	  {
-	    if (check)
-	    {
-	      client.respond(msg); // Simple OK
-	    }
-	    else if (get_response)
-	    {
-	      // Create response from output
+          // Respond OK or with response
+          if (rsvp)
+          {
+            if (check)
+            {
+              client.respond(msg); // Simple OK
+            }
+            else if (get_response)
+            {
+              // Create response from output
 
-	      // Create default response subject from incoming if not set
-	      if (response_subject.empty())
-		response_subject = subject+".response";
-	      log.summary << "Sending response, subject "
-			  << response_subject << endl;
+              // Create default response subject from incoming if not set
+              if (response_subject.empty())
+                response_subject = subject+".response";
+              log.summary << "Sending response, subject "
+                          << response_subject << endl;
 
-	      XMLMesh::Message rmsg(response_subject,
-				    response, false, msg.get_id());
-	      client.send(rmsg);
-	    }
-	    else if (!observe)
-	    {
-	      log.error << "RSVP requested but no --observe, "
-			<< "--check nor --get_response specified\n";
-	      client.respond(SOAP::Fault::CODE_RECEIVER,
-			     "Receiver not configured to return result", msg);
-	    }
-	  }
-	}
+              XMLMesh::Message rmsg(response_subject,
+                                    response, false, msg.get_id());
+              client.send(rmsg);
+            }
+            else if (!observe)
+            {
+              log.error << "RSVP requested but no --observe, "
+                        << "--check nor --get_response specified\n";
+              client.respond(SOAP::Fault::CODE_RECEIVER,
+                             "Receiver not configured to return result", msg);
+            }
+          }
+        }
       }
     }
     else
@@ -341,9 +341,9 @@ int main(int argc, char **argv)
       if (execl(process.c_str(), process.c_str(), subject.c_str(),
                 static_cast<char *>(NULL)))
       {
-	log.error << "Can't exec " << process << ": " << strerror(errno) << endl;
-	log.summary << "Can't start receiving process\n";
-	return 2;
+        log.error << "Can't exec " << process << ": " << strerror(errno) << endl;
+        log.summary << "Can't start receiving process\n";
+        return 2;
       }
     }
   } while (!oneshot);

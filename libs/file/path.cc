@@ -85,10 +85,10 @@ bool Path::is_absolute() const
 #if defined(__WIN32__)
   // Allow for c:\xxx form
   return !path.empty() && (is_sep_char(path[0])
-			   ||(path.size()>=3
-			      && isalpha(path[0])
-			      && path[1]==':'
-			      && is_sep_char(path[2])));
+                           ||(path.size()>=3
+                              && isalpha(path[0])
+                              && path[1]==':'
+                              && is_sep_char(path[2])));
 #else
   return !path.empty() && is_sep_char(path[0]);
 #endif
@@ -393,7 +393,7 @@ bool Path::rename(const Path& new_path) const
 #if defined(__WIN32__)
   // Try supposedly atomic MoveFileEx (NT+)
   if (MoveFileExW(CPATH, new_path.wide_path().c_str(),
-		  MOVEFILE_REPLACE_EXISTING))
+                  MOVEFILE_REPLACE_EXISTING))
     return true;
 
   // Fall back to try non-atomic delete/rename (95/98)

@@ -73,7 +73,7 @@ int main(int argc, char **argv)
   Log::StreamChannel chan_out(cout);
 #endif
   Log::TimestampFilter tsfilter(config.get_value("log/@timestamp",
-						 DEFAULT_TIMESTAMP), chan_out);
+                                                 DEFAULT_TIMESTAMP), chan_out);
   const int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
   Log::logger.connect(level_out);
@@ -109,18 +109,18 @@ int main(int argc, char **argv)
 
       if (gid >= 0)
       {
-	log.summary << "Changing to group " << groupname
-		    << " (" << gid << ")\n";
+        log.summary << "Changing to group " << groupname
+                    << " (" << gid << ")\n";
         if (setgid(static_cast<gid_t>(gid)))
-	{
-	  log.error << "Can't change group: " << strerror(errno) << endl;
-	  goto shutdown;
-	}
+        {
+          log.error << "Can't change group: " << strerror(errno) << endl;
+          goto shutdown;
+        }
       }
       else
       {
-	log.error << "Can't find group " << groupname << "\n";
-	goto shutdown;
+        log.error << "Can't find group " << groupname << "\n";
+        goto shutdown;
       }
     }
 
@@ -130,16 +130,16 @@ int main(int argc, char **argv)
 
       if (uid >= 0)
       {
-	log.summary << "Changing to user " << username << " (" << uid << ")\n";
+        log.summary << "Changing to user " << username << " (" << uid << ")\n";
         if (setuid(static_cast<uid_t>(uid)))
-	{
-	  log.error << "Can't change user: " << strerror(errno) << endl;
+        {
+          log.error << "Can't change user: " << strerror(errno) << endl;
           return 4;
-	}
+        }
       }
       else
       {
-	log.error << "Can't find user " << username << "\n";
+        log.error << "Can't find user " << username << "\n";
         return 4;
       }
     }

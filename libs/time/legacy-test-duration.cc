@@ -43,8 +43,8 @@ int main()
     const double secs = Text::stof(bits[1]);
 
     cout << bits[0] << " -> "
-	 << d.seconds() << "s, NTP: " << d.ntp()
-	 << ", HMS: " << d.hms() << endl;
+         << d.seconds() << "s, NTP: " << d.ntp()
+         << ", HMS: " << d.hms() << endl;
 
     // Use stringification to provide reasonable rounding
     if (Text::ftos(d.seconds()) != Text::ftos(secs))

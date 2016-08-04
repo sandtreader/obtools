@@ -53,7 +53,7 @@ IPAddress::IPAddress(const string& hostname_s)
     char buf[AUX_BUF_SIZE];
     int err;
     if (!gethostbyname_r(hostname, &host, buf, AUX_BUF_SIZE, &result, &err)
-	&& result)
+        && result)
       address = static_cast<uint32_t>(
                         ntohl(*reinterpret_cast<unsigned long *>(host.h_addr)));
     else
@@ -95,8 +95,8 @@ string IPAddress::get_hostname() const
   int err;
 
   if (!gethostbyaddr_r(reinterpret_cast<char *>(&nbo_addr), 4, AF_INET,
-		       &host, buf, AUX_BUF_SIZE, &result, &err)
-	&& result)
+                       &host, buf, AUX_BUF_SIZE, &result, &err)
+        && result)
     return host.h_name;
   else
     return get_dotted_quad();
@@ -144,9 +144,9 @@ MaskedAddress::MaskedAddress(const string& cidr):
 
       // Work out mask bits from number of bits
       if (!n)
-	maskbits = 0;
+        maskbits = 0;
       else
-	maskbits = ~((1 << (32-n))- 1);  // Beware: Dark Arts
+        maskbits = ~((1 << (32-n))- 1);  // Beware: Dark Arts
 
       mask = IPAddress(maskbits);
     }

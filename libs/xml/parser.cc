@@ -48,9 +48,9 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
     if (!c)
     {
       if (root)
-	fatal("Input stream failed unexpectedly");
+        fatal("Input stream failed unexpectedly");
       else
-	fatal("Empty or unreadable document");
+        fatal("Empty or unreadable document");
     }
 
     //Check for tag or text
@@ -60,60 +60,60 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
       s.get(c);  //No WS strip
       switch (c)
       {
-	case '!':  // Comment or DOCTYPE
-	  s.get(c);
-	  switch (c)
-	  {
-	    case '-':  // Comment
-	      s.get(c); // Must read this, otherwise we'll accept <!--->
-	      if (c=='-')
-		skip_comment(s);
-	      else
-	      {
-		error("Weird comment");
-		skip_to_gt(s);  //Try to recover
-	      }
-	      break;
+        case '!':  // Comment or DOCTYPE
+          s.get(c);
+          switch (c)
+          {
+            case '-':  // Comment
+              s.get(c); // Must read this, otherwise we'll accept <!--->
+              if (c=='-')
+                skip_comment(s);
+              else
+              {
+                error("Weird comment");
+                skip_to_gt(s);  //Try to recover
+              }
+              break;
 
-	    default:  // Anything else, don't much care
-	      skip_to_gt(s);
-	      break;
-	  }
-	  break;
+            default:  // Anything else, don't much care
+              skip_to_gt(s);
+              break;
+          }
+          break;
 
-	case '?':  // Prolog or other PI - just ignore
-	  skip_pi(s);
-	  break;
+        case '?':  // Prolog or other PI - just ignore
+          skip_pi(s);
+          break;
 
-	case '/': // End tag
-	  s.get(c);
-	  if (is_name_start(c))
-	    read_end_tag(c, s);
-	  else
-	    fatal("Illegal end tag");
+        case '/': // End tag
+          s.get(c);
+          if (is_name_start(c))
+            read_end_tag(c, s);
+          else
+            fatal("Illegal end tag");
 
-	  //Check for end - can only happen when stack goes empty after
-	  //end tag
-	  if (elements.empty()) done=true;
-	  break;
+          //Check for end - can only happen when stack goes empty after
+          //end tag
+          if (elements.empty()) done=true;
+          break;
 
-	default:  // Something else - could be tag
-	  if (is_name_start(c))
-	  {
-	    // Check for empty tag & empty stack - done
-	    if (read_tag(c, s) && elements.empty()) done=true;
-	  }
-	  else
-	  {
-	    // Check for leniency here - if so, keep it as character
-	    // data, like SGML would
-	    if (flags & PARSER_BE_LENIENT)
-	    {
-	      s.unget();              // Push back second char
-	      read_content('<', s);   // Keep '<' as text
-	    }
-	    else fatal("Illegal tag");
-	  }
+        default:  // Something else - could be tag
+          if (is_name_start(c))
+          {
+            // Check for empty tag & empty stack - done
+            if (read_tag(c, s) && elements.empty()) done=true;
+          }
+          else
+          {
+            // Check for leniency here - if so, keep it as character
+            // data, like SGML would
+            if (flags & PARSER_BE_LENIENT)
+            {
+              s.unget();              // Push back second char
+              read_content('<', s);   // Keep '<' as text
+            }
+            else fatal("Illegal tag");
+          }
       }
     }
     else if (root)
@@ -196,9 +196,9 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       if (!c) fatal("Document ended in attribute value");
       if (c==quote) break;
       if (c=='&')
-	read_ref(aval, s);  //Expand refs
+        read_ref(aval, s);  //Expand refs
       else
-	aval+=c;
+        aval+=c;
     }
     aval.reserve();
 
@@ -260,8 +260,8 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
       //Complain, but ignore it
       ostringstream oss;
       oss << "Mis-nested tags - expected </" << e->name
-	  << ">, opened at line " << e->line << ", but got </"
-	  << name << ">";
+          << ">, opened at line " << e->line << ", but got </"
+          << name << ">";
       error(oss.str());
     }
   }
@@ -345,7 +345,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
       //using PRESERVE_WHITESPACE is unlikely to care.  If they are
       //using PRESERVE_WHITESPACE, though, we'd better not mess it up
       if (!(flags & PARSER_PRESERVE_WHITESPACE))
-	e->children.back()->content+=' ';
+        e->children.back()->content+=' ';
       e->children.back()->content+=content;
     }
     else e->add(new Element("", content));
@@ -402,11 +402,11 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
       // 8-bit and above depends on the length
       // NB we only handle UCS2 here, so can only go to 3 bytes
       if (n < 0x800)
-	text += static_cast<xmlchar>(0xC0 | (n >> 6));
+        text += static_cast<xmlchar>(0xC0 | (n >> 6));
       else
       {
-	text += static_cast<xmlchar>(0xE0 | (n >> 12));
-	text += static_cast<xmlchar>(0x80 | ((n >> 6) & 0x3f));
+        text += static_cast<xmlchar>(0xE0 | (n >> 12));
+        text += static_cast<xmlchar>(0x80 | ((n >> 6) & 0x3f));
       }
 
       text += static_cast<xmlchar>(0x80 | (n & 0x3f));
@@ -508,10 +508,10 @@ void Parser::skip_comment(istream &s) throw (ParseFailed)
       s.get(c);
       if (c=='-')
       {
-	c=0;
-	s.get(c);
-	if (c=='>') break;
-	else if (c == '\n') line++;
+        c=0;
+        s.get(c);
+        if (c=='>') break;
+        else if (c == '\n') line++;
       }
       else if (c == '\n') line++;
     }
@@ -610,8 +610,8 @@ void Parser::initial_processing(Element *e)
 
     //Look for xmlns:* attributes and add to current map
     for(map<string,string>::const_iterator p=e->attrs.begin();
-	p!=e->attrs.end();
-	p++)
+        p!=e->attrs.end();
+        p++)
     {
       const string& aname=p->first;
 
@@ -620,21 +620,21 @@ void Parser::initial_processing(Element *e)
       //inefficient substring compare
       if (string(aname, 0, 5)=="xmlns")
       {
-	//Only xmlns alone?  Default namespace
-	if (aname.size()==5)
-	{
-	  //Store as empty prefix (default)
-	  ns_maps.back()[""]=p->second;
-	}
-	//xmlns:prefix?
-	else if (aname[5]==':')
-	{
-	  string prefix(aname,6);
+        //Only xmlns alone?  Default namespace
+        if (aname.size()==5)
+        {
+          //Store as empty prefix (default)
+          ns_maps.back()[""]=p->second;
+        }
+        //xmlns:prefix?
+        else if (aname[5]==':')
+        {
+          string prefix(aname,6);
 
-	  //Store with prefix
-	  ns_maps.back()[prefix]=p->second;
-	}
-	//Otherwise, ignore it
+          //Store with prefix
+          ns_maps.back()[prefix]=p->second;
+        }
+        //Otherwise, ignore it
       }
     }
   }
@@ -665,7 +665,7 @@ void Parser::final_processing(Element *e)
     //Run through all the old ones and copy them back, optionally
     //modified
     for(map<string,string>::iterator p=old_attrs.begin();
-	p!=old_attrs.end();
+        p!=old_attrs.end();
         p++)
     {
       string name=p->first;
@@ -719,12 +719,12 @@ void Parser::substitute_name(string& name, bool usedef)
 
       //Rebuild name in place
       if (newprefix.empty())
-	name = rest;
+        name = rest;
       else
       {
-	name=newprefix;
-	name += ':';
-	name += rest;
+        name=newprefix;
+        name += ':';
+        name += rest;
       }
     }
   }

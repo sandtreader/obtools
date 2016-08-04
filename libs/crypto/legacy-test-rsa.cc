@@ -23,7 +23,7 @@ using namespace ObTools;
 //--------------------------------------------------------------------------
 // Test a RSA encryptor
 void test(Crypto::RSA& encryptor, Crypto::RSA& decryptor,
-	  const string& what, int cypher_size, int plaintext_size)
+          const string& what, int cypher_size, int plaintext_size)
 {
   unsigned char data[MAX_LEN];
   unsigned char result[MAX_LEN];

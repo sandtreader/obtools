@@ -33,7 +33,7 @@ int RSA::max_plaintext()
 // Returns whether successful (key set up correctly)
 // 'to' must be writable to cipher_size() bytes
 bool RSA::encrypt(const unsigned char *from, int length,
-		  unsigned char *to)
+                  unsigned char *to)
 {
   if (!key.valid) return false;
 

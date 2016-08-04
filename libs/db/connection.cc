@@ -87,10 +87,10 @@ bool Connection::query_bool(const string& sql, bool def)
     {
       case 'T': case 't':
       case 'Y': case 'y':
-	return true;
+        return true;
 
       default:
-	return false;
+        return false;
     }
   }
   else return def;
@@ -102,8 +102,8 @@ bool Connection::query_bool(const string& sql, bool def)
 //If id_field is "", does a normal insert and returns 1
 //Returns ID, or 0 if failed
 int Connection::insert(const string& sql,
-		       const string& table, const string& id_field,
-		       bool in_transaction)
+                       const string& table, const string& id_field,
+                       bool in_transaction)
 {
   // Allow for not interested in returned ID - simple version
   if (id_field.empty()) return exec(sql)?1:0;
@@ -131,8 +131,8 @@ int Connection::insert(const string& sql,
 //------------------------------------------------------------------------
 // Ditto for 64-bit
 uint64_t Connection::insert64(const string& sql,
-			      const string& table, const string& id_field,
-			      bool in_transaction)
+                              const string& table, const string& id_field,
+                              bool in_transaction)
 {
   // Allow for not interested in returned ID - simple version
   if (id_field.empty()) return exec(sql)?1:0;
@@ -163,7 +163,7 @@ uint64_t Connection::insert64(const string& sql,
 // Note: All fields are escaped on insertion
 // Returns ID, or 0 if failed
 int Connection::insert(const string& table, Row& row, const string& id_field,
-		       bool in_transaction)
+                       bool in_transaction)
 {
   ostringstream oss;
   oss << "INSERT INTO " << table;
@@ -174,8 +174,8 @@ int Connection::insert(const string& table, Row& row, const string& id_field,
 
 // Ditto with 64-bit
 uint64_t Connection::insert64(const string& table, Row& row,
-			      const string& id_field,
-			      bool in_transaction)
+                              const string& id_field,
+                              bool in_transaction)
 {
   ostringstream oss;
   oss << "INSERT INTO " << table;
@@ -188,8 +188,8 @@ uint64_t Connection::insert64(const string& table, Row& row,
 // INSERT into a join table with two foreign ID fields
 // Returns whether successful
 bool Connection::insert_join(const string& table,
-			     const string& field1, int id1,
-			     const string& field2, int id2)
+                             const string& field1, int id1,
+                             const string& field2, int id2)
 {
   ostringstream oss;
   oss << "INSERT INTO " << table;
@@ -200,8 +200,8 @@ bool Connection::insert_join(const string& table,
 
 // Ditto with 64-bit
 bool Connection::insert_join64(const string& table,
-			       const string& field1, uint64_t id1,
-			       const string& field2, uint64_t id2)
+                               const string& field1, uint64_t id1,
+                               const string& field2, uint64_t id2)
 {
   ostringstream oss;
   oss << "INSERT INTO " << table;
@@ -216,7 +216,7 @@ bool Connection::insert_join64(const string& table,
 // If where is empty, doesn't add a WHERE at all
 // Returns query result as query()
 Result Connection::select(const string& table, const Row& row,
-			  const string& where)
+                          const string& where)
 {
   ostringstream oss;
   oss << "SELECT " << row.get_fields() << " FROM " << table;
@@ -229,7 +229,7 @@ Result Connection::select(const string& table, const Row& row,
 // matching the list of values in where_row
 // Returns query result as query()
 Result Connection::select(const string& table, const Row& row,
-			  const Row& where_row)
+                          const Row& where_row)
 {
   return select(table, row, where_row.get_where_clause());
 }
@@ -239,7 +239,7 @@ Result Connection::select(const string& table, const Row& row,
 // matching the given integer ID
 // Returns query result as query()
 Result Connection::select_by_id(const string& table, const Row& row,
-				int id, const string& id_field)
+                                int id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -248,7 +248,7 @@ Result Connection::select_by_id(const string& table, const Row& row,
 
 // Ditto, 64-bit
 Result Connection::select_by_id64(const string& table, const Row& row,
-				  uint64_t id, const string& id_field)
+                                  uint64_t id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -261,7 +261,7 @@ Result Connection::select_by_id64(const string& table, const Row& row,
 // ID value is escaped
 // Returns query result as query()
 Result Connection::select_by_id(const string& table, const Row& row,
-				const string& id, const string& id_field)
+                                const string& id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << FieldValue::quote(id);
@@ -275,7 +275,7 @@ Result Connection::select_by_id(const string& table, const Row& row,
 // If where is empty, doesn't add a WHERE at all
 // Returns whether row fetched
 bool Connection::select_row(const string& table, Row& row,
-			    const string& where)
+                            const string& where)
 {
   string limit_where = where+" LIMIT 1";
   Result result = select(table, row, limit_where);
@@ -290,7 +290,7 @@ bool Connection::select_row(const string& table, Row& row,
 // (first) row as the values in the row
 // Returns whether row fetched
 bool Connection::select_row(const string& table, Row& row,
-			    const Row& where_row)
+                            const Row& where_row)
 {
   return select_row(table, row, where_row.get_where_clause());
 }
@@ -301,7 +301,7 @@ bool Connection::select_row(const string& table, Row& row,
 // the values in the row
 // Returns whether row fetched
 bool Connection::select_row_by_id(const string& table, Row& row,
-				  int id, const string& id_field)
+                                  int id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -310,7 +310,7 @@ bool Connection::select_row_by_id(const string& table, Row& row,
 
 // Ditto, 64-bit
 bool Connection::select_row_by_id64(const string& table, Row& row,
-				    uint64_t id, const string& id_field)
+                                    uint64_t id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -324,7 +324,7 @@ bool Connection::select_row_by_id64(const string& table, Row& row,
 // ID value is escaped
 // Returns whether row fetched
 bool Connection::select_row_by_id(const string& table, Row& row,
-				  const string& id, const string& id_field)
+                                  const string& id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << FieldValue::quote(id);
@@ -337,7 +337,7 @@ bool Connection::select_row_by_id(const string& table, Row& row,
 // If where is empty, doesn't add a WHERE at all
 // Returns value or empty string if not found
 string Connection::select_value(const string& table, const string& field,
-				const string& where)
+                                const string& where)
 {
   ostringstream oss;
   oss << "SELECT " << field << " FROM " << table;
@@ -352,7 +352,7 @@ string Connection::select_value(const string& table, const string& field,
 // (unescaped) value
 // Returns value or empty string if not found
 string Connection::select_value(const string& table, const string& field,
-				const Row& where_row)
+                                const Row& where_row)
 {
   return select_value(table, field, where_row.get_where_clause());
 }
@@ -362,8 +362,8 @@ string Connection::select_value(const string& table, const string& field,
 // with the given integer ID, and return the (unescaped) value
 // Returns value or empty string if not found
 string Connection::select_value_by_id(const string& table,
-				      const string& field,
-				      int id, const string& id_field)
+                                      const string& field,
+                                      int id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -372,8 +372,8 @@ string Connection::select_value_by_id(const string& table,
 
 // Ditto, 64-bit
 string Connection::select_value_by_id64(const string& table,
-					const string& field,
-					uint64_t id, const string& id_field)
+                                        const string& field,
+                                        uint64_t id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -386,8 +386,8 @@ string Connection::select_value_by_id64(const string& table,
 // ID value is escaped
 // Returns value or empty string if not found
 string Connection::select_value_by_id(const string& table,
-				      const string& field,
-				      const string& id, const string& id_field)
+                                      const string& field,
+                                      const string& id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << FieldValue::quote(id);
@@ -416,14 +416,14 @@ int Connection::count(const string& table, const Row& where_row)
 // Check if a row exists with the given integer ID
 // Returns whether the row exists
 bool Connection::exists_id(const string& table,
-			   int id, const string& id_field)
+                           int id, const string& id_field)
 {
   return !select_value_by_id(table, id_field, id, id_field).empty();
 }
 
 // Ditto, 64-bit
 bool Connection::exists_id64(const string& table,
-			     uint64_t id, const string& id_field)
+                             uint64_t id, const string& id_field)
 {
   return !select_value_by_id64(table, id_field, id, id_field).empty();
 }
@@ -433,7 +433,7 @@ bool Connection::exists_id64(const string& table,
 // ID value is escaped
 // Returns whether the row exists
 bool Connection::exists_id(const string& table,
-			   const string& id, const string& id_field)
+                           const string& id, const string& id_field)
 {
   return !select_value_by_id(table, id_field, id, id_field).empty();
 }
@@ -444,7 +444,7 @@ bool Connection::exists_id(const string& table,
 // If where is empty, doesn't add a WHERE at all
 // Returns whether successful
 bool Connection::update(const string& table, const Row& row,
-			const string& where)
+                        const string& where)
 {
   ostringstream oss;
   oss << "UPDATE " << table << " SET " << row.get_escaped_assignments();
@@ -458,7 +458,7 @@ bool Connection::update(const string& table, const Row& row,
 // Values are escaped automatically
 // Returns whether successful
 bool Connection::update(const string& table, const Row& row,
-			const Row& where_row)
+                        const Row& where_row)
 {
   return update(table, row, where_row.get_where_clause());
 }
@@ -468,7 +468,7 @@ bool Connection::update(const string& table, const Row& row,
 // matching the given integer ID
 // Returns whether successful
 bool Connection::update_id(const string& table, const Row& row,
-			   int id, const string& id_field)
+                           int id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -477,7 +477,7 @@ bool Connection::update_id(const string& table, const Row& row,
 
 // Ditto, 64-bit
 bool Connection::update_id64(const string& table, const Row& row,
-			     uint64_t id, const string& id_field)
+                             uint64_t id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -490,7 +490,7 @@ bool Connection::update_id64(const string& table, const Row& row,
 // ID value is escaped
 // Returns whether successful
 bool Connection::update_id(const string& table, const Row& row,
-			   const string& id, const string& id_field)
+                           const string& id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << FieldValue::quote(id);
@@ -521,7 +521,7 @@ bool Connection::delete_all(const string& table, const Row& where_row)
 // Do an DELETE in the given table matching the given integer ID
 // Returns whether successful
 bool Connection::delete_id(const string& table,
-			   int id, const string& id_field)
+                           int id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -530,7 +530,7 @@ bool Connection::delete_id(const string& table,
 
 // Ditto, 64-bit
 bool Connection::delete_id64(const string& table,
-			     uint64_t id, const string& id_field)
+                             uint64_t id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << id;
@@ -542,7 +542,7 @@ bool Connection::delete_id64(const string& table,
 // ID value is escaped
 // Returns whether successful
 bool Connection::delete_id(const string& table,
-			   const string& id, const string& id_field)
+                           const string& id, const string& id_field)
 {
   ostringstream oss;
   oss << id_field << " = " << FieldValue::quote(id);
@@ -553,8 +553,8 @@ bool Connection::delete_id(const string& table,
 // DELETE from a join table with two foreign ID fields
 // Returns whether successful
 bool Connection::delete_join(const string& table,
-			     const string& field1, int id1,
-			     const string& field2, int id2)
+                             const string& field1, int id1,
+                             const string& field2, int id2)
 {
   ostringstream oss;
   oss << field1 << " = " << id1 << " AND " << field2 << " = " << id2;
@@ -563,8 +563,8 @@ bool Connection::delete_join(const string& table,
 
 // Ditto, 64-bit
 bool Connection::delete_join64(const string& table,
-			       const string& field1, uint64_t id1,
-			       const string& field2, uint64_t id2)
+                               const string& field1, uint64_t id1,
+                               const string& field2, uint64_t id2)
 {
   ostringstream oss;
   oss << field1 << " = " << id1 << " AND " << field2 << " = " << id2;

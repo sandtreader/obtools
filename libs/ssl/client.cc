@@ -54,7 +54,7 @@ TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote):
 // Constructor, binding specific local address/port and with timeout
 // port can be zero if you only want to bind address
 TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
-		     int timeout): server(remote)
+                     int timeout): server(remote)
 {
   Net::TCPClient base(local, remote, timeout);
   connected = !!base;
@@ -66,7 +66,7 @@ TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
 // Constructor, binding specific local address/port and with timeout and TTL
 // port can be zero if you only want to bind address
 TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
-		     int timeout, int ttl): server(remote)
+                     int timeout, int ttl): server(remote)
 {
   Net::TCPClient base(local, remote, timeout, ttl);
   connected = !!base;

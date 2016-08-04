@@ -22,11 +22,11 @@ public:
   TestServer(Net::EndPoint ep): Net::TCPServer(ep) {}
 
   void process(Net::TCPSocket& s,
-	       Net::EndPoint client);
+               Net::EndPoint client);
 };
 
 void TestServer::process(Net::TCPSocket& s,
-			 Net::EndPoint client)
+                         Net::EndPoint client)
 {
   cerr << "Got connection from " << client
        << " (" << s.get_mac(client.host) << ")" << endl;

@@ -68,20 +68,20 @@ protected:
   // Iterate over child elements, expanding template inline
   // Accumulates expanded script in 'script'
   virtual void expand_inline(XML::Element& te, XML::Element& parent,
-			     CPPT::Tags& tags,
-			     int& max_ci,
-			     const string& streamname,
-			     string& script,
-			     bool is_root = false);
+                             CPPT::Tags& tags,
+                             int& max_ci,
+                             const string& streamname,
+                             string& script,
+                             bool is_root = false);
 
   //--------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
   virtual void expand_use(XML::Element& use_e,
-			  XML::Element& define_e,
-			  XML::Element& parent,
-			  CPPT::Tags& tags,
-			  const string& streamname,
-			  bool is_root = false);
+                          XML::Element& define_e,
+                          XML::Element& parent,
+                          CPPT::Tags& tags,
+                          const string& streamname,
+                          bool is_root = false);
 
   //--------------------------------------------------------------------------
   // Generate includes / file-level code
@@ -97,7 +97,7 @@ public:
   // Constructor - read configuration from config file, output code
   // to given output stream, errors to error stream
   XMIGenerator(const string& _config_file,
-	       ostream& _sout=cout, ostream& _serr=cerr):
+               ostream& _sout=cout, ostream& _serr=cerr):
     Generator(_config_file, _sout, _serr) {}
 };
 
@@ -170,11 +170,11 @@ string XMIGenerator::scope_var(Scope scope)
 // Iterate over child elements, expanding template inline
 // Accumulates expanded script in 'script'
 void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
-				 CPPT::Tags& tags,
-				 int& max_ci,
-				 const string& streamname,
-				 string& script,
-				 bool is_root)
+                                 CPPT::Tags& tags,
+                                 int& max_ci,
+                                 const string& streamname,
+                                 string& script,
+                                 bool is_root)
 {
   string sname = te.get_attr("scope", "class");
   Scope scope = get_scope(sname);
@@ -220,7 +220,7 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
     sout << "                      " << p_var << listop << ")\n";
 
     generate_template(te, te, tags, max_ci, index_var, count_var,
-		      streamname, script);
+                      streamname, script);
     process_script(script, tags, streamname, max_ci);
     script.clear();
 
@@ -232,11 +232,11 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 //--------------------------------------------------------------------------
 // Iterate over child elements, calling predefined template
 void XMIGenerator::expand_use(XML::Element& use_e,
-			      XML::Element& define_e,
-			      XML::Element& parent,
-			      CPPT::Tags& tags,
-			      const string& streamname,
-			      bool is_root)
+                              XML::Element& define_e,
+                              XML::Element& parent,
+                              CPPT::Tags& tags,
+                              const string& streamname,
+                              bool is_root)
 {
   string sname = define_e.get_attr("scope", "class");
   Scope scope = get_scope(sname);
@@ -286,7 +286,7 @@ void XMIGenerator::expand_use(XML::Element& use_e,
     sout << "                      " << p_var << listop << ")\n";
 
     generate_use(use_e, define_e, tags, c_var,
-		 index_var, count_var, streamname);
+                 index_var, count_var, streamname);
 
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_UML_ENDFOR\n";

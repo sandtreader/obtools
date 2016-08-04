@@ -82,7 +82,7 @@ void regenbuf::close()
   if (rename(newfn.c_str(), fn.c_str()))
   {
     cerr << "Rename of " << newfn << " to " << fn << " failed - "
-	 << strerror(errno) << endl;
+         << strerror(errno) << endl;
   }
 }
 

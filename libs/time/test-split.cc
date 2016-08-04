@@ -16,7 +16,7 @@ using namespace ObTools;
 
 // Generic split test - check string format splits to correct values
 void test_split(const string& str, int year, int month, int day,
-		int hour = 0, int min = 0, int sec = 0)
+                int hour = 0, int min = 0, int sec = 0)
 {
   // Auto add time if not given
   string s = str;

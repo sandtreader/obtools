@@ -84,8 +84,8 @@ bool Client::respond(Message& request)
 // Return an error to request given
 // Returns whether successul
 bool Client::respond(SOAP::Fault::Code code,
-		     const string& reason,
-		     Message& request)
+                     const string& reason,
+                     Message& request)
 {
   FaultMessage errm(request.get_id(), code, reason);
   return send(errm);
@@ -119,15 +119,15 @@ bool Client::request(Message& req, Message& response)
       // no interleaving of responses
       if (req.get_id() == response.get_ref())
       {
-	// Did we restart earlier - now resubscribe after we've got the
-	// result of our original request out of the way
-	if (restarted)
-	{
-	  log.summary << "Resubscribing\n";
-	  resubscribe();
-	}
+        // Did we restart earlier - now resubscribe after we've got the
+        // result of our original request out of the way
+        if (restarted)
+        {
+          log.summary << "Resubscribing\n";
+          resubscribe();
+        }
 
-	return true;
+        return true;
       }
 
       // Requeue on the secondary queue so wait() gets it later

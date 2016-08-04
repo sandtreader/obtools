@@ -29,9 +29,9 @@ string Expander::expand(XML::Element& values)
 // Internal recursive expansion, taking current template context and
 // value context
 string Expander::expand_recursive(const XML::Element& templ,
-				  XML::Element& values,
-				  int index,
-				  map<string, string>& vars)
+                                  XML::Element& values,
+                                  int index,
+                                  map<string, string>& vars)
 {
   string text = templ.content;  // In case it is optimised (in which case it
                                 // won't have any children)
@@ -51,55 +51,55 @@ string Expander::expand_recursive(const XML::Element& templ,
     }
     else if (te.name == "expand:replace"
           || te.name == "expand:if"
-	  || te.name == "expand:unless"
-	  || te.name == "expand:ifeq"
-	  || te.name == "expand:ifne")
+          || te.name == "expand:unless"
+          || te.name == "expand:ifeq"
+          || te.name == "expand:ifne")
     {
       // All take a value or var attribute
       string value;
       if (te.has_attr("var"))
       {
-	// Variable lookup
-	string var = te["var"];
-	value = vars[var];
+        // Variable lookup
+        string var = te["var"];
+        value = vars[var];
       }
       else // Note - empty path is allowed
       {
-	// XPath expression
-	string path = te["value"];
-	value = xpath[path];
+        // XPath expression
+        string path = te["value"];
+        value = xpath[path];
       }
 
       if (te.name == "expand:replace")
       {
-	// Simple expansion of the value
-	text += value;
+        // Simple expansion of the value
+        text += value;
       }
       else if (te.name == "expand:if")
       {
-	// Expand this recursively if value is 'true' (begins [TtYy1])
-	char c = value.empty()?0:value[0];
-	if (c=='T' || c=='t' || c=='Y' || c=='y' || c=='1')
-	  text += expand_recursive(te, values, index, vars);
+        // Expand this recursively if value is 'true' (begins [TtYy1])
+        char c = value.empty()?0:value[0];
+        if (c=='T' || c=='t' || c=='Y' || c=='y' || c=='1')
+          text += expand_recursive(te, values, index, vars);
       }
       else if (te.name == "expand:unless")
       {
-	// Expand this recursively if value is not 'true' (begins [TtYy1])
-	char c = value.empty()?0:value[0];
-	if (c!='T' && c!='t' && c!='Y' && c!='y' && c!='1')
-	  text += expand_recursive(te, values, index, vars);
+        // Expand this recursively if value is not 'true' (begins [TtYy1])
+        char c = value.empty()?0:value[0];
+        if (c!='T' && c!='t' && c!='Y' && c!='y' && c!='1')
+          text += expand_recursive(te, values, index, vars);
       }
       else if (te.name == "expand:ifeq")
       {
-	// Expand this recursively if value is equal to 'to'
-	string to = te["to"];
-	if (value == to) text += expand_recursive(te, values, index, vars);
+        // Expand this recursively if value is equal to 'to'
+        string to = te["to"];
+        if (value == to) text += expand_recursive(te, values, index, vars);
       }
       else if (te.name == "expand:ifne")
       {
-	// Expand this recursively if value is not equal to 'to'
-	string to = te["to"];
-	if (value != to) text += expand_recursive(te, values, index, vars);
+        // Expand this recursively if value is not equal to 'to'
+        string to = te["to"];
+        if (value != to) text += expand_recursive(te, values, index, vars);
       }
     }
     else if (te.name == "expand:each")
@@ -110,14 +110,14 @@ string Expander::expand_recursive(const XML::Element& templ,
 
       int i=0;
       for(list<Element *>::iterator ep = elements.begin();
-	  ep!=elements.end(); ++ep)
+          ep!=elements.end(); ++ep)
       {
-	Element& e = **ep;
+        Element& e = **ep;
 
-	// Recurse to children with this element as new value structure
-	// and this loop's index, with new variables (provides scoping)
-	map<string, string> newvars = vars;
-	text += expand_recursive(te, e, i++, newvars);
+        // Recurse to children with this element as new value structure
+        // and this loop's index, with new variables (provides scoping)
+        map<string, string> newvars = vars;
+        text += expand_recursive(te, e, i++, newvars);
       }
     }
     else if (te.name == "expand:index")
@@ -140,14 +140,14 @@ string Expander::expand_recursive(const XML::Element& templ,
       // add start tag, expand content and then end-tag
       if (te.children.size())
       {
-	text += te.start_to_string();
-	text += expand_recursive(te, values, index, vars);
-	text += te.end_to_string();
+        text += te.start_to_string();
+        text += expand_recursive(te, values, index, vars);
+        text += te.end_to_string();
       }
       else
       {
-	// Output empty-close form
-	text += te.to_string();
+        // Output empty-close form
+        text += te.to_string();
       }
     }
   }

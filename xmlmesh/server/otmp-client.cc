@@ -76,7 +76,7 @@ OTMPClientService::OTMPClientService(const XML::Element& cfg):
       log.summary << "  Subscribed to " << subject << " at " << host << endl;
     else
       log.error << "OTMP Client to " << host << " can't subscribe to "
-		<< subject << endl;
+                << subject << endl;
   }
 }
 

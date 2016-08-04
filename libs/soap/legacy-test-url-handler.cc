@@ -23,8 +23,8 @@ class TestURLHandler: public SOAP::URLHandler
   // Implementation of message handler
   bool handle_message(const SOAP::Message& request,
                       SOAP::Message& response,
-		      const Web::HTTPMessage&, Web::HTTPMessage&,
-		      const SSL::ClientDetails& client)
+                      const Web::HTTPMessage&, Web::HTTPMessage&,
+                      const SSL::ClientDetails& client)
   {
     Log::Streams log;
     log.summary << "SOAP request from " << client << endl;

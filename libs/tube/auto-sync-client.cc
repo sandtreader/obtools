@@ -36,7 +36,7 @@ class DispatchThread: public MT::Thread
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << client.name
-			 << " (dispatch): Thread shut down\n";)
+                         << " (dispatch): Thread shut down\n";)
   }
 
 public:
@@ -50,14 +50,14 @@ void AutoSyncClient::handle_async_message(Message& msg)
 {
   Log::Streams log;
   log.error << name << ": Non-response message "
-	    << msg.stag() << " ignored\n";
+            << msg.stag() << " ignored\n";
 
   if (msg.flags & FLAG_RESPONSE_REQUIRED)
   {
     log.detail << "But response requested, so we'll oblige\n";
     Message response(0x4641494C,
-		     "Unknown request",
-		     FLAG_RESPONSE_PROVIDED | (msg.flags & MASK_REQUEST_ID));
+                     "Unknown request",
+                     FLAG_RESPONSE_PROVIDED | (msg.flags & MASK_REQUEST_ID));
     send(response);
   }
 }
@@ -69,7 +69,7 @@ void AutoSyncClient::handle_async_message(Message& msg)
 // Constructor - takes server endpoint (address+port), request timeout
 // (in seconds) and optional name
 AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout,
-			       const string& _name):
+                               const string& _name):
   SyncClient(_server, _timeout, _name)
 {
   dispatch_thread = new DispatchThread(*this);
@@ -78,7 +78,7 @@ AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout,
 //------------------------------------------------------------------------
 // Constructor with SSL
 AutoSyncClient::AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
-			       int _timeout, const string& _name):
+                               int _timeout, const string& _name):
   SyncClient(_server, _ctx, _timeout, _name)
 {
   dispatch_thread = new DispatchThread(*this);

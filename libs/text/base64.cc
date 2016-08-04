@@ -22,7 +22,7 @@ static const char base64_chars[] =
 // Set 0 to suppress split altogether
 // line_end is string to split with, and indent for next line
 string Base64::encode(const unsigned char *block, size_t length,
-		      int split, const string& line_end)
+                      int split, const string& line_end)
 {
   string base64;
 
@@ -49,17 +49,17 @@ string Base64::encode(const unsigned char *block, size_t length,
       // Run out up to 4 6-bit indexes
       for(int j=0; j<count; j++)
       {
-	// Extract from bit 18 to 23, then shift up for next time
-	int in = (n >> 18) & 0x3f;
-	n <<= 6;
+        // Extract from bit 18 to 23, then shift up for next time
+        int in = (n >> 18) & 0x3f;
+        n <<= 6;
 
-	// Encode into base64 characters, plus extras
-	if (in < 62)
-	  base64 += base64_chars[in];
-	else if (in == 62)
-	  base64 += extra_62;
-	else
-	  base64 += extra_63;
+        // Encode into base64 characters, plus extras
+        if (in < 62)
+          base64 += base64_chars[in];
+        else if (in == 62)
+          base64 += extra_62;
+        else
+          base64 += extra_63;
       }
 
       // Split if requested
@@ -104,7 +104,7 @@ string Base64::encode(uint64_t n)
 //--------------------------------------------------------------------------
 // Encode a binary string - options as encode above
 string Base64::encode(const string& binary, int split,
-		      const string& line_end)
+                      const string& line_end)
 {
   return encode(reinterpret_cast<const unsigned char *>(binary.data()),
                 binary.size(), split, line_end);
@@ -126,7 +126,7 @@ size_t Base64::binary_length(const string& base64)
 // Returns real length decoded if it fitted, max_length+1 if it didn't
 // - but it will never actually write more than max_length bytes
 size_t Base64::decode(const string& base64, unsigned char *block,
-		      size_t max_length)
+                      size_t max_length)
 {
   size_t written = 0;
   uint32_t n = 0;
@@ -163,11 +163,11 @@ size_t Base64::decode(const string& base64, unsigned char *block,
       // Turn into 3 bytes, top byte first
       for(int j=0; j<3; j++)
       {
-	if (written < max_length)
-	  block[written++] = static_cast<unsigned char>(n >> 16);
-	else
-	  return max_length+1;
-	n <<=8;
+        if (written < max_length)
+          block[written++] = static_cast<unsigned char>(n >> 16);
+        else
+          return max_length+1;
+        n <<=8;
       }
 
       n=0;
@@ -183,9 +183,9 @@ size_t Base64::decode(const string& base64, unsigned char *block,
     for(int j=0; j<(i&3)-1; j++)
     {
       if (written < max_length)
-	block[written++] = static_cast<unsigned char>(n >> 16);
+        block[written++] = static_cast<unsigned char>(n >> 16);
       else
-	return max_length+1;
+        return max_length+1;
       n <<=8;
     }
   }

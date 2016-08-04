@@ -38,20 +38,20 @@ int main(int argc, char **argv)
 
       try
       {
-	// Just output and reflect what we get
-	string buf;
-	while (*s >> buf)
-	{
-	  cout << buf;
-	  *s << "<< " << buf << "\n";
-	}
+        // Just output and reflect what we get
+        string buf;
+        while (*s >> buf)
+        {
+          cout << buf;
+          *s << "<< " << buf << "\n";
+        }
 
-	cout << "Connection from " << client << " ended\n";
+        cout << "Connection from " << client << " ended\n";
       }
       catch (ObTools::Net::SocketError se)
       {
-	cerr << se << endl;
-	return 2;
+        cerr << se << endl;
+        return 2;
       }
 
       delete s;

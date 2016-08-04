@@ -71,30 +71,30 @@ string condense_blank_lines(const string& text)
     {
       case ' ':
       case '\t':
-	// Just keep it in case line turns out not to be blank
+        // Just keep it in case line turns out not to be blank
       break;
 
       case '\n':
-	if (is_blank)
-	{
-	  // It was a blank line (or an empty one) - suppress it for now
-	  blank_lines++;
-	}
-	else
-	{
-	  // It wasn't blank - check if we have any suppressed
-	  if (blank_lines > 0) newtext += '\n';
-	  blank_lines = 0;
-	  newtext += line;  // Pass it through
-	}
+        if (is_blank)
+        {
+          // It was a blank line (or an empty one) - suppress it for now
+          blank_lines++;
+        }
+        else
+        {
+          // It wasn't blank - check if we have any suppressed
+          if (blank_lines > 0) newtext += '\n';
+          blank_lines = 0;
+          newtext += line;  // Pass it through
+        }
 
-	// Set up for next one
-	line.clear();
-	is_blank = true;
+        // Set up for next one
+        line.clear();
+        is_blank = true;
       break;
 
       default:  // Any non-whitespace - line isn't blank
-	is_blank = false;
+        is_blank = false;
       break;
     }
   }
@@ -121,24 +121,24 @@ int get_common_indent(const string& text)
     switch (*p)
     {
       case ' ':
-	if (!seen_text) indent++;
+        if (!seen_text) indent++;
       break;
 
       case '\t':
-	if (!seen_text) indent+=8;
+        if (!seen_text) indent+=8;
       break;
 
       case '\n':
-	seen_text = false;
-	indent = 0;
+        seen_text = false;
+        indent = 0;
       break;
 
       default:  // Any non-whitespace
-	if (!seen_text)
-	{
-	  if (indent < min) min = indent;
-	  seen_text = true;
-	}
+        if (!seen_text)
+        {
+          if (indent < min) min = indent;
+          seen_text = true;
+        }
       break;
     }
   }
@@ -159,24 +159,24 @@ string remove_indent(const string& text, int indent)
     switch (c)
     {
       case ' ':
-	// Only add spaces if used up indent
-	if (pos++ >= indent) result+=c;
+        // Only add spaces if used up indent
+        if (pos++ >= indent) result+=c;
       break;
 
       case '\t':
-	// Only add tab if used up indent
-	if (pos >= indent) result+=c;
-	pos += 8;
+        // Only add tab if used up indent
+        if (pos >= indent) result+=c;
+        pos += 8;
       break;
 
       case '\n':
-	pos = 0;
-	result+=c;
+        pos = 0;
+        result+=c;
       break;
 
       default:  // Any non-whitespace
-	pos++;
-	result+=c;
+        pos++;
+        result+=c;
       break;
     }
   }
@@ -202,38 +202,38 @@ string canonicalise_space(const string& text)
       case '\t':
       case '\r':
       case '\n':
-	switch (state)
-	{
-	  case 0: // At start, ignore it
-	    break;
+        switch (state)
+        {
+          case 0: // At start, ignore it
+            break;
 
-	  case 1: // After word, go to WS state
-	    state = 2;
-	    break;
+          case 1: // After word, go to WS state
+            state = 2;
+            break;
 
-	  case 2: // More WS - ignore it
-	    break;
-	}
-	break;
+          case 2: // More WS - ignore it
+            break;
+        }
+        break;
 
       default:
-	switch (state)
-	{
-	  case 0: // At start - keep it and go to word
-	    fixed+=c;
-	    state = 1;
-	    break;
+        switch (state)
+        {
+          case 0: // At start - keep it and go to word
+            fixed+=c;
+            state = 1;
+            break;
 
-	  case 1: // More word - keep it
-	    fixed+=c;
-	    break;
+          case 1: // More word - keep it
+            fixed+=c;
+            break;
 
-	  case 2: // First after WS - add single space, keep this and go to 1
-	    fixed+=' ';
-	    fixed+=c;
-	    state = 1;
-	    break;
-	}
+          case 2: // First after WS - add single space, keep this and go to 1
+            fixed+=' ';
+            fixed+=c;
+            state = 1;
+            break;
+        }
     }
   }
 

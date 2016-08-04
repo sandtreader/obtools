@@ -43,7 +43,7 @@ void TimestampFilter::log(Message& msg)
   // ! If there are any more of these, do it more efficiently!
   string tmp_format = Text::subst(format, "%*L", Text::itos(msg.level));
   tmp_format = Text::subst(tmp_format, "%*S",
-			   Text::ftos(msg.timestamp.seconds(),6,3,true));
+                           Text::ftos(msg.timestamp.seconds(),6,3,true));
 
   // Now do strftime on what's left
   char stm[81];

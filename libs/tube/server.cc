@@ -38,32 +38,32 @@ class ServerSendThread: public MT::Thread
 
       // Deal with it
       OBTOOLS_LOG_IF_DEBUG(log.debug << server.name
-			   << " (ssend): Sending message "
-			   << msg.stag() << ", length "
-			   << msg.data.size()
-			   << " (flags " << hex << msg.flags << dec << ")\n";)
+                           << " (ssend): Sending message "
+                           << msg.stag() << ", length "
+                           << msg.data.size()
+                           << " (flags " << hex << msg.flags << dec << ")\n";)
       OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
-			  dumper.dump(msg.data);)
+                          dumper.dump(msg.data);)
 
       try // Handle SocketErrors
       {
-	// Write chunk header
-	session.socket.write_nbo_int(msg.tag);
-	session.socket.write_nbo_int(msg.data.size());
-	session.socket.write_nbo_int(msg.flags); // Flags
+        // Write chunk header
+        session.socket.write_nbo_int(msg.tag);
+        session.socket.write_nbo_int(msg.data.size());
+        session.socket.write_nbo_int(msg.flags); // Flags
 
-	// Write data
-	session.socket.write(msg.data);
+        // Write data
+        session.socket.write(msg.data);
       }
       catch (Net::SocketError se)
       {
-	log.error << server.name << " (ssend): " << se << endl;
-	break;
+        log.error << server.name << " (ssend): " << se << endl;
+        break;
       }
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << server.name
-			 << " (ssend): Thread shutting down\n";)
+                         << " (ssend): Thread shutting down\n";)
   }
 
 public:
@@ -89,7 +89,7 @@ bool Server::verify(Net::EndPoint ep) const
 //------------------------------------------------------------------------
 // TCPServer process method - called in worker thread to handle connection
 void Server::process(SSL::TCPSocket& socket,
-		     const SSL::ClientDetails& client)
+                     const SSL::ClientDetails& client)
 {
   Log::Streams log;  // Our private log
 
@@ -129,40 +129,40 @@ void Server::process(SSL::TCPSocket& socket,
       // Verify tag
       if (tag_recognised(tag))
       {
-	// Handle a TLV block
-	uint32_t len   = socket.read_nbo_int();
-	msg.msg.flags = socket.read_nbo_int();
+        // Handle a TLV block
+        uint32_t len   = socket.read_nbo_int();
+        msg.msg.flags = socket.read_nbo_int();
 
-	OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Received message "
-			     << msg.msg.stag() << ", length "
-			     << len << " (flags "
-			     << hex << msg.msg.flags << dec << ")\n";)
+        OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Received message "
+                             << msg.msg.stag() << ", length "
+                             << len << " (flags "
+                             << hex << msg.msg.flags << dec << ")\n";)
 
-	// Read the data
-	if (!socket.read(msg.msg.data, len))
-	{
-	  log.error << name << ": Short message read - socket died\n";
-	  obit = "died";
-	  break;
-	}
+        // Read the data
+        if (!socket.read(msg.msg.data, len))
+        {
+          log.error << name << ": Short message read - socket died\n";
+          obit = "died";
+          break;
+        }
 
-	OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
-			    dumper.dump(msg.msg.data);)
+        OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
+                            dumper.dump(msg.msg.data);)
 
-	// Post up a message
-	if (!handle_message(msg))
-	{
-	  obit = "killed by server";
-	  break;
-	}
+        // Post up a message
+        if (!handle_message(msg))
+        {
+          obit = "killed by server";
+          break;
+        }
       }
       else
       {
-	// Unrecognised tag
-	log.error << name << ": Unrecognised tag "
-		  << msg.msg.stag() << " - out-of-sync?\n";
-	obit = "unsynced";
-	break;
+        // Unrecognised tag
+        log.error << name << ": Unrecognised tag "
+                  << msg.msg.stag() << " - out-of-sync?\n";
+        obit = "unsynced";
+        break;
       }
     }
     catch (Net::SocketError se)
@@ -201,14 +201,14 @@ void Server::process(SSL::TCPSocket& socket,
     obit = "failed (send)";
 
   log.summary << name << ": Connection from " << client
-	      << " " << obit << endl;
+              << " " << obit << endl;
 }
 
 
 //------------------------------------------------------------------------
 // Constructor
 Server::Server(int port, const string& _name, int backlog,
-	       int min_spare_threads, int max_threads, int _client_timeout):
+               int min_spare_threads, int max_threads, int _client_timeout):
   SSL::TCPServer(0, port, backlog, min_spare_threads, max_threads),
   alive(true), client_timeout(_client_timeout),
   max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
@@ -219,9 +219,9 @@ Server::Server(int port, const string& _name, int backlog,
 //------------------------------------------------------------------------
 // Constructor with SSL
 Server::Server(SSL::Context *_ctx, int port,
-	       const string& _name, int backlog,
-	       int min_spare_threads, int max_threads,
-	       int _client_timeout):
+               const string& _name, int backlog,
+               int min_spare_threads, int max_threads,
+               int _client_timeout):
   SSL::TCPServer(_ctx, port, backlog, min_spare_threads, max_threads),
   alive(true), client_timeout(_client_timeout),
   max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
@@ -232,8 +232,8 @@ Server::Server(SSL::Context *_ctx, int port,
 //------------------------------------------------------------------------
 // Constructor
 Server::Server(Net::EndPoint local, const string& _name, int backlog,
-	       int min_spare_threads, int max_threads,
-	       int _client_timeout):
+               int min_spare_threads, int max_threads,
+               int _client_timeout):
   SSL::TCPServer(0, local, backlog, min_spare_threads, max_threads),
   alive(true), client_timeout(_client_timeout),
   max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)
@@ -244,9 +244,9 @@ Server::Server(Net::EndPoint local, const string& _name, int backlog,
 //------------------------------------------------------------------------
 // Constructor with SSL
 Server::Server(SSL::Context *_ctx, Net::EndPoint local,
-	       const string& _name, int backlog,
-	       int min_spare_threads, int max_threads,
-	       int _client_timeout):
+               const string& _name, int backlog,
+               int min_spare_threads, int max_threads,
+               int _client_timeout):
   SSL::TCPServer(_ctx, local, backlog, min_spare_threads, max_threads),
   alive(true), client_timeout(_client_timeout),
   max_send_queue(DEFAULT_MAX_SEND_QUEUE), name(_name)

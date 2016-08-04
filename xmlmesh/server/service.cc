@@ -166,8 +166,8 @@ bool Service::respond(const RoutingMessage& request)
 // Return a fault to an existing request
 // Returns whether successul
 bool Service::respond(const RoutingMessage& request,
-		      SOAP::Fault::Code code,
-		      const string& reason)
+                      SOAP::Fault::Code code,
+                      const string& reason)
 {
   FaultMessage response(request.message.get_id(), code, reason);
   return respond(response, request);

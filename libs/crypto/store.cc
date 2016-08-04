@@ -22,7 +22,7 @@ namespace ObTools { namespace Crypto {
 // ca_dir should refer to a directory containing certificate files with
 // hashed names (see OpenSSL docs)
 CertificateStore::CertificateStore(const string& ca_file,
-				   const string& ca_dir)
+                                   const string& ca_dir)
 {
   store = X509_STORE_new();
 
@@ -56,7 +56,7 @@ bool CertificateStore::add_crl(const string& crl_file, bool all)
     return false;
 
   X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK
-		            | (all?X509_V_FLAG_CRL_CHECK_ALL:0));
+                            | (all?X509_V_FLAG_CRL_CHECK_ALL:0));
   return true;
 }
 

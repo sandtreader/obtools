@@ -65,8 +65,8 @@ private:
 
 public:
   TestDaemon(): Daemon::Process("Daemon library test", "0.1",
-				"test.cfg", "test",
-				"/tmp/test.log", "/var/run/test.pid")
+                                "test.cfg", "test",
+                                "/tmp/test.log", "/var/run/test.pid")
   {
   }
 };

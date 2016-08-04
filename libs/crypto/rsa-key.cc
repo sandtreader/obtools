@@ -34,7 +34,7 @@ void RSAKey::create(int size, int exponent)
 // If force_private is set, reads a private key PEM block even if a
 // public key is wanted (use for testing both ends with a single key)
 void RSAKey::read(istream& sin, const string& pass_phrase,
-		  bool force_private)
+                  bool force_private)
 {
   string key;
   // Read all we can into the string
@@ -51,7 +51,7 @@ void RSAKey::read(istream& sin, bool force_private)
 // If force_public is set, writes a public key PEM block even if
 // a private key is held - use to generate new public/private pairs
 void RSAKey::write(ostream& sout, const string& pass_phrase,
-		   bool force_public) const
+                   bool force_public) const
 {
   sout << str(pass_phrase, force_public);
 }
@@ -64,8 +64,8 @@ void RSAKey::write(ostream& sout, bool force_public) const
 // Read from string - reads PEM format, with pass phrase
 // If force_private is set, reads a private key even if public (see above)
 void RSAKey::read(const string& text,
-		  const string& pass_phrase,
-		  bool force_private)
+                  const string& pass_phrase,
+                  bool force_private)
 {
   int length = text.size()+1; // C string
 

@@ -152,13 +152,13 @@ void Element::write_indented(int indent, ostream &s) const
       //Could have an 'optimised' content string, though
       if (content.size())
       {
-	//String it all on one line - escaped for &, < and >
-	s << '>' << escape(content, false) << "</" << name << '>' << endl;
+        //String it all on one line - escaped for &, < and >
+        s << '>' << escape(content, false) << "</" << name << '>' << endl;
       }
       else
       {
-	//No, it's really empty
-	s << "/>" << endl;
+        //No, it's really empty
+        s << "/>" << endl;
       }
     }
     else
@@ -166,10 +166,10 @@ void Element::write_indented(int indent, ostream &s) const
       s << '>' << endl;
 
       for(list<Element *>::const_iterator p=children.begin();
-	  p!=children.end();
-	  p++)
+          p!=children.end();
+          p++)
       {
-	(*p)->write_indented(indent+2, s);
+        (*p)->write_indented(indent+2, s);
       }
 
       for(int i=0; i<indent; i++) s<<' ';
@@ -198,26 +198,26 @@ string Element::escape(const string &v, bool escquote) const
     switch (c)
     {
       case '<':
-	r+="&lt;";
-	break;
+        r+="&lt;";
+        break;
 
       case '>':
-	r+="&gt;";
-	break;
+        r+="&gt;";
+        break;
 
       case '&':
-	r+="&amp;";
-	break;
+        r+="&amp;";
+        break;
 
       case '"':
-	if (escquote)
-	  r+="&quot;";
-	else
-	  r+=c;
-	break;
+        if (escquote)
+          r+="&quot;";
+        else
+          r+=c;
+        break;
 
       default:
-	r+=c;
+        r+=c;
     }
   }
   return r;
@@ -336,7 +336,7 @@ bool Element::merge_xml(const string& xml, ostream& serr, int parse_flags)
     else
     {
       serr << "Wrong root name in merged XML: expecting " << name
-	   << " but got " << root.name << endl;
+           << " but got " << root.name << endl;
       return false;
     }
   }
@@ -528,7 +528,7 @@ list<Element *> Element::get_children(const string& ename)
 // where you want to deal with each level independently
 // Const and non-const implementations
 list<const Element *> Element::get_descendants(const string& ename,
-					       const string& prune) const
+                                               const string& prune) const
 {
   list<const Element *>l;
   append_descendants(ename, prune, l);
@@ -536,7 +536,7 @@ list<const Element *> Element::get_descendants(const string& ename,
 }
 
 list<Element *> Element::get_descendants(const string& ename,
-					 const string& prune)
+                                         const string& prune)
 {
   list<Element *>l;
   append_descendants(ename, prune, l);
@@ -550,7 +550,7 @@ list<Element *> Element::get_descendants(const string& ename,
 // <ename>s, not <ename>s within <ename>s
 // Const and non-const implementations
 void Element::append_descendants(const string& ename, const string& prune,
-				 list<const Element *>& l) const
+                                 list<const Element *>& l) const
 {
   for(list<Element *>::const_iterator p=children.begin();
       p!=children.end();
@@ -566,7 +566,7 @@ void Element::append_descendants(const string& ename, const string& prune,
 }
 
 void Element::append_descendants(const string& ename, const string& prune,
-				 list<Element *>& l)
+                                 list<Element *>& l)
 {
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
@@ -674,10 +674,10 @@ bool Element::get_attr_bool(const string& attname, bool def) const
       case 'T': case 't':
       case 'Y': case 'y':
       case '1':
-	return true;
+        return true;
 
       default:
-	return false;
+        return false;
     }
   }
 
@@ -867,8 +867,8 @@ string Element::get_xpath() const
     list<Element *>& sibs = current->parent->children;
 
     for(list<Element *>::const_iterator p=sibs.begin();
-	p!=sibs.end();
-	++p)
+        p!=sibs.end();
+        ++p)
     {
       if (*p == current) mycount = count;
       if ((*p)->name == current->name) count++;

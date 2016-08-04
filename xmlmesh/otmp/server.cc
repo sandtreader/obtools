@@ -18,10 +18,10 @@ namespace ObTools { namespace XMLMesh { namespace OTMP {
 //------------------------------------------------------------------------
 // Constructor
 Server::Server(ClientMessageQueue& receive_queue,
-	       int port, int backlog,
-	       int min_spare_threads, int max_threads, int timeout):
+               int port, int backlog,
+               int min_spare_threads, int max_threads, int timeout):
   Tube::Server((port?port:DEFAULT_PORT), "OTMP", backlog,
-	       min_spare_threads, max_threads, timeout),
+               min_spare_threads, max_threads, timeout),
   receive_q(receive_queue)
 {
 

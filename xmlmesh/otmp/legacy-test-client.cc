@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   }
 
   log.summary << "Host: " << addr
-	      << " (" << addr.get_hostname() << ")" << endl;
+              << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
   Net::EndPoint server(addr, port);
@@ -74,9 +74,9 @@ int main(int argc, char **argv)
 #endif
     {
       if (client.wait(msg))
-	cout << msg.data << endl;
+        cout << msg.data << endl;
       else
-	cout << "RESTART\n";
+        cout << "RESTART\n";
     }
   }
 

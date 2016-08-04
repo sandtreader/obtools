@@ -84,8 +84,8 @@ int main(int argc, char **argv)
       // Read stdin
       while (cin)
       {
-	int c = cin.get();
-	if (c>=0) data += c;
+        int c = cin.get();
+        if (c>=0) data += c;
       }
     }
     else
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   }
 
   log.summary << "Host: " << addr
-	      << " (" << addr.get_hostname() << ")" << endl;
+              << " (" << addr.get_hostname() << ")" << endl;
 
   // Get SSL context
   SSL_OpenSSL::Context ssl_ctx;
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
     if (!key_file.read_all(key_pem))
     {
       log.error << "Can't read key file " << key_file
-		<< ": " << key_pem << endl;
+                << ": " << key_pem << endl;
       return 4;
     }
 
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
     if (!cert_file.read_all(cert_pem))
     {
       log.error << "Can't read certificate file " << cert_file
-		<< ": " << cert_pem << endl;
+                << ": " << cert_pem << endl;
       return 4;
     }
 
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
       Tube::Message response;
 
       if (client.request(msg, response))
-	cout << response.data;
+        cout << response.data;
     }
 
     log.summary << "Shutting down\n";

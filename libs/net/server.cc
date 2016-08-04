@@ -85,9 +85,9 @@ void TCPServer::run()
       // there was a way to pass an allowed-list to the kernel...
       if (!verify(client))
       {
-	::SOCKCLOSE(new_fd);
-	threadpool.replace(thread);
-	continue;
+        ::SOCKCLOSE(new_fd);
+        threadpool.replace(thread);
+        continue;
       }
 
       // Fill in parameters

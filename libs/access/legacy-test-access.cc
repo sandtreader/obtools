@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     bool result = checker.check(resource, addr, user);
 
     cout << resource << "\t" << user << "\t" << address << "\t"
-	 << (result?"ALLOW":"DENY") << endl;
+         << (result?"ALLOW":"DENY") << endl;
   }
 
   return 0;

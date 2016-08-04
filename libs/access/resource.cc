@@ -17,8 +17,8 @@ namespace ObTools { namespace Access {
 // Constructor - reads from a <resource> element, using groups in given map
 // ns gives optional namespace prefix
 Resource::Resource(const XML::Element& resource_e,
-		   map<string, Group *>& groups,
-		   const string& ns)
+                   map<string, Group *>& groups,
+                   const string& ns)
 {
   Log::Streams log;
 
@@ -46,7 +46,7 @@ Resource::Resource(const XML::Element& resource_e,
 // Returns whether the resource matches our pattern - if so, writes the
 // access result to result_p
 bool Resource::check(const string& resource, Net::IPAddress address,
-		     const string& user, bool& result_p)
+                     const string& user, bool& result_p)
 {
   if (!Text::pattern_match(name, resource))  // Note:  Cased
     return false;

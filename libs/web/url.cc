@@ -33,10 +33,10 @@ URL::URL(XML::Element& xml)
       string user = xpath["user"];
       if (user.size())
       {
-	urls << user;
-	string password = xpath["password"];
-	if (password.size()) urls << ":" << password;
-	urls << '@';
+        urls << user;
+        string password = xpath["password"];
+        if (password.size()) urls << ":" << password;
+        urls << '@';
       }
 
       urls << host;
@@ -85,39 +85,39 @@ bool URL::split(XML::Element& xml) const
       string::size_type slash = text.find('/', p+3);
       string host;
       if (slash == string::npos)
-	host = string(text, p+3);
+        host = string(text, p+3);
       else
-	host = string(text, p+3, slash-p-3);
+        host = string(text, p+3, slash-p-3);
 
       // Check for @ prefix - username and password
       p = host.find('@');
       if (p != string::npos)
       {
-	// We have user:pass@host
-	string::size_type r = host.find(':');
-	if (r<p)  // Note, don't trip over later : for port number
-	{
-	  // Have password
-	  xml.add("user", string(host, 0, r));
-	  xml.add("password", string(host, r+1, p-r-1));
-	}
-	else
-	{
-	  // Just user
-	  xml.add("user", string(host, 0, p));
-	}
+        // We have user:pass@host
+        string::size_type r = host.find(':');
+        if (r<p)  // Note, don't trip over later : for port number
+        {
+          // Have password
+          xml.add("user", string(host, 0, r));
+          xml.add("password", string(host, r+1, p-r-1));
+        }
+        else
+        {
+          // Just user
+          xml.add("user", string(host, 0, p));
+        }
 
-	// Remove from host
-	host = string(host, p+1);
+        // Remove from host
+        host = string(host, p+1);
       }
 
       p = host.find(':');
       if (p == string::npos)
-	xml.add("host", host);
+        xml.add("host", host);
       else
       {
-	xml.add("host", string(host, 0, p));
-	xml.add("port", string(host, p+1));
+        xml.add("host", string(host, 0, p));
+        xml.add("port", string(host, p+1));
       }
 
       p = slash;
@@ -311,11 +311,11 @@ string URL::encode(const string& s, bool space_as_plus)
     else switch (c)
     {
       case ' ':
-	if (space_as_plus)
-	  r+='+';
-	else
-	  r+="%20";
-	break;
+        if (space_as_plus)
+          r+='+';
+        else
+          r+="%20";
+        break;
 
       // Reserved characters;
       case '+': case '%':
@@ -324,12 +324,12 @@ string URL::encode(const string& s, bool space_as_plus)
       case '$': case ',': case '/': case '?': case '#':
       case '[': case ']':
         snprintf(buf, 4, "%%%02X", static_cast<unsigned int>(c));
-	r+=buf;
-	break;
+        r+=buf;
+        break;
 
       // Normal characters
       default:
-	r += c;
+        r += c;
     }
   }
 
@@ -369,23 +369,23 @@ string URL::decode(const string& s, bool space_as_plus)
     switch (c)
     {
       case '+':
-	if (space_as_plus)
-	  r += ' ';
-	else
-	  r += '+';
-	break;
+        if (space_as_plus)
+          r += ' ';
+        else
+          r += '+';
+        break;
 
       case '%':
       {
-	string hex;
-	if (++p < l) hex+=s[p];
-	if (++p < l) hex+=s[p];
-	r += static_cast<char>(Text::xtoi(hex));
-	break;
+        string hex;
+        if (++p < l) hex+=s[p];
+        if (++p < l) hex+=s[p];
+        r += static_cast<char>(Text::xtoi(hex));
+        break;
       }
 
       default:
-	r += c;
+        r += c;
     }
   }
 
@@ -397,7 +397,7 @@ string URL::decode(const string& s, bool space_as_plus)
 // (x-www-form-urlencoded) into a property list
 // Decodes '+' as space if 'space_as_plus' is set (the default)
 void URL::decode(const string& s, Misc::PropertyList& props,
-		 bool space_as_plus)
+                 bool space_as_plus)
 {
   // Split on &
   vector<string> params = Text::split(s, '&', false);

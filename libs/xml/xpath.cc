@@ -69,8 +69,8 @@ list<ELEMENT *>
       string::size_type bclose = path.find(']', bopen);
       if (bclose != string::npos && bclose<delim && bclose-bopen>1)
       {
-	string ns(path, bopen+1, bclose-bopen-1);
-	count = atoi(ns.c_str())-1;  // We count from zero
+        string ns(path, bopen+1, bclose-bopen-1);
+        count = atoi(ns.c_str())-1;  // We count from zero
       }
 
       name_end = bopen;
@@ -191,10 +191,10 @@ bool BaseXPathProcessor<ELEMENT>::get_value_bool(const string& path,
     {
       case 'T': case 't':
       case 'Y': case 'y':
-	return true;
+        return true;
 
       default:
-	return false;
+        return false;
     }
   }
 

@@ -43,16 +43,16 @@ class DispatchThread: public MT::Thread
       string data;
       if (transport.wait(data))
       {
-	Message msg(data);  // Construct message from XML <message> data
-	client.handle(msg, log);
+        Message msg(data);  // Construct message from XML <message> data
+        client.handle(msg, log);
       }
       else
       {
         // Stop on shutdown
         if (!client.is_alive()) break;
 
-	log.summary << "Transport restarted - resubscribing\n";
-	client.resubscribe(log);
+        log.summary << "Transport restarted - resubscribing\n";
+        client.resubscribe(log);
       }
     }
   }
@@ -101,7 +101,7 @@ void MultiClient::handle(Message &msg, Log::Streams& log)
     else
     {
       log.error << "Mesh client has no spare workers - '"
-		<< msg.get_subject() << "' message queued\n";
+                << msg.get_subject() << "' message queued\n";
 
       // Queue a copy for an existing worker to catch
       pending_queue.send(new Message(msg));
@@ -125,23 +125,23 @@ void MultiClient::dispatch(Message *msg)
 
       // Try all the subscribers
       for(list<Subscriber *>::iterator p = subscribers.begin();
-	  p!=subscribers.end();
-	  )
+          p!=subscribers.end();
+          )
       {
-	list<Subscriber *>::iterator q = p++;  // Protect from deletion
-	Subscriber *sub = *q;
+        list<Subscriber *>::iterator q = p++;  // Protect from deletion
+        Subscriber *sub = *q;
 
-	// This is where we kill dead ones
-	if (sub->dead && !sub->active)
-	{
-	  delete sub;
-	  subscribers.erase(q);
-	}
-	else if (Text::pattern_match(sub->subject, subject))
-	{
-	  sub->active++;  // Protected by global lock
-	  handlers.push_back(sub);
-	}
+        // This is where we kill dead ones
+        if (sub->dead && !sub->active)
+        {
+          delete sub;
+          subscribers.erase(q);
+        }
+        else if (Text::pattern_match(sub->subject, subject))
+        {
+          sub->active++;  // Protected by global lock
+          handlers.push_back(sub);
+        }
       }
     }
 
@@ -150,14 +150,14 @@ void MultiClient::dispatch(Message *msg)
     {
       Log::Streams log;
       log.error << "Unhandled message received with subject "
-		<< subject << endl;
+                << subject << endl;
     }
 
     // Now have own safe list of subscribers with active set - no-one can
     // interfere with this, even if they try unsubscribing now
     for(list<Subscriber *>::iterator p = handlers.begin();
-	p!=handlers.end();
-	p++)
+        p!=handlers.end();
+        p++)
     {
       Subscriber *sub = *p;
 #if defined(TIME_MESSAGES)
@@ -170,7 +170,7 @@ void MultiClient::dispatch(Message *msg)
       Time::Duration taken = Time::Stamp::now() - start;
       Log::Streams log;
       log.detail << "Incoming message '" << subject << "' handled in "
-		 << taken.seconds() << "s\n";
+                 << taken.seconds() << "s\n";
 #endif
     }
 
@@ -179,11 +179,11 @@ void MultiClient::dispatch(Message *msg)
       MT::RLock l(mutex);
 
       for(list<Subscriber *>::iterator p = handlers.begin();
-	  p!=handlers.end();
-	  p++)
+          p!=handlers.end();
+          p++)
       {
-	Subscriber *sub = *p;
-	sub->active--;
+        Subscriber *sub = *p;
+        sub->active--;
       }
     }
 
@@ -227,27 +227,27 @@ retry:
       string data;
       if (transport.wait(data))
       {
-	Message msg(data);  // Construct message from XML <message> data
+        Message msg(data);  // Construct message from XML <message> data
 
-	// Check ref (if any) to see if it's ours
-	string ref = msg.get_ref();
-	if (ref == id)
-	{
-	  // Check it for OK
-	  if (msg.get_subject() == "xmlmesh.ok") break;
+        // Check ref (if any) to see if it's ours
+        string ref = msg.get_ref();
+        if (ref == id)
+        {
+          // Check it for OK
+          if (msg.get_subject() == "xmlmesh.ok") break;
 
-	  log.error << "Error response to resubscribe:\n" << data << endl;
-	}
-	else
-	{
-	  // Dispatch to others and continue
-	  handle(msg, log);
-	}
+          log.error << "Error response to resubscribe:\n" << data << endl;
+        }
+        else
+        {
+          // Dispatch to others and continue
+          handle(msg, log);
+        }
       }
       else
       {
-	log.summary << "Transport failed during resubscribe - retrying\n";
-	goto retry;  // Try it all again
+        log.summary << "Transport failed during resubscribe - retrying\n";
+        goto retry;  // Try it all again
       }
     }
   }
@@ -269,7 +269,7 @@ void MultiClientWorker::run()
 //------------------------------------------------------------------------
 // Constructor - attach transport
 MultiClient::MultiClient(ClientTransport& _transport,
-			 int _min_spare_workers, int _max_workers):
+                         int _min_spare_workers, int _max_workers):
   transport(_transport), workers(_min_spare_workers, _max_workers),
   alive(true), shutting_down(false)
 {
@@ -306,8 +306,8 @@ bool MultiClient::respond(Message& request)
 // Return an error to request given
 // Returns whether successul
 bool MultiClient::respond(SOAP::Fault::Code code,
-			  const string& reason,
-			  Message& request)
+                          const string& reason,
+                          Message& request)
 {
   FaultMessage errm(request.get_id(), code, reason);
   return send(errm);
@@ -349,8 +349,8 @@ bool MultiClient::request(Message& req, Message& response)
   Time::Duration taken = Time::Stamp::now() - start;
   Log::Streams log;
   log.detail << "Outgoing message '" << req.get_subject()
-	     << "' responded to in "
-	     << taken.seconds() << "s\n";
+             << "' responded to in "
+             << taken.seconds() << "s\n";
 #endif
 
   // Remove it from map

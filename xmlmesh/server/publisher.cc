@@ -149,8 +149,8 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
     case SubscriptionMessage::JOIN:
       if (subscribe(smsg.subject, path))
       {
-	respond(msg);
-	return false;  // Take it
+        respond(msg);
+        return false;  // Take it
       }
       break;
 
@@ -171,7 +171,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
 //------------------------------------------------------------------------
 // Subscribe a client
 bool Publisher::subscribe(const string& subject,
-			  const string& path)
+                          const string& path)
 {
   // Check pattern is one we can accept subscription for
   if (Text::pattern_match(subject_pattern, subject))
@@ -197,7 +197,7 @@ bool Publisher::subscribe(const string& subject,
 // Uses pattern match to allow general unsubscribe
 // E.g. foo.* unsubscribes foo.blah.*, foo.splat as well as foo.*
 void Publisher::unsubscribe(const string& subject,
-			    const string& path)
+                            const string& path)
 {
   MT::RWWriteLock lock(mutex);  // Require write now because may need it later
   for(list<Subscription>::iterator p = subscriptions.begin();
@@ -208,7 +208,7 @@ void Publisher::unsubscribe(const string& subject,
     const Subscription& sub = *q;
 
     if (sub.path == path
-	&& Text::pattern_match(subject, sub.subject))
+        && Text::pattern_match(subject, sub.subject))
     {
       Log::Detail log;
       log << "Client " << path << " unsubscribed from " << sub.subject << endl;

@@ -20,11 +20,11 @@ namespace ObTools { namespace ToolGen {
 // Constructor - read configuration from config file, output code
 // to given stream, errors to other given stream
 Generator::Generator(const string& _config_file,
-		     ostream& _sout, ostream &_serr):
+                     ostream& _sout, ostream &_serr):
   config_file(_config_file),
   ok(false),
   config(_config_file, _serr,
-	 XML::PARSER_OPTIMISE_CONTENT
+         XML::PARSER_OPTIMISE_CONTENT
        | XML::PARSER_PRESERVE_WHITESPACE
        | XML::PARSER_BE_LENIENT),
   sout(_sout), serr(_serr)
@@ -34,7 +34,7 @@ Generator::Generator(const string& _config_file,
   if (!config.read("xt:tool"))
   {
     serr << "Can't read tool configuration file "
-	 << config_file << " (no xt:tool)\n";
+         << config_file << " (no xt:tool)\n";
     return;
   }
 
@@ -149,7 +149,7 @@ void Generator::generate_config_reader()
     string key = e->get_attr("key", "name");
 
     sout << "  _config." << name << " = _config_file.get_map(\"" << path
-	 << "\", \"" << key << "\");\n";
+         << "\", \"" << key << "\");\n";
   }
 
   // Read variables for each config item
@@ -170,7 +170,7 @@ void Generator::generate_config_reader()
     }
 
     sout << "  _config." << name << " = _config_file.get_value"
-	 << type_suffix << "(\"" << path << "\"" << def << ");\n";
+         << type_suffix << "(\"" << path << "\"" << def << ");\n";
   }
 }
 
@@ -183,19 +183,19 @@ CPPT::Tags Generator::read_tags(XML::Element& root, CPPT::Tags& defaults)
   CPPT::Tags tags;
 
   tags.start_code = xpath.get_value("xt:script/xt:tags/xt:start-code",
-				    defaults.start_code);
+                                    defaults.start_code);
   tags.end_code   = xpath.get_value("xt:script/xt:tags/xt:end-code",
-				    defaults.end_code);
+                                    defaults.end_code);
 
   tags.start_expr = xpath.get_value("xt:script/xt:tags/xt:start-expr",
-				    defaults.start_expr);
+                                    defaults.start_expr);
   tags.end_expr   = xpath.get_value("xt:script/xt:tags/xt:end-expr",
-				    defaults.end_expr);
+                                    defaults.end_expr);
 
   tags.start_comment = xpath.get_value("xt:script/xt:tags/xt:start-comment",
-				       defaults.start_comment);
+                                       defaults.start_comment);
   tags.end_comment   = xpath.get_value("xt:script/xt:tags/xt:end-comment",
-				       defaults.end_comment);
+                                       defaults.end_comment);
 
   return tags;
 }
@@ -205,7 +205,7 @@ CPPT::Tags Generator::read_tags(XML::Element& root, CPPT::Tags& defaults)
 // Limit common indent removal to max_ci.  If not yet set (<0), sets it to
 // common indent of this script
 void Generator::process_script(const string& script, CPPT::Tags& tags,
-			       const string& streamname, int& max_ci)
+                               const string& streamname, int& max_ci)
 {
   // Tidy up script first - remove leading and trailing blank lines
   string myscript = Text::strip_blank_lines(script);
@@ -232,12 +232,12 @@ void Generator::process_script(const string& script, CPPT::Tags& tags,
 // Generate use of a predefined 'macro' template
 // Accumulates script in script
 void Generator::generate_use(XML::Element& use_e,
-			     XML::Element& define_e,
-			     CPPT::Tags& tags,
-			     const string& childname,
-			     const string& indexname,
-			     const string& countname,
-			     const string& streamname)
+                             XML::Element& define_e,
+                             CPPT::Tags& tags,
+                             const string& childname,
+                             const string& indexname,
+                             const string& countname,
+                             const string& streamname)
 {
   // Create script expansion for each argument, recording which
   // parameters have been set
@@ -284,12 +284,12 @@ void Generator::generate_use(XML::Element& use_e,
 // max_ci is maximum indent to strip from code
 // Accumulates script in script, dumps it on hitting a sub-template
 void Generator::generate_template(XML::Element& e, XML::Element& te,
-				  CPPT::Tags& tags,
-				  int& max_ci,
-				  const string& indexname,
-				  const string& countname,
-				  const string& streamname,
-				  string& script)
+                                  CPPT::Tags& tags,
+                                  int& max_ci,
+                                  const string& indexname,
+                                  const string& countname,
+                                  const string& streamname,
+                                  string& script)
 {
   // Check for optimised content
   if (e.content.size()) script += e.content;
@@ -367,132 +367,132 @@ void Generator::generate_template(XML::Element& e, XML::Element& te,
     {
       if (ce.name == "xt:template")
       {
-	// Process and clear script before calling sub-template
-	process_script(script, tags, mystream, max_ci);
-	script.clear();
+        // Process and clear script before calling sub-template
+        process_script(script, tags, mystream, max_ci);
+        script.clear();
 
-	// Give us a block context to avoid redeclarations
-	sout << "\n  {\n";
+        // Give us a block context to avoid redeclarations
+        sout << "\n  {\n";
 
-	// Iterate all children through inline expanded template
-	expand_inline(ce, te, mytags, max_ci, mystream, script);
-	process_script(script, mytags, mystream, max_ci);
-	script.clear();
+        // Iterate all children through inline expanded template
+        expand_inline(ce, te, mytags, max_ci, mystream, script);
+        process_script(script, mytags, mystream, max_ci);
+        script.clear();
 
-	// Close block context
-	sout << "  }\n\n";
+        // Close block context
+        sout << "  }\n\n";
       }
       else if (ce.name == "xt:use")
       {
-	// Find defined template
-	string def = ce["template"];
-	if (def.size())
-	{
-	  XML::Element *def_e = defines[def];
-	  if (def_e)
-	  {
-	    XML::Element& de = *def_e;
+        // Find defined template
+        string def = ce["template"];
+        if (def.size())
+        {
+          XML::Element *def_e = defines[def];
+          if (def_e)
+          {
+            XML::Element& de = *def_e;
 
-	    // Process and clear script before calling sub-template
-	    process_script(script, tags, mystream, max_ci);
-	    script.clear();
+            // Process and clear script before calling sub-template
+            process_script(script, tags, mystream, max_ci);
+            script.clear();
 
-	    // Give us a block context to avoid redeclarations
-	    sout << "\n  {\n";
+            // Give us a block context to avoid redeclarations
+            sout << "\n  {\n";
 
-	    // Iterate all children through called template
-	    expand_use(ce, de, te, tags, mystream);
+            // Iterate all children through called template
+            expand_use(ce, de, te, tags, mystream);
 
-	    // Close block context
-	    sout << "  }\n\n";
-	  }
-	  else serr << "No such template defined: " << def << endl;
-	}
-	else serr << "No 'template' argument for xt:use\n";
+            // Close block context
+            sout << "  }\n\n";
+          }
+          else serr << "No such template defined: " << def << endl;
+        }
+        else serr << "No 'template' argument for xt:use\n";
       }
       else if (ce.name == "xt:start")
       {
-	// Process and clear script before conditional
-	process_script(script, tags, mystream, max_ci);
-	script.clear();
+        // Process and clear script before conditional
+        process_script(script, tags, mystream, max_ci);
+        script.clear();
 
-	// Only output conditional if indexname is set
-	if (indexname.size()) sout << "  if (!" << indexname << ")\n  {\n  ";
-	// Don't mess up outer max_ci with these fragments
-	int m = max_ci;
-	generate_template(ce, te, tags, m, indexname, countname,
-			  mystream, script);
-	if (indexname.size()) sout << "  }\n";
+        // Only output conditional if indexname is set
+        if (indexname.size()) sout << "  if (!" << indexname << ")\n  {\n  ";
+        // Don't mess up outer max_ci with these fragments
+        int m = max_ci;
+        generate_template(ce, te, tags, m, indexname, countname,
+                          mystream, script);
+        if (indexname.size()) sout << "  }\n";
       }
       else if (ce.name == "xt:end")
       {
-	// Process and clear script before conditional
-	process_script(script, tags, mystream, max_ci);
-	script.clear();
+        // Process and clear script before conditional
+        process_script(script, tags, mystream, max_ci);
+        script.clear();
 
-	// Only output conditional if countname is set
-	if (countname.size())
-	  sout << "  if ("<<indexname<<"+1 == "<<countname<<")\n  {\n  ";
-	int m = max_ci;
-	generate_template(ce, te, tags, m, indexname, countname,
-			  mystream, script);
-	if (countname.size()) sout << "  }\n";
+        // Only output conditional if countname is set
+        if (countname.size())
+          sout << "  if ("<<indexname<<"+1 == "<<countname<<")\n  {\n  ";
+        int m = max_ci;
+        generate_template(ce, te, tags, m, indexname, countname,
+                          mystream, script);
+        if (countname.size()) sout << "  }\n";
       }
       else if (ce.name == "xt:sep")  // Between items
       {
-	// Process and clear script before conditional
-	process_script(script, tags, mystream, max_ci);
-	script.clear();
+        // Process and clear script before conditional
+        process_script(script, tags, mystream, max_ci);
+        script.clear();
 
-	// Only output conditional if countname is set
-	if (countname.size())
-	  sout << "  if ("<<indexname<<"+1 < "<<countname<<")\n  {\n  ";
-	int m = max_ci;
-	generate_template(ce, te, tags, m, indexname, countname,
-			  mystream, script);
-	if (countname.size()) sout << "  }\n";
+        // Only output conditional if countname is set
+        if (countname.size())
+          sout << "  if ("<<indexname<<"+1 < "<<countname<<")\n  {\n  ";
+        int m = max_ci;
+        generate_template(ce, te, tags, m, indexname, countname,
+                          mystream, script);
+        if (countname.size()) sout << "  }\n";
       }
       else if (ce.name == "xt:if")
       {
-	// Process and clear script before conditional
-	process_script(script, tags, mystream, max_ci);
-	script.clear();
+        // Process and clear script before conditional
+        process_script(script, tags, mystream, max_ci);
+        script.clear();
 
-	sout << "  if (" << ce.get_attr("cond", "0") << ")\n  {\n  ";
-	int m = max_ci;
-	generate_template(ce, te, tags, m, indexname, countname,
-			  mystream, script);
-	sout << "  }\n";
+        sout << "  if (" << ce.get_attr("cond", "0") << ")\n  {\n  ";
+        int m = max_ci;
+        generate_template(ce, te, tags, m, indexname, countname,
+                          mystream, script);
+        sout << "  }\n";
       }
       else if (ce.name == "xt:unless")
       {
-	// Process and clear script before conditional
-	process_script(script, tags, mystream, max_ci);
-	script.clear();
+        // Process and clear script before conditional
+        process_script(script, tags, mystream, max_ci);
+        script.clear();
 
-	sout << "  if (!(" << ce.get_attr("cond", "0") << "))\n  {\n  ";
-	int m = max_ci;
-	generate_template(ce, te, tags, m, indexname, countname,
-			  mystream, script);
-	sout << "  }\n";
+        sout << "  if (!(" << ce.get_attr("cond", "0") << "))\n  {\n  ";
+        int m = max_ci;
+        generate_template(ce, te, tags, m, indexname, countname,
+                          mystream, script);
+        sout << "  }\n";
       }
       else if (ce.name == "xt:nl")  // Force newline
       {
-	sout << streamname << " << endl;\n";
+        sout << streamname << " << endl;\n";
       }
 
       // Recurse to sub-elements, except ignoring xt:xxx
       if (ce.name.substr(0,3) != "xt:")
       {
-	// Add start tag to script
-	script += ce.start_to_string();
+        // Add start tag to script
+        script += ce.start_to_string();
 
-	// Recurse to generate content, keeping 'te' set the same
-	generate_template(ce, te, tags, max_ci, indexname, countname,
-			  mystream, script);
+        // Recurse to generate content, keeping 'te' set the same
+        generate_template(ce, te, tags, max_ci, indexname, countname,
+                          mystream, script);
 
-	// Process end tag as a script
-	script += ce.end_to_string();
+        // Process end tag as a script
+        script += ce.end_to_string();
       }
     }
   OBTOOLS_XML_ENDFOR
@@ -520,7 +520,7 @@ void Generator::generate_code()
     {
       sout<<"//================================================================\n";
       sout << "// Custom code from " << config_file
-	   << " <xt:code> section\n\n";
+           << " <xt:code> section\n\n";
 
       code = Text::remove_indent(code, Text::get_common_indent(code));
       sout << code << endl;
@@ -562,7 +562,7 @@ void Generator::generate_defines()
     int max_ci = -1;
     string script;
     generate_template(te, te, tags, max_ci, indexname, countname,
-		      "sout", script);
+                      "sout", script);
     process_script(script, tags, "sout", max_ci);
     script.clear();
 
@@ -604,16 +604,16 @@ void Generator::generate_roots()
       XML::Element *def_e = defines[def];
       if (def_e)
       {
-	XML::Element& de = *def_e;
+        XML::Element& de = *def_e;
 
-	// Give us a block context to avoid redeclarations
-	cout << "\n  {\n";
+        // Give us a block context to avoid redeclarations
+        cout << "\n  {\n";
 
-	// Iterate all children through called template
-	expand_use(ce, de, root, tags, "cout", true);
+        // Iterate all children through called template
+        expand_use(ce, de, root, tags, "cout", true);
 
-	// Close block context
-	cout << "  }\n\n";
+        // Close block context
+        cout << "  }\n\n";
       }
       else serr << "No such template defined: " << def << endl;
     }

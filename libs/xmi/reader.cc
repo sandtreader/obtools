@@ -223,9 +223,9 @@ void Reader::read_from(istream& s) throw (ParseFailed)
     if (xmi_metamodel.valid())
     {
       if (xmi_metamodel.get_attr("xmi.name")=="UML")
-	uml_version = atof(xmi_metamodel.get_attr("xmi.version").c_str());
+        uml_version = atof(xmi_metamodel.get_attr("xmi.version").c_str());
       else
-	warning("XMI.metamodel claims this isn't UML");
+        warning("XMI.metamodel claims this isn't UML");
     }
   }
 

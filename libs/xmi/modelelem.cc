@@ -44,8 +44,8 @@ void ModelElement::build_refs()
 
   //Get stereotype ref
   string idref = get_idref_property("stereotype",
-				    "UML:ModelElement.stereotype",
-				    "UML:Stereotype");
+                                    "UML:ModelElement.stereotype",
+                                    "UML:Stereotype");
   if (!idref.empty())
   {
     Element *e=reader.lookup_uml_element(idref);
@@ -53,7 +53,7 @@ void ModelElement::build_refs()
     {
       stereotype = dynamic_cast<Stereotype *>(e);
       if (!stereotype)
-	reader.warning("Bogus stereotype idref in id ", id);
+        reader.warning("Bogus stereotype idref in id ", id);
     }
     else
       reader.warning("Non-connected stereotype idref in id ", id);

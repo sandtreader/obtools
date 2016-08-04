@@ -46,19 +46,19 @@ class ClientReceiveThread: public MT::Thread
 
       if (client.is_alive())
       {
-	// Log fault and sleep before retrying
-	log.error << client.name << " (recv): Socket failed, can't restart\n";
-	log.error << client.name << " (recv): Sleeping for "
-		  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
+        // Log fault and sleep before retrying
+        log.error << client.name << " (recv): Socket failed, can't restart\n";
+        log.error << client.name << " (recv): Sleeping for "
+                  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
 
-	// Sleep, checking for shutdown
-	for(int i=0; client.is_alive() && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
+        // Sleep, checking for shutdown
+        for(int i=0; client.is_alive() && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
           this_thread::sleep_for(chrono::milliseconds{10});
       }
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << client.name
-			 << " (recv): Thread shut down\n";)
+                         << " (recv): Thread shut down\n";)
   }
 
 public:
@@ -135,18 +135,18 @@ bool Client::receive_messages(Log::Streams& log)
       msg.flags = socket->read_nbo_int();
 
       OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (recv): Message "
-			   << msg.stag() << ", length " << len
-			   << " (flags " << hex << msg.flags << dec << ")\n";)
+                           << msg.stag() << ", length " << len
+                           << " (flags " << hex << msg.flags << dec << ")\n";)
 
       // Read the data
       if (!socket->read(msg.data, len))
       {
-	log.error << name << " (recv): Short message read - socket died\n";
-	return restart_socket(log);
+        log.error << name << " (recv): Short message read - socket died\n";
+        return restart_socket(log);
       }
 
       OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
-			  dumper.dump(msg.data);)
+                          dumper.dump(msg.data);)
 
       // Post up a message
       receive_q.send(msg);
@@ -155,7 +155,7 @@ bool Client::receive_messages(Log::Streams& log)
     {
       // Unrecognised tag
       log.error << name << " (recv): Unrecognised tag "
-		<< msg.stag() << " - out-of-sync?\n";
+                << msg.stag() << " - out-of-sync?\n";
       //Try to restart socket
       return restart_socket(log);
     }
@@ -173,8 +173,8 @@ bool Client::receive_messages(Log::Streams& log)
       // Restart if not shut down
       if (alive)
       {
-	log.summary << name << " (recv): Attempting to restart socket\n";
-	return restart_socket(log);
+        log.summary << name << " (recv): Attempting to restart socket\n";
+        return restart_socket(log);
       }
     }
 
@@ -226,11 +226,11 @@ bool Client::send_messages(Log::Streams& log)
 
   // Deal with it
   OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (send): Sending message "
-		       << msg.stag() << ", length "
-		       << msg.data.size()
-		       << " (flags " << hex << msg.flags << dec << ")\n";)
+                       << msg.stag() << ", length "
+                       << msg.data.size()
+                       << " (flags " << hex << msg.flags << dec << ")\n";)
   OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
-		      dumper.dump(msg.data);)
+                      dumper.dump(msg.data);)
 
   try // Handle SocketErrors
   {
@@ -259,8 +259,8 @@ bool Client::send_messages(Log::Streams& log)
       // Try to restart socket if not shut down
       if (alive)
       {
-	log.summary << name << " (send): Attempting to restart socket\n";
-	return restart_socket(log);
+        log.summary << name << " (send): Attempting to restart socket\n";
+        return restart_socket(log);
       }
     }
 
@@ -294,7 +294,7 @@ Client::Client(const Net::EndPoint& _server, const string& _name):
 //------------------------------------------------------------------------
 // Constructor with SSL
 Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx,
-	       const string& _name):
+               const string& _name):
   server(_server), ctx(_ctx), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
   alive(true), name(_name)
 {

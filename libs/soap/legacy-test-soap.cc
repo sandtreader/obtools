@@ -35,8 +35,8 @@ int main()
     cout << "\nHeaders:\n";
     list<SOAP::Header> headers = msg2.get_headers();
     for(list<SOAP::Header>::iterator p = headers.begin();
-	p!= headers.end();
-	p++)
+        p!= headers.end();
+        p++)
     {
       SOAP::Header h = *p;
       cout << "- " << h.content->name;
@@ -47,8 +47,8 @@ int main()
     cout << "\nBody elements:\n";
     list<XML::Element *> bodies = msg2.get_bodies();
     for(list<XML::Element *>::iterator p = bodies.begin();
-	p!= bodies.end();
-	p++)
+        p!= bodies.end();
+        p++)
       cout << "- " << (*p)->name << endl;
   }
   else
@@ -72,7 +72,7 @@ int main()
   cout << "\nConstructed MustUnderstand Fault:\n";
   SOAP::MustUnderstandFault mu_fault;
   mu_fault.add_not_understood("xm:foo", "xmlns:xm",
-			      "http://www.obtools.com/foo");
+                              "http://www.obtools.com/foo");
   cout << mu_fault;
 
   return 0;

@@ -64,7 +64,7 @@ public:
   // Constructor to bind to any interface (basic TCP)
   // See ObTools::Net::TCPServer for details of threadpool management
   HTTPServer(HTTPServerService& _service, int port, int backlog,
-	     int min_spare, int max_threads, int timeout):
+             int min_spare, int max_threads, int timeout):
     Web::HTTPServer(port, HTTP_SERVER_VERSION, backlog, min_spare,
                     max_threads, timeout),
     service(_service)

@@ -20,13 +20,13 @@ Operation::Operation(XMI::Reader& rdr, XML::Element& xe)
 
   //Get basic properties
   is_abstract = get_bool_property("isAbstract",
-				  "UML:Operation.isAbstract");
+                                  "UML:Operation.isAbstract");
 
   is_root     = get_bool_property("isRoot",
-				  "UML:Operation.isRoot");
+                                  "UML:Operation.isRoot");
 
   is_leaf     = get_bool_property("isLeaf",
-				  "UML:Operation.isLeaf");
+                                  "UML:Operation.isLeaf");
 
   string cck  = get_property("concurrency", "UML:Operation.concurrency");
 

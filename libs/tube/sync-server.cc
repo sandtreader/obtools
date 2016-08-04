@@ -31,25 +31,25 @@ bool SyncServer::handle_message(const ClientMessage& msg)
       // Check flags
       if (msg.msg.flags & FLAG_RESPONSE_REQUIRED)
       {
-	// Handle it as a synchronous request
-	ClientMessage response(msg.client, 0);
-	if (handle_request(msg, response.msg))
-	{
-	  // Fix up the response flags
-	  response.msg.flags &=~ MASK_SYNC_FLAGS;
-	  response.msg.flags |= FLAG_RESPONSE_PROVIDED;
-	  response.msg.flags |= msg.msg.flags & MASK_REQUEST_ID;
+        // Handle it as a synchronous request
+        ClientMessage response(msg.client, 0);
+        if (handle_request(msg, response.msg))
+        {
+          // Fix up the response flags
+          response.msg.flags &=~ MASK_SYNC_FLAGS;
+          response.msg.flags |= FLAG_RESPONSE_PROVIDED;
+          response.msg.flags |= msg.msg.flags & MASK_REQUEST_ID;
 
-	  // Send it back
-	  send(response);
-	}
+          // Send it back
+          send(response);
+        }
 
-	return true;
+        return true;
       }
       else
       {
-	// Handle it as async
-	return handle_async_message(msg);
+        // Handle it as async
+        return handle_async_message(msg);
       }
     }
   }
@@ -66,7 +66,7 @@ bool SyncServer::handle_async_message(const ClientMessage& msg)
   {
     Log::Streams log;
     log.error << "Unwanted asynchronous message " << msg.msg.stag()
-	      << " received from " << msg.client << endl;
+              << " received from " << msg.client << endl;
   }
 
   // Ignore STARTED, FINISHED

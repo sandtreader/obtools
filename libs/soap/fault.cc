@@ -167,8 +167,8 @@ MustUnderstandFault::MustUnderstandFault():
 // Add a NotUnderstood block
 // attr/value indicate a namespace
 void MustUnderstandFault::add_not_understood(const string& qname,
-					     const string& attr,
-					     const string& value)
+                                             const string& attr,
+                                             const string& value)
 {
   XML::Element& nu = add_header("env:NotUnderstood");
   nu.set_attr("qname", qname);

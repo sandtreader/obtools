@@ -23,7 +23,7 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
 {
   Log::Streams log;
   OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP: Connection from "
-		       << client << endl;)
+                       << client << endl;)
 
   // Enable keepalives
   s.enable_keepalive();
@@ -46,24 +46,24 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
       // Don't wait for EOF in absence of Content-Length, just assume 0
       if (!request.read(ss, false))
       {
-	if (persistent)
-	  log.detail << "Persistent connection from " << client
-		     << " now closed\n";
-	else
-	  log.error << "Can't read HTTP request from socket\n";
+        if (persistent)
+          log.detail << "Persistent connection from " << client
+                     << " now closed\n";
+        else
+          log.error << "Can't read HTTP request from socket\n";
 
         handle_close(client, s);
-	return;
+        return;
       }
 
       // Log request
       log.detail << request.version << " request: " << request.method
-		 << " from " << client << " for "
-		 << request.url << endl;
+                 << " from " << client << " for "
+                 << request.url << endl;
       OBTOOLS_LOG_IF_DEBUG(
         log.debug << request.headers.xml;
         if (request.body.size())
-	  log.debug << "Body:\n" << request.body << endl;
+          log.debug << "Body:\n" << request.body << endl;
       )
 
       // Set version to reflect client
@@ -82,62 +82,62 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
       // Check version
       if (request.version == "HTTP/1.0" || request.version == "HTTP/1.1")
       {
-	string conn_hdr = Text::tolower(request.headers.get("connection"));
+        string conn_hdr = Text::tolower(request.headers.get("connection"));
 
-	// Check for HTTP/1.1
-	if (request.version == "HTTP/1.1")
-	{
-	  // Check for Connection: close - otherwise, assume persistent
-	  if (conn_hdr == "close")
-	  {
-	    if (persistent)
-	      log.detail << "HTTP/1.1 persistent connection from "
-			 << client << " closed\n";
-	    else
-	      log.detail << "HTTP/1.1 non-persistent connection\n";
-	    persistent = false;
-	  }
-	  else
-	  {
-	    if (persistent)
-	      log.detail << "HTTP/1.1 persistent connection from "
-			 << client << " continues\n";
-	    else
-	      log.detail << "HTTP/1.1 persistent connection started\n";
-	    persistent = true;
-	  }
-	}
-	else
-	{
-	  // Check for old-style HTTP/1.0 Keep-Alive
-	  if (conn_hdr == "keep-alive")
-	  {
-	    if (persistent)
-	      log.detail << "HTTP/1.0 persistent connection from "
-			 << client << " continues\n";
-	    else
-	      log.detail << "HTTP/1.0 persistent connection started\n";
+        // Check for HTTP/1.1
+        if (request.version == "HTTP/1.1")
+        {
+          // Check for Connection: close - otherwise, assume persistent
+          if (conn_hdr == "close")
+          {
+            if (persistent)
+              log.detail << "HTTP/1.1 persistent connection from "
+                         << client << " closed\n";
+            else
+              log.detail << "HTTP/1.1 non-persistent connection\n";
+            persistent = false;
+          }
+          else
+          {
+            if (persistent)
+              log.detail << "HTTP/1.1 persistent connection from "
+                         << client << " continues\n";
+            else
+              log.detail << "HTTP/1.1 persistent connection started\n";
+            persistent = true;
+          }
+        }
+        else
+        {
+          // Check for old-style HTTP/1.0 Keep-Alive
+          if (conn_hdr == "keep-alive")
+          {
+            if (persistent)
+              log.detail << "HTTP/1.0 persistent connection from "
+                         << client << " continues\n";
+            else
+              log.detail << "HTTP/1.0 persistent connection started\n";
 
-	    // Reflect it back in response
-	    response.headers.put("connection", "Keep-Alive");
+            // Reflect it back in response
+            response.headers.put("connection", "Keep-Alive");
 
-	    persistent = true;
-	  }
-	  else
-	  {
-	    // We stop
-	    if (persistent)
-	      log.detail << "HTTP/1.0 persistent connection from "
-			 << client << " closed\n";
-	    else
-	      log.detail << "HTTP/1.0 non-persistent connection\n";
-	    persistent = false;
-	  }
-	}
+            persistent = true;
+          }
+          else
+          {
+            // We stop
+            if (persistent)
+              log.detail << "HTTP/1.0 persistent connection from "
+                         << client << " closed\n";
+            else
+              log.detail << "HTTP/1.0 non-persistent connection\n";
+            persistent = false;
+          }
+        }
 
-	// Be optimistic - saves handler doing it for simple cases
-	response.code = 200;
-	response.reason = "OK";
+        // Be optimistic - saves handler doing it for simple cases
+        response.code = 200;
+        response.reason = "OK";
 
         // Check for OPTIONS request - mainly for CORS
         // (we have already set access-control header above)
@@ -145,27 +145,27 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         {
           response.headers.put("Allow", "GET, POST, HEAD");
         }
-	// In all other cases call down to subclass implementation
-	else if (!handle_request(request, response, client, s, ss))
-	{
-	  log.error << "Handler failed - sending 500\n";
-	  error(response, 500, "Server Failure");
-	}
+        // In all other cases call down to subclass implementation
+        else if (!handle_request(request, response, client, s, ss))
+        {
+          log.error << "Handler failed - sending 500\n";
+          error(response, 500, "Server Failure");
+        }
       }
       else
       {
-	response.version = "HTTP/1.1";
-	error(response, 505, "HTTP Version not supported");
+        response.version = "HTTP/1.1";
+        error(response, 505, "HTTP Version not supported");
       }
 
       // Log response
       log.detail << "Response: " << response.code << " "
-		 << response.reason << endl;
+                 << response.reason << endl;
       OBTOOLS_LOG_IF_DEBUG(
         log.debug << response.headers.xml;
         if (response.body.size())
-	  log.debug << "Body:\n" << response.body << endl;
-	)
+          log.debug << "Body:\n" << response.body << endl;
+        )
 
       // Send out response
       // Suppress body if a HEAD request - saves simple handlers having to
@@ -198,9 +198,9 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
 //--------------------------------------------------------------------------
 // Implementation of general request handler
 bool SimpleHTTPServer::handle_request(const HTTPMessage& request,
-				      HTTPMessage& response,
-				      const SSL::ClientDetails& client,
-				      SSL::TCPSocket&, Net::TCPStream&)
+                                      HTTPMessage& response,
+                                      const SSL::ClientDetails& client,
+                                      SSL::TCPSocket&, Net::TCPStream&)
 {
   MT::RWReadLock lock(mutex);
 

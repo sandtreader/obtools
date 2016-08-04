@@ -60,7 +60,7 @@ static void skip_name(Channel::Reader& r)
 // Query for a domain RR of the given type and return raw RDATA from the
 // first answer section
 string Resolver::query(const string& domain, Type type,
-		       const string& type_name)
+                       const string& type_name)
 {
   Log::Streams log;
   log.detail << "DNS resolver: " << domain << " (" << type_name << ")\n";
@@ -68,12 +68,12 @@ string Resolver::query(const string& domain, Type type,
 #if defined(__WIN32__)
   PDNS_RECORD rr;
   DNS_STATUS status = DnsQuery(domain.c_str(), type, DNS_QUERY_STANDARD,
-			       0, &rr, 0);
+                               0, &rr, 0);
 
   if (status != NO_ERROR)
   {
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-	      << ") failed: status=" << status << endl;
+              << ") failed: status=" << status << endl;
     return "";
   }
 
@@ -85,7 +85,7 @@ string Resolver::query(const string& domain, Type type,
   {
     // Nothing returned
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-	      << ") failed: no result\n";
+              << ") failed: no result\n";
     return "";
   }
 
@@ -100,10 +100,10 @@ string Resolver::query(const string& domain, Type type,
     case TYPE_TXT:
       for(unsigned int i=0; i<rr->Data.TXT.dwStringCount; i++)
       {
-	char *s = rr->Data.TXT.pStringArray[i];
-	// Append Pascal string
-	rdata += (char)strlen(s);
-	rdata += s;
+        char *s = rr->Data.TXT.pStringArray[i];
+        // Append Pascal string
+        rdata += (char)strlen(s);
+        rdata += s;
       }
       break;
 
@@ -124,7 +124,7 @@ string Resolver::query(const string& domain, Type type,
   if (len < 0)
   {
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-	      << ") failed\n";
+              << ") failed\n";
     return "";
   }
 
@@ -141,7 +141,7 @@ string Resolver::query(const string& domain, Type type,
     if (rcode)
     {
       log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-		<< ") failed: RCODE=" << rcode << endl;
+                << ") failed: RCODE=" << rcode << endl;
       return "";
     }
 
@@ -166,25 +166,25 @@ string Resolver::query(const string& domain, Type type,
 
       if (atype == type)
       {
-	string rdata;
-	br.read(rdata, rdlen);  // RDATA
-	return rdata;
+        string rdata;
+        br.read(rdata, rdlen);  // RDATA
+        return rdata;
       }
       else
       {
-	br.skip(rdlen);  // Skip it
+        br.skip(rdlen);  // Skip it
       }
     }
 
     // Nothing matched
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-	      << ") failed - no suitable answer sections\n";
+              << ") failed - no suitable answer sections\n";
     return "";
   }
   catch (Channel::Error ce)
   {
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
-	      << ") failed - can't parse response\n";
+              << ") failed - can't parse response\n";
     return "";
   }
 #endif
@@ -220,7 +220,7 @@ string Resolver::query_txt(const string& domain)
   {
     Log::Streams log;
     log.error << "DNS resolver: lookup of " << domain
-	      << " (TXT) failed - bad string lengths in TXT RR\n";
+              << " (TXT) failed - bad string lengths in TXT RR\n";
     return "";
   }
 }
@@ -245,7 +245,7 @@ string Resolver::query_cert(const string& domain)
     {
       Log::Streams log;
       log.error << "DNS resolver: lookup of " << domain
-		<< " (CERT) failed - not PKIX\n";
+                << " (CERT) failed - not PKIX\n";
       return "";
     }
 
@@ -261,7 +261,7 @@ string Resolver::query_cert(const string& domain)
   {
     Log::Streams log;
     log.error << "DNS resolver: lookup of " << domain
-	      << " (CERT) failed - bad RR format\n";
+              << " (CERT) failed - bad RR format\n";
     return "";
   }
 }

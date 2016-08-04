@@ -49,7 +49,7 @@ void ReadThread::run()
     {
       if (n != next_n)
       {
-	cerr << "Out of phase - expected " << next_n << " got " << n << endl;
+        cerr << "Out of phase - expected " << next_n << " got " << n << endl;
         errors++;
       }
 

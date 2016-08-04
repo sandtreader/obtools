@@ -18,7 +18,7 @@ namespace ObTools { namespace Web {
 // Constructor from URL - extracts server from host/port parts
 // Handles https if ctx is set
 HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
-		       int _connection_timeout, int _operation_timeout):
+                       int _connection_timeout, int _operation_timeout):
   user_agent(_ua), ssl_ctx(_ctx), connection_timeout(_connection_timeout),
   operation_timeout(_operation_timeout), socket(0), stream(0),
   http_1_1(false), http_1_1_close(false), progressive(false), chunked(false),
@@ -38,8 +38,8 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
     {
       if (!ssl_ctx)
       {
-	Log::Streams log;
-	log.error << "HTTPS requested but no SSL context given\n";
+        Log::Streams log;
+        log.error << "HTTPS requested but no SSL context given\n";
       }
     }
     else
@@ -90,7 +90,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
   request.url = URL(xml);
 
   OBTOOLS_LOG_IF_DEBUG(log.debug << "HTTP " << request.method << " for "
-		       << request.url << " from " << server << endl;)
+                       << request.url << " from " << server << endl;)
 
   // Set protocol
   request.version = http_1_1?"HTTP/1.1":"HTTP/1.0";
@@ -111,7 +111,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
     if (auth_password.size()) auth_user += ":" + auth_password;
     Text::Base64 base64;
     request.headers.put("Authorization",
-			"Basic "+base64.encode(auth_user,0));
+                        "Basic "+base64.encode(auth_user,0));
   }
 
   // Add cookies if we have a jar
@@ -296,7 +296,7 @@ int HTTPClient::del(const URL& url, string& body)
 // Simple POST operation on a URL
 // Returns result code, fills in response_body if provided, reason code if not
 int HTTPClient::post(const URL& url, const string& request_body,
-		     string& response_body)
+                     string& response_body)
 {
   HTTPMessage request("POST", url);
   request.body = request_body;
@@ -385,26 +385,26 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
       // Need to read a chunk header?
       if (chunked && !current_chunk_length)
       {
-	string line;
+        string line;
 
-	// First line might effectively be blank because it's actually the
-	// end of the previous chunk
-	if (!MIMEHeaders::getline(*stream, line)
-	    || (line.empty() && !MIMEHeaders::getline(*stream, line)))
-	  throw Net::SocketError(EOF);
+        // First line might effectively be blank because it's actually the
+        // end of the previous chunk
+        if (!MIMEHeaders::getline(*stream, line)
+            || (line.empty() && !MIMEHeaders::getline(*stream, line)))
+          throw Net::SocketError(EOF);
 
-	// Split at ;
-	vector<string> bits = Text::split(line, ';');
-	current_chunk_length = Text::xtoi(bits[0]);
+        // Split at ;
+        vector<string> bits = Text::split(line, ';');
+        current_chunk_length = Text::xtoi(bits[0]);
 
-	// Last chunk?
-	if (!current_chunk_length) throw Net::SocketError(EOF);
+        // Last chunk?
+        if (!current_chunk_length) throw Net::SocketError(EOF);
       }
 
       // Read up to requested length, limited to that available
       uint64_t wanted = length-n;
       if (current_chunk_length && wanted > current_chunk_length)
-	wanted = current_chunk_length;
+        wanted = current_chunk_length;
 
       // Try to read this much or up to end of stream
       stream->read(reinterpret_cast<char *>(data)+n, wanted);
@@ -415,10 +415,10 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
       // Count down length only if specified to begin with
       if (current_chunk_length)
       {
-	current_chunk_length -= count;
+        current_chunk_length -= count;
 
-	// If not chunked, and now done, that's it
-	if (!chunked && !current_chunk_length) throw Net::SocketError(EOF);
+        // If not chunked, and now done, that's it
+        if (!chunked && !current_chunk_length) throw Net::SocketError(EOF);
       }
     }
 

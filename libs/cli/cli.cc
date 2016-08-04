@@ -31,18 +31,18 @@ bool CommandLine::readline(string& line)
     {
       case 0:  // EOF
       case 4:  // ctrl-D
-	return false;
+        return false;
 
       case '\r':
       case '\n':
-	if (line.size())
-	  return true;
-	else
-	  sout << prompt;
-	break;
+        if (line.size())
+          return true;
+        else
+          sout << prompt;
+        break;
 
       default:
-	line+=c;
+        line+=c;
     }
   }
 

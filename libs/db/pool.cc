@@ -29,16 +29,16 @@ public:
 //------------------------------------------------------------------------
 // Constructor
 ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
-			       unsigned _min, unsigned _max,
-			       Time::Duration _max_inactivity):
+                               unsigned _min, unsigned _max,
+                               Time::Duration _max_inactivity):
   factory(_factory), min_connections(_min), max_connections(_max),
   max_inactivity(_max_inactivity), mutex(), background_thread(0)
 {
   Log::Streams log;
   log.summary << "Creating database connection pool with ("
-	      << min_connections << "-" << max_connections
-	      << ") connections, max inactivity " << max_inactivity.seconds()
-	      << endl;
+              << min_connections << "-" << max_connections
+              << ") connections, max inactivity " << max_inactivity.seconds()
+              << endl;
 
   // Start with base level
   fill_to_minimum();
@@ -55,7 +55,7 @@ void ConnectionPool::fill_to_minimum()
   {
     Log::Streams log;
     log.detail << "Filling database connection pool with "
-	       << min_connections-connections.size() << " connections\n";
+               << min_connections-connections.size() << " connections\n";
 
     // Create minimum number of connections
     for(unsigned i=connections.size(); i<min_connections; i++)
@@ -63,17 +63,17 @@ void ConnectionPool::fill_to_minimum()
       Connection *conn = factory.create();
       if (conn)
       {
-	if (*conn)
-	{
-	  connections.push_back(conn);
-	  available.push_back(conn);
-	  last_used[conn] = Time::Stamp::now();
-	}
-	else
-	{
-	  delete conn;
-	  break;
-	}
+        if (*conn)
+        {
+          connections.push_back(conn);
+          available.push_back(conn);
+          last_used[conn] = Time::Stamp::now();
+        }
+        else
+        {
+          delete conn;
+          break;
+        }
       }
     }
   }
@@ -82,7 +82,7 @@ void ConnectionPool::fill_to_minimum()
   {
     Log::Streams log;
     log.error << "Can't fill database connection pool: "
-	       << min_connections-connections.size() << " failed\n";
+               << min_connections-connections.size() << " failed\n";
   }
 }
 
@@ -105,9 +105,9 @@ Connection *ConnectionPool::claim()
     {
       last_used[conn] = Time::Stamp::now();
       OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
-			   dlog.debug << "Database connection claimed - "
-			   << connections.size() << " total, "
-			   << available.size() << " available\n";)
+                           dlog.debug << "Database connection claimed - "
+                           << connections.size() << " total, "
+                           << available.size() << " available\n";)
       return conn;
     }
 
@@ -130,18 +130,18 @@ Connection *ConnectionPool::claim()
     {
       if (*conn)
       {
-	connections.push_back(conn);
-	last_used[conn] = Time::Stamp::now();
+        connections.push_back(conn);
+        last_used[conn] = Time::Stamp::now();
 
-	OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
-			     dlog.debug << "New database connection created - "
-			     << "now "<< connections.size() << " in total\n";)
-	return conn;
+        OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
+                             dlog.debug << "New database connection created - "
+                             << "now "<< connections.size() << " in total\n";)
+        return conn;
       }
       else
       {
-	delete conn;
-	return 0;
+        delete conn;
+        return 0;
       }
     }
     else return 0;
@@ -149,7 +149,7 @@ Connection *ConnectionPool::claim()
 
   Log::Streams log;
   log.error << "Database pool reached maximum size: " << max_connections
-	    << endl;
+            << endl;
 
   return 0;
 }
@@ -165,9 +165,9 @@ void ConnectionPool::release(Connection *conn)
   {
     available.push_back(conn);
     OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
-			 dlog.debug << "Database connection released - "
-			 << connections.size() << " total, "
-			 << available.size() << " available\n";)
+                         dlog.debug << "Database connection released - "
+                         << connections.size() << " total, "
+                         << available.size() << " available\n";)
   }
   else
   {
@@ -193,51 +193,51 @@ void ConnectionPool::run_background(bool& running)
       // we can't be sure the ok() operation is thread-safe if it's
       // being used
       for(list<Connection *>::iterator p = available.begin();
-	  p!=available.end();)
+          p!=available.end();)
       {
-	list<Connection *>::iterator q = p++;
+        list<Connection *>::iterator q = p++;
         Connection *conn = *q;
 
-	if (!*conn)
-	{
-	  log.error<< "Idle database connection failed - removing from pool\n";
+        if (!*conn)
+        {
+          log.error<< "Idle database connection failed - removing from pool\n";
 
-	  map<Connection *, Time::Stamp>::iterator lp = last_used.find(conn);
-	  if (lp!=last_used.end()) last_used.erase(lp);
-	  available.erase(q);
-	  connections.remove(conn);
-	  delete conn;
-	}
+          map<Connection *, Time::Stamp>::iterator lp = last_used.find(conn);
+          if (lp!=last_used.end()) last_used.erase(lp);
+          available.erase(q);
+          connections.remove(conn);
+          delete conn;
+        }
       }
 
       // Now look for inactive ones to reap
       for(map<Connection *, Time::Stamp>::iterator p = last_used.begin();
-	  p!=last_used.end();)
+          p!=last_used.end();)
       {
-	map<Connection *, Time::Stamp>::iterator q = p++;
+        map<Connection *, Time::Stamp>::iterator q = p++;
         Connection *conn = q->first;
-	Time::Stamp t = q->second;
+        Time::Stamp t = q->second;
 
-	if (now-t >= max_inactivity)
-	{
-	  // Check if it's the available list
-	  if (find(available.begin(), available.end(), conn)==available.end())
-	  {
-	    log.error << "Claimed connection is inactive since "
-		      << t.iso() << " - ignoring\n";
-	    // Post back a last_used to suppress errors until next timeout
-	    q->second = now;
-	  }
-	  else
-	  {
-	    log.detail << "MySQL connection is inactive - reaping\n";
+        if (now-t >= max_inactivity)
+        {
+          // Check if it's the available list
+          if (find(available.begin(), available.end(), conn)==available.end())
+          {
+            log.error << "Claimed connection is inactive since "
+                      << t.iso() << " - ignoring\n";
+            // Post back a last_used to suppress errors until next timeout
+            q->second = now;
+          }
+          else
+          {
+            log.detail << "MySQL connection is inactive - reaping\n";
 
-	    last_used.erase(q);
-	    connections.remove(conn);
-	    available.remove(conn);
-	    delete conn;
-	  }
-	}
+            last_used.erase(q);
+            connections.remove(conn);
+            available.remove(conn);
+            delete conn;
+          }
+        }
       }
 
       // Refill in case any deleted

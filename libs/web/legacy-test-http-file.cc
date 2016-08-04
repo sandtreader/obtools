@@ -26,12 +26,12 @@ int main()
   if (msg.is_request())
   {
     cout << msg.version << " request: " << msg.method << " for "
-	 << msg.url << endl;
+         << msg.url << endl;
   }
   else
   {
     cout << msg.version << " response: " << msg.code << " - "
-	 << msg.reason << endl;
+         << msg.reason << endl;
   }
 
   cout << msg.headers.xml;

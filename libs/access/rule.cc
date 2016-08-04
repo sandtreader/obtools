@@ -44,7 +44,7 @@ Rule::Rule(const XML::Element& r_e, map<string, Group *>& groups): group(0)
 //--------------------------------------------------------------------------
 // Test the rule for match against the given address and username
 bool Rule::matches(Net::IPAddress attempted_address,
-		   const string& attempted_user)
+                   const string& attempted_user)
 {
   // Note: All specified conditions must match
 

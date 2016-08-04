@@ -16,7 +16,7 @@ namespace ObTools { namespace SOAP {
 // Simple request POST operation on a specified URL and optional SOAPAction
 // Returns result code, fills in response
 int HTTPClient::post(Web::URL& url, const string& soap_action,
-		     Message& request, Message& response)
+                     Message& request, Message& response)
 {
   Log::Streams log;
 
@@ -48,7 +48,7 @@ int HTTPClient::post(Web::URL& url, const string& soap_action,
   if (!soap_response)
   {
     log.error << "Invalid SOAP returned from " << server << ":\n"
-	      << http_response.body << endl;
+              << http_response.body << endl;
     return 500;
   }
 

@@ -91,8 +91,8 @@ XML::Element& Message::add_header(XML::Element *header)
 // Element is modified with role, mustUnderstand and relay attributes
 // Returns reference to created header element
 XML::Element& Message::add_header(const string &name, const string& role,
-				  bool must_understand,
-				  bool relay)
+                                  bool must_understand,
+                                  bool relay)
 {
   XML::Element *header = new XML::Element(name);
 
@@ -114,8 +114,8 @@ XML::Element& Message::add_header(const string &name, const string& role,
 // Element is modified with role, mustUnderstand and relay attributes
 // Returns reference to created header element
 XML::Element& Message::add_header(const string& name, Header::Role role,
-				  bool must_understand,
-				  bool relay)
+                                  bool must_understand,
+                                  bool relay)
 {
   switch (role)
   {
@@ -148,8 +148,8 @@ XML::Element& Message::add_body(XML::Element *body)
 // a standard SOAP encodingStyle attribute
 // body is taken and will be deleted with message
 XML::Element& Message::add_wsdl_body(const string& name,
-				     const string& ns_prefix,
-				     const string& ns)
+                                     const string& ns_prefix,
+                                     const string& ns)
 {
   XML::Element *body = new XML::Element(name, "xmlns:"+ns_prefix, ns);
   if (doc)
@@ -157,7 +157,7 @@ XML::Element& Message::add_wsdl_body(const string& name,
     XML::Element& env_body = doc->make_child("env:Body");
     env_body.add(body);
     env_body.set_attr("env:encodingStyle",
-		      "http://schemas.xmlsoap.org/soap/encoding/");
+                      "http://schemas.xmlsoap.org/soap/encoding/");
   }
 
   return *body;

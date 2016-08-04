@@ -19,7 +19,7 @@ using namespace ObTools;
 //--------------------------------------------------------------------------
 // CRC32 test
 void test(unsigned char *data, int size, Misc::CRC32::Algorithm algorithm,
-	  const char *name)
+          const char *name)
 {
   cout << name << '\t';
 

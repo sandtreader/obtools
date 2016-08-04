@@ -16,11 +16,11 @@ namespace ObTools { namespace XMLMesh {
 //--------------------------------------------------------------------------
 // Constructor for requests
 SubscriptionMessage::SubscriptionMessage(Operation _operation,
-					 const string& _subject):
+                                         const string& _subject):
   Message((_operation==JOIN)?"xmlmesh.subscription.join"
-	                    :"xmlmesh.subscription.leave",
-	  new XML::Element((_operation==JOIN)?"x:join":"x:leave"),
-	  true),
+                            :"xmlmesh.subscription.leave",
+          new XML::Element((_operation==JOIN)?"x:join":"x:leave"),
+          true),
   operation(_operation),
   subject(_subject)
 {

@@ -107,7 +107,7 @@ string ftos(double f, int width, int prec, bool zero_pad)
   ostringstream oss;
   if (width) oss << setw(width);
   if (prec) oss << setprecision(prec)
-		<< setiosflags(ios::fixed | ios::showpoint);
+                << setiosflags(ios::fixed | ios::showpoint);
   if (zero_pad) oss << setfill('0');
   oss << f;
   return oss.str();
@@ -206,7 +206,7 @@ string btox(const vector<uint8_t>& data)
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
 unsigned int xtob(const string& hex, unsigned char *data,
-		  unsigned int max_length)
+                  unsigned int max_length)
 {
   unsigned int length = hex.size()/2;
   if (length > max_length) length = max_length;

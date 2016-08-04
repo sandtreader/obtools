@@ -49,8 +49,8 @@ int main()
   {
     cout << "Wombats on the menu today:" << endl;
     for(list<ObTools::XML::Element *>::const_iterator p=wombats.begin();
-	p!=wombats.end();
-	p++)
+        p!=wombats.end();
+        p++)
     {
       ObTools::XML::Element& wombat=**p;
       cout << "  [" << wombat.content << "]" << endl;
@@ -63,8 +63,8 @@ int main()
   {
     cout << "Wombats in the cellars today:" << endl;
     for(list<ObTools::XML::Element *>::const_iterator p=wombats.begin();
-	p!=wombats.end();
-	p++)
+        p!=wombats.end();
+        p++)
     {
       ObTools::XML::Element& wombat=**p;
       cout << "  [" << wombat.content << "]" << endl;

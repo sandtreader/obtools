@@ -143,9 +143,9 @@ void Socket::set_timeout(int secs, int usecs)
   tv.tv_usec = usecs;
 
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, static_cast<sockopt_t>(&tv),
-	     sizeof(struct timeval));
+             sizeof(struct timeval));
   setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, static_cast<sockopt_t>(&tv),
-	     sizeof(struct timeval));
+             sizeof(struct timeval));
 #endif
 }
 
@@ -340,8 +340,8 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
       string mac = get_mac(ip, ifname);
       if (!mac.empty())
       {
-	if_freenameindex(ifs);
-	return mac;
+        if_freenameindex(ifs);
+        return mac;
       }
     }
 
@@ -372,7 +372,7 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
   char mac[18];
   unsigned char *p = reinterpret_cast<unsigned char *>(arp.arp_ha.sa_data);
   sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
-	  p[0], p[1], p[2], p[3], p[4], p[5]);
+          p[0], p[1], p[2], p[3], p[4], p[5]);
   return mac;
 #endif
 }
@@ -800,7 +800,7 @@ void UDPSocket::enable_broadcast()
   unsigned long n = 1;
 
   setsockopt(fd, SOL_SOCKET, SO_BROADCAST, static_cast<sockopt_t>(&n),
-	     sizeof(unsigned long));
+             sizeof(unsigned long));
 }
 
 //--------------------------------------------------------------------------
@@ -850,7 +850,7 @@ int UDPSocket::csend(const void *msg, size_t len, int flags)
 // If endpoint_p is non-null, sets it to the source of the
 // datagram
 ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
-			     EndPoint *endpoint_p)
+                             EndPoint *endpoint_p)
 {
   struct sockaddr_in saddr;
   socklen_t slen = sizeof(saddr);
@@ -858,7 +858,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
 
 #ifdef __WIN32__
   size = ::recvfrom(fd, (char *)buf, len, flags,
-		    (struct sockaddr *)&saddr, &slen);
+                    (struct sockaddr *)&saddr, &slen);
   if (size == SOCKET_ERROR) size = -1;
 #else
   // Silently loop on EINTR
@@ -878,7 +878,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
 //--------------------------------------------------------------------------
 // Raw datagram sendto wrapper
 int UDPSocket::csendto(const void *msg, size_t len, int flags,
-		       EndPoint endpoint)
+                       EndPoint endpoint)
 {
   struct sockaddr_in saddr;
   endpoint.set(saddr);
@@ -886,7 +886,7 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
 
 #ifdef __WIN32__
   res = ::sendto(fd, (const char *)msg, len, flags,
-		  (struct sockaddr *)&saddr, sizeof(saddr));
+                  (struct sockaddr *)&saddr, sizeof(saddr));
   if (res == SOCKET_ERROR) res = -1;
 #else
   do
@@ -903,7 +903,7 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
 //--------------------------------------------------------------------------
 // Raw datagram sendmsg wrapper
 int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
-			EndPoint endpoint)
+                        EndPoint endpoint)
 {
   struct sockaddr_in saddr;
   endpoint.set(saddr);
@@ -958,7 +958,7 @@ int UDPSocket::send(const void *buf, size_t len, int flags)
 // If endpoint_p is non-null, sets them to the source of the datagram
 // Throws SocketError on failure
 ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
-			    EndPoint *endpoint_p)
+                            EndPoint *endpoint_p)
                                throw (SocketError)
 {
   ssize_t size = crecvfrom(buf, len, flags, endpoint_p);
@@ -970,7 +970,7 @@ ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
 // Safe datagram sendto wrapper
 // Throws SocketError on failure
 ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
-			  EndPoint endpoint)
+                          EndPoint endpoint)
                              throw (SocketError)
 {
   int res = csendto(buf, len, flags, endpoint);
@@ -982,7 +982,7 @@ ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
 // Safe datagram sendmsg wrapper
 // Throws SocketError on failure
 ssize_t UDPSocket::sendmsg(struct iovec *gathers, int ngathers, int flags,
-			  EndPoint endpoint)
+                          EndPoint endpoint)
                              throw (SocketError)
 {
   int res = csendmsg(gathers, ngathers, flags, endpoint);

@@ -17,10 +17,10 @@ AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe):
 {
   //Get basic properties
   is_ordered = (get_property("ordering", "UML:AssociationEnd.ordering")
-		== "ordered");
+                == "ordered");
 
   is_navigable = get_bool_property("isNavigable",
-				  "UML:AssociationEnd.isNavigable");
+                                  "UML:AssociationEnd.isNavigable");
 
   multiplicity = Multiplicity::read_from(source, reader);
 
@@ -47,12 +47,12 @@ void AssociationEnd::build_refs()
 
   // Try UML1.4 participant first
   participant = get_classifier_property("participant",
-					"UML:AssociationEnd.participant");
+                                        "UML:AssociationEnd.participant");
 
   //If not there, try UML1.3 'type'
   if (!participant)
     participant = get_classifier_property("type",
-					  "UML:AssociationEnd.type");
+                                          "UML:AssociationEnd.type");
 
   if (!participant)
     reader.error("Can't get participant in AssociationEnd id ", id);

@@ -21,7 +21,7 @@ Feature::Feature(XMI::Reader& rdr, XML::Element& xe)
 {
   //Get basic properties
   is_static = (get_property("ownerScope", "UML:Feature.ownerScope")
-	       == "classifier");
+               == "classifier");
 }
 
 //--------------------------------------------------------------------------
@@ -41,7 +41,7 @@ StructuralFeature::StructuralFeature(XMI::Reader& rdr, XML::Element& xe):
 {
   //Get basic properties
   is_ordered = (get_property("ordering", "UML:StructuralFeature.ordering")
-		== "ordered");
+                == "ordered");
 
   multiplicity = Multiplicity::read_from(source, reader);
 }

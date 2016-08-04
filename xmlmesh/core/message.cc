@@ -33,14 +33,14 @@ static string _allocate_id()
 //--------------------------------------------------------------------------
 // Add routing header to the given SOAP message
 static void _add_routing_header(SOAP::Message *soap,
-				const string& subject,
-				bool rsvp,
-				const string& ref)
+                                const string& subject,
+                                bool rsvp,
+                                const string& ref)
 {
   // Add routing header - role 'Next', must_understand, relay
   XML::Element& rh = soap->add_header("x:routing",
-				      SOAP::Header::ROLE_NEXT,
-				      true, true);
+                                      SOAP::Header::ROLE_NEXT,
+                                      true, true);
 
   // Add our routing parameters
   rh.set_attr("x:id", _allocate_id());
@@ -54,7 +54,7 @@ static void _add_routing_header(SOAP::Message *soap,
 // ID is manufactured here, and routing header added
 // 'soap' is taken and will be disposed with message
 Message::Message(const string& subject, SOAP::Message *soap,
-		 bool rsvp, const string& ref)
+                 bool rsvp, const string& ref)
 {
   // Create a SOAP message with XMLMesh namespace
   soap_message = soap;
@@ -70,7 +70,7 @@ Message::Message(const string& subject, SOAP::Message *soap,
 // Takes ownership of the XML::Element - make sure it's detached from the
 // parser!
 Message::Message(const string& subject, XML::Element *xml_content,
-		 bool rsvp, const string& ref)
+                 bool rsvp, const string& ref)
 {
   // Create a SOAP message with XMLMesh namespace
   soap_message = new SOAP::Message();
@@ -88,7 +88,7 @@ Message::Message(const string& subject, XML::Element *xml_content,
 // ID is manufactured here
 // Copies text of xml element and reparses it into body
 Message::Message(const string& subject, const XML::Element& xml_content,
-		 bool rsvp, const string& ref)
+                 bool rsvp, const string& ref)
 {
   // Create a SOAP message with XMLMesh namespace
   soap_message = new SOAP::Message();
@@ -111,7 +111,7 @@ Message::Message(const string& subject, const XML::Element& xml_content,
   catch (XML::ParseFailed)
   {
     error_log << "XMLMesh Message creation: "
-	      << "can't reparse supplied element " << xml_content << endl;
+              << "can't reparse supplied element " << xml_content << endl;
   }
 }
 
@@ -120,7 +120,7 @@ Message::Message(const string& subject, const XML::Element& xml_content,
 // ID is manufactured here
 // body_text is the body text to be sent
 Message::Message(const string& subject, const string& body_text,
-		 bool rsvp, const string& ref)
+                 bool rsvp, const string& ref)
 {
   // Create a SOAP message with XMLMesh namespace
   soap_message = new SOAP::Message();
@@ -144,8 +144,8 @@ Message::Message(const string& subject, const string& body_text,
   catch (XML::ParseFailed)
   {
     error_log << "XMLMesh Message creation: "
-	      << "can't parse supplied body text:\n"
-	      << body_text << endl;
+              << "can't parse supplied body text:\n"
+              << body_text << endl;
   }
 }
 

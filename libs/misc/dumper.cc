@@ -36,16 +36,16 @@ void Dumper::dump(const void *block, int length)
       // Pad if last line
       for(int i=w; i<width; i++)
       {
-	if (split && !(i%split)) sout << ' ';
-	sout << "  ";
+        if (split && !(i%split)) sout << ' ';
+        sout << "  ";
       }
 
       sout << " | ";
       for(int i=0; i<w; i++)
       {
-	unsigned char c=p[offset+i];
-	if (!isprint(c)) c='.';
-	sout << c;
+        unsigned char c=p[offset+i];
+        if (!isprint(c)) c='.';
+        sout << c;
       }
     }
 

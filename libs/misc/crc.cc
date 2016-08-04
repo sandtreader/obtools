@@ -45,10 +45,10 @@ CRC::CRC(Algorithm _alg, bool _reflected, bool _flip):
       crc = i;
       for(int bit=0; bit<8; bit++)
       {
-	if (crc & 1)
-	  crc = (crc >> 1) ^ poly;
-	else
-	  crc = crc >> 1;
+        if (crc & 1)
+          crc = (crc >> 1) ^ poly;
+        else
+          crc = crc >> 1;
       }
     }
     else
@@ -56,10 +56,10 @@ CRC::CRC(Algorithm _alg, bool _reflected, bool _flip):
       crc = i << 8;
       for(int bit=0; bit<8; bit++)
       {
-	if (crc & 0x8000)
-	  crc = (crc << 1) ^ poly;
-	else
-	  crc = crc << 1;
+        if (crc & 0x8000)
+          crc = (crc << 1) ^ poly;
+        else
+          crc = crc << 1;
       }
     }
     combinations[i] = crc;

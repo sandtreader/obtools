@@ -59,7 +59,7 @@ bool Directory::ensure(bool parents, int mode) const
 // Return whether successful (directory readable)
 // Fills in leaves if so
 bool Directory::inspect(list<string>& leaves, const string& pattern,
-			bool all)
+                        bool all)
 {
 #if defined(__WIN32__)
   // Use full '*' search, so we can use full pattern format without
@@ -73,7 +73,7 @@ bool Directory::inspect(list<string>& leaves, const string& pattern,
     {
       string fn = wide_to_utf8(data.cFileName);
       if ((all || fn[0] != '.') && Text::pattern_match(pattern, fn))
-	leaves.push_back(fn);
+        leaves.push_back(fn);
 
       if (!FindNextFileW(h, &data)) break;
     }

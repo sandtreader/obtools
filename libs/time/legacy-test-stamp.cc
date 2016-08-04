@@ -14,7 +14,7 @@ using namespace std;
 using namespace ObTools;
 
 const char *days[] = { "Monday", "Tuesday", "Wednesday", "Thursday",
-		       "Friday", "Saturday", "Sunday" };
+                       "Friday", "Saturday", "Sunday" };
 
 //--------------------------------------------------------------------------
 // Main

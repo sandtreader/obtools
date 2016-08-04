@@ -34,7 +34,7 @@ Element::Element(XMI::Reader& rdr, XML::Element& xe):
 //Ignores any elements without an 'xmi.id' attribute - these are refs
 //Prunes descendant tree at 'prune', if given
 void Element::read_subelements(const char *name, ElementFactoryFunc factory,
-			       bool id_required, const char *prune)
+                               bool id_required, const char *prune)
 {
   //Fix 0 prune to empty before cast to string
   if (!prune) prune="";
@@ -81,7 +81,7 @@ void Element::build_refs()
 // [Note to future DTD designers - please choose attributes OR subelements,
 //  not both!]
 string Element::get_property(const string& attr_name,
-			     const string& subelement_name)
+                             const string& subelement_name)
 {
   //Try attribute
   string v = source.get_attr(attr_name);
@@ -102,7 +102,7 @@ string Element::get_property(const string& attr_name,
 // Gets UML element boolean 'property' as above
 // Anything other than 'true' is considered 'false'
 bool Element::get_bool_property(const string& attr_name,
-				const string& subelement_name)
+                                const string& subelement_name)
 {
   return get_property(attr_name, subelement_name) == "true";
 }
@@ -111,8 +111,8 @@ bool Element::get_bool_property(const string& attr_name,
 // Gets UML element integer 'property' as above
 // Returns default if not available, 0 if not a number
 bool Element::get_int_property(const string& attr_name,
-			       const string& subelement_name,
-			       int def)
+                               const string& subelement_name,
+                               int def)
 {
   string v = get_property(attr_name, subelement_name);
   if (v.empty()) return def;
@@ -138,8 +138,8 @@ bool Element::get_int_property(const string& attr_name,
 // sub-sub-element is optional, to cope with single-layer form
 // Returns "" if not found
 string Element::get_idref_property(const string& attr_name,
-				   const string& subelement_name,
-				   const string& subsubelement_name)
+                                   const string& subelement_name,
+                                   const string& subsubelement_name)
 {
   //Try attribute
   string v = source.get_attr(attr_name);
@@ -157,7 +157,7 @@ string Element::get_idref_property(const string& attr_name,
       //Try to open subsubelement
       XML::Element& subsube = sube.get_child(subsubelement_name);
       if (subsube.valid())
-	return subsube.get_attr("xmi.idref");
+        return subsube.get_attr("xmi.idref");
     }
   }
 
@@ -169,12 +169,12 @@ string Element::get_idref_property(const string& attr_name,
 // Allow allows (broken?) Netbeans MDR form with Class/Datatype
 // Returns referenced Element, or 0 if not found
 Element *Element::get_element_property(const string& attr_name,
-				       const string& subelement_name,
-				       const string& subsubelement_name)
+                                       const string& subelement_name,
+                                       const string& subsubelement_name)
 {
   //Try requested subsubelement
   string idref = get_idref_property(attr_name, subelement_name,
-				    subsubelement_name);
+                                    subsubelement_name);
 
   //!XMI: XMI 1.2/UML 1.3 DTD implies only superclass (UML:Classifier,
   //UML:GeneralizableElement) allowed here, but Netbeans MDR (as used
@@ -188,13 +188,13 @@ Element *Element::get_element_property(const string& attr_name,
   //more correct should be using superclasses for everything
   if (idref.empty())
     idref = get_idref_property(attr_name, subelement_name,
-			       "UML:Class");
+                               "UML:Class");
   if (idref.empty())
     idref = get_idref_property(attr_name, subelement_name,
-			       "UML:Interface");
+                               "UML:Interface");
   if (idref.empty())
     idref = get_idref_property(attr_name, subelement_name,
-			       "UML:DataType");
+                               "UML:DataType");
 
   if (idref.empty()) return 0;
 
@@ -209,10 +209,10 @@ Element *Element::get_element_property(const string& attr_name,
 // Ditto, but check to be a UML:Classifier
 // Looks for UML:Classifier element (and MDR mistakes)
 Classifier *Element::get_classifier_property(const string& attr_name,
-					     const string& subelement_name)
+                                             const string& subelement_name)
 {
   Element *e = get_element_property(attr_name, subelement_name,
-				    "UML:Classifier");
+                                    "UML:Classifier");
   if (!e) return 0;
 
   // Make sure it really is some kind of Classifier before returning it
@@ -227,10 +227,10 @@ Classifier *Element::get_classifier_property(const string& attr_name,
 // Ditto, but check to be a UML:GeneralizableElement
 // Looks for UML:GeneralizableElement element (and MDR mistakes)
 GeneralizableElement *Element::get_ge_property(const string& attr_name,
-					       const string& subelement_name)
+                                               const string& subelement_name)
 {
   Element *e = get_element_property(attr_name, subelement_name,
-				    "UML:GeneralizableElement");
+                                    "UML:GeneralizableElement");
   if (!e) return 0;
 
   // Make sure it really is some kind of GE before returning it

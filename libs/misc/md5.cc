@@ -77,7 +77,7 @@ void MD5::update(const char *buf, unsigned len)
   /* Update bitcount */
   t = ctx_bits[0];
   if ((ctx_bits[0] = t + (static_cast<uint32_t>(len) << 3)) < t)
-    ctx_bits[1]++; 	/* Carry from low to high */
+    ctx_bits[1]++;         /* Carry from low to high */
   ctx_bits[1] += len >> 29;
 
   t = (t >> 3) & 0x3f;
@@ -174,7 +174,7 @@ void MD5::finalise(unsigned char digest[16])
 
 /* This is the central step in the MD5 algorithm. */
 #define MD5STEP(f, w, x, y, z, data, s) \
-	( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x )
+        ( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x )
 
 //------------------------------------------------------------------------
 // MD5 Transform

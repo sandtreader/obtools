@@ -27,30 +27,30 @@ bool HTTPMessage::get_first_line(istream& in, string& s)
     switch (c)
     {
       case EOF:  // Error - should end cleanly with blank line
-	return false;
+        return false;
 
       case '\r':
-	// Skip remaining LF if present
-	c = in.get();
-	if (c!=EOF && c!='\n') in.putback(c);
-	return true;
+        // Skip remaining LF if present
+        c = in.get();
+        if (c!=EOF && c!='\n') in.putback(c);
+        return true;
 
       case '\n': // Shouldn't happen, but being liberal for Unix files
-	return true;
+        return true;
 
       case '$':
-	if (!count) // first character
-	{
-	  s+=c;  // Just use this as string
-	  return true;
-	}
-	// Otherwise falling to default...
+        if (!count) // first character
+        {
+          s+=c;  // Just use this as string
+          return true;
+        }
+        // Otherwise falling to default...
 
       default:
-	if (++count < MAX_FIRST_LINE)  // DOS protection
-	  s+=c;
-	else
-	  return false;            // Bomb out
+        if (++count < MAX_FIRST_LINE)  // DOS protection
+          s+=c;
+        else
+          return false;            // Bomb out
     }
   }
 
@@ -92,13 +92,13 @@ bool HTTPMessage::read_headers(istream &in)
       int count = 0;
       while (!in.fail() && count<length)
       {
-	char buf[READ_SIZE];
-	int wanted = READ_SIZE;
-	if (length-count < wanted) wanted = length-count;
-	in.read(buf, wanted);
-	int got = in.gcount();
-	body.append(buf, got);
-	count += got;
+        char buf[READ_SIZE];
+        int wanted = READ_SIZE;
+        if (length-count < wanted) wanted = length-count;
+        in.read(buf, wanted);
+        int got = in.gcount();
+        body.append(buf, got);
+        count += got;
       }
     }
 
@@ -208,16 +208,16 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
       int count = 0;
       while (!in.fail() && (!length || count<length))
       {
-	char buf[READ_SIZE];
-	int wanted = READ_SIZE;
-	if (length && length-count < wanted) wanted = length-count;
+        char buf[READ_SIZE];
+        int wanted = READ_SIZE;
+        if (length && length-count < wanted) wanted = length-count;
 
-	in.read(buf, wanted);
-	int got = in.gcount();
+        in.read(buf, wanted);
+        int got = in.gcount();
 
-	// Add to body content
-	body.append(buf, got);
-	count += got;
+        // Add to body content
+        body.append(buf, got);
+        count += got;
       }
     }
   } while (chunked);

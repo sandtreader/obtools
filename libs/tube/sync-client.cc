@@ -32,7 +32,7 @@ class TimeoutThread: public MT::Thread
     }
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << client.name
-			 << " (timeout): Thread shut down\n";)
+                         << " (timeout): Thread shut down\n";)
   }
 
 public:
@@ -54,7 +54,7 @@ void SyncClient::do_timeouts(Log::Streams& log)
 // Constructor - takes server endpoint (address+port), request timeout
 // (in seconds) and optional name
 SyncClient::SyncClient(Net::EndPoint _server, int _timeout,
-		       const string& _name):
+                       const string& _name):
   Client(_server, _name), timeout(_timeout)
 {
   timeout_thread = new TimeoutThread(*this);
@@ -63,7 +63,7 @@ SyncClient::SyncClient(Net::EndPoint _server, int _timeout,
 //------------------------------------------------------------------------
 // Constructor with SSL
 SyncClient::SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
-		       int _timeout, const string& _name):
+                       int _timeout, const string& _name):
   Client(_server, _ctx, _name), timeout(_timeout)
 {
   timeout_thread = new TimeoutThread(*this);

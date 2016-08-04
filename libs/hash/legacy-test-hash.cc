@@ -56,7 +56,7 @@ void TestThread::run()
       // Check they aren't already there
       do
       {
-	// Generate a random ID with thread uniqueness in lowest bits
+        // Generate a random ID with thread uniqueness in lowest bits
         ids[j] = (static_cast<uint32_t>(rand()^(rand()<<1))/nthreads)
                  *nthreads+n;
       } while (hash.lookup(ids[j]) != Hash::INVALID_INDEX);
@@ -64,8 +64,8 @@ void TestThread::run()
       // Now OK to add
       if (!hash.add(ids[j], i*10+j))
       {
-	cout << "Adding failed after " << i << " entries\n";
-	break;
+        cout << "Adding failed after " << i << " entries\n";
+        break;
       }
     }
 
@@ -75,9 +75,9 @@ void TestThread::run()
       int32_t i2 = hash.lookup(ids[j]);
       if (i2 != i*10+j)
       {
-	cout << "Lookup of " << ids[j] << " failed - expecting "
-	     << i+j << " got " << i2 << endl;
-	//	hash.dump(cout);
+        cout << "Lookup of " << ids[j] << " failed - expecting "
+             << i+j << " got " << i2 << endl;
+        //        hash.dump(cout);
       }
     }
 
@@ -85,7 +85,7 @@ void TestThread::run()
     for(int j=0; j<nids; j++)
     {
       if (prob && rand()%100<prob)
-	hash.remove(ids[j]);
+        hash.remove(ids[j]);
     }
   }
 
@@ -131,14 +131,14 @@ int main(int argc, char **argv)
       // Check the hash is OK
       if (!hash.check(cout))
       {
-	cout << "Hash table is invalid!\n";
-	return 2;
+        cout << "Hash table is invalid!\n";
+        return 2;
       }
 
       bool any_running = false;
       for(i=0; i<nthreads; i++)
-	if (threads[i]->running)
-	  any_running = true;
+        if (threads[i]->running)
+          any_running = true;
 
       if (!any_running) break;
     }
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
   cout << "    Total entries: " << stats.entries << endl;
   cout << "   Total capacity: " << hash.capacity() << endl;
   cout << " Overall fullness: " << 100*stats.entries/hash.capacity()
-	      << "%\n";
+              << "%\n";
   cout << "     Max fullness: " << stats.max_fullness << "%\n";
   cout << "    Longest chain: " << stats.max_chain << endl;
 

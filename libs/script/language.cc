@@ -28,7 +28,7 @@ Action *Language::create_action(Script& script, XML::Element& xml)
   if (a) return a;
   Log::Streams log;
   log.error << "Unknown action '" << xml.name << "' at line "
-	    << xml.line << endl;
+            << xml.line << endl;
   return 0;
 }
 
