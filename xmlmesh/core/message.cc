@@ -17,13 +17,13 @@ namespace ObTools { namespace XMLMesh {
 #define XMLMESH_ID_SIZE 16
 
 //--------------------------------------------------------------------------
-//Standard namespace
+// Standard namespace
 static const char *xmlmesh_namespace = "http://obtools.com/ns/xmlmesh";
 
 //--------------------------------------------------------------------------
-//Allocate an ID
-//Actually, we just generate a very long random one - this should make it
-//globally unique for correlation
+// Allocate an ID
+// Actually, we just generate a very long random one - this should make it
+// globally unique for correlation
 static string _allocate_id()
 {
   Misc::Random r;
@@ -180,8 +180,8 @@ string Message::get_text() const
 }
 
 //--------------------------------------------------------------------------
-//Get SOAP Message, still owned by Message, will be destroyed with it
-//Check for validity with !
+// Get SOAP Message, still owned by Message, will be destroyed with it
+// Check for validity with !
 const SOAP::Message& Message::get_soap() const
 {
   // If we've already got it, return immediately
@@ -206,8 +206,8 @@ const SOAP::Message& Message::get_soap() const
 }
 
 //--------------------------------------------------------------------------
-//Get SOAP message for modification - clears textual copy if any
-//SOAP is still owned by Message, will be destroyed with it
+// Get SOAP message for modification - clears textual copy if any
+// SOAP is still owned by Message, will be destroyed with it
 SOAP::Message& Message::get_modifiable_soap()
 {
   // Make sure we have XML form available
@@ -221,8 +221,8 @@ SOAP::Message& Message::get_modifiable_soap()
 }
 
 //--------------------------------------------------------------------------
-//Get XML Body content, still owned by Message, will be destroyed with it
-//Check for validity with !
+// Get XML Body content, still owned by Message, will be destroyed with it
+// Check for validity with !
 XML::Element& Message::get_body() const
 {
   get_soap();  // Ensure soap_message exists
@@ -230,8 +230,8 @@ XML::Element& Message::get_body() const
 }
 
 //--------------------------------------------------------------------------
-//Ditto, but specifying a particular element name
-//Check for validity with !
+// Ditto, but specifying a particular element name
+// Check for validity with !
 XML::Element& Message::get_body(const string& name) const
 {
   get_soap();  // Ensure soap_message exists
@@ -239,7 +239,7 @@ XML::Element& Message::get_body(const string& name) const
 }
 
 //--------------------------------------------------------------------------
-//Get routing header of the message
+// Get routing header of the message
 const XML::Element& Message::get_routing_header() const
 {
   const SOAP::Message& soap = get_soap();
@@ -251,7 +251,7 @@ const XML::Element& Message::get_routing_header() const
 }
 
 //--------------------------------------------------------------------------
-//Get subject of a message
+// Get subject of a message
 string Message::get_subject() const
 {
   const XML::Element& routing = get_routing_header();
@@ -259,7 +259,7 @@ string Message::get_subject() const
 }
 
 //--------------------------------------------------------------------------
-//Get id of a message
+// Get id of a message
 string Message::get_id() const
 {
   const XML::Element& routing = get_routing_header();
@@ -267,7 +267,7 @@ string Message::get_id() const
 }
 
 //--------------------------------------------------------------------------
-//Get whether the message requires a response
+// Get whether the message requires a response
 bool Message::get_rsvp() const
 {
   const XML::Element& routing = get_routing_header();
@@ -275,7 +275,7 @@ bool Message::get_rsvp() const
 }
 
 //--------------------------------------------------------------------------
-//Get reference of a message
+// Get reference of a message
 string Message::get_ref() const
 {
   const XML::Element& routing = get_routing_header();
@@ -283,7 +283,7 @@ string Message::get_ref() const
 }
 
 //--------------------------------------------------------------------------
-//Destructor - kills xml data if not detached
+// Destructor - kills xml data if not detached
 Message::~Message()
 {
   if (soap_message) delete soap_message;

@@ -33,7 +33,7 @@ int main()
   cout << config.get_root();
 
   // Don't update - it messes up CVS!
-  //config.write();
+  // config.write();
 
   return 0;
 }

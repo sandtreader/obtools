@@ -13,15 +13,15 @@
 namespace ObTools { namespace Script {
 
 //--------------------------------------------------------------------------
-//Constructor - takes top-level script element
+// Constructor - takes top-level script element
 Script::Script(Language& _language, XML::Element& _xml):
   SequenceAction(Action::CP(*this, _xml)), language(_language)
 {
 }
 
 //--------------------------------------------------------------------------
-//Tick the script, setting time stamp
-//Returns whether it is still running
+// Tick the script, setting time stamp
+// Returns whether it is still running
 bool Script::tick()
 {
   now = Time::Stamp::now();
@@ -30,7 +30,7 @@ bool Script::tick()
 }
 
 //--------------------------------------------------------------------------
-//Run the script to the end
+// Run the script to the end
 void Script::run()
 {
   while (tick()) this_thread::sleep_for(chrono::milliseconds{10});

@@ -16,8 +16,8 @@
 namespace ObTools { namespace DB {
 
 //--------------------------------------------------------------------------
-//Execute a query and get first (only) row
-//Returns whether successful - row is cleared and filled in if so
+// Execute a query and get first (only) row
+// Returns whether successful - row is cleared and filled in if so
 bool Connection::query(const string& sql, Row& row)
 {
   Result result = query(sql);
@@ -26,8 +26,8 @@ bool Connection::query(const string& sql, Row& row)
 }
 
 //--------------------------------------------------------------------------
-//Execute a query and get single (only) value from first (only) row
-//Returns whether successful - value is filled in if so
+// Execute a query and get single (only) value from first (only) row
+// Returns whether successful - value is filled in if so
 bool Connection::query(const string& sql, string& value)
 {
   Result result = query(sql);
@@ -36,8 +36,8 @@ bool Connection::query(const string& sql, string& value)
 }
 
 //--------------------------------------------------------------------------
-//Execute a query and get single (only) value from first (only) row
-//Returns value or default if not found
+// Execute a query and get single (only) value from first (only) row
+// Returns value or default if not found
 string Connection::query_string(const string& sql, const string& def)
 {
   string value;
@@ -48,8 +48,8 @@ string Connection::query_string(const string& sql, const string& def)
 }
 
 //--------------------------------------------------------------------------
-//Execute a query and get single (only) integer value from first (only) row
-//Returns value or default if not found
+// Execute a query and get single (only) integer value from first (only) row
+// Returns value or default if not found
 int Connection::query_int(const string& sql, int def)
 {
   string value;
@@ -60,9 +60,9 @@ int Connection::query_int(const string& sql, int def)
 }
 
 //--------------------------------------------------------------------------
-//Execute a query and get single (only) 64-bit integer value from first (only)
-//row
-//Returns value or default if not found
+// Execute a query and get single (only) 64-bit integer value from first (only)
+// row
+// Returns value or default if not found
 uint64_t Connection::query_int64(const string& sql, uint64_t def)
 {
   string value;
@@ -73,8 +73,8 @@ uint64_t Connection::query_int64(const string& sql, uint64_t def)
 }
 
 //--------------------------------------------------------------------------
-//Execute a query and get single (only) boolean value from first (only) row
-//Returns value or default if not found
+// Execute a query and get single (only) boolean value from first (only) row
+// Returns value or default if not found
 bool Connection::query_bool(const string& sql, bool def)
 {
   string value;
@@ -97,10 +97,10 @@ bool Connection::query_bool(const string& sql, bool def)
 }
 
 //--------------------------------------------------------------------------
-//Do an INSERT and retrieve the last inserted serial ID
-//Fetches max(<id_field>) inside a transaction, unless id_field is ""
-//If id_field is "", does a normal insert and returns 1
-//Returns ID, or 0 if failed
+// Do an INSERT and retrieve the last inserted serial ID
+// Fetches max(<id_field>) inside a transaction, unless id_field is ""
+// If id_field is "", does a normal insert and returns 1
+// Returns ID, or 0 if failed
 int Connection::insert(const string& sql,
                        const string& table, const string& id_field,
                        bool in_transaction)

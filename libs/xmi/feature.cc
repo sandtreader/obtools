@@ -19,7 +19,7 @@ using namespace ObTools::UML;
 Feature::Feature(XMI::Reader& rdr, XML::Element& xe)
   :ModelElement(rdr, xe)
 {
-  //Get basic properties
+  // Get basic properties
   is_static = (get_property("ownerScope", "UML:Feature.ownerScope")
                == "classifier");
 }
@@ -39,7 +39,7 @@ void Feature::print_header(ostream& sout)
 StructuralFeature::StructuralFeature(XMI::Reader& rdr, XML::Element& xe):
   Feature(rdr, xe), type(0)
 {
-  //Get basic properties
+  // Get basic properties
   is_ordered = (get_property("ordering", "UML:StructuralFeature.ordering")
                 == "ordered");
 
@@ -77,7 +77,7 @@ void StructuralFeature::print_header(ostream& sout)
 BehaviouralFeature::BehaviouralFeature(XMI::Reader& rdr, XML::Element& xe)
   :Feature(rdr, xe)
 {
-  //Get basic properties
+  // Get basic properties
   is_query = get_bool_property("isQuery", "UML:BehaviouralFeature.isQuery");
 }
 
@@ -91,8 +91,8 @@ void BehaviouralFeature::print_header(ostream& sout)
 }
 
 //--------------------------------------------------------------------------
-//Sugar function to 'return' pseudo-parameter - only takes first
-//Returns 0 if no return (void)
+// Sugar function to 'return' pseudo-parameter - only takes first
+// Returns 0 if no return (void)
 Parameter *BehaviouralFeature::get_return()
 {
   for(list<Element *>::iterator p=subelements.begin();
@@ -107,7 +107,7 @@ Parameter *BehaviouralFeature::get_return()
 }
 
 //--------------------------------------------------------------------------
-//Sugar function to get parameters - also removes 'return' pseudo-parameter
+// Sugar function to get parameters - also removes 'return' pseudo-parameter
 list<Parameter *> BehaviouralFeature::get_parameters()
 {
   list<Parameter *>l;

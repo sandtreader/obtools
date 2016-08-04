@@ -11,7 +11,7 @@
 using namespace ObTools::CPPT;
 
 //--------------------------------------------------------------------------
-//Constructor
+// Constructor
 Processor::Processor(istream& instream, ostream& outstream,
                      const Tags& ts, const string& streamname):
     sin(instream),
@@ -93,7 +93,7 @@ void Processor::open_expr()
     sout << "\" << (";
   else
   {
-    //Start one, in expression state
+    // Start one, in expression state
     sout << "  " << sname << " << (";
     started_text = true;
   }
@@ -103,7 +103,7 @@ void Processor::open_expr()
 // Close C++ block
 void Processor::close_code()
 {
-  //Just wait for more text
+  // Just wait for more text
   started_text = false;
 }
 
@@ -299,8 +299,8 @@ void Processor::process()
 
   }
 
-  //In case it stops unexpectedly in the middle of text (no final newline),
-  //force return to C++ code to close out the text
+  // In case it stops unexpectedly in the middle of text (no final newline),
+  // force return to C++ code to close out the text
   if (state == PS_NORMAL) open_code();
 }
 

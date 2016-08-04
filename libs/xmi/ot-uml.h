@@ -19,8 +19,8 @@
 #include <vector>
 #include "ot-xml.h"
 
-//Mutual recursion problems - define only what ot-xmi.h needs
-//before including it
+// Mutual recursion problems - define only what ot-xmi.h needs
+// before including it
 namespace ObTools { namespace UML {
 class Element;
 class Classifier;
@@ -32,7 +32,7 @@ class Model;
 // Namespace
 namespace ObTools { namespace UML {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 using namespace ObTools;
 
@@ -47,7 +47,7 @@ struct Multiplicity
   int lower;
   int upper;  // -1 for *
 
-  //Default constructor sets to 1-1
+  // Default constructor sets to 1-1
   Multiplicity(): lower(1), upper(1) {}
 
   // Reads multiplicity from UML:Multiplicity subelement
@@ -65,7 +65,7 @@ struct Expression
   string language;
   string body;
 
-  //Method to read from XMI - pass parent element of UML:Expression
+  // Method to read from XMI - pass parent element of UML:Expression
   static Expression read_from(XML::Element &pare);
 };
 
@@ -121,7 +121,7 @@ class Operation;
 class Parameter;
 
 //==========================================================================
-//Element factory support
+// Element factory support
 //(This should go inside class Element, but that triggers bug#297 in gcc2.95)
 
 // Typedef for factory template function for any element
@@ -144,7 +144,7 @@ template<class T> Element *create_element(XMI::Reader& rdr, XML::Element& xe)
 class Element  //abstract
 {
 protected:
-  //Support functions to handle XMI attribute/sub-element option
+  // Support functions to handle XMI attribute/sub-element option
   string get_property(const string& attr_name,
                       const string& subelement_name);
   bool get_bool_property(const string& attr_name,
@@ -164,11 +164,11 @@ protected:
                                         const string& subelement_name);
   Multiplicity get_multiplicity();
 
-  //Support for subclass constructor functions - read all subelements
-  //of given types from XML source, and uses factory func to create them
-  //If id_required is set (false by default), it ignores any elements
-  //without an 'xmi.id' attribute - these are refs
-  //Prunes descendant tree at 'prune', if given
+  // Support for subclass constructor functions - read all subelements
+  // of given types from XML source, and uses factory func to create them
+  // If id_required is set (false by default), it ignores any elements
+  // without an 'xmi.id' attribute - these are refs
+  // Prunes descendant tree at 'prune', if given
   void read_subelements(const char *name, ElementFactoryFunc factory,
                         bool id_required = false, const char *prune=0);
 
@@ -188,14 +188,14 @@ public:
   // Real UML attributes
   string documentation;      //Extracted from TaggedValues
 
-  //Constructor - build from XML element
-  //At this level we capture id and documentation (if any), and recurse
-  //to subelements
+  // Constructor - build from XML element
+  // At this level we capture id and documentation (if any), and recurse
+  // to subelements
   Element(XMI::Reader &rdr, XML::Element& xe);
 
-  //Function to build things that need valid references for things
-  //that might be defined after them (second pass fixup)
-  //Default is to pass down to children
+  // Function to build things that need valid references for things
+  // that might be defined after them (second pass fixup)
+  // Default is to pass down to children
   virtual void build_refs();
 
   // Element printer - indents to indent, calls down to print_header, then
@@ -218,7 +218,7 @@ public:
     return l;
   }
 
-  //Virtual destructor - defaults to deleting subelements
+  // Virtual destructor - defaults to deleting subelements
   virtual ~Element();
 };
 
@@ -238,7 +238,7 @@ public:
   Visibility visibility;
   bool is_specification;
 
-  //Constructor
+  // Constructor
   ModelElement(XMI::Reader &rdr, XML::Element& xe);
 };
 
@@ -252,7 +252,7 @@ protected:
 public:
   bool is_static;      //= (ownerScope==sk_classifier)
 
-  //Constructor
+  // Constructor
   Feature(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -269,7 +269,7 @@ public:
   bool is_ordered;
   Classifier *type;
 
-  //Constructor
+  // Constructor
   StructuralFeature(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -283,7 +283,7 @@ protected:
 public:
   Expression initial_value;
 
-  //Constructor
+  // Constructor
   Attribute(XMI::Reader &rdr, XML::Element& xe);
 };
 
@@ -300,7 +300,7 @@ public:
   ParameterDirection kind;
   Classifier *type;
 
-  //Constructor
+  // Constructor
   Parameter(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -314,18 +314,18 @@ protected:
 public:
   bool is_query;
 
-  //Sugar function to 'return' pseudo-parameter - only takes first
-  //Returns 0 if no return (void)
+  // Sugar function to 'return' pseudo-parameter - only takes first
+  // Returns 0 if no return (void)
   Parameter *get_return();
 
-  //Sugar function to get parameters - also removes 'return' pseudo-parameter
+  // Sugar function to get parameters - also removes 'return' pseudo-parameter
   list<Parameter *> get_parameters();
 
   // Sugar macro for above
   #define OBTOOLS_UML_FOREACH_PARAMETER(_var, _f) \
     OBTOOLS_UML_FOREACH(Parameter, _var, (_f).get_parameters())
 
-  //Constructor
+  // Constructor
   BehaviouralFeature(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -341,7 +341,7 @@ public:
   bool is_root;
   bool is_leaf;
 
-  //Constructor
+  // Constructor
   Operation(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -351,7 +351,7 @@ public:
 class Relationship: public ModelElement  //abstract
 {
 public:
-  //Constructor
+  // Constructor
   Relationship(XMI::Reader& rdr, XML::Element& xe):
     ModelElement(rdr, xe) {}
 };
@@ -368,7 +368,7 @@ public:
   GeneralizableElement *gparent;
   GeneralizableElement *gchild;
 
-  //Constructor - just does safety initialisation - no primitive data
+  // Constructor - just does safety initialisation - no primitive data
   Generalization(XMI::Reader& rdr, XML::Element& xe):
     Relationship(rdr, xe),
     gparent(0),
@@ -420,7 +420,7 @@ public:
     return l;
   }
 
-  //Constructor
+  // Constructor
   GeneralizableElement(XMI::Reader &rdr, XML::Element& xe);
 };
 
@@ -436,7 +436,7 @@ public:
   #define OBTOOLS_UML_FOREACH_ASSOCIATION_END(_var, _c) \
     OBTOOLS_UML_FOREACH(AssociationEnd, _var, (_c).association_ends)
 
-  //Sugar functions to get list of Attributes and Operations
+  // Sugar functions to get list of Attributes and Operations
   list<Attribute *> get_attributes()
     { return filter_subelements<Attribute>(); }
   list<Operation *> get_operations()
@@ -460,7 +460,7 @@ public:
   #define OBTOOLS_UML_FOREACH_CHILD_CLASSIFIER(_var, _c) \
     OBTOOLS_UML_FOREACH(Classifier, _var, (_c).get_children())
 
-  //Constructor
+  // Constructor
   Classifier(XMI::Reader &rdr, XML::Element& xe);
 };
 
@@ -484,7 +484,7 @@ public:
   #define OBTOOLS_UML_FOREACH_CHILD_CLASS(_var, _c) \
     OBTOOLS_UML_FOREACH(Class, _var, (_c).get_children())
 
-  //Constructor
+  // Constructor
   Class(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -494,9 +494,9 @@ public:
 class DataType: public Classifier
 {
 public:
-  //Assume DataTypes don't inherit
+  // Assume DataTypes don't inherit
 
-  //Constructor
+  // Constructor
   DataType(XMI::Reader& rdr, XML::Element& xe):
     Classifier(rdr, xe) {}
 };
@@ -517,7 +517,7 @@ public:
   #define OBTOOLS_UML_FOREACH_PARENT_INTERFACE(_var, _i) \
     OBTOOLS_UML_FOREACH(Interface, _var, (_i).get_parents())
 
-  //Constructor
+  // Constructor
   Interface(XMI::Reader& rdr, XML::Element& xe):
     Classifier(rdr, xe) {}
 };
@@ -531,7 +531,7 @@ public:
   // such a common thing to index
   vector<AssociationEnd *> connections;     //Always 2 or more
 
-  //Constructor
+  // Constructor
   Association(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -552,14 +552,14 @@ public:
   int connection_index;                     //Which end we are in the
                                             // association - 0..n
 
-  //Get the 'other' end of the association (only works for 2 ends)
+  // Get the 'other' end of the association (only works for 2 ends)
   AssociationEnd *get_other_end();
 
   // Get the association we're part of
   Association *get_association()
   { return dynamic_cast<Association *>(parent); }
 
-  //Constructor
+  // Constructor
   AssociationEnd(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -569,7 +569,7 @@ public:
 class Primitive: public DataType
 {
 public:
-  //Constructor
+  // Constructor
   Primitive(XMI::Reader& rdr, XML::Element& xe):
     DataType(rdr, xe) {}
 };
@@ -585,7 +585,7 @@ public:
   // We just flatten EnumerationLiterals to a string list
   list<string> literals;   //List of literal names
 
-  //Constructor
+  // Constructor
   Enumeration(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -596,7 +596,7 @@ public:
 class Stereotype: public GeneralizableElement
 {
 public:
-  //Constructor - just pass up to GE
+  // Constructor - just pass up to GE
   Stereotype(XMI::Reader& rdr, XML::Element& xe):
     GeneralizableElement(rdr, xe) {}
 };
@@ -607,7 +607,7 @@ public:
 class Package: public GeneralizableElement
 {
 public:
-  //Sugar functions to get particular element types
+  // Sugar functions to get particular element types
   list<Package *> get_subpackages()
     { return filter_subelements<Package>(); }
   list<Class *> get_classes()
@@ -619,7 +619,7 @@ public:
   list<Association *> get_associations()
     { return filter_subelements<Association>(); }
 
-  //Sugar macros for above
+  // Sugar macros for above
   #define OBTOOLS_UML_FOREACH_PACKAGE(_var, _p) \
     OBTOOLS_UML_FOREACH(Package, _var, (_p).get_subpackages())
   #define OBTOOLS_UML_FOREACH_CLASS(_var, _p) \
@@ -629,7 +629,7 @@ public:
   #define OBTOOLS_UML_FOREACH_ASSOCIATION(_var, _p) \
     OBTOOLS_UML_FOREACH(Association, _var, (_p).get_associations())
 
-  //Constructor
+  // Constructor
   Package(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -643,8 +643,8 @@ class Model: public Package
 public:
   double uml_version;
 
-  //Constructor - after everything loaded up, we call build_refs to
-  //fix up references
+  // Constructor - after everything loaded up, we call build_refs to
+  // fix up references
   Model(XMI::Reader& rdr, XML::Element& xe, double version=0):
     Package(rdr, xe),
     uml_version(version)

@@ -19,8 +19,8 @@
 using namespace ObTools::ReGen;
 
 //==========================================================================
-//regenbuf - a streambuf which just captures everything into a string, then
-//uses the rest of the ReGen package to modify the file on close
+// regenbuf - a streambuf which just captures everything into a string, then
+// uses the rest of the ReGen package to modify the file on close
 
 //--------------------------------------------------------------------------
 // regenbuf Constructor

@@ -19,7 +19,7 @@
 
 namespace ObTools { namespace Log {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
@@ -199,7 +199,7 @@ public:
 //==========================================================================
 // Log stream for use with sugared objects below
 
-//Logging streambuf
+// Logging streambuf
 class StreamBuf: public streambuf
 {
 private:
@@ -220,7 +220,7 @@ public:
   void close();
 };
 
-//Log stream
+// Log stream
 //  *** Note:  Not shareable between threads - see *** below
 class Stream: public ostream
 {

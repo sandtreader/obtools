@@ -18,7 +18,7 @@
 
 namespace ObTools { namespace CLI {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 using namespace ObTools;
 
@@ -35,7 +35,7 @@ class Handler
 {
 public:
   //------------------------------------------------------------------------
-  //Command handler function
+  // Command handler function
   virtual void handle(string args, istream& sin, ostream& sout) = 0;
 
   // Virtual destructor to keep compiler happy
@@ -57,12 +57,12 @@ public:
   HandlerFunction func;
 
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   MemberHandler(T& _object, HandlerFunction _func):
     object(_object), func(_func) {}
 
   //------------------------------------------------------------------------
-  //Handler function
+  // Handler function
   void handle(string args, istream& sin, ostream& sout)
   { (object.*func)(args, sin, sout); }
 };
@@ -80,22 +80,22 @@ public:
   string usage;    // Longer usage - only provide if it takes arguments
 
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   Command(const string& _word, Handler *_handler,
           const string& _help="", const string& _usage=""):
     handler(_handler), word(_word), help(_help), usage(_usage) {}
 
   //------------------------------------------------------------------------
-  //Handle a command
-  //Note - overridden in CommandGroup
+  // Handle a command
+  // Note - overridden in CommandGroup
   virtual void handle(string args, istream& sin, ostream& sout);
 
   //------------------------------------------------------------------------
-  //Show command usage
+  // Show command usage
   void show_usage(ostream& sout);
 
   //------------------------------------------------------------------------
-  //Destructor
+  // Destructor
   virtual ~Command() { if (handler) delete handler; }
 };
 
@@ -107,24 +107,24 @@ public:
   map<string, Command *> commands;
 
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   CommandGroup(const string& _word, const string& _help=""):
     Command(_word, 0, _help) {}
 
   //------------------------------------------------------------------------
-  //Add a command
+  // Add a command
   void add(Command *command);
 
   //------------------------------------------------------------------------
-  //Handle a command
+  // Handle a command
   virtual void handle(string args, istream& sin, ostream& sout);
 
   //------------------------------------------------------------------------
-  //List help for the group
+  // List help for the group
   void show_help(ostream& sout);
 
   //------------------------------------------------------------------------
-  //Destructor
+  // Destructor
   virtual ~CommandGroup();
 };
 
@@ -136,18 +136,18 @@ public:
   Registry(): CommandGroup("") {}
 
   //------------------------------------------------------------------------
-  //Add a command-group
+  // Add a command-group
   void add(const string& prefix, const string& help="")
   { CommandGroup::add(new CommandGroup(prefix, help)); }
 
   //------------------------------------------------------------------------
-  //Add a command
+  // Add a command
   void add(const string& word, Handler *handler,
            const string& help="", const string& usage="")
   { CommandGroup::add(new Command(word, handler, help, usage)); }
 
   //------------------------------------------------------------------------
-  //Handle a command
+  // Handle a command
   virtual void handle(string args, istream& sin, ostream& sout);
 };
 
@@ -164,23 +164,23 @@ public:
   string prompt;
 
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   CommandLine(Registry& _registry, istream& _sin, ostream& _sout,
               const string& _prompt=">"):
     registry(_registry), sin(_sin), sout(_sout), prompt(_prompt) {}
 
   //------------------------------------------------------------------------
-  //Handle a command
+  // Handle a command
   void handle(string cmd) { registry.handle(cmd, sin, sout); }
 
   //------------------------------------------------------------------------
-  //Read a line into given string
-  //Returns false if ctrl-D read
+  // Read a line into given string
+  // Returns false if ctrl-D read
   bool readline(string& line);
 
   //------------------------------------------------------------------------
-  //Run command line
-  //Returns when exited
+  // Run command line
+  // Returns when exited
   void run();
 };
 

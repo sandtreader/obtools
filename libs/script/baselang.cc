@@ -12,7 +12,7 @@
 namespace ObTools { namespace Script {
 
 //--------------------------------------------------------------------------
-//Factories for standard controls
+// Factories for standard controls
 
 static Init::NewFactory<Action, SequenceAction, Action::CP> sequence_factory;
 static Init::NewFactory<Action, RepeatAction,   Action::CP> repeat_factory;
@@ -28,7 +28,7 @@ static Init::NewFactory<Action, ThreadAction,   Action::CP> thread_factory;
 static Init::NewFactory<Action, RandomAction,   Action::CP> random_factory;
 
 //--------------------------------------------------------------------------
-//Constructor
+// Constructor
 BaseLanguage::BaseLanguage(): Language()
 {
   register_action("sequence", sequence_factory);

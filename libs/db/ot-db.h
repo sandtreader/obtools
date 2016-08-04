@@ -22,7 +22,7 @@
 
 namespace ObTools { namespace DB {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
@@ -344,8 +344,8 @@ public:
   virtual int count() = 0;
 
   //------------------------------------------------------------------------
-  //Get next row from result set
-  //Whether another was found - if so, clears and writes into row
+  // Get next row from result set
+  // Whether another was found - if so, clears and writes into row
   virtual bool fetch(Row& row) = 0;
 
   //------------------------------------------------------------------------
@@ -1077,19 +1077,19 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  //Constructor from plain connection
+  // Constructor from plain connection
   Transaction(Connection& _conn);
 
   //------------------------------------------------------------------------
-  //Constructor from AutoConnection
+  // Constructor from AutoConnection
   Transaction(AutoConnection& _conn);
 
   //------------------------------------------------------------------------
-  //Commit - returns whether commit command ran OK
+  // Commit - returns whether commit command ran OK
   bool commit();
 
   //------------------------------------------------------------------------
-  //Destructor
+  // Destructor
   ~Transaction();
 };
 

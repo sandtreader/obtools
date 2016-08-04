@@ -15,8 +15,8 @@
 #include <iostream>
 #include "ot-xml.h"
 
-//Mutual recursion problems - define only what ot-uml.h needs
-//before including it
+// Mutual recursion problems - define only what ot-uml.h needs
+// before including it
 namespace ObTools { namespace XMI { class Reader; }}
 #include "ot-uml.h"
 
@@ -24,7 +24,7 @@ namespace ObTools { namespace XMI { class Reader; }}
 // Namespace
 namespace ObTools { namespace XMI {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 using namespace ObTools;
 
@@ -46,7 +46,7 @@ private:
   // created in the model itself
   map<string, XML::Element *> xml_element_map;
 
-  //We keep the following to ensure validity of the XML document for our
+  // We keep the following to ensure validity of the XML document for our
   //(and our model's) lifetime
   XML::Parser xml_parser;
 

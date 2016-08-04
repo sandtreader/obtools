@@ -14,7 +14,7 @@
 namespace ObTools { namespace CLI {
 
 //--------------------------------------------------------------------------
-//Handle a command
+// Handle a command
 void Registry::handle(string args, istream& sin, ostream& sout)
 {
   // Canonicalise the command:

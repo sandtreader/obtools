@@ -14,9 +14,9 @@
 namespace ObTools { namespace CLI {
 
 //--------------------------------------------------------------------------
-//Read a line into given string
-//Returns false if ctrl-D read
-//May be overridden for (e.g.) network read
+// Read a line into given string
+// Returns false if ctrl-D read
+// May be overridden for (e.g.) network read
 bool CommandLine::readline(string& line)
 {
   line.erase();
@@ -50,8 +50,8 @@ bool CommandLine::readline(string& line)
 }
 
 //--------------------------------------------------------------------------
-//Run command line
-//Returns when exited
+// Run command line
+// Returns when exited
 void CommandLine::run()
 {
   string line;

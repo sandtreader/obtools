@@ -38,7 +38,7 @@ extern bool winsock_initialise();
 
 namespace ObTools { namespace Net {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //--------------------------------------------------------------------------
@@ -201,7 +201,7 @@ public:
   Protocol(const string& ps);
 
   //------------------------------------------------------------------------
-  //Comparison
+  // Comparison
   bool operator==(const Protocol& p) const { return p.proto == proto; }
   bool operator!=(const Protocol& p) const { return p.proto != proto; }
   bool operator<(const Protocol& p)  const { return p.proto  < proto; }
@@ -636,7 +636,7 @@ public:
   ~TCPStreamBuf();
 };
 
-//TCP stream
+// TCP stream
 class TCPStream: public iostream
 {
 public:

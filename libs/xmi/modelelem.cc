@@ -11,14 +11,14 @@
 using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
-//Constructor - build from XML element
+// Constructor - build from XML element
 ModelElement::ModelElement(XMI::Reader& rdr, XML::Element& xe):
   Element(rdr, xe), stereotype(0)
 {
-  //Get  name
+  // Get  name
   name = get_property("name", "UML:ModelElement.name");
 
-  //Get visibility
+  // Get visibility
   string vis = get_property("visibility", "UML:ModelElement.visibility");
 
   if (vis=="public")
@@ -42,7 +42,7 @@ void ModelElement::build_refs()
 {
   Element::build_refs();
 
-  //Get stereotype ref
+  // Get stereotype ref
   string idref = get_idref_property("stereotype",
                                     "UML:ModelElement.stereotype",
                                     "UML:Stereotype");
@@ -81,7 +81,7 @@ void ModelElement::print_header(ostream& sout)
       break;
 
     case VISIBILITY_PACKAGE:
-      //default - don't clutter it
+      // default - don't clutter it
       break;
   }
 

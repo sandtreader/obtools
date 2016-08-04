@@ -15,7 +15,7 @@ using namespace ObTools::UML;
 AssociationEnd::AssociationEnd(XMI::Reader& rdr, XML::Element& xe):
   ModelElement(rdr, xe), participant(0), connection_index(0)
 {
-  //Get basic properties
+  // Get basic properties
   is_ordered = (get_property("ordering", "UML:AssociationEnd.ordering")
                 == "ordered");
 
@@ -49,7 +49,7 @@ void AssociationEnd::build_refs()
   participant = get_classifier_property("participant",
                                         "UML:AssociationEnd.participant");
 
-  //If not there, try UML1.3 'type'
+  // If not there, try UML1.3 'type'
   if (!participant)
     participant = get_classifier_property("type",
                                           "UML:AssociationEnd.type");
@@ -57,7 +57,7 @@ void AssociationEnd::build_refs()
   if (!participant)
     reader.error("Can't get participant in AssociationEnd id ", id);
 
-  //Fix up Classifier's associations list to point back to me
+  // Fix up Classifier's associations list to point back to me
   participant->association_ends.push_back(this);
 }
 
@@ -73,7 +73,7 @@ void AssociationEnd::print_header(ostream& sout)
   sout << multiplicity;
 
   if (is_ordered) sout << " (ordered)";
-  //It's actually more interesting if it's _not_ navigable!
+  // It's actually more interesting if it's _not_ navigable!
   if (!is_navigable) sout << " (non-navigable)";
 
   switch (aggregation)
@@ -93,7 +93,7 @@ void AssociationEnd::print_header(ostream& sout)
 }
 
 //--------------------------------------------------------------------------
-//Get the 'other' end of the association (only works for 2 ends)
+// Get the 'other' end of the association (only works for 2 ends)
 AssociationEnd *AssociationEnd::get_other_end()
 {
   Association *pa = dynamic_cast<Association *>(parent);

@@ -16,12 +16,12 @@ using namespace ObTools::UML;
 Classifier::Classifier(XMI::Reader& rdr, XML::Element& xe)
   :GeneralizableElement(rdr, xe)
 {
-  //Read attribute and operation sub-elements from XML source
-  //They must have xmi.id's, otherwise they may be references
+  // Read attribute and operation sub-elements from XML source
+  // They must have xmi.id's, otherwise they may be references
   read_subelements("UML:Attribute", create_element<Attribute>, true);
   read_subelements("UML:Operation", create_element<Operation>, true);
 
-  //Log me in the reader's classmap for instant access
+  // Log me in the reader's classmap for instant access
   reader.class_map[name] = this;
 }
 

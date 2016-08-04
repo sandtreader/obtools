@@ -12,7 +12,7 @@ using namespace std;
 using namespace ObTools;
 
 //--------------------------------------------------------------------------
-//Foo command handler
+// Foo command handler
 class FooHandler: public CLI::Handler
 {
 public:

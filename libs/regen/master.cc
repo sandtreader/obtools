@@ -11,7 +11,7 @@
 using namespace ObTools::ReGen;
 
 //==========================================================================
-//Master block
+// Master block
 
 //--------------------------------------------------------------------------
 // Add a line
@@ -48,7 +48,7 @@ void Block::dump(ostream& sout)
 }
 
 //==========================================================================
-//Master file
+// Master file
 
 //--------------------------------------------------------------------------
 // Constructor
@@ -62,7 +62,7 @@ MasterFile::MasterFile(istream &in, const char *mark)
   {
     LineType lt = line_type();
 
-    //Open new blocks before adding, to include open
+    // Open new blocks before adding, to include open
     if (lt == LINE_OPEN)
     {
       string tag = line_tag();
@@ -74,10 +74,10 @@ MasterFile::MasterFile(istream &in, const char *mark)
       }
     }
 
-    //Add lines if required
+    // Add lines if required
     if (current_block) current_block->add_line(lt, line_text());
 
-    //Close old blocks after adding, to include close
+    // Close old blocks after adding, to include close
     if (lt == LINE_CLOSE) current_block = 0;
   }
 }
@@ -114,7 +114,7 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
   Block *b = 0;                       // Current master block (if any)
   list<BlockLine *>::iterator bp;     // current line within master block
 
-  //Read lines from user file and merge blocks from master
+  // Read lines from user file and merge blocks from master
   while (ufile.read_line())
   {
     switch (ufile.line_type())
@@ -180,7 +180,7 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
           }
         }
 
-        //Clean up
+        // Clean up
         b = 0;
         use_lines = true;
         break;
@@ -192,7 +192,7 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
           for(;bp!= b->lines.end() && (*bp)->type != LINE_USER_END; ++bp)
             ;
 
-          //Skip USER_END line, too - we'll use their version
+          // Skip USER_END line, too - we'll use their version
           if (bp!=b->lines.end()) bp++;
 
           // Allow user lines and use their copy of this one

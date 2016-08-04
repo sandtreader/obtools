@@ -131,7 +131,7 @@ bool OTMPClientService::handle(RoutingMessage& msg)
 }
 
 //==========================================================================
-//client thread run
+// client thread run
 void OTMPClientThread::run()
 {
   for(;;) service.dispatch();

@@ -14,7 +14,7 @@
 namespace ObTools { namespace CLI {
 
 //--------------------------------------------------------------------------
-//Handle a command
+// Handle a command
 void Command::handle(string args, istream& sin, ostream& sout)
 {
   // Check for usage present and either no args or "?" or "help"
@@ -26,7 +26,7 @@ void Command::handle(string args, istream& sin, ostream& sout)
 }
 
 //--------------------------------------------------------------------------
-//Show command usage
+// Show command usage
 void Command::show_usage(ostream& sout)
 {
   sout << "Usage: " << usage << endl;

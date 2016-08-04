@@ -31,7 +31,7 @@ enum LineType
 };
 
 //==========================================================================
-//Basic file of lines with markers
+// Basic file of lines with markers
 class MarkedFile
 {
 protected:
@@ -62,7 +62,7 @@ public:
 };
 
 //==========================================================================
-//Block of text from master file
+// Block of text from master file
 struct BlockLine
 {
   LineType type;
@@ -93,7 +93,7 @@ struct Block
 };
 
 //==========================================================================
-//Master file - reads map of blocks and merges user files
+// Master file - reads map of blocks and merges user files
 enum
 {
   MERGE_DELETE_ORPHANS = 1,// Remove blocks from user code no longer in master
@@ -124,10 +124,10 @@ public:
 };
 
 //==========================================================================
-//Regenerating output file stream - replacement for ofstream which
+// Regenerating output file stream - replacement for ofstream which
 //'magically' regenerates over existing files
 
-//regenerating streambuf
+// regenerating streambuf
 class regenbuf: public streambuf
 {
 private:
@@ -150,7 +150,7 @@ public:
   void close();
 };
 
-//Regenerating output file stream
+// Regenerating output file stream
 class rofstream: public ostream
 {
 public:

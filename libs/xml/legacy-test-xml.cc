@@ -17,7 +17,7 @@ int main()
 {
   ObTools::XML::Parser parser;
 
-  //Create some test namespaces
+  // Create some test namespaces
   parser.fix_namespace("namespace1", "ns1");
   parser.fix_namespace("namespace2", "ns2");
 
@@ -36,14 +36,14 @@ int main()
   cout << "This is a " << root.name << " document " << endl;
   cout << "root.attr1 is " << root.get_attr("attr1", "EMPTY") << endl;
 
-  //Look for first wombat
+  // Look for first wombat
   ObTools::XML::Element& wombat = root.get_child("wombat");
   if (wombat.valid())
     cout << "Houston, we have a wombat: [" << wombat.content << "]" << endl;
   else
     cout << "No wombats today!" << endl;
 
-  //Look for lots of wombats
+  // Look for lots of wombats
   list<ObTools::XML::Element *> wombats = root.get_children("wombat");
   if (wombats.size())
   {
@@ -57,7 +57,7 @@ int main()
     }
   }
 
-  //Look for deeply-buried wombats
+  // Look for deeply-buried wombats
   wombats = root.get_descendants("wombat");
   if (wombats.size())
   {
@@ -74,7 +74,7 @@ int main()
   cout << endl << "Here it is back again (with namespaces fixed):" << endl;
   cout << root;
 
-  //Now translate it
+  // Now translate it
   map<string,string> trans_map;
   trans_map["wombat"]="animal.small.furry";  // Translate
   trans_map["ns1:bing"]="";                  // Delete

@@ -55,7 +55,7 @@ typedef off_t off64_t;
 
 namespace ObTools { namespace File {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
@@ -236,15 +236,15 @@ public:
   string write_all(const string& s);
 
   //------------------------------------------------------------------------
-  //Handy octal conversion functions for file modes
-  //Convert integer to octal string
+  // Handy octal conversion functions for file modes
+  // Convert integer to octal string
   static string itoo(int mode_i);
 
-  //Convert octal string to integer
+  // Convert octal string to integer
   static int otoi(const string& mode_s);
 
   //------------------------------------------------------------------------
-  //Handy user/group id functions for ownership
+  // Handy user/group id functions for ownership
   // Get user name from uid
   static string user_id_to_name(uid_t uid);
 

@@ -15,7 +15,7 @@
 
 namespace ObTools { namespace CLI {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 using namespace ObTools;
 
@@ -29,12 +29,12 @@ public:
   string prompt;
 
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   TelnetServer(Registry& _registry, int port, const string& _prompt=">"):
     Net::TCPServer(port), registry(_registry), prompt(_prompt) {}
 
   //------------------------------------------------------------------------
-  //Process a connection
+  // Process a connection
   void process(Net::TCPSocket& s, Net::EndPoint client);
 };
 

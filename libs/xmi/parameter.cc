@@ -15,7 +15,7 @@ using namespace ObTools::UML;
 Parameter::Parameter(XMI::Reader& rdr, XML::Element& xe)
   :ModelElement(rdr, xe), type(0)
 {
-  //Get basic properties
+  // Get basic properties
   string pdk  = get_property("kind", "UML:Parameter.kind");
 
   if (pdk.empty() || pdk=="in")

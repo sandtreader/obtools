@@ -24,11 +24,11 @@
 
 namespace ObTools { namespace Misc {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
-//MD5 sum class
+// MD5 sum class
 class MD5
 {
 private:
@@ -79,21 +79,21 @@ public:
 };
 
 //==========================================================================
-//CRC calculator class
-//Various 16-bit CRC algorithms - note only single block at a time
-//Note:  This is a minefield!
-//There seems general agreement about the parameters of CRC16, the only
-//difference in implementation comes from whether it is reflected or not,
-//which probably indicates a hardware or software origin.
+// CRC calculator class
+// Various 16-bit CRC algorithms - note only single block at a time
+// Note:  This is a minefield!
+// There seems general agreement about the parameters of CRC16, the only
+// difference in implementation comes from whether it is reflected or not,
+// which probably indicates a hardware or software origin.
 
-//But there is a long-running argument about exactly what CCITT is 'supposed'
-//to be.  The most prevelant is probably the plain CCITT below; with
-//CCITT_ZERO the next - but I'm inclined to agree with Joe Geluso
-//that CCITT_MOD may be the 'right' answer, so all three are offered!
+// But there is a long-running argument about exactly what CCITT is 'supposed'
+// to be.  The most prevelant is probably the plain CCITT below; with
+// CCITT_ZERO the next - but I'm inclined to agree with Joe Geluso
+// that CCITT_MOD may be the 'right' answer, so all three are offered!
 
-//Some CCITT versions flip the result; CRC-16 never does
+// Some CCITT versions flip the result; CRC-16 never does
 
-//References:
+// References:
 //   http://www.ross.net/crc/crcpaper.html
 //   http://www.joegeluso.com/software/articles/ccitt.htm
 // and
@@ -186,8 +186,8 @@ public:
 
 
 //==========================================================================
-//Propertylist class
-//Simple sugaring of a string-string map
+// Propertylist class
+// Simple sugaring of a string-string map
 class PropertyList: public map<string, string>
 {
 public:
@@ -384,9 +384,9 @@ public:
 };
 
 //==========================================================================
-//Random string generator
-//Uses best available random number source (e.g. /dev/urandom), falls
-//back to a Marsaglia MWC in its absence
+// Random string generator
+// Uses best available random number source (e.g. /dev/urandom), falls
+// back to a Marsaglia MWC in its absence
 class Random
 {
 private:
@@ -420,7 +420,7 @@ public:
 };
 
 //==========================================================================
-//Hex data dumper
+// Hex data dumper
 class Dumper
 {
   ostream& sout;
@@ -447,8 +447,8 @@ public:
 };
 
 //==========================================================================
-//Range set - stores a list of integer ranges - e.g. file fragments, and
-//offers various useful operations on them (range.cc)
+// Range set - stores a list of integer ranges - e.g. file fragments, and
+// offers various useful operations on them (range.cc)
 template<typename T, typename L>
 class RangeSet
 {

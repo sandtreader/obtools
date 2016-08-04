@@ -23,7 +23,7 @@ namespace ObTools {
 /// and minimal XPath for configuration files
 namespace XML {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 /// Type to use for characters
@@ -155,7 +155,7 @@ public:
   /// Parent element
   Element *parent;
 
-  //Error support
+  // Error support
   int line;   ///< Line number of our start tag
 
   //------------------------------------------------------------------------
@@ -600,17 +600,17 @@ class ParseFailed {};
 class Parser
 {
 private:
-  //Persistent state
+  // Persistent state
   map<string, string> user_ns_map;  //Map of full name->prefix
 
-  //Transient per-document state
+  // Transient per-document state
   deque<Element *> elements;  //Could be a <stack>, but no clear()
   Element *root;       //0 if not valid
   deque<map<string, string> > ns_maps; //Stack of maps of prefix->full name
 
   //------------------------------------------------------------------------
-  //Inline character classification functions
-  //Note: Only allows strict ascii
+  // Inline character classification functions
+  // Note: Only allows strict ascii
   bool is_name_start(xmlchar c)
   { return (isascii(c) && isalnum(c))||c==':'||c=='_'; }
   bool is_name_char(xmlchar c)

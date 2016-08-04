@@ -24,7 +24,7 @@ void Generalization::build_refs()
   if (!gchild)
     reader.error("Can't get child of generalization ", id);
 
-  //Fix up GeneralizableElement lists of child and parent to point to me
+  // Fix up GeneralizableElement lists of child and parent to point to me
   gchild->generalizations.push_back(this);
   gparent->specializations.push_back(this);
 }

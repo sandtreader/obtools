@@ -25,7 +25,7 @@
 
 namespace ObTools { namespace SSL_OpenSSL {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================

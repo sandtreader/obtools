@@ -53,7 +53,7 @@ public:
 };
 
 //==========================================================================
-//Postgres connection class
+// Postgres connection class
 class Connection: public DB::Connection
 {
 private:

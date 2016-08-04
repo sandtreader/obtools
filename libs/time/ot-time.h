@@ -18,7 +18,7 @@
 
 namespace ObTools { namespace Time {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
@@ -43,7 +43,7 @@ const unsigned int NTP_SHIFT = 32;
 typedef uint64_t ntp_stamp_t;
 
 //==========================================================================
-//Split - a split-up time structure, similar to 'struct tm'
+// Split - a split-up time structure, similar to 'struct tm'
 struct Split
 {
   int year;   // Full year - e.g. 2005
@@ -58,8 +58,8 @@ struct Split
 };
 
 //==========================================================================
-//Duration - a length of time, not fixed at any one moment
-//Beware: Falls apart if durations are negative!
+// Duration - a length of time, not fixed at any one moment
+// Beware: Falls apart if durations are negative!
 class Duration
 {
 private:
@@ -177,10 +177,10 @@ public:
 ostream& operator<<(ostream& s, const Duration& d);
 
 //==========================================================================
-//Stamp - fixed moment in absolute time
-//Timestamps are stored in GMT (UTC, Z), and converted from local time on
-//creation.
-//Internal format 64-bit NTP timestamp
+// Stamp - fixed moment in absolute time
+// Timestamps are stored in GMT (UTC, Z), and converted from local time on
+// creation.
+// Internal format 64-bit NTP timestamp
 class Stamp
 {
 protected:
@@ -357,8 +357,8 @@ public:
 ostream& operator<<(ostream& s, const Stamp& st);
 
 //==========================================================================
-//DateStamp - fixed date in absolute time
-//As per Stamp, but can be constructed from just a date
+// DateStamp - fixed date in absolute time
+// As per Stamp, but can be constructed from just a date
 class DateStamp: public Stamp
 {
 public:

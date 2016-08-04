@@ -15,10 +15,10 @@ using namespace ObTools::UML;
 Operation::Operation(XMI::Reader& rdr, XML::Element& xe)
   :BehaviouralFeature(rdr, xe)
 {
-  //Read parameter sub-elements from XML source
+  // Read parameter sub-elements from XML source
   read_subelements("UML:Parameter", create_element<Parameter>);
 
-  //Get basic properties
+  // Get basic properties
   is_abstract = get_bool_property("isAbstract",
                                   "UML:Operation.isAbstract");
 

@@ -29,14 +29,14 @@ int main()
   cout << "output/atomic: "
        << config.get_value_bool("output/atomic", false) << endl;
 
-  //Files
+  // Files
   list<string> files = config.get_values("input/file");
   for(list<string>::iterator p = files.begin();
       p!=files.end();
       p++)
     cout << "input/file: " << *p << endl;
 
-  //Map
+  // Map
   map<string, string> m = config.get_map("types/map");
   for(map<string, string>::iterator p = m.begin(); p!=m.end(); p++)
     cout << "Map '" << p->first << "'->'" << p->second << "'\n";

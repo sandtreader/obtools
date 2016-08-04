@@ -187,7 +187,7 @@ int main(int argc, char **argv)
   cout << "    Longest chain: " << stats.max_chain << endl;
 
   // Dump out
-  //hash.dump(cout);
+  // hash.dump(cout);
 
   return 0;
 }

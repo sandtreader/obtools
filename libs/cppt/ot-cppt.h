@@ -16,7 +16,7 @@
 
 namespace ObTools { namespace CPPT {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
@@ -40,21 +40,21 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   TokenRecogniser(): index(0), longest_valid(0) {}
 
   //------------------------------------------------------------------------
-  //Add a token - empty strings are silently ignored
+  // Add a token - empty strings are silently ignored
   void add_token(const string& tok) { if (tok.size()) tokens.push_back(tok); }
 
   //------------------------------------------------------------------------
-  //Process a character
-  //Returns whether character was used and kept in current_token
-  //State of token validity also returned
+  // Process a character
+  // Returns whether character was used and kept in current_token
+  // State of token validity also returned
   bool process_char(char c, TokenState& state);
 
   //------------------------------------------------------------------------
-  //Get current token or invalid input
+  // Get current token or invalid input
   string get_token() { return current_token; }
 };
 
@@ -93,7 +93,7 @@ private:
   ProcessorState state;
   bool started_text;
 
-  //Individual token recognisers for each state
+  // Individual token recognisers for each state
   TokenRecogniser tr_normal;
   TokenRecogniser tr_code;
   TokenRecogniser tr_expr;
@@ -109,14 +109,14 @@ private:
 
 public:
   //------------------------------------------------------------------------
-  //Constructor
-  //streamname is the name of the stream for boilerplate text output
+  // Constructor
+  // streamname is the name of the stream for boilerplate text output
   Processor(istream& instream, ostream& outstream,
             const Tags& ts,
             const string& streamname="cout");
 
   //------------------------------------------------------------------------
-  //Process the instream into the outstream until EOF
+  // Process the instream into the outstream until EOF
   void process();
 };
 

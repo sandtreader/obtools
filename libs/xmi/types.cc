@@ -39,7 +39,7 @@ Multiplicity Multiplicity::read_from(XML::Element& pare,
     XML::Element& mr = real_me->get_descendant("UML:MultiplicityRange");
     if (mr.valid())
     {
-      //Look either in attributes or sub-elements
+      // Look either in attributes or sub-elements
       if (mr.has_attr("lower"))
         m.lower = mr.get_attr_int("lower");
       else
@@ -67,7 +67,7 @@ Multiplicity Multiplicity::read_from(XML::Element& pare,
 // Multiplicity streamer
 ostream& ObTools::UML::operator<<(ostream& s, const Multiplicity& m)
 {
-  //If 1..1, keep stumm
+  // If 1..1, keep stumm
   if (m.upper==1 && m.lower==1) return s;
 
   s << '[' << m.lower << "..";
@@ -85,7 +85,7 @@ ostream& ObTools::UML::operator<<(ostream& s, const Multiplicity& m)
 //==========================================================================
 // UML::Expression struct
 
-//Method to read from XMI - pass parent element of UML:Expression
+// Method to read from XMI - pass parent element of UML:Expression
 Expression Expression::read_from(XML::Element &pare)
 {
   Expression exp;

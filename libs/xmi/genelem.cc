@@ -16,7 +16,7 @@ using namespace ObTools::UML;
 GeneralizableElement::GeneralizableElement(XMI::Reader& rdr, XML::Element& xe)
   :ModelElement(rdr, xe)
 {
-  //Get basic properties
+  // Get basic properties
   is_abstract = get_bool_property("isAbstract",
                                   "UML:GeneralizableElement.isAbstract");
 

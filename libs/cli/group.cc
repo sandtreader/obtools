@@ -14,7 +14,7 @@
 namespace ObTools { namespace CLI {
 
 //--------------------------------------------------------------------------
-//Add a command
+// Add a command
 void CommandGroup::add(Command *command)
 {
   string t = Text::tolower(command->word);  // Lower case for comparison
@@ -51,7 +51,7 @@ void CommandGroup::add(Command *command)
 }
 
 //--------------------------------------------------------------------------
-//Handle a command
+// Handle a command
 void CommandGroup::handle(string args, istream& sin, ostream& sout)
 {
   // Find first word of args
@@ -79,7 +79,7 @@ void CommandGroup::handle(string args, istream& sin, ostream& sout)
 }
 
 //--------------------------------------------------------------------------
-//List help for the group
+// List help for the group
 void CommandGroup::show_help(ostream& sout)
 {
   size_t maxword = 0;
@@ -107,7 +107,7 @@ void CommandGroup::show_help(ostream& sout)
 }
 
 //--------------------------------------------------------------------------
-//Destructor
+// Destructor
 CommandGroup::~CommandGroup()
 {
   for(map<string, Command *>::iterator p = commands.begin();

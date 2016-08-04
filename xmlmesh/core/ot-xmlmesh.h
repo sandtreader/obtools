@@ -20,7 +20,7 @@
 
 namespace ObTools { namespace XMLMesh {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
@@ -103,43 +103,43 @@ public:
   string get_text() const;
 
   //------------------------------------------------------------------------
-  //Get SOAP Message, still owned by Message, will be destroyed with it
-  //Check for validity with !
+  // Get SOAP Message, still owned by Message, will be destroyed with it
+  // Check for validity with !
   const SOAP::Message& get_soap() const;
 
   //------------------------------------------------------------------------
-  //Get SOAP message for modification - clears textual copy if any
-  //SOAP is still owned by Message, will be destroyed with it
+  // Get SOAP message for modification - clears textual copy if any
+  // SOAP is still owned by Message, will be destroyed with it
   SOAP::Message& get_modifiable_soap();
 
   //------------------------------------------------------------------------
-  //Get XML Body content, still owned by Message, will be destroyed with it
-  //Check for validity with !
+  // Get XML Body content, still owned by Message, will be destroyed with it
+  // Check for validity with !
   XML::Element& get_body() const;
 
   //------------------------------------------------------------------------
-  //Ditto, but specifying a particular element name
-  //Check for validity with !
+  // Ditto, but specifying a particular element name
+  // Check for validity with !
   XML::Element& get_body(const string& name) const;
 
   //------------------------------------------------------------------------
-  //Get subject of a message
+  // Get subject of a message
   string get_subject() const;
 
   //------------------------------------------------------------------------
-  //Get id of a message
+  // Get id of a message
   string get_id() const;
 
   //------------------------------------------------------------------------
-  //Get whether the message requires a response
+  // Get whether the message requires a response
   bool get_rsvp() const;
 
   //------------------------------------------------------------------------
-  //Get reference of a message
+  // Get reference of a message
   string get_ref() const;
 
   //------------------------------------------------------------------------
-  //Destructor - kills xml data if not detached
+  // Destructor - kills xml data if not detached
   ~Message();
 };
 
@@ -186,7 +186,7 @@ public:
   SOAP::Fault& get_fault() const;
 
   //------------------------------------------------------------------------
-  //Test for badness
+  // Test for badness
   bool operator!() const { return code == SOAP::Fault::CODE_UNKNOWN; }
 };
 
@@ -220,7 +220,7 @@ public:
   SubscriptionMessage(Message& msg);
 
   //------------------------------------------------------------------------
-  //Test for badness
+  // Test for badness
   bool operator!() const { return operation == BOGUS; }
 };
 

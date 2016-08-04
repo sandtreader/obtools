@@ -227,7 +227,7 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  //Create generator
+  // Create generator
   XMLGenerator generator(config_file, cout, cerr);
   if (!generator) return 2;
 

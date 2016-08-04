@@ -94,7 +94,7 @@ void Element::merge(const Element& source)
 // Write attributes to given stream
 void Element::write_attrs(ostream &s) const
 {
-  //Output attributes
+  // Output attributes
   for(map<string,string>::const_iterator p=attrs.begin();
       p!=attrs.end();
       p++)
@@ -114,20 +114,20 @@ void Element::write_attrs(ostream &s) const
       // Decide whether value contains ' or " or both
       if (v.find('"') != string::npos)
       {
-        //It has a " in it - see if it also contains a '
+        // It has a " in it - see if it also contains a '
         if (v.find('\'') != string::npos)
         {
-          //Oops - it has both.  Better escape the quote, then
+          // Oops - it has both.  Better escape the quote, then
           escquote=true;
         }
         else
         {
-          //We'll be OK by swapping to using ' as delimiter
+          // We'll be OK by swapping to using ' as delimiter
           delim = '\'';
         }
       }
 
-      //But we must escape &, < and > as well
+      // But we must escape &, < and > as well
       s << ' ' << p->first << "=" << delim << escape(v, escquote) << delim;
     }
   }
@@ -139,25 +139,25 @@ void Element::write_indented(int indent, ostream &s) const
 {
   for(int i=0; i<indent; i++) s<<' ';
 
-  //Name indicates true element
+  // Name indicates true element
   if (name.size())
   {
     // Output start tag and attributes
     s << '<' << name;
     write_attrs(s);
 
-    //Output sub-elements if any
+    // Output sub-elements if any
     if (children.empty())
     {
-      //Could have an 'optimised' content string, though
+      // Could have an 'optimised' content string, though
       if (content.size())
       {
-        //String it all on one line - escaped for &, < and >
+        // String it all on one line - escaped for &, < and >
         s << '>' << escape(content, false) << "</" << name << '>' << endl;
       }
       else
       {
-        //No, it's really empty
+        // No, it's really empty
         s << "/>" << endl;
       }
     }
@@ -178,7 +178,7 @@ void Element::write_indented(int indent, ostream &s) const
   }
   else
   {
-    //Textual data in content - escape for &, < and >
+    // Textual data in content - escape for &, < and >
     s << escape(content, false) << endl;
   }
 }
@@ -452,7 +452,7 @@ const Element& Element::get_descendant(const string& ename) const
     const Element& se = **p;
     if (se.name == ename) return se;
 
-    //Not child, but ask it to search below itself
+    // Not child, but ask it to search below itself
     const Element& sse = se.get_descendant(ename);
     if (sse.valid()) return sse;
   }
@@ -469,7 +469,7 @@ Element& Element::get_descendant(const string& ename)
     Element& se = **p;
     if (se.name == ename) return se;
 
-    //Not child, but ask it to search below itself
+    // Not child, but ask it to search below itself
     Element& sse = se.get_descendant(ename);
     if (sse.valid()) return sse;
   }
@@ -559,7 +559,7 @@ void Element::append_descendants(const string& ename, const string& prune,
     if ((*p)->name==ename)
       l.push_back(*p);
 
-    //Look for descendants, even within a match
+    // Look for descendants, even within a match
     if ((*p)->name!=prune)
       (*p)->append_descendants(ename, prune, l);
   }
@@ -575,7 +575,7 @@ void Element::append_descendants(const string& ename, const string& prune,
     if ((*p)->name==ename)
       l.push_back(*p);
 
-    //Look for descendants, even within a match
+    // Look for descendants, even within a match
     if ((*p)->name!=prune)
       (*p)->append_descendants(ename, prune, l);
   }
@@ -895,18 +895,18 @@ string Element::get_xpath() const
 // the document
 bool Element::translate(map<string, string>& trans_map)
 {
-  //Ignore (and keep) data elements
+  // Ignore (and keep) data elements
   if (name.empty()) return true;
 
-  //Lookup current name in translation map
+  // Lookup current name in translation map
   map<string,string>::iterator tp=trans_map.find(name);
 
-  //Check for map to empty first - no point in recursing if we're going
-  //to be deleted anyway
+  // Check for map to empty first - no point in recursing if we're going
+  // to be deleted anyway
   if (tp!=trans_map.end() && tp->second.empty())
     return false;  //Delete me
 
-  //Recurse to sub-elements first
+  // Recurse to sub-elements first
   for(list<Element *>::iterator p=children.begin();
       p!=children.end();
       )  //Incremented in body to avoid invalidity after erase
@@ -923,7 +923,7 @@ bool Element::translate(map<string, string>& trans_map)
 
   if (tp==trans_map.end()) return true;  // Leave me alone
 
-  //We know it's not empty - change name
+  // We know it's not empty - change name
   name = tp->second;
   return true;  // Leave me alone now
 }

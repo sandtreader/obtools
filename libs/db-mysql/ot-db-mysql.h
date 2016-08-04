@@ -51,7 +51,7 @@ public:
   bool fetch(string& value) override;
 
   //------------------------------------------------------------------------
-  //Destructor
+  // Destructor
   ~ResultSet();
 };
 

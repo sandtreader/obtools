@@ -17,7 +17,7 @@
 
 namespace ObTools { namespace Script {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 // Forward
@@ -140,7 +140,7 @@ public:
 };
 
 //==========================================================================
-//Repeat action
+// Repeat action
 // e.g. <repeat times="4">
 //        ... sub actions ...
 //      </repeat>
@@ -315,7 +315,7 @@ public:
 };
 
 //==========================================================================
-//Log action
+// Log action
 // e.g. <log level="1">Something happened</log>
 class LogAction: public SingleAction
 {
@@ -330,7 +330,7 @@ public:
 };
 
 //==========================================================================
-//Delay action
+// Delay action
 // e.g. <delay time="1" random="yes"/>
 class DelayAction: public Action
 {
@@ -349,7 +349,7 @@ public:
 };
 
 //==========================================================================
-//Set action
+// Set action
 // e.g. <set var="foo">content</set>
 class SetAction: public SingleAction
 {
@@ -364,7 +364,7 @@ public:
 };
 
 //==========================================================================
-//Random action
+// Random action
 // e.g. <random probability="0.01">
 //        ... sub actions executed only at given probability ...
 //      </random>
@@ -397,21 +397,21 @@ protected:
   typedef Init::Factory<Action, Action::CP> factory_t;
 
   //------------------------------------------------------------------------
-  //Register a language construct
+  // Register a language construct
   void register_action(const string& name, factory_t& factory);
 
 public:
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   Language(): action_registry() {};
 
   //------------------------------------------------------------------------
-  //Instantiate an action from the given script and XML element
-  //Returns 0 if it fails
+  // Instantiate an action from the given script and XML element
+  // Returns 0 if it fails
   Action *create_action(Script& script, XML::Element& xml);
 
   //------------------------------------------------------------------------
-  //Run the script to the end
+  // Run the script to the end
   void run();
 };
 
@@ -429,7 +429,7 @@ class BaseLanguage: public Language
 {
 public:
   //------------------------------------------------------------------------
-  //Constructor
+  // Constructor
   BaseLanguage();
 };
 
@@ -448,22 +448,22 @@ public:
   Time::Stamp now;          // Consistent time for ticks
 
   //------------------------------------------------------------------------
-  //Constructor - takes language and top-level <script> XML element
+  // Constructor - takes language and top-level <script> XML element
   Script(Language& _language, XML::Element& _xml);
 
   //------------------------------------------------------------------------
-  //Instantiate an action from the given XML element
-  //Returns 0 if it fails
+  // Instantiate an action from the given XML element
+  // Returns 0 if it fails
   Action *create_action(XML::Element& xml)
   { return language.create_action(*this, xml); }
 
   //------------------------------------------------------------------------
-  //Tick the script, setting time stamp
-  //Returns whether it is still running
+  // Tick the script, setting time stamp
+  // Returns whether it is still running
   bool tick();
 
   //------------------------------------------------------------------------
-  //Run the script to the end
+  // Run the script to the end
   void run();
 };
 

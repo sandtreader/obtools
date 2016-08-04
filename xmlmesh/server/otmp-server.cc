@@ -241,7 +241,7 @@ bool OTMPServer::handle(RoutingMessage& msg)
 }
 
 //==========================================================================
-//Message thread run
+// Message thread run
 void OTMPMessageThread::run()
 {
   for(;;) service.dispatch();

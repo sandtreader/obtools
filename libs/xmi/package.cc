@@ -15,11 +15,11 @@ using namespace ObTools::UML;
 Package::Package(XMI::Reader& rdr, XML::Element& xe)
   :GeneralizableElement(rdr, xe) //Element does the basics
 {
-  //Read all sub-elements I'm interested in, using their respective
-  //factories, pruning at UML:Package to avoid grabbing all
-  //sub-package contents as well
-  //Note we set id_required to avoid grabbing reference elements for things
-  //that can be referenced
+  // Read all sub-elements I'm interested in, using their respective
+  // factories, pruning at UML:Package to avoid grabbing all
+  // sub-package contents as well
+  // Note we set id_required to avoid grabbing reference elements for things
+  // that can be referenced
   const char *p="UML:Package";
   read_subelements("UML:Class",          create_element<Class>, true, p);
   read_subelements("UML:DataType",       create_element<DataType>, true, p);

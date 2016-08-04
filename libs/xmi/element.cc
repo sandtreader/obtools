@@ -13,33 +13,33 @@
 using namespace ObTools::UML;
 
 //--------------------------------------------------------------------------
-//Constructor - build from XML element
+// Constructor - build from XML element
 Element::Element(XMI::Reader& rdr, XML::Element& xe):
   reader(rdr),
   source(xe),
   parent(0)
 {
-  //Get id
+  // Get id
   id = source.get_attr("xmi.id");
 
-  //If id is valid, add myself to the reader's idmap
+  // If id is valid, add myself to the reader's idmap
   if (!id.empty()) reader.record_uml_element(id, this);
 }
 
 
 //--------------------------------------------------------------------------
-//Element sub-element reader
-//Support for subclass constructor functions - read all subelements
-//of given types from XML source, and uses factory func to create them
-//Ignores any elements without an 'xmi.id' attribute - these are refs
-//Prunes descendant tree at 'prune', if given
+// Element sub-element reader
+// Support for subclass constructor functions - read all subelements
+// of given types from XML source, and uses factory func to create them
+// Ignores any elements without an 'xmi.id' attribute - these are refs
+// Prunes descendant tree at 'prune', if given
 void Element::read_subelements(const char *name, ElementFactoryFunc factory,
                                bool id_required, const char *prune)
 {
-  //Fix 0 prune to empty before cast to string
+  // Fix 0 prune to empty before cast to string
   if (!prune) prune="";
 
-  //Get all of this tag
+  // Get all of this tag
   OBTOOLS_XML_FOREACH_PRUNED_DESCENDANT_WITH_TAG(xe, source, name, prune)
     if (!id_required || xe.has_attr("xmi.id"))  // May be reference only
     {
@@ -51,8 +51,8 @@ void Element::read_subelements(const char *name, ElementFactoryFunc factory,
 }
 
 //--------------------------------------------------------------------------
-//Function to build things that need valid references (second pass)
-//We just pass it down to children
+// Function to build things that need valid references (second pass)
+// We just pass it down to children
 void Element::build_refs()
 {
   for(list<Element *>::iterator p=subelements.begin();
@@ -83,11 +83,11 @@ void Element::build_refs()
 string Element::get_property(const string& attr_name,
                              const string& subelement_name)
 {
-  //Try attribute
+  // Try attribute
   string v = source.get_attr(attr_name);
   if (!v.empty()) return v;
 
-  //Try subelement
+  // Try subelement
   XML::Element& sube = source.get_child(subelement_name);
   if (sube.valid())
   {
@@ -141,20 +141,20 @@ string Element::get_idref_property(const string& attr_name,
                                    const string& subelement_name,
                                    const string& subsubelement_name)
 {
-  //Try attribute
+  // Try attribute
   string v = source.get_attr(attr_name);
   if (!v.empty()) return v;
 
-  //Read through subelement
+  // Read through subelement
   XML::Element& sube = source.get_child(subelement_name);
   if (sube.valid())
   {
-    //If subsubelement not given, go for this one
+    // If subsubelement not given, go for this one
     if (subsubelement_name.empty())
       return sube.get_attr("xmi.idref");
     else
     {
-      //Try to open subsubelement
+      // Try to open subsubelement
       XML::Element& subsube = sube.get_child(subsubelement_name);
       if (subsube.valid())
         return subsube.get_attr("xmi.idref");
@@ -172,20 +172,20 @@ Element *Element::get_element_property(const string& attr_name,
                                        const string& subelement_name,
                                        const string& subsubelement_name)
 {
-  //Try requested subsubelement
+  // Try requested subsubelement
   string idref = get_idref_property(attr_name, subelement_name,
                                     subsubelement_name);
 
   //!XMI: XMI 1.2/UML 1.3 DTD implies only superclass (UML:Classifier,
-  //UML:GeneralizableElement) allowed here, but Netbeans MDR (as used
-  //in Poseidon) uses UML:Class, UML:DataType etc.  It feels like a
-  //misdrafting of the spec (other places do expand superclasses into
-  //set-of-all-subclasses for XML), which MDR have unilaterally fixed
+  // UML:GeneralizableElement) allowed here, but Netbeans MDR (as used
+  // in Poseidon) uses UML:Class, UML:DataType etc.  It feels like a
+  // misdrafting of the spec (other places do expand superclasses into
+  // set-of-all-subclasses for XML), which MDR have unilaterally fixed
   //- but comments welcome!
 
-  //Note we only make allowances for Class, Interface and DataType;
-  //Poseidon doesn't issue true Enumerations and Primitives and anything
-  //more correct should be using superclasses for everything
+  // Note we only make allowances for Class, Interface and DataType;
+  // Poseidon doesn't issue true Enumerations and Primitives and anything
+  // more correct should be using superclasses for everything
   if (idref.empty())
     idref = get_idref_property(attr_name, subelement_name,
                                "UML:Class");
@@ -253,12 +253,12 @@ void Element::print_header(ostream& sout)
 // prints sub-elements at indent+2
 void Element::print(ostream& sout, int indent)
 {
-  //Indent first line and downcall to child header printer
+  // Indent first line and downcall to child header printer
   sout << string(indent, ' ');
   print_header(sout);
   sout << endl;
 
-  //Print elements through virtual printer
+  // Print elements through virtual printer
   for(list<Element *>::iterator p=subelements.begin();
       p!=subelements.end();
       p++)
@@ -269,7 +269,7 @@ void Element::print(ostream& sout, int indent)
 // Element destructor
 Element::~Element()
 {
-  //Delete subelements through virtual destructor
+  // Delete subelements through virtual destructor
   for(list<Element *>::iterator p=subelements.begin();
       p!=subelements.end();
       p++)

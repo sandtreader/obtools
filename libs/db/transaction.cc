@@ -28,7 +28,7 @@ Transaction::Transaction(AutoConnection& _autoconn):
 }
 
 //--------------------------------------------------------------------------
-//Commit - returns whether commit command ran OK
+// Commit - returns whether commit command ran OK
 bool Transaction::commit()
 {
   if (!conn || committed) return false;
@@ -36,7 +36,7 @@ bool Transaction::commit()
 }
 
 //--------------------------------------------------------------------------
-//Destructor
+// Destructor
 Transaction::~Transaction()
 {
   if (conn && !committed) conn->exec("ROLLBACK");

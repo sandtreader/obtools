@@ -13,10 +13,10 @@
 using namespace ObTools::CPPT;
 
 //--------------------------------------------------------------------------
-//Process a character
-//Returns whether a token is available - note this will happen on the
-//character _after_ the end of the token
-//State of token validity also returned
+// Process a character
+// Returns whether a token is available - note this will happen on the
+// character _after_ the end of the token
+// State of token validity also returned
 bool TokenRecogniser::process_char(char c, TokenState& state)
 {
   int npossibles = 0;
@@ -33,7 +33,7 @@ bool TokenRecogniser::process_char(char c, TokenState& state)
     {
       npossibles++;
 
-      //Would this be complete?
+      // Would this be complete?
       if (size == index+1) at_least_one_is_valid = true;
     }
   }

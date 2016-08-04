@@ -13,18 +13,18 @@
 namespace ObTools { namespace DB { namespace PG {
 
 //==========================================================================
-//Postgres result class
+// Postgres result class
 
 //--------------------------------------------------------------------------
-//Get number of rows in result set
+// Get number of rows in result set
 int ResultSet::count()
 {
   return PQntuples(res);
 }
 
 //--------------------------------------------------------------------------
-//Get next row from result set
-//Whether another was found - if so, clears and writes into row
+// Get next row from result set
+// Whether another was found - if so, clears and writes into row
 bool ResultSet::fetch(Row& row)
 {
   if (row_cursor < PQntuples(res))
@@ -42,9 +42,9 @@ bool ResultSet::fetch(Row& row)
 }
 
 //--------------------------------------------------------------------------
-//Get first value of next row from result set
-//Value is unescaped
-//Whether another was found - if so, writes into value
+// Get first value of next row from result set
+// Value is unescaped
+// Whether another was found - if so, writes into value
 bool ResultSet::fetch(string& value)
 {
   if (row_cursor < PQntuples(res) && PQnfields(res) > 0)
@@ -56,18 +56,18 @@ bool ResultSet::fetch(string& value)
 }
 
 //--------------------------------------------------------------------------
-//Destructor
+// Destructor
 ResultSet::~ResultSet()
 {
   PQclear(res);
 }
 
 //==========================================================================
-//Postgres connection class
+// Postgres connection class
 
 //--------------------------------------------------------------------------
-//Constructor - takes Postgres connection string
-//e.g. "host=localhost dbname=foo user=prc password=secret"
+// Constructor - takes Postgres connection string
+// e.g. "host=localhost dbname=foo user=prc password=secret"
 Connection::Connection(const string& conninfo)
 {
   conn = PQconnectdb(conninfo.c_str());
@@ -101,8 +101,8 @@ Connection::operator bool()
 }
 
 //--------------------------------------------------------------------------
-//Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
-//Returns whether successful
+// Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
+// Returns whether successful
 bool Connection::exec(const string& sql)
 {
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBexec: " << sql << endl;)
@@ -133,8 +133,8 @@ bool Connection::exec(const string& sql)
 }
 
 //--------------------------------------------------------------------------
-//Execute a query and get result (e.g. SELECT)
-//Returns result - check this for validity
+// Execute a query and get result (e.g. SELECT)
+// Returns result - check this for validity
 Result Connection::query(const string& sql)
 {
   OBTOOLS_LOG_IF_DEBUG(log.debug << "DBquery: " << sql << endl;)
@@ -165,7 +165,7 @@ Result Connection::query(const string& sql)
 }
 
 //--------------------------------------------------------------------------
-//Destructor
+// Destructor
 Connection::~Connection()
 {
   if (conn) PQfinish(conn);

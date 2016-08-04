@@ -19,7 +19,7 @@
 
 namespace ObTools { namespace Message {
 
-//Make our lives easier without polluting anyone else
+// Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================

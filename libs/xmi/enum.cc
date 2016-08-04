@@ -15,7 +15,7 @@ using namespace ObTools::UML;
 Enumeration::Enumeration(XMI::Reader& rdr, XML::Element& xe)
   :DataType(rdr, xe)
 {
-  //Read all EnumerationLiterals (ignoring UML:Enumeration.literal cruft)
+  // Read all EnumerationLiterals (ignoring UML:Enumeration.literal cruft)
   OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(lite, xe,
                                                  "UML:EnumerationLiteral")
     string litname = lite.get_attr("name");

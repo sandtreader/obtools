@@ -156,7 +156,7 @@ bool Client::receive_messages(Log::Streams& log)
       // Unrecognised tag
       log.error << name << " (recv): Unrecognised tag "
                 << msg.stag() << " - out-of-sync?\n";
-      //Try to restart socket
+      // Try to restart socket
       return restart_socket(log);
     }
   }

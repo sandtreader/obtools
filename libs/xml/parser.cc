@@ -30,21 +30,21 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
   {
     xmlchar c=0;
 
-    //Read first character, stripping all leading whitespace
-    //XML: This violates the requirement to send everything to the application
-    //but indicate that some whitespace is insignificant.  We assume that
-    //the application isn't interested in leading whitespace unless it wants
-    //everything (PRESERVE_WHITESPACE), and we don't implement per-element
-    //xml:space semantics either
+    // Read first character, stripping all leading whitespace
+    // XML: This violates the requirement to send everything to the application
+    // but indicate that some whitespace is insignificant.  We assume that
+    // the application isn't interested in leading whitespace unless it wants
+    // everything (PRESERVE_WHITESPACE), and we don't implement per-element
+    // xml:space semantics either
 
-    //Except - if we've been asked to and within the document,
-    //whitespace as normal character data
+    // Except - if we've been asked to and within the document,
+    // whitespace as normal character data
     if (root && (flags & PARSER_PRESERVE_WHITESPACE))
       s.get(c);
     else
       c = skip_ws(s);
 
-    //Now's a good time for a sanity check
+    // Now's a good time for a sanity check
     if (!c)
     {
       if (root)
@@ -53,7 +53,7 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
         fatal("Empty or unreadable document");
     }
 
-    //Check for tag or text
+    // Check for tag or text
     if (c == '<')
     {
       // Process tags - next character identifies type
@@ -92,8 +92,8 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
           else
             fatal("Illegal end tag");
 
-          //Check for end - can only happen when stack goes empty after
-          //end tag
+          // Check for end - can only happen when stack goes empty after
+          // end tag
           if (elements.empty()) done=true;
           break;
 
@@ -118,12 +118,12 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
     }
     else if (root)
     {
-      //Read content into data sub-elements
+      // Read content into data sub-elements
       read_content(c, s);
     }
     else
     {
-      //If we're reading the root, only a tag-like thing is OK
+      // If we're reading the root, only a tag-like thing is OK
       fatal("Non-tag data at start of document");
     }
   }
@@ -138,22 +138,22 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
   Element *e = new Element();
   read_rest_of_name(c, s, e->name);
 
-  //OK, now we have a valid new element
+  // OK, now we have a valid new element
   e->line = line;
 
-  //Now loop looking for attributes or >
+  // Now loop looking for attributes or >
   bool empty=false;
   for(;;)
   {
-    //Next must be / > or whitespace, or it's an error
+    // Next must be / > or whitespace, or it's an error
     if (!is_ascii_space(c) && c!='/' && c!='>')
       fatal("Illegal start tag");
 
-    //If it's whitespace (not / or >), skip it
+    // If it's whitespace (not / or >), skip it
     if (c!='/' && c!='>') c = skip_ws(s, c);
 
 
-    //Empty close />
+    // Empty close />
     if (c=='/')
     {
       empty=true;
@@ -162,31 +162,31 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       break;
     }
 
-    //Normal close
+    // Normal close
     if (c=='>') break;
 
-    //It must be a name start now
+    // It must be a name start now
     if (!is_name_start(c)) fatal("Illegal attribute name");
 
-    //Get attribute name
+    // Get attribute name
     const string& aname = read_rest_of_name(c, s);
 
-    //This must be unique
+    // This must be unique
     if (e->attrs.find(aname) != e->attrs.end())
       fatal("Duplicate attribute name");
 
-    //Skip optional WS, then ensure =
+    // Skip optional WS, then ensure =
     if (is_ascii_space(c)) c = skip_ws(s, c);
     if (c!='=') fatal("No = given for attribute");
 
-    //Skip optional WS again and get start of value
+    // Skip optional WS again and get start of value
     c = skip_ws(s);
 
-    //Must be some kind of quote (this is XML, not SGML!)
+    // Must be some kind of quote (this is XML, not SGML!)
     if (c!='"' && c!='\'') fatal("Attribute value not quoted");
     xmlchar quote = c;
 
-    //Read attribute value to matching quote
+    // Read attribute value to matching quote
     string aval;
     aval.reserve(256);
     for(;;)
@@ -202,28 +202,28 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
     }
     aval.reserve();
 
-    //Add this attribute to the map
+    // Add this attribute to the map
     e->attrs[aname]=aval;
 
-    //Get next char and loop to optional whitespace before close or
-    //another attribute
+    // Get next char and loop to optional whitespace before close or
+    // another attribute
     c=0;
     s.get(c);
   }
 
-  //Add this as a child of the last open element, if any
+  // Add this as a child of the last open element, if any
   if (!elements.empty()) elements.back()->add(e);
 
-  //Process namespaces etc. for this element
+  // Process namespaces etc. for this element
   initial_processing(e);
 
-  //If empty, finalise it now, otherwise stack it as new open element
+  // If empty, finalise it now, otherwise stack it as new open element
   if (empty)
     final_processing(e);
   else
     elements.push_back(e);
 
-  //If we don't have a root before, we do now
+  // If we don't have a root before, we do now
   if (!root) root = e;
 
   return empty;
@@ -236,28 +236,28 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
 {
   const string& name = read_rest_of_name(c, s);
 
-  //Skip optional whitespace
+  // Skip optional whitespace
   if (is_ascii_space(c)) c=skip_ws(s, c);
 
-  //This must now be a '>' or its an error
+  // This must now be a '>' or its an error
   if (c!='>') throw ParseFailed();
 
-  //This should be whatever's on the top of the stack...
+  // This should be whatever's on the top of the stack...
   //... if there is a stack
   if (!elements.empty())
   {
     Element *e = elements.back();
     if (name==e->name)
     {
-      //That's OK, pop the stack
+      // That's OK, pop the stack
       elements.pop_back();
 
-      //Finalise this element (translate namespaces etc.)
+      // Finalise this element (translate namespaces etc.)
       final_processing(e);
     }
     else
     {
-      //Complain, but ignore it
+      // Complain, but ignore it
       ostringstream oss;
       oss << "Mis-nested tags - expected </" << e->name
           << ">, opened at line " << e->line << ", but got </"
@@ -267,7 +267,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
   }
   else
   {
-    //Stack empty - complain but ignore it
+    // Stack empty - complain but ignore it
     error("End-tag found but no elements open");
   }
 }
@@ -287,8 +287,8 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
   {
     // Use passed-in character the first time round
 
-    //Magic whitespace handling - if this is whitespace, keep a single
-    //space unless we are about to end, then strip to read the rest
+    // Magic whitespace handling - if this is whitespace, keep a single
+    // space unless we are about to end, then strip to read the rest
     //(If we're preserving whitespace, ignore all this and treat it as
     // any other character)
     if (!(flags & PARSER_PRESERVE_WHITESPACE) && is_ascii_space(c))
@@ -301,12 +301,12 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
     // First (passed in) character '<' is allowed if lenient
     if (c=='<' && !first)
     {
-      //New tag - push this back and stop
+      // New tag - push this back and stop
       s.unget();
       break;
     }
 
-    //Expand &
+    // Expand &
     if (c=='&')
       read_ref(content, s);
     else if (!c)
@@ -325,25 +325,25 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 
   content.reserve();
 
-  //Create sub-element with content, and add it to currently open element
+  // Create sub-element with content, and add it to currently open element
   if (!elements.empty())
   {
     Element *e = elements.back();
 
-    //See if the last thing we read was also a content element - if so,
-    //we probably got broken by a comment, and it would be nice to just
-    //continue it so it remains available for optimisation
+    // See if the last thing we read was also a content element - if so,
+    // we probably got broken by a comment, and it would be nice to just
+    // continue it so it remains available for optimisation
     if (!e->children.empty() && e->children.back()->name.empty())
     {
-      //We'll treat the comment like whitespace, because we suppressed
-      //any that was at end of previous one or start of this.
+      // We'll treat the comment like whitespace, because we suppressed
+      // any that was at end of previous one or start of this.
 
-      //XML: This means that 'foo<!-- -->bar' gets turned into 'foo bar'
-      //rather than 'foobar'.  I suppose I could do some
-      //horrendous remembering of front and back suppression so we
-      //know if this space is really there, but I think anyone not
-      //using PRESERVE_WHITESPACE is unlikely to care.  If they are
-      //using PRESERVE_WHITESPACE, though, we'd better not mess it up
+      // XML: This means that 'foo<!-- -->bar' gets turned into 'foo bar'
+      // rather than 'foobar'.  I suppose I could do some
+      // horrendous remembering of front and back suppression so we
+      // know if this space is really there, but I think anyone not
+      // using PRESERVE_WHITESPACE is unlikely to care.  If they are
+      // using PRESERVE_WHITESPACE, though, we'd better not mess it up
       if (!(flags & PARSER_PRESERVE_WHITESPACE))
         e->children.back()->content+=' ';
       e->children.back()->content+=content;
@@ -364,7 +364,7 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
   {
     int n;
     s.get(c);
-    //Turn off skipws while reading numbers
+    // Turn off skipws while reading numbers
     // - would like to use s >> noskipws, but GNU 2.95 series broken
     s.unsetf(ios::skipws);
 
@@ -385,14 +385,14 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
     // or didn't end with ;
     if (c!=';') fatal("Malformed character reference");
 
-    //Some subtleties here...  This parser ignores the encoding
-    //specified in the prolog, and hence is only really conformant for
-    //documents with the default encoding, UTF8.  That's enough for me!
+    // Some subtleties here...  This parser ignores the encoding
+    // specified in the prolog, and hence is only really conformant for
+    // documents with the default encoding, UTF8.  That's enough for me!
 
-    //However, it causes some work here: character references are in
-    //the document character set (Unicode), NOT the encoding - hence
-    //to make this consistent, we have to expand the Unicode value to
-    //UTF8 here
+    // However, it causes some work here: character references are in
+    // the document character set (Unicode), NOT the encoding - hence
+    // to make this consistent, we have to expand the Unicode value to
+    // UTF8 here
 
     // 7-bit is simple
     if (n < 0x80)
@@ -415,10 +415,10 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
   else if (isalpha(c)) //Entity name - alphabetic only
   {
     const string& ent = read_rest_of_name(c, s);
-    //Must have ; terminator
+    // Must have ; terminator
     if (c!=';') fatal("Malformed entity reference");
 
-    //Not many options, simple tests will do
+    // Not many options, simple tests will do
     //(Always thought that switch(ent) should be allowed here!)
     if (ent=="lt")
       text+='<';
@@ -455,7 +455,7 @@ void Parser::read_rest_of_name(xmlchar& c, istream& s, string& name)
   name.reserve(16);
   name+=c;
 
-  //Read rest of name
+  // Read rest of name
   for(;;)
   {
     c=0;
@@ -608,33 +608,33 @@ void Parser::initial_processing(Element *e)
     else
       ns_maps.resize(1);
 
-    //Look for xmlns:* attributes and add to current map
+    // Look for xmlns:* attributes and add to current map
     for(map<string,string>::const_iterator p=e->attrs.begin();
         p!=e->attrs.end();
         p++)
     {
       const string& aname=p->first;
 
-      //Begins with xmlns?
-      //GCC2.95 bug - string::compare parameters are nonstandard - use probably
-      //inefficient substring compare
+      // Begins with xmlns?
+      // GCC2.95 bug - string::compare parameters are nonstandard - use probably
+      // inefficient substring compare
       if (string(aname, 0, 5)=="xmlns")
       {
-        //Only xmlns alone?  Default namespace
+        // Only xmlns alone?  Default namespace
         if (aname.size()==5)
         {
-          //Store as empty prefix (default)
+          // Store as empty prefix (default)
           ns_maps.back()[""]=p->second;
         }
-        //xmlns:prefix?
+        // xmlns:prefix?
         else if (aname[5]==':')
         {
           string prefix(aname,6);
 
-          //Store with prefix
+          // Store with prefix
           ns_maps.back()[prefix]=p->second;
         }
-        //Otherwise, ignore it
+        // Otherwise, ignore it
       }
     }
   }
@@ -644,56 +644,56 @@ void Parser::initial_processing(Element *e)
 // Do final processing on an element
 void Parser::final_processing(Element *e)
 {
-  //If we've been asked to, 'optimise' single content sub-elements
+  // If we've been asked to, 'optimise' single content sub-elements
   if (flags & PARSER_OPTIMISE_CONTENT)
     e->optimise();
 
   if ((flags & PARSER_FIX_NAMESPACES)
     && !ns_maps.empty())  // Should always be OK, but be safe
   {
-    //Check current element name in latest ns_map and see if we need to
-    //translate it - including default namespace
+    // Check current element name in latest ns_map and see if we need to
+    // translate it - including default namespace
     substitute_name(e->name, true);
 
-    //Substitute attributes as well - non-obvious because we can't just
-    //replace key names, and it's a hassle to manipulate maps in place.
-    //For simplicity, but not speed, we take a copy of the map and copy
-    //them all across
+    // Substitute attributes as well - non-obvious because we can't just
+    // replace key names, and it's a hassle to manipulate maps in place.
+    // For simplicity, but not speed, we take a copy of the map and copy
+    // them all across
     map<string,string> old_attrs(e->attrs);
     e->attrs.clear();
 
-    //Run through all the old ones and copy them back, optionally
-    //modified
+    // Run through all the old ones and copy them back, optionally
+    // modified
     for(map<string,string>::iterator p=old_attrs.begin();
         p!=old_attrs.end();
         p++)
     {
       string name=p->first;
 
-      //Subsitute without defaulting
+      // Subsitute without defaulting
       substitute_name(name);
 
       e->attrs[name]=p->second;
     }
 
-    //Chop current level off ns_map stack
+    // Chop current level off ns_map stack
     ns_maps.pop_back();
   }
 }
 
 //--------------------------------------------------------------------------
-//Substitute a name (element or attribute) according to the current
-//namespace map (assumed non empty)
-//Replaces the name in place if necessary
-//Only substitutes default namespaces if usedef is true - set for elements
-//not for attributes
-//Returns whether any subsititution done
+// Substitute a name (element or attribute) according to the current
+// namespace map (assumed non empty)
+// Replaces the name in place if necessary
+// Only substitutes default namespaces if usedef is true - set for elements
+// not for attributes
+// Returns whether any subsititution done
 void Parser::substitute_name(string& name, bool usedef)
 {
   map<string,string>& topmap = ns_maps.back();
   string prefix;
 
-  //Look for a prefix
+  // Look for a prefix
   string::size_type pos=name.find(':');
   if (pos!=string::npos)
     prefix.assign(name, 0, pos++);
@@ -701,23 +701,23 @@ void Parser::substitute_name(string& name, bool usedef)
   {
     if (!usedef) return;  //Stop if default not allowed
 
-    //Failing that, look for "" as a default...
+    // Failing that, look for "" as a default...
     //... which prefix is conveniently already set to!
     pos=0;  //Grab whole of name for 'rest' later
   }
 
-  //Lookup this prefix in latest map
+  // Lookup this prefix in latest map
   if (topmap.find(prefix)!=topmap.end())
   {
     string rest(name,pos);
     const string& nsname=topmap[prefix];
 
-    //Look up nsname in user_ns_map and substitute prefix
+    // Look up nsname in user_ns_map and substitute prefix
     if (user_ns_map.find(nsname)!=user_ns_map.end())
     {
       const string& newprefix=user_ns_map[nsname];
 
-      //Rebuild name in place
+      // Rebuild name in place
       if (newprefix.empty())
         name = rest;
       else
@@ -750,7 +750,7 @@ Parser::~Parser()
 }
 
 //==========================================================================
-//Stream functions
+// Stream functions
 
 //--------------------------------------------------------------------------
 // Parse from given stream

@@ -56,7 +56,7 @@ void ReadThread::run()
       //      cout << n << endl;
       next_n = n+1;
     }
-    //else cout << "-";
+    // else cout << "-";
   }
 }
 
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
   {
     if (buffer.put(n))
       n++;
-    //else cout << "+";
+    // else cout << "+";
   }
 
   read_thread.stop();

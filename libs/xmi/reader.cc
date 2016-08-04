@@ -43,7 +43,7 @@ void Reader::error(const char *err, const string& detail)
 }
 
 //--------------------------------------------------------------------------
-//Record an ID to UML element mappimg
+// Record an ID to UML element mappimg
 void Reader::record_uml_element(const string& id, UML::Element *e)
 {
   uml_element_map[id]=e;
@@ -65,7 +65,7 @@ UML::Element *Reader::lookup_uml_element(const string& id)
 // Gather XML element IDs from this element, and recurse
 void Reader::gather_xml_element_ids(XML::Element& e)
 {
-  //Get id
+  // Get id
   string id = e["xmi.id"];
 
   if (!id.empty())
@@ -152,8 +152,8 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
           "UML:AssociationEnd.isNavigable";
   upgrade["Foundation.Core.AssociationEnd.participant"] =
           "UML:AssociationEnd.participant";
-  //Also cope with UML1.3 'type' - conversion to 'participant' happens
-  //in UML upgrade
+  // Also cope with UML1.3 'type' - conversion to 'participant' happens
+  // in UML upgrade
   upgrade["Foundation.Core.AssociationEnd.type"] =
           "UML:AssociationEnd.type";
 
@@ -207,14 +207,14 @@ void Reader::read_from(istream& s) throw (ParseFailed)
 
   XML::Element& root=xml_parser.get_root();
 
-  //Make sure it's XMI
+  // Make sure it's XMI
   if (root.name != "XMI")
     error("Not an <XMI> file - root element is ", root.name);
 
-  //Capture XMI version
+  // Capture XMI version
   xmi_version = atof(root.get_attr("xmi.version").c_str());
 
-  //See if we can find XMI.header/XMI.metamodel
+  // See if we can find XMI.header/XMI.metamodel
   XML::Element& xmi_header = root.get_child("XMI.header");
   double uml_version = 0;
   if (xmi_header.valid())
@@ -229,22 +229,22 @@ void Reader::read_from(istream& s) throw (ParseFailed)
     }
   }
 
-  //Get XMI.content
+  // Get XMI.content
   XML::Element& xmi_content = root.get_child("XMI.content");
   if (!xmi_content.valid()) error("No <XMI.content> in <XMI>");
 
-  //Before delving into UML, check for 1.0 and upgrade to 1.1 names
-  //Do this even if version unknown - can't do any harm
+  // Before delving into UML, check for 1.0 and upgrade to 1.1 names
+  // Do this even if version unknown - can't do any harm
   if (xmi_version < 1.1) upgrade_xmi_to_1_1(root);
 
-  //Get UML model - assume only one
+  // Get UML model - assume only one
   XML::Element& modele = xmi_content.get_child("UML:Model");
   if (!modele.valid()) error("No <UML:Model> in <XMI.content>");
 
   // Read elements with an ID into XML element map
   gather_xml_element_ids(modele);
 
-  //Now read model into a UML Model
+  // Now read model into a UML Model
   model = new UML::Model(*this, modele, uml_version);
 }
 

@@ -15,7 +15,7 @@ using namespace ObTools::UML;
 Class::Class(XMI::Reader& rdr, XML::Element& xe)
   :Classifier(rdr, xe)
 {
-  //Get basic properties
+  // Get basic properties
   is_active = get_bool_property("isActive", "UML:Class.isActive");
 }
 
