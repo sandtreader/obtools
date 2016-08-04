@@ -272,14 +272,14 @@ protected:
   // Return a fault to an existing request
   // Returns whether successul
   bool respond(const RoutingMessage& request,
-	       SOAP::Fault::Code code,
-	       const string& reason);
+               SOAP::Fault::Code code,
+               const string& reason);
 
 public:
   //------------------------------------------------------------------------
   // Constructors
   Service(const string& _id,
-	  int _min_threads=1, int _max_threads=1):
+          int _min_threads=1, int _max_threads=1):
     multithreaded(_max_threads>1),
     threads(_min_threads, _max_threads),
     id(_id)
@@ -289,7 +289,7 @@ public:
   Service(const XML::Element& cfg):
     multithreaded(cfg.get_attr_int("minthreads", 1) > 1),
     threads(cfg.get_attr_int("minthreads", 1),
-	    cfg.get_attr_int("maxthreads", 1)),
+            cfg.get_attr_int("maxthreads", 1)),
     id(cfg["id"])
   {}
 

@@ -146,22 +146,22 @@ class Element  //abstract
 protected:
   //Support functions to handle XMI attribute/sub-element option
   string get_property(const string& attr_name,
-		      const string& subelement_name);
+                      const string& subelement_name);
   bool get_bool_property(const string& attr_name,
-			 const string& subelement_name);
+                         const string& subelement_name);
   bool get_int_property(const string& attr_name,
-			const string& subelement_name,
-			int def=0);
+                        const string& subelement_name,
+                        int def=0);
   string get_idref_property(const string& attr_name,
-			    const string& subelement_name,
-			    const string& subsubelement_name="");
+                            const string& subelement_name,
+                            const string& subsubelement_name="");
   Element *get_element_property(const string& attr_name,
-				const string& subelement_name,
-				const string& subsubelement_name="");
+                                const string& subelement_name,
+                                const string& subsubelement_name="");
   Classifier *get_classifier_property(const string& attr_name,
-				      const string& subelement_name);
+                                      const string& subelement_name);
   GeneralizableElement *get_ge_property(const string& attr_name,
-					const string& subelement_name);
+                                        const string& subelement_name);
   Multiplicity get_multiplicity();
 
   //Support for subclass constructor functions - read all subelements
@@ -170,7 +170,7 @@ protected:
   //without an 'xmi.id' attribute - these are refs
   //Prunes descendant tree at 'prune', if given
   void read_subelements(const char *name, ElementFactoryFunc factory,
-			bool id_required = false, const char *prune=0);
+                        bool id_required = false, const char *prune=0);
 
   // Element header printer - print header line
   // Override this in subclass: upcall to parent, then to add your info
@@ -209,8 +209,8 @@ public:
   {
     list<T *> l;
     for(list<Element *>::iterator p=subelements.begin();
-	p!=subelements.end();
-	p++)
+        p!=subelements.end();
+        p++)
     {
       T *t = dynamic_cast<T *>(*p);
       if (t) l.push_back(t);
@@ -398,8 +398,8 @@ public:
   {
     list<T *> l;
     for(list<Generalization *>::iterator p=generalizations.begin();
-	p!=generalizations.end();
-	p++)
+        p!=generalizations.end();
+        p++)
     {
       T *t = dynamic_cast<T *>((*p)->gparent);
       if (t) l.push_back(t);
@@ -411,8 +411,8 @@ public:
   {
     list<T *> l;
     for(list<Generalization *>::iterator p=specializations.begin();
-	p!=specializations.end();
-	p++)
+        p!=specializations.end();
+        p++)
     {
       T *t = dynamic_cast<T *>((*p)->gchild);
       if (t) l.push_back(t);

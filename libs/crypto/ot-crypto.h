@@ -459,7 +459,7 @@ public:
   // If force_private is set, reads a private key PEM block even if a
   // public key is wanted (use for testing both ends with a single key)
   void read(istream& sin, const string& pass_phrase,
-	    bool force_private = false);
+            bool force_private = false);
 
   // Backwards compatibility stub
   void read(istream& sin, bool force_private = false);
@@ -469,7 +469,7 @@ public:
   // If force_public is set, writes a public key PEM block even if
   // a private key is held - use to generate new public/private pairs
   void write(ostream& sout, const string& pass_phrase,
-	     bool force_public = false) const;
+             bool force_public = false) const;
 
   // Backwards compatibility stub
   void write(ostream& sout, bool force_public = false) const;
@@ -478,7 +478,7 @@ public:
   // Read from string - reads PEM format, with pass phrase
   // If force_private is set, reads a private key even if public (see above)
   void read(const string& text, const string& pass_phrase,
-	    bool force_private = false);
+            bool force_private = false);
 
   //------------------------------------------------------------------------
   // Read from DER
@@ -562,7 +562,7 @@ class PKCS5
   // Returns copied and padded malloc'ed data block, and modifies length
   // to length of padded block
   static unsigned char *pad(const unsigned char *data, int& length,
-			    int multiple);
+                            int multiple);
 
   //------------------------------------------------------------------------
   // Pad a block of data to given length multiple
@@ -622,7 +622,7 @@ public:
   //------------------------------------------------------------------------
   // Static: Get hash of block of data.  Writes DIGEST_LENGTH bytes to result
   static void digest(const void *data, size_t length,
-		     unsigned char *result);
+                     unsigned char *result);
 
   //------------------------------------------------------------------------
   // Ditto, but returning hex string

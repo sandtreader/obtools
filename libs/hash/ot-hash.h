@@ -79,7 +79,7 @@ struct Stats
 // Hash block template - parameters as above, plus helper for ID
 // splitting/comparison
 template<class HASH_ID_T, class HASH_INDEX_T, class INDEX_T,
-	 class HELPER_T> class Block
+         class HELPER_T> class Block
 {
 private:
   // Handy typedefs
@@ -145,13 +145,13 @@ public:
     {
       // Snap out forward pointer
       if (p->next != INVALID_HASH_INDEX)
-	table[p->next].prev = p->prev;
+        table[p->next].prev = p->prev;
 
       // Snap out previous pointer
       if (p->prev != INVALID_HASH_INDEX)
-	table[p->prev].next = p->next;
+        table[p->prev].next = p->next;
       else // It's the first one
-	freelist = p->next;
+        freelist = p->next;
 
       // Clear chain and set index
       p->id    = id;
@@ -172,7 +172,7 @@ public:
       // Remove 'q' from freelist, and clear back-link from the new head
       freelist = q->next;
       if (freelist != INVALID_HASH_INDEX)
-	table[freelist].prev = INVALID_HASH_INDEX;
+        table[freelist].prev = INVALID_HASH_INDEX;
 
       // Set up q
       q->id    = id;
@@ -183,7 +183,7 @@ public:
       // Splice q into p's forward chain
       q->next = p->next;
       if (p->next != INVALID_HASH_INDEX)
-	table[p->next].prev = qi;
+        table[p->next].prev = qi;
       p->next = qi;  // Set last to ensure atomic update in lookup
 
       return true;
@@ -214,9 +214,9 @@ public:
 
       // Chain to next
       if (p->next != INVALID_HASH_INDEX)
-	p = table+p->next;
+        p = table+p->next;
       else
-	return INVALID_INDEX;
+        return INVALID_INDEX;
     }
   }
 
@@ -244,88 +244,88 @@ public:
       // Check for hit (most likely case)
       if (p->id == id)
       {
-	// Remember index for result
-	INDEX_T index = p->index;
+        // Remember index for result
+        INDEX_T index = p->index;
 
-	// Splice out from collision chain...
-	// We have to be very careful here...  The entry we are splicing out
-	// could be at the head of a chain for items which follow later.
-	// Because the chain is coalesced, multiple points along it can be
-	// heads of chains.  Hence we avoid actually deleting an entry if
-	// there is anything that requires it to be present
+        // Splice out from collision chain...
+        // We have to be very careful here...  The entry we are splicing out
+        // could be at the head of a chain for items which follow later.
+        // Because the chain is coalesced, multiple points along it can be
+        // heads of chains.  Hence we avoid actually deleting an entry if
+        // there is anything that requires it to be present
 
-	// The algorithm here is basically this:
-	//   To delete an entry, search forward for any later entry in the
-	//   same chain which hashes to the location to be deleted (using prev)
-	//   If found:  Replace the deleted entry with it, and delete
-	//              (recursively) the new gap
-	//   If not found:  Safe to snap out in place
+        // The algorithm here is basically this:
+        //   To delete an entry, search forward for any later entry in the
+        //   same chain which hashes to the location to be deleted (using prev)
+        //   If found:  Replace the deleted entry with it, and delete
+        //              (recursively) the new gap
+        //   If not found:  Safe to snap out in place
 
-	// Start by trying to delete this one
-	HASH_INDEX_T to_delete_i = i;
+        // Start by trying to delete this one
+        HASH_INDEX_T to_delete_i = i;
 
-	// Loop while more to delete (flattening linear recursion on delete)
-	for(;;)
-	{
-	  entry_t *to_delete = table+to_delete_i;
+        // Loop while more to delete (flattening linear recursion on delete)
+        for(;;)
+        {
+          entry_t *to_delete = table+to_delete_i;
 
-	  // First find 'q', an entry which hashes to here
-	  HASH_INDEX_T qi = to_delete->next;
+          // First find 'q', an entry which hashes to here
+          HASH_INDEX_T qi = to_delete->next;
 
-	  while (qi != INVALID_HASH_INDEX)
-	  {
-	    entry_t *q = table+qi;
+          while (qi != INVALID_HASH_INDEX)
+          {
+            entry_t *q = table+qi;
 
-	    // Does this hash to the one we're trying to delete?
-	    if (q->head == to_delete_i)
-	    {
-	      // Copy its data back to the one being deleted
-	      // note: next/prev remain the same
-	      to_delete->index = q->index;
-	      to_delete->id    = q->id;
-	      to_delete->head  = q->head;
+            // Does this hash to the one we're trying to delete?
+            if (q->head == to_delete_i)
+            {
+              // Copy its data back to the one being deleted
+              // note: next/prev remain the same
+              to_delete->index = q->index;
+              to_delete->id    = q->id;
+              to_delete->head  = q->head;
 
-	      // Now continue and delete this one
-	      to_delete_i    = qi;
-	      to_delete      = table+qi;
-	      break;  // From search on qi
-	    }
+              // Now continue and delete this one
+              to_delete_i    = qi;
+              to_delete      = table+qi;
+              break;  // From search on qi
+            }
 
-	    qi = q->next;
-	  }
+            qi = q->next;
+          }
 
-	  // Did we reach the end?
-	  if (qi == INVALID_HASH_INDEX)
-	  {
-	    // Nothing relevant found - we can delete here
+          // Did we reach the end?
+          if (qi == INVALID_HASH_INDEX)
+          {
+            // Nothing relevant found - we can delete here
 
-	    // Snap out link from previous item in chain
-	    if (to_delete->prev != INVALID_HASH_INDEX)
-	      table[to_delete->prev].next = to_delete->next;
+            // Snap out link from previous item in chain
+            if (to_delete->prev != INVALID_HASH_INDEX)
+              table[to_delete->prev].next = to_delete->next;
 
-	    // Ditto for prev link from next item
-	    if (to_delete->next != INVALID_HASH_INDEX)
-	      table[to_delete->next].prev = to_delete->prev;
+            // Ditto for prev link from next item
+            if (to_delete->next != INVALID_HASH_INDEX)
+              table[to_delete->next].prev = to_delete->prev;
 
-	    // Clear contents and back-link
-	    to_delete->index = INVALID_INDEX;
-	    to_delete->prev  = INVALID_HASH_INDEX;
+            // Clear contents and back-link
+            to_delete->index = INVALID_INDEX;
+            to_delete->prev  = INVALID_HASH_INDEX;
 
-	    // This becomes the new head of the freelist
-	    // First back-link the current freelist (if any) to this
-	    if (freelist != INVALID_HASH_INDEX)
-	      table[freelist].prev = to_delete_i;
+            // This becomes the new head of the freelist
+            // First back-link the current freelist (if any) to this
+            if (freelist != INVALID_HASH_INDEX)
+              table[freelist].prev = to_delete_i;
 
-	    // Now splice to head
-	    to_delete->next = freelist;
-	    freelist = to_delete_i;
+            // Now splice to head
+            to_delete->next = freelist;
+            freelist = to_delete_i;
 
-	    // Nothing more to delete
-	    break;
-	  }
-	}
+            // Nothing more to delete
+            break;
+          }
+        }
 
-	return index;
+        return index;
       }
 
       // Chain to next
@@ -361,18 +361,18 @@ public:
       // First sanity check pointer
       if (i<0)
       {
-	sout << "Freelist goes negative (" << i << ") after "
-	     << previous << endl;
-	ok = false;
-	break;
+        sout << "Freelist goes negative (" << i << ") after "
+             << previous << endl;
+        ok = false;
+        break;
       }
 
       if (i>=size)
       {
-	sout << "Freelist goes too large (" << i << ") after "
-	     << previous << endl;
-	ok = false;
-	break;
+        sout << "Freelist goes too large (" << i << ") after "
+             << previous << endl;
+        ok = false;
+        break;
       }
 
       entry_t *p = table+i;
@@ -380,10 +380,10 @@ public:
       // Check for loops
       if (marks[i])
       {
-	sout << "Freelist loops back to " << i << " after " << previous
-	     << endl;
-	ok = false;
-	break;
+        sout << "Freelist loops back to " << i << " after " << previous
+             << endl;
+        ok = false;
+        break;
       }
 
       marks[i] = true;
@@ -391,18 +391,18 @@ public:
       // Check this is empty
       if (p->used())
       {
-	sout << "Freelist entry at " << i << " is used by index "
-	     << p->index << endl;
-	ok = false;
-	break;
+        sout << "Freelist entry at " << i << " is used by index "
+             << p->index << endl;
+        ok = false;
+        break;
       }
 
       // Check we point back to previous
       if (p->prev != previous)
       {
-	sout << "Back-pointer misses at " << i << ": expected " << previous
-	     << ", got " << p->id << endl;
-	ok = false;
+        sout << "Back-pointer misses at " << i << ": expected " << previous
+             << ", got " << p->id << endl;
+        ok = false;
       }
 
       // Get next
@@ -420,54 +420,54 @@ public:
       // if so, it's the head of a chain
       if (p->used() && start == i)
       {
-	HASH_INDEX_T previous = p->prev;  // May be in middle of chain
+        HASH_INDEX_T previous = p->prev;  // May be in middle of chain
 
-	// Follow chain
-	for(HASH_INDEX_T j=i; j!=INVALID_HASH_INDEX; j=table[j].next)
-	{
-	  // Sanity check pointer
-	  if (j<0)
-	  {
-	    sout << "Chain started at " << i
-		 << " goes negative (" << j << ")\n";
-	    ok = false;
-	    break;
-	  }
+        // Follow chain
+        for(HASH_INDEX_T j=i; j!=INVALID_HASH_INDEX; j=table[j].next)
+        {
+          // Sanity check pointer
+          if (j<0)
+          {
+            sout << "Chain started at " << i
+                 << " goes negative (" << j << ")\n";
+            ok = false;
+            break;
+          }
 
-	  if (j>=size)
-	  {
-	    sout << "Chain started at " << i
-		 << " goes too large (" <<j<< ")\n";
-	    ok = false;
-	    break;
-	  }
+          if (j>=size)
+          {
+            sout << "Chain started at " << i
+                 << " goes too large (" <<j<< ")\n";
+            ok = false;
+            break;
+          }
 
-	  entry_t *q = table+j;
-	  marks[j] = true;
+          entry_t *q = table+j;
+          marks[j] = true;
 
-	  // Check we are used
-	  if (!q->used())
-	  {
-	    sout << "Entry at " << j << " is marked unused\n";
-	    ok = false;
-	  }
+          // Check we are used
+          if (!q->used())
+          {
+            sout << "Entry at " << j << " is marked unused\n";
+            ok = false;
+          }
 
-	  // Check previous pointer
-	  if (q->prev != previous)
-	  {
-	    sout << "Entry at " << j << " has bad prev link\n";
-	    ok = false;
-	  }
-	  previous = j;
+          // Check previous pointer
+          if (q->prev != previous)
+          {
+            sout << "Entry at " << j << " has bad prev link\n";
+            ok = false;
+          }
+          previous = j;
 
-	  // Check our head marker for where we hash to is correct
-	  HASH_INDEX_T q_start = helper.get_start(q->id);
-	  if (q_start != q->head)
-	  {
-	    sout << "Entry at " << j << " has bad head marker\n";
-	    ok = false;
-	  }
-	}
+          // Check our head marker for where we hash to is correct
+          HASH_INDEX_T q_start = helper.get_start(q->id);
+          if (q_start != q->head)
+          {
+            sout << "Entry at " << j << " has bad head marker\n";
+            ok = false;
+          }
+        }
       }
     }
 
@@ -476,8 +476,8 @@ public:
     {
       if (!marks[i])
       {
-	sout << "Entry at " << i << " is orphaned\n";
-	ok = false;
+        sout << "Entry at " << i << " is orphaned\n";
+        ok = false;
       }
     }
 
@@ -502,22 +502,22 @@ public:
       // See if it's used
       if (p->used())
       {
-	stats_p.entries++;
+        stats_p.entries++;
 
-	// If it hashes to where it should be, it's the head of a chain
-	if (helper.get_start(p->id) == i)
-	{
-	  int length = 0;
+        // If it hashes to where it should be, it's the head of a chain
+        if (helper.get_start(p->id) == i)
+        {
+          int length = 0;
 
-	  // Follow chain
-	  for(HASH_INDEX_T j=i;
-	      j!=INVALID_HASH_INDEX;
-	      length++, j=table[j].next)
-	    ;
+          // Follow chain
+          for(HASH_INDEX_T j=i;
+              j!=INVALID_HASH_INDEX;
+              length++, j=table[j].next)
+            ;
 
-	  if (length > stats_p.max_chain)
-	    stats_p.max_chain = length;
-	}
+          if (length > stats_p.max_chain)
+            stats_p.max_chain = length;
+        }
       }
     }
 
@@ -539,25 +539,25 @@ public:
       sout << setw(8) << i << ": ";
       if (e->used())
       {
-	sout << setw(5) << e->id << " -> "
-	     << setw(10) << setiosflags(ios_base::left) << e->index
-	     << resetiosflags(ios_base::left);
-	if (e->next != INVALID_HASH_INDEX)
-	  sout << " next: " << e->next;
-	if (e->prev != INVALID_HASH_INDEX)
-	  sout << " prev: " << e->prev;
-	sout << " head: " << e->head;
-	sout << endl;
+        sout << setw(5) << e->id << " -> "
+             << setw(10) << setiosflags(ios_base::left) << e->index
+             << resetiosflags(ios_base::left);
+        if (e->next != INVALID_HASH_INDEX)
+          sout << " next: " << e->next;
+        if (e->prev != INVALID_HASH_INDEX)
+          sout << " prev: " << e->prev;
+        sout << " head: " << e->head;
+        sout << endl;
       }
       else
       {
-	sout << "EMPTY";
-	if (i == freelist) sout << " FREELIST";
-	if (e->next != INVALID_HASH_INDEX)
-	  sout << " next: " << e->next;
-	if (e->prev != INVALID_HASH_INDEX)
-	  sout << " previous: " << e->prev;
-	sout << endl;
+        sout << "EMPTY";
+        if (i == freelist) sout << " FREELIST";
+        if (e->next != INVALID_HASH_INDEX)
+          sout << " next: " << e->next;
+        if (e->prev != INVALID_HASH_INDEX)
+          sout << " previous: " << e->prev;
+        sout << endl;
       }
     }
   }
@@ -713,11 +713,11 @@ public:
       ostringstream oss;  // Accumulate as string so we can mark it
       if (!table[i]->check(oss))
       {
-	sout << "Consistency check failed in block " << i << ":\n";
-	sout << oss.str();
-	sout << "Block dump:\n";
-	table[i]->dump(sout);
-	ok = false;
+        sout << "Consistency check failed in block " << i << ":\n";
+        sout << oss.str();
+        sout << "Block dump:\n";
+        table[i]->dump(sout);
+        ok = false;
       }
     }
 
@@ -739,9 +739,9 @@ public:
 
       stats_p.entries += block_stats.entries;
       if (block_stats.max_fullness > stats_p.max_fullness)
-	stats_p.max_fullness = block_stats.max_fullness;
+        stats_p.max_fullness = block_stats.max_fullness;
       if (block_stats.max_chain > stats_p.max_chain)
-	stats_p.max_chain = block_stats.max_chain;
+        stats_p.max_chain = block_stats.max_chain;
     }
   }
 
@@ -770,7 +770,7 @@ public:
     {
       // Delete all blocks
       for(int i=0; i<(1<<nbits); i++)
-	if (table[i]) delete table[i];
+        if (table[i]) delete table[i];
 
       free(table);
     }
@@ -833,7 +833,7 @@ template<class ID_T         = uint32_t,
        > class Table:
   public GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T,
                       INDEX_T,
-		      IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> >
+                      IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> >
 {
 public:
   //--------------------------------------------------------------------------

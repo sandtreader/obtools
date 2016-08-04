@@ -84,7 +84,7 @@ vector<string> split_words(const string& text);
 // If there are no delimiters, the whole string (even if empty) goes into
 // the first result element
 vector<string> split(const string& text, char delim=',',
-		     bool canonicalise = true, int max=0);
+                     bool canonicalise = true, int max=0);
 
 //==========================================================================
 // Pattern matching functions (pattern.cc)
@@ -94,19 +94,19 @@ vector<string> split(const string& text, char delim=',',
 // Matches a pattern against a string
 // Returns whether it matches
 // Pattern can contain:
-//	*	Matches any number of characters, or none
-//	?	Matches a single character
-//	[abc]	Matches any character in set. Ranges x-y allowed
-//	[!abc]  Matches	any character not in set.  Ranges allowed
-//	\	Escapes following character special character
+//        *        Matches any number of characters, or none
+//        ?        Matches a single character
+//        [abc]        Matches any character in set. Ranges x-y allowed
+//        [!abc]  Matches        any character not in set.  Ranges allowed
+//        \        Escapes following character special character
 //
-//	   cased gives whether case sensitive match (true)
+//           cased gives whether case sensitive match (true)
 bool pattern_match(const char *pattern, const char *text,
-		   bool cased=true);
+                   bool cased=true);
 
 // More C++ friendly version
 bool pattern_match(const string& pattern, const string& text,
-		   bool cased=true);
+                   bool cased=true);
 
 //==========================================================================
 // Substitution functions (subst.cc)
@@ -187,7 +187,7 @@ string btox(const vector<uint8_t>& data);
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
 unsigned int xtob(const string& hex, unsigned char *data,
-		  unsigned int max_length);
+                  unsigned int max_length);
 
 //==========================================================================
 // Base64 encoder/decoder
@@ -209,7 +209,7 @@ public:
   // Set 0 to suppress split altogether
   // line_end is string to split with, and indent for next line
   string encode(const unsigned char *block, size_t length,
-		int split=76, const string& line_end = "\r\n");
+                int split=76, const string& line_end = "\r\n");
 
   //--------------------------------------------------------------------------
   // Encode a 64-bit integer, top byte first (big-endian)
@@ -219,7 +219,7 @@ public:
   //--------------------------------------------------------------------------
   // Encode a binary string - options as encode above
   string encode(const string& binary, int split=76,
-		const string& line_end="\r\n");
+                const string& line_end="\r\n");
 
   //--------------------------------------------------------------------------
   // Get length of binary block required for decode

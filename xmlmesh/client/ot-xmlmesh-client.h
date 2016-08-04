@@ -99,8 +99,8 @@ public:
   // Return an error to request given
   // Returns whether successul
   bool respond(SOAP::Fault::Code code,
-	       const string& reason,
-	       Message& request);
+               const string& reason,
+               Message& request);
 
   //------------------------------------------------------------------------
   // Send a message and get a response (blocking)
@@ -251,8 +251,8 @@ public:
   //------------------------------------------------------------------------
   // Constructor - attach transport
   MultiClient(ClientTransport& _transport,
-	      int _min_spare_workers=DEFAULT_MIN_SPARE_WORKERS,
-	      int _max_workers=DEFAULT_MAX_WORKERS);
+              int _min_spare_workers=DEFAULT_MIN_SPARE_WORKERS,
+              int _max_workers=DEFAULT_MAX_WORKERS);
 
   //------------------------------------------------------------------------
   // Check if not shutting down
@@ -277,8 +277,8 @@ public:
   // Return an error to request given
   // Returns whether successul
   bool respond(SOAP::Fault::Code code,
-	       const string& reason,
-	       Message& request);
+               const string& reason,
+               Message& request);
 
   //------------------------------------------------------------------------
   // Send a message and get a response (blocking)

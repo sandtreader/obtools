@@ -48,17 +48,17 @@ protected:
   // Limit common indent removal to max_ci.  If not yet set (<0), sets it to
   // common indent of this script
   void process_script(const string& script, CPPT::Tags& tags,
-		      const string& streamname, int& max_ci);
+                      const string& streamname, int& max_ci);
 
   //--------------------------------------------------------------------------
   // Generate use of a predefined 'macro' template
   void generate_use(XML::Element& use_e,
-		    XML::Element& define_e,
-		    CPPT::Tags& tags,
-		    const string& childname,
-		    const string& indexname,
-		    const string& countname,
-		    const string& streamname);
+                    XML::Element& define_e,
+                    CPPT::Tags& tags,
+                    const string& childname,
+                    const string& indexname,
+                    const string& countname,
+                    const string& streamname);
 
   //--------------------------------------------------------------------------
   // Generate code for a particular template element
@@ -67,12 +67,12 @@ protected:
   // max_ci is maximum indent to strip from code
   // Accumulates script in script, dumps it on hitting a sub-template
   void generate_template(XML::Element& te, XML::Element& parent,
-			 CPPT::Tags& tags,
-			 int& max_ci,
-			 const string& indexname,
-			 const string& countname,
-			 const string& streamname,
-			 string& script);
+                         CPPT::Tags& tags,
+                         int& max_ci,
+                         const string& indexname,
+                         const string& countname,
+                         const string& streamname,
+                         string& script);
 
   //--------------------------------------------------------------------------
   // Output code to read configuration items
@@ -97,20 +97,20 @@ protected:
   // Iterate over child elements, expanding template inline
   // Accumulates expanded script in 'script'
   virtual void expand_inline(XML::Element& te, XML::Element& parent,
-			     CPPT::Tags& tags,
-			     int& max_ci,
-			     const string& streamname,
-			     string& script,
-			     bool is_root = false) = 0;
+                             CPPT::Tags& tags,
+                             int& max_ci,
+                             const string& streamname,
+                             string& script,
+                             bool is_root = false) = 0;
 
   //--------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
   virtual void expand_use(XML::Element& use_e,
-			  XML::Element& define_e,
-			  XML::Element& parent,
-			  CPPT::Tags& tags,
-			  const string& streamname,
-			  bool is_root = false) = 0;
+                          XML::Element& define_e,
+                          XML::Element& parent,
+                          CPPT::Tags& tags,
+                          const string& streamname,
+                          bool is_root = false) = 0;
 
   //--------------------------------------------------------------------------
   // Generate includes / file-level code
@@ -130,7 +130,7 @@ public:
   // Constructor - read configuration from config file, output code
   // to given output stream, errors to error stream
   Generator(const string& _config_file,
-	    ostream& _sout=cout, ostream& serr=cerr);
+            ostream& _sout=cout, ostream& serr=cerr);
 
   //------------------------------------------------------------------------
   // Validity check

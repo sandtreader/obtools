@@ -172,7 +172,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor with SSL
   Client(const Net::EndPoint& _server, SSL::Context *_ctx,
-	 const string& _name="Tube");
+         const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Start send and receive threads
@@ -258,7 +258,7 @@ private:
   // Set up a request entry to wait for a response
   // (call before actually sending message, in case response is instant)
   void start_request(Message& request, Net::EndPoint client,
-		     const string& name);
+                     const string& name);
 
   //------------------------------------------------------------------------
   // Block waiting for a response to the given request
@@ -300,12 +300,12 @@ public:
   // Constructor - takes server endpoint (address+port), request timeout
   // (in seconds) and optional name
   SyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT,
-	     const string& _name="Tube");
+             const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Constructor with SSL
   SyncClient(Net::EndPoint _server, SSL::Context *_ctx,
-	     int _timeout=DEFAULT_TIMEOUT, const string& _name="Tube");
+             int _timeout=DEFAULT_TIMEOUT, const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Handle timeouts - called by background thread - do not call directly
@@ -345,14 +345,14 @@ public:
   // Constructor - takes server endpoint (address+port), request timeout
   // (in seconds) and optional name
   AutoSyncClient(Net::EndPoint _server,
-		 int _timeout=SyncClient::DEFAULT_TIMEOUT,
-		 const string& _name="Tube");
+                 int _timeout=SyncClient::DEFAULT_TIMEOUT,
+                 const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Constructor with SSL
   AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
-		 int _timeout=SyncClient::DEFAULT_TIMEOUT,
-		 const string& _name="Tube");
+                 int _timeout=SyncClient::DEFAULT_TIMEOUT,
+                 const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Overrideable function to handle an asynchronous message - by default
@@ -408,7 +408,7 @@ struct ClientSession
   // Constructor
   // Adds this session to the given map - destructor removes it again
   ClientSession(SSL::TCPSocket& _socket, Net::EndPoint _client,
-		SessionMap& _map):
+                SessionMap& _map):
     socket(_socket), client(_client), map(_map), alive(true)
   { map.add(_client, this); }
 
@@ -439,7 +439,7 @@ struct ClientMessage
 
   // Constructor for message
   ClientMessage(const SSL::ClientDetails& _client, tag_t _tag,
-		const string& _data="", flags_t _flags=0):
+                const string& _data="", flags_t _flags=0):
     client(_client), msg(_tag, _data,_flags), action(MESSAGE_DATA) {}
 
   // Constructor for other action
@@ -487,34 +487,34 @@ public:
   // Constructor - takes port to listen on, with optional timeout (secs)
   // The rest is thread/socket tuning - see Net::TCPServer
   Server(int port, const string& _name="Tube",
-	 int backlog=DEFAULT_BACKLOG,
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
-	 int max_threads=DEFAULT_MAX_THREADS,
-	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
+         int backlog=DEFAULT_BACKLOG,
+         int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
+         int max_threads=DEFAULT_MAX_THREADS,
+         int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
   //------------------------------------------------------------------------
   // Constructor with defined local interface
   Server(Net::EndPoint local, const string& _name="Tube",
-	 int backlog=DEFAULT_BACKLOG,
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
-	 int max_threads=DEFAULT_MAX_THREADS,
-	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
+         int backlog=DEFAULT_BACKLOG,
+         int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
+         int max_threads=DEFAULT_MAX_THREADS,
+         int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
   //------------------------------------------------------------------------
   // Constructors with SSL
   Server(SSL::Context *_ctx, int port,
-	 const string& _name="Tube",
-	 int backlog=DEFAULT_BACKLOG,
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
-	 int max_threads=DEFAULT_MAX_THREADS,
-	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
+         const string& _name="Tube",
+         int backlog=DEFAULT_BACKLOG,
+         int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
+         int max_threads=DEFAULT_MAX_THREADS,
+         int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
   Server(SSL::Context *_ctx, Net::EndPoint local,
-	 const string& _name="Tube",
-	 int backlog=DEFAULT_BACKLOG,
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
-	 int max_threads=DEFAULT_MAX_THREADS,
-	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
+         const string& _name="Tube",
+         int backlog=DEFAULT_BACKLOG,
+         int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
+         int max_threads=DEFAULT_MAX_THREADS,
+         int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
   //------------------------------------------------------------------------
   // Check it hasn't been killed
@@ -539,7 +539,7 @@ public:
   //------------------------------------------------------------------------
   // TCPServer process method - handles new connections
   void process(SSL::TCPSocket& s,
-	       const SSL::ClientDetails& client);
+               const SSL::ClientDetails& client);
 
   //------------------------------------------------------------------------
   // Background functions called by threads - do not use directly
@@ -586,38 +586,38 @@ public:
   //------------------------------------------------------------------------
   // Constructors - as Server
   SyncServer(int port, const string& _name="Tube",
-	     int backlog=Server::DEFAULT_BACKLOG,
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	     int max_threads=Server::DEFAULT_MAX_THREADS,
-	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+             int backlog=Server::DEFAULT_BACKLOG,
+             int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+             int max_threads=Server::DEFAULT_MAX_THREADS,
+             int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(port, _name, backlog, min_spare_threads, max_threads,
-	   _client_timeout) {}
+           _client_timeout) {}
 
   SyncServer(Net::EndPoint local, const string& _name="Tube",
-	     int backlog=Server::DEFAULT_BACKLOG,
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	     int max_threads=Server::DEFAULT_MAX_THREADS,
-	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+             int backlog=Server::DEFAULT_BACKLOG,
+             int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+             int max_threads=Server::DEFAULT_MAX_THREADS,
+             int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(local, _name, backlog, min_spare_threads, max_threads,
-	   _client_timeout) {}
+           _client_timeout) {}
 
   SyncServer(SSL::Context *_ctx, int port,
-	     const string& _name="Tube",
-	     int backlog=Server::DEFAULT_BACKLOG,
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	     int max_threads=Server::DEFAULT_MAX_THREADS,
-	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+             const string& _name="Tube",
+             int backlog=Server::DEFAULT_BACKLOG,
+             int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+             int max_threads=Server::DEFAULT_MAX_THREADS,
+             int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(_ctx, port, _name, backlog, min_spare_threads, max_threads,
-	   _client_timeout) {}
+           _client_timeout) {}
 
   SyncServer(SSL::Context *_ctx, Net::EndPoint local,
-	     const string& _name="Tube",
-	     int backlog=Server::DEFAULT_BACKLOG,
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	     int max_threads=Server::DEFAULT_MAX_THREADS,
-	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+             const string& _name="Tube",
+             int backlog=Server::DEFAULT_BACKLOG,
+             int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+             int max_threads=Server::DEFAULT_MAX_THREADS,
+             int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(_ctx, local, _name, backlog, min_spare_threads, max_threads,
-	   _client_timeout) {}
+           _client_timeout) {}
 };
 
 
@@ -632,41 +632,41 @@ public:
   //------------------------------------------------------------------------
   // Constructors - as Server
   AutoSyncServer(int port, const string& _name="Tube",
-	     int backlog=Server::DEFAULT_BACKLOG,
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	     int max_threads=Server::DEFAULT_MAX_THREADS,
-	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+             int backlog=Server::DEFAULT_BACKLOG,
+             int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+             int max_threads=Server::DEFAULT_MAX_THREADS,
+             int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(port, _name, backlog, min_spare_threads, max_threads,
-	       _client_timeout),
+               _client_timeout),
     run_thread(*this) {}
 
   AutoSyncServer(Net::EndPoint local, const string& _name="Tube",
-		 int backlog=Server::DEFAULT_BACKLOG,
-		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		 int max_threads=Server::DEFAULT_MAX_THREADS,
-		 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                 int backlog=Server::DEFAULT_BACKLOG,
+                 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                 int max_threads=Server::DEFAULT_MAX_THREADS,
+                 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(local, _name, backlog, min_spare_threads, max_threads,
-	       _client_timeout),
+               _client_timeout),
     run_thread(*this) {}
 
   AutoSyncServer(SSL::Context *_ctx, int port,
-		 const string& _name="Tube",
-		 int backlog=Server::DEFAULT_BACKLOG,
-		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		 int max_threads=Server::DEFAULT_MAX_THREADS,
-		 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                 const string& _name="Tube",
+                 int backlog=Server::DEFAULT_BACKLOG,
+                 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                 int max_threads=Server::DEFAULT_MAX_THREADS,
+                 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(_ctx, port, _name, backlog, min_spare_threads, max_threads,
-	       _client_timeout),
+               _client_timeout),
     run_thread(*this) {}
 
   AutoSyncServer(SSL::Context *_ctx, Net::EndPoint local,
-		 const string& _name="Tube",
-		 int backlog=Server::DEFAULT_BACKLOG,
-		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		 int max_threads=Server::DEFAULT_MAX_THREADS,
-		 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                 const string& _name="Tube",
+                 int backlog=Server::DEFAULT_BACKLOG,
+                 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                 int max_threads=Server::DEFAULT_MAX_THREADS,
+                 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads,
-	       _client_timeout),
+               _client_timeout),
     run_thread(*this) {}
 };
 
@@ -694,35 +694,35 @@ class BiSyncServer: public SyncServer
   //------------------------------------------------------------------------
   // Constructors - as Server but with timeout
   BiSyncServer(int port, int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG,
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	       int max_threads=Server::DEFAULT_MAX_THREADS,
-	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
+               const string& _name="Tube",
+               int backlog=Server::DEFAULT_BACKLOG,
+               int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+               int max_threads=Server::DEFAULT_MAX_THREADS,
+               int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
   BiSyncServer(Net::EndPoint local,
-	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG,
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	       int max_threads=Server::DEFAULT_MAX_THREADS,
-	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
+               int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+               const string& _name="Tube",
+               int backlog=Server::DEFAULT_BACKLOG,
+               int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+               int max_threads=Server::DEFAULT_MAX_THREADS,
+               int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
   BiSyncServer(SSL::Context *_ctx, int port,
-	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG,
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	       int max_threads=Server::DEFAULT_MAX_THREADS,
-	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
+               int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+               const string& _name="Tube",
+               int backlog=Server::DEFAULT_BACKLOG,
+               int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+               int max_threads=Server::DEFAULT_MAX_THREADS,
+               int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
   BiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
-	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG,
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-	       int max_threads=Server::DEFAULT_MAX_THREADS,
-	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
+               int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+               const string& _name="Tube",
+               int backlog=Server::DEFAULT_BACKLOG,
+               int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+               int max_threads=Server::DEFAULT_MAX_THREADS,
+               int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
   //------------------------------------------------------------------------
   // Handle timeouts - called by background thread - do not call directly
@@ -764,46 +764,46 @@ public:
   //------------------------------------------------------------------------
   // Constructors - as Server
   AutoBiSyncServer(int port, int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG,
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		   int max_threads=Server::DEFAULT_MAX_THREADS,
-		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                   const string& _name="Tube",
+                   int backlog=Server::DEFAULT_BACKLOG,
+                   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                   int max_threads=Server::DEFAULT_MAX_THREADS,
+                   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     BiSyncServer(port, _request_timeout, _name, backlog,
-		 min_spare_threads, max_threads, _client_timeout),
+                 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 
   AutoBiSyncServer(Net::EndPoint local,
-		   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG,
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		   int max_threads=Server::DEFAULT_MAX_THREADS,
-		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+                   const string& _name="Tube",
+                   int backlog=Server::DEFAULT_BACKLOG,
+                   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                   int max_threads=Server::DEFAULT_MAX_THREADS,
+                   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     BiSyncServer(local, _request_timeout, _name, backlog,
-		 min_spare_threads, max_threads, _client_timeout),
+                 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 
   AutoBiSyncServer(SSL::Context *_ctx, int port,
-		   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG,
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		   int max_threads=Server::DEFAULT_MAX_THREADS,
-		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+                   const string& _name="Tube",
+                   int backlog=Server::DEFAULT_BACKLOG,
+                   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                   int max_threads=Server::DEFAULT_MAX_THREADS,
+                   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     BiSyncServer(_ctx, port, _request_timeout, _name, backlog,
-		 min_spare_threads, max_threads, _client_timeout),
+                 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 
   AutoBiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
-		   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
-		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG,
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
-		   int max_threads=Server::DEFAULT_MAX_THREADS,
-		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
+                   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+                   const string& _name="Tube",
+                   int backlog=Server::DEFAULT_BACKLOG,
+                   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+                   int max_threads=Server::DEFAULT_MAX_THREADS,
+                   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     BiSyncServer(_ctx, local, _request_timeout, _name, backlog,
-		 min_spare_threads, max_threads, _client_timeout),
+                 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 };
 

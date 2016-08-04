@@ -137,13 +137,13 @@ public:
   // Constructor, binding specific local address/port and with timeout
   // port can be zero if you only want to bind address
   TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
-	    int timeout);
+            int timeout);
 
   //--------------------------------------------------------------------------
   // Constructor, binding specific local address/port and with timeout and TTL
   // port can be zero if you only want to bind address
   TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
-	    int timeout, int ttl);
+            int timeout, int ttl);
 
   //--------------------------------------------------------------------------
   // Constructor from existing fd
@@ -202,14 +202,14 @@ public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
   TCPServer(Context *_ctx, int _port, int _backlog=5,
-	    int min_spare=1, int max_threads=10):
+            int min_spare=1, int max_threads=10):
     Net::TCPServer(_port, _backlog, min_spare, max_threads),
     ctx(_ctx) {}
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
   TCPServer(Context *_ctx, Net::EndPoint _address, int _backlog=5,
-	    int min_spare=1, int max_threads=10):
+            int min_spare=1, int max_threads=10):
     Net::TCPServer(_address, _backlog, min_spare, max_threads),
     ctx(_ctx) {}
 

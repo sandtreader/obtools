@@ -91,7 +91,7 @@ public:
   // The last entry you return true for will be evicted
   // If you never return true, nothing will be evicted
   virtual bool check_worst(const PolicyData& current,
-			   const PolicyData& worst) = 0;
+                           const PolicyData& worst) = 0;
 
   // Virtual destructor to keep compiler happy
   virtual ~EvictorPolicy() {}
@@ -191,8 +191,8 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   Cache(const TIDY_POLICY& _tpol,
-	const EVICTOR_POLICY& _epol,
-	unsigned int _limit=0):
+        const EVICTOR_POLICY& _epol,
+        unsigned int _limit=0):
     limit(_limit), tidy_policy(_tpol), evictor_policy(_epol), mutex() {}
 
   //--------------------------------------------------------------------------
@@ -296,13 +296,13 @@ public:
     MT::RWWriteLock lock(mutex);
 
     for(MapIterator p = cachemap.begin();
-	p!=cachemap.end();)
+        p!=cachemap.end();)
     {
       MapIterator q=p++;
       MCType &mc = q->second;
       if (!tidy_policy.keep_entry(mc.policy_data, now)
           && prepare_to_die(q->first, mc.content))
-	cachemap.erase(q);
+        cachemap.erase(q);
     }
   }
 
@@ -325,24 +325,24 @@ public:
 
       // Show the policy all the entries, let them choose the worst
       for(MapIterator p = cachemap.begin();
-	  p!=cachemap.end();
-	  ++p)
+          p!=cachemap.end();
+          ++p)
       {
-	MCType &mc = p->second;
-	if (evictor_policy.check_worst(mc.policy_data, worst_data))
-	{
-	  // Keep this as the worst
-	  worst = p;
-	  worst_data = mc.policy_data;
-	}
+        MCType &mc = p->second;
+        if (evictor_policy.check_worst(mc.policy_data, worst_data))
+        {
+          // Keep this as the worst
+          worst = p;
+          worst_data = mc.policy_data;
+        }
       }
 
       // Did we find one?
       if (worst!=cachemap.end()
           && prepare_to_die(worst->first, worst->second.content))
       {
-	cachemap.erase(worst);
-	needed--;
+        cachemap.erase(worst);
+        needed--;
       }
       else return false;  // Can't do it
     }
@@ -359,8 +359,8 @@ public:
 
     s << "Cache size " << cachemap.size() << ", limit " << limit << ":\n";
     for(MapIterator p = cachemap.begin();
-	p!=cachemap.end();
-	++p)
+        p!=cachemap.end();
+        ++p)
     {
       MCType &mc = p->second;
       PolicyData &pd = mc.policy_data;
@@ -368,8 +368,8 @@ public:
       s << p->first;
       if (show_content) s << " -> " << mc.content << endl;
       s << " (at=" << pd.add_time-now <<
-	", ut=" << pd.use_time-now <<
-	", use=" << pd.use_count << ")\n";
+        ", ut=" << pd.use_time-now <<
+        ", use=" << pd.use_count << ")\n";
     }
   }
 
@@ -493,8 +493,8 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   PointerCache(const TIDY_POLICY& _tpol,
-	       const EVICTOR_POLICY& _epol,
-	       unsigned int _limit=0):
+               const EVICTOR_POLICY& _epol,
+               unsigned int _limit=0):
     Cache<ID, PointerContent<CONTENT>,
           TIDY_POLICY, EVICTOR_POLICY>(_tpol, _epol, _limit) {}
 
@@ -557,8 +557,8 @@ public:
       MapIterator p = this->cachemap.find(id);
       if (p != this->cachemap.end())
       {
-	to_delete = p->second.content.ptr;
-	this->cachemap.erase(p);
+        to_delete = p->second.content.ptr;
+        this->cachemap.erase(p);
       }
     }
 
@@ -585,22 +585,22 @@ public:
       MT::RWWriteLock lock(this->mutex);
 
       for(MapIterator p = this->cachemap.begin();
-	  p!=this->cachemap.end();)
+          p!=this->cachemap.end();)
       {
-	MapIterator q=p++;
-	MCType &mc = q->second;
-	if (!this->tidy_policy.keep_entry(mc.policy_data, now)
+        MapIterator q=p++;
+        MCType &mc = q->second;
+        if (!this->tidy_policy.keep_entry(mc.policy_data, now)
             && prepare_to_die(q->first, q->second.content.ptr))
-	{
-	  to_delete.push_back(q->second.content.ptr);
-	  this->cachemap.erase(q);
-	}
+        {
+          to_delete.push_back(q->second.content.ptr);
+          this->cachemap.erase(q);
+        }
       }
     }
 
     // Now do the delete outside the lock
     for(typename list<CONTENT *>::iterator p = to_delete.begin();
-	p!=to_delete.end(); ++p)
+        p!=to_delete.end(); ++p)
       delete(*p);
   }
 
@@ -620,25 +620,25 @@ public:
       PolicyData worst_data;
 
       {
-	MT::RWWriteLock lock(this->mutex);
-	MapIterator worst = this->cachemap.end();
+        MT::RWWriteLock lock(this->mutex);
+        MapIterator worst = this->cachemap.end();
 
-	// Show the policy all the entries, let them choose the worst
-	for(MapIterator p = this->cachemap.begin();
-	    p!=this->cachemap.end();
-	    ++p)
-	{
-	  MCType &mc = p->second;
-	  if (this->evictor_policy.check_worst(mc.policy_data, worst_data))
-	  {
-	    // Keep this as the worst
-	    worst = p;
-	    worst_data = mc.policy_data;
-	  }
-	}
+        // Show the policy all the entries, let them choose the worst
+        for(MapIterator p = this->cachemap.begin();
+            p!=this->cachemap.end();
+            ++p)
+        {
+          MCType &mc = p->second;
+          if (this->evictor_policy.check_worst(mc.policy_data, worst_data))
+          {
+            // Keep this as the worst
+            worst = p;
+            worst_data = mc.policy_data;
+          }
+        }
 
-	// Did we find one?
-	if (worst!=this->cachemap.end())
+        // Did we find one?
+        if (worst!=this->cachemap.end())
         {
           // Fail if blocked by subclass
           if (!prepare_to_die(worst->first, worst->second.content.ptr))
@@ -647,8 +647,8 @@ public:
           to_delete = worst->second.content.ptr;
           this->cachemap.erase(worst);
           needed--;
-	}
-	else return false;  // Can't do it
+        }
+        else return false;  // Can't do it
       }
 
       // Do delete outside lock

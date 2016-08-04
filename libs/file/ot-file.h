@@ -318,7 +318,7 @@ public:
   // Return whether successful (directory readable)
   // Fills in leaves if so
   bool inspect(list<string>& leaves, const string& pattern="*",
-	       bool all=false);
+               bool all=false);
 
   //--------------------------------------------------------------------------
   // Get list of directory contents, as full paths prefixed by directory path
@@ -355,9 +355,9 @@ class InStream: public istream
   //--------------------------------------------------------------------------
   // Constructor
   InStream(const string& fn,
-	   ios::openmode mode = ios::in | ios::binary):
+           ios::openmode mode = ios::in | ios::binary):
     fd(_wopen(Path::utf8_to_wide(fn).c_str(),
-	      O_RDONLY | ((mode & ios::binary)?O_BINARY:0))),
+              O_RDONLY | ((mode & ios::binary)?O_BINARY:0))),
     filebuf(fd, mode)
   { if (fd>=0) istream::init(&filebuf); else setstate(failbit); }
 
@@ -375,12 +375,12 @@ class OutStream: public ostream
   //--------------------------------------------------------------------------
   // Constructor
   OutStream(const string& fn,
-	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
+           ios::openmode mode = ios::out | ios::trunc | ios::binary):
     fd(_wopen(Path::utf8_to_wide(fn).c_str(),
-	      O_RDWR | O_CREAT |((mode & ios::binary)?O_BINARY:0)
-	                       |((mode & ios::trunc)?O_TRUNC:0)
+              O_RDWR | O_CREAT |((mode & ios::binary)?O_BINARY:0)
+                               |((mode & ios::trunc)?O_TRUNC:0)
                                |((mode & ios::app)?O_APPEND:0),
-	      S_IWRITE | S_IREAD)),
+              S_IWRITE | S_IREAD)),
     filebuf(fd, mode)
   { if (fd>=0) ostream::init(&filebuf); else setstate(failbit); }
 
@@ -397,7 +397,7 @@ class InStream: public ifstream
   //--------------------------------------------------------------------------
   // Constructor
   InStream(const string& fn,
-	   ios::openmode mode = ios::in | ios::binary):
+           ios::openmode mode = ios::in | ios::binary):
     ifstream(fn.c_str(), mode) {}
 };
 
@@ -407,7 +407,7 @@ class OutStream: public ofstream
   //--------------------------------------------------------------------------
   // Constructor
   OutStream(const string& fn,
-	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
+           ios::openmode mode = ios::out | ios::trunc | ios::binary):
     ofstream(fn.c_str(), mode) {}
 };
 

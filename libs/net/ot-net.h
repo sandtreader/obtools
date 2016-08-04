@@ -628,8 +628,8 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   TCPStreamBuf(TCPSocket& _s,
-	       int _in_buf_size = DEFAULT_IN_BUFFER,
-	       int _out_buf_size = DEFAULT_OUT_BUFFER);
+               int _in_buf_size = DEFAULT_IN_BUFFER,
+               int _out_buf_size = DEFAULT_OUT_BUFFER);
 
   //--------------------------------------------------------------------------
   // Destructor
@@ -703,7 +703,7 @@ public:
   //--------------------------------------------------------------------------
   // Raw datagram sendmsg wrapper
   int csendmsg(struct iovec *gathers, int ngathers, int flags,
-	       EndPoint endpoint);
+               EndPoint endpoint);
 
   //--------------------------------------------------------------------------
   // Safe datagram recv wrapper
@@ -734,7 +734,7 @@ public:
   // Safe datagram sendmsg wrapper
   // Throws SocketError on failure
   ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags,
-		  EndPoint endpoint)
+                  EndPoint endpoint)
     throw (SocketError);
 
 };
@@ -847,14 +847,14 @@ public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
   TCPServer(int _port, int _backlog=5,
-	    int min_spare=1, int max_threads=10):
+            int min_spare=1, int max_threads=10):
     TCPSocket(), address(IPAddress(inaddr_any), _port), backlog(_backlog),
     threadpool(min_spare, max_threads), alive(true) { start(); }
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
   TCPServer(EndPoint _address, int _backlog=5,
-	    int min_spare=1, int max_threads=10):
+            int min_spare=1, int max_threads=10):
     TCPSocket(), address(_address), backlog(_backlog),
     threadpool(min_spare, max_threads), alive(true) { start(); }
 

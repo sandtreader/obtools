@@ -144,8 +144,8 @@ public:
   // Element is modified with role, mustUnderstand and relay attributes
   // Returns reference to created header element
   XML::Element& add_header(const string& name, const string& role,
-			   bool must_understand = true,
-			   bool relay = false);
+                           bool must_understand = true,
+                           bool relay = false);
 
   //------------------------------------------------------------------------
   // Add a header element with given standard role
@@ -153,8 +153,8 @@ public:
   // Element is modified with role, relay and mustUnderstand attributes
   // Returns reference to created header element
   XML::Element& add_header(const string& name, Header::Role role,
-			   bool must_understand = true,
-			   bool relay = false);
+                           bool must_understand = true,
+                           bool relay = false);
 
   //------------------------------------------------------------------------
   // Add a body element
@@ -199,8 +199,8 @@ public:
   // a standard SOAP encodingStyle attribute
   // body is taken and will be deleted with message
   XML::Element& add_wsdl_body(const string& name,
-			      const string& ns_prefix,
-			      const string& ns);
+                              const string& ns_prefix,
+                              const string& ns);
 
   //------------------------------------------------------------------------
   // Get list of body elements
@@ -325,7 +325,7 @@ public:
   // Add a NotUnderstood block
   // attr/value indicate a namespace
   void add_not_understood(const string& qname, const string& attr,
-			  const string& value);
+                          const string& value);
 
 };
 
@@ -340,26 +340,26 @@ public:
   //--------------------------------------------------------------------------
   // Constructor from server, no SSL
   HTTPClient(Net::EndPoint _server, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0):
+             int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(_server, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from server, with SSL
   HTTPClient(Net::EndPoint _server, SSL::Context *ctx, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0):
+             int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(_server, ctx, _ua, _connection_timeout, _operation_timeout)
     {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL, no SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0):
+             int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, 0, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
   // Constructor from URL, with SSL - extracts server from host/port parts
   HTTPClient(Web::URL& url, SSL::Context *ctx, const string& _ua="",
-	     int _connection_timeout=0, int _operation_timeout=0):
+             int _connection_timeout=0, int _operation_timeout=0):
     Web::HTTPClient(url, ctx, _ua, _connection_timeout, _operation_timeout) {}
 
   //--------------------------------------------------------------------------
@@ -372,7 +372,7 @@ public:
   // Simple request POST operation on a specified URL and optional SOAP action
   // Returns result code, fills in response
   int post(Web::URL& url, const string& soap_action,
-	   Message& request, Message& response);
+           Message& request, Message& response);
 
   //--------------------------------------------------------------------------
   // Simple request POST operation to root URL
@@ -395,8 +395,8 @@ private:
   //--------------------------------------------------------------------------
   // Implementation of standard HTTP handler
   bool handle_request(const Web::HTTPMessage& http_request,
-		      Web::HTTPMessage& http_response,
-		      const SSL::ClientDetails& client);
+                      Web::HTTPMessage& http_response,
+                      const SSL::ClientDetails& client);
 
 protected:
   //--------------------------------------------------------------------------
@@ -404,9 +404,9 @@ protected:
   // http_request, http_response and client are made available for complex
   // use, but can be ignored
   virtual bool handle_message(const Message& request, Message& response,
-			      const Web::HTTPMessage& http_request,
-			      Web::HTTPMessage& http_response,
-			      const SSL::ClientDetails& client) = 0;
+                              const Web::HTTPMessage& http_request,
+                              Web::HTTPMessage& http_response,
+                              const SSL::ClientDetails& client) = 0;
 
   //--------------------------------------------------------------------------
   // Handy support for generating faults - fills in response with fault

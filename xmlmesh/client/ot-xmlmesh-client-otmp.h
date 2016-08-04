@@ -73,7 +73,7 @@ public:
 
   // Constructor specifying workers
   OTMPMultiClient(Net::EndPoint server,
-		  int min_spare_workers, int max_workers):
+                  int min_spare_workers, int max_workers):
     MultiClient(transport, min_spare_workers, max_workers),
     transport(server) { start(); }
 

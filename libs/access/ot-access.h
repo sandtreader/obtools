@@ -102,14 +102,14 @@ class Resource
   // Constructor - reads from a <resource> element, using groups in given map
   // ns gives optional namespace prefix
   Resource(const XML::Element& resource_e, map<string, Group *>& groups,
-	   const string& ns="");
+           const string& ns="");
 
   //--------------------------------------------------------------------------
   // Check access to a given real resource by a given user
   // Returns whether the resource matches our pattern - if so, writes the
   // access result to result_p
   bool check(const string& resource, Net::IPAddress address,
-	     const string& user, bool& result_p);
+             const string& user, bool& result_p);
 
   //--------------------------------------------------------------------------
   // Dump the rule to the given ostream
@@ -138,7 +138,7 @@ public:
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given user
   bool check(const string& resource, Net::IPAddress address,
-	     const string& user);
+             const string& user);
 
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given SSL client
@@ -146,7 +146,7 @@ public:
   bool check(const string& resource, const SSL::ClientDetails& client)
   {
     return check(resource, client.address.host,
-		 client.cert_cn.empty()?"#anonymous":client.cert_cn);
+                 client.cert_cn.empty()?"#anonymous":client.cert_cn);
   }
 
   //--------------------------------------------------------------------------

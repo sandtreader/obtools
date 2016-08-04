@@ -112,8 +112,8 @@ public:
   //Constructor
   //streamname is the name of the stream for boilerplate text output
   Processor(istream& instream, ostream& outstream,
-	    const Tags& ts,
-	    const string& streamname="cout");
+            const Tags& ts,
+            const string& streamname="cout");
 
   //------------------------------------------------------------------------
   //Process the instream into the outstream until EOF

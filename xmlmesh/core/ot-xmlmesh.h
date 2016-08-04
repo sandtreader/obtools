@@ -47,7 +47,7 @@ public:
   // ID is manufactured here, and routing header added
   // 'soap' is taken and will be disposed with message
   Message(const string& subject, SOAP::Message *soap,
-	  bool rsvp, const string& ref);
+          bool rsvp, const string& ref);
 
   //--------------------------------------------------------------------------
   // Constructor from XML for outgoing messages
@@ -55,21 +55,21 @@ public:
   // Takes ownership of the XML::Element - make sure it's detached from the
   // parser!
   Message(const string& subject, XML::Element *xml_content,
-	  bool rsvp = false, const string& ref="");
+          bool rsvp = false, const string& ref="");
 
   //--------------------------------------------------------------------------
   // Constructor from partial XML for outgoing messages
   // ID is manufactured here
   // Copies text of xml element and reparses it into body
   Message(const string& subject, const XML::Element& xml_content,
-	  bool rsvp = false, const string& ref="");
+          bool rsvp = false, const string& ref="");
 
   //--------------------------------------------------------------------------
   // Constructor from partial XML text for outgoing messages
   // ID is manufactured here
   // body_text is the body text to be sent
   Message(const string& subject, const string& body_text,
-	  bool rsvp = false, const string& ref="");
+          bool rsvp = false, const string& ref="");
 
   //--------------------------------------------------------------------------
   // Constructor from XML <message> text for incoming messages
@@ -174,7 +174,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructor for responses
   FaultMessage(const string& ref, SOAP::Fault::Code _code,
-	       const string& _reason);
+               const string& _reason);
 
   //--------------------------------------------------------------------------
   // Down-cast constructor from general message on receipt

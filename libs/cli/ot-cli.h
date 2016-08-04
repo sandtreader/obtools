@@ -82,7 +82,7 @@ public:
   //------------------------------------------------------------------------
   //Constructor
   Command(const string& _word, Handler *_handler,
-	  const string& _help="", const string& _usage=""):
+          const string& _help="", const string& _usage=""):
     handler(_handler), word(_word), help(_help), usage(_usage) {}
 
   //------------------------------------------------------------------------
@@ -143,7 +143,7 @@ public:
   //------------------------------------------------------------------------
   //Add a command
   void add(const string& word, Handler *handler,
-	   const string& help="", const string& usage="")
+           const string& help="", const string& usage="")
   { CommandGroup::add(new Command(word, handler, help, usage)); }
 
   //------------------------------------------------------------------------
@@ -166,7 +166,7 @@ public:
   //------------------------------------------------------------------------
   //Constructor
   CommandLine(Registry& _registry, istream& _sin, ostream& _sout,
-	      const string& _prompt=">"):
+              const string& _prompt=">"):
     registry(_registry), sin(_sin), sout(_sout), prompt(_prompt) {}
 
   //------------------------------------------------------------------------

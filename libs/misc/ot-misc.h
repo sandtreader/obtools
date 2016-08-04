@@ -269,12 +269,12 @@ public:
     {
       switch(v[0])
       {
-	case 'T': case 't':
-	case 'Y': case 'y':
-	  return true;
+        case 'T': case 't':
+        case 'Y': case 'y':
+          return true;
 
-	default:
-	  return false;
+        default:
+          return false;
       }
     }
 
@@ -312,7 +312,7 @@ public:
   //--------------------------------------------------------------------------
   // Dump contents
   void dump(ostream& s, const string& prefix="    ",
-	    const string& separator=" = ") const;
+            const string& separator=" = ") const;
 
   //--------------------------------------------------------------------------
   // Convert to delimited string

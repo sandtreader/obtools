@@ -46,8 +46,8 @@ public:
   //--------------------------------------------------------------------------
   // Default constructor - the above filled in in subclass constructors
   Handler(const XML::Element& cfg, const string& _doc_name="",
-	  const string& _ns_prefix="", const string& _ns_url="",
-	  bool _complex_result = false):
+          const string& _ns_prefix="", const string& _ns_url="",
+          bool _complex_result = false):
     name(cfg.name),
     document_name(_doc_name),
     complex_result(_complex_result),

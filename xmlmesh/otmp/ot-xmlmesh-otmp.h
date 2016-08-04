@@ -43,7 +43,7 @@ struct ClientMessage: public Tube::ClientMessage
 {
   // Constructor for message
   ClientMessage(const SSL::ClientDetails& _client,
-		const string& _data="", Tube::flags_t _flags=0):
+                const string& _data="", Tube::flags_t _flags=0):
     Tube::ClientMessage(_client, TAG_MESSAGE, _data, _flags) {}
 };
 
@@ -95,8 +95,8 @@ public:
   // timeout is keepalive timeout (secs)
   // The rest is thread/socket tuning - see Net::TCPServer
   Server(ClientMessageQueue& receive_queue,
-	 int port=0, int backlog=5,
-	 int min_spare_threads=1, int max_threads=10, int timeout=0);
+         int port=0, int backlog=5,
+         int min_spare_threads=1, int max_threads=10, int timeout=0);
 };
 
 //==========================================================================
