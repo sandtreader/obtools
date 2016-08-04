@@ -24,10 +24,10 @@ int main(int argc, char **argv)
   Misc::MD5 md5er;
   string md5 = md5er.sum(text);
 
-  cout << "MD5 of '" << text << "' is " << md5 
+  cout << "MD5 of '" << text << "' is " << md5
        << " (" << md5.size() << " characters)\n";
 
-  return 0;  
+  return 0;
 }
 
 

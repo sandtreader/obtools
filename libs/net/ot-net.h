@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Net
 // C++ wrapping of BSD sockets etc.
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -36,7 +36,7 @@ extern bool winsock_initialise();
 
 #include "ot-mt.h"
 
-namespace ObTools { namespace Net { 
+namespace ObTools { namespace Net {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -53,7 +53,7 @@ class IPAddress
 private:
   uint32_t address;   // Host byte order
   static const uint32_t BADADDR = 0xffffffff;
- 
+
 public:
   //--------------------------------------------------------------------------
   // Basic constructors
@@ -90,12 +90,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Check for multicast (224-239.x.x.x)
-  bool is_multicast() const 
+  bool is_multicast() const
   { return (address >> 28) == 0xE; }  // Top byte is 1110
 
   //--------------------------------------------------------------------------
   // & operator - get network number given a mask
-  IPAddress operator&(const IPAddress& mask) const 
+  IPAddress operator&(const IPAddress& mask) const
   { return IPAddress(address & mask.address); }
 
   //--------------------------------------------------------------------------
@@ -103,15 +103,15 @@ public:
   IPAddress operator~() const { return IPAddress(~address); }
 
   //--------------------------------------------------------------------------
-  // == operator 
+  // == operator
   bool operator==(const IPAddress& o) const { return address == o.address; }
 
   //--------------------------------------------------------------------------
-  // != operator 
+  // != operator
   bool operator!=(const IPAddress& o) const { return address != o.address; }
 
   //--------------------------------------------------------------------------
-  // < operator to help with maps 
+  // < operator to help with maps
   bool operator<(const IPAddress& o) const { return address < o.address; }
 };
 
@@ -131,9 +131,9 @@ public:
   //--------------------------------------------------------------------------
   // Basic constructors
   MaskedAddress(): address(), mask() {}
-  MaskedAddress(uint32_t _address, uint32_t _mask): 
+  MaskedAddress(uint32_t _address, uint32_t _mask):
     address(_address), mask(_mask) {}
-  MaskedAddress(IPAddress _address, IPAddress _mask): 
+  MaskedAddress(IPAddress _address, IPAddress _mask):
     address(_address), mask(_mask) {}
   MaskedAddress(IPAddress _address):         // Host mask
     address(_address), mask() {}
@@ -158,12 +158,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Comparators - same if both are the same
-  // == operator 
-  bool operator==(const MaskedAddress& o) const 
+  // == operator
+  bool operator==(const MaskedAddress& o) const
   { return address == o.address && mask == o.mask; }
 
-  // != operator 
-  bool operator!=(const MaskedAddress& o) const 
+  // != operator
+  bool operator!=(const MaskedAddress& o) const
   { return address != o.address || mask != o.mask; }
 
   //--------------------------------------------------------------------------
@@ -180,7 +180,7 @@ public:
 ostream& operator<<(ostream& s, const MaskedAddress& ip);
 
 //==========================================================================
-// IP Protocol 
+// IP Protocol
 // Tries to be as near as possible an enum with extra
 class Protocol
 {
@@ -223,14 +223,14 @@ public:
 
 //------------------------------------------------------------------------
 // << operator to write Protocol to ostream (address.cc)
-// e.g. cout << proto; 
+// e.g. cout << proto;
 ostream& operator<<(ostream& s, const Protocol& p);
 
 //==========================================================================
 // Network endpoint (address.cc) - IP Address and port identifying client
 class EndPoint
 {
-public: 
+public:
   IPAddress host;
   int port;              // Host Byte Order
 
@@ -265,18 +265,18 @@ public:
   bool operator!() const { return !host; }
 
   //--------------------------------------------------------------------------
-  // == operator 
-  bool operator==(const EndPoint& o) const 
+  // == operator
+  bool operator==(const EndPoint& o) const
   { return host == o.host && port == o.port; }
 
   //--------------------------------------------------------------------------
-  // != operator 
-  bool operator!=(const EndPoint& o) const 
+  // != operator
+  bool operator!=(const EndPoint& o) const
   { return host != o.host || port != o.port; }
 
   //--------------------------------------------------------------------------
-  // < operator to help with maps 
-  bool operator<(const EndPoint& o) const 
+  // < operator to help with maps
+  bool operator<(const EndPoint& o) const
   { return host < o.host || (host == o.host && port < o.port); }
 };
 
@@ -290,7 +290,7 @@ ostream& operator<<(ostream& s, const EndPoint& ep);
 // plus protocol
 class Port
 {
-public: 
+public:
   IPAddress host;
   Protocol proto;
   int port;              // Host Byte Order
@@ -298,7 +298,7 @@ public:
   //--------------------------------------------------------------------------
   // Constructors
   Port(): host(), proto(Protocol::TCP), port(0) {}
-  Port(IPAddress _host, Protocol _proto, int _port): 
+  Port(IPAddress _host, Protocol _proto, int _port):
     host(_host), proto(_proto), port(_port) {}
 
   //--------------------------------------------------------------------------
@@ -310,20 +310,20 @@ public:
   bool operator!() const { return !host; }
 
   //--------------------------------------------------------------------------
-  // == operator 
-  bool operator==(const Port& o) const 
+  // == operator
+  bool operator==(const Port& o) const
   { return host == o.host && proto == o.proto && port == o.port; }
 
   //--------------------------------------------------------------------------
-  // != operator 
-  bool operator!=(const Port& o) const 
+  // != operator
+  bool operator!=(const Port& o) const
   { return host != o.host || proto != o.proto || port != o.port; }
 
   //--------------------------------------------------------------------------
-  // < operator to help with maps 
-  bool operator<(const Port& o) const 
-  { return host < o.host 
-      || (host == o.host && proto < o.proto) 
+  // < operator to help with maps
+  bool operator<(const Port& o) const
+  { return host < o.host
+      || (host == o.host && proto < o.proto)
       || (host == o.host && proto == o.proto && port < o.port); }
 };
 
@@ -448,14 +448,14 @@ public:
 
   //--------------------------------------------------------------------------
   // Get local address
-  // Only works if socket is bound or connected.  
-  // Because of multihoming, IP address may only be available if connected 
+  // Only works if socket is bound or connected.
+  // Because of multihoming, IP address may only be available if connected
   // to a specific remote host
   EndPoint local();
 
   //--------------------------------------------------------------------------
   // Get remote address
-  // Only works if socket is connected.  
+  // Only works if socket is connected.
   EndPoint remote();
 
   //--------------------------------------------------------------------------
@@ -473,7 +473,7 @@ public:
 
 //==========================================================================
 // Socket exceptions
-class SocketError 
+class SocketError
 {
 public:
   int error;  // errno value, or 0
@@ -524,7 +524,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Read data from the socket into a string
-  // Appends whatever read data is available to the given string 
+  // Appends whatever read data is available to the given string
   // Returns whether successful (socket hasn't closed)
   // Throws SocketError on failure
   bool read(string& s) throw (SocketError);
@@ -602,16 +602,16 @@ class TCPStreamBuf: public streambuf
 {
 private:
   TCPSocket& s;
-  int in_buf_size; 
+  int in_buf_size;
   char *in_buf;       // Input buffer (may be zero for unbuffered)
   int out_buf_size;
   char *out_buf;      // Output buffer (may be zero for unbuffered)
 
 protected:
   // Streambuf overflow - handles characters
-  int overflow(int); 
+  int overflow(int);
   int sync();
-   
+
   // Streambuf underflows - see STL manual for awful details
   int underflow();
   int uflow();
@@ -627,7 +627,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructor
-  TCPStreamBuf(TCPSocket& _s, 
+  TCPStreamBuf(TCPSocket& _s,
 	       int _in_buf_size = DEFAULT_IN_BUFFER,
 	       int _out_buf_size = DEFAULT_OUT_BUFFER);
 
@@ -641,7 +641,7 @@ class TCPStream: public iostream
 {
 public:
   // Constructor - like fstream
-  TCPStream(TCPSocket& s): 
+  TCPStream(TCPSocket& s):
     iostream(new TCPStreamBuf(s)) {}
 
   // Destructor
@@ -708,7 +708,7 @@ public:
   //--------------------------------------------------------------------------
   // Safe datagram recv wrapper
   // Throws SocketError on failure
-  ssize_t recv(void *buf, size_t len, int flags=0) 
+  ssize_t recv(void *buf, size_t len, int flags=0)
     throw (SocketError);
 
   //--------------------------------------------------------------------------
@@ -748,7 +748,7 @@ class TCPClient: public TCPSocket
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   TCPClient(EndPoint endpoint);
 
   //--------------------------------------------------------------------------
@@ -792,7 +792,7 @@ private:
   EndPoint address;
   int backlog;
   void start();
-  
+
 public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
@@ -803,12 +803,12 @@ public:
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
   TCPSingleServer(EndPoint _address, int _backlog=5):
-    TCPSocket(), address(_address), backlog(_backlog) 
+    TCPSocket(), address(_address), backlog(_backlog)
     { start(); }
 
   //--------------------------------------------------------------------------
   // Listen for a connection and return a TCP socket
-  // If timeout is non-zero, times out and returns 0 if no connection in 
+  // If timeout is non-zero, times out and returns 0 if no connection in
   // that time
   // Returns connected socket or 0 if it fails
   TCPSocket *wait(int timeout=0);
@@ -840,22 +840,22 @@ private:
   int backlog;
   MT::ThreadPool<TCPWorkerThread> threadpool;
   bool alive;
-  
+
   void start();
 
 public:
   //--------------------------------------------------------------------------
   // Constructor with just port (INADDR_ANY binding)
-  TCPServer(int _port, int _backlog=5, 
+  TCPServer(int _port, int _backlog=5,
 	    int min_spare=1, int max_threads=10):
     TCPSocket(), address(IPAddress(inaddr_any), _port), backlog(_backlog),
     threadpool(min_spare, max_threads), alive(true) { start(); }
 
   //--------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
-  TCPServer(EndPoint _address, int _backlog=5, 
+  TCPServer(EndPoint _address, int _backlog=5,
 	    int min_spare=1, int max_threads=10):
-    TCPSocket(), address(_address), backlog(_backlog), 
+    TCPSocket(), address(_address), backlog(_backlog),
     threadpool(min_spare, max_threads), alive(true) { start(); }
 
   //--------------------------------------------------------------------------
@@ -871,7 +871,7 @@ public:
   virtual bool verify(EndPoint) const { return true; }
 
   //--------------------------------------------------------------------------
-  // Virtual function to process a single connection on the given socket.  
+  // Virtual function to process a single connection on the given socket.
   // Called in its own thread, this use blocking IO to read and write the
   // socket, and should just return when the socket ends or when bored
   virtual void process(TCPSocket &s, EndPoint client)=0;
@@ -890,7 +890,7 @@ public:
   void take_over(int fd, Net::EndPoint remote_address);
 
   //--------------------------------------------------------------------------
-  // Factory for creating a client socket - overridable in subclass 
+  // Factory for creating a client socket - overridable in subclass
   // (e.g. SSL::TCPServer)
   virtual TCPSocket *create_client_socket(int client_fd);
 

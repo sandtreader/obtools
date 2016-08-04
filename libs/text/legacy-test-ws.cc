@@ -47,7 +47,7 @@ int main()
   cout << "First line is '" << Text::remove_line(stext) << "' leaving\n===\n"
        << stext << "===\n";
 
-  return 0;  
+  return 0;
 }
 
 

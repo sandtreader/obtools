@@ -25,12 +25,12 @@ int main()
 
   if (msg.is_request())
   {
-    cout << msg.version << " request: " << msg.method << " for " 
+    cout << msg.version << " request: " << msg.method << " for "
 	 << msg.url << endl;
   }
   else
   {
-    cout << msg.version << " response: " << msg.code << " - " 
+    cout << msg.version << " response: " << msg.code << " - "
 	 << msg.reason << endl;
   }
 
@@ -39,8 +39,8 @@ int main()
 
   cout << "\n--- Regenerated\n";
   cout << msg << endl;
- 
-  return 0;  
+
+  return 0;
 }
 
 

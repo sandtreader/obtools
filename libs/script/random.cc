@@ -16,7 +16,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-RandomAction::RandomAction(const CP& cp): 
+RandomAction::RandomAction(const CP& cp):
   SequenceAction(cp)
 {
   double probability = xml.get_attr_real("probability");

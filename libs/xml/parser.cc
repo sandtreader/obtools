@@ -96,7 +96,7 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
 	  //end tag
 	  if (elements.empty()) done=true;
 	  break;
-       
+
 	default:  // Something else - could be tag
 	  if (is_name_start(c))
 	  {
@@ -179,7 +179,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
     if (is_ascii_space(c)) c = skip_ws(s, c);
     if (c!='=') fatal("No = given for attribute");
 
-    //Skip optional WS again and get start of value 
+    //Skip optional WS again and get start of value
     c = skip_ws(s);
 
     //Must be some kind of quote (this is XML, not SGML!)
@@ -195,7 +195,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
       s.get(c);
       if (!c) fatal("Document ended in attribute value");
       if (c==quote) break;
-      if (c=='&') 
+      if (c=='&')
 	read_ref(aval, s);  //Expand refs
       else
 	aval+=c;
@@ -218,7 +218,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
   initial_processing(e);
 
   //If empty, finalise it now, otherwise stack it as new open element
-  if (empty) 
+  if (empty)
     final_processing(e);
   else
     elements.push_back(e);
@@ -259,7 +259,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
     {
       //Complain, but ignore it
       ostringstream oss;
-      oss << "Mis-nested tags - expected </" << e->name 
+      oss << "Mis-nested tags - expected </" << e->name
 	  << ">, opened at line " << e->line << ", but got </"
 	  << name << ">";
       error(oss.str());
@@ -267,7 +267,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
   }
   else
   {
-    //Stack empty - complain but ignore it 
+    //Stack empty - complain but ignore it
     error("End-tag found but no elements open");
   }
 }
@@ -311,12 +311,12 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
       read_ref(content, s);
     else if (!c)
       fatal("Unexpected end of stream");
-    else 
+    else
     {
       if (c=='\n') line++;   // Count unmashed lines if preserving
       content+=c;
     }
-    
+
     // Read another for next time
     c=0;
     s.get(c);
@@ -338,7 +338,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
       //We'll treat the comment like whitespace, because we suppressed
       //any that was at end of previous one or start of this.
 
-      //XML: This means that 'foo<!-- -->bar' gets turned into 'foo bar' 
+      //XML: This means that 'foo<!-- -->bar' gets turned into 'foo bar'
       //rather than 'foobar'.  I suppose I could do some
       //horrendous remembering of front and back suppression so we
       //know if this space is really there, but I think anyone not
@@ -371,13 +371,13 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
     if (c=='x')
     {
       c=0;
-      s >> hex >> n >> c; 
+      s >> hex >> n >> c;
     }
     else
     {
       s.unget();
       c=0;
-      s >> n >> c; 
+      s >> n >> c;
     }
     s.setf(ios::skipws);
 
@@ -397,7 +397,7 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
     // 7-bit is simple
     if (n < 0x80)
       text += static_cast<xmlchar>(n);
-    else 
+    else
     {
       // 8-bit and above depends on the length
       // NB we only handle UCS2 here, so can only go to 3 bytes
@@ -433,7 +433,7 @@ void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
     else
       fatal("Unrecognised entity name");
   }
-  else 
+  else
   {
     // Check for leniency here - if so, keep it as character
     // data, like SGML would
@@ -563,7 +563,7 @@ void Parser::fatal(const string& s) throw (ParseFailed)
 // Returns Element::none if not valid
 Element& Parser::get_root() const
 {
-  if (root) 
+  if (root)
     return *root;
   else
     return Element::none;
@@ -651,7 +651,7 @@ void Parser::final_processing(Element *e)
   if ((flags & PARSER_FIX_NAMESPACES)
     && !ns_maps.empty())  // Should always be OK, but be safe
   {
-    //Check current element name in latest ns_map and see if we need to 
+    //Check current element name in latest ns_map and see if we need to
     //translate it - including default namespace
     substitute_name(e->name, true);
 
@@ -670,7 +670,7 @@ void Parser::final_processing(Element *e)
     {
       string name=p->first;
 
-      //Subsitute without defaulting 
+      //Subsitute without defaulting
       substitute_name(name);
 
       e->attrs[name]=p->second;
@@ -692,7 +692,7 @@ void Parser::substitute_name(string& name, bool usedef)
 {
   map<string,string>& topmap = ns_maps.back();
   string prefix;
-    
+
   //Look for a prefix
   string::size_type pos=name.find(':');
   if (pos!=string::npos)
@@ -770,7 +770,7 @@ void Parser::read_from(const string &s) throw (ParseFailed)
 //------------------------------------------------------------------------
 // >> operator to read from istream
 istream& ObTools::XML::operator>>(istream& s, Parser& p) throw (ParseFailed)
-{ 
+{
   p.read_from(s);
   return s;
 }

@@ -35,7 +35,7 @@ class Storage: public ObCache::Storage
 
 public:
   //--------------------------------------------------------------------------
-  /// Constructor 
+  /// Constructor
   Storage(DB::ConnectionPool& _db_pool        ///< Database connection pool
 	  ):
     db_pool(_db_pool) {}
@@ -61,7 +61,7 @@ class Storer
 public:
   //--------------------------------------------------------------------------
   /// Interface to load an object from the given DB connection
-  virtual Object *load(object_id_t id, DB::AutoConnection& db) 
+  virtual Object *load(object_id_t id, DB::AutoConnection& db)
     throw (Exception) = 0;
 
   //--------------------------------------------------------------------------

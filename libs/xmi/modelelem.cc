@@ -34,7 +34,7 @@ ModelElement::ModelElement(XMI::Reader& rdr, XML::Element& xe):
     reader.warning("Unknown element visibility: ", vis);
     visibility=VISIBILITY_PRIVATE;  //safest
   }
-}    
+}
 
 //--------------------------------------------------------------------------
 // Second-pass reference fix
@@ -43,7 +43,7 @@ void ModelElement::build_refs()
   Element::build_refs();
 
   //Get stereotype ref
-  string idref = get_idref_property("stereotype", 
+  string idref = get_idref_property("stereotype",
 				    "UML:ModelElement.stereotype",
 				    "UML:Stereotype");
   if (!idref.empty())
@@ -75,7 +75,7 @@ void ModelElement::print_header(ostream& sout)
     case VISIBILITY_PROTECTED:
       sout << " protected";
       break;
-    
+
     case VISIBILITY_PRIVATE:
       sout << " private";
       break;
@@ -87,7 +87,7 @@ void ModelElement::print_header(ostream& sout)
 
   sout << " '" << name << "'";
 
-  if (stereotype) 
+  if (stereotype)
     sout << " <<" << stereotype->name << ">>";
 }
 

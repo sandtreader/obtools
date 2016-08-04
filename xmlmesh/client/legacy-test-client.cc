@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  log.summary << "Host: " << addr 
+  log.summary << "Host: " << addr
 	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 
   // Subscribe to some stuff
   XMLMesh::Subscription sub(client, "info.*");
-  
+
   // Loop for a while sending and receiving
   for(int i=0; i<30; i++)
   {
@@ -73,12 +73,12 @@ int main(int argc, char **argv)
 #if defined(_SINGLE)
     if (client.wait(msg))
 #else
-    if (client.poll(msg)) 
+    if (client.poll(msg))
 #endif
       log.detail << msg.get_text() << endl;
   }
 
-  return 0;  
+  return 0;
 }
 
 

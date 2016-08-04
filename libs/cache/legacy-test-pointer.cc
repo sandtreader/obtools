@@ -38,7 +38,7 @@ int main()
   cache.add("foo", new Wombat("Foo", 1));
   cache.add("bar", new Wombat("Bar", 2));
 
-  // Iterator cache 
+  // Iterator cache
   for(LRUEvictionPointerCache<string, Wombat>::iterator p = cache.begin();
       p!=cache.end();
       ++p)
@@ -67,7 +67,7 @@ int main()
   else
     cout << "No Bar\n";
 
-  return 0;  
+  return 0;
 }
 
 

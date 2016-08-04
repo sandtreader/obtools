@@ -2,7 +2,7 @@
 // ObTools::Access: rule.cc
 //
 // Access rule (AND of individual conditions)
-// 
+//
 // Copyright (c) 2008 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -30,7 +30,7 @@ Rule::Rule(const XML::Element& r_e, map<string, Group *>& groups): group(0)
     }
     else group = q->second;
   }
- 
+
   // Look for user, default to *
   user = r_e.get_attr("user", "*");
 
@@ -43,13 +43,13 @@ Rule::Rule(const XML::Element& r_e, map<string, Group *>& groups): group(0)
 
 //--------------------------------------------------------------------------
 // Test the rule for match against the given address and username
-bool Rule::matches(Net::IPAddress attempted_address, 
+bool Rule::matches(Net::IPAddress attempted_address,
 		   const string& attempted_user)
 {
   // Note: All specified conditions must match
-  
+
   // Check group (if set)
-  if (group && !group->contains(attempted_user)) 
+  if (group && !group->contains(attempted_user))
     return false;
 
   // Check user (set to * if unspecified, so no need to check here)
@@ -66,7 +66,7 @@ void Rule::dump(ostream& sout) const
 {
   if (group) sout << " group '" << group->get_id() << "'";
   if (user != "*") sout << " user '" << user << "'";
-  if (address.get_network_bits()) 
+  if (address.get_network_bits())
     sout << " address " << address;
   else if (!group && user=="*")
     sout << " all";
@@ -75,9 +75,9 @@ void Rule::dump(ostream& sout) const
 //--------------------------------------------------------------------------
 // Write rule to ostream
 ostream& operator<<(ostream& sout, const Rule& r)
-{ 
-  r.dump(sout); 
-  return sout; 
+{
+  r.dump(sout);
+  return sout;
 }
 
 

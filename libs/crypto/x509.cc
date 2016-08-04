@@ -32,7 +32,7 @@ void Certificate::read(istream& sin)
 {
   string text;
   // Read all we can into the string
-  while (sin) 
+  while (sin)
   {
     int c = sin.get();
     if (c>=0) text+=static_cast<char>(c);
@@ -104,7 +104,7 @@ void Certificate::read(const string& text)
 }
 
 //------------------------------------------------------------------------
-// Convert to PEM format string 
+// Convert to PEM format string
 string Certificate::str() const
 {
   if (!x509) return "INVALID!";

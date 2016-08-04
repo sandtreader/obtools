@@ -30,11 +30,11 @@ int main(int argc, char **argv)
   cout << "Padded:\n";
   dumper.dump(ps, length);
 
-  cout << "Original length is " << Crypto::PKCS5::original_length(ps, length) 
+  cout << "Original length is " << Crypto::PKCS5::original_length(ps, length)
        << endl;
 
   free(ps);
-  return 0;  
+  return 0;
 }
 
 

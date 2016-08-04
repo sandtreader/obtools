@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Channel
 // Structured Protocol/Format reading and writing
-// 
+//
 // Copyright (c) 2005 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -14,18 +14,18 @@
 #include "ot-net.h"
 #include <iostream>
 
-namespace ObTools { namespace Channel { 
+namespace ObTools { namespace Channel {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
 // Channel exceptions
-class Error 
+class Error
 {
 public:
   int error;  // errno value, or 0
-  string text; 
+  string text;
   Error(int e=0): error(e), text("") {}
   Error(int e, const string& t): error(e), text(t) {}
 };
@@ -268,7 +268,7 @@ public:
   //--------------------------------------------------------------------------
   // Little-endian (LSB first) versions of the above
   // Not recommended for new protocols - only for compatibility with existing
-  // little-endian (often by default through using C structures on x86) 
+  // little-endian (often by default through using C structures on x86)
   // protocols
   // Throws Error on failure or EOF
   void write_le_16(uint16_t i);

@@ -17,7 +17,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-ScopeAction::ScopeAction(const CP& cp): 
+ScopeAction::ScopeAction(const CP& cp):
   SequenceAction(cp), ticked(false)
 {
 

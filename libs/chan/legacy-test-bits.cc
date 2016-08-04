@@ -60,7 +60,7 @@ int main()
   }
 
   cerr << "Buffer didn't end correctly\n";
-  return 2;  
+  return 2;
 }
 
 

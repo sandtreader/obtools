@@ -44,7 +44,7 @@ PropertyList::PropertyList(const string& str, char sep, char quote)
 
     // Find next quote
     string::size_type qp = str.find(quote, ep+1);
-    
+
     // Get sp fenced to end, for convenience
     string::size_type spf = (sp == string::npos)?str.size():sp;
 
@@ -57,7 +57,7 @@ PropertyList::PropertyList(const string& str, char sep, char quote)
       {
 	// That's the value between them - use it, unmodified
 	add(name, string(str, qp+1, qp2-qp-1));
-	
+
 	// Check for next separator after closing quote for next go
 	sp = str.find(sep, qp2+1);
       }
@@ -89,14 +89,14 @@ void PropertyList::dump(ostream& s, const string& prefix,
 			const string& separator) const
 {
   for(const_iterator p = begin(); p!=end(); ++p)
-    s << prefix << p->first << separator << p->second << endl; 
+    s << prefix << p->first << separator << p->second << endl;
 }
 
 //------------------------------------------------------------------------
 // << operator to write PropertyList to ostream
-ostream& operator<<(ostream& s, const PropertyList& pl) 
-{ 
-  pl.dump(s); 
+ostream& operator<<(ostream& s, const PropertyList& pl)
+{
+  pl.dump(s);
   return s;
 }
 
@@ -199,7 +199,7 @@ retry:
       result += c;
     }
   }
-  
+
   return result;
 }
 

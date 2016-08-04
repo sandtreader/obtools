@@ -28,7 +28,7 @@ Package::Package(XMI::Reader& rdr, XML::Element& xe)
   read_subelements("UML:Interface",      create_element<Interface>, true, p);
   read_subelements("UML:Stereotype",     create_element<Stereotype>, true, p);
   read_subelements("UML:Association",    create_element<Association>, true, p);
-  read_subelements("UML:Generalization", create_element<Generalization>, true, 
+  read_subelements("UML:Generalization", create_element<Generalization>, true,
 		                                                           p);
   read_subelements("UML:Package",        create_element<Package>, true, p);
 }

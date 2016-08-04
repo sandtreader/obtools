@@ -13,10 +13,10 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Constructor
 Enumeration::Enumeration(XMI::Reader& rdr, XML::Element& xe)
-  :DataType(rdr, xe) 
+  :DataType(rdr, xe)
 {
   //Read all EnumerationLiterals (ignoring UML:Enumeration.literal cruft)
-  OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(lite, xe, 
+  OBTOOLS_XML_FOREACH_DESCENDANT_WITH_TAG(lite, xe,
 						 "UML:EnumerationLiteral")
     string litname = lite.get_attr("name");
     if (!litname.empty()) literals.push_back(litname);

@@ -44,7 +44,7 @@ void test(uint64_t n)
 int main(int argc, char **argv)
 {
   string s;
-  if (argc > 1) 
+  if (argc > 1)
   {
     for(int i=1; i<argc; i++)
     {

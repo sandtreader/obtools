@@ -19,9 +19,9 @@ namespace ObTools { namespace Crypto {
 //------------------------------------------------------------------------
 // Constructor:
 // ca_file should refer to a PEM format containing a list of trusted CAs
-// ca_dir should refer to a directory containing certificate files with 
+// ca_dir should refer to a directory containing certificate files with
 // hashed names (see OpenSSL docs)
-CertificateStore::CertificateStore(const string& ca_file, 
+CertificateStore::CertificateStore(const string& ca_file,
 				   const string& ca_dir)
 {
   store = X509_STORE_new();

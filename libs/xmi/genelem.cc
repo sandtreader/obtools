@@ -17,13 +17,13 @@ GeneralizableElement::GeneralizableElement(XMI::Reader& rdr, XML::Element& xe)
   :ModelElement(rdr, xe)
 {
   //Get basic properties
-  is_abstract = get_bool_property("isAbstract", 
+  is_abstract = get_bool_property("isAbstract",
 				  "UML:GeneralizableElement.isAbstract");
 
-  is_root     = get_bool_property("isRoot", 
+  is_root     = get_bool_property("isRoot",
 				  "UML:GeneralizableElement.isRoot");
 
-  is_leaf     = get_bool_property("isLeaf", 
+  is_leaf     = get_bool_property("isLeaf",
 				  "UML:GeneralizableElement.isLeaf");
 }
 

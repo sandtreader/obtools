@@ -35,7 +35,7 @@ class TestThread: public MT::Thread
 
 public:
   bool running;
-  TestThread(int _n, TestHash& _hash): n(_n), hash(_hash), running(true) 
+  TestThread(int _n, TestHash& _hash): n(_n), hash(_hash), running(true)
   { start(); }
 };
 
@@ -75,7 +75,7 @@ void TestThread::run()
       int32_t i2 = hash.lookup(ids[j]);
       if (i2 != i*10+j)
       {
-	cout << "Lookup of " << ids[j] << " failed - expecting " 
+	cout << "Lookup of " << ids[j] << " failed - expecting "
 	     << i+j << " got " << i2 << endl;
 	//	hash.dump(cout);
       }
@@ -84,7 +84,7 @@ void TestThread::run()
     // Delete according to probability
     for(int j=0; j<nids; j++)
     {
-      if (prob && rand()%100<prob) 
+      if (prob && rand()%100<prob)
 	hash.remove(ids[j]);
     }
   }
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
   if (argc > 6) prob     = atoi(argv[6]);
 
   // Create hash table with default types
-  cout << "Creating table with " << bits << " top bits, " 
+  cout << "Creating table with " << bits << " top bits, "
        << (1<<bits) << " blocks of " << bsize << " entries\n";
   TestHash hash(bits, bsize);
   cout << "Total capacity: " << hash.capacity() << " entries\n";
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
     for(;;)
     {
       // Check the hash is OK
-      if (!hash.check(cout)) 
+      if (!hash.check(cout))
       {
 	cout << "Hash table is invalid!\n";
 	return 2;
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 
   // Validate
   cout << "Validating hash table\n";
-  if (!hash.check(cout)) 
+  if (!hash.check(cout))
   {
     cout << "Hash table is invalid!\n";
     return 2;
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
   // Dump out
   //hash.dump(cout);
 
-  return 0;  
+  return 0;
 }
 
 

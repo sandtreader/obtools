@@ -49,7 +49,7 @@ int main()
   ObTools::XML::Expander expander(root);
   cout << "Expanded element:\n" << expander.expand(values);
 
-  return 0;  
+  return 0;
 }
 
 

@@ -23,20 +23,20 @@ using namespace ObTools::ReGen;
 //uses the rest of the ReGen package to modify the file on close
 
 //------------------------------------------------------------------------
-// regenbuf Constructor 
-regenbuf::regenbuf(string _fn, const char *_marker, int _flags): 
+// regenbuf Constructor
+regenbuf::regenbuf(string _fn, const char *_marker, int _flags):
   streambuf(), fn(_fn), closed(false), marker(_marker), flags(_flags)
-{ 
+{
   // use unbuffered IO, since we're going to buffer it anyway
-  setp(0,0); 
+  setp(0,0);
   setg(0,0,0);
 }
 
 //------------------------------------------------------------------------
 // regenbuf Destructor - force close
-regenbuf::~regenbuf() 
-{ 
-  close(); 
+regenbuf::~regenbuf()
+{
+  close();
 }
 
 //------------------------------------------------------------------------
@@ -81,7 +81,7 @@ void regenbuf::close()
 
   if (rename(newfn.c_str(), fn.c_str()))
   {
-    cerr << "Rename of " << newfn << " to " << fn << " failed - " 
+    cerr << "Rename of " << newfn << " to " << fn << " failed - "
 	 << strerror(errno) << endl;
   }
 }

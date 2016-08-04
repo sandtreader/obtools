@@ -31,7 +31,7 @@ bool Parser::verify()
     return false;
   }
 
-  // Make sure it has a body 
+  // Make sure it has a body
   if (!root.get_child("env:Body"))
   {
     serr << "SOAP message has no Body\n";

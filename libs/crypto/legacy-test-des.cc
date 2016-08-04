@@ -122,7 +122,7 @@ int main()
   cbc3.set_iv(iv);
   test(cbc3, "CBC3", true);
 
-  return 0;  
+  return 0;
 }
 
 

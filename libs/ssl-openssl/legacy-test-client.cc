@@ -77,8 +77,8 @@ int main(int argc, char **argv)
     cerr << se << endl;
     return 1;
   }
-   
-  return 0;  
+
+  return 0;
 }
 
 

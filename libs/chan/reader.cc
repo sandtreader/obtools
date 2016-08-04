@@ -300,7 +300,7 @@ double Reader::read_nbo_fixed_point(int before_bits, int after_bits)
 // Throws Error on failure or EOF
 uint16_t Reader::read_le_16()
 {
-  // No easy way to do this with htonl, since if we're big-endian it's 
+  // No easy way to do this with htonl, since if we're big-endian it's
   // a NOOP anyway - so do it manually
   unsigned char buf[2];
   read(buf, 2);

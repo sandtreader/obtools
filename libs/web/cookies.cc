@@ -90,7 +90,7 @@ string Cookie::str(bool attrs) const
   {
     if (!!expires) oss << "; Expires=" << expires.rfc822();
     if (domain.size()) oss << "; Domain=" << domain;
-    if (path.size()) oss << "; Path=" << path; 
+    if (path.size()) oss << "; Path=" << path;
     if (secure) oss << "; Secure";
     if (http_only) oss << "; HttpOnly";
   }

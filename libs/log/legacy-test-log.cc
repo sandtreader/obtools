@@ -39,7 +39,7 @@ int main()
   log.error << "Hey, both cout and cerr should see this\n";
   log.error << "But only cerr will see this\nand this\n";
 
-  return 0;  
+  return 0;
 }
 
 

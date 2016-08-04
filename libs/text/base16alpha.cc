@@ -2,7 +2,7 @@
 // ObTools::Text: alpha16.cc
 //
 // Base16 encoding/decoding into an alpha-only character set believed safe
-// from 'bad' words 
+// from 'bad' words
 //
 // Alphabet is "bcdg hjkl mpqr svwz" - no vowels, and also missing "fntxy"
 //
@@ -18,14 +18,14 @@ namespace ObTools { namespace Text {
 static const char alphabet[] = "bcdghjklmpqrsvwz";
 
 // Reverse array of alpha, -1 is disallowed
-static const int reverse[] = 
-  { -1, 0, 1, 2, -1, -1, 3, 
+static const int reverse[] =
+  { -1, 0, 1, 2, -1, -1, 3,
     4, -1, 5, 6, 7,
-    8, -1, -1, 9, 10, 11, 
+    8, -1, -1, 9, 10, 11,
     12, -1, -1, 13, 14, -1, -1, 15 };
 
 //--------------------------------------------------------------------------
-// Encode a 64-bit integer 
+// Encode a 64-bit integer
 // Uses as many characters as required
 string Base16Alpha::encode(uint64_t n)
 {

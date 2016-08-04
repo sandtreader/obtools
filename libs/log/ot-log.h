@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Log
 // Logging handling
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -17,7 +17,7 @@
 #include <string>
 #include <iostream>
 
-namespace ObTools { namespace Log { 
+namespace ObTools { namespace Log {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -34,7 +34,7 @@ enum Level
   LEVEL_DUMP    = 5    // Gory detail (packet dumps etc.)
 };
 
-// Parallel macros for use in preprocessor 
+// Parallel macros for use in preprocessor
 #define OBTOOLS_LOG_LEVEL_NONE    0
 #define OBTOOLS_LOG_LEVEL_ERROR   1
 #define OBTOOLS_LOG_LEVEL_SUMMARY 2
@@ -66,12 +66,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructor
-  Message(Level l, const string& t): level(l), text(t) 
+  Message(Level l, const string& t): level(l), text(t)
   { timestamp=Time::Stamp::now(); }
 };
 
 //==========================================================================
-// Log channel 
+// Log channel
 // Abstract virtual definition of a logging channel
 // Note: Safe to share channels between threads because mutexed
 class Channel
@@ -128,7 +128,7 @@ private:
 
 public:
   // Constructor takes Text::pattern_match (glob) format
-  PatternFilter(const string& _p, Channel& _next): 
+  PatternFilter(const string& _p, Channel& _next):
     Filter(_next), pattern(_p) {}
 
   void log(Message& msg);
@@ -139,7 +139,7 @@ public:
 // Adds timestamps to the front of each message
 // Accepts strftime format, plus the following extensions:
 //   %*L:   The log level as a single digit
-//   %*S:   The exact floating point seconds time (use instead of %S)  
+//   %*S:   The exact floating point seconds time (use instead of %S)
 class TimestampFilter: public Filter
 {
 private:
@@ -147,7 +147,7 @@ private:
 
 public:
   // Constructor takes strftime format
-  TimestampFilter(const string& _format, Channel& _next): 
+  TimestampFilter(const string& _format, Channel& _next):
     Filter(_next), format(_format) {}
 
   void log(Message& msg);
@@ -182,9 +182,9 @@ public:
   //--------------------------------------------------------------------------
   // Constructor
   Distributor() {}
-  
+
   //--------------------------------------------------------------------------
-  // Connect a channel 
+  // Connect a channel
   void connect(Channel& chan);
 
   //--------------------------------------------------------------------------
@@ -210,8 +210,8 @@ private:
 
 protected:
   // Streambuf overflow - handles characters
-  int overflow(int); 
-   
+  int overflow(int);
+
 public:
   // Constructor
   StreamBuf(Channel& _channel, Level level);
@@ -226,7 +226,7 @@ class Stream: public ostream
 {
 public:
   // Constructor - like ofstream
-  Stream(Channel &channel, Level level): 
+  Stream(Channel &channel, Level level):
     ostream(new StreamBuf(channel, level)) {}
 
   // Destructor
@@ -246,7 +246,7 @@ extern Distributor logger;
 //
 // e.g.
 //  OBTOOLS_LOG_IF_DUMP(ObTools::Log::Dump << "Packet: " << packet;)
-// 
+//
 // Also simple macros for #if - e.g.
 // #if OBTOOLS_LOG_DEBUG
 //  ...
@@ -270,32 +270,32 @@ extern Distributor logger;
 //==========================================================================
 // Single logging streams - use in multi-threaded code to get a local logging
 // stream.  If you need more than two of these, use a Streams object instead
-// e.g. 
+// e.g.
 //   ObTools::Log::Error elog;
 //   elog << "Oops\n";
 
 class Error: public Stream
 {
-public: 
+public:
   Error(): Stream(logger, LEVEL_ERROR) {}
 };
 
 class Summary: public Stream
 {
-public:   
+public:
   Summary(): Stream(logger, LEVEL_SUMMARY) {}
 };
 
 class Detail: public Stream
 {
-public:   
+public:
   Detail(): Stream(logger, LEVEL_DETAIL) {}
 };
 
 #if OBTOOLS_LOG_DEBUG
 class Debug: public Stream
 {
-public:   
+public:
   Debug(): Stream(logger, LEVEL_DEBUG) {}
 };
 #endif
@@ -303,7 +303,7 @@ public:
 #if OBTOOLS_LOG_DUMP
 class Dump: public Stream
 {
-public:   
+public:
   Dump(): Stream(logger, LEVEL_DUMP) {}
 };
 #endif

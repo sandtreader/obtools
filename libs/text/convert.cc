@@ -57,7 +57,7 @@ string i64tos(uint64_t i)
 // String to 64-bit integer (0 default)
 uint64_t stoi64(const string& s)
 {
-  // Note:  We can't use atoll here because it is signed and barfs on 
+  // Note:  We can't use atoll here because it is signed and barfs on
   // anything over 2^63-1
   unsigned long long n = 0;
   sscanf(s.c_str(), FORMAT_UNSIGNED_64, &n);
@@ -106,7 +106,7 @@ string ftos(double f, int width, int prec, bool zero_pad)
 {
   ostringstream oss;
   if (width) oss << setw(width);
-  if (prec) oss << setprecision(prec) 
+  if (prec) oss << setprecision(prec)
 		<< setiosflags(ios::fixed | ios::showpoint);
   if (zero_pad) oss << setfill('0');
   oss << f;
@@ -205,7 +205,7 @@ string btox(const vector<uint8_t>& data)
 //--------------------------------------------------------------------------
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
-unsigned int xtob(const string& hex, unsigned char *data, 
+unsigned int xtob(const string& hex, unsigned char *data,
 		  unsigned int max_length)
 {
   unsigned int length = hex.size()/2;

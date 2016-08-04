@@ -22,7 +22,7 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Test a RSA encryptor
-void test(Crypto::RSA& encryptor, Crypto::RSA& decryptor, 
+void test(Crypto::RSA& encryptor, Crypto::RSA& decryptor,
 	  const string& what, int cypher_size, int plaintext_size)
 {
   unsigned char data[MAX_LEN];
@@ -79,7 +79,7 @@ int main()
   rsa_pri.key.create(KEY_LEN);
   cout << "Private key:\n" << rsa_pri.key << endl;
 
-  Crypto::RSA rsa_pub(false);  
+  Crypto::RSA rsa_pub(false);
   rsa_pub.key.read(rsa_pri.key.str(), true); // Transfer over by text (ugh!)
   cout << "Public key:\n" << rsa_pub.key << endl;
 
@@ -97,7 +97,7 @@ int main()
   // Private encrypt, public decrypt
   //test(rsa_pri, rsa_pub, "Private-to-Public", cypher_size, max_plaintext);
 
-  return 0;  
+  return 0;
 }
 
 

@@ -26,7 +26,7 @@ int main()
   cout << "/@version: "  << config.get_value("/@version") << endl;
   cout << "directory: "  << config.get_value("directory") << endl;
   cout << "output/mode: "  << config.get_value_int("output/mode", 444) << endl;
-  cout << "output/atomic: " 
+  cout << "output/atomic: "
        << config.get_value_bool("output/atomic", false) << endl;
 
   //Files
@@ -41,7 +41,7 @@ int main()
   for(map<string, string>::iterator p = m.begin(); p!=m.end(); p++)
     cout << "Map '" << p->first << "'->'" << p->second << "'\n";
 
-  return 0;  
+  return 0;
 }
 
 

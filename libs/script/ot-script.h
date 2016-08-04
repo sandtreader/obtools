@@ -2,7 +2,7 @@
 // ObTools::Script: ot-script.h
 //
 // Public definitions for XML script library
-// 
+//
 // Copyright (c) 2006 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -40,7 +40,7 @@ struct Context
 //==========================================================================
 // Script action (abstract)
 // Dynamically created during run - only active actions on the stack will
-// be instantiated at any one time 
+// be instantiated at any one time
 class Action
 {
 protected:
@@ -173,7 +173,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  // If 'race' is set, the entire group is stopped when the first one 
+  // If 'race' is set, the entire group is stopped when the first one
   // finishes; otherwise, the group continues until the last finishes
   ParallelAction(const CP& cp, bool race);
 
@@ -288,7 +288,7 @@ private:
     virtual void run() { action.run_thread(context); }
 
   public:
-    ActionThread(ThreadAction& a, Context& c): action(a), context(c) 
+    ActionThread(ThreadAction& a, Context& c): action(a), context(c)
       { start(); }
   };
 
@@ -434,7 +434,7 @@ public:
 };
 
 //==========================================================================
-// Top-level script 
+// Top-level script
 class Script: public SequenceAction
 {
 private:

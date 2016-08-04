@@ -12,7 +12,7 @@
 
 #include "ot-tube.h"
 
-namespace ObTools { namespace XMLMesh { namespace OTMP { 
+namespace ObTools { namespace XMLMesh { namespace OTMP {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -33,7 +33,7 @@ enum Tag
 // OTMP message with fixed tag
 struct Message: public Tube::Message
 {
-  Message(const string& _data="", Tube::flags_t _flags=0): 
+  Message(const string& _data="", Tube::flags_t _flags=0):
     Tube::Message(TAG_MESSAGE, _data, _flags) {}
 };
 
@@ -95,7 +95,7 @@ public:
   // timeout is keepalive timeout (secs)
   // The rest is thread/socket tuning - see Net::TCPServer
   Server(ClientMessageQueue& receive_queue,
-	 int port=0, int backlog=5, 
+	 int port=0, int backlog=5,
 	 int min_spare_threads=1, int max_threads=10, int timeout=0);
 };
 

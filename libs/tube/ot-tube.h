@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Tube
 // Generic, symmetric binary message connection
-// 
+//
 // Copyright (c) 2007 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -18,14 +18,14 @@
 #include "ot-log.h"
 #include "ot-ssl.h"
 
-namespace ObTools { namespace Tube { 
+namespace ObTools { namespace Tube {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
 // Definition of ObTools Tube protocol - a simple binary TLV protocol
-// for encapsulating messages in a stream and providing a measure of 
+// for encapsulating messages in a stream and providing a measure of
 // synchronisation sanity check
 
 // All integers are network byte-order (NBO) => MSB first
@@ -38,19 +38,19 @@ using namespace std;
 //     <chunk>
 //
 // A chunk is a tag indicating the chunk type (application specific)
-// the length of the message, some flags (application specific), and the data 
-// of the message.  
+// the length of the message, some flags (application specific), and the data
+// of the message.
 //
-// Because there aren't many tags defined out of the 32-bit range, the tag 
+// Because there aren't many tags defined out of the 32-bit range, the tag
 // also acts as a sanity check on synchronisation.
 //
-// chunk: 
+// chunk:
 //    0:        4-byte tag, first char at 0 (equivalently, 32-bit NBO integer)
 //    4:        4-byte NBO integer length ('L')
 //    8:        32-bits of flags (see below), NBO
 //    12-L+12: 'L' bytes of message, unterminated and unpadded
 //
-// Note: The top 16 bits (first two bytes) of flags are reserved for this 
+// Note: The top 16 bits (first two bytes) of flags are reserved for this
 // protocol in synchronous request/response mode (see SyncClient/SyncServer
 // below)
 //
@@ -59,12 +59,12 @@ using namespace std;
 //
 //    Bits 16-29: 14-bit message ID
 //
-// Error behaviour:  
-//   If a stream ends cleanly before the first chunk, or between chunks, this 
+// Error behaviour:
+//   If a stream ends cleanly before the first chunk, or between chunks, this
 //     is fine
 //   If a stream fails before the first chunk, or between chunks, an error
 //     should be logged
-//   If a stream fails or ends within a chunk, the message should be dropped 
+//   If a stream fails or ends within a chunk, the message should be dropped
 //     and an error logged
 //   If any chunk begins with an unrecognised tag, the stream should be killed
 //     and an error logged
@@ -78,7 +78,7 @@ typedef unsigned short id_t;
 
 //==========================================================================
 // Flags
-enum 
+enum
 {
   MASK_SYNC_FLAGS         = 0xFFFF0000UL,
 
@@ -109,12 +109,12 @@ struct Message
   tag_t tag;               // tag=0 indicates invalid
   // Length is implicit in data.size()
   flags_t flags;
-  string data;  
+  string data;
 
   //------------------------------------------------------------------------
   // Constructors
   Message(): tag(0), flags(0) {}
-  Message(tag_t _tag, const string& _data="", flags_t _flags=0): 
+  Message(tag_t _tag, const string& _data="", flags_t _flags=0):
     tag(_tag), flags(_flags), data(_data) {}
 
   //------------------------------------------------------------------------
@@ -171,7 +171,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor with SSL
-  Client(const Net::EndPoint& _server, SSL::Context *_ctx, 
+  Client(const Net::EndPoint& _server, SSL::Context *_ctx,
 	 const string& _name="Tube");
 
   //------------------------------------------------------------------------
@@ -206,7 +206,7 @@ public:
 
   //------------------------------------------------------------------------
   // Receive a message - blocks waiting for one to arrive
-  // Returns false if the connection was restarted 
+  // Returns false if the connection was restarted
   virtual bool wait(Message& msg);
 
   //------------------------------------------------------------------------
@@ -224,7 +224,7 @@ public:
 class SyncRequestCache
 {
 private:
-  // Request record 
+  // Request record
   struct Request
   {
     Time::Stamp started;
@@ -233,7 +233,7 @@ private:
     MT::BasicCondVar ready;
 
     // Normal constructor
-    Request(Net::EndPoint _client): 
+    Request(Net::EndPoint _client):
       started(Time::Stamp::now()), client(_client) {}
 
     // Default constructor for map
@@ -243,15 +243,15 @@ private:
   // Request map, by ID
   MT::Mutex request_mutex;
   id_t request_id;
-  map<id_t, Request> requests; 
+  map<id_t, Request> requests;
 
  public:
   //------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   SyncRequestCache(): request_id(0) {}
 
   //------------------------------------------------------------------------
-  // Handle timeouts 
+  // Handle timeouts
   void do_timeouts(Log::Streams& log, int timeout, const string& name);
 
   //------------------------------------------------------------------------
@@ -285,7 +285,7 @@ private:
 };
 
 //==========================================================================
-// Synchronous request-response client, but still providing a wait() 
+// Synchronous request-response client, but still providing a wait()
 // interface for asynchronous messaging
 class SyncClient: public Client
 {
@@ -299,7 +299,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port), request timeout
   // (in seconds) and optional name
-  SyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT, 
+  SyncClient(Net::EndPoint _server, int _timeout=DEFAULT_TIMEOUT,
 	     const string& _name="Tube");
 
   //------------------------------------------------------------------------
@@ -344,14 +344,14 @@ public:
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port), request timeout
   // (in seconds) and optional name
-  AutoSyncClient(Net::EndPoint _server, 
-		 int _timeout=SyncClient::DEFAULT_TIMEOUT, 
+  AutoSyncClient(Net::EndPoint _server,
+		 int _timeout=SyncClient::DEFAULT_TIMEOUT,
 		 const string& _name="Tube");
 
   //------------------------------------------------------------------------
   // Constructor with SSL
   AutoSyncClient(Net::EndPoint _server, SSL::Context *_ctx,
-		 int _timeout=SyncClient::DEFAULT_TIMEOUT, 
+		 int _timeout=SyncClient::DEFAULT_TIMEOUT,
 		 const string& _name="Tube");
 
   //------------------------------------------------------------------------
@@ -403,7 +403,7 @@ struct ClientSession
   bool alive;
 
   // Thread and queue stuff
-  MT::Queue<Message> send_q;  
+  MT::Queue<Message> send_q;
 
   // Constructor
   // Adds this session to the given map - destructor removes it again
@@ -420,7 +420,7 @@ struct ClientSession
 //==========================================================================
 // Client-specific Message Structure - includes client endpoint
 // Note:  It's tempting to put a ClientSession ref in here so we can send
-// stuff back directly;  however this causes major garbage collection 
+// stuff back directly;  however this causes major garbage collection
 // headaches if the session dies while something still has a handle on this
 // message;  it's safer to re-lookup the endpoint each time.
 struct ClientMessage
@@ -438,7 +438,7 @@ struct ClientMessage
   const Action action;
 
   // Constructor for message
-  ClientMessage(const SSL::ClientDetails& _client, tag_t _tag, 
+  ClientMessage(const SSL::ClientDetails& _client, tag_t _tag,
 		const string& _data="", flags_t _flags=0):
     client(_client), msg(_tag, _data,_flags), action(MESSAGE_DATA) {}
 
@@ -486,33 +486,33 @@ public:
   //------------------------------------------------------------------------
   // Constructor - takes port to listen on, with optional timeout (secs)
   // The rest is thread/socket tuning - see Net::TCPServer
-  Server(int port, const string& _name="Tube", 
-	 int backlog=DEFAULT_BACKLOG, 
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS, 
+  Server(int port, const string& _name="Tube",
+	 int backlog=DEFAULT_BACKLOG,
+	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
 	 int max_threads=DEFAULT_MAX_THREADS,
 	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
   //------------------------------------------------------------------------
   // Constructor with defined local interface
-  Server(Net::EndPoint local, const string& _name="Tube", 
-	 int backlog=DEFAULT_BACKLOG, 
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS, 
+  Server(Net::EndPoint local, const string& _name="Tube",
+	 int backlog=DEFAULT_BACKLOG,
+	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
 	 int max_threads=DEFAULT_MAX_THREADS,
 	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
   //------------------------------------------------------------------------
   // Constructors with SSL
-  Server(SSL::Context *_ctx, int port, 
-	 const string& _name="Tube", 
-	 int backlog=DEFAULT_BACKLOG, 
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS, 
+  Server(SSL::Context *_ctx, int port,
+	 const string& _name="Tube",
+	 int backlog=DEFAULT_BACKLOG,
+	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
 	 int max_threads=DEFAULT_MAX_THREADS,
 	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
-  Server(SSL::Context *_ctx, Net::EndPoint local, 
-	 const string& _name="Tube", 
-	 int backlog=DEFAULT_BACKLOG, 
-	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS, 
+  Server(SSL::Context *_ctx, Net::EndPoint local,
+	 const string& _name="Tube",
+	 int backlog=DEFAULT_BACKLOG,
+	 int min_spare_threads=DEFAULT_MIN_SPARE_THREADS,
 	 int max_threads=DEFAULT_MAX_THREADS,
 	 int _client_timeout=DEFAULT_CLIENT_TIMEOUT);
 
@@ -557,7 +557,7 @@ public:
 // Tube server for synchronous requests/responses
 // Provides a simpler interface to handle request-response messages
 // Also passes async messages to handle_async_message() but implements
-// this here as just logging an error 
+// this here as just logging an error
 // Note send() can still be used to send async messages back
 // Note:  Requires a thread to call run()
 class SyncServer: public Server
@@ -585,35 +585,35 @@ protected:
 public:
   //------------------------------------------------------------------------
   // Constructors - as Server
-  SyncServer(int port, const string& _name="Tube", 
-	     int backlog=Server::DEFAULT_BACKLOG, 
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  SyncServer(int port, const string& _name="Tube",
+	     int backlog=Server::DEFAULT_BACKLOG,
+	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	     int max_threads=Server::DEFAULT_MAX_THREADS,
 	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
-    Server(port, _name, backlog, min_spare_threads, max_threads, 
+    Server(port, _name, backlog, min_spare_threads, max_threads,
 	   _client_timeout) {}
 
-  SyncServer(Net::EndPoint local, const string& _name="Tube", 
-	     int backlog=Server::DEFAULT_BACKLOG, 
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  SyncServer(Net::EndPoint local, const string& _name="Tube",
+	     int backlog=Server::DEFAULT_BACKLOG,
+	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	     int max_threads=Server::DEFAULT_MAX_THREADS,
 	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(local, _name, backlog, min_spare_threads, max_threads,
 	   _client_timeout) {}
 
-  SyncServer(SSL::Context *_ctx, int port, 
-	     const string& _name="Tube", 
-	     int backlog=Server::DEFAULT_BACKLOG, 
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  SyncServer(SSL::Context *_ctx, int port,
+	     const string& _name="Tube",
+	     int backlog=Server::DEFAULT_BACKLOG,
+	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	     int max_threads=Server::DEFAULT_MAX_THREADS,
 	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(_ctx, port, _name, backlog, min_spare_threads, max_threads,
 	   _client_timeout) {}
 
-  SyncServer(SSL::Context *_ctx, Net::EndPoint local, 
-	     const string& _name="Tube", 
-	     int backlog=Server::DEFAULT_BACKLOG, 
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  SyncServer(SSL::Context *_ctx, Net::EndPoint local,
+	     const string& _name="Tube",
+	     int backlog=Server::DEFAULT_BACKLOG,
+	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	     int max_threads=Server::DEFAULT_MAX_THREADS,
 	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     Server(_ctx, local, _name, backlog, min_spare_threads, max_threads,
@@ -623,7 +623,7 @@ public:
 
 //==========================================================================
 // Tube server for synchronous requests/responses with its own run()
-// thread 
+// thread
 class AutoSyncServer: public SyncServer
 {
   Net::TCPServerThread run_thread;
@@ -631,38 +631,38 @@ class AutoSyncServer: public SyncServer
 public:
   //------------------------------------------------------------------------
   // Constructors - as Server
-  AutoSyncServer(int port, const string& _name="Tube", 
-	     int backlog=Server::DEFAULT_BACKLOG, 
-	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  AutoSyncServer(int port, const string& _name="Tube",
+	     int backlog=Server::DEFAULT_BACKLOG,
+	     int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	     int max_threads=Server::DEFAULT_MAX_THREADS,
 	     int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(port, _name, backlog, min_spare_threads, max_threads,
 	       _client_timeout),
     run_thread(*this) {}
 
-  AutoSyncServer(Net::EndPoint local, const string& _name="Tube", 
-		 int backlog=Server::DEFAULT_BACKLOG, 
-		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  AutoSyncServer(Net::EndPoint local, const string& _name="Tube",
+		 int backlog=Server::DEFAULT_BACKLOG,
+		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		 int max_threads=Server::DEFAULT_MAX_THREADS,
 		 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(local, _name, backlog, min_spare_threads, max_threads,
 	       _client_timeout),
     run_thread(*this) {}
 
-  AutoSyncServer(SSL::Context *_ctx, int port, 
-		 const string& _name="Tube", 
-		 int backlog=Server::DEFAULT_BACKLOG, 
-		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  AutoSyncServer(SSL::Context *_ctx, int port,
+		 const string& _name="Tube",
+		 int backlog=Server::DEFAULT_BACKLOG,
+		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		 int max_threads=Server::DEFAULT_MAX_THREADS,
 		 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(_ctx, port, _name, backlog, min_spare_threads, max_threads,
 	       _client_timeout),
     run_thread(*this) {}
 
-  AutoSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
-		 const string& _name="Tube", 
-		 int backlog=Server::DEFAULT_BACKLOG, 
-		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+  AutoSyncServer(SSL::Context *_ctx, Net::EndPoint local,
+		 const string& _name="Tube",
+		 int backlog=Server::DEFAULT_BACKLOG,
+		 int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		 int max_threads=Server::DEFAULT_MAX_THREADS,
 		 int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
     SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads,
@@ -695,32 +695,32 @@ class BiSyncServer: public SyncServer
   // Constructors - as Server but with timeout
   BiSyncServer(int port, int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG, 
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+	       int backlog=Server::DEFAULT_BACKLOG,
+	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	       int max_threads=Server::DEFAULT_MAX_THREADS,
 	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
-  BiSyncServer(Net::EndPoint local, 
+  BiSyncServer(Net::EndPoint local,
 	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG, 
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+	       int backlog=Server::DEFAULT_BACKLOG,
+	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	       int max_threads=Server::DEFAULT_MAX_THREADS,
 	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
-  BiSyncServer(SSL::Context *_ctx, int port, 
-	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT, 
-	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG, 
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
-	       int max_threads=Server::DEFAULT_MAX_THREADS,
-	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
-
-  BiSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
+  BiSyncServer(SSL::Context *_ctx, int port,
 	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 	       const string& _name="Tube",
-	       int backlog=Server::DEFAULT_BACKLOG, 
-	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+	       int backlog=Server::DEFAULT_BACKLOG,
+	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
+	       int max_threads=Server::DEFAULT_MAX_THREADS,
+	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
+
+  BiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
+	       int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
+	       const string& _name="Tube",
+	       int backlog=Server::DEFAULT_BACKLOG,
+	       int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 	       int max_threads=Server::DEFAULT_MAX_THREADS,
 	       int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT);
 
@@ -738,7 +738,7 @@ class BiSyncServer: public SyncServer
   // Handle asynchronous messages which aren't responses
   // Implemented here just to log an error, but can be overridden if you
   // still need to receive async messages
-  // NOTE change of name from SyncServer version - we override 
+  // NOTE change of name from SyncServer version - we override
   // handle_async_message and only call this if it's not a response
   // Also called for STARTED and FINISHED psuedo-messages
   // Return whether connection should be allowed to continue
@@ -754,8 +754,8 @@ class BiSyncServer: public SyncServer
 };
 
 //==========================================================================
-// Tube server for bidirectional synchronous requests/responses with its own 
-// run() thread 
+// Tube server for bidirectional synchronous requests/responses with its own
+// run() thread
 class AutoBiSyncServer: public BiSyncServer
 {
   Net::TCPServerThread run_thread;
@@ -765,44 +765,44 @@ public:
   // Constructors - as Server
   AutoBiSyncServer(int port, int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG, 
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+		   int backlog=Server::DEFAULT_BACKLOG,
+		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		   int max_threads=Server::DEFAULT_MAX_THREADS,
 		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
-    BiSyncServer(port, _request_timeout, _name, backlog, 
+    BiSyncServer(port, _request_timeout, _name, backlog,
 		 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 
-  AutoBiSyncServer(Net::EndPoint local, 
+  AutoBiSyncServer(Net::EndPoint local,
 		   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG, 
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+		   int backlog=Server::DEFAULT_BACKLOG,
+		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		   int max_threads=Server::DEFAULT_MAX_THREADS,
 		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
-    BiSyncServer(local, _request_timeout, _name, backlog, 
+    BiSyncServer(local, _request_timeout, _name, backlog,
 		 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 
-  AutoBiSyncServer(SSL::Context *_ctx, int port, 
+  AutoBiSyncServer(SSL::Context *_ctx, int port,
 		   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG, 
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+		   int backlog=Server::DEFAULT_BACKLOG,
+		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		   int max_threads=Server::DEFAULT_MAX_THREADS,
 		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
-    BiSyncServer(_ctx, port, _request_timeout, _name, backlog, 
+    BiSyncServer(_ctx, port, _request_timeout, _name, backlog,
 		 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 
-  AutoBiSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
+  AutoBiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
 		   int _request_timeout = DEFAULT_REQUEST_TIMEOUT,
 		   const string& _name="Tube",
-		   int backlog=Server::DEFAULT_BACKLOG, 
-		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS, 
+		   int backlog=Server::DEFAULT_BACKLOG,
+		   int min_spare_threads=Server::DEFAULT_MIN_SPARE_THREADS,
 		   int max_threads=Server::DEFAULT_MAX_THREADS,
 		   int _client_timeout=Server::DEFAULT_CLIENT_TIMEOUT):
-    BiSyncServer(_ctx, local, _request_timeout, _name, backlog, 
+    BiSyncServer(_ctx, local, _request_timeout, _name, backlog,
 		 min_spare_threads, max_threads, _client_timeout),
     run_thread(*this) {}
 };

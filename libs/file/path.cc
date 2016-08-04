@@ -36,7 +36,7 @@
 #include <ext/stdio_filebuf.h>
 #else
 #if defined(__APPLE__)
-// No LARGEFILE, otherwise sensible 
+// No LARGEFILE, otherwise sensible
 #define O_LARGEFILE 0
 #endif
 #define STRUCT_STAT struct stat64
@@ -69,7 +69,7 @@ Path::Path(const string& dir, const string& leaf)
 
 //--------------------------------------------------------------------------
 // Constructor from existing path and leaf (combines as above)
-Path::Path(const Path& _path, const string& leaf) 
+Path::Path(const Path& _path, const string& leaf)
 {
   string dir = _path.str();
   if (dir.empty() || is_sep_char(dir[dir.size()-1]))
@@ -85,7 +85,7 @@ bool Path::is_absolute() const
 #if defined(__WIN32__)
   // Allow for c:\xxx form
   return !path.empty() && (is_sep_char(path[0])
-			   ||(path.size()>=3 
+			   ||(path.size()>=3
 			      && isalpha(path[0])
 			      && path[1]==':'
 			      && is_sep_char(path[2])));
@@ -100,7 +100,7 @@ bool Path::is_absolute() const
 string Path::dirname() const
 {
   string::size_type slash = path.rfind(SEPCHAR);
-  if (slash == string::npos) 
+  if (slash == string::npos)
   {
     // No normal separator - check for ALTSEPCHAR (/ in Windows) instead
     if (ALTSEPCHAR) slash = path.rfind(ALTSEPCHAR);
@@ -122,7 +122,7 @@ string Path::dirname() const
 string Path::leafname() const
 {
   string::size_type slash = path.rfind(SEPCHAR);
-  if (slash == string::npos) 
+  if (slash == string::npos)
   {
     // No normal separator - check for ALTSEPCHAR (/ in Windows) instead
     if (ALTSEPCHAR) slash = path.rfind(ALTSEPCHAR);
@@ -223,7 +223,7 @@ bool Path::is_dir() const
 {
   STRUCT_STAT sb;
   if (STAT(CPATH, &sb)) return false;
-  return S_ISDIR(sb.st_mode); 
+  return S_ISDIR(sb.st_mode);
 }
 
 //--------------------------------------------------------------------------
@@ -277,7 +277,7 @@ bool Path::set_last_modified(time_t t) const
 #endif
   utb.actime = time(NULL);  // Now
   utb.modtime = t;
-  return !UTIME(CPATH, &utb); 
+  return !UTIME(CPATH, &utb);
 }
 
 //--------------------------------------------------------------------------
@@ -333,7 +333,7 @@ bool Path::set_ownership(uid_t owner, uid_t group) const
 //--------------------------------------------------------------------------
 // Get the file's owner & group - string version
 bool Path::set_ownership(const string& owner, const string& group) const
-{ 
+{
   int uid = user_name_to_id(owner);
   int gid = group_name_to_id(group);
   if (uid < 0 || gid < 0) return false;
@@ -346,18 +346,18 @@ bool Path::set_ownership(const string& owner, const string& group) const
 bool Path::erase() const
 {
   if (is_dir())
-#if defined(__WIN32__) 
+#if defined(__WIN32__)
   {
     // Note: Shelling out to rmdir opens a console window
 
     // Create string with extra null on the end, plus manual null in case
     // c_str() does something odd - we use data() instead
-    wstring double_null = wide_path() + (wchar_t)0 + (wchar_t)0; 
-    SHFILEOPSTRUCTW op = 
+    wstring double_null = wide_path() + (wchar_t)0 + (wchar_t)0;
+    SHFILEOPSTRUCTW op =
     {
       0, FO_DELETE, double_null.data(), 0,
       FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
-      false, 0, L"" 
+      false, 0, L""
     };
     return !SHFileOperationW(&op);
   }
@@ -392,7 +392,7 @@ bool Path::rename(const Path& new_path) const
 {
 #if defined(__WIN32__)
   // Try supposedly atomic MoveFileEx (NT+)
-  if (MoveFileExW(CPATH, new_path.wide_path().c_str(), 
+  if (MoveFileExW(CPATH, new_path.wide_path().c_str(),
 		  MOVEFILE_REPLACE_EXISTING))
     return true;
 
@@ -404,7 +404,7 @@ bool Path::rename(const Path& new_path) const
   // Fall through to usual rename (which uses MoveFile())
 #endif
 
-  return !::rename(c_str(), new_path.c_str());  
+  return !::rename(c_str(), new_path.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -562,7 +562,7 @@ int Path::group_name_to_id(const string& gname)
 
 #if defined(__WIN32__)
 //------------------------------------------------------------------------
-// Windows only - helper function to convert a UTF8 filename into a 
+// Windows only - helper function to convert a UTF8 filename into a
 // wide character one
 wstring Path::utf8_to_wide(const string& utf8)
 {
@@ -616,9 +616,9 @@ string Path::wide_to_utf8(const wstring& wide)
 
 //------------------------------------------------------------------------
 // << operator to write Path to ostream
-ostream& operator<<(ostream& s, const Path& p) 
-{ 
-  s<<p.str(); return s; 
+ostream& operator<<(ostream& s, const Path& p)
+{
+  s<<p.str(); return s;
 }
 
 }} // namespaces

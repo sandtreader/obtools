@@ -35,7 +35,7 @@ int main()
   // Don't update - it messes up CVS!
   //config.write();
 
-  return 0;  
+  return 0;
 }
 
 

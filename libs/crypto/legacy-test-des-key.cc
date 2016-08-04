@@ -49,13 +49,13 @@ int main()
       return 2;
     }
   }
-  else 
+  else
   {
     cerr << "Can't create valid key\n";
     return 2;
   }
 
-  return 0;  
+  return 0;
 }
 
 

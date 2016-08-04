@@ -50,7 +50,7 @@ int main()
   test("*.*");
   test("*.*.*");
 
-  return 0;  
+  return 0;
 }
 
 

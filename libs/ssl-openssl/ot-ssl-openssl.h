@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::SSL
 // SSL/TLS Socket functions - wrapper around libssl
-// 
+//
 // Copyright (c) 2009 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -15,15 +15,15 @@
 #include "ot-crypto.h"
 
 // This is rather ugly...  We want to use SSL as a namespace, but
-// OpenSSL defines it as a struct.  Hence we redefine SSL here to 
-// expand to OpenSSL for the duration of the OpenSSL header 
+// OpenSSL defines it as a struct.  Hence we redefine SSL here to
+// expand to OpenSSL for the duration of the OpenSSL header
 #define SSL OpenSSL
 #include <openssl/ssl.h>
 #undef SSL
 
 #include <openssl/err.h>
 
-namespace ObTools { namespace SSL_OpenSSL { 
+namespace ObTools { namespace SSL_OpenSSL {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -97,7 +97,7 @@ public:
   //--------------------------------------------------------------------------
   // Use given verify locations (list of trusted CAs)
   // ca_file should refer to a PEM format containing a list of trusted CAs
-  // ca_dir should refer to a directory containing certificate files with 
+  // ca_dir should refer to a directory containing certificate files with
   // hashed names (see OpenSSL docs)
   // Either one or the other is optional, but not both
   void set_verify_paths(const string& ca_file="", const string& ca_dir="");

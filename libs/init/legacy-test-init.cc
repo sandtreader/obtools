@@ -41,7 +41,7 @@ int main()
 
   cout << "Sub: " << s->a << endl;
   delete s;
-  return 0;  
+  return 0;
 }
 
 

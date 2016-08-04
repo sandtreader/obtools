@@ -13,7 +13,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-ParallelAction::ParallelAction(const CP& cp, bool _race): 
+ParallelAction::ParallelAction(const CP& cp, bool _race):
   Action(cp), race(_race)
 {
 }

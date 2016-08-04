@@ -14,7 +14,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 //Constructor - takes top-level script element
-Script::Script(Language& _language, XML::Element& _xml): 
+Script::Script(Language& _language, XML::Element& _xml):
   SequenceAction(Action::CP(*this, _xml)), language(_language)
 {
 }

@@ -160,7 +160,7 @@ void Processor::process()
 	// Check for new tokens
 	switch (tokstate)
 	{
-	  case TOKEN_READING: 
+	  case TOKEN_READING:
 	    // Output this character as text if not used
 	    if (!used_char) output_text(c);
 	    break;
@@ -204,7 +204,7 @@ void Processor::process()
 	  // Check for new tokens
 	  switch (tokstate)
 	  {
-	    case TOKEN_READING: 
+	    case TOKEN_READING:
 	      // Output this character verbatim if not used
 	      if (!used_char) sout << c;
 	      break;
@@ -240,7 +240,7 @@ void Processor::process()
 	  // Check for new tokens
 	  switch (tokstate)
 	  {
-	    case TOKEN_READING: 
+	    case TOKEN_READING:
 	      // Output this character verbatim if not used
 	      if (!used_char) sout << c;
 	      break;
@@ -273,7 +273,7 @@ void Processor::process()
 	  // Check for new tokens
 	  switch (tokstate)
 	  {
-	    case TOKEN_READING: 
+	    case TOKEN_READING:
 	      // Swallow it
 	      break;
 
@@ -295,8 +295,8 @@ void Processor::process()
 	      break;
 	  }
 	  break;
-    }  
-    
+    }
+
   }
 
   //In case it stops unexpectedly in the middle of text (no final newline),

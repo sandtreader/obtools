@@ -119,7 +119,7 @@ public:
   bool subscribe(const string& subject);
 
   //------------------------------------------------------------------------
-  // Unsubscribe for messages of a given subject 
+  // Unsubscribe for messages of a given subject
   // Subject is a pattern - can use more general pattern to unsubscribe
   // more specific ones
   // e.g. client.unsubscribe("*");
@@ -142,7 +142,7 @@ public:
   Subscription(Client& _client, const string& _subject):
     client(_client), subject(_subject)
   { client.subscribe(subject); }
-    
+
   ~Subscription() { client.unsubscribe(subject); }
 };
 
@@ -164,13 +164,13 @@ class MultiClient;  // forward
 // ** THIS MEANS SUBSCRIBER OBJECTS SHOULD NEVER BE INCLUDED OR AUTO  **
 // ** only new()'ed, and disconnected()'ed rather than delete()'ed    **
 
-// [Technical rationale:  This object is both the subscription and the 
-//  message handler.  The destructor can only unsubscribe once the 
+// [Technical rationale:  This object is both the subscription and the
+//  message handler.  The destructor can only unsubscribe once the
 //  Subscriber superclass destructor is called, by which time the object has
 //  'become' just a Subscriber, with no implementation of handle(), so you
 //  will get 'pure virtual method called' aborts() if a message is already
 //  in progress.  In any case, your child class state is no longer valid at
-//  that point.  disconnect() safely deregisters and requests a delayed 
+//  that point.  disconnect() safely deregisters and requests a delayed
 //  death if anything (including the caller) is active inside the handler
 class Subscriber
 {
@@ -180,7 +180,7 @@ protected:
 public:
   string subject;
   int active;        // Number of handlers using this
-  bool dead;         // Death requested 
+  bool dead;         // Death requested
 
   //------------------------------------------------------------------------
   // Constructor: register into multiclient
@@ -227,7 +227,7 @@ public:
 
 //==========================================================================
 // Complex 'multi-user' XMLMesh client using any transport
-// Operates with background worker threads 
+// Operates with background worker threads
 // Request-response is handled with the same interface as Client, but
 // multiple may be outstanding in different threads at once
 // Subscribed messages are delivered into Subscriber objects (q.v.)
@@ -238,7 +238,7 @@ private:
   list<Subscriber *> subscribers;              // Active subscribers
   map<string, MultiClientRequest *> requests;  // Active requests, by id
   MT::Thread *dispatch_thread;                 // Message dispatch thread
-  MT::ThreadPool<MultiClientWorker> workers;   // Worker thread pool 
+  MT::ThreadPool<MultiClientWorker> workers;   // Worker thread pool
   MT::Queue<Message *> pending_queue;          // Queued messages
   MT::RMutex mutex;                            // Global state lock
   bool alive;
@@ -354,7 +354,7 @@ class MessageTransportSubscriber: public Subscriber
 
     // Check body document name, if specified
     if (!message_handler.document_name.empty()
-     && request.name != message_handler.ns_prefix + ":" 
+     && request.name != message_handler.ns_prefix + ":"
                       + message_handler.document_name+"-request")
     {
       client.respond(SOAP::Fault::CODE_SENDER, "Bad document name", msg);
@@ -364,7 +364,7 @@ class MessageTransportSubscriber: public Subscriber
     // Prepare response body, even if not used
     XML::Element response(message_handler.ns_prefix+":"
                           +message_handler.document_name+"-response",
-                          "xmlns:" + message_handler.ns_prefix, 
+                          "xmlns:" + message_handler.ns_prefix,
                           message_handler.ns_url);
 
     // Create fake SSL client details

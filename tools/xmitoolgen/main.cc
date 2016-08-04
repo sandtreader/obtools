@@ -42,7 +42,7 @@ private:
 
 protected:
   //--------------------------------------------------------------------------
-  // Obtain an element parameter name to use to in the function generated 
+  // Obtain an element parameter name to use to in the function generated
   // by the given template - use shortened scope requested
   // Overridable by 'var' attribute
   virtual string get_parameter_name(XML::Element &te)
@@ -58,7 +58,7 @@ protected:
   //--------------------------------------------------------------------------
   // Obtain the type of the element parameter for the function
   virtual string get_parameter_type(XML::Element &te)
-  { 
+  {
     string name = te.get_attr("scope", "class");
     Scope scope = get_scope(name);
     return scope_nstype(scope) + "&";
@@ -76,7 +76,7 @@ protected:
 
   //--------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
-  virtual void expand_use(XML::Element& use_e, 
+  virtual void expand_use(XML::Element& use_e,
 			  XML::Element& define_e,
 			  XML::Element& parent,
 			  CPPT::Tags& tags,
@@ -84,7 +84,7 @@ protected:
 			  bool is_root = false);
 
   //--------------------------------------------------------------------------
-  // Generate includes / file-level code 
+  // Generate includes / file-level code
   virtual void generate_includes();
 
   //--------------------------------------------------------------------------
@@ -96,7 +96,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor - read configuration from config file, output code
   // to given output stream, errors to error stream
-  XMIGenerator(const string& _config_file, 
+  XMIGenerator(const string& _config_file,
 	       ostream& _sout=cout, ostream& _serr=cerr):
     Generator(_config_file, _sout, _serr) {}
 };
@@ -115,8 +115,8 @@ XMIGenerator::Scope XMIGenerator::get_scope(const string& name)
   else if (name == "association_end") return SCOPE_ASSOCIATION_END;
   else if (name == "generalization")  return SCOPE_GENERALIZATION;
 
-  serr << "Unknown scope: " << name << endl;  
-  return SCOPE_MODEL; 
+  serr << "Unknown scope: " << name << endl;
+  return SCOPE_MODEL;
 }
 
 //--------------------------------------------------------------------------
@@ -191,14 +191,14 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
   // Special handling for model/package at root - call on self, since model is
   // a package
   if (is_root
-      && (scope == SCOPE_PACKAGE 
+      && (scope == SCOPE_PACKAGE
        || scope == SCOPE_MODEL))
   {
     // Generate directly using the model as a package
     sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
     generate_template(te, te, tags, max_ci, "", "", streamname, script);
   }
-  else 
+  else
   {
     string listop;
     // Special handling for generalizations and associations within classes
@@ -217,9 +217,9 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
     sout << "  int " << count_var << " = " << p_var << listop << ".size();\n";
 
     sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
-    sout << "                      " << p_var << listop << ")\n"; 
+    sout << "                      " << p_var << listop << ")\n";
 
-    generate_template(te, te, tags, max_ci, index_var, count_var, 
+    generate_template(te, te, tags, max_ci, index_var, count_var,
 		      streamname, script);
     process_script(script, tags, streamname, max_ci);
     script.clear();
@@ -231,7 +231,7 @@ void XMIGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 
 //--------------------------------------------------------------------------
 // Iterate over child elements, calling predefined template
-void XMIGenerator::expand_use(XML::Element& use_e, 
+void XMIGenerator::expand_use(XML::Element& use_e,
 			      XML::Element& define_e,
 			      XML::Element& parent,
 			      CPPT::Tags& tags,
@@ -257,14 +257,14 @@ void XMIGenerator::expand_use(XML::Element& use_e,
   // Special handling for model/package at root - call on self, since model is
   // a package
   if (is_root
-      && (scope == SCOPE_PACKAGE 
+      && (scope == SCOPE_PACKAGE
        || scope == SCOPE_MODEL))
   {
     // Generate directly using the model as a package
     sout<<"  ObTools::UML::Model& " << c_var << " = *reader.model;\n\n";
     generate_use(use_e, define_e, tags, c_var, "0", "1", streamname);
   }
-  else 
+  else
   {
     string listop;
     // Special handling for generalizations and associations within classes
@@ -283,18 +283,18 @@ void XMIGenerator::expand_use(XML::Element& use_e,
     sout << "  int " << count_var << " = " << p_var << listop << ".size();\n";
 
     sout << "  OBTOOLS_UML_FOREACH(" << stype << ", " << c_var << ",\n";
-    sout << "                      " << p_var << listop << ")\n"; 
+    sout << "                      " << p_var << listop << ")\n";
 
-    generate_use(use_e, define_e, tags, c_var, 
+    generate_use(use_e, define_e, tags, c_var,
 		 index_var, count_var, streamname);
-    
+
     sout << "  " << index_var << "++;\n";
     sout << "  OBTOOLS_UML_ENDFOR\n";
   }
 }
 
 //--------------------------------------------------------------------------
-// Generate includes / file-level code 
+// Generate includes / file-level code
 void XMIGenerator::generate_includes()
 {
   Generator::generate_includes();
@@ -360,7 +360,7 @@ int main(int argc, char **argv)
   // Generate code
   generator.generate();
 
-  return 0;  
+  return 0;
 }
 
 

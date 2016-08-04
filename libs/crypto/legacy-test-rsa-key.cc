@@ -43,7 +43,7 @@ void test(bool priv, const string& pass_phrase="")
       exit(2);
     }
   }
-  else 
+  else
   {
     cerr << "Can't create valid key\n";
     exit(2);
@@ -65,7 +65,7 @@ int main()
   cout << "\nPrivate key with passphrase:\n";
   test(true, "hello");
 
-  return 0;  
+  return 0;
 }
 
 

@@ -50,11 +50,11 @@ Message::Message(istream& in_s, Parser& p): doc(0)
 //------------------------------------------------------------------------
 // Replace with another message - like a copy constructor, but explicit
 // and destroys the original
-void Message::take(Message& original) 
-{ 
+void Message::take(Message& original)
+{
   if (doc) delete doc;
-  doc=original.doc; 
-  original.doc=0; 
+  doc=original.doc;
+  original.doc=0;
 }
 
 //------------------------------------------------------------------------
@@ -156,7 +156,7 @@ XML::Element& Message::add_wsdl_body(const string& name,
   {
     XML::Element& env_body = doc->make_child("env:Body");
     env_body.add(body);
-    env_body.set_attr("env:encodingStyle", 
+    env_body.set_attr("env:encodingStyle",
 		      "http://schemas.xmlsoap.org/soap/encoding/");
   }
 
@@ -165,20 +165,20 @@ XML::Element& Message::add_wsdl_body(const string& name,
 
 //------------------------------------------------------------------------
 // Dump to given output stream
-void Message::write_to(ostream& s) const 
-{ 
+void Message::write_to(ostream& s) const
+{
   if (doc)
-    doc->write_to(s, true); 
+    doc->write_to(s, true);
   else
     s << "INVALID SOAP!\n";
-} 
+}
 
 //------------------------------------------------------------------------
 // Output to XML text
-string Message::to_string() const 
-{ 
+string Message::to_string() const
+{
   if (doc)
-    return doc->to_string(true); 
+    return doc->to_string(true);
   else
     return "INVALID SOAP!\n";
 }
@@ -192,7 +192,7 @@ ostream& operator<<(ostream& s, const Message& m)
 }
 
 //------------------------------------------------------------------------
-// Flatten any href/id (SOAP1.1) reference structure, taking copies of 
+// Flatten any href/id (SOAP1.1) reference structure, taking copies of
 // referenced elements and replacing referencing elements with them, thus
 // creating the inline equivalent document.
 // Leaves any references to ancestors (loops) alone
@@ -256,13 +256,13 @@ void Message::fix_hrefs(XML::Element& e, map<string, XML::Element *>& ids)
     // Recurse to this to replace hrefs inside it
     fix_hrefs(*copy, ids);
 
-    // Replace element with this 
+    // Replace element with this
     e.replace_with(copy);
 
     // Delete old element (e goes invalid here)
     delete &e;
   }
-  else 
+  else
   {
     // Recurse to children
     for(XML::Element::iterator p(e.children); p; ++p)
@@ -327,7 +327,7 @@ static Header _read_header(const XML::Element& he)
   else if (rs == RN_NEXT)
     role = Header::ROLE_NEXT;
   // UR is default - SOAP 1.2: 5.2.2
-  else if (rs.empty() || rs == RN_ULTIMATE_RECEIVER)  
+  else if (rs.empty() || rs == RN_ULTIMATE_RECEIVER)
     role = Header::ROLE_ULTIMATE_RECEIVER;
   else
     role = Header::ROLE_OTHER;
@@ -338,7 +338,7 @@ static Header _read_header(const XML::Element& he)
 //------------------------------------------------------------------------
 // Get list of header elements
 list<Header> Message::get_headers() const
-{ 
+{
   list<Header> headers;
 
   if (doc)

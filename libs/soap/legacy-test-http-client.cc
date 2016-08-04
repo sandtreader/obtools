@@ -43,8 +43,8 @@ int main(int argc, char **argv)
   // If it doesn't look like SOAP already, wrap it up
   if (in.find("env:Envelope") == string::npos)
   {
-    in = "<?xml version='1.0' encoding='UTF-8'?>\n" 
-         "<env:Envelope xmlns:env='http://schemas.xmlsoap.org/soap/envelope/'>\n" 
+    in = "<?xml version='1.0' encoding='UTF-8'?>\n"
+         "<env:Envelope xmlns:env='http://schemas.xmlsoap.org/soap/envelope/'>\n"
          "  <env:Body>\n"
          +in+
          "  </env:Body>\n"

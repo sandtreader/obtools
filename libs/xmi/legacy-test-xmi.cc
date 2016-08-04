@@ -36,7 +36,7 @@ int main()
   //List model
   reader.model->print(cout);
 
-  return 0;  
+  return 0;
 }
 
 

@@ -13,8 +13,8 @@
 namespace ObTools { namespace SSL {
 
 //--------------------------------------------------------------------------
-// Constructor 
-TCPClient::TCPClient(Context *ctx, Net::EndPoint endpoint): 
+// Constructor
+TCPClient::TCPClient(Context *ctx, Net::EndPoint endpoint):
   server(endpoint)
 {
   // Connect ordinary TCPClient, check its OK and steal its fd
@@ -53,7 +53,7 @@ TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote):
 //--------------------------------------------------------------------------
 // Constructor, binding specific local address/port and with timeout
 // port can be zero if you only want to bind address
-TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote, 
+TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
 		     int timeout): server(remote)
 {
   Net::TCPClient base(local, remote, timeout);
@@ -65,7 +65,7 @@ TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
 //--------------------------------------------------------------------------
 // Constructor, binding specific local address/port and with timeout and TTL
 // port can be zero if you only want to bind address
-TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote, 
+TCPClient::TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
 		     int timeout, int ttl): server(remote)
 {
   Net::TCPClient base(local, remote, timeout, ttl);

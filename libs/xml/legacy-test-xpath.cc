@@ -37,7 +37,7 @@ int main()
       p++)
   {
     ObTools::XML::Element& wombat=**p;
-    cout << "  [" << wombat.content << "]" 
+    cout << "  [" << wombat.content << "]"
 	 << " at " << wombat.get_xpath() << endl;
   }
 
@@ -48,18 +48,18 @@ int main()
   cout << "cellar/wombat: " << xpath.get_value("cellar/wombat") << endl;
   cout << "cellar/wombat[2]: " << xpath.get_value("cellar/wombat[2]") << endl;
   cout << "cellar[2]/wombat: " << xpath.get_value("cellar[2]/wombat") << endl;
-  cout << "XX1:bing/XX1:bong/@jim: " 
+  cout << "XX1:bing/XX1:bong/@jim: "
        << xpath.get_value_int("XX1:bing/XX1:bong/@jim") << endl;
-  cout << "XX1:bing/XX1:bong/@long: " 
+  cout << "XX1:bing/XX1:bong/@long: "
        << xpath.get_value_int64("XX1:bing/XX1:bong/@long") << endl;
-  cout << "XX1:bing/XX1:bong/random:element/@flag: " 
-       << xpath.get_value_bool("XX1:bing/XX1:bong/random:element/@flag") 
+  cout << "XX1:bing/XX1:bong/random:element/@flag: "
+       << xpath.get_value_bool("XX1:bing/XX1:bong/random:element/@flag")
        << endl;
   cout << "not: "           << xpath.get_value("not", "OK") << endl;
   cout << "not/@foo: "      << xpath.get_value("not/@foo", "OK") << endl;
   cout << "bar/@not: "      << xpath.get_value("bar/@not", "OK") << endl;
 
-  return 0;  
+  return 0;
 }
 
 

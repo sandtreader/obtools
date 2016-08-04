@@ -31,7 +31,7 @@ int main()
   for(vector<string>::iterator p = l2.begin(); p!=l2.end(); ++p)
     cout << "  [" << *p << "]\n";
 
-  return 0;  
+  return 0;
 }
 
 

@@ -49,7 +49,7 @@ int main()
   while (res.fetch(row))
     log.detail << row["id"] << ":" << row["name"] << endl;
 
-  return 0;  
+  return 0;
 }
 
 

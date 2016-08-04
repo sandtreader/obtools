@@ -13,12 +13,12 @@
 namespace ObTools { namespace Log {
 
 //------------------------------------------------------------------------
-// StreamBuf Constructor 
-StreamBuf::StreamBuf(Channel& _channel, Level _level): 
+// StreamBuf Constructor
+StreamBuf::StreamBuf(Channel& _channel, Level _level):
   closed(false), channel(_channel), level(_level)
 {
   // use unbuffered IO, since we're going to buffer it anyway
-  setp(0,0); 
+  setp(0,0);
   setg(0,0,0);
 }
 

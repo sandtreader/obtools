@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 #else
   Log::StreamChannel chan_out(cout);
 #endif
-  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp", 
+  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp",
 						 DEFAULT_TIMESTAMP), chan_out);
   const int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
   Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   pidfile.close();
 #endif
 
-  log.summary << "ObTools XMLMesh server '" << argv[0] << "' version " 
+  log.summary << "ObTools XMLMesh server '" << argv[0] << "' version "
               << VERSION << " starting\n";
 
   // Configure server
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 
       if (gid >= 0)
       {
-	log.summary << "Changing to group " << groupname 
+	log.summary << "Changing to group " << groupname
 		    << " (" << gid << ")\n";
         if (setgid(static_cast<gid_t>(gid)))
 	{
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 	  goto shutdown;
 	}
       }
-      else 
+      else
       {
 	log.error << "Can't find group " << groupname << "\n";
 	goto shutdown;
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
           return 4;
 	}
       }
-      else 
+      else
       {
 	log.error << "Can't find user " << username << "\n";
         return 4;

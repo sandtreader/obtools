@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  log.summary << "Host: " << addr 
+  log.summary << "Host: " << addr
 	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
   client.shutdown();
   cout << "Done\n";
 
-  return 0;  
+  return 0;
 }
 
 

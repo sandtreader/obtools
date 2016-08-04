@@ -28,11 +28,11 @@ int RSA::max_plaintext()
 }
 
 //------------------------------------------------------------------------
-// Encrypt a block 
+// Encrypt a block
 // Length may be up to max_plaintext() bytes
 // Returns whether successful (key set up correctly)
 // 'to' must be writable to cipher_size() bytes
-bool RSA::encrypt(const unsigned char *from, int length, 
+bool RSA::encrypt(const unsigned char *from, int length,
 		  unsigned char *to)
 {
   if (!key.valid) return false;
@@ -47,10 +47,10 @@ bool RSA::encrypt(const unsigned char *from, int length,
 }
 
 //------------------------------------------------------------------------
-// Decrypt a block 
+// Decrypt a block
 // Returns decrypted length of block
 // Assumes 'from' data is always cipher_size() bytes
-// 'to' must be writable to cipher_size() bytes 
+// 'to' must be writable to cipher_size() bytes
 // (unless you _really_ understand padding!)
 int RSA::decrypt(const unsigned char *from, unsigned char *to)
 {

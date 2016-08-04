@@ -78,7 +78,7 @@ int main()
   map<string,string> trans_map;
   trans_map["wombat"]="animal.small.furry";  // Translate
   trans_map["ns1:bing"]="";                  // Delete
-  
+
   root.translate(trans_map);
 
   cout << endl;
@@ -92,7 +92,7 @@ int main()
   cout << "Here it is merged with another foo:\n";
   cout << root;
 
-  return 0;  
+  return 0;
 }
 
 

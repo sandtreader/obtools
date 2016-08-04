@@ -3,7 +3,7 @@
 //
 // Thread action - runs its contents as a separate real processor thread
 // Sleep time gives time (us) between child ticks
-// <thread sleep="10000"> 
+// <thread sleep="10000">
 //   ...
 // </thread>
 //

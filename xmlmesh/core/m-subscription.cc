@@ -15,13 +15,13 @@ namespace ObTools { namespace XMLMesh {
 
 //--------------------------------------------------------------------------
 // Constructor for requests
-SubscriptionMessage::SubscriptionMessage(Operation _operation, 
+SubscriptionMessage::SubscriptionMessage(Operation _operation,
 					 const string& _subject):
   Message((_operation==JOIN)?"xmlmesh.subscription.join"
 	                    :"xmlmesh.subscription.leave",
 	  new XML::Element((_operation==JOIN)?"x:join":"x:leave"),
 	  true),
-  operation(_operation), 
+  operation(_operation),
   subject(_subject)
 {
   soap_message->get_body().set_attr("subject", _subject);
@@ -29,7 +29,7 @@ SubscriptionMessage::SubscriptionMessage(Operation _operation,
 
 //--------------------------------------------------------------------------
 // Down-cast constructor from general message on receipt
-SubscriptionMessage::SubscriptionMessage(Message& msg): 
+SubscriptionMessage::SubscriptionMessage(Message& msg):
   Message(msg.get_text())  // Copy text
 {
   // Get the body
@@ -45,11 +45,11 @@ SubscriptionMessage::SubscriptionMessage(Message& msg):
     Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
     error_log << "Unknown XML in subscription message:\n";
     error_log << get_text() << "\n";
-    operation = BOGUS;  
+    operation = BOGUS;
   }
 
   // Get subject
-  subject = body.get_attr("subject", "*"); 
+  subject = body.get_attr("subject", "*");
 }
 
 //------------------------------------------------------------------------
@@ -60,7 +60,7 @@ ostream& operator<<(ostream& s, const SubscriptionMessage& m)
   {
     case SubscriptionMessage::JOIN:  s<<"Join ("; break;
     case SubscriptionMessage::LEAVE: s<<"Leave ("; break;
-    case SubscriptionMessage::BOGUS: 
+    case SubscriptionMessage::BOGUS:
       s<<"Problem in subscription handling ("; break;
   }
 

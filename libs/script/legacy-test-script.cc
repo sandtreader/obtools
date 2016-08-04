@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   }
   log.summary << "Script finished\n";
 
-  return 0;  
+  return 0;
 }
 
 

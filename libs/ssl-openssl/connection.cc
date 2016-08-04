@@ -15,14 +15,14 @@ namespace ObTools { namespace SSL_OpenSSL {
 //--------------------------------------------------------------------------
 // Raw stream read wrapper
 ssize_t Connection::cread(void *buf, size_t count)
-{ 
+{
   return SSL_read(ssl, buf, count);
 }
 
 //--------------------------------------------------------------------------
 // Raw stream write wrapper
 ssize_t Connection::cwrite(const void *buf, size_t count)
-{ 
+{
   return SSL_write(ssl, buf, count);
 }
 
@@ -36,10 +36,10 @@ string Connection::get_peer_cn()
 
 //--------------------------------------------------------------------------
 // Destructor
-Connection::~Connection() 
+Connection::~Connection()
 {
-  SSL_shutdown(ssl); 
-  SSL_free(ssl); 
+  SSL_shutdown(ssl);
+  SSL_free(ssl);
 }
 
 }} // namespaces

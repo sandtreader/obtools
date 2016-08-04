@@ -47,7 +47,7 @@ void StringReader::rewind(size_t n)
 {
   if (n<=offset)
     offset-=n;
-  else 
+  else
     throw Error(1, "Rewound too far");
 }
 

@@ -15,7 +15,7 @@
 namespace ObTools { namespace Misc {
 
 //------------------------------------------------------------------------
-// Polynomials expressed as a bitmap with D<n> = x^n, top term left off 
+// Polynomials expressed as a bitmap with D<n> = x^n, top term left off
 #define POLY_CRC32  ((1U<<26) + (1U<<23) + (1U<<22) + (1U<<16) + \
                      (1U<<12) + (1U<<11) + (1U<<10) + (1U<<8) + \
                      (1U<<7) + (1U<<5) + (1U<<4) + (1U<<2) + \

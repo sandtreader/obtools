@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::Time: test-duration.cc
 //
-// Test harness for time library - reading and converting durations 
+// Test harness for time library - reading and converting durations
 //
 // Copyright (c) 2005 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement

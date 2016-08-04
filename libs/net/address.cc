@@ -40,9 +40,9 @@ IPAddress::IPAddress(const string& hostname_s)
     // Believed to be threadsafe (using TLS for result), but doesn't
     // provide gethostbyname_r anyway
     struct hostent *host;
-    host = gethostbyname(hostname);               
+    host = gethostbyname(hostname);
 
-    if (host) 
+    if (host)
       address = (uint32_t)ntohl(*(unsigned long *)(host->h_addr));
     else
       address = BADADDR;

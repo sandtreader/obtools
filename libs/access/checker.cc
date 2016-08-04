@@ -2,7 +2,7 @@
 // ObTools::Access: ot-access.h
 //
 // Access checker module
-// 
+//
 // Copyright (c) 2008 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -43,8 +43,8 @@ Checker::Checker(const XML::Element& config, const string& ns)
 bool Checker::check(const string& resource, Net::IPAddress address,
 		    const string& user)
 {
-  bool result;  
- 
+  bool result;
+
   // Ask all resources;  first one that matches the resource gets to choose
   for(list<Resource *>::iterator p = resources.begin(); p!=resources.end();++p)
   {
@@ -84,7 +84,7 @@ void Checker::dump(ostream& sout) const
     sout << "Resources:\n";
   }
 
-  for(list<Resource *>::const_iterator p = resources.begin(); 
+  for(list<Resource *>::const_iterator p = resources.begin();
       p!=resources.end();++p)
   {
     const Resource *r = *p;

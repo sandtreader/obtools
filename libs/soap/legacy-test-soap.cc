@@ -71,11 +71,11 @@ int main()
 
   cout << "\nConstructed MustUnderstand Fault:\n";
   SOAP::MustUnderstandFault mu_fault;
-  mu_fault.add_not_understood("xm:foo", "xmlns:xm", 
+  mu_fault.add_not_understood("xm:foo", "xmlns:xm",
 			      "http://www.obtools.com/foo");
   cout << mu_fault;
 
-  return 0;  
+  return 0;
 }
 
 

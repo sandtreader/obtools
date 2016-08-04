@@ -3,10 +3,10 @@
 //
 // Definition of ObTools UML class model
 //
-// Basically a simplified subset of UML1.4 with the main Foundation.Core 
+// Basically a simplified subset of UML1.4 with the main Foundation.Core
 // Foundation.Data-Type and Foundation.Model-Management bits needed
 // for simple Class Diagrams
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -19,10 +19,10 @@
 #include <vector>
 #include "ot-xml.h"
 
-//Mutual recursion problems - define only what ot-xmi.h needs 
+//Mutual recursion problems - define only what ot-xmi.h needs
 //before including it
-namespace ObTools { namespace UML { 
-class Element; 
+namespace ObTools { namespace UML {
+class Element;
 class Classifier;
 class Model;
 }}
@@ -44,7 +44,7 @@ using namespace ObTools;
 // !UML: We only support a single level of range
 struct Multiplicity
 {
-  int lower; 
+  int lower;
   int upper;  // -1 for *
 
   //Default constructor sets to 1-1
@@ -166,14 +166,14 @@ protected:
 
   //Support for subclass constructor functions - read all subelements
   //of given types from XML source, and uses factory func to create them
-  //If id_required is set (false by default), it ignores any elements 
-  //without an 'xmi.id' attribute - these are refs 
+  //If id_required is set (false by default), it ignores any elements
+  //without an 'xmi.id' attribute - these are refs
   //Prunes descendant tree at 'prune', if given
   void read_subelements(const char *name, ElementFactoryFunc factory,
 			bool id_required = false, const char *prune=0);
 
   // Element header printer - print header line
-  // Override this in subclass: upcall to parent, then to add your info 
+  // Override this in subclass: upcall to parent, then to add your info
   // to the end of the line.  Do not add endl.
   virtual void print_header(ostream &sout);
 
@@ -198,7 +198,7 @@ public:
   //Default is to pass down to children
   virtual void build_refs();
 
-  // Element printer - indents to indent, calls down to print_header, then 
+  // Element printer - indents to indent, calls down to print_header, then
   // prints sub-elements at indent+2
   // Only override if you want to replace entire printing
   virtual void print(ostream& sout, int indent=0);
@@ -230,8 +230,8 @@ class ModelElement: public Element  //abstract
 {
 protected:
   void build_refs();                        //Capture stereotype ref
-  void print_header(ostream& sout);  
-  
+  void print_header(ostream& sout);
+
 public:
   string name;               //Published name
   Stereotype *stereotype;    //0 if none
@@ -247,7 +247,7 @@ public:
 class Feature: public ModelElement  // abstract
 {
 protected:
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   bool is_static;      //= (ownerScope==sk_classifier)
@@ -262,7 +262,7 @@ class StructuralFeature: public Feature  //abstract
 {
 protected:
   void build_refs();                        //Capture type
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   Multiplicity multiplicity;
@@ -278,29 +278,29 @@ public:
 class Attribute: public StructuralFeature
 {
 protected:
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   Expression initial_value;
 
-  //Constructor 
+  //Constructor
   Attribute(XMI::Reader &rdr, XML::Element& xe);
 };
 
 //==========================================================================
-// UML Parameter 
+// UML Parameter
 class Parameter: public ModelElement
 {
 protected:
   void build_refs();                        //Capture type
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   Expression default_value;
   ParameterDirection kind;
   Classifier *type;
 
-  //Constructor 
+  //Constructor
   Parameter(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -309,7 +309,7 @@ public:
 class BehaviouralFeature: public Feature  //abstract
 {
 protected:
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   bool is_query;
@@ -321,7 +321,7 @@ public:
   //Sugar function to get parameters - also removes 'return' pseudo-parameter
   list<Parameter *> get_parameters();
 
-  // Sugar macro for above 
+  // Sugar macro for above
   #define OBTOOLS_UML_FOREACH_PARAMETER(_var, _f) \
     OBTOOLS_UML_FOREACH(Parameter, _var, (_f).get_parameters())
 
@@ -333,14 +333,14 @@ public:
 // UML Operation class
 class Operation: public BehaviouralFeature
 {
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   CallConcurrency concurrency;
   bool is_abstract;
   bool is_root;
-  bool is_leaf; 
-  
+  bool is_leaf;
+
   //Constructor
   Operation(XMI::Reader& rdr, XML::Element& xe);
 };
@@ -362,7 +362,7 @@ class Generalization: public Relationship
 {
 protected:
   void build_refs();                        //Capture parent, child
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   GeneralizableElement *gparent;
@@ -381,7 +381,7 @@ public:
 class GeneralizableElement: public ModelElement   //abstract
 {
 protected:
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   bool is_root;
@@ -389,8 +389,8 @@ public:
   bool is_abstract;
 
   // List of pointers to Generalization objects
-  list<Generalization *> generalizations; 
-  list<Generalization *> specializations; 
+  list<Generalization *> generalizations;
+  list<Generalization *> specializations;
 
   // Template functions for sugar functions to get parents/children of
   // particular types
@@ -432,7 +432,7 @@ class Classifier: public GeneralizableElement  // abstract
 public:
   list<AssociationEnd *> association_ends;  // That refer to us
 
-  // Sugar macro for above 
+  // Sugar macro for above
   #define OBTOOLS_UML_FOREACH_ASSOCIATION_END(_var, _c) \
     OBTOOLS_UML_FOREACH(AssociationEnd, _var, (_c).association_ends)
 
@@ -442,19 +442,19 @@ public:
   list<Operation *> get_operations()
     { return filter_subelements<Operation>(); }
 
-  // Sugar macros for above 
+  // Sugar macros for above
   #define OBTOOLS_UML_FOREACH_ATTRIBUTE(_var, _c) \
     OBTOOLS_UML_FOREACH(Attribute, _var, (_c).get_attributes())
   #define OBTOOLS_UML_FOREACH_OPERATION(_var, _c) \
     OBTOOLS_UML_FOREACH(Operation, _var, (_c).get_operations())
 
-  // Sugar functions to get simple inheritance structure 
+  // Sugar functions to get simple inheritance structure
   list<Classifier *> get_parents()
     { return filter_parents<Classifier>(); }
   list<Classifier *> get_children()
     { return filter_children<Classifier>(); }
-  
-  // Sugar macros for above 
+
+  // Sugar macros for above
   #define OBTOOLS_UML_FOREACH_PARENT_CLASSIFIER(_var, _c) \
     OBTOOLS_UML_FOREACH(Classifier, _var, (_c).get_parents())
   #define OBTOOLS_UML_FOREACH_CHILD_CLASSIFIER(_var, _c) \
@@ -465,12 +465,12 @@ public:
 };
 
 //==========================================================================
-// UML Class 
+// UML Class
 // (most functionality comes from Classifier)
 class Class: public Classifier
 {
 protected:
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   bool is_active;
@@ -513,7 +513,7 @@ public:
   list<Interface *> get_parents()
     { return filter_parents<Interface>(); }
 
-  // Sugar macro for above 
+  // Sugar macro for above
   #define OBTOOLS_UML_FOREACH_PARENT_INTERFACE(_var, _i) \
     OBTOOLS_UML_FOREACH(Interface, _var, (_i).get_parents())
 
@@ -523,7 +523,7 @@ public:
 };
 
 //==========================================================================
-// UML Association 
+// UML Association
 class Association: public GeneralizableElement
 {
 public:
@@ -531,17 +531,17 @@ public:
   // such a common thing to index
   vector<AssociationEnd *> connections;     //Always 2 or more
 
-  //Constructor 
+  //Constructor
   Association(XMI::Reader& rdr, XML::Element& xe);
 };
 
 //==========================================================================
-// UML AssociationEnd 
+// UML AssociationEnd
 class AssociationEnd: public ModelElement
 {
 protected:
   void build_refs();                        //Capture participant
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   bool is_navigable;
@@ -549,7 +549,7 @@ public:
   AggregationKind aggregation;
   Multiplicity multiplicity;
   Classifier *participant;                  //Thing we connect to
-  int connection_index;                     //Which end we are in the 
+  int connection_index;                     //Which end we are in the
                                             // association - 0..n
 
   //Get the 'other' end of the association (only works for 2 ends)
@@ -579,7 +579,7 @@ public:
 class Enumeration: public DataType
 {
 protected:
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
   // We just flatten EnumerationLiterals to a string list
@@ -590,7 +590,7 @@ public:
 };
 
 //==========================================================================
-// UML Stereotype 
+// UML Stereotype
 // We don't bother with much of this except as a name, although it is
 // still inheritable from GE
 class Stereotype: public GeneralizableElement
@@ -602,7 +602,7 @@ public:
 };
 
 //==========================================================================
-// UML Package 
+// UML Package
 // Currently ignore Namespace component of this
 class Package: public GeneralizableElement
 {
@@ -610,11 +610,11 @@ public:
   //Sugar functions to get particular element types
   list<Package *> get_subpackages()
     { return filter_subelements<Package>(); }
-  list<Class *> get_classes()     
+  list<Class *> get_classes()
     { return filter_subelements<Class>(); }
-  list<Interface *> get_interfaces()     
+  list<Interface *> get_interfaces()
     { return filter_subelements<Interface>(); }
-  list<DataType *> get_datatypes()     
+  list<DataType *> get_datatypes()
     { return filter_subelements<DataType>(); }
   list<Association *> get_associations()
     { return filter_subelements<Association>(); }
@@ -629,7 +629,7 @@ public:
   #define OBTOOLS_UML_FOREACH_ASSOCIATION(_var, _p) \
     OBTOOLS_UML_FOREACH(Association, _var, (_p).get_associations())
 
-  //Constructor 
+  //Constructor
   Package(XMI::Reader& rdr, XML::Element& xe);
 };
 
@@ -638,15 +638,15 @@ public:
 // Just a package with a distinguished type and a version
 class Model: public Package
 {
-  void print_header(ostream& sout);  
+  void print_header(ostream& sout);
 
 public:
-  double uml_version;     
+  double uml_version;
 
-  //Constructor - after everything loaded up, we call build_refs to 
+  //Constructor - after everything loaded up, we call build_refs to
   //fix up references
   Model(XMI::Reader& rdr, XML::Element& xe, double version=0):
-    Package(rdr, xe), 
+    Package(rdr, xe),
     uml_version(version)
   { build_refs(); }
 };
@@ -655,11 +655,11 @@ public:
 // XMI iteration support macros (pray to the C++ gods for anonymous
 // functions one day!)
 //
-// e.g. 
+// e.g.
 //    OBTOOLS_UML_FOREACH(Attribute, a, cls.get_attributes())
 //      cout << a.name << endl;
 //    OBTOOLS_UML_ENDFOR
-// 
+//
 // Sugared further within each class, above
 
 #define OBTOOLS_UML_FOREACH(_cls, _var, _list)                            \

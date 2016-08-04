@@ -4,7 +4,7 @@
 // Public definitions for ObTools::DNS
 // Portable DNS lookups for TXT, CERT, MX etc. records which can't be got
 // from gethostbyname (or ot-net.h wrapper)
-// 
+//
 // Copyright (c) 2008 Obtools Limited.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -14,7 +14,7 @@
 
 #include <string>
 
-namespace ObTools { namespace DNS { 
+namespace ObTools { namespace DNS {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -38,7 +38,7 @@ public:
   Resolver();
 
   //--------------------------------------------------------------------------
-  // Query for a domain RR of the given type and return raw RDATA from the 
+  // Query for a domain RR of the given type and return raw RDATA from the
   // first answer section
   string query(const string& domain, Type type, const string& type_name="");
 

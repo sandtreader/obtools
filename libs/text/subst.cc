@@ -23,7 +23,7 @@ string subst(string text, const string& old, const string& rep)
   string::size_type old_l = old.size();
   string::size_type rep_l = rep.size();
 
-  while (p<text.size() && (p=text.find(old,p))!=string::npos) 
+  while (p<text.size() && (p=text.find(old,p))!=string::npos)
   {
     text.replace(p,old_l,rep);
     p+=rep_l;

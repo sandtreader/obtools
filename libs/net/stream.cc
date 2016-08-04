@@ -12,9 +12,9 @@
 namespace ObTools { namespace Net {
 
 //------------------------------------------------------------------------
-// TCPStreamBuf Constructor 
+// TCPStreamBuf Constructor
 TCPStreamBuf::TCPStreamBuf(TCPSocket& _s, int _in_buf_size, int _out_buf_size):
-  s(_s), 
+  s(_s),
   in_buf_size(_in_buf_size), in_buf(0),
   out_buf_size(_out_buf_size), out_buf(0)
 {
@@ -28,7 +28,7 @@ TCPStreamBuf::TCPStreamBuf(TCPSocket& _s, int _in_buf_size, int _out_buf_size):
   // the extra character in overflow()
   if (!out_buf_size) out_buf_size = 1;
   out_buf = new char[out_buf_size];
-  setp(out_buf, out_buf+out_buf_size-1); 
+  setp(out_buf, out_buf+out_buf_size-1);
 }
 
 //------------------------------------------------------------------------
@@ -96,7 +96,7 @@ streamsize TCPStreamBuf::showmanyc()
 }
 
 //------------------------------------------------------------------------
-// TCPStreamBuf Destructor 
+// TCPStreamBuf Destructor
 TCPStreamBuf::~TCPStreamBuf()
 {
   if (in_buf) delete[] in_buf;

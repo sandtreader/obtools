@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::DB Library
 // General C++ database wrapper
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -33,7 +33,7 @@ using namespace std;
 //  2) The driver unescapes all data as it fetches it
 //  3) In raw operations such as exec() and query() it is up to the caller
 //     to escape string values in the SQL
-//  4) In 'cooked' operations such as insert() and select() where this 
+//  4) In 'cooked' operations such as insert() and select() where this
 //     library constructs its own SQL all values are escaped automatically
 
 //==========================================================================
@@ -659,7 +659,7 @@ public:
                           uint64_t id, const string& id_field = "id");
 
   //------------------------------------------------------------------------
-  // Do a SELECT for all fields in the given row in the given table 
+  // Do a SELECT for all fields in the given row in the given table
   // with the given string ID, and return the single (first) row as
   // the values in the row (unescaped)
   // ID value is escaped
@@ -744,7 +744,7 @@ public:
   bool update(const string& table, const Row& row, const Row& where_row);
 
   //------------------------------------------------------------------------
-  // Do an UPDATE for all fields in the given row in the given table 
+  // Do an UPDATE for all fields in the given row in the given table
   // matching the given integer ID
   // Returns whether successful
   bool update_id(const string& table, const Row& row,

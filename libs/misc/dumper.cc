@@ -24,7 +24,7 @@ void Dumper::dump(const void *block, int length)
   {
     int w = length-offset;
     if (w>width) w=width;
-    
+
     sout << hex << setw(4) << setfill('0') << offset << ':';
     for(int i=0; i<w; i++)
     {
@@ -39,7 +39,7 @@ void Dumper::dump(const void *block, int length)
 	if (split && !(i%split)) sout << ' ';
 	sout << "  ";
       }
-	
+
       sout << " | ";
       for(int i=0; i<w; i++)
       {

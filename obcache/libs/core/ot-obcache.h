@@ -97,7 +97,7 @@ protected:
 public:
   //--------------------------------------------------------------------------
   /// Constructor from id and storage
-  Stub(object_id_t _id, Storage& _storage): 
+  Stub(object_id_t _id, Storage& _storage):
     id(_id), storage(_storage), real(0) {}
 
 };
@@ -107,14 +107,14 @@ public:
 /// Maintains LRU cache of objects in memory
 /// Also implements Storage so it can be used by a Stub
 class Cache:
-  public ObTools::Cache::LRUEvictionPointerCache<object_id_t, Object>, 
+  public ObTools::Cache::LRUEvictionPointerCache<object_id_t, Object>,
   public Storage
 {
-  Storage& storage;      ///< Real storage 
+  Storage& storage;      ///< Real storage
 
 public:
   //--------------------------------------------------------------------------
-  /// Constructor 
+  /// Constructor
   Cache(Storage& _storage, unsigned int _limit=0):
   ObTools::Cache::LRUEvictionPointerCache<object_id_t, Object>::
     LRUEvictionPointerCache(_limit),

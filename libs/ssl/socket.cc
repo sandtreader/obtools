@@ -15,7 +15,7 @@ namespace ObTools { namespace SSL {
 //--------------------------------------------------------------------------
 // Raw stream read wrapper
 ssize_t TCPSocket::cread(void *buf, size_t count)
-{ 
+{
   // If not SSL, revert to basic
   if (!ssl) return Net::TCPSocket::cread(buf, count);
 
@@ -25,7 +25,7 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
 //--------------------------------------------------------------------------
 // Raw stream write wrapper
 ssize_t TCPSocket::cwrite(const void *buf, size_t count)
-{ 
+{
   // If not SSL, revert to basic
   if (!ssl) return Net::TCPSocket::cwrite(buf, count);
 

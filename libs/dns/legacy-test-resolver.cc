@@ -33,9 +33,9 @@ int main(int argc, char **argv)
   for(i=1; i<argc-1; i++)
   {
     string opt(argv[i]);
-    if (opt == "-q" || opt=="--quiet") 
+    if (opt == "-q" || opt=="--quiet")
       log_level--;
-    else if (opt == "-v" || opt=="--verbose") 
+    else if (opt == "-v" || opt=="--verbose")
       log_level++;
     else
     {

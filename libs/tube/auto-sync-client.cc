@@ -24,8 +24,8 @@ class DispatchThread: public MT::Thread
   AutoSyncClient& client;
   Log::Streams log;  // Thread local
 
-  void run() 
-  { 
+  void run()
+  {
     while (client.is_alive())
     {
       Message msg;
@@ -35,7 +35,7 @@ class DispatchThread: public MT::Thread
       if (msg.is_valid()) client.handle_async_message(msg);
     }
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << client.name 
+    OBTOOLS_LOG_IF_DEBUG(log.debug << client.name
 			 << " (dispatch): Thread shut down\n";)
   }
 
@@ -49,7 +49,7 @@ public:
 void AutoSyncClient::handle_async_message(Message& msg)
 {
   Log::Streams log;
-  log.error << name << ": Non-response message " 
+  log.error << name << ": Non-response message "
 	    << msg.stag() << " ignored\n";
 
   if (msg.flags & FLAG_RESPONSE_REQUIRED)
@@ -68,7 +68,7 @@ void AutoSyncClient::handle_async_message(Message& msg)
 //------------------------------------------------------------------------
 // Constructor - takes server endpoint (address+port), request timeout
 // (in seconds) and optional name
-AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout, 
+AutoSyncClient::AutoSyncClient(Net::EndPoint _server, int _timeout,
 			       const string& _name):
   SyncClient(_server, _timeout, _name)
 {

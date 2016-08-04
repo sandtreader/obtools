@@ -27,7 +27,7 @@ Action *Language::create_action(Script& script, XML::Element& xml)
   Action *a = action_registry.create(xml.name, Action::CP(script, xml));
   if (a) return a;
   Log::Streams log;
-  log.error << "Unknown action '" << xml.name << "' at line " 
+  log.error << "Unknown action '" << xml.name << "' at line "
 	    << xml.line << endl;
   return 0;
 }

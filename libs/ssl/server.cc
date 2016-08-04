@@ -41,7 +41,7 @@ Net::TCPSocket *TCPServer::create_client_socket(int client_fd)
 }
 
 //--------------------------------------------------------------------------
-// Override of normal process method to call the SSL version 
+// Override of normal process method to call the SSL version
 void TCPServer::process(Net::TCPSocket &s, Net::EndPoint client)
 {
   // Downcast to our TCPSocket - should be safe because we create it above

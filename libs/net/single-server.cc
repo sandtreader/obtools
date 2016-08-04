@@ -34,7 +34,7 @@ void TCPSingleServer::start()
 
 //--------------------------------------------------------------------------
 // Listen for a connection and return a TCP socket
-// If timeout is non-zero, times out and returns 0 if no connection in 
+// If timeout is non-zero, times out and returns 0 if no connection in
 // that time
 // Returns connected socket or 0 if it fails
 TCPSocket *TCPSingleServer::wait(int timeout)
@@ -46,9 +46,9 @@ TCPSocket *TCPSingleServer::wait(int timeout)
 
   // Accept connection
   fd_t new_fd = ::accept(fd, 0, 0);
-  if (new_fd != INVALID_FD) 
+  if (new_fd != INVALID_FD)
     return new TCPSocket(new_fd);
-  else 
+  else
     return 0;
 }
 

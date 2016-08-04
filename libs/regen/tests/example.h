@@ -11,13 +11,13 @@
 //~
 //~foo
 
-//~[ 	  class foo   	 
+//~[ 	  class foo
 //------------------------------------------------------------------
 class foo: bar
-{             
+{
 
-private:      
-  int a;      
+private:
+  int a;
   string b;
 
   //~^ ----- Manually added private methods ------
@@ -25,24 +25,24 @@ private:
 
   //~v -------------------------------------------
 
-public:      
+public:
   int uml_method();
-  bar();           
-}                  
+  bar();
+}
 //~]
 
 
-//~[ Example::foo (1) 
+//~[ Example::foo (1)
 //------------------------------------------------------------------------
-void Example::foo(int x, int y)                                    
-{                                                              
+void Example::foo(int x, int y)
+{
 //~^ ---- Manual code ----
-                                                                   
+
 
 
 
 //~v ---------------------
-} 
+}
 //~]
 
 

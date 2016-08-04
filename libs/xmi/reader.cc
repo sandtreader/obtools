@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 using namespace ObTools::XMI;
-using namespace ObTools; 
+using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Constructor
@@ -28,14 +28,14 @@ Reader::Reader(ostream&s):
 
 //------------------------------------------------------------------------
 // Warning handler
-void Reader::warning(const char *warn, const string& detail) 
+void Reader::warning(const char *warn, const string& detail)
 {
   serr << warn << detail << endl;
 }
 
 //------------------------------------------------------------------------
 // Fatal error handler
-void Reader::error(const char *err, const string& detail) 
+void Reader::error(const char *err, const string& detail)
      throw (ParseFailed)
 {
   serr << err << detail << endl;
@@ -65,7 +65,7 @@ UML::Element *Reader::lookup_uml_element(const string& id)
 // Gather XML element IDs from this element, and recurse
 void Reader::gather_xml_element_ids(XML::Element& e)
 {
-  //Get id 
+  //Get id
   string id = e["xmi.id"];
 
   if (!id.empty())
@@ -97,7 +97,7 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
   // Build map 1.0 -> 1.1
   // Note - we only map things we're interested in, leaving the document
   // a mixture of old and new names - beware, if you want to use the
-  // XML document for things our model doesn't cover, and you want to 
+  // XML document for things our model doesn't cover, and you want to
   // read XMI 1.0.  One option is to do your own mapping of the document
   // like this before you process it.
 
@@ -107,7 +107,7 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
   upgrade["Foundation.Core.Class"]        = "UML:Class";
   upgrade["Foundation.Core.DataType"]     = "UML:DataType";
   upgrade["Foundation.Core.Enumeration"]  = "UML:Enumeration";
-  upgrade["Foundation.Core.EnumerationLiteral"]  = 
+  upgrade["Foundation.Core.EnumerationLiteral"]  =
           "UML:EnumerationLiteral";
   upgrade["Foundation.Core.Primitive"]    = "UML:Primitive";
   upgrade["Foundation.Core.Stereotype"]   = "UML:Stereotype";
@@ -123,21 +123,21 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
 
   // 'Property' names
   upgrade["Foundation.Core.ModelElement.name"] = "UML:ModelElement.name";
-  upgrade["Foundation.Core.ModelElement.visibility"] = 
+  upgrade["Foundation.Core.ModelElement.visibility"] =
           "UML:ModelElement.visibility";
-  upgrade["Foundation.Core.ModelElement.stereotype"] = 
+  upgrade["Foundation.Core.ModelElement.stereotype"] =
           "UML:ModelElement.stereotype";
 
-  upgrade["Foundation.Core.GeneralizableElement.isAbstract"] = 
+  upgrade["Foundation.Core.GeneralizableElement.isAbstract"] =
           "UML:GeneralizableElement.isAbstract";
-  upgrade["Foundation.Core.GeneralizableElement.isRoot"] = 
+  upgrade["Foundation.Core.GeneralizableElement.isRoot"] =
           "UML:GeneralizableElement.isRoot";
-  upgrade["Foundation.Core.GeneralizableElement.isLeaf"] = 
+  upgrade["Foundation.Core.GeneralizableElement.isLeaf"] =
           "UML:GeneralizableElement.isLeaf";
 
-  upgrade["Foundation.Core.Generalization.parent"] = 
+  upgrade["Foundation.Core.Generalization.parent"] =
           "UML:Generalization.parent";
-  upgrade["Foundation.Core.Generalization.child"] = 
+  upgrade["Foundation.Core.Generalization.child"] =
           "UML:Generalization.child";
 
   upgrade["Foundation.Core.Class.isActive"] = "UML:Class.isActive";
@@ -158,34 +158,34 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
           "UML:AssociationEnd.type";
 
   upgrade["Foundation.Core.Feature.ownerScope"] = "UML:Feature.ownerScope";
-  upgrade["Foundation.Core.StructuralFeature.type"] = 
+  upgrade["Foundation.Core.StructuralFeature.type"] =
           "UML:StructuralFeature.type";
-  upgrade["Foundation.Core.StructuralFeature.ordering"] = 
+  upgrade["Foundation.Core.StructuralFeature.ordering"] =
           "UML:StructuralFeature.ordering";
-  upgrade["Foundation.Core.Attribute.initialValue"] = 
+  upgrade["Foundation.Core.Attribute.initialValue"] =
           "UML:Attribute.initialValue";
-  upgrade["Foundation.Core.BehaviouralFeature.isQuery"] = 
+  upgrade["Foundation.Core.BehaviouralFeature.isQuery"] =
           "UML:BehaviouralFeature.isQuery";
 
   upgrade["Foundation.Core.Operation.isAbstract"] = "UML:Operation.isAbstract";
   upgrade["Foundation.Core.Operation.isRoot"] = "UML:Operation.isRoot";
   upgrade["Foundation.Core.Operation.isLeaf"] = "UML:Operation.isLeaf";
-  upgrade["Foundation.Core.Operation.concurrency"] = 
+  upgrade["Foundation.Core.Operation.concurrency"] =
           "UML:Operation.concurrency";
   upgrade["Foundation.Core.Parameter.kind"] = "UML:Parameter.kind";
   upgrade["Foundation.Core.Parameter.type"] = "UML:Parameter.type";
 
   upgrade["Foundation.Data_Types.Multiplicity"] = "UML:Multiplicity";
   upgrade["Foundation.Data_Types.MultiplicityRange"] = "UML:MultiplicityRange";
-  upgrade["Foundation.Data_Types.MultiplicityRange.lower"] = 
+  upgrade["Foundation.Data_Types.MultiplicityRange.lower"] =
     "UML:MultiplicityRange.lower";
-  upgrade["Foundation.Data_Types.MultiplicityRange.upper"] = 
+  upgrade["Foundation.Data_Types.MultiplicityRange.upper"] =
     "UML:MultiplicityRange.upper";
 
   upgrade["Foundation.Data_Types.Expression"] = "UML:Expression";
-  upgrade["Foundation.Data_Types.Expression.language"] = 
+  upgrade["Foundation.Data_Types.Expression.language"] =
           "UML:Expression.language";
-  upgrade["Foundation.Data_Types.Expression.body"] = 
+  upgrade["Foundation.Data_Types.Expression.body"] =
           "UML:Expression.body";
 
   // Translate
@@ -208,7 +208,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   XML::Element& root=xml_parser.get_root();
 
   //Make sure it's XMI
-  if (root.name != "XMI") 
+  if (root.name != "XMI")
     error("Not an <XMI> file - root element is ", root.name);
 
   //Capture XMI version
@@ -251,7 +251,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
 //------------------------------------------------------------------------
 // >> operator to read from istream
 istream& ObTools::XMI::operator>>(istream& s, Reader& p) throw (ParseFailed)
-{ 
+{
   p.read_from(s);
   return s;
 }

@@ -7,7 +7,7 @@
 // Provides all kinds of functionality to do with combining and splitting
 // pathnames, getting file information etc. - everything you can do without
 // needing to open the file;  for that, use C++ streams!
-// 
+//
 // Copyright (c) 2005 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -53,7 +53,7 @@ typedef off_t off64_t;
 #define O_LARGEFILE 0
 #endif
 
-namespace ObTools { namespace File { 
+namespace ObTools { namespace File {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -75,7 +75,7 @@ protected:
   static const char EXTCHAR = '.';
 
   // Check if a character is a separator, allowing for both \ and / in Win32
-  static bool is_sep_char(char c) 
+  static bool is_sep_char(char c)
   { return c==SEPCHAR || (ALTSEPCHAR && c==ALTSEPCHAR); }
 
 public:
@@ -140,7 +140,7 @@ public:
   //--------------------------------------------------------------------------
   // Get basename: leafname with extension (if any) removed
   string basename() const;
- 
+
   //--------------------------------------------------------------------------
   // Fix a path to local directory separator type
   // Use to convert '/'-separated paths (e.g. URLs) to local separator
@@ -261,7 +261,7 @@ public:
 
 #if defined(__WIN32__)
   //------------------------------------------------------------------------
-  // Windows only - helper function to convert a UTF8 filename into a 
+  // Windows only - helper function to convert a UTF8 filename into a
   // wide character one
   static wstring utf8_to_wide(const string& utf8);
 
@@ -298,7 +298,7 @@ class Directory: public Path
 {
 public:
   //--------------------------------------------------------------------------
-  // Constructors, as Path (q.v.) 
+  // Constructors, as Path (q.v.)
   Directory(): Path() {}
   Directory(const Path& _o): Path(_o) {}
   Directory(const string& _path): Path(_path) {}
@@ -317,7 +317,7 @@ public:
   // If all is set, hidden/dotfiles are returned (including . and ..)
   // Return whether successful (directory readable)
   // Fills in leaves if so
-  bool inspect(list<string>& leaves, const string& pattern="*", 
+  bool inspect(list<string>& leaves, const string& pattern="*",
 	       bool all=false);
 
   //--------------------------------------------------------------------------
@@ -350,15 +350,15 @@ class InStream: public istream
 {
   int fd;
   __gnu_cxx::stdio_filebuf<char> filebuf;
-  
- public: 
+
+ public:
   //--------------------------------------------------------------------------
   // Constructor
-  InStream(const string& fn, 
+  InStream(const string& fn,
 	   ios::openmode mode = ios::in | ios::binary):
-    fd(_wopen(Path::utf8_to_wide(fn).c_str(), 
+    fd(_wopen(Path::utf8_to_wide(fn).c_str(),
 	      O_RDONLY | ((mode & ios::binary)?O_BINARY:0))),
-    filebuf(fd, mode) 
+    filebuf(fd, mode)
   { if (fd>=0) istream::init(&filebuf); else setstate(failbit); }
 
   //--------------------------------------------------------------------------
@@ -370,18 +370,18 @@ class OutStream: public ostream
 {
   int fd;
   __gnu_cxx::stdio_filebuf<char> filebuf;
-  
- public: 
+
+ public:
   //--------------------------------------------------------------------------
   // Constructor
-  OutStream(const string& fn, 
+  OutStream(const string& fn,
 	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
-    fd(_wopen(Path::utf8_to_wide(fn).c_str(), 
+    fd(_wopen(Path::utf8_to_wide(fn).c_str(),
 	      O_RDWR | O_CREAT |((mode & ios::binary)?O_BINARY:0)
 	                       |((mode & ios::trunc)?O_TRUNC:0)
                                |((mode & ios::app)?O_APPEND:0),
 	      S_IWRITE | S_IREAD)),
-    filebuf(fd, mode) 
+    filebuf(fd, mode)
   { if (fd>=0) ostream::init(&filebuf); else setstate(failbit); }
 
   //--------------------------------------------------------------------------
@@ -393,20 +393,20 @@ class OutStream: public ostream
 // Unix/OSX versions - they are normal fstreams
 class InStream: public ifstream
 {
- public: 
+ public:
   //--------------------------------------------------------------------------
   // Constructor
-  InStream(const string& fn, 
+  InStream(const string& fn,
 	   ios::openmode mode = ios::in | ios::binary):
     ifstream(fn.c_str(), mode) {}
 };
 
 class OutStream: public ofstream
 {
- public: 
+ public:
   //--------------------------------------------------------------------------
   // Constructor
-  OutStream(const string& fn, 
+  OutStream(const string& fn,
 	   ios::openmode mode = ios::out | ios::trunc | ios::binary):
     ofstream(fn.c_str(), mode) {}
 };

@@ -52,11 +52,11 @@ int main(int argc, char **argv)
       string contents;
       if (!path.read_all(contents))
       {
-	log.error << "Can't read back " << path << ": " << strerror(errno) 
+	log.error << "Can't read back " << path << ": " << strerror(errno)
 		  << endl;
 	return 2;
       }
-      
+
       log.summary << "Read data: " << contents.size() << " bytes\n";
 
       // If second argument set, use it as interval

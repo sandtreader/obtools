@@ -114,7 +114,7 @@ int get_common_indent(const string& text)
   int min = 80;
   int indent = 0;
   bool seen_text = false;
-  
+
   // Run a simple state machine counting leading whitespace on lines
   for(string::const_iterator p = text.begin(); p!=text.end(); p++)
   {

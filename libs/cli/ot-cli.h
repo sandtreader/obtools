@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::CLI
 // Command-line handling functionality
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -16,7 +16,7 @@
 #include <map>
 #include <iostream>
 
-namespace ObTools { namespace CLI { 
+namespace ObTools { namespace CLI {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -81,7 +81,7 @@ public:
 
   //------------------------------------------------------------------------
   //Constructor
-  Command(const string& _word, Handler *_handler, 
+  Command(const string& _word, Handler *_handler,
 	  const string& _help="", const string& _usage=""):
     handler(_handler), word(_word), help(_help), usage(_usage) {}
 
@@ -108,7 +108,7 @@ public:
 
   //------------------------------------------------------------------------
   //Constructor
-  CommandGroup(const string& _word, const string& _help=""): 
+  CommandGroup(const string& _word, const string& _help=""):
     Command(_word, 0, _help) {}
 
   //------------------------------------------------------------------------
@@ -142,7 +142,7 @@ public:
 
   //------------------------------------------------------------------------
   //Add a command
-  void add(const string& word, Handler *handler, 
+  void add(const string& word, Handler *handler,
 	   const string& help="", const string& usage="")
   { CommandGroup::add(new Command(word, handler, help, usage)); }
 
@@ -152,7 +152,7 @@ public:
 };
 
 //==========================================================================
-// Command line 
+// Command line
 // Standard single command-line for IO streams (most usually, cin and cout)
 class CommandLine
 {
@@ -165,7 +165,7 @@ public:
 
   //------------------------------------------------------------------------
   //Constructor
-  CommandLine(Registry& _registry, istream& _sin, ostream& _sout, 
+  CommandLine(Registry& _registry, istream& _sin, ostream& _sout,
 	      const string& _prompt=">"):
     registry(_registry), sin(_sin), sout(_sout), prompt(_prompt) {}
 

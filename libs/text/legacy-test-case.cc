@@ -24,7 +24,7 @@ int main()
   cout << "Lower: " << Text::tolower(text) << endl;
   cout << "Upper: " << Text::toupper(text) << endl;
 
-  return 0;  
+  return 0;
 }
 
 

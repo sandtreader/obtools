@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Init
 // Support for auto-initialisation and factories
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -16,7 +16,7 @@
 #include <map>
 #include <ot-xml.h>
 
-namespace ObTools { namespace Init { 
+namespace ObTools { namespace Init {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -25,12 +25,12 @@ using namespace std;
 // Initialisation action template
 // Abstract superclass representing some initialisation to be done to
 // global state, in increasing order of rank
-// 
+//
 // Suggested values for rank:
-//  0 (default)  Independent modules not needing anything else 
+//  0 (default)  Independent modules not needing anything else
 //  1            Modules dependent on rank 0 having been initialised
 //  2            Modules dependent on rank 1 having been initialised
-//  etc. 
+//  etc.
 //
 // Note also that all actions are called after full static initialisation
 // of static objects
@@ -65,7 +65,7 @@ public:
   // Register an action
   // This method is designed to work even if it is called before the
   // singleton Sequence is fully initialised
-  static void add(Action& a); 
+  static void add(Action& a);
 
   //------------------------------------------------------------------------
   // Run all initialisations in order
@@ -86,8 +86,8 @@ public:
 
 //==========================================================================
 // Factory template
-// Abstract superclass for creating objects of superclass <SUPER> with 
-// create parameters <CP>.  
+// Abstract superclass for creating objects of superclass <SUPER> with
+// create parameters <CP>.
 // Default create parameter is an XML element (e.g. from config)
 template<class SUPER, class CP=const XML::Element&> class Factory
 {

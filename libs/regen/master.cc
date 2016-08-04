@@ -113,7 +113,7 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
   bool use_lines = true;
   Block *b = 0;                       // Current master block (if any)
   list<BlockLine *>::iterator bp;     // current line within master block
-  
+
   //Read lines from user file and merge blocks from master
   while (ufile.read_line())
   {
@@ -223,7 +223,7 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
 	break;
     }
   }
-  
+
   // Append any remaining unused blocks from the master
   if (!(flags & MERGE_SUPPRESS_NEW))
   {
@@ -241,7 +241,7 @@ void MasterFile::merge(MarkedFile &ufile, ostream& sout, int flags)
 	  sout << bl->text << endl;
 	}
       }
-      
+
       // Reset for next time
       b->used = false;
     }

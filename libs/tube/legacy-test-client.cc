@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  log.summary << "Host: " << addr 
+  log.summary << "Host: " << addr
 	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Get SSL context
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     string key_pem;
     if (!key_file.read_all(key_pem))
     {
-      log.error << "Can't read key file " << key_file 
+      log.error << "Can't read key file " << key_file
 		<< ": " << key_pem << endl;
       return 4;
     }
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     string cert_pem;
     if (!cert_file.read_all(cert_pem))
     {
-      log.error << "Can't read certificate file " << cert_file 
+      log.error << "Can't read certificate file " << cert_file
 		<< ": " << cert_pem << endl;
       return 4;
     }
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
     Tube::Client client(server, ssl?&ssl_ctx:0);
     client.start();
 
-    // Loop for a while just sending 
+    // Loop for a while just sending
     for(int i=0; i<n; i++)
     {
       if (i) this_thread::sleep_for(chrono::seconds{1});
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 
   log.summary << "Done\n";
 
-  return 0;  
+  return 0;
 }
 
 

@@ -110,7 +110,7 @@ bool Client::request(Message& req, Message& response)
     // Block waiting for a message (note, don't use wait(), otherwise
     // we end up going in circles!)
     string data;
-    if (transport.wait(data)) 
+    if (transport.wait(data))
     {
       response = Message(data);
 
@@ -197,7 +197,7 @@ bool Client::subscribe(const string& subject)
 }
 
 //------------------------------------------------------------------------
-// Unsubscribe for messages of a given subject 
+// Unsubscribe for messages of a given subject
 // Subject is a pattern - can use more general pattern to unsubscribe
 // more specific ones
 // e.g. client.unsubscribe("*");

@@ -13,19 +13,19 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Constructor
 Operation::Operation(XMI::Reader& rdr, XML::Element& xe)
-  :BehaviouralFeature(rdr, xe) 
+  :BehaviouralFeature(rdr, xe)
 {
   //Read parameter sub-elements from XML source
   read_subelements("UML:Parameter", create_element<Parameter>);
 
   //Get basic properties
-  is_abstract = get_bool_property("isAbstract", 
+  is_abstract = get_bool_property("isAbstract",
 				  "UML:Operation.isAbstract");
 
-  is_root     = get_bool_property("isRoot", 
+  is_root     = get_bool_property("isRoot",
 				  "UML:Operation.isRoot");
 
-  is_leaf     = get_bool_property("isLeaf", 
+  is_leaf     = get_bool_property("isLeaf",
 				  "UML:Operation.isLeaf");
 
   string cck  = get_property("concurrency", "UML:Operation.concurrency");

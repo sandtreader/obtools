@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::Tube: server.cc
 //
-// Implementation of tube server 
+// Implementation of tube server
 //
 // Copyright (c) 2007 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
@@ -28,8 +28,8 @@ class ServerSendThread: public MT::Thread
   ClientSession& session;
   Log::Streams log;  // Private to this thread
 
-  void run() 
-  { 
+  void run()
+  {
     while (session.alive)
     {
       // Block for a message
@@ -37,10 +37,10 @@ class ServerSendThread: public MT::Thread
       if (!session.alive) break;
 
       // Deal with it
-      OBTOOLS_LOG_IF_DEBUG(log.debug << server.name 
+      OBTOOLS_LOG_IF_DEBUG(log.debug << server.name
 			   << " (ssend): Sending message "
-			   << msg.stag() << ", length " 
-			   << msg.data.size() 
+			   << msg.stag() << ", length "
+			   << msg.data.size()
 			   << " (flags " << hex << msg.flags << dec << ")\n";)
       OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
 			  dumper.dump(msg.data);)
@@ -62,12 +62,12 @@ class ServerSendThread: public MT::Thread
       }
     }
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << server.name 
+    OBTOOLS_LOG_IF_DEBUG(log.debug << server.name
 			 << " (ssend): Thread shutting down\n";)
   }
 
 public:
-  ServerSendThread(Server& _server, ClientSession& _session): 
+  ServerSendThread(Server& _server, ClientSession& _session):
     server(_server), session(_session) { start(); }
 };
 
@@ -134,8 +134,8 @@ void Server::process(SSL::TCPSocket& socket,
 	msg.msg.flags = socket.read_nbo_int();
 
 	OBTOOLS_LOG_IF_DEBUG(log.debug << name << ": Received message "
-			     << msg.msg.stag() << ", length " 
-			     << len << " (flags " 
+			     << msg.msg.stag() << ", length "
+			     << len << " (flags "
 			     << hex << msg.msg.flags << dec << ")\n";)
 
 	// Read the data
@@ -159,7 +159,7 @@ void Server::process(SSL::TCPSocket& socket,
       else
       {
 	// Unrecognised tag
-	log.error << name << ": Unrecognised tag " 
+	log.error << name << ": Unrecognised tag "
 		  << msg.msg.stag() << " - out-of-sync?\n";
 	obit = "unsynced";
 	break;
@@ -202,12 +202,12 @@ void Server::process(SSL::TCPSocket& socket,
 
   log.summary << name << ": Connection from " << client
 	      << " " << obit << endl;
-} 
+}
 
 
 //------------------------------------------------------------------------
 // Constructor
-Server::Server(int port, const string& _name, int backlog, 
+Server::Server(int port, const string& _name, int backlog,
 	       int min_spare_threads, int max_threads, int _client_timeout):
   SSL::TCPServer(0, port, backlog, min_spare_threads, max_threads),
   alive(true), client_timeout(_client_timeout),
@@ -218,8 +218,8 @@ Server::Server(int port, const string& _name, int backlog,
 
 //------------------------------------------------------------------------
 // Constructor with SSL
-Server::Server(SSL::Context *_ctx, int port,  
-	       const string& _name, int backlog, 
+Server::Server(SSL::Context *_ctx, int port,
+	       const string& _name, int backlog,
 	       int min_spare_threads, int max_threads,
 	       int _client_timeout):
   SSL::TCPServer(_ctx, port, backlog, min_spare_threads, max_threads),
@@ -231,7 +231,7 @@ Server::Server(SSL::Context *_ctx, int port,
 
 //------------------------------------------------------------------------
 // Constructor
-Server::Server(Net::EndPoint local, const string& _name, int backlog, 
+Server::Server(Net::EndPoint local, const string& _name, int backlog,
 	       int min_spare_threads, int max_threads,
 	       int _client_timeout):
   SSL::TCPServer(0, local, backlog, min_spare_threads, max_threads),
@@ -243,8 +243,8 @@ Server::Server(Net::EndPoint local, const string& _name, int backlog,
 
 //------------------------------------------------------------------------
 // Constructor with SSL
-Server::Server(SSL::Context *_ctx, Net::EndPoint local, 
-	       const string& _name, int backlog, 
+Server::Server(SSL::Context *_ctx, Net::EndPoint local,
+	       const string& _name, int backlog,
 	       int min_spare_threads, int max_threads,
 	       int _client_timeout):
   SSL::TCPServer(_ctx, local, backlog, min_spare_threads, max_threads),
@@ -262,7 +262,7 @@ bool Server::send(ClientMessage& msg)
 {
   // Look up client in map, and queue it on there
   MT::RWReadLock lock(client_sessions.mutex);
-  map<Net::EndPoint, ClientSession *>::iterator p 
+  map<Net::EndPoint, ClientSession *>::iterator p
     = client_sessions.sessions.find(msg.client.address);
   if (p != client_sessions.sessions.end())
   {
@@ -272,7 +272,7 @@ bool Server::send(ClientMessage& msg)
       this_thread::sleep_for(chrono::milliseconds{SEND_BUSY_WAIT_TIME});
 
     cs->send_q.send(msg.msg);
-    return true;  
+    return true;
   }
 
   return false;

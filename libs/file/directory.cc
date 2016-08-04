@@ -58,7 +58,7 @@ bool Directory::ensure(bool parents, int mode) const
 // If all is set, hidden/dotfiles are returned (including . and ..)
 // Return whether successful (directory readable)
 // Fills in leaves if so
-bool Directory::inspect(list<string>& leaves, const string& pattern, 
+bool Directory::inspect(list<string>& leaves, const string& pattern,
 			bool all)
 {
 #if defined(__WIN32__)
@@ -85,9 +85,9 @@ bool Directory::inspect(list<string>& leaves, const string& pattern,
   if (!dir) return false;
 
   struct dirent *de;
-  while ((de=readdir(dir))!=0) 
+  while ((de=readdir(dir))!=0)
   {
-    if ((all || de->d_name[0] != '.') 
+    if ((all || de->d_name[0] != '.')
      && Text::pattern_match(pattern, de->d_name))
       leaves.push_back(string(de->d_name));
   }

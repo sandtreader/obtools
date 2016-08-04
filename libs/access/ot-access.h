@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Access
 // Generic access checking (ACL) library
-// 
+//
 // Copyright (c) 2008 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -17,7 +17,7 @@
 #include <list>
 #include <map>
 
-namespace ObTools { namespace Access { 
+namespace ObTools { namespace Access {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -88,7 +88,7 @@ ostream& operator<<(ostream& sout, const Rule& r);
 
 //==========================================================================
 // Resource class (resource.cc)
-class Resource 
+class Resource
 {
  private:
   string name;                 // Glob pattern
@@ -130,14 +130,14 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   // Takes <access> config level (containing <groups> and <resources>)
   // Also allows optional namespace prefix for all sub-elements
   Checker(const XML::Element& config, const string& ns="");
 
   //--------------------------------------------------------------------------
   // Check access to a given resource by a given user
-  bool check(const string& resource, Net::IPAddress address, 
+  bool check(const string& resource, Net::IPAddress address,
 	     const string& user);
 
   //--------------------------------------------------------------------------
@@ -145,7 +145,7 @@ public:
   // Checks using CN as user, or #anonymous if not identified
   bool check(const string& resource, const SSL::ClientDetails& client)
   {
-    return check(resource, client.address.host, 
+    return check(resource, client.address.host,
 		 client.cert_cn.empty()?"#anonymous":client.cert_cn);
   }
 

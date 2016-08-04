@@ -37,12 +37,12 @@ int main()
   string s = headers.get("split");
   ObTools::Misc::PropertyList pl = headers.split_parameters(s);
   cout << "First: " << s << endl;
-  cout << "Parameters:\n" << pl; 
+  cout << "Parameters:\n" << pl;
 
   cout << "\n--- Regenerated\n";
   cout << headers;
-  
-  return 0;  
+
+  return 0;
 }
 
 

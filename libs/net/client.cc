@@ -24,7 +24,7 @@ TCPClient::TCPClient(EndPoint endpoint):
   struct sockaddr_in saddr;
   server.set(saddr);
 
-  if (fd != INVALID_FD 
+  if (fd != INVALID_FD
    && !connect(fd, reinterpret_cast<struct sockaddr *>(&saddr), sizeof(saddr)))
     connected = true;
 }
@@ -132,7 +132,7 @@ TCPClient::TCPClient(EndPoint local, EndPoint remote, int timeout, int ttl):
 
 //--------------------------------------------------------------------------
 // Constructor from existing fd
-TCPClient::TCPClient(int _fd, EndPoint remote): 
+TCPClient::TCPClient(int _fd, EndPoint remote):
   TCPSocket(_fd), server(remote), connected(true)
 {
 

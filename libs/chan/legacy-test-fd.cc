@@ -43,7 +43,7 @@ int main()
 
   cout << "Bytes written: " << sw.get_offset() << endl;
   close(fd);
-  
+
   fd = open("test.out", O_RDONLY);
   if (fd < 0)
   {
@@ -63,14 +63,14 @@ int main()
   string s;
   sr.read(s, 3);
   cout << s << endl;
-   
+
   uint32_t n;
   if (sr.read_nbo_32(n))
     cerr << "Stream didn't end!\n";
   else
     cout << "Stream ended OK\n";
 
-  return 0;  
+  return 0;
 }
 
 

@@ -36,7 +36,7 @@ typedef const void *sockopt_t;
 namespace ObTools { namespace Net {
 
 //==========================================================================
-// Abstract Socket 
+// Abstract Socket
 
 //--------------------------------------------------------------------------
 // Default destructor - close
@@ -154,7 +154,7 @@ void Socket::set_timeout(int secs, int usecs)
 void Socket::set_priority(int prio)
 {
 #if defined(__WIN32__) || defined(__APPLE__)
-#warning set_priority not implemented 
+#warning set_priority not implemented
 #else
   unsigned long n = static_cast<unsigned long>(prio);
 
@@ -188,7 +188,7 @@ bool Socket::join_multicast(IPAddress address)
   mreq.imr_interface.s_addr = inaddr_any;
 #else
   struct ip_mreqn mreq;
-  mreq.imr_ifindex = 0; 
+  mreq.imr_ifindex = 0;
   mreq.imr_address.s_addr = inaddr_any;
 #endif
   mreq.imr_multiaddr.s_addr = address.nbo();
@@ -210,7 +210,7 @@ bool Socket::leave_multicast(IPAddress address)
   mreq.imr_interface.s_addr = inaddr_any;
 #else
   struct ip_mreqn mreq;
-  mreq.imr_ifindex = 0; 
+  mreq.imr_ifindex = 0;
   mreq.imr_address.s_addr = inaddr_any;
 #endif
 
@@ -225,7 +225,7 @@ bool Socket::leave_multicast(IPAddress address)
 // Whether successful
 bool Socket::bind(int port)
 {
-  // Bind to local port, allow any remote address or port 
+  // Bind to local port, allow any remote address or port
   struct sockaddr_in saddr;
   saddr.sin_family      = AF_INET;
   saddr.sin_addr.s_addr = inaddr_any;
@@ -240,7 +240,7 @@ bool Socket::bind(int port)
 // Whether successful
 bool Socket::bind(EndPoint address)
 {
-  // Bind to local port, allow any remote address or port 
+  // Bind to local port, allow any remote address or port
   struct sockaddr_in saddr;
   address.set(saddr);
 
@@ -283,8 +283,8 @@ bool Socket::wait_writeable(int timeout)
 
 //--------------------------------------------------------------------------
 // Get local address
-// Only works if socket is bound or connected.  
-// Because of multihoming, IP address may only be available if connected 
+// Only works if socket is bound or connected.
+// Because of multihoming, IP address may only be available if connected
 // to a specific remote host
 EndPoint Socket::local()
 {
@@ -299,7 +299,7 @@ EndPoint Socket::local()
 
 //--------------------------------------------------------------------------
 // Get remote address
-// Only works if socket is connected.  
+// Only works if socket is connected.
 EndPoint Socket::remote()
 {
   struct sockaddr_in name;
@@ -322,7 +322,7 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
 #warning get_mac not implemented
   return "";
 #else
-  // Check if device specified - if not, lookup all Ethernet interfaces 
+  // Check if device specified - if not, lookup all Ethernet interfaces
   // and recurse
   if (device_name.empty())
   {
@@ -434,9 +434,9 @@ string SocketError::get_string()
 // << operator to write SocketError to ostream
 // e.g. cout << e;
 ostream& operator<<(ostream& s, const SocketError& e)
-{ 
+{
   if (e.error)
-    s << "Socket Error (" << e.error << "): " << strerror(e.error); 
+    s << "Socket Error (" << e.error << "): " << strerror(e.error);
   else
     s << "Socket EOF";
 
@@ -444,19 +444,19 @@ ostream& operator<<(ostream& s, const SocketError& e)
 }
 
 //==========================================================================
-// TCP Socket 
+// TCP Socket
 
 //--------------------------------------------------------------------------
 // Constructor - allocates socket
 TCPSocket::TCPSocket()
 {
-  fd = socket(PF_INET, SOCK_STREAM, 0); 
+  fd = socket(PF_INET, SOCK_STREAM, 0);
 }
 
 //--------------------------------------------------------------------------
 // Raw stream read wrapper
 ssize_t TCPSocket::cread(void *buf, size_t count)
-{ 
+{
   if (fd == INVALID_FD) return -1;
 
   ssize_t size;
@@ -468,7 +468,7 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
   // Silently loop on EINTR
   do
   {
-    size = ::read(fd, buf, count); 
+    size = ::read(fd, buf, count);
   }
   while (fd != INVALID_FD && size<0 && errno == EINTR);
 #endif
@@ -479,7 +479,7 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
 //--------------------------------------------------------------------------
 // Raw stream write wrapper
 ssize_t TCPSocket::cwrite(const void *buf, size_t count)
-{ 
+{
   if (fd == INVALID_FD) return -1;
 
   ssize_t size;
@@ -492,9 +492,9 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
   do
   {
 #ifdef __BSD__
-    size = ::send(fd, buf, count, 0); 
+    size = ::send(fd, buf, count, 0);
 #else
-    size = ::send(fd, buf, count, MSG_NOSIGNAL); 
+    size = ::send(fd, buf, count, MSG_NOSIGNAL);
 #endif
   }
   while (fd != INVALID_FD && size<0 && errno == EINTR);
@@ -508,7 +508,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 // Returns amount actually read - not necessarily all required!
 // Throws SocketError on failure
 ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
-{ 
+{
   ssize_t size = cread(buf, count);
   if (size < 0) throw SocketError(SOCKERRNO);
   return size;
@@ -518,14 +518,14 @@ ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 // Safe stream write wrapper
 // Throws SocketError on failure
 void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
-{ 
+{
   ssize_t size = cwrite(buf, count);
   if (size!=static_cast<ssize_t>(count)) throw SocketError(SOCKERRNO);
 }
 
 //--------------------------------------------------------------------------
 // Read data from the socket into a string
-// Appends whatever read data is available to the given string 
+// Appends whatever read data is available to the given string
 // Returns whether successful (socket hasn't closed)
 // Throws SocketError on failure
 bool TCPSocket::read(string& s) throw (SocketError)
@@ -563,7 +563,7 @@ bool TCPSocket::read(string& s, size_t count) throw (SocketError)
     }
     else return false;
   }
-  
+
   return true;
 }
 
@@ -581,10 +581,10 @@ bool TCPSocket::read_exact(void *buf, size_t count) throw (SocketError)
     ssize_t size = read(cbuf+done, count-done);
     if (size)
       done += size;
-    else 
+    else
       return false;
   }
-  
+
   return true;
 }
 
@@ -596,7 +596,7 @@ void TCPSocket::readall(string& s) throw (SocketError)
   while (read(s))
     ;
 }
- 
+
 //--------------------------------------------------------------------------
 // Write the given string to the socket, blocking until finished
 // Throws SocketError on failure
@@ -655,7 +655,7 @@ int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
         int used = v.iov_len;
         if (sent < used) used = sent;
 
-        // Update length and pointer - if all used, this just leaves 
+        // Update length and pointer - if all used, this just leaves
         // a zero length with pointer still in place
         v.iov_len -= used;
         v.iov_base = static_cast<unsigned char *>(v.iov_base)+used;
@@ -730,20 +730,20 @@ void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
 }
 
 //==========================================================================
-// UDP Socket 
+// UDP Socket
 
 //--------------------------------------------------------------------------
 // Constructor - allocates socket
 UDPSocket::UDPSocket()
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  fd = socket(PF_INET, SOCK_DGRAM, 0);
 }
 
 //--------------------------------------------------------------------------
 // Constructor - allocates socket and binds to local port (UDP server)
 UDPSocket::UDPSocket(int port)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  fd = socket(PF_INET, SOCK_DGRAM, 0);
   if (!Socket::bind(port)) close();
 }
 
@@ -765,7 +765,7 @@ UDPSocket::UDPSocket(EndPoint local, bool, bool reuse)
 // Use this to obtain local addressing for packets sent to this endpoint
 UDPSocket::UDPSocket(EndPoint remote)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  fd = socket(PF_INET, SOCK_DGRAM, 0);
 
   struct sockaddr_in saddr;
   remote.set(saddr);
@@ -781,7 +781,7 @@ UDPSocket::UDPSocket(EndPoint remote)
 // and then connects to remote port (UDP client)
 UDPSocket::UDPSocket(EndPoint local, EndPoint remote)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0); 
+  fd = socket(PF_INET, SOCK_DGRAM, 0);
   if (!Socket::bind(local)) close();
 
   struct sockaddr_in saddr;
@@ -806,17 +806,17 @@ void UDPSocket::enable_broadcast()
 //--------------------------------------------------------------------------
 // Raw datagram recv wrapper
 ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
-{ 
+{
   ssize_t size;
 
 #ifdef __WIN32__
-  size = ::recv(fd, (char *)buf, len, flags); 
+  size = ::recv(fd, (char *)buf, len, flags);
   if (size == SOCKET_ERROR) size = -1;
 #else
   // Silently loop on EINTR
   do
   {
-    size = ::recv(fd, buf, len, flags); 
+    size = ::recv(fd, buf, len, flags);
   }
   while (size<0 && errno == EINTR);
 #endif
@@ -827,17 +827,17 @@ ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
 //--------------------------------------------------------------------------
 // Raw datagram send wrapper
 int UDPSocket::csend(const void *msg, size_t len, int flags)
-{ 
+{
   int res;
 
 #ifdef __WIN32__
-  res = ::send(fd, (const char *)msg, len, flags); 
+  res = ::send(fd, (const char *)msg, len, flags);
   if (res == SOCKET_ERROR) res = -1;
 #else
   // Silently loop on EINTR
   do
   {
-    res = ::send(fd, msg, len, flags); 
+    res = ::send(fd, msg, len, flags);
   }
   while (res<0 && errno == EINTR);
 #endif
@@ -858,20 +858,20 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
 
 #ifdef __WIN32__
   size = ::recvfrom(fd, (char *)buf, len, flags,
-		    (struct sockaddr *)&saddr, &slen); 
+		    (struct sockaddr *)&saddr, &slen);
   if (size == SOCKET_ERROR) size = -1;
 #else
   // Silently loop on EINTR
   do
   {
-    size = ::recvfrom(fd, buf, len, flags, 
+    size = ::recvfrom(fd, buf, len, flags,
                       reinterpret_cast<struct sockaddr *>(&saddr), &slen);
   }
   while (size<0 && errno == EINTR);
 #endif
 
   if (size >= 0 && endpoint_p) *endpoint_p = EndPoint(saddr);
-  
+
   return size;
 }
 
@@ -886,12 +886,12 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
 
 #ifdef __WIN32__
   res = ::sendto(fd, (const char *)msg, len, flags,
-		  (struct sockaddr *)&saddr, sizeof(saddr)); 
+		  (struct sockaddr *)&saddr, sizeof(saddr));
   if (res == SOCKET_ERROR) res = -1;
 #else
   do
   {
-    res = ::sendto(fd, msg, len, flags, 
+    res = ::sendto(fd, msg, len, flags,
                    reinterpret_cast<struct sockaddr *>(&saddr), sizeof(saddr));
   }
   while (res<0 && errno == EINTR);
@@ -924,7 +924,7 @@ int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
 
   do
   {
-    res = ::sendmsg(fd, &mh, flags); 
+    res = ::sendmsg(fd, &mh, flags);
   }
   while (res<0 && errno == EINTR);
 #endif
@@ -945,7 +945,7 @@ ssize_t UDPSocket::recv(void *buf, size_t len, int flags) throw (SocketError)
 //--------------------------------------------------------------------------
 // Safe datagram send wrapper
 // Throws SocketError on failure
-int UDPSocket::send(const void *buf, size_t len, int flags) 
+int UDPSocket::send(const void *buf, size_t len, int flags)
   throw (SocketError)
 {
   int res = csend(buf, len, flags);

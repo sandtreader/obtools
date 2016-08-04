@@ -19,12 +19,12 @@ Element::Element(XMI::Reader& rdr, XML::Element& xe):
   source(xe),
   parent(0)
 {
-  //Get id 
+  //Get id
   id = source.get_attr("xmi.id");
 
   //If id is valid, add myself to the reader's idmap
   if (!id.empty()) reader.record_uml_element(id, this);
-}    
+}
 
 
 //--------------------------------------------------------------------------
@@ -78,7 +78,7 @@ void Element::build_refs()
 //
 // Returns "" if not found
 //
-// [Note to future DTD designers - please choose attributes OR subelements, 
+// [Note to future DTD designers - please choose attributes OR subelements,
 //  not both!]
 string Element::get_property(const string& attr_name,
 			     const string& subelement_name)
@@ -135,7 +135,7 @@ bool Element::get_int_property(const string& attr_name,
 //     ...
 //
 // Attributes take priority
-// sub-sub-element is optional, to cope with single-layer form 
+// sub-sub-element is optional, to cope with single-layer form
 // Returns "" if not found
 string Element::get_idref_property(const string& attr_name,
 				   const string& subelement_name,
@@ -166,7 +166,7 @@ string Element::get_idref_property(const string& attr_name,
 
 //--------------------------------------------------------------------------
 // Gets a cross-referenced element from an idref property
-// Allow allows (broken?) Netbeans MDR form with Class/Datatype 
+// Allow allows (broken?) Netbeans MDR form with Class/Datatype
 // Returns referenced Element, or 0 if not found
 Element *Element::get_element_property(const string& attr_name,
 				       const string& subelement_name,
@@ -216,7 +216,7 @@ Classifier *Element::get_classifier_property(const string& attr_name,
   if (!e) return 0;
 
   // Make sure it really is some kind of Classifier before returning it
-  Classifier *c = dynamic_cast<Classifier *>(e);  
+  Classifier *c = dynamic_cast<Classifier *>(e);
   if (c) return c;
 
   reader.warning("Bogus classifier idref found in id ", id);
@@ -234,7 +234,7 @@ GeneralizableElement *Element::get_ge_property(const string& attr_name,
   if (!e) return 0;
 
   // Make sure it really is some kind of GE before returning it
-  GeneralizableElement *ge = dynamic_cast<GeneralizableElement *>(e);  
+  GeneralizableElement *ge = dynamic_cast<GeneralizableElement *>(e);
   if (ge) return ge;
 
   reader.warning("Bogus GE idref found in id ", id);
@@ -242,14 +242,14 @@ GeneralizableElement *Element::get_ge_property(const string& attr_name,
 }
 
 //--------------------------------------------------------------------------
-// Element header printer 
+// Element header printer
 void Element::print_header(ostream& sout)
 {
   sout << source.name;
 }
 
 //--------------------------------------------------------------------------
-// Element printer - indents to indent, calls down to print_header, then 
+// Element printer - indents to indent, calls down to print_header, then
 // prints sub-elements at indent+2
 void Element::print(ostream& sout, int indent)
 {

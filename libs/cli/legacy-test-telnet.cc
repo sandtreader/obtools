@@ -42,7 +42,7 @@ int main()
   CLI::TelnetServer cli(reg, 7777, "Test#");
   cli.run();
 
-  return 0;  
+  return 0;
 }
 
 

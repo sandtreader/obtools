@@ -36,7 +36,7 @@ DESKey& DESKey::operator=(const DESKey& k)
 }
 
 //------------------------------------------------------------------------
-// Check and load the key from base data - sets valid true or false 
+// Check and load the key from base data - sets valid true or false
 // after checking it
 void DESKey::load()
 {
@@ -46,7 +46,7 @@ void DESKey::load()
 
 //------------------------------------------------------------------------
 // Create a new key from random data
-// Must seed PRNG first 
+// Must seed PRNG first
 void DESKey::create()
 {
   do
@@ -59,7 +59,7 @@ void DESKey::create()
 }
 
 //------------------------------------------------------------------------
-// Read from data block - requires 8 bytes of data 
+// Read from data block - requires 8 bytes of data
 void DESKey::read(const unsigned char *data)
 {
   memcpy(key, data, 8);
@@ -67,7 +67,7 @@ void DESKey::read(const unsigned char *data)
 }
 
 //------------------------------------------------------------------------
-// Write to data block - writes 8 bytes of data 
+// Write to data block - writes 8 bytes of data
 void DESKey::write(unsigned char *data) const
 {
   memcpy(data, key, 8);
@@ -78,7 +78,7 @@ void DESKey::write(unsigned char *data) const
 void DESKey::read(istream& sin)
 {
   int i;
-  
+
   for(i=0; i<16; i++)
   {
     int n = sin.get();
@@ -124,7 +124,7 @@ string DESKey::str() const
   write(oss);
   return oss.str();
 }
-  
+
 //------------------------------------------------------------------------
 // Read from channel (8 binary bytes)
 void DESKey::read(Channel::Reader& reader) throw (Channel::Error)

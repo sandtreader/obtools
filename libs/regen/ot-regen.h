@@ -38,7 +38,7 @@ protected:
   istream& sin;             // Stream we're reading from
   const char *marker;       // Marker string
   string line;              // Last line read, not including EOL
-  
+
 public:
   //------------------------------------------------------------------------
   // Constructor
@@ -62,7 +62,7 @@ public:
 };
 
 //==========================================================================
-//Block of text from master file 
+//Block of text from master file
 struct BlockLine
 {
   LineType type;
@@ -94,7 +94,7 @@ struct Block
 
 //==========================================================================
 //Master file - reads map of blocks and merges user files
-enum 
+enum
 {
   MERGE_DELETE_ORPHANS = 1,// Remove blocks from user code no longer in master
   MERGE_SUPPRESS_NEW = 2   // Suppress new blocks from master
@@ -124,7 +124,7 @@ public:
 };
 
 //==========================================================================
-//Regenerating output file stream - replacement for ofstream which 
+//Regenerating output file stream - replacement for ofstream which
 //'magically' regenerates over existing files
 
 //regenerating streambuf
@@ -139,8 +139,8 @@ private:
 
 protected:
   // Streambuf overflow - handles characters
-  int overflow(int); 
-   
+  int overflow(int);
+
 public:
   // Constructor/destructor
   regenbuf(string _fn, const char *_marker="//~", int flags=0);
@@ -150,12 +150,12 @@ public:
   void close();
 };
 
-//Regenerating output file stream 
+//Regenerating output file stream
 class rofstream: public ostream
 {
 public:
   // Constructor - like ofstream, also take MasterFile marker and flags
-  rofstream(string _fn, const char *_marker="//~", int _flags=0): 
+  rofstream(string _fn, const char *_marker="//~", int _flags=0):
     ostream(new regenbuf(_fn, _marker, _flags)) {}
 
   // Destructor

@@ -2,7 +2,7 @@
 // ObTools::CPPT: ot-cppt.h
 //
 // Public definitions for C++ template processor
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -25,11 +25,11 @@ enum TokenState
 {
   TOKEN_READING,          // Waiting for more input
   TOKEN_VALID,            // Input derived a token
-  TOKEN_INVALID           // Input derived a non-token 
+  TOKEN_INVALID           // Input derived a non-token
 };
 
 //==========================================================================
-// Token recogniser 
+// Token recogniser
 class TokenRecogniser
 {
 private:
@@ -65,7 +65,7 @@ enum ProcessorState
   PS_NORMAL,  // Passing through text
   PS_CODE,    // In C++ code
   PS_EXPR,    // In C++ expr
-  PS_COMMENT  // In template comment 
+  PS_COMMENT  // In template comment
 };
 
 //==========================================================================

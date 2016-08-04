@@ -15,7 +15,7 @@ namespace ObTools { namespace Text {
 static const char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 //--------------------------------------------------------------------------
-// Encode a 64-bit integer 
+// Encode a 64-bit integer
 // Uses as many characters as required
 string Base36::encode(uint64_t n)
 {

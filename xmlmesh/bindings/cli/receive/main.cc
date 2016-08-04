@@ -10,7 +10,7 @@
 //
 // Copyright (c) 2005 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
-// ======================================================================= 
+// =======================================================================
 
 #include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
@@ -50,7 +50,7 @@ void usage(char *pname)
   cout << "  -f --foreground  Run in foreground rather than as a daemon\n";
   cout << "  -1 --oneshot     Receive only one message and exit (default, loops forever)\n";
   cout << "  -h --host <host> Set XMLMesh host (default 'localhost')\n";
-  cout << "  -p --port <port> Set XMLMesh port (default " 
+  cout << "  -p --port <port> Set XMLMesh port (default "
        << XMLMesh::OTMP::DEFAULT_PORT << ")\n";
   cout << "  -? --help       Output this usage\n";
 }
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  log.summary << "Host: " << addr 
+  log.summary << "Host: " << addr
 	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
     else
       text = msg.get_body().to_string();  // Just the first body
 
-    log.summary << "Received message, subject " << subject 
+    log.summary << "Received message, subject " << subject
 		<< (rsvp?", RSVP":"") << endl;
     log.detail << text;
 
@@ -270,8 +270,8 @@ int main(int argc, char **argv)
 	log.error << "Child process died\n";
 
 	// Respond with fatal error if requested
-	if (rsvp) 
-	  client.respond(SOAP::Fault::CODE_RECEIVER, 
+	if (rsvp)
+	  client.respond(SOAP::Fault::CODE_RECEIVER,
 			 "Receiving process failed", msg);
       }
       else
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
 	int rc = WEXITSTATUS(status);
 	if (rc)
 	{
-	  log.error << "Child process returned code " << rc 
+	  log.error << "Child process returned code " << rc
 		    << ", response " << response;
 
 	  // Respond with error, capturing any output as fault
@@ -304,10 +304,10 @@ int main(int argc, char **argv)
 	      // Create default response subject from incoming if not set
 	      if (response_subject.empty())
 		response_subject = subject+".response";
-	      log.summary << "Sending response, subject " 
+	      log.summary << "Sending response, subject "
 			  << response_subject << endl;
 
-	      XMLMesh::Message rmsg(response_subject, 
+	      XMLMesh::Message rmsg(response_subject,
 				    response, false, msg.get_id());
 	      client.send(rmsg);
 	    }
@@ -315,7 +315,7 @@ int main(int argc, char **argv)
 	    {
 	      log.error << "RSVP requested but no --observe, "
 			<< "--check nor --get_response specified\n";
-	      client.respond(SOAP::Fault::CODE_RECEIVER, 
+	      client.respond(SOAP::Fault::CODE_RECEIVER,
 			     "Receiver not configured to return result", msg);
 	    }
 	  }

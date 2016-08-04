@@ -68,7 +68,7 @@ bool URLHandler::fault(Message& response, Fault::Code code,
   Log::Streams log;
   Fault fault(code, reason);
 
-  log.error << "SOAP Fault: " << fault.get_code_string() 
+  log.error << "SOAP Fault: " << fault.get_code_string()
 	    << ": " << reason << endl;
 
   response.take(fault);

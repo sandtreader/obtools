@@ -109,7 +109,7 @@ string Expander::expand_recursive(const XML::Element& templ,
       list<Element *> elements = xpath.get_elements(path);
 
       int i=0;
-      for(list<Element *>::iterator ep = elements.begin(); 
+      for(list<Element *>::iterator ep = elements.begin();
 	  ep!=elements.end(); ++ep)
       {
 	Element& e = **ep;

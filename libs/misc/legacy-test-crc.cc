@@ -76,7 +76,7 @@ int main(int argc, char **argv)
   test(data, size, Misc::CRC::ALGORITHM_CCITT_ZERO, "CCITT_ZERO");
   test(data, size, Misc::CRC::ALGORITHM_CCITT_MOD,  "CCITT_MOD");
 
-  return 0;  
+  return 0;
 }
 
 

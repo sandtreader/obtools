@@ -12,7 +12,7 @@
 namespace ObTools { namespace SOAP {
 
 //------------------------------------------------------------------------
-// Constructor for outgoing faults 
+// Constructor for outgoing faults
 // Reason is the English (xml:lang="en") version - use add_reason for more
 Fault::Fault(Code code, const string& reason): Message()
 {

@@ -2,7 +2,7 @@
 // ObTools::Access: group.cc
 //
 // Access group structure
-// 
+//
 // Copyright (c) 2008 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -26,7 +26,7 @@ Group::Group(const XML::Element& group_e, const string& ns)
     users.push_back(u_e["name"]);
   }
 }
-  
+
 //--------------------------------------------------------------------------
 // Check if a given user name is in the group
 bool Group::contains(const string& user)
@@ -55,9 +55,9 @@ void Group::dump(ostream& sout) const
 //--------------------------------------------------------------------------
 // Write group to ostream
 ostream& operator<<(ostream& sout, const Group& g)
-{ 
-  g.dump(sout); 
-  return sout; 
+{
+  g.dump(sout);
+  return sout;
 }
 
 

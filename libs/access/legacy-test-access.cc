@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	 << (result?"ALLOW":"DENY") << endl;
   }
 
-  return 0;  
+  return 0;
 }
 
 

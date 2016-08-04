@@ -47,10 +47,10 @@ int main()
   // Create command registry
   CLI::Registry reg;
   reg.add("foo", new FooHandler(), "Launch foos", "foo <options>");
-  reg.add("jim", 
+  reg.add("jim",
 	  new CLI::MemberHandler<BigClass>(c, &BigClass::jim_handler),
 	  "Ask jim");
-  reg.add("fred", 
+  reg.add("fred",
 	  new CLI::MemberHandler<BigClass>(c, &BigClass::fred_handler),
 	  "Ask fred");
 
@@ -58,7 +58,7 @@ int main()
   CLI::CommandLine cli(reg, cin, cout, "Test>");
   cli.run();
 
-  return 0;  
+  return 0;
 }
 
 

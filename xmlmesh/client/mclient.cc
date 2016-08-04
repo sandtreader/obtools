@@ -36,8 +36,8 @@ class DispatchThread: public MT::Thread
   ClientTransport& transport;
   Log::Streams log;  // Thread-local log streams
 
-  void run() 
-  { 
+  void run()
+  {
     for(;;)
     {
       string data;
@@ -58,7 +58,7 @@ class DispatchThread: public MT::Thread
   }
 
 public:
-  DispatchThread(MultiClient &_client, ClientTransport& _transport): 
+  DispatchThread(MultiClient &_client, ClientTransport& _transport):
     client(_client), transport(_transport) { }
 };
 
@@ -100,7 +100,7 @@ void MultiClient::handle(Message &msg, Log::Streams& log)
     }
     else
     {
-      log.error << "Mesh client has no spare workers - '" 
+      log.error << "Mesh client has no spare workers - '"
 		<< msg.get_subject() << "' message queued\n";
 
       // Queue a copy for an existing worker to catch
@@ -149,11 +149,11 @@ void MultiClient::dispatch(Message *msg)
     if (handlers.empty())
     {
       Log::Streams log;
-      log.error << "Unhandled message received with subject " 
+      log.error << "Unhandled message received with subject "
 		<< subject << endl;
     }
 
-    // Now have own safe list of subscribers with active set - no-one can 
+    // Now have own safe list of subscribers with active set - no-one can
     // interfere with this, even if they try unsubscribing now
     for(list<Subscriber *>::iterator p = handlers.begin();
 	p!=handlers.end();
@@ -164,12 +164,12 @@ void MultiClient::dispatch(Message *msg)
       Time::Stamp start = Time::Stamp::now();
 #endif
 
-      sub->handle(*msg); 
+      sub->handle(*msg);
 
 #if defined(TIME_MESSAGES)
       Time::Duration taken = Time::Stamp::now() - start;
       Log::Streams log;
-      log.detail << "Incoming message '" << subject << "' handled in " 
+      log.detail << "Incoming message '" << subject << "' handled in "
 		 << taken.seconds() << "s\n";
 #endif
     }
@@ -258,8 +258,8 @@ retry:
 
 //------------------------------------------------------------------------
 // Run function - pass msg to subscriber
-void MultiClientWorker::run() 
-{ 
+void MultiClientWorker::run()
+{
   client->dispatch(msg);
 }
 
@@ -348,12 +348,12 @@ bool MultiClient::request(Message& req, Message& response)
 #if defined(TIME_MESSAGES)
   Time::Duration taken = Time::Stamp::now() - start;
   Log::Streams log;
-  log.detail << "Outgoing message '" << req.get_subject() 
-	     << "' responded to in " 
+  log.detail << "Outgoing message '" << req.get_subject()
+	     << "' responded to in "
 	     << taken.seconds() << "s\n";
 #endif
 
-  // Remove it from map 
+  // Remove it from map
   {
     MT::RLock l(mutex);
     requests.erase(id);

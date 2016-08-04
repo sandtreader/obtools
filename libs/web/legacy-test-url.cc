@@ -15,7 +15,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-  if (argc < 2) 
+  if (argc < 2)
   {
     cout << "Supply a URL!\n";
     return 2;
@@ -50,8 +50,8 @@ int main(int argc, char **argv)
   cout << "\n--- Regenerated\n";
   ObTools::Web::URL url2(root);
   cout << url2 << endl;
- 
-  return 0;  
+
+  return 0;
 }
 
 

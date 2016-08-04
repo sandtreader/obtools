@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::Text: pattern.cc
 //
-// Pattern 'glob' functions 
+// Pattern 'glob' functions
 //
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
@@ -30,18 +30,18 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
 
   p = pattern;
   q = text;
-  
+
   for (;;)
-  { 
+  {
     c = *p++;
     d = *q++;
-    
+
     if (!cased)
     {
       c = ::tolower(c);
       d = ::tolower(d);
     }
-    
+
     switch (c)
     {
       case '\0': 		/* Finished - text must have finished too */
@@ -56,7 +56,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
       case '?':			/* Single char - musn't have finished text */
         if (!d) return false;
         break;
-        
+
       case '*':			/* Span - match up to next pattern character,
       				   or recurse if another special */
         c = *p;
@@ -70,7 +70,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
             if (!cased) d = ::tolower(d);
           }
         }
-        
+
         /* Recurse to ensure we can match the rest of the pattern somewhere
            along here */
         q--;
@@ -103,17 +103,17 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
         }
         found = false;
         c = *p++;
-          
+
         do
         {
           if (c == '\\') c = *p++;
           if (!cased) c = ::tolower(c);
 
           if (*p == '-' && p[1] != ']')
-          { 
+          {
             char e;
             if (*++p == '\\') p++;
-              
+
             e=*p;
             if (!cased) e = ::tolower(e);
             if (d >= c && d <= e) found = true;
@@ -140,8 +140,8 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
 
 // More C++ friendly version
 bool pattern_match(const string& pattern, const string& text, bool cased)
-{ 
-  return pattern_match(pattern.c_str(), text.c_str(), cased); 
+{
+  return pattern_match(pattern.c_str(), text.c_str(), cased);
 }
 
 

@@ -34,7 +34,7 @@ size_t FDReader::basic_read(void *buf, size_t count)
     char temp[SKIP_BUF_SIZE];  // Skip up to this many bytes
     n = ::read(fd, temp, count);
   }
-  
+
   if (n<0) throw Error(2, strerror(errno));
 
   offset += n;

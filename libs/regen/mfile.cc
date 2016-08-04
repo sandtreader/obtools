@@ -53,7 +53,7 @@ LineType MarkedFile::line_type()
 
 //------------------------------------------------------------------------
 // Get tag of last read line
-// Tag is remainder of line after marker and open char, with leading and 
+// Tag is remainder of line after marker and open char, with leading and
 // trailing WS removed
 string MarkedFile::line_tag()
 {
@@ -74,7 +74,7 @@ string MarkedFile::line_tag()
   // Find end, skipping trailing whitespace
   end = line.find_last_not_of(" \t");
   if (end == string::npos || end<=pos) return "";
-  
+
   // Extract this
   return line.substr(pos, end-pos+1);
 }

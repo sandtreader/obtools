@@ -22,7 +22,7 @@ namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
 // Encrypt/decrypt a block in place
-// If block is not padded to 8 bytes, the remainder (up to 7) bytes 
+// If block is not padded to 8 bytes, the remainder (up to 7) bytes
 // WILL NOT BE ENCRYPTED
 // Encrypts if 'encryption' is set (default), otherwise decrypts
 // IV is modified if set
@@ -48,7 +48,7 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
 	break;
 
       case 2:
-	DES_ede2_cbc_encrypt(data, data, length, &keys[0].schedule, 
+	DES_ede2_cbc_encrypt(data, data, length, &keys[0].schedule,
 			     &keys[1].schedule, &iv.key, enc);
 	break;
 
@@ -76,15 +76,15 @@ bool DES::encrypt(unsigned char *data, int length, bool encryption)
 	break;
 
 	case 2:
-	  DES_ecb2_encrypt(DES_CBLOCK_CAST(data), 
-			   DES_CBLOCK_CAST(data), 
+	  DES_ecb2_encrypt(DES_CBLOCK_CAST(data),
+			   DES_CBLOCK_CAST(data),
 			   &keys[0].schedule, &keys[1].schedule,
 			   enc);
 	  break;
 
 	case 3:
-	  DES_ecb3_encrypt(DES_CBLOCK_CAST(data), 
-			   DES_CBLOCK_CAST(data), 
+	  DES_ecb3_encrypt(DES_CBLOCK_CAST(data),
+			   DES_CBLOCK_CAST(data),
 			   &keys[0].schedule, &keys[1].schedule,
 			   &keys[2].schedule, enc);
 	  break;

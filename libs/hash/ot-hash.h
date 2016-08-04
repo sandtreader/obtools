@@ -8,7 +8,7 @@
 //
 // Top level is a simple cut of N top bits into a flat table of pointers
 // Second level is a coalesced chain hash with an internal freelist
-// 
+//
 // Performance:
 //   Addition: O(1) in all cases
 //   Lookup:   O(1) usually, O(N) when full and hashing is perverse
@@ -31,7 +31,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace ObTools { namespace Hash { 
+namespace ObTools { namespace Hash {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -90,7 +90,7 @@ private:
   // ID splitting helper
   HELPER_T& helper;
 
-  entry_t *table;        
+  entry_t *table;
   HASH_INDEX_T freelist;  // First available free entry for collisions
 #if !defined(_SINGLE)
   MT::RWMutex mutex;      // On freelist and chain state
@@ -112,7 +112,7 @@ public:
     for(HASH_INDEX_T i=0; i<size; i++)
     {
       entry_t *e = table+i;
-      
+
       // Chain forwards and back, with end markers
       e->next  = (i<size-1)?(i+1):INVALID_HASH_INDEX;
       e->prev  = i?i-1:INVALID_HASH_INDEX;
@@ -139,13 +139,13 @@ public:
     MT::RWWriteLock lock(mutex);
 #endif
 
-    // Check this entry - if not used, take it, and also snap it out of 
+    // Check this entry - if not used, take it, and also snap it out of
     // the free list
     if (!p->used())
     {
       // Snap out forward pointer
       if (p->next != INVALID_HASH_INDEX)
-	table[p->next].prev = p->prev; 
+	table[p->next].prev = p->prev;
 
       // Snap out previous pointer
       if (p->prev != INVALID_HASH_INDEX)
@@ -155,7 +155,7 @@ public:
 
       // Clear chain and set index
       p->id    = id;
-      p->index = index;  
+      p->index = index;
       p->next  = INVALID_HASH_INDEX;
       p->prev  = INVALID_HASH_INDEX;
       p->head  = start;  // Where we would naturally hash to
@@ -185,7 +185,7 @@ public:
       if (p->next != INVALID_HASH_INDEX)
 	table[p->next].prev = qi;
       p->next = qi;  // Set last to ensure atomic update in lookup
-      
+
       return true;
     }
   }
@@ -282,7 +282,7 @@ public:
 	      // Copy its data back to the one being deleted
 	      // note: next/prev remain the same
 	      to_delete->index = q->index;
-	      to_delete->id    = q->id; 
+	      to_delete->id    = q->id;
 	      to_delete->head  = q->head;
 
 	      // Now continue and delete this one
@@ -290,7 +290,7 @@ public:
 	      to_delete      = table+qi;
 	      break;  // From search on qi
 	    }
-	    
+
 	    qi = q->next;
 	  }
 
@@ -361,7 +361,7 @@ public:
       // First sanity check pointer
       if (i<0)
       {
-	sout << "Freelist goes negative (" << i << ") after " 
+	sout << "Freelist goes negative (" << i << ") after "
 	     << previous << endl;
 	ok = false;
 	break;
@@ -369,7 +369,7 @@ public:
 
       if (i>=size)
       {
-	sout << "Freelist goes too large (" << i << ") after " 
+	sout << "Freelist goes too large (" << i << ") after "
 	     << previous << endl;
 	ok = false;
 	break;
@@ -391,7 +391,7 @@ public:
       // Check this is empty
       if (p->used())
       {
-	sout << "Freelist entry at " << i << " is used by index " 
+	sout << "Freelist entry at " << i << " is used by index "
 	     << p->index << endl;
 	ok = false;
 	break;
@@ -416,7 +416,7 @@ public:
       entry_t *p = table+i;
       HASH_INDEX_T start = helper.get_start(p->id);
 
-      // See if it's used and hashes to where it should be - 
+      // See if it's used and hashes to where it should be -
       // if so, it's the head of a chain
       if (p->used() && start == i)
       {
@@ -428,7 +428,7 @@ public:
 	  // Sanity check pointer
 	  if (j<0)
 	  {
-	    sout << "Chain started at " << i 
+	    sout << "Chain started at " << i
 		 << " goes negative (" << j << ")\n";
 	    ok = false;
 	    break;
@@ -436,7 +436,7 @@ public:
 
 	  if (j>=size)
 	  {
-	    sout << "Chain started at " << i 
+	    sout << "Chain started at " << i
 		 << " goes too large (" <<j<< ")\n";
 	    ok = false;
 	    break;
@@ -470,7 +470,7 @@ public:
 	}
       }
     }
-    
+
     // Now check that every entry is marked
     for(HASH_INDEX_T i=0; i<size; i++)
     {
@@ -480,7 +480,7 @@ public:
 	ok = false;
       }
     }
-    
+
     return ok;
   }
 
@@ -510,23 +510,23 @@ public:
 	  int length = 0;
 
 	  // Follow chain
-	  for(HASH_INDEX_T j=i; 
-	      j!=INVALID_HASH_INDEX; 
+	  for(HASH_INDEX_T j=i;
+	      j!=INVALID_HASH_INDEX;
 	      length++, j=table[j].next)
 	    ;
-	  
+
 	  if (length > stats_p.max_chain)
 	    stats_p.max_chain = length;
 	}
       }
     }
-    
+
     // Calculate fullness
     stats_p.max_fullness = 100*stats_p.entries/size;
   }
 
   //--------------------------------------------------------------------------
-  // Dump block to given output stream 
+  // Dump block to given output stream
   void dump(ostream& sout)
   {
 #if !defined(_SINGLE)
@@ -539,12 +539,12 @@ public:
       sout << setw(8) << i << ": ";
       if (e->used())
       {
-	sout << setw(5) << e->id << " -> " 
+	sout << setw(5) << e->id << " -> "
 	     << setw(10) << setiosflags(ios_base::left) << e->index
 	     << resetiosflags(ios_base::left);
-	if (e->next != INVALID_HASH_INDEX) 
+	if (e->next != INVALID_HASH_INDEX)
 	  sout << " next: " << e->next;
-	if (e->prev != INVALID_HASH_INDEX) 
+	if (e->prev != INVALID_HASH_INDEX)
 	  sout << " prev: " << e->prev;
 	sout << " head: " << e->head;
 	sout << endl;
@@ -553,9 +553,9 @@ public:
       {
 	sout << "EMPTY";
 	if (i == freelist) sout << " FREELIST";
-	if (e->next != INVALID_HASH_INDEX) 
+	if (e->next != INVALID_HASH_INDEX)
 	  sout << " next: " << e->next;
-	if (e->prev != INVALID_HASH_INDEX) 
+	if (e->prev != INVALID_HASH_INDEX)
 	  sout << " previous: " << e->prev;
 	sout << endl;
       }
@@ -571,7 +571,7 @@ public:
 };
 
 //==========================================================================
-// General hash table template 
+// General hash table template
 
 // GeneralTable takes a splitter for ID type, which need not be integral,
 // as long as it has an assignment and comparison operator.
@@ -606,7 +606,7 @@ public:
   // _nbits gives number of bits to chop off at top level
   // _block_size gives number of entries to create at each second-level block
   GeneralTable(int _nbits, int _block_size):
-    nbits(_nbits), block_size(_block_size), table(0), built(false), 
+    nbits(_nbits), block_size(_block_size), table(0), built(false),
     helper(_nbits, _block_size)
   {
     int nblocks = 1<<nbits;
@@ -619,13 +619,13 @@ public:
     int i;
     for(i=0; i<nblocks; i++) table[i] = 0;
 
-    // Build table 
+    // Build table
     for(i=0; i<nblocks; i++)
     {
       table[i] = new block_t(block_size, helper);
       if (!*table[i]) return;
     }
-    
+
     built = true;
   }
 
@@ -644,7 +644,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Get total memory used
-  unsigned long memory() 
+  unsigned long memory()
   { return (1<<nbits)*(sizeof(block_t)+block_size*sizeof(entry_t)); }
 
   //--------------------------------------------------------------------------
@@ -720,7 +720,7 @@ public:
 	ok = false;
       }
     }
-    
+
     return ok;
   }
 
@@ -746,7 +746,7 @@ public:
   }
 
   //--------------------------------------------------------------------------
-  // Dump table to given output stream 
+  // Dump table to given output stream
   void dump(ostream& sout)
   {
     if (!table)
@@ -771,7 +771,7 @@ public:
       // Delete all blocks
       for(int i=0; i<(1<<nbits); i++)
 	if (table[i]) delete table[i];
-      
+
       free(table);
     }
   }
@@ -795,7 +795,7 @@ private:
 public:
   //--------------------------------------------------------------------------
   // Constructor
-  IntegerIDHelper(int _nbits, int _block_size): 
+  IntegerIDHelper(int _nbits, int _block_size):
     nbits(_nbits), block_size(_block_size)
   {
     block_mask = (1<<nbits)-1;
@@ -811,7 +811,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Get start offset in hash block from hash ID
-  HASH_INDEX_T get_start(HASH_ID_T id) 
+  HASH_INDEX_T get_start(HASH_ID_T id)
   { return static_cast<HASH_INDEX_T>(id % block_size); }
 
 };
@@ -825,14 +825,14 @@ public:
 //   HASH_INDEX_T: SIGNED integer type for index within hash block
 //   INDEX_T:      SIGNED integer type for output index
 
-// Defaults are for a sensible 32 into 16+16 => 32 structure 
-template<class ID_T         = uint32_t, 
-         class HASH_ID_T    = uint16_t, 
+// Defaults are for a sensible 32 into 16+16 => 32 structure
+template<class ID_T         = uint32_t,
+         class HASH_ID_T    = uint16_t,
          class HASH_INDEX_T = int16_t,
          class INDEX_T      = int32_t
        > class Table:
-  public GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T, 
-                      INDEX_T, 
+  public GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T,
+                      INDEX_T,
 		      IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> >
 {
 public:
@@ -840,10 +840,10 @@ public:
   // Constructor
   // _nbits gives number of bits to chop off at top level
   // _block_size gives number of entries to create at each second-level block
-  Table(int _nbits, int _block_size): 
-    GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T, INDEX_T, 
-                 IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T> 
-                >::GeneralTable(_nbits, _block_size) 
+  Table(int _nbits, int _block_size):
+    GeneralTable<ID_T, HASH_ID_T, HASH_INDEX_T, INDEX_T,
+                 IntegerIDHelper<ID_T, HASH_ID_T, HASH_INDEX_T>
+                >::GeneralTable(_nbits, _block_size)
   {}
 };
 

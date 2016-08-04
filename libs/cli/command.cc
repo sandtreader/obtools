@@ -16,13 +16,13 @@ namespace ObTools { namespace CLI {
 //------------------------------------------------------------------------
 //Handle a command
 void Command::handle(string args, istream& sin, ostream& sout)
-{ 
+{
   // Check for usage present and either no args or "?" or "help"
-  if (usage.size() 
+  if (usage.size()
    && (!args.size() || args=="?" || Text::tolower(args)=="help"))
     show_usage(sout);
   else
-    handler->handle(args, sin, sout); 
+    handler->handle(args, sin, sout);
 }
 
 //------------------------------------------------------------------------

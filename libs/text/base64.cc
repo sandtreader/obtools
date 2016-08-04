@@ -21,7 +21,7 @@ static const char base64_chars[] =
 // Split gives length of line to split at - default (76) is to RFC
 // Set 0 to suppress split altogether
 // line_end is string to split with, and indent for next line
-string Base64::encode(const unsigned char *block, size_t length, 
+string Base64::encode(const unsigned char *block, size_t length,
 		      int split, const string& line_end)
 {
   string base64;
@@ -30,7 +30,7 @@ string Base64::encode(const unsigned char *block, size_t length,
   size_t rlength = 3*((length+2)/3);
   const unsigned char *p = block;
   uint32_t n = 0;
-  int count = 1;  
+  int count = 1;
   int chars = 0;
 
   for(size_t i=0; i<rlength; i++)
@@ -90,7 +90,7 @@ string Base64::encode(uint64_t n)
     count = 4;
     n <<= 32;
   }
-  
+
   // Extract bytes, top byte first
   for(int i=0; i<count; i++)
   {
@@ -103,7 +103,7 @@ string Base64::encode(uint64_t n)
 
 //--------------------------------------------------------------------------
 // Encode a binary string - options as encode above
-string Base64::encode(const string& binary, int split, 
+string Base64::encode(const string& binary, int split,
 		      const string& line_end)
 {
   return encode(reinterpret_cast<const unsigned char *>(binary.data()),
@@ -111,7 +111,7 @@ string Base64::encode(const string& binary, int split,
 }
 
 //--------------------------------------------------------------------------
-// Get length of binary block required for decode 
+// Get length of binary block required for decode
 // This is a maximum estimate - real length may be less than this, but
 // will never be more
 size_t Base64::binary_length(const string& base64)
@@ -122,10 +122,10 @@ size_t Base64::binary_length(const string& base64)
 }
 
 //--------------------------------------------------------------------------
-// Decode a base64 string into a binary block.  
+// Decode a base64 string into a binary block.
 // Returns real length decoded if it fitted, max_length+1 if it didn't
 // - but it will never actually write more than max_length bytes
-size_t Base64::decode(const string& base64, unsigned char *block, 
+size_t Base64::decode(const string& base64, unsigned char *block,
 		      size_t max_length)
 {
   size_t written = 0;
@@ -198,7 +198,7 @@ size_t Base64::decode(const string& base64, unsigned char *block,
 // Returns whether successful - if so, sets 'n'
 bool Base64::decode(const string& base64, uint64_t& n)
 {
-  unsigned char buf[8];  
+  unsigned char buf[8];
   size_t len = decode(base64, buf, 8);
   if (len > 8) return false;
 

@@ -19,14 +19,14 @@ class TestServer: public ObTools::Net::TCPServer
 public:
   TestServer(int port): ObTools::Net::TCPServer(port) {}
 
-  void process(ObTools::Net::TCPSocket& s, 
+  void process(ObTools::Net::TCPSocket& s,
 	       ObTools::Net::EndPoint client);
 };
 
-void TestServer::process(ObTools::Net::TCPSocket& s, 
+void TestServer::process(ObTools::Net::TCPSocket& s,
 			 ObTools::Net::EndPoint client)
 {
-  cerr << "Got connection from " << client 
+  cerr << "Got connection from " << client
        << " (" << s.get_mac(client.host) << ")" << endl;
 
   try
@@ -45,7 +45,7 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
   {
     cerr << se << endl;
   }
-} 
+}
 
 
 //--------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Cache
 // General-purpose 'evictor cache' template
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -17,7 +17,7 @@
 #include <iostream>
 #include <time.h>
 
-namespace ObTools { namespace Cache { 
+namespace ObTools { namespace Cache {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -46,7 +46,7 @@ struct PolicyData
 // data for eviction policies
 template<class CONTENT> struct MapContent
 {
-  CONTENT content;                       
+  CONTENT content;
   PolicyData policy_data;
 
   MapContent() {}  // Required for map => CONTENT default constructor
@@ -83,14 +83,14 @@ public:
 
   //--------------------------------------------------------------------------
   // Eviction policy - find the worst entry
-  // Called for every unlocked cache entry with current policy data 
+  // Called for every unlocked cache entry with current policy data
   // and 'worst' policy data so far.  Return true if the current one is
   // 'worse' according to your policy than the worst one;  the current
   // will then become the worst for subsequent calls (if any)
   // Initial value of 'worst' is default value (now, no use)
   // The last entry you return true for will be evicted
   // If you never return true, nothing will be evicted
-  virtual bool check_worst(const PolicyData& current, 
+  virtual bool check_worst(const PolicyData& current,
 			   const PolicyData& worst) = 0;
 
   // Virtual destructor to keep compiler happy
@@ -123,11 +123,11 @@ template <class ID, class CONTENT> struct CacheIterator
 
   // Incrementors - note p++ requires a temporary: use ++p in preference
   CacheIterator& operator++() { map_iterator++; return *this; }
-  CacheIterator operator++(int) 
+  CacheIterator operator++(int)
   { CacheIterator t = *this; map_iterator++; return t; }
-    
+
   CacheIterator& operator--() { map_iterator--; return *this; }
-  CacheIterator operator--(int) 
+  CacheIterator operator--(int)
   { CacheIterator t = *this; map_iterator--; return t; }
 
   // Comparators
@@ -152,7 +152,7 @@ template <class ID, class CONTENT> struct CacheIterator
 //   ID:              Key of cache map (e.g. string, int) - must be hashable
 //   CONTENT:         What we want the cache to hold
 //   TIDY_POLICY:     Tidy Policy class (inherits from TidyPolicy<ID, CONTENT>)
-//   EVICTOR_POLICY:  Eviction Policy class 
+//   EVICTOR_POLICY:  Eviction Policy class
 //                      (inherits from EvictorPolicy<ID, CONTENT>)
 
 // At this level, we assume CONTENT is fairly primitive (e.g, string,
@@ -161,7 +161,7 @@ template <class ID, class CONTENT> struct CacheIterator
 
 // See PointerCache if you want to store something bigger.
 
-template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY> 
+template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY>
   class Cache
 {
 protected:
@@ -190,9 +190,9 @@ public:
 
   //--------------------------------------------------------------------------
   // Constructor
-  Cache(const TIDY_POLICY& _tpol, 
+  Cache(const TIDY_POLICY& _tpol,
 	const EVICTOR_POLICY& _epol,
-	unsigned int _limit=0): 
+	unsigned int _limit=0):
     limit(_limit), tidy_policy(_tpol), evictor_policy(_epol), mutex() {}
 
   //--------------------------------------------------------------------------
@@ -213,26 +213,26 @@ public:
   // Any existing content under this ID is deleted
   // Whether successful - can fail if limit reached and no eviction possible
   bool add(const ID& id, const CONTENT& content)
-  { 
+  {
     if (limit && cachemap.size() >= limit && !evict()) return false;
 
     MT::RWWriteLock lock(mutex);  // NB Don't lock around evict
-    cachemap[id] = MCType(content); 
-    return true; 
+    cachemap[id] = MCType(content);
+    return true;
   }
 
   //--------------------------------------------------------------------------
   // Check (without copying) whether a given ID exists in the cache
   bool contains(const ID& id)
-  { 
+  {
     MT::RWReadLock lock(mutex);
-    return (cachemap.find(id) != cachemap.end()); 
+    return (cachemap.find(id) != cachemap.end());
   }
 
   //--------------------------------------------------------------------------
   // Get current size of map
   unsigned int size()
-  { 
+  {
     return cachemap.size();
   }
 
@@ -263,7 +263,7 @@ public:
     // of enforcing a single write lock on a very common operation
     MT::RWReadLock lock(mutex);
     MapIterator p = cachemap.find(id);
-    if (p != cachemap.end()) 
+    if (p != cachemap.end())
     {
       p->second.policy_data.touch();
       return true;
@@ -273,8 +273,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Remove content of given ID
-  virtual void remove(const ID& id) 
-  { 
+  virtual void remove(const ID& id)
+  {
     MT::RWWriteLock lock(mutex);
     MapIterator p = cachemap.find(id);
     if (p != cachemap.end()) cachemap.erase(p);
@@ -290,8 +290,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Run background evictor policy
-  virtual void tidy() 
-  { 
+  virtual void tidy()
+  {
     time_t now = time(0);
     MT::RWWriteLock lock(mutex);
 
@@ -315,13 +315,13 @@ public:
     MT::RWWriteLock lock(mutex);
 
     // Number we need to evict
-    unsigned int needed = cachemap.size() - limit + 1;  
+    unsigned int needed = cachemap.size() - limit + 1;
     if (needed <= 0) return true;
 
     while (needed)
     {
       PolicyData worst_data;
-      MapIterator worst = cachemap.end();  
+      MapIterator worst = cachemap.end();
 
       // Show the policy all the entries, let them choose the worst
       for(MapIterator p = cachemap.begin();
@@ -347,13 +347,13 @@ public:
       else return false;  // Can't do it
     }
 
-    return true; // Got enough 
+    return true; // Got enough
   }
 
   //--------------------------------------------------------------------------
   // Dump contents to given stream
   void dump(ostream& s, bool show_content=false)
-  { 
+  {
     MT::RWReadLock lock(mutex);
     time_t now = time(0);
 
@@ -367,7 +367,7 @@ public:
 
       s << p->first;
       if (show_content) s << " -> " << mc.content << endl;
-      s << " (at=" << pd.add_time-now << 
+      s << " (at=" << pd.add_time-now <<
 	", ut=" << pd.use_time-now <<
 	", use=" << pd.use_count << ")\n";
     }
@@ -375,7 +375,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Iterators
-  // NB! If you use these in a MT environment you must manually lock the mutex 
+  // NB! If you use these in a MT environment you must manually lock the mutex
   // This is also the reason there is no const_iterator - it is never safe
   // to use a const cache, since you won't be able to lock it
   typedef CacheIterator<ID, CONTENT> iterator;
@@ -384,14 +384,14 @@ public:
 
   //--------------------------------------------------------------------------
   // Clear all content
-  virtual void clear() 
+  virtual void clear()
   {
     MT::RWWriteLock lock(mutex);
-    cachemap.clear(); 
+    cachemap.clear();
   }
 
   //--------------------------------------------------------------------------
-  // Virtual destructor 
+  // Virtual destructor
   // (does nothing here, but PointerCache uses it to free pointers)
   virtual ~Cache() {}
 };
@@ -414,7 +414,7 @@ template<class CONTENT> struct PointerContent
 
 // << operator to make dump work - requires that the content itself has
 // a << operator, too
-template<class CONTENT> 
+template<class CONTENT>
 ostream& operator<<(ostream&s, const PointerContent<CONTENT>& pc)
 {
   if (pc.ptr) s << *(pc.ptr);
@@ -441,16 +441,16 @@ template <class ID, class CONTENT> struct PointerCacheIterator
   // Constructors
   PointerCacheIterator() {}
   PointerCacheIterator(const MapIteratorType& mi): map_iterator(mi) {}
-  PointerCacheIterator(const PointerCacheIterator& ci): 
+  PointerCacheIterator(const PointerCacheIterator& ci):
     map_iterator(ci.map_iterator) {}
 
   // Incrementors - note p++ requires a temporary: use ++p in preference
   PointerCacheIterator& operator++() { map_iterator++; return *this; }
-  PointerCacheIterator operator++(int) 
+  PointerCacheIterator operator++(int)
   { PointerCacheIterator t = *this; map_iterator++; return t; }
-    
+
   PointerCacheIterator& operator--() { map_iterator--; return *this; }
-  PointerCacheIterator operator--(int) 
+  PointerCacheIterator operator--(int)
   { PointerCacheIterator t = *this; map_iterator--; return t; }
 
   // Comparators
@@ -473,9 +473,9 @@ template <class ID, class CONTENT> struct PointerCacheIterator
 // Like Cache, but assuming larger objects requiring dynamic allocation
 
 // Main PointerCache template
-template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY> 
-  class PointerCache: 
-  public Cache<ID, PointerContent<CONTENT>, TIDY_POLICY, EVICTOR_POLICY>  
+template<class ID, class CONTENT, class TIDY_POLICY, class EVICTOR_POLICY>
+  class PointerCache:
+  public Cache<ID, PointerContent<CONTENT>, TIDY_POLICY, EVICTOR_POLICY>
 {
 protected:
   //--------------------------------------------------------------------------
@@ -494,8 +494,8 @@ public:
   // Constructor
   PointerCache(const TIDY_POLICY& _tpol,
 	       const EVICTOR_POLICY& _epol,
-	       unsigned int _limit=0): 
-    Cache<ID, PointerContent<CONTENT>, 
+	       unsigned int _limit=0):
+    Cache<ID, PointerContent<CONTENT>,
           TIDY_POLICY, EVICTOR_POLICY>(_tpol, _epol, _limit) {}
 
   //--------------------------------------------------------------------------
@@ -521,7 +521,7 @@ public:
   {
     MT::RWReadLock lock(this->mutex);
     MapIterator p = this->cachemap.find(id);
-    if (p != this->cachemap.end()) 
+    if (p != this->cachemap.end())
       return p->second.content.ptr;
     else
       return 0;
@@ -535,7 +535,7 @@ public:
   {
     MT::RWWriteLock lock(this->mutex);
     MapIterator p = this->cachemap.find(id);
-    if (p != this->cachemap.end()) 
+    if (p != this->cachemap.end())
     {
       CONTENT *r = p->second.content.ptr;
       this->cachemap.erase(p);
@@ -546,8 +546,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Remove content of given ID
-  virtual void remove(const ID& id) 
-  { 
+  virtual void remove(const ID& id)
+  {
     CONTENT *to_delete = 0;
 
     // Avoid locking around delete to prevent deadlocks if destruction
@@ -561,22 +561,22 @@ public:
 	this->cachemap.erase(p);
       }
     }
-	
+
     if (to_delete) delete(to_delete);
   }
 
   //--------------------------------------------------------------------------
   // Warning and decision whether to allow deletion from tidy or eviction
   // Always OK here - override to prevent deletion of active objects
-  // Getting this call indicates the cache thinks the object is a candidate 
+  // Getting this call indicates the cache thinks the object is a candidate
   // for deletion, so shutting down gracefully to accept the call next time is
   // a good idea
   virtual bool prepare_to_die(const ID&, CONTENT *) { return true; }
 
   //--------------------------------------------------------------------------
   // Run background evictor policy
-  virtual void tidy() 
-  { 
+  virtual void tidy()
+  {
     list<CONTENT *> to_delete;
     time_t now = time(0);
 
@@ -611,7 +611,7 @@ public:
   virtual bool evict()
   {
     // Number we need to evict
-    unsigned int needed = this->cachemap.size() - this->limit + 1;  
+    unsigned int needed = this->cachemap.size() - this->limit + 1;
     if (needed <= 0) return true;
 
     while (needed)
@@ -621,7 +621,7 @@ public:
 
       {
 	MT::RWWriteLock lock(this->mutex);
-	MapIterator worst = this->cachemap.end();  
+	MapIterator worst = this->cachemap.end();
 
 	// Show the policy all the entries, let them choose the worst
 	for(MapIterator p = this->cachemap.begin();
@@ -650,12 +650,12 @@ public:
 	}
 	else return false;  // Can't do it
       }
-      
+
       // Do delete outside lock
       if (to_delete) delete(to_delete);
     }
 
-    return true; // Got enough 
+    return true; // Got enough
   }
 
 
@@ -667,12 +667,12 @@ public:
 
   //--------------------------------------------------------------------------
   // Clear all content
-  virtual void clear() 
+  virtual void clear()
   {
     MT::RWWriteLock lock(this->mutex);
     for(MapIterator p = this->cachemap.begin(); p!=this->cachemap.end(); ++p)
-      delete(p->second.content.ptr); 
-    this->cachemap.clear(); 
+      delete(p->second.content.ptr);
+    this->cachemap.clear();
   }
 
   //--------------------------------------------------------------------------
@@ -687,7 +687,7 @@ public:
 
 //==========================================================================
 // No tidy policy - does nothing
-template<class ID, class CONTENT> class NoTidyPolicy: 
+template<class ID, class CONTENT> class NoTidyPolicy:
   public TidyPolicy<ID, CONTENT>
 {
 public:
@@ -702,7 +702,7 @@ public:
 
 //==========================================================================
 // No eviction policy - does nothing
-template<class ID, class CONTENT> class NoEvictorPolicy: 
+template<class ID, class CONTENT> class NoEvictorPolicy:
   public EvictorPolicy<ID, CONTENT>
 {
 public:
@@ -718,7 +718,7 @@ public:
 //==========================================================================
 // Timeout-since-last-use tidy policy
 // Simply removes entries a given time after last use
-template<class ID, class CONTENT> class UseTimeoutTidyPolicy: 
+template<class ID, class CONTENT> class UseTimeoutTidyPolicy:
   public TidyPolicy<ID, CONTENT>
 {
 public:
@@ -736,7 +736,7 @@ public:
 //==========================================================================
 // Timeout total age tidy policy
 // Simply removes entries a given time after creation
-template<class ID, class CONTENT> class AgeTimeoutTidyPolicy: 
+template<class ID, class CONTENT> class AgeTimeoutTidyPolicy:
   public TidyPolicy<ID, CONTENT>
 {
 public:
@@ -749,13 +749,13 @@ public:
   // Checks time since addition isn't greater than timeout
   bool keep_entry(const PolicyData& pd, time_t now)
   { return !timeout || now-pd.add_time < timeout; }
-  
+
 };
 
 //==========================================================================
 // LRU eviction policy
 // Removes least recently used
-template<class ID, class CONTENT> class LRUEvictorPolicy: 
+template<class ID, class CONTENT> class LRUEvictorPolicy:
   public EvictorPolicy<ID, CONTENT>
 {
 public:
@@ -770,7 +770,7 @@ public:
 //==========================================================================
 // Oldest eviction policy
 // Removes oldest entry
-template<class ID, class CONTENT> class AgeEvictorPolicy: 
+template<class ID, class CONTENT> class AgeEvictorPolicy:
   public EvictorPolicy<ID, CONTENT>
 {
 public:
@@ -793,7 +793,7 @@ template<class ID, class CONTENT> class BasicCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  BasicCache(unsigned int _limit=0): 
+  BasicCache(unsigned int _limit=0):
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           NoEvictorPolicy<ID,CONTENT> >
     (NoTidyPolicy<ID, CONTENT>(), NoEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -806,7 +806,7 @@ template<class ID, class CONTENT> class BasicPointerCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  BasicPointerCache(unsigned int _limit = 0): 
+  BasicPointerCache(unsigned int _limit = 0):
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  NoEvictorPolicy<ID,CONTENT> >
     (NoTidyPolicy<ID, CONTENT>(), NoEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -819,10 +819,10 @@ template<class ID, class CONTENT> class UseTimeoutCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  UseTimeoutCache(int _timeout, unsigned int _limit = 0): 
+  UseTimeoutCache(int _timeout, unsigned int _limit = 0):
     Cache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
           NoEvictorPolicy<ID,CONTENT> >
-    (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+    (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout),
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
@@ -834,10 +834,10 @@ template<class ID, class CONTENT> class UseTimeoutPointerCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  UseTimeoutPointerCache(int _timeout, unsigned int _limit = 0): 
+  UseTimeoutPointerCache(int _timeout, unsigned int _limit = 0):
     PointerCache<ID, CONTENT, UseTimeoutTidyPolicy<ID, CONTENT>,
                  NoEvictorPolicy<ID,CONTENT> >
-    (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+    (UseTimeoutTidyPolicy<ID, CONTENT>(_timeout),
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
@@ -849,10 +849,10 @@ template<class ID, class CONTENT> class AgeTimeoutCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeTimeoutCache(int _timeout, unsigned int _limit = 0): 
+  AgeTimeoutCache(int _timeout, unsigned int _limit = 0):
     Cache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
           NoEvictorPolicy<ID,CONTENT> >
-    (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+    (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout),
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
@@ -864,10 +864,10 @@ template<class ID, class CONTENT> class AgeTimeoutPointerCache:
                NoEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeTimeoutPointerCache(int _timeout, unsigned int _limit = 0): 
+  AgeTimeoutPointerCache(int _timeout, unsigned int _limit = 0):
     PointerCache<ID, CONTENT, AgeTimeoutTidyPolicy<ID, CONTENT>,
                  NoEvictorPolicy<ID,CONTENT> >
-    (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout), 
+    (AgeTimeoutTidyPolicy<ID, CONTENT>(_timeout),
      NoEvictorPolicy<ID, CONTENT>(), _limit) {}
   void set_timeout(int _timeout) { this->tidy_policy.timeout = _timeout; }
 };
@@ -879,7 +879,7 @@ template<class ID, class CONTENT> class LRUEvictionCache:
                LRUEvictorPolicy<ID, CONTENT> >
 {
 public:
-  LRUEvictionCache(unsigned int _limit = 0): 
+  LRUEvictionCache(unsigned int _limit = 0):
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           LRUEvictorPolicy<ID,CONTENT> >
     (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -892,7 +892,7 @@ template<class ID, class CONTENT> class LRUEvictionPointerCache:
                       LRUEvictorPolicy<ID, CONTENT> >
 {
 public:
-  LRUEvictionPointerCache(unsigned int _limit = 0): 
+  LRUEvictionPointerCache(unsigned int _limit = 0):
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  LRUEvictorPolicy<ID,CONTENT> >
     (NoTidyPolicy<ID, CONTENT>(), LRUEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -905,7 +905,7 @@ template<class ID, class CONTENT> class AgeEvictionCache:
                AgeEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeEvictionCache(unsigned int _limit = 0): 
+  AgeEvictionCache(unsigned int _limit = 0):
     Cache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
           AgeEvictorPolicy<ID,CONTENT> >
     (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>(), _limit) {}
@@ -918,7 +918,7 @@ template<class ID, class CONTENT> class AgeEvictionPointerCache:
                       AgeEvictorPolicy<ID, CONTENT> >
 {
 public:
-  AgeEvictionPointerCache(unsigned int _limit = 0): 
+  AgeEvictionPointerCache(unsigned int _limit = 0):
     PointerCache<ID, CONTENT, NoTidyPolicy<ID, CONTENT>,
                  AgeEvictorPolicy<ID,CONTENT> >
     (NoTidyPolicy<ID, CONTENT>(), AgeEvictorPolicy<ID, CONTENT>(), _limit) {}

@@ -19,7 +19,7 @@ using namespace ObTools;
 class InfoSubscriber: public XMLMesh::Subscriber
 {
 public:
-  InfoSubscriber(XMLMesh::MultiClient& client): 
+  InfoSubscriber(XMLMesh::MultiClient& client):
     XMLMesh::Subscriber(client, "info.*") {}
 
   void handle(XMLMesh::Message& msg)
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  log.summary << "Host: " << addr 
+  log.summary << "Host: " << addr
 	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
@@ -71,8 +71,8 @@ int main(int argc, char **argv)
   XMLMesh::OTMPMultiClient client(server);
 
   // Subscribe to information
-  InfoSubscriber *infosub = new InfoSubscriber(client); 
-  
+  InfoSubscriber *infosub = new InfoSubscriber(client);
+
   // Loop for a while sending out messages
   for(int i=0; i<10; i++)
   {
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
   // Disconnect, rather than delete
   infosub->disconnect();
 
-  return 0;  
+  return 0;
 }
 
 

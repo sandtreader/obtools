@@ -31,10 +31,10 @@ bool ReplicatedAction::tick(Context& con)
   while (started < copies)
   {
     // Check we're allowed to
-    if (!started 
+    if (!started
      || (script.now >= last_start && script.now-last_start >= spread))
     {
-      // Create SequenceAction child using our own XML as the model 
+      // Create SequenceAction child using our own XML as the model
       Action *a = new SequenceAction(Action::CP(script, xml));
       actions[started++] = a;
       a->start(con);

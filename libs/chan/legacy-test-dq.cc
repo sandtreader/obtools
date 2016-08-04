@@ -46,14 +46,14 @@ int main()
   string s;
   br.read(s, 3);
   cout << s << endl;
-   
+
   uint32_t n;
   if (br.read_nbo_32(n))
     cerr << "Block didn't end!\n";
   else
     cout << "Block ended OK\n";
 
-  return 0;  
+  return 0;
 }
 
 

@@ -33,10 +33,10 @@ static vector<MT::Mutex *> mutexes;
 extern "C"
 {
 
-// Locking function 
+// Locking function
 static void openssl_locking_function(int mode, int n, const char *, int)
 {
-  if (mode & CRYPTO_LOCK) 
+  if (mode & CRYPTO_LOCK)
     mutexes[n]->lock();
   else
     mutexes[n]->unlock();
@@ -57,7 +57,7 @@ static unsigned long openssl_id_function(void)
 }
 
 // Dynamic lock creation function
-static struct CRYPTO_dynlock_value *openssl_dyn_create_function(const char *, 
+static struct CRYPTO_dynlock_value *openssl_dyn_create_function(const char *,
 								int)
 {
   return new struct CRYPTO_dynlock_value();
@@ -74,7 +74,7 @@ static void openssl_dyn_lock_function(int mode, struct CRYPTO_dynlock_value *l,
 }
 
 // Destroy dynamic crypto lock function
-static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l, 
+static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l,
 					 const char *, int)
 {
   delete l;
@@ -86,7 +86,7 @@ static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l,
 // Constructor
 Library::Library()
 {
-  if (should_initialise()) 
+  if (should_initialise())
   {
     // Create as many locks as the library requires
     for(int n=CRYPTO_num_locks(); n--;)
@@ -111,7 +111,7 @@ Library::Library()
 // Destructor
 Library::~Library()
 {
-  // Clean up unless no-one has initialised before 
+  // Clean up unless no-one has initialised before
   if (!should_initialise())
   {
     // Clear all callbacks

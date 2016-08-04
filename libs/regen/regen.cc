@@ -49,7 +49,7 @@ int main(int argc, char **argv)
       return 4;
     }
   }
-  
+
   char *userfn = argv[i++];
   char *masterfn = argv[i++];
 

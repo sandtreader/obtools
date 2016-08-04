@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::XMLMesh: ot-xmlmesh-client-otmp.h
 //
-// Definition of OTMP-based XMLMesh client 
+// Definition of OTMP-based XMLMesh client
 //
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
@@ -72,9 +72,9 @@ public:
     MultiClient(transport), transport(server) { start(); }
 
   // Constructor specifying workers
-  OTMPMultiClient(Net::EndPoint server, 
-		  int min_spare_workers, int max_workers): 
-    MultiClient(transport, min_spare_workers, max_workers), 
+  OTMPMultiClient(Net::EndPoint server,
+		  int min_spare_workers, int max_workers):
+    MultiClient(transport, min_spare_workers, max_workers),
     transport(server) { start(); }
 
   //------------------------------------------------------------------------

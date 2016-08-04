@@ -33,7 +33,7 @@ int main(int argc, char **argv)
   for(list<File::Path>::iterator p = paths.begin(); p!=paths.end(); ++p)
     cout << "  " << *p << endl;
 
-  return 0;  
+  return 0;
 }
 
 

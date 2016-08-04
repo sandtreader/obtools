@@ -45,7 +45,7 @@ Multiplicity Multiplicity::read_from(XML::Element& pare,
       else
       {
 	XML::Element &mrl = mr.get_child("UML:MultiplicityRange.lower");
-	if (mrl.valid() && !mrl.content.empty()) 
+	if (mrl.valid() && !mrl.content.empty())
 	  m.lower = atoi(mrl.content.c_str());
       }
 
@@ -54,7 +54,7 @@ Multiplicity Multiplicity::read_from(XML::Element& pare,
       else
       {
 	XML::Element &mru = mr.get_child("UML:MultiplicityRange.upper");
-	if (mru.valid() && !mru.content.empty()) 
+	if (mru.valid() && !mru.content.empty())
 	  m.upper = atoi(mru.content.c_str());
       }
     }
@@ -101,7 +101,7 @@ Expression Expression::read_from(XML::Element &pare)
     else
     {
       XML::Element& lange = expe.get_child("UML:Expression.language");
-      if (lange.valid()) 
+      if (lange.valid())
 	exp.language = lange.content;
     }
 
@@ -111,7 +111,7 @@ Expression Expression::read_from(XML::Element &pare)
     else
     {
       XML::Element& bodye = expe.get_child("UML:Expression.body");
-      if (bodye.valid()) 
+      if (bodye.valid())
 	exp.body = bodye.content;
     }
   }

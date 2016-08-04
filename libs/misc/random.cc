@@ -39,11 +39,11 @@ void Random::generate_binary(unsigned char *p, int n)
   if (!(count++ % REINIT_PERIOD))
   {
 #ifdef USE_DEV_URANDOM
-    // In Real Operating Systems (tm), /dev/urandom gives us an unlimited 
+    // In Real Operating Systems (tm), /dev/urandom gives us an unlimited
     // supply of random bytes from a hardware-assisted entropy pool
     // but it's slow, so don't do it every time, just use it to reset the
     // PRNG now and again
-    ifstream f("/dev/urandom", ios_base::binary);  
+    ifstream f("/dev/urandom", ios_base::binary);
 
     if (f)
     {
@@ -72,7 +72,7 @@ void Random::generate_binary(unsigned char *p, int n)
 
   // Generate pseudo-random as a fallback
   // Marsaglia Multiply-With-Carry (MWC), converted to produce bytes
-  for(int i=0; i<n; i++) 
+  for(int i=0; i<n; i++)
   {
     z = 36969 * (z & 65535) + (z >> 16);
     w = 18000 * (w & 65535) + (w >> 16);

@@ -28,8 +28,8 @@ class TimeoutThread: public MT::Thread
   BiSyncServer& server;
   Log::Streams log;  // Thread local
 
-  void run() 
-  { 
+  void run()
+  {
     while (server.is_alive())
     {
       server.do_timeouts(log);
@@ -56,11 +56,11 @@ void BiSyncServer::do_timeouts(Log::Streams& log)
 
 //------------------------------------------------------------------------
 // Constructors - as Server but with timeout
-BiSyncServer::BiSyncServer(int port, int _request_timeout, 
-			   const string& _name, 
-			   int backlog, int min_spare_threads, 
+BiSyncServer::BiSyncServer(int port, int _request_timeout,
+			   const string& _name,
+			   int backlog, int min_spare_threads,
 			   int max_threads, int _client_timeout):
-  SyncServer(port, _name, backlog, min_spare_threads, max_threads, 
+  SyncServer(port, _name, backlog, min_spare_threads, max_threads,
 	     _client_timeout),
   request_timeout(_request_timeout)
 {
@@ -68,7 +68,7 @@ BiSyncServer::BiSyncServer(int port, int _request_timeout,
 }
 
 BiSyncServer::BiSyncServer(Net::EndPoint local, int _request_timeout,
-			   const string& _name, int backlog, 
+			   const string& _name, int backlog,
 			   int min_spare_threads, int max_threads,
 			   int _client_timeout):
   SyncServer(local, _name, backlog, min_spare_threads, max_threads,
@@ -78,9 +78,9 @@ BiSyncServer::BiSyncServer(Net::EndPoint local, int _request_timeout,
   timeout_thread = new TimeoutThread(*this);
 }
 
-BiSyncServer::BiSyncServer(SSL::Context *_ctx, int port, 
-			   int _request_timeout, 
-			   const string& _name, int backlog, 
+BiSyncServer::BiSyncServer(SSL::Context *_ctx, int port,
+			   int _request_timeout,
+			   const string& _name, int backlog,
 			   int min_spare_threads, int max_threads,
 			   int _client_timeout):
   SyncServer(_ctx, port, _name, backlog, min_spare_threads, max_threads,
@@ -90,9 +90,9 @@ BiSyncServer::BiSyncServer(SSL::Context *_ctx, int port,
   timeout_thread = new TimeoutThread(*this);
 }
 
-BiSyncServer::BiSyncServer(SSL::Context *_ctx, Net::EndPoint local, 
-			   int _request_timeout, const string& _name, 
-			   int backlog, int min_spare_threads, 
+BiSyncServer::BiSyncServer(SSL::Context *_ctx, Net::EndPoint local,
+			   int _request_timeout, const string& _name,
+			   int backlog, int min_spare_threads,
 			   int max_threads, int _client_timeout):
   SyncServer(_ctx, local, _name, backlog, min_spare_threads, max_threads,
 	     _client_timeout),
@@ -114,7 +114,7 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
   ClientSession *cs = 0;
   {
     MT::RWReadLock lock(client_sessions.mutex);
-    map<Net::EndPoint, ClientSession *>::iterator p 
+    map<Net::EndPoint, ClientSession *>::iterator p
       = client_sessions.sessions.find(request.client.address);
     if (p != client_sessions.sessions.end())
     {
@@ -124,7 +124,7 @@ bool BiSyncServer::request(ClientMessage& request, Message& response)
       // session already so this saves looking it up again)
       while (cs->send_q.waiting() > max_send_queue) // Zero must work
         this_thread::sleep_for(chrono::milliseconds{SEND_BUSY_WAIT_TIME});
-      
+
       cs->send_q.send(request.msg);
     }
   }

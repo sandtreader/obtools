@@ -15,17 +15,17 @@
 namespace ObTools { namespace Misc {
 
 //------------------------------------------------------------------------
-// Polynomials expressed as a bitmap with D<n> = x^n, top term left off 
+// Polynomials expressed as a bitmap with D<n> = x^n, top term left off
 #define CRC_CCITT ((1U<<12) + (1<<5) + 1)
 #define CRC_16    ((1U<<15) + (1<<2) + 1)
 
-// Reversed polynomials for use with LSB-first 
+// Reversed polynomials for use with LSB-first
 #define CRC_CCITT_REV ((1U<<15) + (1<<10) + (1<<3))
 #define CRC_16_REV    ((1U<<15) + (1<<13) + 1)
 
 //------------------------------------------------------------------------
 // Constructor
-CRC::CRC(Algorithm _alg, bool _reflected, bool _flip): 
+CRC::CRC(Algorithm _alg, bool _reflected, bool _flip):
   algorithm(_alg), reflected(_reflected), flip(_flip)
 {
   int poly;
@@ -49,7 +49,7 @@ CRC::CRC(Algorithm _alg, bool _reflected, bool _flip):
 	  crc = (crc >> 1) ^ poly;
 	else
 	  crc = crc >> 1;
-      }	   
+      }
     }
     else
     {
@@ -89,21 +89,21 @@ CRC::crc_t CRC::calculate(const unsigned char *data, size_t length)
       crc = reflected?0xF0B8:0x1D0F;  // Joe Geluso's theory, plus reversal
       break;
   }
-    
+
   // Run each byte through table
   if (reflected)
   {
     for(;length; length--)
-    { 
+    {
       unsigned char byte = *data++;
       crc_t combiner = (crc & 0xff) ^ byte;
-      crc = (crc >> 8) ^ combinations[combiner];     
+      crc = (crc >> 8) ^ combinations[combiner];
     }
   }
   else
   {
     for(;length; length--)
-    { 
+    {
       unsigned char byte = *data++;
       crc_t combiner = (crc>>8) ^ byte;
       crc = ((crc << 8)&0xffff) ^ combinations[combiner];

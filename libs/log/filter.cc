@@ -17,10 +17,10 @@ namespace ObTools { namespace Log {
 
 void LevelFilter::log(Message& msg)
 {
-  if (msg.level <= level) 
+  if (msg.level <= level)
     next.log(msg);
 }
-  
+
 //==========================================================================
 // PatternFilter
 
@@ -29,7 +29,7 @@ void PatternFilter::log(Message& msg)
   if (Text::pattern_match(pattern, msg.text))
     next.log(msg);
 }
-  
+
 //==========================================================================
 // Timestamp filter
 
@@ -42,7 +42,7 @@ void TimestampFilter::log(Message& msg)
   // Process the string for our extensions first
   // ! If there are any more of these, do it more efficiently!
   string tmp_format = Text::subst(format, "%*L", Text::itos(msg.level));
-  tmp_format = Text::subst(tmp_format, "%*S", 
+  tmp_format = Text::subst(tmp_format, "%*S",
 			   Text::ftos(msg.timestamp.seconds(),6,3,true));
 
   // Now do strftime on what's left

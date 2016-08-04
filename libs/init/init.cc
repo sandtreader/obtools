@@ -21,21 +21,21 @@ static list<Action *> *get_actions()
   if (!actions) actions = new list<Action *>;
   return actions;
 }
-    
+
 //------------------------------------------------------------------------
 // Register an action
 // This method is designed to work even if it is called before the
 // singleton Sequence is fully initialised
-void Sequence::add(Action& a) 
+void Sequence::add(Action& a)
 {
-  get_actions()->push_back(&a); 
+  get_actions()->push_back(&a);
 }
 
 //------------------------------------------------------------------------
 // Action pointer comparison function
 static bool sort_action_rank(Action *a1, Action *a2)
-{ 
-  return a1->rank < a2->rank; 
+{
+  return a1->rank < a2->rank;
 }
 
 //------------------------------------------------------------------------

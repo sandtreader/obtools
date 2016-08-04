@@ -44,7 +44,7 @@ void test(Text::Base64& base64, uint64_t n)
 int main(int argc, char **argv)
 {
   string s;
-  if (argc > 1) 
+  if (argc > 1)
     s = argv[1];
   else
   {
@@ -59,9 +59,9 @@ int main(int argc, char **argv)
 
   // Encode text
   string es = base64.encode(s);
-  cout << "Base 64 of [" << s << "] (" << s.size() << " bytes):\n" 
+  cout << "Base 64 of [" << s << "] (" << s.size() << " bytes):\n"
        << es << endl;
-  
+
   // Decode text
   size_t len = base64.binary_length(es);
   cout << "Decode will take up to " << len << " bytes\n";

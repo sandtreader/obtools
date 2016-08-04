@@ -13,7 +13,7 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Constructor
 Attribute::Attribute(XMI::Reader& rdr, XML::Element& xe)
-  :StructuralFeature(rdr, xe) 
+  :StructuralFeature(rdr, xe)
 {
   XML::Element& ive = source.get_child("UML:Attribute.initialValue");
   if (ive.valid())

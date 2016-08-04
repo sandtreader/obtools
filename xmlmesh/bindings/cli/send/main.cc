@@ -8,7 +8,7 @@
 //
 // Copyright (c) 2005 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
-// ======================================================================= 
+// =======================================================================
 
 #include "ot-xmlmesh-client-otmp.h"
 #include "ot-log.h"
@@ -35,7 +35,7 @@ void usage(char *pname)
   cout << "  -v --verbose    More logging\n";
   cout << "  -q --quiet      No logging, even on error\n";
   cout << "  -h --host       Set XMLMesh host (default 'localhost')\n";
-  cout << "  -p --port       Set XMLMesh port (default " 
+  cout << "  -p --port       Set XMLMesh port (default "
        << XMLMesh::OTMP::DEFAULT_PORT << ")\n";
   cout << "  -? --help       Output this usage\n";
 }
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  log.summary << "Host: " << addr 
+  log.summary << "Host: " << addr
 	      << " (" << addr.get_hostname() << ")" << endl;
 
   // Start client
@@ -141,12 +141,12 @@ int main(int argc, char **argv)
   else
   {
     ifstream fin(file.c_str());
-    if (!fin) 
+    if (!fin)
     {
       cerr << "Can't read file " << file << endl;
       return 2;
     }
-    while (fin) 
+    while (fin)
     {
       char c;
       fin.get(c);
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
     this_thread::sleep_for(chrono::seconds{1});  // Wait for it to go out
   }
 
-  return 0;  
+  return 0;
 }
 
 

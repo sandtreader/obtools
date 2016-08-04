@@ -47,14 +47,14 @@ protected:
   // Process a script to cout, using given tags
   // Limit common indent removal to max_ci.  If not yet set (<0), sets it to
   // common indent of this script
-  void process_script(const string& script, CPPT::Tags& tags, 
+  void process_script(const string& script, CPPT::Tags& tags,
 		      const string& streamname, int& max_ci);
-  
+
   //--------------------------------------------------------------------------
   // Generate use of a predefined 'macro' template
   void generate_use(XML::Element& use_e,
 		    XML::Element& define_e,
-		    CPPT::Tags& tags, 
+		    CPPT::Tags& tags,
 		    const string& childname,
 		    const string& indexname,
 		    const string& countname,
@@ -67,8 +67,8 @@ protected:
   // max_ci is maximum indent to strip from code
   // Accumulates script in script, dumps it on hitting a sub-template
   void generate_template(XML::Element& te, XML::Element& parent,
-			 CPPT::Tags& tags, 
-			 int& max_ci, 
+			 CPPT::Tags& tags,
+			 int& max_ci,
 			 const string& indexname,
 			 const string& countname,
 			 const string& streamname,
@@ -85,7 +85,7 @@ protected:
   // === Abstract virtual functions to be implemented by subclass ==
 
   //--------------------------------------------------------------------------
-  // Obtain an element parameter name to use to in the function generated 
+  // Obtain an element parameter name to use to in the function generated
   // by the given template
   virtual string get_parameter_name(XML::Element &te) = 0;
 
@@ -105,7 +105,7 @@ protected:
 
   //--------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
-  virtual void expand_use(XML::Element& use_e, 
+  virtual void expand_use(XML::Element& use_e,
 			  XML::Element& define_e,
 			  XML::Element& parent,
 			  CPPT::Tags& tags,
@@ -113,7 +113,7 @@ protected:
 			  bool is_root = false) = 0;
 
   //--------------------------------------------------------------------------
-  // Generate includes / file-level code 
+  // Generate includes / file-level code
   virtual void generate_includes();
 
   //--------------------------------------------------------------------------
@@ -129,7 +129,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor - read configuration from config file, output code
   // to given output stream, errors to error stream
-  Generator(const string& _config_file, 
+  Generator(const string& _config_file,
 	    ostream& _sout=cout, ostream& serr=cerr);
 
   //------------------------------------------------------------------------

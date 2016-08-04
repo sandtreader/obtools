@@ -34,7 +34,7 @@ void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
 
       switch (c)
       {
-	case 0: 
+	case 0:
 	case 4:  // ctrl-D
 	  return;
 
@@ -44,7 +44,7 @@ void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
 	case '\n':
 	  if (line.size())
 	  {
-	    // Handle this line 
+	    // Handle this line
 	    registry.handle(line, io, io);
 	    line.erase();
 	  }

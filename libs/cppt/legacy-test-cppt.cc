@@ -15,7 +15,7 @@ using namespace std;
 
 int main()
 {
-  ObTools::CPPT::Tags tags = 
+  ObTools::CPPT::Tags tags =
   { "<?", "?>", "<?=", "?>", "<?#", "?>" };
 
   ObTools::CPPT::Processor processor(cin, cout, tags, "cout");
@@ -29,7 +29,7 @@ int main()
   cout << "return 0;\n";
   cout << "}\n";
 
-  return 0;  
+  return 0;
 }
 
 

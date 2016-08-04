@@ -1,14 +1,14 @@
-//~[ Example::foo (1) 
+//~[ Example::foo (1)
 //------------------------------------------------------------------------
-void Example::foo(int x, int y)                                    
-{                                                              
+void Example::foo(int x, int y)
+{
 //~^ ---- Manual code ----
-                                                                   
+
 
 
 
 //~v ---------------------
-} 
+}
 //~]
 
 

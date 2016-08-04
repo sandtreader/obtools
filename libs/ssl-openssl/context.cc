@@ -178,7 +178,7 @@ void Context::set_session_id_context(const string& s)
 }
 
 //--------------------------------------------------------------------------
-// Create a new SSL connection from the context on the given fd, and 
+// Create a new SSL connection from the context on the given fd, and
 // accept() it
 Connection *Context::accept_connection(int fd)
 {

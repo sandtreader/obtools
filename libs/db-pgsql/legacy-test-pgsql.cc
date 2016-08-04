@@ -45,7 +45,7 @@ int main()
 
   if (!conn.exec("DELETE from test where id=3")) return 2;
 
-  return 0;  
+  return 0;
 }
 
 

@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Misc
 // Miscellaneous useful classes
-// 
+//
 // Copyright (c) 2003 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -22,7 +22,7 @@
 #include "ot-chan.h"
 #include "ot-text.h"
 
-namespace ObTools { namespace Misc { 
+namespace ObTools { namespace Misc {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -51,12 +51,12 @@ public:
 
   //------------------------------------------------------------------------
   // Update to reflect the concatenation of another buffer full
-  // of bytes. 
+  // of bytes.
   void update(const char *buf, unsigned len);
 
   //------------------------------------------------------------------------
   // Final wrapup
-  // Fills 'digest' with 16 binary bytes representing the MD5 sum 
+  // Fills 'digest' with 16 binary bytes representing the MD5 sum
   void finalise(unsigned char digest[16]);
 
   //--------------------------------------------------------------------------
@@ -74,7 +74,7 @@ public:
   uint64_t hash_to_int(const string& text);
 
   //------------------------------------------------------------------------
-  // Destructor 
+  // Destructor
   ~MD5();
 };
 
@@ -88,7 +88,7 @@ public:
 
 //But there is a long-running argument about exactly what CCITT is 'supposed'
 //to be.  The most prevelant is probably the plain CCITT below; with
-//CCITT_ZERO the next - but I'm inclined to agree with Joe Geluso 
+//CCITT_ZERO the next - but I'm inclined to agree with Joe Geluso
 //that CCITT_MOD may be the 'right' answer, so all three are offered!
 
 //Some CCITT versions flip the result; CRC-16 never does
@@ -109,9 +109,9 @@ public:
 
   enum Algorithm
   {
-    ALGORITHM_CRC16 = 0,       // x^16 + x^15 + x^2 + 1, init 0x0000 
+    ALGORITHM_CRC16 = 0,       // x^16 + x^15 + x^2 + 1, init 0x0000
     ALGORITHM_CCITT = 1,       // x^16 + x^12 + x^5 + 1, init 0xFFFF
-    ALGORITHM_CCITT_ZERO = 2,  // x^16 + x^12 + x^5 + 1, init 0x0000 
+    ALGORITHM_CCITT_ZERO = 2,  // x^16 + x^12 + x^5 + 1, init 0x0000
     ALGORITHM_CCITT_MOD  = 3   // x^16 + x^12 + x^5 + 1, init 0x1DOF
   } algorithm;
 
@@ -311,7 +311,7 @@ public:
 
   //--------------------------------------------------------------------------
   // Dump contents
-  void dump(ostream& s, const string& prefix="    ", 
+  void dump(ostream& s, const string& prefix="    ",
 	    const string& separator=" = ") const;
 
   //--------------------------------------------------------------------------
@@ -434,7 +434,7 @@ public:
   // width gives number of bytes per line
   // split is interval of spaces between bytes: 0 is no spaces
   // ascii gives printable ASCII listing as well if set
-  Dumper(ostream& _sout, int _width=16, int _split=4, bool _ascii=true): 
+  Dumper(ostream& _sout, int _width=16, int _split=4, bool _ascii=true):
     sout(_sout), width(_width), split(_split), ascii(_ascii) {}
 
   //------------------------------------------------------------------------
@@ -541,7 +541,7 @@ public:
   // Ordered set of ranges
   set<Range> ranges;
 
-  // Expected end offset - provides information for various operations 
+  // Expected end offset - provides information for various operations
   // below.  Will be modified by insertions if exceeded - hence 0 is fine
   // if you want just to count the total length seen so far
   offset_t end_offset;
@@ -867,7 +867,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get percentage coverage
-  int percentage_complete() 
+  int percentage_complete()
   { return end_offset?(100*coverage()/end_offset):100; }
 
   //------------------------------------------------------------------------
@@ -890,7 +890,7 @@ public:
 
     for(unsigned int i=0; i<length; i++)
     {
-      // Calculate (exactly, avoiding rounding and overflow) start and end 
+      // Calculate (exactly, avoiding rounding and overflow) start and end
       // of this fraction (end=start of next)
       double this_start = static_cast<double>(end_offset)*i
                           / static_cast<double>(length);

@@ -16,7 +16,7 @@ namespace ObTools { namespace Crypto {
 // Pad a block of data to given length multiple
 // Returns copied and padded malloc'ed data block, and modifies length
 // to length of padded block (deprecated)
-unsigned char *PKCS5::pad(const unsigned char *data, int& length, 
+unsigned char *PKCS5::pad(const unsigned char *data, int& length,
 			  int multiple)
 {
   // Always adds padding, even if not really needed

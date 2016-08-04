@@ -1,7 +1,7 @@
 //==========================================================================
 // ObTools::XMI: class.cc
 //
-// UML::Feature, UML::StructuralFeature and UML::BehaviouralFeature 
+// UML::Feature, UML::StructuralFeature and UML::BehaviouralFeature
 // functionality
 //
 // Copyright (c) 2003 Paul Clark.  All rights reserved
@@ -118,7 +118,7 @@ list<Parameter *> BehaviouralFeature::get_parameters()
     Parameter *par = dynamic_cast<Parameter *>(*p);
     if (par && par->kind != PARAMETER_RETURN) l.push_back(par);
   }
-  
+
   return l;
 }
 

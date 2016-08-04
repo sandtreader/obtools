@@ -17,9 +17,9 @@ namespace ObTools { namespace Tube {
 void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
 				   const string& name)
 {
-  MT::Lock lock(request_mutex); 
+  MT::Lock lock(request_mutex);
   Time::Stamp now = Time::Stamp::now();
-  for(map<id_t, Request>::iterator p = requests.begin(); 
+  for(map<id_t, Request>::iterator p = requests.begin();
       p!=requests.end(); ++p)
   {
     Request& req = p->second;
@@ -36,13 +36,13 @@ void SyncRequestCache::do_timeouts(Log::Streams& log, int timeout,
 //------------------------------------------------------------------------
 // Set up a request entry to wait for a response
 // (call before actually sending message, in case response is instant)
-void SyncRequestCache::start_request(Message& request, 
+void SyncRequestCache::start_request(Message& request,
 				     Net::EndPoint client,
 				     const string& name)
 {
   Log::Streams log;
 
-  MT::Lock lock(request_mutex); 
+  MT::Lock lock(request_mutex);
 
   // Get a new ID and increment counter
 retry:
@@ -79,7 +79,7 @@ bool SyncRequestCache::wait_response(const Message& request,
                                      Message& response)
 {
   // Lock mutex - wait will unlock it then relock on exit
-  MT::Lock lock(request_mutex); 
+  MT::Lock lock(request_mutex);
   id_t id = static_cast<id_t>((request.flags & MASK_REQUEST_ID)
                               >> SHIFT_REQUEST_ID);
   Request& req = requests[id];
@@ -87,7 +87,7 @@ bool SyncRequestCache::wait_response(const Message& request,
   // Wait for signal, unlocking and then relocking mutex
   req.ready.wait(lock);
 
-  // Copy response 
+  // Copy response
   response = req.response;
 
   // Remove request record
@@ -118,7 +118,7 @@ bool SyncRequestCache::handle_response(const Message& response,
                                    << response.stag() << endl;)
 
     // Lookup ID in mutex
-    MT::Lock lock(request_mutex); 
+    MT::Lock lock(request_mutex);
     map<id_t, Request>::iterator p = requests.find(id);
     if (p!=requests.end())
     {
@@ -145,8 +145,8 @@ bool SyncRequestCache::handle_response(const Message& response,
 void SyncRequestCache::shutdown(Net::EndPoint client)
 {
   // Signal all request conditions to free up requesting threads
-  MT::Lock lock(request_mutex); 
-  for(map<id_t, Request>::iterator p = requests.begin(); 
+  MT::Lock lock(request_mutex);
+  for(map<id_t, Request>::iterator p = requests.begin();
       p!=requests.end(); ++p)
   {
     Request& req = p->second;
@@ -162,13 +162,13 @@ void SyncRequestCache::shutdown()
 {
   // Signal all request conditions to free up requesting threads
   {
-    MT::Lock lock(request_mutex); 
-    for(map<id_t, Request>::iterator p = requests.begin(); 
+    MT::Lock lock(request_mutex);
+    for(map<id_t, Request>::iterator p = requests.begin();
 	p!=requests.end(); ++p)
     {
       Request& req = p->second;
       req.ready.notify_one();  // Leaving empty response
-      
+
       // The waiting thread will delete the request
     }
   }

@@ -49,10 +49,10 @@ bool TokenRecogniser::process_char(char c, TokenState& state)
     // Keep this character
     current_token += c;
 
-    if (at_least_one_is_valid) 
-    { 
+    if (at_least_one_is_valid)
+    {
       // If only one possiblity, we're done
-      if (npossibles == 1) 
+      if (npossibles == 1)
       {
 	state = TOKEN_VALID;
 	index = 0;  // Clear for next time
@@ -67,7 +67,7 @@ bool TokenRecogniser::process_char(char c, TokenState& state)
   }
   else
   {
-    // Not in any token - first simple check to see if anything happened 
+    // Not in any token - first simple check to see if anything happened
     // before, and just carry on reading if not
     if (!index) return false;
 

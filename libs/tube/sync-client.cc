@@ -23,8 +23,8 @@ class TimeoutThread: public MT::Thread
   SyncClient& client;
   Log::Streams log;  // Thread local
 
-  void run() 
-  { 
+  void run()
+  {
     while (client.is_alive())
     {
       client.do_timeouts(log);
@@ -53,7 +53,7 @@ void SyncClient::do_timeouts(Log::Streams& log)
 //------------------------------------------------------------------------
 // Constructor - takes server endpoint (address+port), request timeout
 // (in seconds) and optional name
-SyncClient::SyncClient(Net::EndPoint _server, int _timeout, 
+SyncClient::SyncClient(Net::EndPoint _server, int _timeout,
 		       const string& _name):
   Client(_server, _name), timeout(_timeout)
 {

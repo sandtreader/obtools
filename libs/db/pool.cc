@@ -28,16 +28,16 @@ public:
 
 //------------------------------------------------------------------------
 // Constructor
-ConnectionPool::ConnectionPool(ConnectionFactory& _factory, 
+ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
 			       unsigned _min, unsigned _max,
 			       Time::Duration _max_inactivity):
-  factory(_factory), min_connections(_min), max_connections(_max), 
+  factory(_factory), min_connections(_min), max_connections(_max),
   max_inactivity(_max_inactivity), mutex(), background_thread(0)
 {
   Log::Streams log;
   log.summary << "Creating database connection pool with ("
-	      << min_connections << "-" << max_connections 
-	      << ") connections, max inactivity " << max_inactivity.seconds() 
+	      << min_connections << "-" << max_connections
+	      << ") connections, max inactivity " << max_inactivity.seconds()
 	      << endl;
 
   // Start with base level
@@ -104,7 +104,7 @@ Connection *ConnectionPool::claim()
     if (*conn)
     {
       last_used[conn] = Time::Stamp::now();
-      OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
+      OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
 			   dlog.debug << "Database connection claimed - "
 			   << connections.size() << " total, "
 			   << available.size() << " available\n";)
@@ -133,7 +133,7 @@ Connection *ConnectionPool::claim()
 	connections.push_back(conn);
 	last_used[conn] = Time::Stamp::now();
 
-	OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
+	OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
 			     dlog.debug << "New database connection created - "
 			     << "now "<< connections.size() << " in total\n";)
 	return conn;
@@ -148,7 +148,7 @@ Connection *ConnectionPool::claim()
   }
 
   Log::Streams log;
-  log.error << "Database pool reached maximum size: " << max_connections 
+  log.error << "Database pool reached maximum size: " << max_connections
 	    << endl;
 
   return 0;
@@ -164,8 +164,8 @@ void ConnectionPool::release(Connection *conn)
   if (find(available.begin(), available.end(), conn) == available.end())
   {
     available.push_back(conn);
-    OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog; 
-			 dlog.debug << "Database connection released - " 
+    OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
+			 dlog.debug << "Database connection released - "
 			 << connections.size() << " total, "
 			 << available.size() << " available\n";)
   }
@@ -191,8 +191,8 @@ void ConnectionPool::run_background(bool& running)
       // Look for idle connections which have died
       // Note:  We only check available (idle) connections because
       // we can't be sure the ok() operation is thread-safe if it's
-      // being used 
-      for(list<Connection *>::iterator p = available.begin(); 
+      // being used
+      for(list<Connection *>::iterator p = available.begin();
 	  p!=available.end();)
       {
 	list<Connection *>::iterator q = p++;
@@ -201,7 +201,7 @@ void ConnectionPool::run_background(bool& running)
 	if (!*conn)
 	{
 	  log.error<< "Idle database connection failed - removing from pool\n";
-	  
+
 	  map<Connection *, Time::Stamp>::iterator lp = last_used.find(conn);
 	  if (lp!=last_used.end()) last_used.erase(lp);
 	  available.erase(q);
@@ -211,19 +211,19 @@ void ConnectionPool::run_background(bool& running)
       }
 
       // Now look for inactive ones to reap
-      for(map<Connection *, Time::Stamp>::iterator p = last_used.begin(); 
+      for(map<Connection *, Time::Stamp>::iterator p = last_used.begin();
 	  p!=last_used.end();)
       {
 	map<Connection *, Time::Stamp>::iterator q = p++;
         Connection *conn = q->first;
 	Time::Stamp t = q->second;
-	
+
 	if (now-t >= max_inactivity)
 	{
 	  // Check if it's the available list
 	  if (find(available.begin(), available.end(), conn)==available.end())
 	  {
-	    log.error << "Claimed connection is inactive since " 
+	    log.error << "Claimed connection is inactive since "
 		      << t.iso() << " - ignoring\n";
 	    // Post back a last_used to suppress errors until next timeout
 	    q->second = now;
@@ -256,7 +256,7 @@ ConnectionPool::~ConnectionPool()
   if (background_thread) delete background_thread;
 
   // Delete all connections
-  for(list<Connection *>::iterator p = connections.begin(); 
+  for(list<Connection *>::iterator p = connections.begin();
       p!=connections.end(); ++p)
     delete *p;
 }

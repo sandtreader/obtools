@@ -2,9 +2,9 @@
 // ObTools::SSL: ot-ssl.h
 //
 // Public definitions for ObTools::SSL
-// Abstract SSL interface - does nothing here.  Subclass Context to 
+// Abstract SSL interface - does nothing here.  Subclass Context to
 // implement particularly SSL providers
-// 
+//
 // Copyright (c) 2009 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -15,7 +15,7 @@
 #include "ot-net.h"
 #include "ot-xml.h"
 
-namespace ObTools { namespace SSL { 
+namespace ObTools { namespace SSL {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -121,7 +121,7 @@ private:
 
 public:
   //--------------------------------------------------------------------------
-  // Constructor 
+  // Constructor
   TCPClient(Context *ctx, Net::EndPoint endpoint);
 
   //--------------------------------------------------------------------------
@@ -136,13 +136,13 @@ public:
   //--------------------------------------------------------------------------
   // Constructor, binding specific local address/port and with timeout
   // port can be zero if you only want to bind address
-  TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote, 
+  TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
 	    int timeout);
 
   //--------------------------------------------------------------------------
   // Constructor, binding specific local address/port and with timeout and TTL
   // port can be zero if you only want to bind address
-  TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote, 
+  TCPClient(Context *ctx, Net::EndPoint local, Net::EndPoint remote,
 	    int timeout, int ttl);
 
   //--------------------------------------------------------------------------

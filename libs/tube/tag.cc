@@ -21,9 +21,9 @@ string tag_to_string(tag_t tag)
   for(int i=0; i<4; i++)
   {
     char c = static_cast<char>(tag >> (24-8*i));  // Big-endian
-    if (isprint(c)) 
+    if (isprint(c))
       s+=c;
-    else 
+    else
       goto non_print;
   }
 

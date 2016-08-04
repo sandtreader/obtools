@@ -46,14 +46,14 @@ int main()
     cerr << collisions << " collisions\n";
     cerr << "Worst repeat count is " << worst << endl;
 
-    // Not very mathematical, but less than 1 in 1000 collisions is 
+    // Not very mathematical, but less than 1 in 1000 collisions is
     // probably OK
     return (collisions > NUM_TRIES/1000)?2:0;
   }
   else
   {
     cerr << "No collisions\n";
-    return 0;  
+    return 0;
   }
 }
 

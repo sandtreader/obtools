@@ -57,7 +57,7 @@ static void skip_name(Channel::Reader& r)
 #endif
 
 //--------------------------------------------------------------------------
-// Query for a domain RR of the given type and return raw RDATA from the 
+// Query for a domain RR of the given type and return raw RDATA from the
 // first answer section
 string Resolver::query(const string& domain, Type type,
 		       const string& type_name)
@@ -67,8 +67,8 @@ string Resolver::query(const string& domain, Type type,
 
 #if defined(__WIN32__)
   PDNS_RECORD rr;
-  DNS_STATUS status = DnsQuery(domain.c_str(), type, DNS_QUERY_STANDARD, 
-			       0, &rr, 0); 
+  DNS_STATUS status = DnsQuery(domain.c_str(), type, DNS_QUERY_STANDARD,
+			       0, &rr, 0);
 
   if (status != NO_ERROR)
   {
@@ -121,7 +121,7 @@ string Resolver::query(const string& domain, Type type,
   unsigned char buf[MAX_RESULT];
   int len = res_query(domain.c_str(), ns_c_in, static_cast<ns_type>(type),
                       buf, MAX_RESULT);
-  if (len < 0) 
+  if (len < 0)
   {
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
 	      << ") failed\n";
@@ -170,7 +170,7 @@ string Resolver::query(const string& domain, Type type,
 	br.read(rdata, rdlen);  // RDATA
 	return rdata;
       }
-      else 
+      else
       {
 	br.skip(rdlen);  // Skip it
       }
@@ -219,7 +219,7 @@ string Resolver::query_txt(const string& domain)
   catch (Channel::Error ce)
   {
     Log::Streams log;
-    log.error << "DNS resolver: lookup of " << domain 
+    log.error << "DNS resolver: lookup of " << domain
 	      << " (TXT) failed - bad string lengths in TXT RR\n";
     return "";
   }
@@ -244,7 +244,7 @@ string Resolver::query_cert(const string& domain)
     if (type != 1)
     {
       Log::Streams log;
-      log.error << "DNS resolver: lookup of " << domain 
+      log.error << "DNS resolver: lookup of " << domain
 		<< " (CERT) failed - not PKIX\n";
       return "";
     }
@@ -260,7 +260,7 @@ string Resolver::query_cert(const string& domain)
   catch (Channel::Error ce)
   {
     Log::Streams log;
-    log.error << "DNS resolver: lookup of " << domain 
+    log.error << "DNS resolver: lookup of " << domain
 	      << " (CERT) failed - bad RR format\n";
     return "";
   }

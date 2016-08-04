@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Crypto
 // C++ wrappers for crypto functions, (currently) using OpenSSL
-// 
+//
 // Copyright (c) 2006 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -19,8 +19,8 @@
 #include <string.h>
 
 // This is rather ugly...  We want to use SSL as a namespace, but
-// OpenSSL defines it as a struct.  Hence we redefine SSL here to 
-// expand to OpenSSL for the duration of the OpenSSL headers 
+// OpenSSL defines it as a struct.  Hence we redefine SSL here to
+// expand to OpenSSL for the duration of the OpenSSL headers
 #define SSL OpenSSL
 #include <openssl/aes.h>
 #include <openssl/des.h>
@@ -33,7 +33,7 @@
 
 #include "ot-mt.h"
 
-namespace ObTools { namespace Crypto { 
+namespace ObTools { namespace Crypto {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -279,7 +279,7 @@ public:
 
 //==========================================================================
 // DES key (des-key.cc)
-// 8-byte key, also used for IV 
+// 8-byte key, also used for IV
 class DESKey
 {
 private:
@@ -290,7 +290,7 @@ public:
   DES_key_schedule schedule; // Expanded key for optimised processing
   bool is_key;                    // True if a key, false if an IV
   bool valid;                     // Whether key/schedule is valid
-  
+
   //------------------------------------------------------------------------
   // Default constructor
   DESKey(bool _is_key = true): is_key(_is_key), valid(false) {
@@ -315,15 +315,15 @@ public:
 
   //------------------------------------------------------------------------
   // Create a new key from random data
-  // Must seed PRNG first 
+  // Must seed PRNG first
   void create();
 
   //------------------------------------------------------------------------
-  // Read from data block - requires 8 bytes of data 
+  // Read from data block - requires 8 bytes of data
   void read(const unsigned char *data);
 
   //------------------------------------------------------------------------
-  // Write to data block - writes 8 bytes of data 
+  // Write to data block - writes 8 bytes of data
   void write(unsigned char *data) const;
 
   //------------------------------------------------------------------------
@@ -344,7 +344,7 @@ public:
 
 #if defined(__OBTOOLS_CHAN_H)
   // Provide channel versions without forcing use of ot-chan.h
-  
+
   //------------------------------------------------------------------------
   // Read from channel (8 binary bytes)
   void read(Channel::Reader& reader) throw (Channel::Error);
@@ -366,7 +366,7 @@ ostream& operator<<(ostream& s, const DESKey& k);
 //==========================================================================
 // DES crypto object
 // Uses ECB (1 key, no IV) and CBC (1-3 keys, with IV) according to
-// number of keys and whether IV set 
+// number of keys and whether IV set
 class DES
 {
 public:
@@ -397,7 +397,7 @@ public:
 
   //------------------------------------------------------------------------
   // Encrypt/decrypt a block in place
-  // If block is not padded to 8 bytes, the remainder (up to 7) bytes 
+  // If block is not padded to 8 bytes, the remainder (up to 7) bytes
   // WILL NOT BE ENCRYPTED
   // Encrypts if 'encryption' is set (default), otherwise decrypts
   // IV is modified if set
@@ -425,7 +425,7 @@ public:
 
   bool is_private; // Private or public?
   bool valid;      // Whether key is valid
-  
+
   //------------------------------------------------------------------------
   // Default constructor
   RSAKey(bool _private = false):
@@ -458,7 +458,7 @@ public:
   // Read from stream - reads PEM format, with pass phrase
   // If force_private is set, reads a private key PEM block even if a
   // public key is wanted (use for testing both ends with a single key)
-  void read(istream& sin, const string& pass_phrase, 
+  void read(istream& sin, const string& pass_phrase,
 	    bool force_private = false);
 
   // Backwards compatibility stub
@@ -467,8 +467,8 @@ public:
   //------------------------------------------------------------------------
   // Write to stream - writes PEM format, with pass phrase
   // If force_public is set, writes a public key PEM block even if
-  // a private key is held - use to generate new public/private pairs 
-  void write(ostream& sout, const string& pass_phrase, 
+  // a private key is held - use to generate new public/private pairs
+  void write(ostream& sout, const string& pass_phrase,
 	     bool force_public = false) const;
 
   // Backwards compatibility stub
@@ -488,7 +488,7 @@ public:
 
   // Backwards compatibility stub
   void read(const string& text, bool force_private = false);
-    
+
   //------------------------------------------------------------------------
   // Convert to string (PEM format) with pass_phrase
   // force_public forces public key output from private key (see above)
@@ -537,23 +537,23 @@ public:
   int max_plaintext();
 
   //------------------------------------------------------------------------
-  // Encrypt a block 
+  // Encrypt a block
   // Length may be up to max_plaintext() bytes
   // Returns whether successful (key set up correctly)
   // 'to' must be writable to cipher_size() bytes
   bool encrypt(const unsigned char *from, int length, unsigned char *to);
 
   //------------------------------------------------------------------------
-  // Decrypt a block 
+  // Decrypt a block
   // Returns decrypted length of block
   // Assumes 'from' data is always cypher_size() bytes
-  // 'to' must be writable to cipher_size() bytes 
+  // 'to' must be writable to cipher_size() bytes
   // (unless you _really_ understand padding!)
   int decrypt(const unsigned char *from, unsigned char *to);
 };
 
 //==========================================================================
-// PKCS5 padding support 
+// PKCS5 padding support
 class PKCS5
 {
  public:
@@ -738,7 +738,7 @@ public:
   void read(const string& text);
 
   //------------------------------------------------------------------------
-  // Convert to string (PEM format) 
+  // Convert to string (PEM format)
   string str() const;
 
   //------------------------------------------------------------------------
@@ -783,7 +783,7 @@ class CertificateStore
   //------------------------------------------------------------------------
   // Constructor:
   // ca_file should refer to a PEM format containing a list of trusted CAs
-  // ca_dir should refer to a directory containing certificate files with 
+  // ca_dir should refer to a directory containing certificate files with
   // hashed names (see OpenSSL docs)
   CertificateStore(const string& ca_file="", const string& ca_dir="");
 

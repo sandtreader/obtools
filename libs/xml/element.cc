@@ -208,7 +208,7 @@ string Element::escape(const string &v, bool escquote) const
       case '&':
 	r+="&amp;";
 	break;
-	
+
       case '"':
 	if (escquote)
 	  r+="&quot;";
@@ -310,7 +310,7 @@ Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
     }
     else return none;
   }
-  catch (ParseFailed) 
+  catch (ParseFailed)
   {
     return none;
   }
@@ -340,7 +340,7 @@ bool Element::merge_xml(const string& xml, ostream& serr, int parse_flags)
       return false;
     }
   }
-  catch (ParseFailed) 
+  catch (ParseFailed)
   {
     return false;
   }
@@ -440,7 +440,7 @@ Element& Element::make_child(const string& ename)
 
 //--------------------------------------------------------------------------
 // Find first (or only) descendant of given name
-// Returns Element::none if there isn't one 
+// Returns Element::none if there isn't one
 // (Like get_child() but ignoring intervening cruft)
 // Const and non-const implementations
 const Element& Element::get_descendant(const string& ename) const
@@ -546,7 +546,7 @@ list<Element *> Element::get_descendants(const string& ename,
 //--------------------------------------------------------------------------
 // Dump all descendant elements of given name into given list
 // Prune walk at elements matching 'prune'
-// Ename and prune can be the same - then returns only first level of 
+// Ename and prune can be the same - then returns only first level of
 // <ename>s, not <ename>s within <ename>s
 // Const and non-const implementations
 void Element::append_descendants(const string& ename, const string& prune,
@@ -556,7 +556,7 @@ void Element::append_descendants(const string& ename, const string& prune,
       p!=children.end();
       p++)
   {
-    if ((*p)->name==ename) 
+    if ((*p)->name==ename)
       l.push_back(*p);
 
     //Look for descendants, even within a match
@@ -572,7 +572,7 @@ void Element::append_descendants(const string& ename, const string& prune,
       p!=children.end();
       p++)
   {
-    if ((*p)->name==ename) 
+    if ((*p)->name==ename)
       l.push_back(*p);
 
     //Look for descendants, even within a match
@@ -601,7 +601,7 @@ string Element::get_content() const
 
     // Look for absence of tag rather than presence of content - this
     // might be optimised and we don't want to collect second-level stuff
-    if (e.name.empty() && !e.content.empty()) 
+    if (e.name.empty() && !e.content.empty())
     {
       s+=(*p)->content;
       s+='\n';
@@ -668,7 +668,7 @@ bool Element::get_attr_bool(const string& attname, bool def) const
   {
     char c=0;
     if (!p->second.empty()) c=p->second[0];
-      
+
     switch(c)
     {
       case 'T': case 't':
@@ -705,7 +705,7 @@ int Element::get_attr_int(const string& attname, int def) const
 int Element::get_attr_hex(const string& attname, int def) const
 {
   map<string,string>::const_iterator p=attrs.find(attname);
-  if (p!=attrs.end()) 
+  if (p!=attrs.end())
   {
     istringstream iss(p->second);
     iss >> hex >> def;
@@ -854,8 +854,8 @@ string Element::get_xpath() const
   string xpath;
 
   // Loop up through parents, stop at root
-  for(const Element *current=this; 
-      current && current->parent; 
+  for(const Element *current=this;
+      current && current->parent;
       current=current->parent)
   {
     ostringstream oss;
@@ -889,7 +889,7 @@ string Element::get_xpath() const
 //   If not present, leave it and return true
 //   If present but mapped to "", leave it return false (=> delete me)
 //   If present and mapped to non empty, change to mapped string
-// 
+//
 // Recurses to sub-elements and deletes them if they return false -
 // net effect begin that names mapped to "" are (deep) deleted from
 // the document
@@ -996,7 +996,7 @@ Element::~Element()
 
 //------------------------------------------------------------------------
 // >> operator to write to ostream
-ostream& ObTools::XML::operator<<(ostream& s, const Element& e) 
+ostream& ObTools::XML::operator<<(ostream& s, const Element& e)
 {
   e.write_to(s);
   return s;

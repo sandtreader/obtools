@@ -22,7 +22,7 @@ namespace ObTools { namespace Crypto {
 
 //------------------------------------------------------------------------
 // Create a new key from random data
-// Must seed PRNG first 
+// Must seed PRNG first
 void RSAKey::create(int size, int exponent)
 {
   rsa = RSA_generate_key(size, exponent, 0, 0);
@@ -49,7 +49,7 @@ void RSAKey::read(istream& sin, bool force_private)
 //------------------------------------------------------------------------
 // Write to stream - writes PEM format
 // If force_public is set, writes a public key PEM block even if
-// a private key is held - use to generate new public/private pairs 
+// a private key is held - use to generate new public/private pairs
 void RSAKey::write(ostream& sout, const string& pass_phrase,
 		   bool force_public) const
 {
@@ -63,7 +63,7 @@ void RSAKey::write(ostream& sout, bool force_public) const
 //------------------------------------------------------------------------
 // Read from string - reads PEM format, with pass phrase
 // If force_private is set, reads a private key even if public (see above)
-void RSAKey::read(const string& text, 
+void RSAKey::read(const string& text,
 		  const string& pass_phrase,
 		  bool force_private)
 {

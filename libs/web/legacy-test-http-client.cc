@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     else if (arg == "-u") op = put;
     else if (arg == "-d") op = del;
     else if (arg == "-1") http_1_1 = true;
-    else 
+    else
     {
       cerr << "Unknown option " << arg << endl;
       return 2;
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
     // Create client on first URL
     if (!client)
     {
-      client = new Web::HTTPClient(url, &ctx, 
+      client = new Web::HTTPClient(url, &ctx,
 				   "ObTools Test HTTP client", 5, 5);
       if (http_1_1) client->enable_persistence();
       if (progressive) client->enable_progressive();
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
     if (result >= 200 && result < 300)
     {
-      log.detail << "We connected from " << client->get_last_local_address() 
+      log.detail << "We connected from " << client->get_last_local_address()
 		 << endl;
 
       if (progressive)

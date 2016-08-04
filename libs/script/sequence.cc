@@ -14,7 +14,7 @@ namespace ObTools { namespace Script {
 
 //------------------------------------------------------------------------
 // Constructor
-SequenceAction::SequenceAction(const CP& cp): 
+SequenceAction::SequenceAction(const CP& cp):
   Action(cp), it(xml.children.begin()), current(0)
 {
 }

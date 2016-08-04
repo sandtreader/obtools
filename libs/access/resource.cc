@@ -2,7 +2,7 @@
 // ObTools::Access: resource.cc
 //
 // Access resource structure
-// 
+//
 // Copyright (c) 2008 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -16,7 +16,7 @@ namespace ObTools { namespace Access {
 //--------------------------------------------------------------------------
 // Constructor - reads from a <resource> element, using groups in given map
 // ns gives optional namespace prefix
-Resource::Resource(const XML::Element& resource_e, 
+Resource::Resource(const XML::Element& resource_e,
 		   map<string, Group *>& groups,
 		   const string& ns)
 {
@@ -40,7 +40,7 @@ Resource::Resource(const XML::Element& resource_e,
     denied.push_back(Rule(d_e, groups));
   }
 }
-  
+
 //--------------------------------------------------------------------------
 // Check access to a given real resource by a given user
 // Returns whether the resource matches our pattern - if so, writes the
@@ -100,9 +100,9 @@ void Resource::dump(ostream& sout) const
 //--------------------------------------------------------------------------
 // Write rule to ostream
 ostream& operator<<(ostream& sout, const Resource& r)
-{ 
-  r.dump(sout); 
-  return sout; 
+{
+  r.dump(sout);
+  return sout;
 }
 
 

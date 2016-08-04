@@ -122,7 +122,7 @@ void Writer::write_nbo_fixed_point(double f, int before_bits, int after_bits)
 // Throws Error on failure
 void Writer::write_le_16(uint16_t i)
 {
-  // No easy way to do this with htonl, since if we're big-endian it's 
+  // No easy way to do this with htonl, since if we're big-endian it's
   // a NOOP anyway - so do it manually
   unsigned char buf[2];
   buf[0] = static_cast<unsigned char>(i);
@@ -184,7 +184,7 @@ void Writer::skip(size_t n)
   {
     size_t i = n;
     if (i > 256) i=256;
-    basic_write(buf, i); 
+    basic_write(buf, i);
     n-=i;
   }
 }
@@ -192,7 +192,7 @@ void Writer::skip(size_t n)
 //--------------------------------------------------------------------------
 // Pad to given alignment (bytes) from current offset
 void Writer::align(size_t n)
-{ 
+{
   skip(static_cast<int>(n*((offset+n-1)/n) - offset));  // Bytes to pad
 }
 

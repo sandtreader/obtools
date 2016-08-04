@@ -24,7 +24,7 @@ int main()
   text = Text::subst(text, "foo", "fool");
   cout << "s/foo/fool/g: " << text << endl;
 
-  return 0;  
+  return 0;
 }
 
 

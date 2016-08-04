@@ -20,16 +20,16 @@ using namespace ObTools;
 class TestServer: public SSL::TCPServer
 {
 public:
-  TestServer(SSL::Context *ctx, int port): 
+  TestServer(SSL::Context *ctx, int port):
     SSL::TCPServer(ctx, port) {}
 
   void process(Net::TCPSocket& s, Net::EndPoint client);
 };
 
-void TestServer::process(Net::TCPSocket& s, 
+void TestServer::process(Net::TCPSocket& s,
 			 Net::EndPoint client)
 {
-  cerr << "Got connection from " << client 
+  cerr << "Got connection from " << client
        << " (" << s.get_mac(client.host) << ")" << endl;
 
   try
@@ -48,7 +48,7 @@ void TestServer::process(Net::TCPSocket& s,
   {
     cerr << se << endl;
   }
-} 
+}
 
 
 //--------------------------------------------------------------------------

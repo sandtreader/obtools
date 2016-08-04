@@ -74,7 +74,7 @@ double Row::get_real(const string& fieldname, double def) const
 string Row::get_fields() const
 {
   string result;
-  for(map<string, FieldValue>::const_iterator p = fields.begin(); 
+  for(map<string, FieldValue>::const_iterator p = fields.begin();
       p!=fields.end(); ++p)
   {
     if (!result.empty()) result += ", ";
@@ -101,8 +101,8 @@ string Row::get_escaped_values() const
 }
 
 //------------------------------------------------------------------------
-// Get string with field names and values in order with '=', 
-// separated by commas and spaces, values delimited with single quotes 
+// Get string with field names and values in order with '=',
+// separated by commas and spaces, values delimited with single quotes
 // (e.g. for UPDATE)
 string Row::get_escaped_assignments() const
 {

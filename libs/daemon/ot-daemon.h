@@ -3,7 +3,7 @@
 //
 // Public definitions for ObTools::Daemon
 // Common infrastructure for Unix daemons/background servers
-// 
+//
 // Copyright (c) 2009 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
@@ -16,7 +16,7 @@
 #include "ot-log.h"
 #include "ot-xml.h"
 
-namespace ObTools { namespace Daemon { 
+namespace ObTools { namespace Daemon {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
@@ -78,7 +78,7 @@ class Shell
   Application& application;     // The application to manage
   string name;                 // Long name of process
   string version;              // Version number
-  string default_config_file;  // Path to default config if not specified 
+  string default_config_file;  // Path to default config if not specified
   string config_element;       // Top-level element to expect in config
   string default_log_file;     // Default log file path
   string default_pid_file;     // Default PID file path
@@ -120,7 +120,7 @@ public:
   int start(int argc, char **argv);
 
   //--------------------------------------------------------------------------
-  // Signal to shut down 
+  // Signal to shut down
   void shutdown();
 
   //--------------------------------------------------------------------------

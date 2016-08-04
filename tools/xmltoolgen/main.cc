@@ -20,7 +20,7 @@ class XMLGenerator: public Generator
 {
 protected:
   //--------------------------------------------------------------------------
-  // Obtain an element parameter name to use to in the function generated 
+  // Obtain an element parameter name to use to in the function generated
   // by the given template - use name of element requested, or 'child' if none
   // Overridable by 'var' attribute
   virtual string get_parameter_name(XML::Element &te)
@@ -47,7 +47,7 @@ protected:
 
   //--------------------------------------------------------------------------
   // Iterate over child elements, calling predefined template
-  virtual void expand_use(XML::Element& use_e, 
+  virtual void expand_use(XML::Element& use_e,
 			  XML::Element& define_e,
 			  XML::Element& parent,
 			  CPPT::Tags& tags,
@@ -63,7 +63,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor - read configuration from config file, output code
   // to given output stream, errors to error stream
-  XMLGenerator(const string& _config_file, 
+  XMLGenerator(const string& _config_file,
 	       ostream& _sout=cout, ostream& _serr=cerr):
     Generator(_config_file, _sout, _serr) {}
 };
@@ -83,7 +83,7 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
   if (is_root)
   {
     sout << "  //Expand root template\n";
-    sout<<"  ObTools::XML::Element& " << child_var 
+    sout<<"  ObTools::XML::Element& " << child_var
 	<< " = _parser.get_root();\n";
 
     // Generate directly on the root element
@@ -103,7 +103,7 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
     if (ename.empty()) // All children
     {
       sout << " = " << parent_var << ".children.size();\n";
-      sout << "  OBTOOLS_XML_FOREACH_CHILD(" 
+      sout << "  OBTOOLS_XML_FOREACH_CHILD("
 	   << child_var << ", " << parent_var << ")\n";
     }
     else
@@ -111,10 +111,10 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
       sout << " = " <<parent_var<<".get_children(\""<<ename<<"\").size();\n";
       sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
 	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
-    }     
+    }
 
 
-    generate_template(te, te, tags, max_ci, index_var, count_var, 
+    generate_template(te, te, tags, max_ci, index_var, count_var,
 		      streamname, script);
     process_script(script, tags, streamname, max_ci);
     script.clear();
@@ -126,7 +126,7 @@ void XMLGenerator::expand_inline(XML::Element& te, XML::Element& parent,
 
 //--------------------------------------------------------------------------
 // Iterate over child elements, calling predefined template
-void XMLGenerator::expand_use(XML::Element& use_e, 
+void XMLGenerator::expand_use(XML::Element& use_e,
 			      XML::Element& define_e,
 			      XML::Element& parent,
 			      CPPT::Tags& tags,
@@ -138,7 +138,7 @@ void XMLGenerator::expand_use(XML::Element& use_e,
   if (is_root)
   {
     sout << "  //Call root template\n";
-    sout<<"  ObTools::XML::Element& " << child_var 
+    sout<<"  ObTools::XML::Element& " << child_var
 	<< " = _parser.get_root();\n";
 
     // Generate directly on the root element
@@ -164,7 +164,7 @@ void XMLGenerator::expand_use(XML::Element& use_e,
     if (ename.empty()) // All children
     {
       sout << " = " << parent_var << ".children.size();\n";
-      sout << "  OBTOOLS_XML_FOREACH_CHILD(" 
+      sout << "  OBTOOLS_XML_FOREACH_CHILD("
 	   << child_var << ", " << parent_var << ")\n";
     }
     else
@@ -172,9 +172,9 @@ void XMLGenerator::expand_use(XML::Element& use_e,
       sout << " = " <<parent_var<<".get_children(\""<<ename<<"\").size();\n";
       sout << "  OBTOOLS_XML_FOREACH_CHILD_WITH_TAG("
 	   << child_var << ", " << parent_var << ", \"" << ename << "\")\n";
-    }     
+    }
 
-    generate_use(use_e, define_e, tags, child_var, 
+    generate_use(use_e, define_e, tags, child_var,
 		 index_var, count_var, streamname);
 
     sout << "  " << index_var << "++;\n";
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
   // Generate code
   generator.generate();
 
-  return 0;  
+  return 0;
 }
 
 

@@ -37,8 +37,8 @@ class ClientReceiveThread: public MT::Thread
   Client& client;
   Log::Streams log;  // Private to this thread
 
-  void run() 
-  { 
+  void run()
+  {
     while (client.is_alive())
     {
       // Loop while socket is happy
@@ -48,16 +48,16 @@ class ClientReceiveThread: public MT::Thread
       {
 	// Log fault and sleep before retrying
 	log.error << client.name << " (recv): Socket failed, can't restart\n";
-	log.error << client.name << " (recv): Sleeping for " 
+	log.error << client.name << " (recv): Sleeping for "
 		  << DEAD_SOCKET_SLEEP_TIME << " seconds\n";
-	
+
 	// Sleep, checking for shutdown
 	for(int i=0; client.is_alive() && i<100*DEAD_SOCKET_SLEEP_TIME; i++)
           this_thread::sleep_for(chrono::milliseconds{10});
       }
     }
 
-    OBTOOLS_LOG_IF_DEBUG(log.debug << client.name 
+    OBTOOLS_LOG_IF_DEBUG(log.debug << client.name
 			 << " (recv): Thread shut down\n";)
   }
 
@@ -135,7 +135,7 @@ bool Client::receive_messages(Log::Streams& log)
       msg.flags = socket->read_nbo_int();
 
       OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (recv): Message "
-			   << msg.stag() << ", length " << len 
+			   << msg.stag() << ", length " << len
 			   << " (flags " << hex << msg.flags << dec << ")\n";)
 
       // Read the data
@@ -154,7 +154,7 @@ bool Client::receive_messages(Log::Streams& log)
     else
     {
       // Unrecognised tag
-      log.error << name << " (recv): Unrecognised tag " 
+      log.error << name << " (recv): Unrecognised tag "
 		<< msg.stag() << " - out-of-sync?\n";
       //Try to restart socket
       return restart_socket(log);
@@ -177,7 +177,7 @@ bool Client::receive_messages(Log::Streams& log)
 	return restart_socket(log);
       }
     }
-    
+
     return false;
   }
 
@@ -192,8 +192,8 @@ class ClientSendThread: public MT::Thread
   Client& client;
   Log::Streams log;  // Private to this thread
 
-  void run() 
-  { 
+  void run()
+  {
     while (client.is_alive()) client.send_messages(log);
 
     OBTOOLS_LOG_IF_DEBUG(log.debug << client.name << " (send): Thread shut down\n";)
@@ -226,8 +226,8 @@ bool Client::send_messages(Log::Streams& log)
 
   // Deal with it
   OBTOOLS_LOG_IF_DEBUG(log.debug << name << " (send): Sending message "
-		       << msg.stag() << ", length " 
-		       << msg.data.size() 
+		       << msg.stag() << ", length "
+		       << msg.data.size()
 		       << " (flags " << hex << msg.flags << dec << ")\n";)
   OBTOOLS_LOG_IF_DUMP(Misc::Dumper dumper(log.dump);
 		      dumper.dump(msg.data);)
@@ -275,7 +275,7 @@ bool Client::send_messages(Log::Streams& log)
 
 //------------------------------------------------------------------------
 // Constructor - no SSL
-Client::Client(const Net::EndPoint& _server, const string& _name): 
+Client::Client(const Net::EndPoint& _server, const string& _name):
   server(_server), ctx(0), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
   alive(true), name(_name)
 {
@@ -293,8 +293,8 @@ Client::Client(const Net::EndPoint& _server, const string& _name):
 
 //------------------------------------------------------------------------
 // Constructor with SSL
-Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx, 
-	       const string& _name): 
+Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx,
+	       const string& _name):
   server(_server), ctx(_ctx), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
   alive(true), name(_name)
 {
@@ -340,7 +340,7 @@ bool Client::poll()
 
 //------------------------------------------------------------------------
 // Receive a message - blocks waiting for one to arrive
-// Returns false if the connection was restarted 
+// Returns false if the connection was restarted
 bool Client::wait(Message& msg)
 {
   msg = receive_q.wait();    // Never fails
@@ -363,7 +363,7 @@ void Client::shutdown()
 
     // Likewise on the receive queue to tell the user
     receive_q.send(Message());
-    
+
     // Wait for threads to exit cleanly - enough time for a TCP connection
     // to time out fully, and then some
     for(int i=0; i<SOCKET_CONNECT_TIMEOUT*100+50; i++)

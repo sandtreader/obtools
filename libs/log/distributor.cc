@@ -42,7 +42,7 @@ void Distributor::log(Message& msg)
   MT::Lock lock(mutex);
 #endif
 
-  // Send to all channels 
+  // Send to all channels
   list<Channel *>::iterator p;
   for(p=channels.begin(); p!=channels.end(); p++)
     (*p)->log(msg);

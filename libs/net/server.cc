@@ -75,7 +75,7 @@ void TCPServer::run()
 
     fd_t new_fd = ::accept(fd, reinterpret_cast<struct sockaddr *>(&saddr),
                            &len);
-    if (alive && new_fd != INVALID_FD) 
+    if (alive && new_fd != INVALID_FD)
     {
       EndPoint client(saddr);
 
@@ -94,7 +94,7 @@ void TCPServer::run()
       thread->server         = this;
       thread->client_fd      = new_fd;
       thread->client_ep      = client;
-	
+
       // Start it off
       thread->kick();
     }
@@ -123,12 +123,12 @@ Socket::fd_t TCPServer::initiate(EndPoint remote_address, int timeout)
     thread->server         = this;
     thread->client_fd      = fd;
     thread->client_ep      = remote_address;
-	
+
     // Start it off
     thread->kick();
     return fd;
   }
-  else 
+  else
   {
     threadpool.replace(thread);
     return INVALID_FD;
@@ -146,7 +146,7 @@ void TCPServer::take_over(int fd, Net::EndPoint remote_address)
   thread->server         = this;
   thread->client_fd      = fd;
   thread->client_ep      = remote_address;
-	
+
   // Start it off
   thread->kick();
 }
@@ -171,7 +171,7 @@ void TCPServer::shutdown()
   }
 
   // Note: Client sockets will be closed by TCPWorkerThread::die()
-  threadpool.shutdown(); 
+  threadpool.shutdown();
 }
 
 //--------------------------------------------------------------------------
@@ -182,7 +182,7 @@ void TCPWorkerThread::run()
   unique_ptr<TCPSocket> s(server->create_client_socket(client_fd));
 
   // Just pass them to the server's process function
-  if (s.get()) 
+  if (s.get())
     server->process(*s, client_ep);
   else
     ::SOCKCLOSE(client_fd);  // Drop it
@@ -195,8 +195,8 @@ void TCPWorkerThread::run()
 // Force socket to close on being asked to die
 void TCPWorkerThread::die(bool wait)
 {
-  if (client_fd >= 0) ::SOCKCLOSE(client_fd); 
-  MT::PoolThread::die(wait); 
+  if (client_fd >= 0) ::SOCKCLOSE(client_fd);
+  MT::PoolThread::die(wait);
 }
 
 }} // namespaces

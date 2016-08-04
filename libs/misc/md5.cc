@@ -35,14 +35,14 @@ namespace ObTools { namespace Misc {
 void MD5::byte_reverse(char *buf, unsigned longs)
 {
   uint32_t t;
-  do 
+  do
   {
     t = static_cast<uint32_t>(static_cast<unsigned>(buf[3]) << 8
                               | buf[2]) << 16
                               | (static_cast<unsigned>(buf[1]) << 8 | buf[0]);
     *reinterpret_cast<uint32_t *>(buf) = t;
     buf += 4;
-  } 
+  }
   while (--longs);
 }
 
@@ -62,7 +62,7 @@ void MD5::initialise()
   ctx_buf[1] = 0xefcdab89;
   ctx_buf[2] = 0x98badcfe;
   ctx_buf[3] = 0x10325476;
-  
+
   ctx_bits[0] = 0;
   ctx_bits[1] = 0;
 }
@@ -80,15 +80,15 @@ void MD5::update(const char *buf, unsigned len)
     ctx_bits[1]++; 	/* Carry from low to high */
   ctx_bits[1] += len >> 29;
 
-  t = (t >> 3) & 0x3f;	
+  t = (t >> 3) & 0x3f;
 
   /* Handle any leading odd-sized chunks */
-  if (t) 
+  if (t)
   {
     char *p = static_cast<char *>(ctx_in) + t;
 
     t = 64 - t;
-    if (len < t) 
+    if (len < t)
     {
       memcpy(p, buf, len);
       return;
@@ -99,9 +99,9 @@ void MD5::update(const char *buf, unsigned len)
     buf += t;
     len -= t;
   }
-   
+
   /* Process data in 64-byte chunks */
-  while (len >= 64) 
+  while (len >= 64)
   {
     memcpy(ctx_in, buf, 64);
     byte_reverse(ctx_in, 16);
@@ -115,10 +115,10 @@ void MD5::update(const char *buf, unsigned len)
 }
 
 //------------------------------------------------------------------------
-// Final wrapup - pad to 64-byte boundary with the bit pattern 
+// Final wrapup - pad to 64-byte boundary with the bit pattern
 // 1 0* (64-bit count of bits processed, MSB-first)
 // Taken from MD5Final()
-// Fills 'digest' with 16 binary bytes representing the MD5 sum 
+// Fills 'digest' with 16 binary bytes representing the MD5 sum
 void MD5::finalise(unsigned char digest[16])
 {
   unsigned count;
@@ -136,7 +136,7 @@ void MD5::finalise(unsigned char digest[16])
   count = 64 - 1 - count;
 
   /* Pad out to 56 mod 64 */
-  if (count < 8) 
+  if (count < 8)
   {
     /* Two lots of padding:  Pad the first block to 64 bytes */
     memset(p, 0, count);
@@ -145,8 +145,8 @@ void MD5::finalise(unsigned char digest[16])
 
     /* Now fill the next block with 56 bytes */
     memset(ctx_in, 0, 56);
-  } 
-  else 
+  }
+  else
   {
     /* Pad block to 56 bytes */
     memset(p, 0, count - 8);
@@ -207,7 +207,7 @@ void MD5::transform(uint32_t buf[4], uint32_t in[16])
   MD5STEP(F1, d, a, b, c, in[13] + 0xfd987193, 12);
   MD5STEP(F1, c, d, a, b, in[14] + 0xa679438e, 17);
   MD5STEP(F1, b, c, d, a, in[15] + 0x49b40821, 22);
-  
+
   MD5STEP(F2, a, b, c, d, in[1] + 0xf61e2562, 5);
   MD5STEP(F2, d, a, b, c, in[6] + 0xc040b340, 9);
   MD5STEP(F2, c, d, a, b, in[11] + 0x265e5a51, 14);
@@ -224,7 +224,7 @@ void MD5::transform(uint32_t buf[4], uint32_t in[16])
   MD5STEP(F2, d, a, b, c, in[2] + 0xfcefa3f8, 9);
   MD5STEP(F2, c, d, a, b, in[7] + 0x676f02d9, 14);
   MD5STEP(F2, b, c, d, a, in[12] + 0x8d2a4c8a, 20);
-  
+
   MD5STEP(F3, a, b, c, d, in[5] + 0xfffa3942, 4);
   MD5STEP(F3, d, a, b, c, in[8] + 0x8771f681, 11);
   MD5STEP(F3, c, d, a, b, in[11] + 0x6d9d6122, 16);
@@ -241,7 +241,7 @@ void MD5::transform(uint32_t buf[4], uint32_t in[16])
   MD5STEP(F3, d, a, b, c, in[12] + 0xe6db99e5, 11);
   MD5STEP(F3, c, d, a, b, in[15] + 0x1fa27cf8, 16);
   MD5STEP(F3, b, c, d, a, in[2] + 0xc4ac5665, 23);
-  
+
   MD5STEP(F4, a, b, c, d, in[0] + 0xf4292244, 6);
   MD5STEP(F4, d, a, b, c, in[7] + 0x432aff97, 10);
   MD5STEP(F4, c, d, a, b, in[14] + 0xab9423a7, 15);
@@ -325,9 +325,9 @@ uint64_t MD5::hash_to_int(const string& text)
 
 //------------------------------------------------------------------------
 // Destructor - like the original, nukes the input 'in case it's sensitive'
-MD5::~MD5() 
-{ 
-  memset(ctx_in, 0, 64); 
+MD5::~MD5()
+{
+  memset(ctx_in, 0, 64);
 };
 
 }} // namespaces

@@ -22,7 +22,7 @@ DelayAction::DelayAction(const CP& cp): Action(cp)
 {
   start = script.now;
   time = Time::Duration(xml.get_attr("time","0"));
-  
+
   // Check for randomisation
   if (xml.get_attr_bool("random") && !!time)
     time = Time::Duration(static_cast<double>(

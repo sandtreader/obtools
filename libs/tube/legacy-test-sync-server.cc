@@ -56,13 +56,13 @@ int main(int argc, char **argv)
   Log::LevelFilter     level_out(Log::LEVEL_DUMP, tsfilter);
   Log::logger.connect(level_out);
 
-  // Create server 
+  // Create server
   TestServer server(port);
   server.open();
 
   // Run the server
   server.run();
-  return 0;  
+  return 0;
 }
 
 

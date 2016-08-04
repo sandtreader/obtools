@@ -15,13 +15,13 @@
 #ifndef __OBTOOLS_RING_H
 #define __OBTOOLS_RING_H
 
-namespace ObTools { namespace Ring { 
+namespace ObTools { namespace Ring {
 
 //Make our lives easier without polluting anyone else
 using namespace std;
 
 //==========================================================================
-// Ring buffer template 
+// Ring buffer template
 
 // Template parameters:
 //   ITEM_T:       Type of an item in the ring buffer
@@ -42,7 +42,7 @@ private:
   //--------------------------------------------------------------------------
   // Modular increment - increments the value given, mod length
   int inc(int n) { return (++n>=length)?0:n; }
-  
+
 public:
   //--------------------------------------------------------------------------
   // Constructor
@@ -72,7 +72,7 @@ public:
   }
 
   // Ways to flush the queue:  Both end up with in_index=out_index, but
-  // you must call the right one depending whether you are the putter or 
+  // you must call the right one depending whether you are the putter or
   // getter, otherwise there is a race condition
 
   //--------------------------------------------------------------------------

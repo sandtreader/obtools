@@ -13,7 +13,7 @@ using namespace ObTools::UML;
 //--------------------------------------------------------------------------
 // Constructor
 Parameter::Parameter(XMI::Reader& rdr, XML::Element& xe)
-  :ModelElement(rdr, xe), type(0) 
+  :ModelElement(rdr, xe), type(0)
 {
   //Get basic properties
   string pdk  = get_property("kind", "UML:Parameter.kind");

@@ -60,7 +60,7 @@ int Connection::query_int(const string& sql, int def)
 }
 
 //------------------------------------------------------------------------
-//Execute a query and get single (only) 64-bit integer value from first (only) 
+//Execute a query and get single (only) 64-bit integer value from first (only)
 //row
 //Returns value or default if not found
 uint64_t Connection::query_int64(const string& sql, uint64_t def)
@@ -101,7 +101,7 @@ bool Connection::query_bool(const string& sql, bool def)
 //Fetches max(<id_field>) inside a transaction, unless id_field is ""
 //If id_field is "", does a normal insert and returns 1
 //Returns ID, or 0 if failed
-int Connection::insert(const string& sql, 
+int Connection::insert(const string& sql,
 		       const string& table, const string& id_field,
 		       bool in_transaction)
 {
@@ -126,11 +126,11 @@ int Connection::insert(const string& sql,
   if (!in_transaction) exec("COMMIT");
 
   return id;
-}			 
+}
 
 //------------------------------------------------------------------------
 // Ditto for 64-bit
-uint64_t Connection::insert64(const string& sql, 
+uint64_t Connection::insert64(const string& sql,
 			      const string& table, const string& id_field,
 			      bool in_transaction)
 {
@@ -155,7 +155,7 @@ uint64_t Connection::insert64(const string& sql,
   if (!in_transaction) exec("COMMIT");
 
   return id;
-}			 
+}
 
 //------------------------------------------------------------------------
 // Do an INSERT and retrieve the last inserted serial ID, from row data
@@ -173,7 +173,7 @@ int Connection::insert(const string& table, Row& row, const string& id_field,
 }
 
 // Ditto with 64-bit
-uint64_t Connection::insert64(const string& table, Row& row, 
+uint64_t Connection::insert64(const string& table, Row& row,
 			      const string& id_field,
 			      bool in_transaction)
 {
@@ -187,7 +187,7 @@ uint64_t Connection::insert64(const string& table, Row& row,
 //------------------------------------------------------------------------
 // INSERT into a join table with two foreign ID fields
 // Returns whether successful
-bool Connection::insert_join(const string& table, 
+bool Connection::insert_join(const string& table,
 			     const string& field1, int id1,
 			     const string& field2, int id2)
 {
@@ -196,10 +196,10 @@ bool Connection::insert_join(const string& table,
   oss << " (" << field1 << ", " << field2 << ")";
   oss << " VALUES (" << id1 << ", " << id2 << ")";
   return exec(oss.str());
-}			 
+}
 
 // Ditto with 64-bit
-bool Connection::insert_join64(const string& table, 
+bool Connection::insert_join64(const string& table,
 			       const string& field1, uint64_t id1,
 			       const string& field2, uint64_t id2)
 {
@@ -208,14 +208,14 @@ bool Connection::insert_join64(const string& table,
   oss << " (" << field1 << ", " << field2 << ")";
   oss << " VALUES (" << id1 << ", " << id2 << ")";
   return exec(oss.str());
-}			 
+}
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // with the given WHERE clause
 // If where is empty, doesn't add a WHERE at all
 // Returns query result as query()
-Result Connection::select(const string& table, const Row& row, 
+Result Connection::select(const string& table, const Row& row,
 			  const string& where)
 {
   ostringstream oss;
@@ -225,20 +225,20 @@ Result Connection::select(const string& table, const Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // matching the list of values in where_row
 // Returns query result as query()
-Result Connection::select(const string& table, const Row& row, 
+Result Connection::select(const string& table, const Row& row,
 			  const Row& where_row)
 {
   return select(table, row, where_row.get_where_clause());
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // matching the given integer ID
 // Returns query result as query()
-Result Connection::select_by_id(const string& table, const Row& row, 
+Result Connection::select_by_id(const string& table, const Row& row,
 				int id, const string& id_field)
 {
   ostringstream oss;
@@ -247,7 +247,7 @@ Result Connection::select_by_id(const string& table, const Row& row,
 }
 
 // Ditto, 64-bit
-Result Connection::select_by_id64(const string& table, const Row& row, 
+Result Connection::select_by_id64(const string& table, const Row& row,
 				  uint64_t id, const string& id_field)
 {
   ostringstream oss;
@@ -256,11 +256,11 @@ Result Connection::select_by_id64(const string& table, const Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // matching the given string ID
 // ID value is escaped
 // Returns query result as query()
-Result Connection::select_by_id(const string& table, const Row& row, 
+Result Connection::select_by_id(const string& table, const Row& row,
 				const string& id, const string& id_field)
 {
   ostringstream oss;
@@ -269,12 +269,12 @@ Result Connection::select_by_id(const string& table, const Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // with the given WHERE clause, and return the single (first) row as
 // the values in the row
 // If where is empty, doesn't add a WHERE at all
 // Returns whether row fetched
-bool Connection::select_row(const string& table, Row& row, 
+bool Connection::select_row(const string& table, Row& row,
 			    const string& where)
 {
   string limit_where = where+" LIMIT 1";
@@ -285,22 +285,22 @@ bool Connection::select_row(const string& table, Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
-// with a WHERE clause constructed from where_row, and return the single 
+// Do a SELECT for all fields in the given row in the given table
+// with a WHERE clause constructed from where_row, and return the single
 // (first) row as the values in the row
 // Returns whether row fetched
-bool Connection::select_row(const string& table, Row& row, 
+bool Connection::select_row(const string& table, Row& row,
 			    const Row& where_row)
 {
   return select_row(table, row, where_row.get_where_clause());
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // with the given integer ID, and return the single (first) row as
 // the values in the row
 // Returns whether row fetched
-bool Connection::select_row_by_id(const string& table, Row& row,  
+bool Connection::select_row_by_id(const string& table, Row& row,
 				  int id, const string& id_field)
 {
   ostringstream oss;
@@ -309,7 +309,7 @@ bool Connection::select_row_by_id(const string& table, Row& row,
 }
 
 // Ditto, 64-bit
-bool Connection::select_row_by_id64(const string& table, Row& row,  
+bool Connection::select_row_by_id64(const string& table, Row& row,
 				    uint64_t id, const string& id_field)
 {
   ostringstream oss;
@@ -318,12 +318,12 @@ bool Connection::select_row_by_id64(const string& table, Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for all fields in the given row in the given table 
+// Do a SELECT for all fields in the given row in the given table
 // with the given string ID, and return the single (first) row as
 // the values in the row
 // ID value is escaped
 // Returns whether row fetched
-bool Connection::select_row_by_id(const string& table, Row& row,  
+bool Connection::select_row_by_id(const string& table, Row& row,
 				  const string& id, const string& id_field)
 {
   ostringstream oss;
@@ -332,7 +332,7 @@ bool Connection::select_row_by_id(const string& table, Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for a single field in the given table 
+// Do a SELECT for a single field in the given table
 // with the given WHERE clause, and return the (unescaped) value
 // If where is empty, doesn't add a WHERE at all
 // Returns value or empty string if not found
@@ -347,8 +347,8 @@ string Connection::select_value(const string& table, const string& field,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for a single field in the given table 
-// with a WHERE clause constructed from where_row, and return the 
+// Do a SELECT for a single field in the given table
+// with a WHERE clause constructed from where_row, and return the
 // (unescaped) value
 // Returns value or empty string if not found
 string Connection::select_value(const string& table, const string& field,
@@ -358,10 +358,10 @@ string Connection::select_value(const string& table, const string& field,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for a single field in the given table 
+// Do a SELECT for a single field in the given table
 // with the given integer ID, and return the (unescaped) value
 // Returns value or empty string if not found
-string Connection::select_value_by_id(const string& table, 
+string Connection::select_value_by_id(const string& table,
 				      const string& field,
 				      int id, const string& id_field)
 {
@@ -371,7 +371,7 @@ string Connection::select_value_by_id(const string& table,
 }
 
 // Ditto, 64-bit
-string Connection::select_value_by_id64(const string& table, 
+string Connection::select_value_by_id64(const string& table,
 					const string& field,
 					uint64_t id, const string& id_field)
 {
@@ -381,12 +381,12 @@ string Connection::select_value_by_id64(const string& table,
 }
 
 //------------------------------------------------------------------------
-// Do a SELECT for a single field in the given table 
+// Do a SELECT for a single field in the given table
 // with the given integer ID, and return the (unescaped) value
 // ID value is escaped
 // Returns value or empty string if not found
-string Connection::select_value_by_id(const string& table, 
-				      const string& field,  
+string Connection::select_value_by_id(const string& table,
+				      const string& field,
 				      const string& id, const string& id_field)
 {
   ostringstream oss;
@@ -415,14 +415,14 @@ int Connection::count(const string& table, const Row& where_row)
 //------------------------------------------------------------------------
 // Check if a row exists with the given integer ID
 // Returns whether the row exists
-bool Connection::exists_id(const string& table, 
+bool Connection::exists_id(const string& table,
 			   int id, const string& id_field)
 {
   return !select_value_by_id(table, id_field, id, id_field).empty();
 }
 
 // Ditto, 64-bit
-bool Connection::exists_id64(const string& table, 
+bool Connection::exists_id64(const string& table,
 			     uint64_t id, const string& id_field)
 {
   return !select_value_by_id64(table, id_field, id, id_field).empty();
@@ -432,18 +432,18 @@ bool Connection::exists_id64(const string& table,
 // Check if a row exists with the given string ID
 // ID value is escaped
 // Returns whether the row exists
-bool Connection::exists_id(const string& table, 
+bool Connection::exists_id(const string& table,
 			   const string& id, const string& id_field)
 {
   return !select_value_by_id(table, id_field, id, id_field).empty();
 }
 
 //------------------------------------------------------------------------
-// Do an UPDATE for all fields in the given row in the given table 
+// Do an UPDATE for all fields in the given row in the given table
 // with the given WHERE clause.  Values are escaped automatically
 // If where is empty, doesn't add a WHERE at all
 // Returns whether successful
-bool Connection::update(const string& table, const Row& row, 
+bool Connection::update(const string& table, const Row& row,
 			const string& where)
 {
   ostringstream oss;
@@ -453,21 +453,21 @@ bool Connection::update(const string& table, const Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do an UPDATE for all fields in the given row in the given table 
-// with a WHERE clause created from where_row.  
+// Do an UPDATE for all fields in the given row in the given table
+// with a WHERE clause created from where_row.
 // Values are escaped automatically
 // Returns whether successful
-bool Connection::update(const string& table, const Row& row, 
+bool Connection::update(const string& table, const Row& row,
 			const Row& where_row)
 {
   return update(table, row, where_row.get_where_clause());
 }
 
 //------------------------------------------------------------------------
-// Do an UPDATE for all fields in the given row in the given table 
+// Do an UPDATE for all fields in the given row in the given table
 // matching the given integer ID
 // Returns whether successful
-bool Connection::update_id(const string& table, const Row& row, 
+bool Connection::update_id(const string& table, const Row& row,
 			   int id, const string& id_field)
 {
   ostringstream oss;
@@ -476,7 +476,7 @@ bool Connection::update_id(const string& table, const Row& row,
 }
 
 // Ditto, 64-bit
-bool Connection::update_id64(const string& table, const Row& row, 
+bool Connection::update_id64(const string& table, const Row& row,
 			     uint64_t id, const string& id_field)
 {
   ostringstream oss;
@@ -485,11 +485,11 @@ bool Connection::update_id64(const string& table, const Row& row,
 }
 
 //------------------------------------------------------------------------
-// Do an UPDATE for all fields in the given row in the given table 
+// Do an UPDATE for all fields in the given row in the given table
 // matching the given string ID
 // ID value is escaped
 // Returns whether successful
-bool Connection::update_id(const string& table, const Row& row,  
+bool Connection::update_id(const string& table, const Row& row,
 			   const string& id, const string& id_field)
 {
   ostringstream oss;
@@ -520,7 +520,7 @@ bool Connection::delete_all(const string& table, const Row& where_row)
 //------------------------------------------------------------------------
 // Do an DELETE in the given table matching the given integer ID
 // Returns whether successful
-bool Connection::delete_id(const string& table, 
+bool Connection::delete_id(const string& table,
 			   int id, const string& id_field)
 {
   ostringstream oss;
@@ -529,7 +529,7 @@ bool Connection::delete_id(const string& table,
 }
 
 // Ditto, 64-bit
-bool Connection::delete_id64(const string& table, 
+bool Connection::delete_id64(const string& table,
 			     uint64_t id, const string& id_field)
 {
   ostringstream oss;
@@ -541,7 +541,7 @@ bool Connection::delete_id64(const string& table,
 // Do a DELETE in the given table matching the given string ID
 // ID value is escaped
 // Returns whether successful
-bool Connection::delete_id(const string& table, 
+bool Connection::delete_id(const string& table,
 			   const string& id, const string& id_field)
 {
   ostringstream oss;
@@ -552,24 +552,24 @@ bool Connection::delete_id(const string& table,
 //------------------------------------------------------------------------
 // DELETE from a join table with two foreign ID fields
 // Returns whether successful
-bool Connection::delete_join(const string& table, 
+bool Connection::delete_join(const string& table,
 			     const string& field1, int id1,
 			     const string& field2, int id2)
 {
   ostringstream oss;
   oss << field1 << " = " << id1 << " AND " << field2 << " = " << id2;
   return delete_all(table, oss.str());
-}			 
+}
 
 // Ditto, 64-bit
-bool Connection::delete_join64(const string& table, 
+bool Connection::delete_join64(const string& table,
 			       const string& field1, uint64_t id1,
 			       const string& field2, uint64_t id2)
 {
   ostringstream oss;
   oss << field1 << " = " << id1 << " AND " << field2 << " = " << id2;
   return delete_all(table, oss.str());
-}			 
+}
 
 
 }} // namespaces

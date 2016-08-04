@@ -22,8 +22,8 @@ class ReflectorThread: public MT::Thread
   XMLMesh::OTMP::Server& server;
   MT::Queue<XMLMesh::OTMP::ClientMessage>& receive_q;
 
-  void run() 
-  { 
+  void run()
+  {
     for(;;)
     {
       // Block for a message
@@ -36,8 +36,8 @@ class ReflectorThread: public MT::Thread
   }
 
 public:
-  ReflectorThread(XMLMesh::OTMP::Server &s, 
-		  MT::Queue<XMLMesh::OTMP::ClientMessage>& q): 
+  ReflectorThread(XMLMesh::OTMP::Server &s,
+		  MT::Queue<XMLMesh::OTMP::ClientMessage>& q):
     server(s), receive_q(q) { start(); }
 };
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   // Create unified receive queue
   MT::Queue<XMLMesh::OTMP::ClientMessage> q;
 
-  // Create server 
+  // Create server
   XMLMesh::OTMP::Server server(q, port);
   server.open();
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 
   // Run the server
   server.run();
-  return 0;  
+  return 0;
 }
 
 
