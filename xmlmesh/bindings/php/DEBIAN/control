@@ -1,10 +1,10 @@
 Source: ot-xmlmesh-php-native
-Section: Video
+Section: PHP
 Priority: optional
-Maintainer: PacketShip Support <support@packetship.com>
+Maintainer: Paul Clark <debian@obtools.com>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.6
-Homepage: http://www.packetship.com/
+Homepage: http://www.obtools.com/
 
 Package: ot-xmlmesh-php-native
 Architecture: all
