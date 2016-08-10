@@ -9,6 +9,7 @@
 
 #include "ot-log.h"
 #include "ot-text.h"
+#include <math.h>
 
 namespace ObTools { namespace Log {
 
@@ -42,8 +43,11 @@ void TimestampFilter::log(Message& msg)
   // Process the string for our extensions first
   // ! If there are any more of these, do it more efficiently!
   string tmp_format = Text::subst(format, "%*L", Text::itos(msg.level));
-  tmp_format = Text::subst(tmp_format, "%*S",
-                           Text::ftos(msg.timestamp.seconds(),6,3,true));
+  double seconds = msg.timestamp.seconds();
+
+  // Floor to nearest millisecond to prevent 60th second ever happening
+  seconds = floor(seconds*1000.0)/1000.0;
+  tmp_format = Text::subst(tmp_format, "%*S", Text::ftos(seconds,6,3,true));
 
   // Now do strftime on what's left
   char stm[81];
