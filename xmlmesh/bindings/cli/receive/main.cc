@@ -269,8 +269,8 @@ int main(int argc, char **argv)
       {
         log.error << "Child process died\n";
 
-        // Respond with fatal error if requested
-        if (rsvp)
+        // Respond with fatal error if requested and not just observing
+        if (rsvp && !observe)
           client.respond(SOAP::Fault::CODE_RECEIVER,
                          "Receiving process failed", msg);
       }
@@ -283,7 +283,7 @@ int main(int argc, char **argv)
                     << ", response " << response;
 
           // Respond with error, capturing any output as fault
-          if (rsvp)
+          if (rsvp && !observe)
             client.respond(SOAP::Fault::CODE_RECEIVER, response, msg);
         }
         else
