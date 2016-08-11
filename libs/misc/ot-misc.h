@@ -576,7 +576,7 @@ public:
       --it;
 
     // Eat and remove any existing ranges that overlap with this one
-    if (it != ranges.end() && it->overlaps_with(range))
+    while (it != ranges.end() && it->overlaps_with(range))
     {
       // Adjust new one to include it
       range.merge(*it);
