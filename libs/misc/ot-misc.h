@@ -572,8 +572,14 @@ public:
     // Find the first range which starts immediately before the new one
     iterator it = ranges.lower_bound(range);
     if ((it == ranges.end() && it != ranges.begin())
-        || (it != ranges.end() && it->start > start))
+        || (it != ranges.end() && it != ranges.begin() && it->start > start))
+    {
       --it;
+      // Check that the range we're on has some overlap, and if not budge
+      // forwards
+      if (it->end() < start)
+        ++it;
+    }
 
     // Eat and remove any existing ranges that overlap with this one
     while (it != ranges.end() && it->overlaps_with(range))

@@ -69,6 +69,24 @@ TEST(RangeSetTest, TestInsertCoalescesAdjacent)
   ASSERT_EQ(expected, rs.ranges);
 }
 
+TEST(RangeSetTest, TestInsertCoalescesOnlyFollowing)
+{
+  Misc::UInt64RangeSet rs(5);
+  ASSERT_TRUE(rs.begin() == rs.end());
+  rs.insert(1, 2);
+  ASSERT_EQ(1, rs.count()) << rs;
+  rs.insert(6, 1);
+  ASSERT_EQ(2, rs.count()) << rs;
+  rs.insert(4, 2);
+  ASSERT_EQ(2, rs.count()) << rs;
+
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert({1, 2});
+  expected.insert({4, 3});
+
+  ASSERT_EQ(expected, rs.ranges);
+}
+
 TEST(RangeSetTest, TestRemove)
 {
   Misc::UInt64RangeSet rs(5);
