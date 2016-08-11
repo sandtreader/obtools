@@ -35,6 +35,40 @@ TEST(RangeSetTest, TestInsert)
   ASSERT_EQ(expected, rs.ranges);
 }
 
+TEST(RangeSetTest, TestInsertSquashesMultipleOverlaps)
+{
+  Misc::UInt64RangeSet rs(5);
+  ASSERT_TRUE(rs.begin() == rs.end());
+  rs.insert(10, 2);
+  ASSERT_EQ(1, rs.count()) << rs;
+  rs.insert(16, 5);
+  ASSERT_EQ(2, rs.count()) << rs;
+  rs.insert(0, 30);
+  ASSERT_EQ(1, rs.count()) << rs;
+
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(0, 30));
+
+  ASSERT_EQ(expected, rs.ranges);
+}
+
+TEST(RangeSetTest, TestInsertCoalescesAdjacent)
+{
+  Misc::UInt64RangeSet rs(5);
+  ASSERT_TRUE(rs.begin() == rs.end());
+  rs.insert(10, 2);
+  ASSERT_EQ(1, rs.count()) << rs;
+  rs.insert(16, 5);
+  ASSERT_EQ(2, rs.count()) << rs;
+  rs.insert(12, 4);
+  ASSERT_EQ(1, rs.count()) << rs;
+
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(10, 11));
+
+  ASSERT_EQ(expected, rs.ranges);
+}
+
 TEST(RangeSetTest, TestRemove)
 {
   Misc::UInt64RangeSet rs(5);
