@@ -87,6 +87,92 @@ TEST(RangeSetTest, TestInsertCoalescesOnlyFollowing)
   ASSERT_EQ(expected, rs.ranges);
 }
 
+TEST(RangeSetTest, TestInsertCoalescingDataFromGLTPFetch)
+{
+  Misc::UInt64RangeSet rs(5);
+  ASSERT_TRUE(rs.begin() == rs.end());
+
+  rs.insert(29360128,1048576);
+  rs.insert(65011712,1048576);
+  rs.insert(31457280,1048576);
+  rs.insert(44040192,1048576);
+  rs.insert(57671680,1048576);
+  rs.insert(59768832,1048576);
+  rs.insert(48234496,1048576);
+  rs.insert(70254592,1048576);
+  rs.insert(62914560,1048576);
+  rs.insert(4194304,1048576);
+  rs.insert(45088768,1048576);
+  rs.insert(56623104,1048576);
+  rs.insert(7340032,1048576);
+  rs.insert(5242880,1048576);
+  rs.insert(41943040,1048576);
+  rs.insert(42991616,1048576);
+  rs.insert(36700160,1048576);
+  rs.insert(37748736,1048576);
+  rs.insert(39845888,1048576);
+  rs.insert(46137344,1048576);
+  rs.insert(19922944,1048576);
+  rs.insert(38797312,1048576);
+  rs.insert(75497472,483856);
+  rs.insert(35651584,1048576);
+  rs.insert(34603008,1048576);
+  rs.insert(58720256,1048576);
+  rs.insert(61865984,1048576);
+  rs.insert(30408704,1048576);
+  rs.insert(47185920,1048576);
+  rs.insert(66060288,1048576);
+  rs.insert(60817408,1048576);
+  rs.insert(1048576,1048576);
+  rs.insert(40894464,1048576);
+  rs.insert(33554432,1048576);
+  rs.insert(12582912,1048576);
+  rs.insert(63963136,1048576);
+  rs.insert(0,1048576);
+  rs.insert(8388608,1048576);
+  rs.insert(73400320,1048576);
+  rs.insert(52428800,1048576);
+  rs.insert(10485760,1048576);
+  rs.insert(6291456,1048576);
+  rs.insert(9437184,1048576);
+  rs.insert(74448896,1048576);
+  rs.insert(17825792,1048576);
+  rs.insert(32505856,1048576);
+  rs.insert(14680064,1048576);
+  rs.insert(13631488,1048576);
+  rs.insert(27262976,1048576);
+  rs.insert(69206016,1048576);
+  rs.insert(23068672,1048576);
+  rs.insert(11534336,1048576);
+  rs.insert(71303168,1048576);
+  rs.insert(16777216,1048576);
+  rs.insert(18874368,1048576);
+  rs.insert(22020096,1048576);
+  rs.insert(20971520,1048576);
+  rs.insert(53477376,1048576);
+  rs.insert(55574528,1048576);
+  rs.insert(50331648,1048576);
+  rs.insert(25165824,1048576);
+  rs.insert(24117248,1048576);
+  rs.insert(72351744,1048576);
+  rs.insert(15728640,1048576);
+  rs.insert(26214400,1048576);
+  rs.insert(3145728,1048576);
+  rs.insert(28311552,1048576);
+  rs.insert(51380224,1048576);
+  rs.insert(54525952,1048576);
+  rs.insert(68157440,1048576);
+  rs.insert(2097152,1048576);
+  rs.insert(67108864,1048576);
+  rs.insert(49283072,1048576);
+
+  ASSERT_EQ(1, rs.count()) << rs;
+  set<Misc::UInt64RangeSet::Range> expected;
+  expected.insert(Misc::UInt64RangeSet::Range(0,75981328));
+
+  ASSERT_EQ(expected, rs.ranges);
+}
+
 TEST(RangeSetTest, TestRemove)
 {
   Misc::UInt64RangeSet rs(5);
