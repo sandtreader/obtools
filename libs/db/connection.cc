@@ -16,6 +16,28 @@
 namespace ObTools { namespace DB {
 
 //--------------------------------------------------------------------------
+// Create a held prepared statement
+bool Connection::prepare_statement(const string& id, const string& sql)
+{
+  auto stmt = prepare(sql);
+  if (!stmt)
+    return false;
+  prepared_statements[id] = move(stmt);
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Get a held prepared statement for use
+// Note: user is responsible for ensuring thread safety
+AutoStatement Connection::get_statement(const string& id)
+{
+  auto it = prepared_statements.find(id);
+  if (it == prepared_statements.end())
+    return nullptr;
+  return &it->second;
+}
+
+//--------------------------------------------------------------------------
 // Execute a query and get first (only) row
 // Returns whether successful - row is cleared and filled in if so
 bool Connection::query(const string& sql, Row& row)
@@ -571,5 +593,22 @@ bool Connection::delete_join64(const string& table,
   return delete_all(table, oss.str());
 }
 
+//==========================================================================
+// Connection Factory
+
+//--------------------------------------------------------------------------
+// create a new connection
+Connection *ConnectionFactory::create()
+{
+  auto conn = create_connection();
+  if (conn)
+  {
+    for (const auto& stmt: prepared_statements)
+    {
+      conn->prepare_statement(stmt.first, stmt.second);
+    }
+  }
+  return conn;
+}
 
 }} // namespaces

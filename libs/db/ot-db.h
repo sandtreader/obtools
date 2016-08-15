@@ -424,7 +424,7 @@ public:
 
 //==========================================================================
 // Prepared Statement Wrapper
-class Statement
+class Statement: public PreparedStatement
 {
 private:
   unique_ptr<PreparedStatement> statement;
@@ -432,6 +432,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
+  Statement() = default;
   Statement(PreparedStatement *_statement):
     statement{_statement}
   {}
@@ -445,43 +446,50 @@ public:
 
   //------------------------------------------------------------------------
   // Bind a parameter (integer)
-  bool bind(int index, int64_t value)
+  bool bind(int index, int64_t value) override
   {
     return statement && statement->bind(index, value);
   }
 
   //------------------------------------------------------------------------
   // Bind a parameter (text)
-  bool bind(int index, const string& value)
+  bool bind(int index, const string& value) override
   {
     return statement && statement->bind(index, value);
   }
 
   //------------------------------------------------------------------------
   // Bind a parameter (null)
-  bool bind(int index)
+  bool bind(int index) override
   {
     return statement && statement->bind(index);
   }
 
   //------------------------------------------------------------------------
   // Reset statement
-  void reset()
+  void reset() override
   {
     if (statement) statement->reset();
   }
 
   //------------------------------------------------------------------------
-  // Execture statement
-  bool execute()
+  // Execute statement
+  bool execute() override
   {
     return statement && statement->execute();
   }
 
   //------------------------------------------------------------------------
+  // Get number of rows in result set
+  int count() override
+  {
+    return statement && statement->count();
+  }
+
+  //------------------------------------------------------------------------
   // Get next row from result set
   // Whether another was found - if so, clears writes into row
-  bool fetch(Row& row)
+  bool fetch(Row& row) override
   {
     return statement && statement->fetch(row);
   }
@@ -489,7 +497,7 @@ public:
   //------------------------------------------------------------------------
   // Get first value of next row from result set
   // Whether another was found - if so, writes into value
-  bool fetch(string& value)
+  bool fetch(string& value) override
   {
     return statement && statement->fetch(value);
   }
@@ -497,9 +505,99 @@ public:
 };
 
 //==========================================================================
+// AutoStatement
+// resets a statement on destruction
+class AutoStatement: public PreparedStatement
+{
+private:
+  Statement *statement;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  AutoStatement(Statement *_statement):
+    statement{_statement}
+  {}
+
+  //------------------------------------------------------------------------
+  // Is valid
+  operator bool() const
+  {
+    return statement && *statement;
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (integer)
+  bool bind(int index, int64_t value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (text)
+  bool bind(int index, const string& value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (null)
+  bool bind(int index) override
+  {
+    return statement && statement->bind(index);
+  }
+
+  //------------------------------------------------------------------------
+  // Reset statement
+  void reset() override
+  {
+    if (statement) statement->reset();
+  }
+
+  //------------------------------------------------------------------------
+  // Execute statement
+  bool execute() override
+  {
+    return statement && statement->execute();
+  }
+
+  //------------------------------------------------------------------------
+  // Get number of rows in result set
+  int count() override
+  {
+    return statement && statement->count();
+  }
+
+  //------------------------------------------------------------------------
+  // Get next row from result set
+  // Whether another was found - if so, clears writes into row
+  bool fetch(Row& row) override
+  {
+    return statement && statement->fetch(row);
+  }
+
+  //------------------------------------------------------------------------
+  // Get first value of next row from result set
+  // Whether another was found - if so, writes into value
+  bool fetch(string& value) override
+  {
+    return statement && statement->fetch(value);
+  }
+  //------------------------------------------------------------------------
+  // Destructor
+  ~AutoStatement()
+  {
+    if (statement) statement->reset();
+  }
+};
+
+//==========================================================================
 // Database connection (abstract)
 class Connection
 {
+protected:
+  map<string, Statement> prepared_statements;
+
 public:
   //========================================================================
   // Virtual functions implemented by driver subclass
@@ -524,11 +622,24 @@ public:
   virtual Statement prepare(const string& sql) = 0;
 
   //------------------------------------------------------------------------
+  // Gets the last insert id
+  virtual uint64_t get_last_insert_id() = 0;
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Connection() {}
 
   //========================================================================
   // Helper functions implemented in connection.cc
+
+  //------------------------------------------------------------------------
+  // Create a held prepared statement
+  bool prepare_statement(const string& id, const string& sql);
+
+  //------------------------------------------------------------------------
+  // Get a held prepared statement for use
+  // Note: user is responsible for ensuring thread safety
+  AutoStatement get_statement(const string& id);
 
   //------------------------------------------------------------------------
   // Execute a query and get first (only) row
@@ -810,14 +921,24 @@ public:
 // a new connection with them on demand
 class ConnectionFactory
 {
-public:
-  //------------------------------------------------------------------------
-  // Constructor
-  ConnectionFactory() {}
+protected:
+  map<string, string> prepared_statements;
 
   //------------------------------------------------------------------------
-  // Interface to create a new connection
-  virtual Connection *create() = 0;
+  // Create a new connection
+  virtual Connection *create_connection() = 0;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  ConnectionFactory() = default;
+  ConnectionFactory(const map<string, string>& _prepared_statements):
+    prepared_statements{_prepared_statements}
+  {}
+
+  //------------------------------------------------------------------------
+  // create a new connection
+  Connection *create();
 
   //------------------------------------------------------------------------
   // Virtual destructor
@@ -898,6 +1019,11 @@ struct AutoConnection
   bool exec(const string& sql) { return conn?conn->exec(sql):false; }
 
   Result query(const string& sql) { return conn?conn->query(sql):Result(); }
+
+  AutoStatement get_statement(const string& id)
+  {
+    return conn ? conn->get_statement(id) : nullptr;
+  }
 
   bool query(const string& sql, Row& row)
   { return conn?conn->query(sql, row):false; }

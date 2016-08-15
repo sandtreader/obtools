@@ -163,6 +163,13 @@ Result Connection::query(const string& sql)
 }
 
 //--------------------------------------------------------------------------
+// Gets the last insert id
+uint64_t Connection::get_last_insert_id()
+{
+  return mysql_insert_id(conn);
+}
+
+//--------------------------------------------------------------------------
 // Destructor
 Connection::~Connection()
 {

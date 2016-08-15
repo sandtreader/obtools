@@ -94,6 +94,10 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Gets the last insert id
+  uint64_t get_last_insert_id() override;
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Connection();
 };
@@ -107,7 +111,12 @@ class ConnectionFactory: public DB::ConnectionFactory
   string user;
   string passwd;
   string dbname;
-  int port;
+  unsigned int port;
+
+  //------------------------------------------------------------------------
+  // Interface to create a new connection
+  DB::Connection *create_connection() override
+  { return new MySQL::Connection(host, user, passwd, dbname, port); }
 
 public:
   //------------------------------------------------------------------------
@@ -115,13 +124,15 @@ public:
   ConnectionFactory(const string& _host, const string& _user,
                     const string& _passwd, const string& _dbname,
                     unsigned int _port=0):
-    host(_host), user(_user), passwd(_passwd), dbname(_dbname), port(_port)
+    host{_host}, user{_user}, passwd{_passwd}, dbname{_dbname}, port{_port}
   {}
-
-  //------------------------------------------------------------------------
-  // Interface to create a new connection
-  DB::Connection *create()
-  { return new MySQL::Connection(host, user, passwd, dbname, port); }
+  ConnectionFactory(const string& _host, const string& _user,
+                    const string& _passwd, const string& _dbname,
+                    unsigned int _port,
+                    const map<string, string>& statements):
+    DB::ConnectionFactory{statements},
+    host{_host}, user{_user}, passwd{_passwd}, dbname{_dbname}, port{_port}
+  {}
 };
 
 

@@ -117,6 +117,10 @@ public:
   // Prepare a statement
   // Returns result - check this for validity
   Statement prepare(const string& sql) override;
+
+  //------------------------------------------------------------------------
+  // Gets the last insert id
+  uint64_t get_last_insert_id() override;
 };
 
 //==========================================================================
@@ -126,19 +130,23 @@ class ConnectionFactory: public DB::ConnectionFactory
   // Connection details
   string file;
 
-public:
-  //------------------------------------------------------------------------
-  // Constructor
-  ConnectionFactory(const string& _file):
-    file(_file)
-  {}
-
   //------------------------------------------------------------------------
   // Interface to create a new connection
-  DB::Connection *create()
+  DB::Connection *create_connection() override
   {
     return new Connection(file);
   }
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  ConnectionFactory(const string& _file):
+    file(_file)
+  {}
+  ConnectionFactory(const string& _file,
+                    const map<string, string>& statements):
+    DB::ConnectionFactory{statements}, file{_file}
+  {}
 };
 
 //==========================================================================

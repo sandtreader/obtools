@@ -147,6 +147,21 @@ TEST_F(DBSQLiteTest, TestHeldPreparedStatementDoesNotHoldLock)
   ASSERT_FALSE(File::Path(string{dbfile} + "-journal").exists());
 }
 
+TEST_F(DBSQLiteTest, TestLastInsertId)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto conn = unique_ptr<DB::Connection>(factory.create());
+  ASSERT_TRUE(conn->exec("create table test (id int primary key)"));
+
+  auto trans = DB::Transaction{*conn};
+  auto statement = conn->prepare("insert into test() values ()");
+  const auto expected = 42;
+  for (auto i = 0; i < expected; ++i)
+    ASSERT_TRUE(statement.execute());
+  EXPECT_EQ(expected, conn->get_last_insert_id());
+  trans.commit();
+}
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)

@@ -90,6 +90,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Gets the last insert id
+  uint64_t get_last_insert_id() override
+  {
+    throw runtime_error("Last insert id not implemented for PGSQL");
+  }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Connection();
 };
@@ -101,15 +108,18 @@ class ConnectionFactory: public DB::ConnectionFactory
   // Connection details
   string conninfo;
 
-public:
-  //------------------------------------------------------------------------
-  // Constructor
-  ConnectionFactory(const string& _conninfo):  conninfo(_conninfo) {}
-
   //------------------------------------------------------------------------
   // Interface to create a new connection
-  DB::Connection *create()
+  DB::Connection *create_connection() override
   { return new PG::Connection(conninfo); }
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  ConnectionFactory(const string& _conninfo):  conninfo(_conninfo) {}
+  ConnectionFactory(const string& _conninfo,
+                    const map<string, string>& statements):
+    DB::ConnectionFactory{statements}, conninfo(_conninfo) {}
 };
 
 //==========================================================================

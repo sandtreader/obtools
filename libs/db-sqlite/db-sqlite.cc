@@ -225,4 +225,11 @@ Statement Connection::prepare(const string& sql)
   return Statement(new PreparedStatement{stmt});
 }
 
+//--------------------------------------------------------------------------
+// Gets the last insert id
+uint64_t Connection::get_last_insert_id()
+{
+  return sqlite3_last_insert_rowid(conn.get());
+}
+
 }}} // namespaces
