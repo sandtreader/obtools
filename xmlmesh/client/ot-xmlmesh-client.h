@@ -381,7 +381,7 @@ class MessageTransportSubscriber: public Subscriber
         // Change .request to .response
         // Assuming it's the last occurance of .request, but perhaps not the
         // end of the subject
-        auto resp_subject = subject;
+        auto resp_subject = msg.get_subject();
         const auto pos = resp_subject.rfind(".request");
         if (pos != string::npos)
           resp_subject.replace(pos, 8, ".response");
