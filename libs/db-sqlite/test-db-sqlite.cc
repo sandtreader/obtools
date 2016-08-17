@@ -151,10 +151,10 @@ TEST_F(DBSQLiteTest, TestLastInsertId)
 {
   auto factory = DB::SQLite::ConnectionFactory(dbfile);
   auto conn = unique_ptr<DB::Connection>(factory.create());
-  ASSERT_TRUE(conn->exec("create table test (id int primary key)"));
+  ASSERT_TRUE(conn->exec("create table test (id int primary key, a text)"));
 
   auto trans = DB::Transaction{*conn};
-  auto statement = conn->prepare("insert into test() values ()");
+  auto statement = conn->prepare("insert into test(a) values ('a')");
   const auto expected = 42;
   for (auto i = 0; i < expected; ++i)
     ASSERT_TRUE(statement.execute());
