@@ -1043,6 +1043,9 @@ struct AutoConnection
   bool query_bool(const string& sql, bool def=false)
   { return conn?conn->query_bool(sql, def):def; }
 
+  uint64_t get_last_insert_id()
+  { return conn?conn->get_last_insert_id():0; }
+
   int insert(const string& sql,
              const string& table, const string& id_field="id",
              bool in_transaction=false)
