@@ -379,11 +379,15 @@ class MessageTransportSubscriber: public Subscriber
       if (message_handler.complex_result)
       {
         // Change .request to .response
-        string orig_subject(subject, 0, subject.size()-8);
+        // Assuming it's the last occurance of .request, but perhaps not the
+        // end of the subject
+        auto resp_subject = subject;
+        const auto pos = resp_subject.rfind(".request");
+        if (pos != string::npos)
+          resp_subject.replace(pos, 8, ".response");
 
         // Send correlated response
-        XMLMesh::Message resp(orig_subject+".response", response,
-                              false, msg.get_id());
+        XMLMesh::Message resp(resp_subject, response, false, msg.get_id());
         client.send(resp);
       }
       else
