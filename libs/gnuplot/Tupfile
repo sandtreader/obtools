@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Gnuplot library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME = ot-gnuplot
+TYPE = headers
+
+include_rules
