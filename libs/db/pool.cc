@@ -230,7 +230,7 @@ void ConnectionPool::run_background(bool& running)
           }
           else
           {
-            log.detail << "MySQL connection is inactive - reaping\n";
+            log.detail << "Database connection is inactive - reaping\n";
 
             last_used.erase(q);
             connections.remove(conn);
