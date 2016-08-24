@@ -510,7 +510,7 @@ public:
 class AutoStatement: public PreparedStatement
 {
 private:
-  Statement *statement;
+  Statement *statement = nullptr;
 
 public:
   //------------------------------------------------------------------------
@@ -518,6 +518,15 @@ public:
   AutoStatement(Statement *_statement):
     statement{_statement}
   {}
+
+  //------------------------------------------------------------------------
+  // Copy assignment operator
+  AutoStatement& operator=(const AutoStatement& b)
+  {
+    if (statement) statement->reset();
+    statement = b.statement;
+    return *this;
+  }
 
   //------------------------------------------------------------------------
   // Is valid
