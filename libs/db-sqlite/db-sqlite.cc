@@ -43,7 +43,7 @@ bool PreparedStatement::bind(int index, int64_t value)
 bool PreparedStatement::bind(int index, const string& value)
 {
   return sqlite3_bind_text(stmt.get(), index, value.c_str(),
-                           value.size(), SQLITE_STATIC) == SQLITE_OK;
+                           value.size(), SQLITE_TRANSIENT) == SQLITE_OK;
 }
 
 //--------------------------------------------------------------------------
