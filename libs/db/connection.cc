@@ -10,6 +10,7 @@
 
 #include "ot-db.h"
 #include "ot-text.h"
+#include "ot-log.h"
 #include <stdlib.h>
 #include <sstream>
 
@@ -33,7 +34,11 @@ AutoStatement Connection::get_statement(const string& id)
 {
   auto it = prepared_statements.find(id);
   if (it == prepared_statements.end())
+  {
+    Log::Error log;
+    log << "Failed to get prepared statement id " << id << endl;
     return nullptr;
+  }
   return &it->second;
 }
 
@@ -605,7 +610,11 @@ Connection *ConnectionFactory::create()
   {
     for (const auto& stmt: prepared_statements)
     {
-      conn->prepare_statement(stmt.first, stmt.second);
+      if (!conn->prepare_statement(stmt.first, stmt.second))
+      {
+        Log::Error log;
+        log << "Failed to prepare statement id " << stmt.first << endl;
+      }
     }
   }
   return conn;
