@@ -16,52 +16,56 @@
 
 namespace ObTools { namespace Time {
 
-//--------------------------------------------------------------------------
-// Constructor (static initialiser) of unit dictionary
-Duration::UnitDictionary::UnitDictionary()
+namespace {
+// Unit dictionary - just one static instance of this
+struct UnitDictionary
 {
-  multiples["s"]       = 1;
-  multiples["sec"]     = 1;
-  multiples["secs"]    = 1;
-  multiples["second"]  = 1;
-  multiples["seconds"] = 1;
+  map<string, int> multiples =
+  {
+    {"s",         1},
+    {"sec",       1},
+    {"secs",      1},
+    {"second",    1},
+    {"seconds",   1},
 
-  multiples["m"]       = MINUTE;
-  multiples["min"]     = MINUTE;
-  multiples["mins"]    = MINUTE;
-  multiples["minute"]  = MINUTE;
-  multiples["minutes"] = MINUTE;
+    {"m",         MINUTE},
+    {"min",       MINUTE},
+    {"mins",      MINUTE},
+    {"minute",    MINUTE},
+    {"minutes",   MINUTE},
 
-  multiples["h"]       = HOUR;
-  multiples["hr"]      = HOUR;
-  multiples["hour"]    = HOUR;
-  multiples["hours"]   = HOUR;
-  multiples["hrs"]     = HOUR;
+    {"h",         HOUR},
+    {"hr",        HOUR},
+    {"hrs",       HOUR},
+    {"hour",      HOUR},
+    {"hours",     HOUR},
 
-  multiples["d"]       = DAY;
-  multiples["day"]     = DAY;
-  multiples["days"]    = DAY;
-  multiples["dt"]      = DAY; // For ISO P1DT12H form
+    {"d",         DAY},
+    {"day",       DAY},
+    {"days",      DAY},
+    {"dt",        DAY}, // For ISO P1DT12H form
 
-  multiples["w"]       = WEEK;
-  multiples["week"]    = WEEK;
-  multiples["wk"]      = WEEK;
-  multiples["weeks"]   = WEEK;
-  multiples["wks"]     = WEEK;
-
-  fractions["ns"]      = NANO;
-  fractions["us"]      = MICRO;
-  fractions["ms"]      = MILLI;
-}
-
-// Actual static variable
-Duration::UnitDictionary Duration::units;
+    {"w",         WEEK},
+    {"wk",        WEEK},
+    {"wks",       WEEK},
+    {"week",      WEEK},
+    {"weeks",     WEEK},
+  };
+  map<string, int> fractions =
+  {
+    {"ns",        NANO},
+    {"us",        MICRO},
+    {"ms",        MILLI},
+  };
+};
+} // anonymous namespace
 
 //--------------------------------------------------------------------------
 // Constructor from string
 // See ot-time.h for details
 Duration::Duration(const string& text)
 {
+  static const auto units = UnitDictionary{};
   istringstream iss(text);
   int shift=0;
   char c=0;

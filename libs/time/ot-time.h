@@ -65,15 +65,6 @@ class Duration
 private:
   double t;      // Seconds
 
-  // Unit dictionary - just one static instance of this
-  static struct UnitDictionary
-  {
-    map<string, int> multiples;
-    map<string, int> fractions;
-
-    UnitDictionary();  // Static initialiser in duration.cc
-  } units;
-
 public:
   //------------------------------------------------------------------------
   // Default constructor
