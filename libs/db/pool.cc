@@ -228,7 +228,7 @@ void ConnectionPool::run_background(bool& running)
             // Post back a last_used to suppress errors until next timeout
             q->second = now;
           }
-          else
+          else if (connections.size() > min_connections)
           {
             log.detail << "Database connection is inactive - reaping\n";
 
