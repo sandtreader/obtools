@@ -196,7 +196,7 @@ Result Connection::query(const string& sql)
   else
   {
     Log::Error log;
-    log << "SQLite query failed: " << sqlite3_errstr(e) << endl;
+    log << "SQLite query failed: " << sqlite3_errmsg(conn.get()) << endl;
   }
   return Result(new ResultSet{stmt});
 }
@@ -218,7 +218,7 @@ Statement Connection::prepare(const string& sql)
   else
   {
     Log::Error log;
-    log << "SQLite prepare failed: " << sqlite3_errstr(e) << endl;
+    log << "SQLite prepare failed: " << sqlite3_errmsg(conn.get()) << endl;
   }
   return Statement(new PreparedStatement{stmt});
 }
