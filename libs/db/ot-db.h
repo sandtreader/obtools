@@ -398,8 +398,20 @@ class PreparedStatement: public ResultSet
 {
 public:
   //------------------------------------------------------------------------
+  // Bind a parameter (bool)
+  virtual bool bind(int index, bool value) = 0;
+
+  //------------------------------------------------------------------------
   // Bind a parameter (integer)
   virtual bool bind(int index, int64_t value) = 0;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  virtual bool bind(int index, uint64_t value) = 0;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (real)
+  virtual bool bind(int index, double value) = 0;
 
   //------------------------------------------------------------------------
   // Bind a parameter (text)
@@ -445,8 +457,29 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Bind a parameter (bool)
+  bool bind(int index, bool value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
   // Bind a parameter (integer)
   bool bind(int index, int64_t value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  bool bind(int index, uint64_t value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (real)
+  bool bind(int index, double value) override
   {
     return statement && statement->bind(index, value);
   }
@@ -536,8 +569,29 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Bind a parameter (bool)
+  bool bind(int index, bool value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
   // Bind a parameter (integer)
   bool bind(int index, int64_t value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  bool bind(int index, uint64_t value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (real)
+  bool bind(int index, double value) override
   {
     return statement && statement->bind(index, value);
   }

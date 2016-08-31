@@ -35,8 +35,26 @@ public:
   PreparedStatement(sqlite3_stmt *stmt);
 
   //------------------------------------------------------------------------
+  // Bind a parameter (bool)
+  bool bind(int index, bool value) override
+  {
+    return bind(index, static_cast<int64_t>(value));
+  }
+
+  //------------------------------------------------------------------------
   // Bind a parameter (integer)
   bool bind(int index, int64_t value) override;
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  bool bind(int index, uint64_t value) override
+  {
+    return bind(index, static_cast<int64_t>(value));
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (real)
+  bool bind(int index, double value) override;
 
   //------------------------------------------------------------------------
   // Bind a parameter (text)

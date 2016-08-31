@@ -39,6 +39,13 @@ bool PreparedStatement::bind(int index, int64_t value)
 }
 
 //--------------------------------------------------------------------------
+// Bind a parameter (real)
+bool PreparedStatement::bind(int index, double value)
+{
+  return sqlite3_bind_double(stmt.get(), index, value) == SQLITE_OK;
+}
+
+//--------------------------------------------------------------------------
 // Bind a parameter (text)
 bool PreparedStatement::bind(int index, const string& value)
 {
