@@ -40,7 +40,7 @@ streamsize BufferedOutFileBuf::xsputn(const char *s, streamsize n)
 {
   auto avail = this->epptr() - this->pptr();
   if (avail >= n)
-    return __streambuf_type::xsputn(s, n);
+    return streambuf::xsputn(s, n);
   else
     return filebuf::xsputn(s, n);
 }
@@ -175,7 +175,7 @@ bool MultiOutStream::open_back(const char *filename, ios_base::openmode mode)
   unique_ptr<filebuf> buf(new filebuf);
   if (buf->open(filename, mode))
   {
-    file_bufs.push_back(move(buf));
+    file_bufs.emplace_back(buf.release());
     return true;
   }
   return false;
