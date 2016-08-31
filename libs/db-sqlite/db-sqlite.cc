@@ -186,7 +186,6 @@ Result Connection::query(const string& sql)
 {
   OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBquery: " << sql << endl;})
 
-  char *err{nullptr};
   sqlite3_stmt *stmt{0};
   auto e = sqlite3_prepare_v2(conn.get(), sql.c_str(), sql.size(), &stmt,
                               nullptr);
@@ -197,7 +196,7 @@ Result Connection::query(const string& sql)
   else
   {
     Log::Error log;
-    log << "SQLite query failed: " << err << endl;
+    log << "SQLite query failed: " << sqlite3_errstr(e) << endl;
   }
   return Result(new ResultSet{stmt});
 }
@@ -209,7 +208,6 @@ Statement Connection::prepare(const string& sql)
 {
   OBTOOLS_LOG_IF_DEBUG({Log::Debug dlog; dlog << "DBprepare: " << sql << endl;})
 
-  char *err{nullptr};
   sqlite3_stmt *stmt{0};
   auto e = sqlite3_prepare_v2(conn.get(), sql.c_str(), sql.size(), &stmt,
                               nullptr);
@@ -220,7 +218,7 @@ Statement Connection::prepare(const string& sql)
   else
   {
     Log::Error log;
-    log << "SQLite prepare failed: " << err << endl;
+    log << "SQLite prepare failed: " << sqlite3_errstr(e) << endl;
   }
   return Statement(new PreparedStatement{stmt});
 }
