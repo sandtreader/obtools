@@ -139,6 +139,15 @@ public:
   //------------------------------------------------------------------------
   // Gets the last insert id
   uint64_t get_last_insert_id() override;
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~Connection()
+  {
+    // SQLite needs all prepared statements to be finalized before closing
+    // the connection
+    prepared_statements.clear();
+  }
 };
 
 //==========================================================================
