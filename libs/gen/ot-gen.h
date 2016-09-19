@@ -64,6 +64,13 @@ public:
     string(id)
   {}
 
+  //------------------------------------------------------------------------
+  // Validity check by bool cast
+  operator bool() const
+  {
+    return !empty();
+  }
+
 private:
   //------------------------------------------------------------------------
   // hide string modification functions
