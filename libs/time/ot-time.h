@@ -208,6 +208,7 @@ public:
   // Validity checks - NTP 0 is not valid
   bool valid() const { return t!=0; }
   bool operator!() const { return !t; }
+  operator bool() const { return t; }
 
   //------------------------------------------------------------------------
   // Convert to time_t
@@ -320,6 +321,12 @@ public:
   Stamp& operator+=(const Duration& d)
   { t += d.ntp(); return *this; }
 
+  Stamp operator+(double d) const
+  { return operator+(Duration{d}); }
+
+  Stamp& operator+=(double d)
+  { return operator+=(Duration{d}); }
+
   //------------------------------------------------------------------------
   // Subtract a Duration from a stamp
   Stamp operator-(const Duration& d) const
@@ -327,6 +334,12 @@ public:
 
   Stamp& operator-=(const Duration& d)
   { t -= d.ntp(); return *this; }
+
+  Stamp operator-(double d) const
+  { return operator-(Duration{d}); }
+
+  Stamp& operator-=(double d)
+  { return operator-=(Duration{d}); }
 
   //------------------------------------------------------------------------
   // Comparison operators
