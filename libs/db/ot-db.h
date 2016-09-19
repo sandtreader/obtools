@@ -410,6 +410,10 @@ public:
   virtual bool bind(int index, uint64_t value) = 0;
 
   //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  virtual bool bind(int index, unsigned value) = 0;
+
+  //------------------------------------------------------------------------
   // Bind a parameter (real)
   virtual bool bind(int index, double value) = 0;
 
@@ -473,6 +477,13 @@ public:
   //------------------------------------------------------------------------
   // Bind a parameter (unsigned integer)
   bool bind(int index, uint64_t value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  bool bind(int index, unsigned value) override
   {
     return statement && statement->bind(index, value);
   }
@@ -590,6 +601,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  bool bind(int index, unsigned value) override
+  {
+    return statement && statement->bind(index, value);
+  }
+
+  //------------------------------------------------------------------------
   // Bind a parameter (real)
   bool bind(int index, double value) override
   {
@@ -646,6 +664,7 @@ public:
   {
     return statement && statement->fetch(value);
   }
+
   //------------------------------------------------------------------------
   // Destructor
   ~AutoStatement()

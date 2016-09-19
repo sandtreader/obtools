@@ -53,6 +53,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Bind a parameter (unsigned integer)
+  bool bind(int index, unsigned value) override
+  {
+    return bind(index, static_cast<int64_t>(value));
+  }
+
+  //------------------------------------------------------------------------
   // Bind a parameter (real)
   bool bind(int index, double value) override;
 
