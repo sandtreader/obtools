@@ -40,9 +40,9 @@ bool ResultSet::fetch(Row& row)
   {
     row.clear();
 
-    // Load all the fields by name into the row, unescaping as we go
+    // Load all the fields by name into the row
     for (auto i = 0; i < num_fields; ++i)
-      if (myrow[i]) row.add_unescaped(fields[i].name, myrow[i]);
+      if (myrow[i]) row.add(fields[i].name, myrow[i]);
 
     return true;
   }
@@ -60,7 +60,7 @@ bool ResultSet::fetch(string& value)
 
   if (myrow && num_fields > 0)
   {
-    value = FieldValue::unescape(myrow[0]?myrow[0]:"");
+    value = myrow[0] ? myrow[0] : "";
     return true;
   }
   else return false;

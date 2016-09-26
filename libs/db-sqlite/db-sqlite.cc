@@ -96,9 +96,9 @@ bool PreparedStatement::fetch(Row& row)
   {
     auto v = sqlite3_column_text(stmt.get(), i);
     if (v == nullptr)
-      row.add_unescaped(field_names[i], "");
+      row.add(field_names[i], "");
     else
-      row.add_unescaped(field_names[i], reinterpret_cast<const char *>(v));
+      row.add(field_names[i], reinterpret_cast<const char *>(v));
   }
   return true;
 }
