@@ -18,6 +18,11 @@ ifdef DEBUG
   CFLAGS += -ggdb3 -DDEBUG
 endif
 
+# Profiling settings
+ifdef PROFILE
+  CFLAGS += -ggdb3 -O2
+endif
+
 # Release settings
 ifdef RELEASE
   CFLAGS += -O2
@@ -29,7 +34,11 @@ ifneq ($(VERSION)empty,empty)
   ifdef DEBUG
     CFLAGS += -DVERSION='"$(VERSION) (debug)"'
   else
-    CFLAGS += -DVERSION='"$(VERSION)"'
+    ifdef PROFILE
+      CFLAGS += -DVERSION='"$(VERSION) (profile)"'
+    else
+      CFLAGS += -DVERSION='"$(VERSION)"'
+    endif
   endif
 endif
 
