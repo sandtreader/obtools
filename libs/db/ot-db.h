@@ -73,6 +73,9 @@ public:
   FieldValue(const string& value):
     str_val{value}, type{STRING} {}
 
+  FieldValue(const char *value):
+    str_val{value ? value : ""}, type{STRING} {}
+
   FieldValue(int value):
     int_val{value}, type{INT} {}
 
@@ -178,7 +181,7 @@ public:
   //------------------------------------------------------------------------
   // Add name/value pair (from a FieldValue)
   Row& add(const string& fieldname, const FieldValue& value)
-  { fields[fieldname] = value; return *this; }
+  { fields[fieldname] = FieldValue{value}; return *this; }
 
   //------------------------------------------------------------------------
   // Handy operator to add null values to a row, for select()
@@ -189,6 +192,11 @@ public:
   // Add name/value pair
   void add(const string& fieldname, const string& value)
   { fields[fieldname] = FieldValue(value); }
+
+  //------------------------------------------------------------------------
+  // Add char * value to row
+  void add(const string& fieldname, const char *value)
+  { fields[fieldname] = FieldValue{value}; }
 
   //------------------------------------------------------------------------
   // Add name/value pair (NULL if empty)
@@ -204,11 +212,6 @@ public:
   // Add a NULL entry
   void add_null(const string& fieldname)
   { fields[fieldname] = FieldValue(); }
-
-  //------------------------------------------------------------------------
-  // Add name/value pair, unescaping value (for use by drivers only)
-  void add_unescaped(const string& fieldname, const string& value)
-  { fields[fieldname] = FieldValue(FieldValue::unescape(value)); }
 
   //------------------------------------------------------------------------
   // Add integer value to row
