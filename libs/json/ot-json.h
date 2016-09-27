@@ -62,7 +62,7 @@ public:
 
   //------------------------------------------------------------------------
   // Set a property on an object value
-  void set(const string& name, const Value& v) { o[name] = v; }
+  Value& set(const string& name, const Value& v) { return (o[name] = v); }
 
   // Special explicit cases for int and string to remove ambiguity on 0
   void set(const string& name, uint64_t _n) { set(name, Value(_n)); }
@@ -70,7 +70,7 @@ public:
 
   //------------------------------------------------------------------------
   // Add an element to an array value
-  void add(const Value& v) { a.push_back(v); }
+  Value& add(const Value& v) { a.push_back(v); return a.back(); }
 
   // Special cases for int, string as above
   void add(uint64_t _n) { add(Value(_n)); }
@@ -103,8 +103,12 @@ public:
   { return get(index); }
 
   //------------------------------------------------------------------------
-  // Get a string value with the given default
-  string get_str(const string& def="") const { return (type==STRING)?s:def; }
+  // Read as a string value with the given default
+  string as_str(const string& def="") const { return (type==STRING)?s:def; }
+
+  //------------------------------------------------------------------------
+  // Read as an integer value with the given default
+  uint64_t as_int(uint64_t def=0) const { return (type==INTEGER)?n:def; }
 
   //------------------------------------------------------------------------
   // Write the value to the given stream

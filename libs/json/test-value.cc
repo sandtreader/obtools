@@ -36,13 +36,22 @@ TEST(Value, TestIsTrue)
   ASSERT_FALSE(v0.is_true());
 }
 
-TEST(Value, TestGetStr)
+TEST(Value, TestAsStr)
 {
   Value v("foo");
-  ASSERT_EQ("foo", v.get_str());
+  ASSERT_EQ("foo", v.as_str());
 
   Value nv;
-  ASSERT_EQ("bar", nv.get_str("bar"));
+  ASSERT_EQ("bar", nv.as_str("bar"));
+}
+
+TEST(Value, TestAsInt)
+{
+  Value v(42);
+  ASSERT_EQ(42, v.as_int());
+
+  Value nv;
+  ASSERT_EQ(99, nv.as_int(99));
 }
 
 TEST(Value, TestObjectSetter)
