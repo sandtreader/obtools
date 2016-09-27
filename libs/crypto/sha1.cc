@@ -72,9 +72,18 @@ void SHA1::digest(const void *data, size_t length, unsigned char *result)
          static_cast<unsigned long>(length), result);
 }
 
-//--------------------------------------------------------------------------
-// Ditto, but returning hex string
+//------------------------------------------------------------------------
+// Digest returning binary string
 string SHA1::digest(const void *data, size_t length)
+{
+  unsigned char buf[DIGEST_LENGTH];
+  digest(data, length, buf);
+  return string(reinterpret_cast<char *>(buf), DIGEST_LENGTH);
+}
+
+//--------------------------------------------------------------------------
+// Digest returning hex string
+string SHA1::digest_hex(const void *data, size_t length)
 {
   unsigned char buf[DIGEST_LENGTH];
   digest(data, length, buf);

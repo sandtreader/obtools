@@ -86,7 +86,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get a value from the given object property
-  // Returns Value(NULL) if this is not an object or property doesn't exist
+  // Returns Value::none if this is not an object or property doesn't exist
   const Value& get(const string& property) const;
 
   // [] operator using the above

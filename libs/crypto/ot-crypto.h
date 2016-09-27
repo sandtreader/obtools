@@ -625,13 +625,20 @@ public:
                      unsigned char *result);
 
   //------------------------------------------------------------------------
-  // Ditto, but returning hex string
+  // Digest returning binary string
   static string digest(const void *data, size_t length);
 
   //------------------------------------------------------------------------
-  // C++-friendly version of the above
+  // Digest returning hex string
+  static string digest_hex(const void *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // C++-friendly versions of the above
   static string digest(const string& text)
   { return digest(text.data(), text.length()); }
+
+  static string digest_hex(const string& text)
+  { return digest_hex(text.data(), text.length()); }
 };
 
 //==========================================================================
