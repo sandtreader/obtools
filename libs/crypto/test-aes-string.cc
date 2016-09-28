@@ -61,6 +61,34 @@ TEST(AESStringTests, TestEncryptDecryptCycleMatches)
   ASSERT_EQ(plain, decrypted);
 }
 
+TEST(AESStringTests, TestEncryptDecryptKey)
+{
+  // Create random 'session' key and iv
+  Crypto::AESKey session_key(Crypto::AESKey::BITS_128);
+  session_key.create();
+
+  Crypto::AESKey session_iv(Crypto::AESKey::BITS_128, 0);
+  session_iv.create();
+
+  // Create 'content' key to be encrypted (must be 128)
+  Crypto::AESKey content_key(Crypto::AESKey::BITS_128);
+  content_key.create();
+  Crypto::AESKey content_key_original = content_key;
+
+  // Create encryptor, CBC
+  Crypto::AES aes;
+  aes.set_key(session_key);
+  aes.set_iv(session_iv);
+
+  ASSERT_TRUE(aes.encrypt(content_key));
+  ASSERT_EQ(content_key.size, Crypto::AESKey::BITS_256);
+
+  aes.set_iv(session_iv);  // reset IV
+  ASSERT_TRUE(aes.decrypt(content_key));
+  ASSERT_EQ(content_key.size, Crypto::AESKey::BITS_128);
+
+  ASSERT_EQ(content_key_original.str(), content_key.str());
+}
 
 int main(int argc, char **argv)
 {

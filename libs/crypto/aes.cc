@@ -160,6 +160,29 @@ bool AES::decrypt(vector<unsigned char>& data)
   return true;
 }
 
+//--------------------------------------------------------------------------
+// Encrypt another key in place, with padding
+// Only works for 128-bit keys, turns into a 256 bit 'key' for output
+bool AES::encrypt(AESKey& key)
+{
+  if (key.size != AESKey::BITS_128) return false;
+  PKCS5::pad_in_place(key.key, 16, 16); // To 32 bytes
+  key.size = AESKey::BITS_256;
+  if (!encrypt(key.key, 32)) return false;
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Decrypt a key in place, unpadding
+// Only works for 128-bit keys encrypted to 256 bits
+bool AES::decrypt(AESKey& key)
+{
+  if (key.size != AESKey::BITS_256) return false;
+  if (!encrypt(key.key, 32, false)) return false;
+  key.size = AESKey::BITS_128;  // Simply truncate
+  return true;
+}
+
 }} // namespaces
 
 
