@@ -137,6 +137,10 @@ public:
   void read(const string& text);
 
   //------------------------------------------------------------------------
+  // Read from string as binary
+  void read_binary(const string& text);
+
+  //------------------------------------------------------------------------
   // Set from passphrase
   void set_from_passphrase(const string& text);
 

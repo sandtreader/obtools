@@ -111,6 +111,14 @@ void AESKey::read(const string& text)
   read(iss);
 }
 
+//------------------------------------------------------------------------
+// Read from string as binary
+void AESKey::read_binary(const string& binary)
+{
+  istringstream iss(binary);
+  read_binary(iss);
+}
+
 //--------------------------------------------------------------------------
 // Set from passphrase
 void AESKey::set_from_passphrase(const string& text)
