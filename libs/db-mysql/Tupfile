@@ -6,6 +6,6 @@
 
 NAME    = ot-db-mysql
 TYPE    = lib
-DEPENDS = ot-db ext-mysqlclient_r
+DEPENDS = ot-db ext-mysqlclient
 
 include_rules
