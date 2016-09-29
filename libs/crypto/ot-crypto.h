@@ -276,12 +276,12 @@ public:
   // Sugared version of decrypt, PKCS5 unpadding and decrypting in place
   bool decrypt(vector<unsigned char>& data);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Encrypt another key in place, with padding
   // Only works for 128-bit keys, turns into a 256 bit 'key' for output
   bool encrypt(AESKey& key);
 
-  //--------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Decrypt a key in place, unpadding
   // Only works for 128-bit keys encrypted to 256 bits
   bool decrypt(AESKey& key);
