@@ -3,7 +3,7 @@
 //
 // SOAP URL handler specialisations
 //
-// Copyright (c) 2006 Paul Clark.  All rights reserved
+// Copyright (c) 2006-2016 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -19,8 +19,29 @@ bool URLHandler::handle_request(const Web::HTTPMessage& http_request,
 {
   Log::Streams log;
 
-  // Request must be POST
-  if (http_request.method != "POST")
+  // Request must be POST, or GET with a 'q' parameter
+  string request_body = http_request.body;
+  if (http_request.method == "GET")
+  {
+    string body = http_request.url.get_query_parameter("q");
+    if (body.empty())
+    {
+      log.error << "SOAP server received GET with no 'q' parameter\n";
+      http_response.code = 405;
+      http_response.reason = "Method not allowed: GET with no 'q'";
+      return true;
+    }
+
+    Text::Base64 base64;
+    if (!base64.decode(body, request_body))
+    {
+      log.error << "SOAP server received GET with bad base64\n";
+      http_response.code = 404;
+      http_response.reason = "Bad request: Bad Base64 in 'q'";
+      return true;
+    }
+  }
+  else if (http_request.method != "POST")
   {
     log.error << "SOAP server received bad request method: "
               << http_request.method << endl;
@@ -37,7 +58,7 @@ bool URLHandler::handle_request(const Web::HTTPMessage& http_request,
     parser.fix_namespace(p->first, p->second);
 
   // Parse into message
-  Message request(http_request.body, parser);
+  Message request(request_body, parser);
 
   // Make sure it's valid
   if (!request)
