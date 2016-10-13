@@ -109,6 +109,7 @@ public:
   // Validity checks - 0 time is not valid
   bool valid() const { return t!=0; }
   bool operator!() const { return !t; }
+  operator bool() const { return t; }
 
   //------------------------------------------------------------------------
   // Convert to floating point seconds (e.g. for NTP timestamp in text)
@@ -137,6 +138,8 @@ public:
   // Arithmetic operators, so far as it makes sense
   Duration operator-(const Duration& o) const { return Duration(t-o.t); }
   Duration operator+(const Duration& o) const { return Duration(t+o.t); }
+  Duration operator-(double n) const { return Duration(t-n); }
+  Duration operator+(double n) const { return Duration(t+n); }
   Duration operator*(double n) const { return Duration(t*n); }
   Duration operator/(double n) const { return Duration(t/n); }
 
@@ -144,6 +147,8 @@ public:
   // Arithmetic assignments
   Duration operator+=(const Duration& o) { t+=o.t; return *this; }
   Duration operator-=(const Duration& o) { t-=o.t; return *this; }
+  Duration operator+=(double n) { t+=n; return *this; }
+  Duration operator-=(double n) { t-=n; return *this; }
   Duration operator*=(double n) { t*=n; return *this; }
   Duration operator/=(double n) { t/=n; return *this; }
 
@@ -155,6 +160,18 @@ public:
   bool operator>(const Duration& o) const { return t>o.t; }
   bool operator<=(const Duration& o) const { return t<=o.t; }
   bool operator>=(const Duration& o) const { return t>=o.t; }
+  bool operator==(double n) const { return t==n; }
+  bool operator!=(double n) const { return t!=n; }
+  bool operator<(double n) const { return t<n; }
+  bool operator>(double n) const { return t>n; }
+  bool operator<=(double n) const { return t<=n; }
+  bool operator>=(double n) const { return t>=n; }
+  bool operator==(int n) const { return t==n; }
+  bool operator!=(int n) const { return t!=n; }
+  bool operator<(int n) const { return t<n; }
+  bool operator>(int n) const { return t>n; }
+  bool operator<=(int n) const { return t<=n; }
+  bool operator>=(int n) const { return t>=n; }
 
   //------------------------------------------------------------------------
   // Constructor-like static function to return monotonic clock - baseline
