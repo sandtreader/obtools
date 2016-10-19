@@ -133,6 +133,7 @@ string PropertyList::str(char sep, char quote)
 string PropertyList::interpolate(const string& text) const
 {
   string result;
+  result.reserve(text.size());
 
   for(string::const_iterator p = text.begin(); p!=text.end();)
   {
