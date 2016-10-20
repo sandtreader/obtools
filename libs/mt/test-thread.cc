@@ -43,7 +43,7 @@ TEST(ThreadTest, TestRuns)
   };
 
   auto threads = vector<TestThread>{10};
-  this_thread::sleep_for(chrono::seconds{1});
+  this_thread::sleep_for(chrono::milliseconds{200});
   for (auto& t : threads)
     EXPECT_EQ(true, t.has_run());
 }
@@ -81,7 +81,7 @@ TEST(ThreadTest, TestLocking)
   auto threads = vector<unique_ptr<TestThread>>{};
   for (auto i = 0; i < num_threads; ++i)
     threads.push_back(make_unique<TestThread>(m, counter));
-  this_thread::sleep_for(chrono::seconds{1});
+  this_thread::sleep_for(chrono::milliseconds{200});
   EXPECT_EQ(num_threads * num_iterations, counter);
 }
 
@@ -114,7 +114,7 @@ TEST(ThreadTest, TestWaitForJoinOnDestruct)
 
     void run() override
     {
-      this_thread::sleep_for(chrono::seconds(1));
+      this_thread::sleep_for(chrono::milliseconds(100));
       waited = true;
     }
 
@@ -161,7 +161,7 @@ TEST(ThreadTest, TestRepeatedStarts)
     for(auto i=0; i<10; i++)
     {
       thread.start();
-      this_thread::sleep_for(chrono::milliseconds(10));
+      this_thread::sleep_for(chrono::milliseconds(20));
     }
   }
 
