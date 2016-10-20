@@ -42,7 +42,7 @@ void TestServer::process(ObTools::Net::TCPSocket& s,
 
     cerr << "Connection from " << client << " ended\n";
   }
-  catch (ObTools::Net::SocketError se)
+  catch (const ObTools::Net::SocketError& se)
   {
     cerr << se << endl;
   }

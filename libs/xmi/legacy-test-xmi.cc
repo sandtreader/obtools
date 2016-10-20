@@ -21,7 +21,7 @@ int main()
   {
     cin >> reader;
   }
-  catch (ObTools::XMI::ParseFailed)
+  catch (const ObTools::XMI::ParseFailed&)
   {
     cerr << "XMI parse failed" << endl;
     return 2;

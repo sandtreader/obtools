@@ -480,7 +480,7 @@ public:
   SocketError(int e=0): error(e) {}
 
   // Get error string
-  string get_string();
+  string get_string() const;
 };
 
 //--------------------------------------------------------------------------

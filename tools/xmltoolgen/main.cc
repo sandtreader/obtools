@@ -199,7 +199,7 @@ void XMLGenerator::generate_main()
   sout<<"  {\n";
   sout<<"    cin >> _parser;\n";
   sout<<"  }\n";
-  sout<<"  catch (ObTools::XML::ParseFailed)\n";
+  sout<<"  catch (const ObTools::XML::ParseFailed&)\n";
   sout<<"  {\n";
   sout<<"    cerr << \"XML parse failed\" << endl;\n";
   sout<<"    return 2;\n";

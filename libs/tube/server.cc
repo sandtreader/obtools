@@ -55,7 +55,7 @@ class ServerSendThread: public MT::Thread
         // Write data
         session.socket.write(msg.data);
       }
-      catch (Net::SocketError se)
+      catch (const Net::SocketError& se)
       {
         log.error << server.name << " (ssend): " << se << endl;
         break;
@@ -165,7 +165,7 @@ void Server::process(SSL::TCPSocket& socket,
         break;
       }
     }
-    catch (Net::SocketError se)
+    catch (const Net::SocketError& se)
     {
       log.error << name << ": " << se << endl;
       obit = "failed";

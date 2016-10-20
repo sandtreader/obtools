@@ -108,7 +108,7 @@ Message::Message(const string& subject, const XML::Element& xml_content,
     parser.read_from(xml_content.to_string());
     soap_message->add_body(parser.detach_root());
   }
-  catch (XML::ParseFailed)
+  catch (const XML::ParseFailed&)
   {
     error_log << "XMLMesh Message creation: "
               << "can't reparse supplied element " << xml_content << endl;
@@ -141,7 +141,7 @@ Message::Message(const string& subject, const string& body_text,
     else
       error_log << "XMLMesh Message creation: No body XML found\n";
   }
-  catch (XML::ParseFailed)
+  catch (const XML::ParseFailed&)
   {
     error_log << "XMLMesh Message creation: "
               << "can't parse supplied body text:\n"

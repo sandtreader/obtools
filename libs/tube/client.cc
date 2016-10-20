@@ -160,7 +160,7 @@ bool Client::receive_messages(Log::Streams& log)
       return restart_socket(log);
     }
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     if (alive)
     {
@@ -246,7 +246,7 @@ bool Client::send_messages(Log::Streams& log)
     // Write data
     socket->write(msg.data);
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     if (alive)
     {

@@ -310,7 +310,7 @@ Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
     }
     else return none;
   }
-  catch (ParseFailed)
+  catch (const ParseFailed&)
   {
     return none;
   }
@@ -340,7 +340,7 @@ bool Element::merge_xml(const string& xml, ostream& serr, int parse_flags)
       return false;
     }
   }
-  catch (ParseFailed)
+  catch (const ParseFailed&)
   {
     return false;
   }

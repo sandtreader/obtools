@@ -58,7 +58,7 @@ void TelnetServer::process(Net::TCPSocket& s, Net::EndPoint)
       }
     }
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     cerr << se << endl;
   }

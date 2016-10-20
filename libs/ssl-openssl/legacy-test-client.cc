@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     string s;
     while (client >> s) cout << s;
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     cerr << se << endl;
     return 1;

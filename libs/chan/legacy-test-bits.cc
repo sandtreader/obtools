@@ -53,7 +53,7 @@ int main()
   {
     bitr.read_bit();
   }
-  catch (ObTools::Channel::Error e)
+  catch (const ObTools::Channel::Error& e)
   {
     cout << "Buffer ended OK: " << e << endl;
     return 0;

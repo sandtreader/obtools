@@ -44,7 +44,7 @@ void TestServer::process(Net::TCPSocket& s,
 
     cerr << "Connection from " << client << " ended\n";
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     cerr << se << endl;
   }

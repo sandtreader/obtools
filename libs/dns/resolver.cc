@@ -181,7 +181,7 @@ string Resolver::query(const string& domain, Type type,
               << ") failed - no suitable answer sections\n";
     return "";
   }
-  catch (Channel::Error ce)
+  catch (const Channel::Error&)
   {
     log.error << "DNS resolver: lookup of " << domain << " (" << type_name
               << ") failed - can't parse response\n";
@@ -216,7 +216,7 @@ string Resolver::query_txt(const string& domain)
 
     return result;
   }
-  catch (Channel::Error ce)
+  catch (const Channel::Error&)
   {
     Log::Streams log;
     log.error << "DNS resolver: lookup of " << domain
@@ -257,7 +257,7 @@ string Resolver::query_cert(const string& domain)
     sr.read(der, rdlen-sr.get_offset());
     return der;
   }
-  catch (Channel::Error ce)
+  catch (const Channel::Error&)
   {
     Log::Streams log;
     log.error << "DNS resolver: lookup of " << domain

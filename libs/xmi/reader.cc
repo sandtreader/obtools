@@ -200,7 +200,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
   {
     s >> xml_parser;
   }
-  catch (XML::ParseFailed)
+  catch (const XML::ParseFailed&)
   {
     error("XML parsing failed");
   }

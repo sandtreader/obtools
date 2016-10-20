@@ -30,7 +30,7 @@ Message::Message(const string& text, Parser& p): doc(0)
     p.read_from(text);
     if (p.verify()) doc = p.detach_root();
   }
-  catch (ObTools::XML::ParseFailed)
+  catch (const ObTools::XML::ParseFailed&)
   {}
 }
 
@@ -43,7 +43,7 @@ Message::Message(istream& in_s, Parser& p): doc(0)
     in_s >> p;
     if (p.verify()) doc = p.detach_root();
   }
-  catch (ObTools::XML::ParseFailed)
+  catch (const ObTools::XML::ParseFailed&)
   {}
 }
 

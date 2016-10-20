@@ -36,7 +36,7 @@ size_t TCPSocketReader::basic_read(void *buf, size_t count)
     offset += n;
     return n;
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     throw Error(se.error, se.get_string());
   }
@@ -53,7 +53,7 @@ void TCPSocketWriter::basic_write(const void *buf, size_t count)
     s.write(buf, count);
     offset += count;
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     throw Error(se.error, se.get_string());
   }

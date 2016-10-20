@@ -26,7 +26,7 @@ int main()
       double result = evaluator.evaluate(expr);
       cout << ">> " << result << endl;
     }
-    catch (Expression::Exception e)
+    catch (const Expression::Exception& e)
     {
       cerr << "! " << e.error << endl;
     }

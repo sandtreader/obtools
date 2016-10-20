@@ -27,7 +27,7 @@ void roundtrip(const char *fn)
   {
     value = parser.read_value();
   }
-  catch (Exception e)
+  catch (const Exception& e)
   {
     FAIL() << "Raw parse failed: " << e.error;
   }
@@ -45,7 +45,7 @@ void roundtrip(const char *fn)
   {
     value2 = parser2.read_value();
   }
-  catch (Exception e)
+  catch (const Exception& e)
   {
     FAIL() << "Regen parse failed: " << e.error;
   }

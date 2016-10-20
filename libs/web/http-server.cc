@@ -186,7 +186,7 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
     // Shut down socket
     s.shutdown();
   }
-  catch (ObTools::Net::SocketError se)
+  catch (const ObTools::Net::SocketError& se)
   {
     log.error << se << endl;
   }

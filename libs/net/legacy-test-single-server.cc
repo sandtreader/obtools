@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 
         cout << "Connection from " << client << " ended\n";
       }
-      catch (ObTools::Net::SocketError se)
+      catch (const ObTools::Net::SocketError& se)
       {
         cerr << se << endl;
         return 2;

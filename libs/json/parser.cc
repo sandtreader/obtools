@@ -151,7 +151,7 @@ Value Parser::read_value()
         throw Exception("Unrecognised token ");
     }
   }
-  catch (Lex::Exception e)
+  catch (const Lex::Exception& e)
   {
     throw Exception(e.error);
   }

@@ -162,7 +162,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 
     return do_receive(request, response);
   }
-  catch (ObTools::Net::SocketError se)
+  catch (const ObTools::Net::SocketError& se)
   {
     log.error << "HTTP: " << se << endl;
     delete stream; stream = 0;
@@ -231,7 +231,7 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
       delete socket; socket = 0;
     }
   }
-  catch (ObTools::Net::SocketError se)
+  catch (const ObTools::Net::SocketError& se)
   {
     log.error << "HTTP: " << se << endl;
     delete stream; stream = 0;
@@ -425,7 +425,7 @@ unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
     // Read what was needed
     return n;
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     // End of file - optionally close socket
     if (!http_1_1 || http_1_1_close)
@@ -456,7 +456,7 @@ unsigned long HTTPClient::write(unsigned char *data, unsigned long length)
     // Return what was written
     return length;
   }
-  catch (Net::SocketError se)
+  catch (const Net::SocketError& se)
   {
     // End of file - optionally close socket
     if (!http_1_1 || http_1_1_close)

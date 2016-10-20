@@ -33,7 +33,7 @@ bool Tree::read_value(Channel::BitReader& reader, Value& value) const
         return true;
       }
     }
-    catch (Channel::Error &e)
+    catch (const Channel::Error& e)
     {
       return false;
     }
@@ -116,7 +116,7 @@ bool MultiTree::read_escaped_char(Channel::BitReader& reader,
     c = reader.read_bits(8);
     return true;
   }
-  catch (Channel::Error e)
+  catch (const Channel::Error& e)
   {
     return false;
   }

@@ -422,7 +422,7 @@ set<string> Socket::get_host_macs()
 
 //--------------------------------------------------------------------------
 // Get error string
-string SocketError::get_string()
+string SocketError::get_string() const
 {
   if (error)
     return string(strerror(error));

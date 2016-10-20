@@ -35,7 +35,7 @@ bool Configuration::read(const string& ename)
       {
         f >> parser;
       }
-      catch (ParseFailed)
+      catch (const ParseFailed&)
       {
         serr << "Bad XML in config file\n";
         return false;
@@ -70,7 +70,7 @@ bool Configuration::read_text(const string& text, const string& ename)
   {
     parser.read_from(text);
   }
-  catch (ParseFailed)
+  catch (const ParseFailed&)
   {
     serr << "Bad XML in config file\n";
     return false;

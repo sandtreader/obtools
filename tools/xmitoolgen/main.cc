@@ -321,7 +321,7 @@ void XMIGenerator::generate_main()
   sout<<"  {\n";
   sout<<"    cin >> reader;\n";
   sout<<"  }\n";
-  sout<<"  catch (ObTools::XMI::ParseFailed)\n";
+  sout<<"  catch (const ObTools::XMI::ParseFailed&)\n";
   sout<<"  {\n";
   sout<<"    cerr << \"XMI parse failed\" << endl;\n";
   sout<<"    return 2;\n";

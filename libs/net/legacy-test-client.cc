@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     string s;
     while (client >> s) cout << s;
   }
-  catch (ObTools::Net::SocketError se)
+  catch (const ObTools::Net::SocketError& se)
   {
     cerr << se << endl;
     return 1;

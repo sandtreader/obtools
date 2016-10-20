@@ -25,7 +25,7 @@ int main()
   {
     cin >> parser;
   }
-  catch (ObTools::XML::ParseFailed)
+  catch (const ObTools::XML::ParseFailed&)
   {
     cerr << "XML parse failed" << endl;
     return 2;

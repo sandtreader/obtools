@@ -148,7 +148,7 @@ void AESKey::set_from_int(uint64_t n)
     writer.write_nbo_64(n);
     valid = true;
   }
-  catch (Channel::Error)
+  catch (const Channel::Error&)
   {}
 }
 
