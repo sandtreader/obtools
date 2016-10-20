@@ -18,21 +18,21 @@ namespace ObTools { namespace MT {
 // Returns whether successful
 bool Thread::start()
 {
-  running = true;  // before it runs - otherwise it could delete us again
-                   // before we've even started!
-                   // Set before trying to create the thread in order to avoid
-                   // race condition with _thread_start
-  if (mythread && mythread->joinable())
-    mythread->join();
+
+  running.signal(true); // before it runs - otherwise it could delete us again
+                        // before we've even started!
+                        // Set before trying to create the thread in order to
+                        // avoid race condition with _thread_start
+  join();
 
   mythread = make_unique<thread>([this]()
   {
-    if (this->running)
+    if (this->is_running())
       this->run();
-    this->running = false;
+    running.signal(false);
   });
   if (!mythread)
-    running = false;
+    running.signal(false);
   return running;
 }
 
@@ -59,7 +59,7 @@ void Thread::cancel()
   if (mythread)
   {
     // Try to cancel if not already stopped
-    running = false;
+    running.signal(false);
 
     // Join to make sure it has cleanly finished before we exit
     join();

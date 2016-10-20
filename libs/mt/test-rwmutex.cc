@@ -31,7 +31,7 @@ TEST(RWMutexTest, TestSafe)
   private:
     void run() override
     {
-      while (running)
+      while (is_running())
       {
         MT::RWReadLock lock{m};
         if (bad)
@@ -51,7 +51,7 @@ TEST(RWMutexTest, TestSafe)
   private:
     void run() override
     {
-      while (running)
+      while (is_running())
       {
         {
           MT::RWWriteLock lock{m};

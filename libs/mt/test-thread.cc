@@ -168,6 +168,52 @@ TEST(ThreadTest, TestRepeatedStarts)
   ASSERT_EQ(10, count);
 }
 
+TEST(ThreadTest, TestSleepFor)
+{
+  class TestThread: public MT::Thread
+  {
+  private:
+    void run() override
+    {
+      sleep_for(chrono::milliseconds(100));
+    }
+  };
+
+  TestThread thread;
+  auto start = chrono::steady_clock::now();
+  thread.start();
+  this_thread::sleep_for(chrono::milliseconds(10));
+  thread.join();
+  auto end = chrono::steady_clock::now();
+  auto slept_for =
+    std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+  ASSERT_GE(slept_for, chrono::milliseconds(100));
+}
+
+TEST(ThreadTest, TestSleepForInterruptable)
+{
+  class TestThread: public MT::Thread
+  {
+  private:
+    void run() override
+    {
+      sleep_for(chrono::seconds(60));
+    }
+  };
+
+  TestThread thread;
+  auto start = chrono::steady_clock::now();
+  thread.start();
+  this_thread::sleep_for(chrono::milliseconds(10));
+  thread.cancel();
+  auto end = chrono::steady_clock::now();
+  auto slept_for =
+    std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+  ASSERT_LT(slept_for, chrono::seconds(1));
+}
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)

@@ -18,7 +18,7 @@ namespace ObTools { namespace MT {
 // Takes 'self' as argument and bounces on to (virtual) run()
 bool PoolThread::start()
 {
-  running = true;
+  running.signal(true);
   mythread = make_unique<thread>([this](){
     while (true)
     {
@@ -41,10 +41,10 @@ bool PoolThread::start()
       // Return to pool
       this->replacer.replace(this);
     }
-    this->running = false;
+    running.signal(false);
   });
   if (!mythread)
-    running = false;
+    running.signal(false);
   return running;
 }
 
@@ -67,7 +67,7 @@ void PoolThread::kick()
 // Request it to die.  If 'wait' is set, waits for thread to exit
 void PoolThread::die(bool wait)
 {
-  if (mythread && running)
+  if (is_running())
   {
     dying = true;
     in_use.signal();  // Release from wait

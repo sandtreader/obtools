@@ -1033,7 +1033,7 @@ public:
 //==========================================================================
 // Database connection pool - maintains list of database connections which
 // can be claimed and released
-class ConnectionPool
+class ConnectionPool: MT::Thread
 {
   ConnectionFactory& factory;
   unsigned min_connections;        // Number started on creation
@@ -1047,10 +1047,13 @@ class ConnectionPool
 
   // Background thread and timestamps
   map<Connection *, Time::Stamp> last_used;
-  MT::Thread *background_thread;
 
   // Internals
   void fill_to_minimum();
+
+  //------------------------------------------------------------------------
+  // Run background timeout loop (called from internal thread)
+  void run() override;
 
 public:
   //------------------------------------------------------------------------
@@ -1066,10 +1069,6 @@ public:
   //------------------------------------------------------------------------
   // Release a connection after use
   void release(Connection *conn);
-
-  //------------------------------------------------------------------------
-  // Run background timeout loop (called from internal thread)
-  void run_background(bool& running);
 
   //------------------------------------------------------------------------
   // Destructor

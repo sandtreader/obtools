@@ -11,20 +11,9 @@
 #include "ot-log.h"
 #include <algorithm>
 
-#define BACKGROUND_SLEEP_TIME 1
+#define BACKGROUND_SLEEP_TIME 10
 
 namespace ObTools { namespace DB {
-
-//==========================================================================
-// Background thread class
-class BackgroundThread: public MT::Thread
-{
-  ConnectionPool& pool;
-  virtual void run() { pool.run_background(running); }
-
-public:
-  BackgroundThread(ConnectionPool& _pool): pool(_pool) { start(); }
-};
 
 //--------------------------------------------------------------------------
 // Constructor
@@ -32,7 +21,7 @@ ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
                                unsigned _min, unsigned _max,
                                Time::Duration _max_inactivity):
   factory(_factory), min_connections(_min), max_connections(_max),
-  max_inactivity(_max_inactivity), mutex(), background_thread(0)
+  max_inactivity(_max_inactivity), mutex()
 {
   Log::Streams log;
   log.summary << "Creating database connection pool with ("
@@ -43,8 +32,8 @@ ConnectionPool::ConnectionPool(ConnectionFactory& _factory,
   // Start with base level
   fill_to_minimum();
 
-  // Start background thread
-  background_thread = new BackgroundThread(*this);
+  // Start thread
+  start();
 }
 
 //--------------------------------------------------------------------------
@@ -178,11 +167,11 @@ void ConnectionPool::release(Connection *conn)
 
 //--------------------------------------------------------------------------
 // Run background timeout loop (called from internal thread)
-void ConnectionPool::run_background(bool& running)
+void ConnectionPool::run()
 {
   Log::Streams log;
 
-  while (running)
+  while (is_running())
   {
     { // Not inside sleep
       MT::Lock lock(mutex);
@@ -244,7 +233,7 @@ void ConnectionPool::run_background(bool& running)
       fill_to_minimum();
     }
 
-    this_thread::sleep_for(chrono::seconds{BACKGROUND_SLEEP_TIME});
+    sleep_for(chrono::seconds{BACKGROUND_SLEEP_TIME});
   }
 }
 
@@ -252,8 +241,8 @@ void ConnectionPool::run_background(bool& running)
 // Destructor
 ConnectionPool::~ConnectionPool()
 {
-  // Stop background thread
-  if (background_thread) delete background_thread;
+  cancel();
+  join();
 
   // Delete all connections
   for(list<Connection *>::iterator p = connections.begin();

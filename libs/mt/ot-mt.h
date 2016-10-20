@@ -34,17 +34,110 @@ using RLock = unique_lock<recursive_mutex>;
 using BasicCondVar = condition_variable;
 
 //==========================================================================
+// Condition variable class (boolean condition)
+// Implements safe signalling on a simple boolean variable
+class Condition
+{
+private:
+  volatile bool flag;
+  condition_variable cv;
+  mutable mutex m;
+
+public:
+  //------------------------------------------------------------------------
+  // Default Constructor - initialises condvar and mutex
+  Condition(bool initial = false):
+    flag{initial}
+  {}
+
+  //------------------------------------------------------------------------
+  // Get the current value
+  operator bool() const
+  {
+    unique_lock<mutex> lock{m};
+    return flag;
+  }
+
+  //------------------------------------------------------------------------
+  // Wait on the condition to become as desired
+  void wait(bool desired = true)
+  {
+    unique_lock<mutex> lock{m};
+    while (flag != desired)
+      cv.wait(lock);
+  }
+
+  //------------------------------------------------------------------------
+  // Wait on the condition to become as desired, or for given period
+  template< class Rep, class Period >
+    void wait_for(const std::chrono::duration<Rep,Period>& time,
+                  bool desired = true)
+  {
+    unique_lock<mutex> lock{m};
+    if (flag != desired)
+      cv.wait_for(lock, time);
+  }
+
+  //------------------------------------------------------------------------
+  // Signal the condition to become as stated
+  void signal(bool value = true)
+  {
+    unique_lock<mutex> lock{m};
+    if (flag != value)
+    {
+      flag = value;
+      cv.notify_one();
+    }
+  }
+
+  //------------------------------------------------------------------------
+  // Broadcast the condition to become as stated (multiple waiters)
+  void broadcast(bool value = true)
+  {
+    unique_lock<mutex> lock{m};
+    if (flag != value)
+    {
+      flag = value;
+      cv.notify_all();
+    }
+  }
+
+  //------------------------------------------------------------------------
+  // Clear the flag without signalling.
+  // This is used with the default 'true' parameters of wait/signal/broadcast
+  // to implement 'rising-edge-only' synchronisation.  If you want both edges
+  // synchronised, manually wait/signal/broadcast for 'false' too
+  void clear() { flag = false; }
+};
+
+//==========================================================================
 // Abstract Thread class
 class Thread
 {
-public:
-  bool running = false;         // True if thread still running
+  friend class PoolThread;
+private:
+  mutable Condition running;    // whether running or not
   unique_ptr<thread> mythread;  // thread
 
   //------------------------------------------------------------------------
   // Virtual run routine - called once thread has started by start()
-  // Do not call directly!
   virtual void run() = 0;
+
+protected:
+  //------------------------------------------------------------------------
+  // Test if running
+  bool is_running() const
+  { return mythread && running; }
+
+  //------------------------------------------------------------------------
+  // Sleep for a given period, or until thread told to stop
+  template< class Rep, class Period >
+    void sleep_for(const std::chrono::duration<Rep,Period>& time)
+  {
+    running.wait_for(time, false);
+  }
+
+public:
 
   //------------------------------------------------------------------------
   // Start - note separate from default constructor to allow you time to create
@@ -88,70 +181,11 @@ public:
 
   //------------------------------------------------------------------------
   // Test if it has stopped
-  bool operator!() const { return !mythread || !running; }
+  bool operator!() const { return !is_running(); }
 
   //------------------------------------------------------------------------
   // Destructor - ask it to cancel if started
   virtual ~Thread();
-};
-
-//==========================================================================
-// Condition variable class (boolean condition)
-// Implements safe signalling on a simple boolean variable
-class Condition
-{
-private:
-  volatile bool flag;
-  condition_variable cv;
-  mutex m;
-
-public:
-  //------------------------------------------------------------------------
-  // Default Constructor - initialises condvar and mutex
-  Condition(bool initial = false):
-    flag{initial}
-  {}
-
-  //------------------------------------------------------------------------
-  // Wait on the condition to become as desired
-  void wait(bool desired=true)
-  {
-    unique_lock<mutex> lock{m};       // Use locks to ensure exception safety
-
-    while (flag!=desired)
-      cv.wait(lock);
-  }
-
-  //------------------------------------------------------------------------
-  // Signal the condition to become as stated
-  void signal(bool value = true)
-  {
-    unique_lock<mutex> lock{m};
-    if (flag != value)
-    {
-      flag = value;
-      cv.notify_one();
-    }
-  }
-
-  //------------------------------------------------------------------------
-  // Broadcast the condition to become as stated (multiple waiters)
-  void broadcast(bool value = true)
-  {
-    unique_lock<mutex> lock{m};
-    if (flag != value)
-    {
-      flag = value;
-      cv.notify_all();
-    }
-  }
-
-  //------------------------------------------------------------------------
-  // Clear the flag without signalling.
-  // This is used with the default 'true' parameters of wait/signal/broadcast
-  // to implement 'rising-edge-only' synchronisation.  If you want both edges
-  // synchronised, manually wait/signal/broadcast for 'false' too
-  void clear() { flag = false; }
 };
 
 //==========================================================================
