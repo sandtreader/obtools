@@ -265,19 +265,19 @@ public:
   { return encrypt_rtb(data, length, false); }
 
   //------------------------------------------------------------------------
-  // Sugared versions with binary strings and PKCS5 padding
+  // Sugared versions with binary strings and PKCS7 padding
   bool encrypt(const string& plaintext, string& ciphertext_p);
 
   //------------------------------------------------------------------------
-  // Sugared version of encrypt, encrypting and PKCS5 padding in place
+  // Sugared version of encrypt, encrypting and PKCS7 padding in place
   bool encrypt(vector<unsigned char>& data);
 
   //------------------------------------------------------------------------
-  // Sugared version of decrypt with binary strings and PKCS5 unpadding
+  // Sugared version of decrypt with binary strings and PKCS7 unpadding
   bool decrypt(const string& ciphertext, string& plaintext_p);
 
   //------------------------------------------------------------------------
-  // Sugared version of decrypt, PKCS5 unpadding and decrypting in place
+  // Sugared version of decrypt, PKCS7 unpadding and decrypting in place
   bool decrypt(vector<unsigned char>& data);
 
   //------------------------------------------------------------------------
@@ -567,8 +567,8 @@ public:
 };
 
 //==========================================================================
-// PKCS5 padding support
-class PKCS5
+// PKCS7 padding support
+class PKCS7
 {
  public:
   //------------------------------------------------------------------------

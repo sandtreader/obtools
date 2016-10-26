@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::Crypto: pkcs5.cc
+// ObTools::Crypto: pkcs7.cc
 //
-// PKCS5 padding
+// PKCS7 padding
 //
 // Copyright (c) 2006 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
@@ -16,7 +16,7 @@ namespace ObTools { namespace Crypto {
 // Pad a block of data to given length multiple
 // Returns copied and padded malloc'ed data block, and modifies length
 // to length of padded block (deprecated)
-unsigned char *PKCS5::pad(const unsigned char *data, int& length,
+unsigned char *PKCS7::pad(const unsigned char *data, int& length,
                           int multiple)
 {
   // Always adds padding, even if not really needed
@@ -35,7 +35,7 @@ unsigned char *PKCS5::pad(const unsigned char *data, int& length,
 //--------------------------------------------------------------------------
 // Pad a block of data to given length multiple
 // Updates data vector in place
-void PKCS5::pad(vector<unsigned char>& data, int multiple)
+void PKCS7::pad(vector<unsigned char>& data, int multiple)
 {
   // Always adds padding, even if not really needed
   int length = data.size();
@@ -49,7 +49,7 @@ void PKCS5::pad(vector<unsigned char>& data, int multiple)
 // Pad a block of data to given length multiple, in place
 // Data must be at least multiple bytes longer than length
 // Returns length of padded data
-int PKCS5::pad_in_place(unsigned char *data, int length, int multiple)
+int PKCS7::pad_in_place(unsigned char *data, int length, int multiple)
 {
   // Always adds padding, even if not really needed
   int new_length = (length+multiple)/multiple*multiple;
@@ -64,7 +64,7 @@ int PKCS5::pad_in_place(unsigned char *data, int length, int multiple)
 //--------------------------------------------------------------------------
 // Unpad a block of data
 // Returns original length of block - data is not copied or modified
-int PKCS5::original_length(const unsigned char *data, int length)
+int PKCS7::original_length(const unsigned char *data, int length)
 {
   if (!length) return 0;
   int pad = data[length-1];
@@ -75,7 +75,7 @@ int PKCS5::original_length(const unsigned char *data, int length)
 //--------------------------------------------------------------------------
 // Unpad a block of data
 // Updates data vector in place
-void PKCS5::unpad(vector<unsigned char>& data)
+void PKCS7::unpad(vector<unsigned char>& data)
 {
   data.resize(original_length(&data[0], data.size()));
 }

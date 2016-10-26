@@ -99,7 +99,7 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
 }
 
 //--------------------------------------------------------------------------
-// Sugared version of encrypt with binary strings and PKCS5 padding
+// Sugared version of encrypt with binary strings and PKCS7 padding
 bool AES::encrypt(const string& plaintext, string& ciphertext_p)
 {
   int length = plaintext.size();
@@ -108,7 +108,7 @@ bool AES::encrypt(const string& plaintext, string& ciphertext_p)
   vector<unsigned char> pt(length);
   memcpy(&pt[0], plaintext.data(), length);
 
-  PKCS5::pad(pt, AES_BLOCK_SIZE);
+  PKCS7::pad(pt, AES_BLOCK_SIZE);
   length = pt.size();
 
   // Encrypt
@@ -121,15 +121,15 @@ bool AES::encrypt(const string& plaintext, string& ciphertext_p)
 }
 
 //--------------------------------------------------------------------------
-// Sugared version of encrypt, encrypting and PKCS5 padding in place
+// Sugared version of encrypt, encrypting and PKCS7 padding in place
 bool AES::encrypt(vector<unsigned char>& data)
 {
-  PKCS5::pad(data, AES_BLOCK_SIZE);
+  PKCS7::pad(data, AES_BLOCK_SIZE);
   return encrypt(&data[0], data.size());
 }
 
 //--------------------------------------------------------------------------
-// Sugared version of decrypt with binary  strings and PKCS5 unpadding
+// Sugared version of decrypt with binary  strings and PKCS7 unpadding
 bool AES::decrypt(const string& ciphertext, string& plaintext_p)
 {
   int length = ciphertext.size();
@@ -143,7 +143,7 @@ bool AES::decrypt(const string& ciphertext, string& plaintext_p)
   if (!decrypt(data, length)) return false;
 
   // Unpad
-  length = PKCS5::original_length(data, length);
+  length = PKCS7::original_length(data, length);
 
   // Convert back to string
   plaintext_p = string(reinterpret_cast<const char *>(data), length);
@@ -152,11 +152,11 @@ bool AES::decrypt(const string& ciphertext, string& plaintext_p)
 }
 
 //--------------------------------------------------------------------------
-// Sugared version of decrypt, PKCS5 unpadding and decrypting in place
+// Sugared version of decrypt, PKCS7 unpadding and decrypting in place
 bool AES::decrypt(vector<unsigned char>& data)
 {
   if (!decrypt(&data[0], data.size())) return false;
-  PKCS5::unpad(data);
+  PKCS7::unpad(data);
   return true;
 }
 
@@ -166,7 +166,7 @@ bool AES::decrypt(vector<unsigned char>& data)
 bool AES::encrypt(AESKey& key)
 {
   if (key.size != AESKey::BITS_128) return false;
-  PKCS5::pad_in_place(key.key, 16, 16); // To 32 bytes
+  PKCS7::pad_in_place(key.key, 16, 16); // To 32 bytes
   key.size = AESKey::BITS_256;
   if (!encrypt(key.key, 32)) return false;
   return true;
