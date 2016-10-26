@@ -169,7 +169,7 @@ public:
 
   //------------------------------------------------------------------------
   // Cancel - ask it to stop
-  void cancel();
+  virtual void cancel();
 
   //------------------------------------------------------------------------
   // Kill a thread (or send another signal)
