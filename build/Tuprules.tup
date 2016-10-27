@@ -73,7 +73,7 @@ ifeq ($(TYPE),shared)
 endif
 ifeq ($(TYPE),exe)
   : main.cc |> !cc |> {objs}
-  : {objs} | $(DEPGROUPS) |> !exelink |> {exe}
+  : {objs} $(EXTRAOBJS) | $(DEPGROUPS) |> !exelink |> {exe}
 endif
 
 ifdef TEST
