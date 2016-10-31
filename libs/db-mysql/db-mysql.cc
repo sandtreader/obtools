@@ -41,7 +41,7 @@ bool ResultSet::fetch(Row& row)
     row.clear();
 
     // Load all the fields by name into the row
-    for (auto i = 0; i < num_fields; ++i)
+    for (auto i = 0u; i < num_fields; ++i)
       if (myrow[i]) row.add(fields[i].name, myrow[i]);
 
     return true;

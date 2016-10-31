@@ -10,7 +10,7 @@ ARCHIVER = ar
 LINKER = $(COMPILER)
 
 # Basic compiler options
-CFLAGS += --std=c++11 -Wall -Werror -fPIC
+CFLAGS += --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC
 LFLAGS += --std=c++11
 
 # Debug settings

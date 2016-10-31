@@ -58,9 +58,9 @@ HMAC::~HMAC()
   if (!finished)
   {
     // Dump into a fake buffer
-    unsigned char bucket[digest_length];
+    auto bucket = vector<unsigned char>(digest_length);
     unsigned int len;
-    HMAC_Final(&hmac_ctx, bucket, &len);
+    HMAC_Final(&hmac_ctx, &bucket[0], &len);
   }
 }
 

@@ -88,7 +88,7 @@ public:
   //------------------------------------------------------------------------
   // Prepare a statement
   // Returns result - check this for validity
-  Statement prepare(const string& sql) override
+  Statement prepare(const string& /* sql */) override
   {
     throw runtime_error("Prepare not implemented for MySQL");
   }
