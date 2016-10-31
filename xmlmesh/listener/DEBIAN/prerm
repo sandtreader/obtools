@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+if [ $1 = "remove" -o $1 = "upgrade" -o $1 = "purge" ]; then
+  /etc/init.d/ot-xmlmesh-listener stop
+  update-rc.d -f ot-xmlmesh-listener remove > /dev/null 2>&1
+fi
+

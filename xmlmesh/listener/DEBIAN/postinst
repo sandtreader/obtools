@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+if [ $1 = "configure" ]; then
+
+  update-rc.d ot-xmlmesh-listener defaults
+  invoke-rc.d ot-xmlmesh-listener start
+
+fi

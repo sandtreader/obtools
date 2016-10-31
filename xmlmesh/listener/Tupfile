@@ -1,0 +1,15 @@
+#===========================================================================
+# Tupfile for ObTools XMLMesh listener daemon
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME     = ot-xmlmesh-listener
+TYPE     = exe
+DEPENDS  = ot-net ot-log ot-daemon ot-xmlmesh-otmp ot-xmlmesh-client
+
+PACKAGE  = $(NAME)
+VERSION  = 0.1.0
+REVISION = 1
+
+include_rules

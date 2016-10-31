@@ -1,0 +1,15 @@
+Source: ot-xmlmesh-listener
+Section: Network
+Priority: optional
+Maintainer: Paul Clark <debian@obtools.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.6
+Homepage: http://www.obtools.com/
+
+Package: ot-xmlmesh-listener
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: ObTools XMLMesh message bus listener
+ Provides daemon which listens for XMLMesh messages and runs scripts to
+ handle them
+

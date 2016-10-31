@@ -1,0 +1,36 @@
+<!--
+  Configuration file for ObTools XMLMesh listener daemon
+  Copyright (c) Paul Clark 2016.  All rights reserved.
+  This code comes with NO WARRANTY and is subject to licence agreement
+-->
+
+<listener>
+  <!-- Logging configuration
+
+       'level' is one of:
+
+         0 - Silence
+         1 - Errors only
+         2 - Session start/stop (default)
+         3 - Details & intermediate changes
+         4 - Debug
+         5 - Everything imaginable
+
+       Production builds are only capable of outputting to level 3
+
+       'file' (default /var/log/obtools/listener.log) gives log file
+
+       'timestamp' gives strftime(3) format for timestamp prefix,
+       with extensions: %*S = seconds+milliseconds, %*L = log level
+       Plain text can also be added.  If empty, nothing is added
+  -->
+  <log level="3" file="/var/log/obtools/listener.log"
+       timestamp="%a %d %b %H:%M:%*S [%*L]: "/>
+
+  <!-- Drop to ordinary user privileges -->
+  <security user="nobody" group="nogroup"/>
+
+  <!-- XMLMesh host and port -->
+  <xmlmesh host="localhost" port="29167"/>
+
+</listener>
