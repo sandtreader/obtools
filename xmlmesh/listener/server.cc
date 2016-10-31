@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XMLMesh::Listener: main.cc
+// ObTools::XMLMesh::Listener: server.cc
 //
 // Global singleton server object for XMLMesh listener
 //
@@ -8,8 +8,14 @@
 
 #include "listener.h"
 #include "ot-log.h"
+#include "ot-xmlmesh-client-otmp.h"
 
 namespace ObTools { namespace XMLMesh {
+
+namespace
+{
+  const auto default_actions_dir = "/etc/obtools/actions/";
+}
 
 //--------------------------------------------------------------------------
 // Constructor
@@ -85,6 +91,77 @@ void Server::reconfigure()
 {
   Log::Streams log;
   log.summary << "Configuring server dynamic state" << endl;
+
+  XML::XPathProcessor config(config_xml);
+
+  // Keep a snapshot of the actions in place, to spot changes
+  MT::RWWriteLock lock(actions_mutex);
+  auto old_actions = actions;
+
+  // Get and inspect the actions directory
+  File::Directory actions_dir(config.get_value("actions/@dir",
+                                               default_actions_dir));
+  if (old_actions.size())
+    log.detail << "Updating actions from " << actions_dir << ":\n";
+  else
+    log.summary << "Reading actions from " << actions_dir << ":\n";
+  list<File::Path> paths;
+  actions_dir.inspect(paths);
+  for(const auto path: paths)
+  {
+    if (old_actions.size())
+      log.detail << " - " << path << endl;
+    else
+      log.summary << " - " << path << endl;
+
+    // Read it, and split lines
+    XML::Configuration action_config(path.str(), log.error);
+    if (action_config.read("action"))
+    {
+      const auto subject = action_config["subject"];
+      const auto command = action_config["command"];
+      Action action(command);
+
+      // Does it already exist and is the same?
+      auto old_it = old_actions.find(subject);
+      if (old_it != old_actions.end())
+      {
+        if (old_it->second == action)
+        {
+          log.detail << "   - unchanged action on subject '"
+                     << subject << "'\n";
+        }
+        else
+        {
+          log.summary << "   - updated action on subject '"
+                     << subject << "'\n";
+          actions[subject] = action;  // Use copy constructor, leave subscriber
+        }
+
+        // Remove so we don't delete
+        old_actions.erase(old_it);
+      }
+      else
+      {
+        log.summary << "   - new action on subject '" << subject << "'\n";
+        actions[subject] = action;
+        if (mesh) actions[subject].subscribe(*mesh, subject);
+      }
+    }
+    else log.error << "Can't read action file " << path << "\n";
+  }
+
+  // Remove any remaining dead actions
+  for(const auto it: old_actions)
+  {
+    log.summary << "Removing dead action on subject '" << it.first << "'\n";
+    auto ait = actions.find(it.first);
+    if (ait != actions.end())
+    {
+      ait->second.unsubscribe();
+      actions.erase(ait);
+    }
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -101,6 +178,12 @@ void Server::cleanup()
   Log::Streams log;
 
   log.summary << "Shutting down...\n";
+
+  // Unsubscribe any remaining actions
+  MT::RWWriteLock lock(actions_mutex);
+  for(auto it: actions) it.second.unsubscribe();
+
+  // Shut down mesh
   if (mesh) delete mesh;
   mesh = 0;
 }

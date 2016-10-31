@@ -13,13 +13,67 @@
 #include "ot-time.h"
 #include "ot-web.h"
 #include "ot-init.h"
-#include "ot-xmlmesh-client-otmp.h"
+#include "ot-xmlmesh-client.h"
 
 namespace ObTools { namespace XMLMesh {
 
 // Make our lives easier without polluting anyone else
 using namespace std;
 using namespace ObTools;
+
+//==========================================================================
+// A listener action - mapping from subject pattern to a command to run
+class Action
+{
+  string command;  // Command to run, with expansion $SUBJECT
+
+  // Subscriber class
+  class Subscriber: public XMLMesh::Subscriber
+  {
+    Action& action;
+
+    // Implementation of subscriber message handling
+    void handle(XMLMesh::Message& msg) { action.handle(msg); }
+
+  public:
+    Subscriber(XMLMesh::MultiClient& mesh,
+               const string& subject,
+               Action& _action):
+      XMLMesh::Subscriber(mesh, subject), action(_action) {}
+  };
+
+  // Note - explicitly managed because we live in a map and we can't have it
+  // being unsubscribed just because the map wants to do some shuffling
+  Subscriber *subscriber{nullptr};
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  Action() {}
+  Action(const string& _command):
+    command(_command) {}
+
+  //------------------------------------------------------------------------
+  // Copy constructor - leave subscriber in place
+  Action(const Action& o) { command = o.command; }
+
+  //------------------------------------------------------------------------
+  // Comparator
+  bool operator==(const Action& o) { return o.command == command; }
+
+
+  //------------------------------------------------------------------------
+  // Handle a message
+  void handle(const XMLMesh::Message& msg);
+
+  //------------------------------------------------------------------------
+  // Subscribe to the given subject
+  void subscribe(XMLMesh::MultiClient& mesh, const string& subject);
+
+  //------------------------------------------------------------------------
+  // Unsubscribe
+  void unsubscribe();
+};
 
 //==========================================================================
 // Global state
@@ -30,9 +84,13 @@ class Server: public Daemon::Application
   // Configuration read from file
   XML::Element config_xml;
 
+  // List of current actions, by subject
+  MT::RWMutex actions_mutex;
+  map<string, Action> actions;
+
  public:
   // Mesh interface
-  XMLMesh::OTMPMultiClient *mesh;
+  XMLMesh::MultiClient *mesh;
 
   //------------------------------------------------------------------------
   // Constructor
