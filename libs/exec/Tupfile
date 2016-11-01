@@ -6,6 +6,6 @@
 
 NAME    = ot-exec
 TYPE    = lib
-DEPENDS = ot-log
+DEPENDS = ot-log ot-text
 
 include_rules

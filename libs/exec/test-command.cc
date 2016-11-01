@@ -14,11 +14,33 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::Exec;
 
-TEST(Command, TestNothing)
+TEST(Command, TestFailureOnBadCommand)
 {
-
+  Command cmd("this-will-fail");
+  ASSERT_FALSE(cmd.execute());
 }
 
+TEST(Command, TestOKOnSimpleGoodCommand)
+{
+  Command cmd("/bin/date");
+  ASSERT_TRUE(cmd.execute());
+}
+
+TEST(Command, TestOutputFromCommandWithArguments)
+{
+  Command cmd("/bin/echo Hello, world!");
+  string output;
+  ASSERT_TRUE(cmd.execute(output));
+  ASSERT_EQ("Hello, world!\n", output);
+}
+
+TEST(Command, TestInputToCommand)
+{
+  Command cmd("/bin/cat");
+  string output;
+  ASSERT_TRUE(cmd.execute("Hello, world!", output));
+  ASSERT_EQ("Hello, world!", output);
+}
 
 int main(int argc, char **argv)
 {

@@ -20,7 +20,36 @@ namespace ObTools { namespace Exec {
 using namespace std;
 
 //==========================================================================
-//
+// Command to be executed
+class Command
+{
+  vector<string> args;  // [0] is the command path
+
+ public:
+  //------------------------------------------------------------------------
+  // Constructor from a single command - splits arguments
+  Command(const string& command_with_args);
+
+  //------------------------------------------------------------------------
+  // Constructor from already split arguments - args[0] is the executable
+  Command(const vector<string>& _args): args(_args) {}
+
+  //--------------------------------------------------------------------------
+  // Execute a command, passing the given input as stdin and capturing stdout
+  // as output_p.  stderr is captured to Log::Error
+  // Returns whether the command ran OK
+  bool execute(const string& input, string& output_p);
+
+  //--------------------------------------------------------------------------
+  // As above, but ignoring input
+  bool execute(string& output_p)
+  { return execute("", output_p); }
+
+  //--------------------------------------------------------------------------
+  // As above, but no input or output
+  bool execute()
+  { string output; return execute("", output); }
+};
 
 //==========================================================================
 }} // namespaces
