@@ -18,7 +18,7 @@ namespace ObTools { namespace XMLMesh {
 //--------------------------------------------------------------------------
 // Send a message - can block if the queue is full
 // Whether message queued
-bool Client::send(Message& msg)
+bool Client::send(const Message& msg)
 {
   string data = msg.get_text();  // Convert to <message> string
   return transport.send(data);
@@ -74,7 +74,7 @@ bool Client::wait(Message& msg)
 //--------------------------------------------------------------------------
 // Return OK to request given
 // Returns whether successul
-bool Client::respond(Message& request)
+bool Client::respond(const Message& request)
 {
   OKMessage okm(request.get_id());
   return send(okm);
@@ -85,7 +85,7 @@ bool Client::respond(Message& request)
 // Returns whether successul
 bool Client::respond(SOAP::Fault::Code code,
                      const string& reason,
-                     Message& request)
+                     const Message& request)
 {
   FaultMessage errm(request.get_id(), code, reason);
   return send(errm);
@@ -94,7 +94,7 @@ bool Client::respond(SOAP::Fault::Code code,
 //--------------------------------------------------------------------------
 // Send a message and get a response (blocking)
 // Returns whether successful, fills in response if so
-bool Client::request(Message& req, Message& response)
+bool Client::request(const Message& req, Message& response)
 {
   // Send message
   if (!send(req))
@@ -149,7 +149,7 @@ bool Client::request(Message& req, Message& response)
 //--------------------------------------------------------------------------
 // Send a message and confirm receipt or error
 // Returns whether successful.  Handles errors itself
-bool Client::request(Message& req)
+bool Client::request(const Message& req)
 {
   Message response;
   if (!request(req, response)) return false;

@@ -76,7 +76,7 @@ public:
   //------------------------------------------------------------------------
   // Send a message - can block if queue full
   // Whether message queued
-  bool send(Message& msg);
+  bool send(const Message& msg);
 
   //------------------------------------------------------------------------
   // Receive a message - never blocks, returns whether one was received
@@ -93,24 +93,24 @@ public:
   //------------------------------------------------------------------------
   // Return OK to request given
   // Returns whether successul
-  bool respond(Message& request);
+  bool respond(const Message& request);
 
   //------------------------------------------------------------------------
   // Return an error to request given
   // Returns whether successul
   bool respond(SOAP::Fault::Code code,
                const string& reason,
-               Message& request);
+               const Message& request);
 
   //------------------------------------------------------------------------
   // Send a message and get a response (blocking)
   // Returns whether successful, fills in response if so
-  bool request(Message& req, Message& response);
+  bool request(const Message& req, Message& response);
 
   //------------------------------------------------------------------------
   // Send a message and confirm receipt or error
   // Returns whether successful.  Handles errors itself
-  bool request(Message& req);
+  bool request(const Message& req);
 
   //------------------------------------------------------------------------
   // Subscribe for messages of a given subject - expressed as a pattern match
@@ -266,29 +266,29 @@ public:
   //------------------------------------------------------------------------
   // Send a message - can block if queue is full
   // Whether message queued
-  bool send(Message& msg);
+  bool send(const Message& msg);
 
   //------------------------------------------------------------------------
   // Return OK to request given
   // Returns whether successul
-  bool respond(Message& request);
+  bool respond(const Message& request);
 
   //------------------------------------------------------------------------
   // Return an error to request given
   // Returns whether successul
   bool respond(SOAP::Fault::Code code,
                const string& reason,
-               Message& request);
+               const Message& request);
 
   //------------------------------------------------------------------------
   // Send a message and get a response (blocking)
   // Returns whether successful, fills in response if so
-  bool request(Message& req, Message& response);
+  bool request(const Message& req, Message& response);
 
   //------------------------------------------------------------------------
   // Send a message and confirm receipt or error
   // Returns whether successful.  Handles errors itself
-  bool request(Message& req);
+  bool request(const Message& req);
 
   //------------------------------------------------------------------------
   // Register a subscriber functor

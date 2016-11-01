@@ -287,7 +287,7 @@ void MultiClient::start()
 //--------------------------------------------------------------------------
 // Send a message - never blocks, but can fail if the queue is full
 // Whether message queued
-bool MultiClient::send(Message& msg)
+bool MultiClient::send(const Message& msg)
 {
   string data = msg.get_text();  // Convert to <message> string
   return transport.send(data);
@@ -296,7 +296,7 @@ bool MultiClient::send(Message& msg)
 //--------------------------------------------------------------------------
 // Return OK to request given
 // Returns whether successul
-bool MultiClient::respond(Message& request)
+bool MultiClient::respond(const Message& request)
 {
   OKMessage okm(request.get_id());
   return send(okm);
@@ -307,7 +307,7 @@ bool MultiClient::respond(Message& request)
 // Returns whether successul
 bool MultiClient::respond(SOAP::Fault::Code code,
                           const string& reason,
-                          Message& request)
+                          const Message& request)
 {
   FaultMessage errm(request.get_id(), code, reason);
   return send(errm);
@@ -316,7 +316,7 @@ bool MultiClient::respond(SOAP::Fault::Code code,
 //--------------------------------------------------------------------------
 // Send a message and get a response (blocking)
 // Returns whether successful, fills in response if so
-bool MultiClient::request(Message& req, Message& response)
+bool MultiClient::request(const Message& req, Message& response)
 {
   // Create a client request
   MultiClientRequest mcr(&response);
@@ -365,7 +365,7 @@ bool MultiClient::request(Message& req, Message& response)
 //--------------------------------------------------------------------------
 // Send a message and confirm receipt or error
 // Returns whether successful.  Handles errors itself
-bool MultiClient::request(Message& req)
+bool MultiClient::request(const Message& req)
 {
   Message response;
   if (!request(req, response)) return false;
