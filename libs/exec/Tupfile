@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Exec library
+#
+# Copyright (c) 2016 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-exec
+TYPE    = lib
+DEPENDS = ot-log
+
+include_rules
