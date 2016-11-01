@@ -458,7 +458,7 @@ public:
 
   //------------------------------------------------------------------------
   // Is valid
-  operator bool() const
+  operator bool() const override
   {
     return *statement;
   }
@@ -577,7 +577,7 @@ public:
 
   //------------------------------------------------------------------------
   // Is valid
-  operator bool() const
+  operator bool() const override
   {
     return statement && *statement;
   }
