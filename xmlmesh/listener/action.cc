@@ -8,6 +8,7 @@
 
 #include "listener.h"
 #include "ot-log.h"
+#include "ot-exec.h"
 
 namespace ObTools { namespace XMLMesh {
 
@@ -30,8 +31,44 @@ void Action::unsubscribe()
 // Handle a message
 void Action::handle(const XMLMesh::Message& msg)
 {
-  Log::Summary log;
-  log << "Received XMLMesh message " << msg.get_subject() << endl;
+  Log::Streams log;
+  string subject = msg.get_subject();
+  log.detail << "Received XMLMesh message " << subject << endl;
+
+  // Substitute the subject in the command
+  string expanded_command = Text::subst(command, "$SUBJECT", subject);
+
+  // Run the command
+  Exec::Command cmd(expanded_command);
+  string output;
+  if (!cmd.execute(msg.get_body().to_string(), output))
+  {
+    log.error << "Failed to run command '" << command << "' for message "
+              << subject << endl;
+
+    if (msg.get_rsvp())
+      subscriber->get_mesh().respond(SOAP::Fault::CODE_RECEIVER,
+                                     "Command failed", msg);
+    return;
+  }
+
+  if (msg.get_rsvp())
+  {
+    if (output.empty())
+    {
+      // Just send OK
+      subscriber->get_mesh().respond(msg);
+    }
+    else
+    {
+      // Construct response subject by replacing .request (if any)
+      // with .response, or just appending it
+      string response_subject = Text::subst(subject, ".request", "");
+      response_subject += ".response";
+      XMLMesh::Message response(response_subject, output, false, msg.get_id());
+      subscriber->get_mesh().send(response);
+    }
+  }
 }
 
 

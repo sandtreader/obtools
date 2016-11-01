@@ -40,6 +40,8 @@ class Action
                const string& subject,
                Action& _action):
       XMLMesh::Subscriber(mesh, subject), action(_action) {}
+
+    XMLMesh::MultiClient& get_mesh() { return client; }
   };
 
   // Note - explicitly managed because we live in a map and we can't have it
@@ -54,8 +56,8 @@ public:
     command(_command) {}
 
   //------------------------------------------------------------------------
-  // Copy constructor - leave subscriber in place
-  Action(const Action& o) { command = o.command; }
+  // Explicit update from a new action, leaving subscriber in place
+  void update(const Action& o) { command = o.command; }
 
   //------------------------------------------------------------------------
   // Comparator

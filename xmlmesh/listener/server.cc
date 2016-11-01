@@ -135,7 +135,7 @@ void Server::reconfigure()
         {
           log.summary << "   - updated action on subject '"
                      << subject << "'\n";
-          actions[subject] = action;  // Use copy constructor, leave subscriber
+          actions[subject].update(action);
         }
 
         // Remove so we don't delete
