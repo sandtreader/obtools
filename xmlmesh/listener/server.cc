@@ -181,11 +181,13 @@ void Server::cleanup()
 
   // Unsubscribe any remaining actions
   MT::RWWriteLock lock(actions_mutex);
-  for(auto it: actions) it.second.unsubscribe();
+  for(auto& it: actions) it.second.unsubscribe();
 
   // Shut down mesh
   if (mesh) delete mesh;
   mesh = 0;
+
+  log.summary << "Shutdown complete\n";
 }
 
 }} // namespaces

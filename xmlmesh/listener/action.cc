@@ -22,14 +22,7 @@ void Action::subscribe(XMLMesh::MultiClient& mesh, const string& subject)
 // Unsubscribe
 void Action::unsubscribe()
 {
-  Log::Summary log;
-  log << "Disconnecting " << command << endl;
-
-  if (subscriber)
-  {
-    subscriber->disconnect();
-    log << "Done\n";
-  }
+  if (subscriber) subscriber->disconnect();
   subscriber = 0;
 }
 

@@ -61,7 +61,6 @@ public:
   // Comparator
   bool operator==(const Action& o) { return o.command == command; }
 
-
   //------------------------------------------------------------------------
   // Handle a message
   void handle(const XMLMesh::Message& msg);
