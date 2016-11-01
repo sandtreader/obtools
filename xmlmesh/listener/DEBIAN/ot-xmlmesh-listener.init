@@ -15,20 +15,26 @@ test -f /usr/sbin/ot-xmlmesh-listener || exit 0
 case "$1" in
 start)	echo -n "Starting ObTools XMLMesh listener daemon: ot-xmlmesh-listener"
         start-stop-daemon --start --quiet --pidfile /var/run/ot-xmlmesh-listener.pid --name ot-xmlmesh-listener --startas /usr/sbin/ot-xmlmesh-listener
-        echo "." 
+        echo "."
 	;;
 stop)	echo -n "Stopping ObTools XMLMesh listener daemon: ot-xmlmesh-listener"
-        start-stop-daemon --stop --retry 5 --oknodo --quiet --pidfile /var/run/ot-xmlmesh-listener.pid --name ot-xmlmesh-listener 
+        start-stop-daemon --stop --retry 5 --oknodo --quiet --pidfile /var/run/ot-xmlmesh-listener.pid --name ot-xmlmesh-listener
         echo "."
         ;;
-restart|force-reload) echo -n "Restarting ObTools XMLMesh listener daemon: ot-xmlmesh-listener"
+reload|force-reload)
+        echo -n "Reloading ObTools XMLMesh listener daemon configuration"
+        start-stop-daemon --stop --signal 1 --quiet --pidfile /var/run/ot-xmlmesh-listener.pid --name ot-xmlmesh-listener
+        echo "."
+        ;;
+
+restart) echo -n "Restarting ObTools XMLMesh listener daemon: ot-xmlmesh-listener"
         start-stop-daemon --stop --retry 5 --oknodo --quiet --pidfile /var/run/ot-xmlmesh-listener.pid --name ot-xmlmesh-listener
 	sleep 2
         start-stop-daemon --start --quiet --pidfile /var/run/ot-xmlmesh-listener.pid --name ot-xmlmesh-listener --startas /usr/sbin/ot-xmlmesh-listener
         echo "."
         ;;
-*)	echo "Usage: /etc/init.d/ot-xmlmesh-listener start|stop|restart|force-reload"
-        exit 1 
+*)	echo "Usage: /etc/init.d/ot-xmlmesh-listener start|stop|restart|reload|force-reload"
+        exit 1
         ;;
 esac
 exit 0
