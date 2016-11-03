@@ -15,6 +15,9 @@
 #ifndef __OBTOOLS_RING_H
 #define __OBTOOLS_RING_H
 
+#include <atomic>
+#include <vector>
+
 namespace ObTools { namespace Ring {
 
 // Make our lives easier without polluting anyone else
@@ -29,10 +32,9 @@ using namespace std;
 template<class ITEM_T> class Buffer
 {
 private:
-  ITEM_T *items;            // Fixed-size, preallocated array
-  int length;               // Size of array
-  int in_index;             // Index of next item to be written
-  int out_index;            // Index of next item to be read
+  vector<ITEM_T> items;           // Fixed array of items
+  atomic<unsigned> in_index{0};   // Index of next item to be written
+  atomic<unsigned> out_index{0};  // Index of next item to be read
 
   // Note: in_index == out_index => queue empty
   //       in_index == out_index-1 (mod length) => queue full
@@ -41,19 +43,18 @@ private:
 
   //------------------------------------------------------------------------
   // Modular increment - increments the value given, mod length
-  int inc(int n) { return (++n>=length)?0:n; }
+  unsigned inc(unsigned n) { return (++n>=items.size())?0:n; }
 
 public:
   //------------------------------------------------------------------------
   // Constructor
-  Buffer(int _length): items(new ITEM_T[_length+1]), length(_length+1),
-    in_index(0), out_index(0) {}
+  Buffer(int length): items(length+1) {}
 
   //------------------------------------------------------------------------
   // Write an item - returns whether successfully written (buffer wasn't full)
   bool put(const ITEM_T& item)
   {
-    int next_in_index = inc(in_index);
+    unsigned next_in_index = inc(in_index);
     if (next_in_index == out_index) return false;
     items[in_index] = item;
     in_index = next_in_index;
@@ -85,20 +86,13 @@ public:
 
   //------------------------------------------------------------------------
   // Get array size
-  int size() const { return length-1; }
+  unsigned size() const { return items.size()-1; }
 
   //------------------------------------------------------------------------
   // Get number of items used
-  int used() const { return out_index<=in_index?
-                              in_index-out_index:
-                              in_index+length-out_index; }
-
-  //------------------------------------------------------------------------
-  // Destructor
-  ~Buffer()
-  {
-    delete[] items;
-  }
+  unsigned used() const { return out_index<=in_index?
+                                    in_index-out_index:
+                                    in_index+items.size()-out_index; }
 };
 
 //==========================================================================

@@ -13,6 +13,12 @@
 using namespace std;
 using namespace ObTools;
 
+TEST(RingBuffer, TestRingBufferSize)
+{
+  Ring::Buffer<int> buffer(10);
+  ASSERT_EQ(10, buffer.size());
+}
+
 TEST(RingBuffer, TestEmptyRingBufferHasZeroUsed)
 {
   Ring::Buffer<int> buffer(10);
