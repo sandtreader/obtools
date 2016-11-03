@@ -18,6 +18,12 @@ ifdef DEBUG
   CFLAGS += -ggdb3 -DDEBUG
 endif
 
+# Thread safety settings
+ifdef DEBUGTHREAD
+  CFLAGS += -ggdb3 -O2 -fsanitize=thread
+  LFLAGS += -fsanitize=thread
+endif
+
 # Profiling settings
 ifdef PROFILE
   CFLAGS += -ggdb3 -O2
