@@ -78,11 +78,11 @@ public:
 
   //------------------------------------------------------------------------
   // Flush the queue, called from putter side
-  void flush_from_put() { in_index = out_index; }
+  void flush_from_put() { in_index = out_index.load(); }
 
   //------------------------------------------------------------------------
   // Flush the queue, called from getter side
-  void flush_from_get() { out_index = in_index; }
+  void flush_from_get() { out_index = in_index.load(); }
 
   //------------------------------------------------------------------------
   // Get array size
