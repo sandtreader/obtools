@@ -738,7 +738,7 @@ public:
 class Task
 {
 private:
-  bool running;
+  Condition running;
 
 public:
   //------------------------------------------------------------------------
@@ -761,12 +761,20 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Sleep for a given period, or until thread told to stop
+  template< class Rep, class Period >
+    void sleep_for(const std::chrono::duration<Rep,Period>& time)
+  {
+    running.wait_for(time, false);
+  }
+
+  //------------------------------------------------------------------------
   // Virtual shutdown method
   // Override if anything special is needed to unblock something in the run()
   // method (e.g. closing a socket to unblock a recv)
   virtual void shutdown()
   {
-    running = false;
+    running.signal(false);
   }
 
   //------------------------------------------------------------------------
