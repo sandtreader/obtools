@@ -127,7 +127,7 @@ protected:
   //------------------------------------------------------------------------
   // Test if running
   bool is_running() const
-  { return mythread && running; }
+  { return running; }
 
   //------------------------------------------------------------------------
   // Sleep for a given period, or until thread told to stop

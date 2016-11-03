@@ -129,7 +129,7 @@ TEST(ThreadTest, TestWaitForJoinOnDestruct)
   auto waited = false;
   {
     TestThread t{waited};
-    this_thread::sleep_for(chrono::milliseconds(10));
+    this_thread::sleep_for(chrono::milliseconds(20));
   }
   EXPECT_TRUE(waited);
 }
