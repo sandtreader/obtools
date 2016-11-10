@@ -8,47 +8,36 @@
 //==========================================================================
 
 #include "ot-log.h"
-#include "ot-text.h"
 
 namespace ObTools { namespace Log {
 
 //--------------------------------------------------------------------------
-// Connect a channel
-void Distributor::connect(Channel& chan)
+// Connect a channel (takes ownership)
+void Distributor::connect(Channel *channel)
 {
-#if !defined(_SINGLE)
   MT::Lock lock(mutex);
-#endif
-
-  channels.push_back(&chan);
+  channels.emplace_back(channel);
 }
 
 //--------------------------------------------------------------------------
-// Disconnect the given channel
-void Distributor::disconnect(Channel& chan)
+// Connect channel with timestamp and level logging (takes ownership)
+void Distributor::connect_full(Channel *channel, Level level,
+                               const string& time_format)
 {
-#if !defined(_SINGLE)
-  MT::Lock lock(mutex);
-#endif
-
-  channels.remove(&chan);
+  auto fc = new FilteredChannel{channel};
+  fc->append_filter(new LevelFilter{level});
+  fc->append_filter(new TimestampFilter{time_format});
+  connect(fc);
 }
 
 //--------------------------------------------------------------------------
 // Log a message
 void Distributor::log(Message& msg)
 {
-#if !defined(_SINGLE)
   MT::Lock lock(mutex);
-#endif
-
   // Send to all channels
-  list<Channel *>::iterator p;
-  for(p=channels.begin(); p!=channels.end(); p++)
-    (*p)->log(msg);
+  for (auto& channel: channels)
+    channel->log(msg);
 }
 
 }} // namespaces
-
-
-

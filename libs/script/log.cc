@@ -17,13 +17,14 @@ namespace ObTools { namespace Script {
 // Run action
 bool LogAction::run(Context& con)
 {
-  int level = xml.get_attr_int("level", Log::LEVEL_SUMMARY);
+  auto level = static_cast<Log::Level>(
+      xml.get_attr_int("level", static_cast<int>(Log::Level::summary)));
   string text = xml.get_content();
 
   // Interpolate with context vars
   text = con.vars.interpolate(text);
 
-  Log::Message msg(static_cast<Log::Level>(level), text);
+  Log::Message msg(level, text);
   Log::logger.log(msg);
 
   return true;

@@ -24,15 +24,29 @@ using namespace std;
 
 //==========================================================================
 // Standard log levels
-enum Level
+enum class Level
 {
-  LEVEL_NONE    = 0,   // Nothing at all (nothing should log at this level)
-  LEVEL_ERROR   = 1,   // Errors the operator should know about
-  LEVEL_SUMMARY = 2,   // Summary of things happening
-  LEVEL_DETAIL  = 3,   // Detail of things happening
-  LEVEL_DEBUG   = 4,   // Debugging
-  LEVEL_DUMP    = 5    // Gory detail (packet dumps etc.)
+  none    = 0,   // Nothing at all (nothing should log at this level)
+  error   = 1,   // Errors the operator should know about
+  summary = 2,   // Summary of things happening
+  detail  = 3,   // Detail of things happening
+  debug   = 4,   // Debugging
+  dump    = 5    // Gory detail (packet dumps etc.)
 };
+
+inline Level& operator++(Level& level)
+{
+  if (level != Level::dump)
+    level = static_cast<Level>(static_cast<int>(level) + 1);
+  return level;
+}
+
+inline Level& operator--(Level& level)
+{
+  if (level != Level::none)
+    level = static_cast<Level>(static_cast<int>(level) - 1);
+  return level;
+}
 
 // Parallel macros for use in preprocessor
 #define OBTOOLS_LOG_LEVEL_NONE    0
@@ -77,12 +91,6 @@ public:
 class Channel
 {
 public:
-  MT::Mutex mutex;  // Assume multi-threaded use
-
-  //------------------------------------------------------------------------
-  // Constructor
-  Channel() {}
-
   //------------------------------------------------------------------------
   // Abstract virtual logging function
   virtual void log(Message& msg) = 0;
@@ -93,19 +101,48 @@ public:
 };
 
 //==========================================================================
-// Abtract Filter channel
-// Does something to the message and passes it on, or drops it
-class Filter: public Channel
+// Abstract Filter
+// Modifies, drops or passes message
+class Filter
 {
-protected:
-  Channel& next;
-
 public:
-  Filter(Channel& _next): next(_next) {}
+  //------------------------------------------------------------------------
+  // Pass a message - returns true if message should be passed on
+  virtual bool pass(Message& msg) = 0;
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  virtual ~Filter() {}
 };
 
 //==========================================================================
-// LevelFilter channel
+// Abtract Filter channel
+// Does something to the message and passes it on, or drops it
+class FilteredChannel: public Channel
+{
+protected:
+  list<unique_ptr<Filter>> filters;
+  unique_ptr<Channel> output;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor (takes ownership of output channel)
+  FilteredChannel(Channel *_output): output{_output} {}
+
+  //------------------------------------------------------------------------
+  // Add a filter (takes ownership of filter)
+  void append_filter(Filter *filter)
+  {
+    filters.emplace_back(filter);
+  }
+
+  //------------------------------------------------------------------------
+  // Log message
+  void log(Message& msg) override;
+};
+
+//==========================================================================
+// LevelFilter
 // Filters messages by maximum log level
 class LevelFilter: public Filter
 {
@@ -113,13 +150,20 @@ private:
   Level level;
 
 public:
-  LevelFilter(Level _l, Channel& _next): Filter(_next), level(_l) {}
+  //------------------------------------------------------------------------
+  // Constructor
+  LevelFilter(Level _level): level{_level} {}
 
-  void log(Message& msg);
+  //------------------------------------------------------------------------
+  // Pass a message - returns true if message should be passed on
+  bool pass(Message& msg) override
+  {
+    return msg.level <= level;
+  }
 };
 
 //==========================================================================
-// PatternFilter channel
+// PatternFilter
 // Filters messages by a pattern applies to the text
 class PatternFilter: public Filter
 {
@@ -127,15 +171,17 @@ private:
   string pattern;
 
 public:
+  //------------------------------------------------------------------------
   // Constructor takes Text::pattern_match (glob) format
-  PatternFilter(const string& _p, Channel& _next):
-    Filter(_next), pattern(_p) {}
+  PatternFilter(const string& _pattern): pattern{_pattern} {}
 
-  void log(Message& msg);
+  //------------------------------------------------------------------------
+  // Pass a message - returns true if message should be passed on
+  bool pass(Message& msg) override;
 };
 
 //==========================================================================
-// TimestampFilter channel
+// TimestampFilter
 // Adds timestamps to the front of each message
 // Accepts strftime format, plus the following extensions:
 //   %*L:   The log level as a single digit
@@ -146,11 +192,13 @@ private:
   string format;
 
 public:
+  //------------------------------------------------------------------------
   // Constructor takes strftime format
-  TimestampFilter(const string& _format, Channel& _next):
-    Filter(_next), format(_format) {}
+  TimestampFilter(const string& _format): format{_format} {}
 
-  void log(Message& msg);
+  //------------------------------------------------------------------------
+  // Pass a message - returns true if message should be passed on
+  bool pass(Message& msg) override;
 };
 
 //==========================================================================
@@ -158,16 +206,53 @@ public:
 class StreamChannel: public Channel
 {
 private:
-  ostream& stream;
+  ostream *stream;
 
 public:
   //------------------------------------------------------------------------
   // Constructor
-  StreamChannel(ostream& s): stream(s) {}
+  StreamChannel(ostream *s): stream(s) {}
 
   //------------------------------------------------------------------------
   // Logging function
   void log(Message& msg);
+};
+
+//==========================================================================
+// Channel to standard iostream
+class OwnedStreamChannel: public Channel
+{
+private:
+  unique_ptr<ostream> stream;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor (takes ownership of stream)
+  OwnedStreamChannel(ostream *s): stream(s) {}
+
+  //------------------------------------------------------------------------
+  // Logging function
+  void log(Message& msg);
+};
+
+//==========================================================================
+// Channel to reference of another Channel
+class ReferencedChannel: public Channel
+{
+private:
+  Channel& channel;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  ReferencedChannel(Channel& _channel): channel(_channel) {}
+
+  //------------------------------------------------------------------------
+  // Logging function
+  void log(Message& msg)
+  {
+    channel.log(msg);
+  }
 };
 
 //==========================================================================
@@ -176,24 +261,21 @@ public:
 class Distributor: public Channel
 {
 private:
-  list<Channel *> channels;
+  MT::Mutex mutex;
+  list<unique_ptr<Channel>> channels;
 
 public:
   //------------------------------------------------------------------------
-  // Constructor
-  Distributor() {}
+  // Connect a channel (takes ownership)
+  void connect(Channel *channel);
 
   //------------------------------------------------------------------------
-  // Connect a channel
-  void connect(Channel& chan);
-
-  //------------------------------------------------------------------------
-  // Disconnect the given channel
-  void disconnect(Channel& chan);
+  // Connect a channel with timestamp and level logging (takes ownership)
+  void connect_full(Channel *channel, Level level, const string& time_format);
 
   //------------------------------------------------------------------------
   // Log a message
-  void log(Message& msg);
+  void log(Message& msg) override;
 };
 
 //==========================================================================
@@ -277,26 +359,26 @@ extern Distributor logger;
 class Error: public Stream
 {
 public:
-  Error(): Stream(logger, LEVEL_ERROR) {}
+  Error(): Stream(logger, Level::error) {}
 };
 
 class Summary: public Stream
 {
 public:
-  Summary(): Stream(logger, LEVEL_SUMMARY) {}
+  Summary(): Stream(logger, Level::summary) {}
 };
 
 class Detail: public Stream
 {
 public:
-  Detail(): Stream(logger, LEVEL_DETAIL) {}
+  Detail(): Stream(logger, Level::detail) {}
 };
 
 #if OBTOOLS_LOG_DEBUG
 class Debug: public Stream
 {
 public:
-  Debug(): Stream(logger, LEVEL_DEBUG) {}
+  Debug(): Stream(logger, Level::debug) {}
 };
 #endif
 
@@ -304,7 +386,7 @@ public:
 class Dump: public Stream
 {
 public:
-  Dump(): Stream(logger, LEVEL_DUMP) {}
+  Dump(): Stream(logger, Level::dump) {}
 };
 #endif
 
@@ -332,6 +414,3 @@ struct Streams
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_LOG_H
-
-
-

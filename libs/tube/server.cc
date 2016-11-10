@@ -81,7 +81,7 @@ bool Server::verify(Net::EndPoint ep) const
       p++)
     if (*p == ep.host) return true;
 
-  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  Log::Stream error_log(Log::logger, Log::Level::error);
   error_log << name << ": Rejected connection from " << ep << endl;
   return false;
 }

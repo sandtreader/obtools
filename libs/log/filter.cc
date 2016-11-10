@@ -14,35 +14,33 @@
 namespace ObTools { namespace Log {
 
 //==========================================================================
-// LevelFilter
-
-void LevelFilter::log(Message& msg)
+// Filtered Channel
+void FilteredChannel::log(Message& msg)
 {
-  if (msg.level <= level)
-    next.log(msg);
+  for (auto& filter: filters)
+  {
+    if (!filter->pass(msg))
+      return;
+  }
+  output->log(msg);
 }
 
 //==========================================================================
-// PatternFilter
-
-void PatternFilter::log(Message& msg)
+// Pattern filter
+bool PatternFilter::pass(Message& msg)
 {
-  if (Text::pattern_match(pattern, msg.text))
-    next.log(msg);
+  return Text::pattern_match(pattern, msg.text);
 }
 
 //==========================================================================
 // Timestamp filter
 
-void TimestampFilter::log(Message& msg)
+bool TimestampFilter::pass(Message& msg)
 {
-#if !defined(_SINGLE)
-  MT::Lock lock(mutex);    // localtime is dubiously thread-safe
-#endif
-
   // Process the string for our extensions first
   // ! If there are any more of these, do it more efficiently!
-  string tmp_format = Text::subst(format, "%*L", Text::itos(msg.level));
+  string tmp_format = Text::subst(format, "%*L",
+                                  Text::itos(static_cast<int>(msg.level)));
   double seconds = msg.timestamp.seconds();
 
   // Floor to nearest millisecond to prevent 60th second ever happening
@@ -65,10 +63,7 @@ void TimestampFilter::log(Message& msg)
   nmsg += msg.text;
   msg.text = nmsg;
 
-  next.log(msg);
+  return true;
 }
 
 }} // namespaces
-
-
-

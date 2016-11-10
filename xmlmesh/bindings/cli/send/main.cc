@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   bool soap_response = false;
   string host("localhost");
   int port = XMLMesh::OTMP::DEFAULT_PORT;
-  Log::Level log_level = Log::LEVEL_ERROR;
+  Log::Level log_level = Log::Level::error;
 
   // Parse options
   for(int i=1; i<argc; i++)
@@ -74,11 +74,11 @@ int main(int argc, char **argv)
         soap_response = true;
       else if (opt == "-v" || opt == "--verbose")
       {
-        log_level = Log::LEVEL_DETAIL;
-        OBTOOLS_LOG_IF_DEBUG(log_level = Log::LEVEL_DEBUG;)
+        log_level = Log::Level::detail;
+        OBTOOLS_LOG_IF_DEBUG(log_level = Log::Level::debug;)
       }
       else if (opt == "-q" || opt == "--quiet")
-        log_level = Log::LEVEL_NONE;
+        log_level = Log::Level::none;
       else if ((opt == "-h" || opt == "--host") && i<argc-2)
         host = argv[++i];
       else if ((opt == "-p" || opt == "--port") && i<argc-2)
@@ -107,9 +107,10 @@ int main(int argc, char **argv)
   }
 
   // Set up logging
-  Log::StreamChannel   chan_out(cout);
-  Log::LevelFilter     level_out(log_level, chan_out);
-  Log::logger.connect(level_out);
+  auto chan_out = new Log::StreamChannel{&cout};
+  auto filtered_out = new Log::FilteredChannel{chan_out};
+  filtered_out->append_filter(new Log::LevelFilter{log_level});
+  Log::logger.connect(filtered_out);
   Log::Streams log;
 
   // Resolve name

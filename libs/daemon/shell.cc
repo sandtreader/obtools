@@ -113,24 +113,28 @@ int Shell::start(int argc, char **argv)
 #endif
 
   // Create log stream if daemon
-  ostream *sout = &cout;
+  auto chan_out = static_cast<Log::Channel *>(nullptr);
   if (go_daemon)
   {
     string logfile = config.get_value("log/@file", default_log_file);
-    sout = new ofstream(logfile.c_str(), ios::app);
+    auto sout = new ofstream(logfile.c_str(), ios::app);
     if (!*sout)
     {
       cerr << argv[0] << ": Unable to open logfile " << logfile << endl;
       return 2;
     }
+    chan_out = new Log::OwnedStreamChannel{sout};
+  }
+  else
+  {
+    chan_out = new Log::StreamChannel{&cout};
   }
 
-  Log::StreamChannel chan_out(*sout);
-  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp",
-                                                 DEFAULT_TIMESTAMP), chan_out);
-  int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
-  Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
-  Log::logger.connect(level_out);
+  auto log_level = config.get_value_int("log/@level",
+                                        static_cast<int>(Log::Level::summary));
+  auto level_out = static_cast<Log::Level>(log_level);
+  auto time_format = config.get_value("log/@timestamp", DEFAULT_TIMESTAMP);
+  Log::logger.connect_full(chan_out, level_out, time_format);
   Log::Streams log;
   log.summary << name << " version " << version << " starting\n";
 

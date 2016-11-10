@@ -331,7 +331,7 @@ bool MultiClient::request(const Message& req, Message& response)
   // Send message
   if (!send(req))
   {
-    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    Log::Error error_log;
     error_log << "Sending request failed\n";
     MT::RLock l(mutex);
     requests.erase(id);
@@ -376,7 +376,7 @@ bool MultiClient::request(const Message& req)
 
   // Handle error
   FaultMessage errm(response);
-  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  Log::Error error_log;
   if (!errm)
   {
     error_log << "Weird response received:\n";
@@ -403,7 +403,7 @@ void MultiClient::register_subscriber(Subscriber *sub)
   // the application
   if (!transport.is_connected())
   {
-    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    Log::Error error_log;
     error_log << "XMLMesh not connected - delaying subscription for "
               << sub->subject << endl;
     return;
@@ -413,7 +413,7 @@ void MultiClient::register_subscriber(Subscriber *sub)
   SubscriptionMessage msg(SubscriptionMessage::JOIN, sub->subject);
   if (!request(msg))
   {
-    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    Log::Error error_log;
     error_log << "Unable to subscribe for " << sub->subject << endl;
   }
 }
@@ -429,7 +429,7 @@ void MultiClient::deregister_subscriber(Subscriber *sub)
   // blocked waiting for OTMP socket to recover, when we don't really care
   if (shutting_down?!send(msg):!request(msg))
   {
-    Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+    Log::Error error_log;
     error_log << "Unable to unsubscribe for " << sub->subject << endl;
   }
 

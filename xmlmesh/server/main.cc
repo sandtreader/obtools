@@ -62,21 +62,22 @@ int main(int argc, char **argv)
   // Set up logging
 #if defined(DAEMON)
   const string logfile = config.get_value("log/@file", DEFAULT_LOGFILE);
-  ofstream logstream(logfile.c_str(),ios::app);
-  if (!logstream)
+  auto logstream = new ofstream{logfile.c_str(),ios::app};
+  if (!logstream || !*logstream)
   {
     cerr << "xmlmesh-server: Unable to open logfile " << logfile << endl;
     return 2;
   }
-  Log::StreamChannel chan_out(logstream);
+  auto chan_out = new Log::OwnedStreamChannel{logstream};
 #else
-  Log::StreamChannel chan_out(cout);
+  auto chan_out = new Log::StreamChannel{&cout};
 #endif
-  Log::TimestampFilter tsfilter(config.get_value("log/@timestamp",
-                                                 DEFAULT_TIMESTAMP), chan_out);
-  const int log_level = config.get_value_int("log/@level", Log::LEVEL_SUMMARY);
-  Log::LevelFilter level_out(static_cast<Log::Level>(log_level), tsfilter);
-  Log::logger.connect(level_out);
+  const auto time_format = config.get_value("log/@timestamp",
+                                             DEFAULT_TIMESTAMP);
+  const int log_level = config.get_value_int("log/@level",
+                                      static_cast<int>(Log::Level::summary));
+  const auto level_out = static_cast<Log::Level>(log_level);
+  Log::logger.connect_full(chan_out, level_out, time_format);
   Log::Streams log;
 
 #if defined(DAEMON)

@@ -99,7 +99,7 @@ Message::Message(const string& subject, const XML::Element& xml_content,
 
   // Manufacturer our own error stream since we're used multithreaded and
   // there's nothing long-lived here to provide a full Streams structure
-  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  Log::Error error_log;
 
   // Parse content body
   XML::Parser parser(error_log);
@@ -130,7 +130,7 @@ Message::Message(const string& subject, const string& body_text,
   _add_routing_header(soap_message, subject, rsvp, ref);
 
   // Parse content body
-  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  Log::Error error_log;
   XML::Parser parser(error_log);
   try
   {
@@ -190,7 +190,7 @@ const SOAP::Message& Message::get_soap() const
 
   // Create parser with fixed namespace in case someone's being clever
   // and using another prefix
-  Log::Stream error_log(Log::logger, Log::LEVEL_ERROR);
+  Log::Error error_log;
   SOAP::Parser parser(error_log);
   parser.fix_namespace(xmlmesh_namespace, "x");
 

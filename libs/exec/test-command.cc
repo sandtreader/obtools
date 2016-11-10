@@ -44,10 +44,13 @@ TEST(Command, TestInputToCommand)
 
 int main(int argc, char **argv)
 {
-  Log::StreamChannel chan_out(cout);
-  Log::LevelFilter level_out(Log::LEVEL_DETAIL, chan_out);
   if (argc > 1 && string(argv[1]) == "-v")
+  {
+    auto chan_out = new Log::StreamChannel{&cout};
+    auto level_out = new Log::FilteredChannel{chan_out};
+    level_out->append_filter(new Log::LevelFilter{Log::Level::detail});
     Log::logger.connect(level_out);
+  }
 
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

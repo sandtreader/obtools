@@ -13,17 +13,79 @@
 using namespace std;
 using namespace ObTools;
 
-TEST(LogFilters, TestSecondsRoundedDown)
+TEST(LogFilters, TestLevelFilterDoesNotAlterMessage)
 {
-  ostringstream oss;
-  Log::StreamChannel sc(oss);
-  Log::TimestampFilter filter("%*S: ", sc);
+  auto filter = Log::LevelFilter{Log::Level::detail};
+  const auto expected = "Hello!";
+  auto msg = Log::Message{Log::Level::detail, expected};
+  filter.pass(msg);
+  ASSERT_EQ(expected, msg.text);
+}
 
-  Log::Message msg(Log::LEVEL_DETAIL, "Hello!");
-  msg.timestamp = Time::Stamp("1967-01-29 05:59:59.9997");
+TEST(LogFilters, TestLevelFilterAllowsHighEnoughMessage)
+{
+  auto filter = Log::LevelFilter{Log::Level::detail};
+  auto msg = Log::Message{Log::Level::summary, "Hello!"};
+  ASSERT_TRUE(filter.pass(msg));
+}
 
-  filter.log(msg);
-  ASSERT_EQ("59.999: Hello!\n", oss.str());
+TEST(LogFilters, TestLevelFilterDropsTooLowMessage)
+{
+  auto filter = Log::LevelFilter{Log::Level::summary};
+  auto msg = Log::Message{Log::Level::detail, "Hello!"};
+  ASSERT_FALSE(filter.pass(msg));
+}
+
+TEST(LogFilters, TestPatternFilterDoesNotAlterMessage)
+{
+  auto filter = Log::PatternFilter{"H*"};
+  const auto expected = "Hello!";
+  auto msg = Log::Message{Log::Level::detail, expected};
+  filter.pass(msg);
+  ASSERT_EQ(expected, msg.text);
+}
+
+TEST(LogFilters, TestPatternFilterAllowsMatchingMessage)
+{
+  auto filter = Log::PatternFilter{"H*"};
+  auto msg = Log::Message{Log::Level::detail, "Hello!"};
+  ASSERT_TRUE(filter.pass(msg));
+}
+
+TEST(LogFilters, TestPatternFilterDropsNonMatchingMessage)
+{
+  auto filter = Log::PatternFilter{"F*"};
+  auto msg = Log::Message{Log::Level::detail, "Hello!"};
+  ASSERT_FALSE(filter.pass(msg));
+}
+
+TEST(LogFilters, TestTimeStampFilterAddsTimestamp)
+{
+  auto filter = Log::TimestampFilter{"%H:%M:%*S %a %d %b %Y: "};
+  auto msg = Log::Message{Log::Level::detail, "Hello!"};
+  msg.timestamp = Time::Stamp{"1967-01-29 06:01:45"};
+
+  filter.pass(msg);
+  ASSERT_EQ("06:01:45.000 Sun 29 Jan 1967: Hello!", msg.text);
+}
+
+TEST(LogFilters, TestTimeStampFilterAddsLogLevelMaybeItShouldntThough)
+{
+  auto filter = Log::TimestampFilter{"[%*L]: "};
+  auto msg = Log::Message{Log::Level::detail, "Hello!"};
+
+  filter.pass(msg);
+  ASSERT_EQ("[3]: Hello!", msg.text);
+}
+
+TEST(LogFilters, TestTimeStampFilterSecondsRoundedDown)
+{
+  auto filter = Log::TimestampFilter{"%*S: "};
+  auto msg = Log::Message{Log::Level::detail, "Hello!"};
+  msg.timestamp = Time::Stamp{"1967-01-29 05:59:59.9997"};
+
+  filter.pass(msg);
+  ASSERT_EQ("59.999: Hello!", msg.text);
 }
 
 int main(int argc, char **argv)

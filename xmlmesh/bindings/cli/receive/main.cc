@@ -76,7 +76,7 @@ int main(int argc, char **argv)
   bool oneshot = false;
   string host("localhost");
   int port = XMLMesh::OTMP::DEFAULT_PORT;
-  int log_level = Log::LEVEL_SUMMARY;
+  auto log_level = Log::Level::summary;
   string logfile;
 
   // Parse options
@@ -97,9 +97,9 @@ int main(int argc, char **argv)
       else if (opt == "-s" || opt == "--soap")
         soap = true;
       else if (opt == "-v" || opt == "--verbose")
-        log_level++;
+        ++log_level;
       else if (opt == "-q" || opt == "--quiet")
-        log_level--;
+        --log_level;
       else if ((opt == "-l" || opt == "--log") && i<argc-2)
         logfile = argv[++i];
       else if (opt == "-f" || opt == "--foreground")
@@ -141,10 +141,10 @@ int main(int argc, char **argv)
   }
 
   // Set up logging
-  Log::StreamChannel *chan_out;
+  auto chan_out = static_cast<Log::Channel *>(nullptr);
   if (logfile.empty())
   {
-    chan_out = new Log::StreamChannel(cout);
+    chan_out = new Log::StreamChannel(&cout);
   }
   else
   {
@@ -154,12 +154,10 @@ int main(int argc, char **argv)
       cerr << "Unable to open logfile " << logfile << endl;
       return 2;
     }
-    chan_out = new Log::StreamChannel(*logstream);
+    chan_out = new Log::OwnedStreamChannel(logstream);
   }
 
-  Log::TimestampFilter tsfilter(DEFAULT_TIMESTAMP, *chan_out);
-  Log::LevelFilter     level_out(static_cast<Log::Level>(log_level), tsfilter);
-  Log::logger.connect(level_out);
+  Log::logger.connect_full(chan_out, log_level, DEFAULT_TIMESTAMP);
   Log::Streams log;
 
   // Resolve name
