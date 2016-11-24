@@ -1287,6 +1287,10 @@ class Transaction
 private:
   Connection *conn;
   bool committed;
+#ifdef DEBUG
+  chrono::high_resolution_clock::time_point
+    start = chrono::high_resolution_clock::now();
+#endif
 
 public:
   //------------------------------------------------------------------------
