@@ -71,7 +71,14 @@ void PreparedStatement::reset()
 // Execute statement
 bool PreparedStatement::execute()
 {
-  return sqlite3_step(stmt.get()) == SQLITE_DONE;
+  const auto result = sqlite3_step(stmt.get());
+  if (result != SQLITE_DONE)
+  {
+    Log::Error log;
+    log << "SQLite statement failed to execute: "
+        << sqlite3_errstr(result) << endl;
+  }
+  return result == SQLITE_DONE;
 }
 
 //--------------------------------------------------------------------------
