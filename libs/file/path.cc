@@ -50,6 +50,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#include <ftw.h>
 #endif
 
 #define READ_BUF_SIZE 4096
@@ -346,8 +347,8 @@ bool Path::set_ownership(const string& owner, const string& group) const
 bool Path::erase() const
 {
   if (is_dir())
-#if defined(__WIN32__)
   {
+#if defined(__WIN32__)
     // Note: Shelling out to rmdir opens a console window
 
     // Create string with extra null on the end, plus manual null in case
@@ -360,10 +361,20 @@ bool Path::erase() const
       false, 0, L""
     };
     return !SHFileOperationW(&op);
-  }
 #else
-    return !system((string("rm -rf \"")+path+"\"").c_str());
+    return !nftw(path.c_str(),
+                 [](const char *fpath, const struct stat * /* sb */,
+                    int typeflag, struct FTW * /* ftwbuf */)
+                 {
+                   switch (typeflag)
+                   {
+                     case FTW_F: case FTW_SL: return UNLINK(fpath);
+                     case FTW_D: case FTW_DP: return rmdir(fpath);
+                     default: return -1;
+                   }
+                 }, 64, FTW_DEPTH | FTW_PHYS);
 #endif
+  }
   else
   {
     if (UNLINK(CPATH))
