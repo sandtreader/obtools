@@ -131,8 +131,8 @@ TEST(ActionTest, TestMultipleHandlers)
   expected.push_back(1);
   expected.push_back(2);
   expected.push_back(3);
-  ASSERT_EQ(expected, handler1.nums);
-  ASSERT_EQ(expected, handler2.nums);
+  EXPECT_EQ(expected, handler1.nums);
+  EXPECT_EQ(expected, handler2.nums);
 }
 
 

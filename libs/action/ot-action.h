@@ -66,7 +66,7 @@ private:
   MT::Mutex handlers_mutex;
 
   MT::Queue<Action<T> *> actions;
-  int queue_limit;
+  int queue_limit = 0;
 
   class ActionTask: public MT::Task
   {
