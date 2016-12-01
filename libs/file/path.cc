@@ -376,18 +376,19 @@ bool Path::erase() const
         break;
       }
 
-      auto de = dirent{};
-      dirent *der = nullptr;
       auto subdirs = false;
-      while (!readdir_r(d, &de, &der) && der)
+      // Note: readdir is meant to be thread-safe in all modern implementations
+      // at least if you're not passing the dir structure between threads.
+      // The re-entrant readdir_r has some issues and is deprecated now
+      while (auto de = readdir(d))
       {
-        switch (de.d_type)
+        switch (de->d_type)
         {
           case DT_DIR:
-            if (strncmp(de.d_name, ".", 1) && strncmp(de.d_name, "..", 2))
+            if (strncmp(de->d_name, ".", 1) && strncmp(de->d_name, "..", 2))
             {
               auto sd = dir;
-              sd.extend(de.d_name);
+              sd.extend(de->d_name);
               dirs.push(sd);
               subdirs = true;
             }
@@ -396,7 +397,7 @@ bool Path::erase() const
           case DT_REG:
             {
               auto f = dir;
-              f.extend(de.d_name);
+              f.extend(de->d_name);
               unlink(f.c_str());
             }
             break;
@@ -409,8 +410,8 @@ bool Path::erase() const
 
       if (!subdirs)
       {
-        dirs.pop();
         rmdir(dir.c_str());
+        dirs.pop();
       }
     }
     return result;
