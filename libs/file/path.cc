@@ -50,7 +50,8 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
-#include <ftw.h>
+#include <dirent.h>
+#include <stack>
 #endif
 
 #define READ_BUF_SIZE 4096
@@ -362,17 +363,57 @@ bool Path::erase() const
     };
     return !SHFileOperationW(&op);
 #else
-    return !nftw(path.c_str(),
-                 [](const char *fpath, const struct stat * /* sb */,
-                    int typeflag, struct FTW * /* ftwbuf */)
-                 {
-                   switch (typeflag)
-                   {
-                     case FTW_F: case FTW_SL: return UNLINK(fpath);
-                     case FTW_D: case FTW_DP: return rmdir(fpath);
-                     default: return -1;
-                   }
-                 }, 64, FTW_DEPTH | FTW_PHYS);
+    auto result = true;
+    auto dirs = stack<Path>{};
+    dirs.push(*this);
+    while (result && !dirs.empty())
+    {
+      const auto& dir = dirs.top();
+      auto d = opendir(dir.c_str());
+      if (!d)
+      {
+        result = false;
+        break;
+      }
+
+      auto de = dirent{};
+      dirent *der = nullptr;
+      auto subdirs = false;
+      while (!readdir_r(d, &de, &der) && der)
+      {
+        switch (de.d_type)
+        {
+          case DT_DIR:
+            if (strncmp(de.d_name, ".", 1) && strncmp(de.d_name, "..", 2))
+            {
+              auto sd = dir;
+              sd.extend(de.d_name);
+              dirs.push(sd);
+              subdirs = true;
+            }
+            break;
+          case DT_LNK:
+          case DT_REG:
+            {
+              auto f = dir;
+              f.extend(de.d_name);
+              unlink(f.c_str());
+            }
+            break;
+          default:
+            result = false;
+            break;
+        }
+      }
+      closedir(d);
+
+      if (!subdirs)
+      {
+        dirs.pop();
+        rmdir(dir.c_str());
+      }
+    }
+    return result;
 #endif
   }
   else
