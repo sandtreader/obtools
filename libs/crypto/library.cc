@@ -29,6 +29,7 @@ namespace ObTools { namespace Crypto {
 // Array of static mutexes
 static vector<MT::Mutex *> mutexes;
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 // Force C call standard
 extern "C"
 {
@@ -81,6 +82,7 @@ static void openssl_dyn_destroy_function(struct CRYPTO_dynlock_value *l,
 }
 
 } // extern "C"
+#endif
 
 //--------------------------------------------------------------------------
 // Constructor
@@ -92,12 +94,14 @@ Library::Library()
     for(int n=CRYPTO_num_locks(); n--;)
       mutexes.push_back(new MT::Mutex());
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     // Register callbacks
     CRYPTO_set_locking_callback(openssl_locking_function);
     CRYPTO_set_id_callback(openssl_id_function);
     CRYPTO_set_dynlock_create_callback(openssl_dyn_create_function);
     CRYPTO_set_dynlock_lock_callback(openssl_dyn_lock_function);
     CRYPTO_set_dynlock_destroy_callback(openssl_dyn_destroy_function);
+#endif
 
     OpenSSL_add_all_algorithms();
 
@@ -114,12 +118,14 @@ Library::~Library()
   // Clean up unless no-one has initialised before
   if (!should_initialise())
   {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     // Clear all callbacks
     CRYPTO_set_dynlock_create_callback(NULL);
     CRYPTO_set_dynlock_lock_callback(NULL);
     CRYPTO_set_dynlock_destroy_callback(NULL);
     CRYPTO_set_locking_callback(NULL);
     CRYPTO_set_id_callback(NULL);
+#endif
 
     // Empty the mutex array
     for(vector<MT::Mutex *>::iterator p=mutexes.begin(); p!=mutexes.end();++p)

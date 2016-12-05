@@ -36,9 +36,7 @@ AESKey::~AESKey()
 // Must seed PRNG first
 void AESKey::create()
 {
-  if (!RAND_bytes(&key[0], size / 8))
-    RAND_pseudo_bytes(&key[0], size / 8);  // Fallback
-  valid = true;
+  valid = RAND_bytes(&key[0], size / 8);
 }
 
 //--------------------------------------------------------------------------

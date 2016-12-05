@@ -25,7 +25,9 @@ namespace ObTools { namespace Crypto {
 // Must seed PRNG first
 void RSAKey::create(int size, int exponent)
 {
-  rsa = RSA_generate_key(size, exponent, 0, 0);
+  unique_ptr<BIGNUM, decltype(&BN_free)> exp{BN_new(), BN_free};
+  BN_set_word(exp.get(), exponent);
+  RSA_generate_key_ex(rsa, size, exp.get(), nullptr);
   if (rsa) valid = true;
 }
 

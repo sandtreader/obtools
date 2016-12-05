@@ -663,7 +663,12 @@ public:
 class HMAC
 {
 private:
-  HMAC_CTX hmac_ctx;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+  unique_ptr<HMAC_CTX> hmac_ctx{};
+#else
+  unique_ptr<HMAC_CTX, decltype(&HMAC_CTX_free)>
+    hmac_ctx{HMAC_CTX_new(), HMAC_CTX_free};
+#endif
   bool finished;
   const unsigned int digest_length;
 

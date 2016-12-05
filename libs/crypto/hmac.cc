@@ -18,8 +18,10 @@ HMAC::HMAC(const void *key, int key_len, const EVP_MD *md,
            unsigned int _digest_length):
   finished(false), digest_length(_digest_length)
 {
-  HMAC_CTX_init(&hmac_ctx);
-  HMAC_Init_ex(&hmac_ctx, key, key_len, md, 0);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+  HMAC_CTX_init(hmac_ctx.get());
+#endif
+  HMAC_Init_ex(hmac_ctx.get(), key, key_len, md, 0);
 }
 
 //--------------------------------------------------------------------------
@@ -27,7 +29,7 @@ HMAC::HMAC(const void *key, int key_len, const EVP_MD *md,
 void HMAC::update(const unsigned char *data, size_t length)
 {
   if (!finished)
-    HMAC_Update(&hmac_ctx, data, length);
+    HMAC_Update(hmac_ctx.get(), data, length);
 }
 
 //--------------------------------------------------------------------------
@@ -37,7 +39,7 @@ void HMAC::get_result(unsigned char *result)
   if (!finished)
   {
     unsigned int len;
-    HMAC_Final(&hmac_ctx, result, &len);
+    HMAC_Final(hmac_ctx.get(), result, &len);
   }
   finished = true;
 }
@@ -60,7 +62,7 @@ HMAC::~HMAC()
     // Dump into a fake buffer
     auto bucket = vector<unsigned char>(digest_length);
     unsigned int len;
-    HMAC_Final(&hmac_ctx, &bucket[0], &len);
+    HMAC_Final(hmac_ctx.get(), &bucket[0], &len);
   }
 }
 

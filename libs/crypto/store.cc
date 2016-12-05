@@ -64,14 +64,14 @@ bool CertificateStore::add_crl(const string& crl_file, bool all)
 // Verify a certificate
 bool CertificateStore::verify(const Certificate& cert)
 {
-  X509_STORE_CTX ctx;
+  unique_ptr<X509_STORE_CTX, decltype(&X509_STORE_CTX_free)>
+    ctx{X509_STORE_CTX_new(), X509_STORE_CTX_free};
   MT::Lock lock(mutex);
 
   // Verify certificate only, no other chain
-  bool result = X509_STORE_CTX_init(&ctx, store, cert.get_x509(), 0)
-             && X509_verify_cert(&ctx);
+  bool result = X509_STORE_CTX_init(ctx.get(), store, cert.get_x509(), 0)
+             && X509_verify_cert(ctx.get());
 
-  X509_STORE_CTX_cleanup(&ctx);
   return result;
 }
 

@@ -99,7 +99,7 @@ static int verify_common_name_callback(int preverify_ok,
   {
     OpenSSL *ssl = reinterpret_cast<OpenSSL *>(X509_STORE_CTX_get_ex_data(
           x509_ctx, SSL_get_ex_data_X509_STORE_CTX_idx()));
-    SSL_CTX *ssl_ctx = ssl->ctx;
+    SSL_CTX *ssl_ctx = SSL_get_SSL_CTX(ssl);
     Context *ctx = reinterpret_cast<Context *>(SSL_CTX_get_ex_data(ssl_ctx,
                                                  get_ssl_ctx_index()));
     if (ctx)

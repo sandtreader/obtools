@@ -39,10 +39,12 @@ bool AES::encrypt(unsigned char *data, int length, bool encryption, bool rtb)
     if (key.size != AESKey::BITS_128 || !iv.valid)
       return false;
 
-    unsigned char counter[AES_BLOCK_SIZE];
-    memset(counter, 0, sizeof(counter));
-    unsigned int num = 0;
-    AES_ctr128_encrypt(data, data, length, &aes_key, iv.key, counter, &num);
+    unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)>
+      ctx{EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free};
+    EVP_EncryptInit_ex(ctx.get(), EVP_aes_128_ctr(), nullptr, key.key, iv.key);
+    auto enc_len = int{};
+    EVP_EncryptUpdate(ctx.get(), data, &enc_len, data, length);
+    EVP_EncryptFinal_ex(ctx.get(), data + enc_len, &enc_len);
   }
   else if (iv.valid) // Check for CBC - IV is valid
   {
