@@ -385,12 +385,15 @@ bool Path::erase() const
         switch (de->d_type)
         {
           case DT_DIR:
-            if (strncmp(de->d_name, ".", 1) && strncmp(de->d_name, "..", 2))
             {
-              auto sd = dir;
-              sd.extend(de->d_name);
-              dirs.push(sd);
-              subdirs = true;
+              auto d = string{de->d_name};
+              if (d != "." && d != "..")
+              {
+                auto sd = dir;
+                sd.extend(d);
+                dirs.push(sd);
+                subdirs = true;
+              }
             }
             break;
           case DT_LNK:
