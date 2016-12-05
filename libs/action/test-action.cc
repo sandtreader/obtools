@@ -90,24 +90,37 @@ TEST(ActionTest, TestRegistration)
 TEST(ActionTest, TestQueueLimit)
 {
   Handler handler;
+  vector<int> expected;
 
   {
+    vector<int> tmp;
     Action::Manager<ActionType> manager;
     manager.add_handler(one, handler);
     manager.set_queue_limit(2);
     ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
               manager.queue(new ActionOne(1)));
+    tmp.push_back(1);
     ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
               manager.queue(new ActionOne(2)));
-    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::replaced_old,
-              manager.queue(new ActionOne(3)));
+    tmp.push_back(2);
+    for (auto i = 3; i < 11; ++i)
+    {
+      switch (manager.queue(new ActionOne(i)))
+      {
+        case Action::Manager<ActionType>::QueueResult::ok:
+          expected.push_back(tmp.front());
+        case Action::Manager<ActionType>::QueueResult::replaced_old:
+          tmp.erase(tmp.begin());
+          tmp.push_back(i);
+          break;
+      }
+    }
+    expected.insert(expected.end(), tmp.begin(), tmp.end());
     // Allow actions to be handled
     this_thread::sleep_for(chrono::milliseconds{100});
   }
 
-  vector<int> expected;
-  expected.push_back(2);
-  expected.push_back(3);
+  ASSERT_TRUE(expected.size());
   ASSERT_EQ(expected, handler.nums);
 }
 
