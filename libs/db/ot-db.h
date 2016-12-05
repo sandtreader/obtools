@@ -57,8 +57,8 @@ private:
   string str_val;
   union
   {
-    int int_val;
     uint64_t int64_val = 0;
+    int int_val;
     bool bool_val;
     double real_val;
   };
@@ -186,12 +186,12 @@ public:
   //------------------------------------------------------------------------
   // Handy operator to add null values to a row, for select()
   Row& operator<<(const string& fieldname)
-  { fields[fieldname] = FieldValue(); return *this; }
+  { fields[fieldname] = FieldValue{}; return *this; }
 
   //------------------------------------------------------------------------
   // Add name/value pair
   void add(const string& fieldname, const string& value)
-  { fields[fieldname] = FieldValue(value); }
+  { fields[fieldname] = FieldValue{value}; }
 
   //------------------------------------------------------------------------
   // Add char * value to row
@@ -203,64 +203,64 @@ public:
   void add_or_null(const string& fieldname, const string& value)
   {
     if (value.size())
-      fields[fieldname] = FieldValue(value);
+      fields[fieldname] = FieldValue{value};
     else
-      fields[fieldname] = FieldValue();
+      fields[fieldname] = FieldValue{};
   }
 
   //------------------------------------------------------------------------
   // Add a NULL entry
   void add_null(const string& fieldname)
-  { fields[fieldname] = FieldValue(); }
+  { fields[fieldname] = FieldValue{}; }
 
   //------------------------------------------------------------------------
   // Add integer value to row
   void add(const string& fieldname, int value)
-  { fields[fieldname] = FieldValue(value); }
+  { fields[fieldname] = FieldValue{value}; }
 
   //------------------------------------------------------------------------
   // Add integer value to row (NULL if zero)
   void add_or_null(const string& fieldname, int value)
   {
     if (value)
-      fields[fieldname] = FieldValue(value);
+      fields[fieldname] = FieldValue{value};
     else
-      fields[fieldname] = FieldValue();
+      fields[fieldname] = FieldValue{};
   }
 
   //------------------------------------------------------------------------
   // Add a 64-bit integer value to row
   void add_int64(const string& fieldname, uint64_t value)
-  { fields[fieldname] = FieldValue(value); }
+  { fields[fieldname] = FieldValue{value}; }
 
   //------------------------------------------------------------------------
   // Add a 64-bit integer value to row (NULL if zero)
   void add_int64_or_null(const string& fieldname, uint64_t value)
   {
     if (value)
-      fields[fieldname] = FieldValue(value);
+      fields[fieldname] = FieldValue{value};
     else
-      fields[fieldname] = FieldValue();
+      fields[fieldname] = FieldValue{};
   }
 
   //------------------------------------------------------------------------
   // Add boolean value to row
   void add(const string& fieldname, bool value)
-  { fields[fieldname] = FieldValue(value); }
+  { fields[fieldname] = FieldValue{value}; }
 
   //------------------------------------------------------------------------
   // Add real value to row
   void add(const string& fieldname, double value)
-  { fields[fieldname] = FieldValue(value); }
+  { fields[fieldname] = FieldValue{value}; }
 
   //------------------------------------------------------------------------
   // Add real value to row (NULL if zero)
   void add_or_null(const string& fieldname, double value)
   {
     if (value)
-      fields[fieldname] = FieldValue(value);
+      fields[fieldname] = FieldValue{value};
     else
-      fields[fieldname] = FieldValue();
+      fields[fieldname] = FieldValue{};
   }
 
   //------------------------------------------------------------------------
@@ -268,9 +268,9 @@ public:
   void add_time_or_null(const string& fieldname, const Time::Stamp& value)
   {
     if (value.valid())
-      fields[fieldname] = FieldValue(value.iso());
+      fields[fieldname] = FieldValue{value.iso()};
     else
-      fields[fieldname] = FieldValue();
+      fields[fieldname] = FieldValue{};
   }
 
   //------------------------------------------------------------------------
@@ -279,9 +279,9 @@ public:
                         const Time::DateStamp& value)
   {
     if (value.valid())
-      fields[fieldname] = FieldValue(value.iso());
+      fields[fieldname] = FieldValue{value.iso()};
     else
-      fields[fieldname] = FieldValue();
+      fields[fieldname] = FieldValue{};
   }
 
   //------------------------------------------------------------------------
