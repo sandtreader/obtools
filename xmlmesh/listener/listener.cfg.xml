@@ -34,10 +34,12 @@
   <xmlmesh host="localhost" port="29167"/>
 
   <!-- Actions directory - each file in this directory defines an action
-       in XML:
+       in XML.  Command is passed the message as stdin, and $SUBJECT is
+       interpolated with the message subject - e.g.:
+
        <action>
          <subject>test.*</subject>
-         <command>/usr/bin/myscript.sh</command>
+         <command>/usr/bin/myscript.sh $SUBJECT</command>
        </action>
   -->
   <actions dir="/etc/obtools/actions/"/>
