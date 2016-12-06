@@ -33,9 +33,12 @@
   <!-- XMLMesh host and port -->
   <xmlmesh host="localhost" port="29167"/>
 
-  <!-- Actions directory - each file in this directory defines one or more
-       actions.  Each is a line of the form:
-       subject command
+  <!-- Actions directory - each file in this directory defines an action
+       in XML:
+       <action>
+         <subject>test.*</subject>
+         <command>/usr/bin/myscript.sh</command>
+       </action>
   -->
   <actions dir="/etc/obtools/actions/"/>
 

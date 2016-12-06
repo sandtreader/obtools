@@ -114,7 +114,7 @@ void Server::reconfigure()
     else
       log.summary << " - " << path << endl;
 
-    // Read it, and split lines
+    // Read it as XML
     XML::Configuration action_config(path.str(), log.error);
     if (action_config.read("action"))
     {
