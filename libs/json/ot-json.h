@@ -103,6 +103,11 @@ public:
   { return get(index); }
 
   //------------------------------------------------------------------------
+  // Get the size of an array (if it is an array, otherwise 0)
+  size_t size() const
+  { return (type==ARRAY)?a.size():0; }
+
+  //------------------------------------------------------------------------
   // Read as a string value with the given default
   string as_str(const string& def="") const { return (type==STRING)?s:def; }
 

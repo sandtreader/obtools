@@ -120,6 +120,17 @@ TEST(Value, TestArrayGetter)
   EXPECT_TRUE(!nv2);
 }
 
+TEST(Value, TestArraySize)
+{
+  Value value(Value::ARRAY);
+  value.add(1);
+  value.add(2);
+  ASSERT_EQ(2, value.size());
+
+  Value nv;
+  ASSERT_EQ(0, nv.size());
+}
+
 TEST(Value, TestWritingUnsetThrows)
 {
   Value value;
