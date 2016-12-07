@@ -54,6 +54,18 @@ TEST(Value, TestAsInt)
   ASSERT_EQ(99, nv.as_int(99));
 }
 
+TEST(Value, TestAsFloat)
+{
+  Value vf(Value::NUMBER, 42.9);
+  ASSERT_EQ(42.9, vf.as_float());
+
+  Value vi(42);
+  ASSERT_EQ(42.0, vi.as_float());
+
+  Value nv;
+  ASSERT_EQ(99.9, nv.as_float(99.9));
+}
+
 TEST(Value, TestObjectSetter)
 {
   Value value(Value::OBJECT);
@@ -106,6 +118,17 @@ TEST(Value, TestArrayGetter)
   EXPECT_TRUE(!nv1);
   const Value& nv2 = value[1];
   EXPECT_TRUE(!nv2);
+}
+
+TEST(Value, TestArraySize)
+{
+  Value value(Value::ARRAY);
+  value.add(1);
+  value.add(2);
+  ASSERT_EQ(2, value.size());
+
+  Value nv;
+  ASSERT_EQ(0, nv.size());
 }
 
 TEST(Value, TestWritingUnsetThrows)
