@@ -95,6 +95,20 @@ TEST(Analyser, TestIntegerGivesNumberThenEND)
   ASSERT_EQ(Token::END, token.type);
 }
 
+TEST(Analyser, TestNegativeIntegerGivesNumberThenEND)
+{
+  string s("-1234");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("-1234", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
 TEST(Analyser, TestFloatGivesNumberThenEND)
 {
   string s("1234.56");
@@ -104,6 +118,20 @@ TEST(Analyser, TestFloatGivesNumberThenEND)
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::NUMBER, token.type);
   ASSERT_EQ("1234.56", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
+TEST(Analyser, TestNegativeFloatGivesNumberThenEND)
+{
+  string s("-1234.56");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("-1234.56", token.value);
 
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::END, token.type);
@@ -328,9 +356,28 @@ TEST(Analyser, TestComplexSymbolsAreGreedy)
   ASSERT_EQ(Token::END, token.type);
 }
 
+TEST(Analyser, TestMinusOnlyTreatedAsNumberIfFollowedByDigit)
+{
+  string s("-x");
+  istringstream input(s);
+  Analyser analyser(input);
+  analyser.add_symbol("-");
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::SYMBOL, token.type);
+  ASSERT_EQ("-", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NAME, token.type);
+  ASSERT_EQ("x", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
 TEST(Analyser, TestComplexMixtureOfSymbols)
 {
-  string s(" fred1++ <= jimX_99---1.0  ");
+  string s(" fred1++ <= jimX_99--- -1.0  ");
   istringstream input(s);
   Analyser analyser(input);
   analyser.add_symbol("++");
@@ -366,7 +413,7 @@ TEST(Analyser, TestComplexMixtureOfSymbols)
 
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::NUMBER, token.type);
-  ASSERT_EQ("1.0", token.value);
+  ASSERT_EQ("-1.0", token.value);
 
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::END, token.type);
