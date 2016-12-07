@@ -54,6 +54,18 @@ TEST(Value, TestAsInt)
   ASSERT_EQ(99, nv.as_int(99));
 }
 
+TEST(Value, TestAsFloat)
+{
+  Value vf(Value::NUMBER, 42.9);
+  ASSERT_EQ(42.9, vf.as_float());
+
+  Value vi(42);
+  ASSERT_EQ(42.0, vi.as_float());
+
+  Value nv;
+  ASSERT_EQ(99.9, nv.as_float(99.9));
+}
+
 TEST(Value, TestObjectSetter)
 {
   Value value(Value::OBJECT);

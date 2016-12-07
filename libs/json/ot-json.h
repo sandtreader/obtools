@@ -111,6 +111,11 @@ public:
   uint64_t as_int(uint64_t def=0) const { return (type==INTEGER)?n:def; }
 
   //------------------------------------------------------------------------
+  // Read as a float value with the given default - also promotes integers
+  double as_float(double def=0.0) const
+  { return (type==NUMBER)?f:((type==INTEGER)?n:def); }
+
+  //------------------------------------------------------------------------
   // Write the value to the given stream
   // Set 'pretty' for multi-line, indented pretty-print, clear for optimal
   void write_to(ostream& s, bool pretty=false, int indent=0) const;
