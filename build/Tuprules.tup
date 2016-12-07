@@ -91,7 +91,7 @@ ifdef TEST
   else
     : foreach {testobjs} | <$(NAME)-non-main> $(DEPGROUPS) |> !exetestlink |> {tests}
   endif
-  : foreach {tests} |> !runtest |>
+  : foreach {tests} | $(TESTRUNDEPS) |> !runtest |>
 endif
 
 ifdef RELEASE
