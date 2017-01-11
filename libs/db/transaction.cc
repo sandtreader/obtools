@@ -17,18 +17,35 @@ namespace ObTools { namespace DB {
 
 //--------------------------------------------------------------------------
 // Constructor from plain connection
-Transaction::Transaction(Connection& _conn): conn(&_conn), committed(false)
+Transaction::Transaction(Connection& _conn, bool immediate):
+  conn(&_conn), committed(false)
 {
-  if (!conn->exec("BEGIN")) committed = true;  // Make commit fail
+  if (immediate)
+    committed = !conn->transaction_begin_immediate();
+  else
+    committed = !conn->transaction_begin();
+#ifdef DEBUG
+  begun_at = chrono::high_resolution_clock::now() - start;
+#endif
 }
 
 //--------------------------------------------------------------------------
 // Constructor from AutoConnection
-Transaction::Transaction(AutoConnection& _autoconn):
+Transaction::Transaction(AutoConnection& _autoconn, bool immediate):
   conn(_autoconn.conn), committed(false)
 {
-  if (!conn || !conn->exec("BEGIN"))
-    committed = true;  // Make commit fail
+  if (!conn)
+  {
+    committed = true;
+    return;
+  }
+  if (immediate)
+    committed = !conn->transaction_begin_immediate();
+  else
+    committed = !conn->transaction_begin();
+#ifdef DEBUG
+  begun_at = chrono::high_resolution_clock::now() - start;
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -37,15 +54,13 @@ bool Transaction::commit()
 {
   if (!conn || committed) return false;
 #ifdef DEBUG
-  const auto commit_start = chrono::high_resolution_clock::now();
+  const auto commit_at = chrono::high_resolution_clock::now() - start;
 #endif
-  committed = conn->exec("COMMIT");
+  committed = conn->transaction_commit();
 #ifdef DEBUG
   const auto spent = chrono::high_resolution_clock::now() - start;
   if (spent > chrono::milliseconds{1000})
   {
-    const auto commit_spent = chrono::high_resolution_clock::now()
-                              - commit_start;
     Log::Error log;
     constexpr auto buff_size = 2;
     void *buffer[buff_size];
@@ -60,8 +75,12 @@ bool Transaction::commit()
     }
     log << "Slow transaction ("
         << chrono::duration_cast<chrono::milliseconds>(spent).count()
-        << "ms / commit "
-        << chrono::duration_cast<chrono::milliseconds>(commit_spent).count()
+        << "ms "
+        << "/ begun at "
+        << chrono::duration_cast<chrono::milliseconds>(begun_at).count()
+        << "ms "
+        << "/ commit at "
+        << chrono::duration_cast<chrono::milliseconds>(commit_at).count()
         << "ms): " << line << endl;
   }
 #endif
@@ -72,7 +91,7 @@ bool Transaction::commit()
 // Destructor
 Transaction::~Transaction()
 {
-  if (conn && !committed) conn->exec("ROLLBACK");
+  if (conn && !committed) conn->transaction_rollback();
 }
 
 
