@@ -15,6 +15,7 @@
 using namespace std;
 using namespace ObTools;
 
+namespace {
 class DBSQLiteTest: public ::testing::Test
 {
 protected:
@@ -27,25 +28,28 @@ public:
   }
 };
 
+const auto timeout = Time::Duration{"1 minute"};
+}
+
 //--------------------------------------------------------------------------
 // Tests
 TEST_F(DBSQLiteTest, TestConnection)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   EXPECT_TRUE(conn.get());
 }
 
 TEST_F(DBSQLiteTest, TestCreateTable)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   EXPECT_TRUE(conn->exec("create table test (id int)"));
 }
 
 TEST_F(DBSQLiteTest, TestCreateTableAndRead)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   ASSERT_TRUE(conn->exec("create table test (id int)"));
   EXPECT_TRUE(conn->exec("insert into test (id) values (123)"));
@@ -57,7 +61,7 @@ TEST_F(DBSQLiteTest, TestCreateTableAndRead)
 
 TEST_F(DBSQLiteTest, TestCanReadWhilstWriteLocked)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   ASSERT_TRUE(conn->exec("create table test (id int)"));
   auto trans = DB::Transaction{*conn};
@@ -98,7 +102,7 @@ TEST_F(DBSQLiteTest, TestCanReadWhilstWriteLocked)
 
 TEST_F(DBSQLiteTest, TestPreparedStatement)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   ASSERT_TRUE(conn->exec("create table test (id int, name text)"));
   ASSERT_TRUE(conn->exec("insert into test (id, name) values (123, 'foo')"));
@@ -113,7 +117,7 @@ TEST_F(DBSQLiteTest, TestPreparedStatement)
 
 TEST_F(DBSQLiteTest, TestPreparedStatementReuse)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   ASSERT_TRUE(conn->exec("create table test (id int, name text)"));
   ASSERT_TRUE(conn->exec("insert into test (id, name) values (123, 'foo')"));
@@ -133,7 +137,7 @@ TEST_F(DBSQLiteTest, TestPreparedStatementReuse)
 
 TEST_F(DBSQLiteTest, TestHeldPreparedStatementDoesNotHoldLock)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   ASSERT_TRUE(conn->exec("create table test (id int, name text)"));
 
@@ -149,7 +153,7 @@ TEST_F(DBSQLiteTest, TestHeldPreparedStatementDoesNotHoldLock)
 
 TEST_F(DBSQLiteTest, TestLastInsertId)
 {
-  auto factory = DB::SQLite::ConnectionFactory(dbfile);
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
   auto conn = unique_ptr<DB::Connection>(factory.create());
   ASSERT_TRUE(conn->exec("create table test (id int primary key, a text)"));
 
