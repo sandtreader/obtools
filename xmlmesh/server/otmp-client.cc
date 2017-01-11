@@ -64,8 +64,6 @@ OTMPClientService::OTMPClientService(const XML::Element& cfg):
   client_thread(*this)
 {
   Log::Streams log;
-  client_thread.start();
-
   log.summary << "OTMP Client '" << id << "' to " << host << " started\n";
 
   for(XML::Element::const_iterator p(cfg.get_children("subscription")); p; ++p)
@@ -78,6 +76,10 @@ OTMPClientService::OTMPClientService(const XML::Element& cfg):
       log.error << "OTMP Client to " << host << " can't subscribe to "
                 << subject << endl;
   }
+
+  // Start waiter thread *after* subscription done so it doesn't race for
+  // OK response
+  client_thread.start();
 }
 
 //--------------------------------------------------------------------------
