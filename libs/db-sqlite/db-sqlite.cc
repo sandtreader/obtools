@@ -14,10 +14,6 @@
 
 namespace ObTools { namespace DB { namespace SQLite {
 
-namespace {
-const auto pow2_timeout_ms = 8;
-}
-
 //==========================================================================
 // SQLite prepare statement class
 
@@ -133,7 +129,7 @@ bool PreparedStatement::fetch(string& value)
 
 //--------------------------------------------------------------------------
 // Constructor
-Connection::Connection(const string& file):
+Connection::Connection(const string& file, const Time::Duration& timeout):
   conn{nullptr, sqlite3_close}
 {
   sqlite3 *c{nullptr};
@@ -151,19 +147,8 @@ Connection::Connection(const string& file):
   // OK, we have a connection
   log.detail << "SQLite connection opened to " << file << endl;
 
-  // Set up a busy handler
-  sqlite3_busy_handler(c, [](void *, int attempts)
-  {
-    if (attempts > pow2_timeout_ms)
-    {
-      Log::Error log;
-      log << "SQLite query timed out" << endl;
-      return 0;
-    }
-    this_thread::sleep_for(chrono::milliseconds{
-                           static_cast<uint64_t>(pow(2, attempts))});
-    return 1;
-  }, nullptr);
+  // Set up a busy timeout
+  sqlite3_busy_timeout(c, timeout.milliseconds());
 }
 
 //--------------------------------------------------------------------------

@@ -35,7 +35,7 @@ Token Analyser::read_name_token(char c)
 // Read a number token
 Token Analyser::read_number_token(char c)
 {
-  // Read a string value
+  // Read a string value - c is digit or -
   string value;
   value += c;
 
@@ -232,6 +232,14 @@ Token Analyser::read_token()
     return read_number_token(c);
   else if (c=='"')
     return read_string_token();
+  else if (c=='-')
+  {
+    // Treated as symbol unless followed by digit
+    if (isdigit(peek()))
+      return read_number_token(c);
+    else
+      return read_symbol_token(c);
+  }
   else
     return read_symbol_token(c);
 }

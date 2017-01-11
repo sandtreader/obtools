@@ -103,12 +103,22 @@ public:
   { return get(index); }
 
   //------------------------------------------------------------------------
+  // Get the size of an array (if it is an array, otherwise 0)
+  size_t size() const
+  { return (type==ARRAY)?a.size():0; }
+
+  //------------------------------------------------------------------------
   // Read as a string value with the given default
   string as_str(const string& def="") const { return (type==STRING)?s:def; }
 
   //------------------------------------------------------------------------
   // Read as an integer value with the given default
   uint64_t as_int(uint64_t def=0) const { return (type==INTEGER)?n:def; }
+
+  //------------------------------------------------------------------------
+  // Read as a float value with the given default - also promotes integers
+  double as_float(double def=0.0) const
+  { return (type==NUMBER)?f:((type==INTEGER)?n:def); }
 
   //------------------------------------------------------------------------
   // Write the value to the given stream

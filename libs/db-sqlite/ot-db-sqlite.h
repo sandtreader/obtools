@@ -122,7 +122,7 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  Connection(const string& filename);
+  Connection(const string& filename, const Time::Duration& timeout);
 
   //------------------------------------------------------------------------
   // Check if connection is really OK
@@ -163,23 +163,25 @@ class ConnectionFactory: public DB::ConnectionFactory
 {
   // Connection details
   string file;
+  Time::Duration timeout;
 
   //------------------------------------------------------------------------
   // Interface to create a new connection
   DB::Connection *create_connection() override
   {
-    return new Connection(file);
+    return new Connection{file, timeout};
   }
 
 public:
   //------------------------------------------------------------------------
   // Constructors
-  ConnectionFactory(const string& _file):
-    file(_file)
+  ConnectionFactory(const string& _file, const Time::Duration& _timeout):
+    file{_file}, timeout{_timeout}
   {}
   ConnectionFactory(const string& _file,
+                    const Time::Duration& _timeout,
                     const map<string, string>& statements):
-    DB::ConnectionFactory{statements}, file{_file}
+    DB::ConnectionFactory{statements}, file{_file}, timeout{_timeout}
   {}
 };
 

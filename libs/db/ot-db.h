@@ -711,6 +711,34 @@ public:
   virtual uint64_t get_last_insert_id() = 0;
 
   //------------------------------------------------------------------------
+  // Begin a transaction
+  virtual bool transaction_begin()
+  {
+    return exec("begin");
+  }
+
+  //------------------------------------------------------------------------
+  // Begin a transaction with immediate lock
+  virtual bool transaction_begin_immediate()
+  {
+    return exec("begin immediate");
+  }
+
+  //------------------------------------------------------------------------
+  // Commit a transaction
+  virtual bool transaction_commit()
+  {
+    return exec("commit");
+  }
+
+  //------------------------------------------------------------------------
+  // Roll back a transaction
+  virtual bool transaction_rollback()
+  {
+    return exec("rollback");
+  }
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Connection() {}
 
@@ -1290,16 +1318,17 @@ private:
 #ifdef DEBUG
   chrono::high_resolution_clock::time_point
     start = chrono::high_resolution_clock::now();
+  chrono::high_resolution_clock::duration begun_at;
 #endif
 
 public:
   //------------------------------------------------------------------------
   // Constructor from plain connection
-  Transaction(Connection& _conn);
+  Transaction(Connection& _conn, bool immediate = false);
 
   //------------------------------------------------------------------------
   // Constructor from AutoConnection
-  Transaction(AutoConnection& _conn);
+  Transaction(AutoConnection& _conn, bool immediate = false);
 
   //------------------------------------------------------------------------
   // Commit - returns whether commit command ran OK

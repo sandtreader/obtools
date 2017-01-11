@@ -145,6 +145,35 @@ template <class ID, class CONTENT> struct CacheIterator
   const ID& id() const { return map_iterator->first; }
 };
 
+// Const equivalent
+template <class ID, class CONTENT> struct ConstCacheIterator
+{
+  typedef bidirectional_iterator_tag iterator_category;
+  typedef ptrdiff_t difference_type;
+  typedef CONTENT value_type;
+  typedef CONTENT& reference;
+  typedef CONTENT *pointer;
+  typedef map<ID, MapContent<CONTENT> > MapType;
+  typedef typename MapType::const_iterator MapIteratorType;
+  MapIteratorType map_iterator;
+  ConstCacheIterator() {}
+  ConstCacheIterator(const MapIteratorType& mi): map_iterator(mi) {}
+  ConstCacheIterator(const ConstCacheIterator& ci): map_iterator(ci.map_iterator) {}
+  ConstCacheIterator& operator++() { map_iterator++; return *this; }
+  ConstCacheIterator operator++(int)
+  { ConstCacheIterator t = *this; map_iterator++; return t; }
+  ConstCacheIterator& operator--() { map_iterator--; return *this; }
+  ConstCacheIterator operator--(int)
+  { ConstCacheIterator t = *this; map_iterator--; return t; }
+  bool operator==(const ConstCacheIterator& o) const
+  { return map_iterator == o.map_iterator; }
+  bool operator!=(const ConstCacheIterator& o) const
+  { return map_iterator != o.map_iterator; }
+  reference operator*() const { return map_iterator->second.content; }
+  pointer operator->() const { return &(operator*()); }
+  const ID& id() const { return map_iterator->first; }
+};
+
 //==========================================================================
 // Cache template
 
@@ -186,7 +215,7 @@ protected:
 
 public:
   // Overall readers/writer mutex
-  MT::RWMutex mutex;
+  mutable MT::RWMutex mutex;
 
   //------------------------------------------------------------------------
   // Constructor
@@ -205,7 +234,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get the limit
-  int get_limit() { return limit; }
+  int get_limit() const { return limit; }
 
   //------------------------------------------------------------------------
   // Add an item of content to the cache
@@ -223,7 +252,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check (without copying) whether a given ID exists in the cache
-  bool contains(const ID& id)
+  bool contains(const ID& id) const
   {
     MT::RWReadLock lock(mutex);
     return (cachemap.find(id) != cachemap.end());
@@ -231,7 +260,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get current size of map
-  unsigned int size()
+  unsigned int size() const
   {
     return cachemap.size();
   }
@@ -239,10 +268,10 @@ public:
   //------------------------------------------------------------------------
   // Returns copy of content of a given ID in the map
   // Whether found - if not, result is not changed
-  bool lookup(const ID& id, CONTENT& result)
+  bool lookup(const ID& id, CONTENT& result) const
   {
     MT::RWReadLock lock(mutex);
-    MapIterator p = cachemap.find(id);
+    const auto p = cachemap.find(id);
     if (p != cachemap.end())
     {
       result = p->second.content;
@@ -352,7 +381,7 @@ public:
 
   //------------------------------------------------------------------------
   // Dump contents to given stream
-  void dump(ostream& s, bool show_content=false)
+  void dump(ostream& s, bool show_content=false) const
   {
     MT::RWReadLock lock(mutex);
     time_t now = time(0);
@@ -381,6 +410,9 @@ public:
   typedef CacheIterator<ID, CONTENT> iterator;
   iterator begin() { return iterator(cachemap.begin()); }
   iterator end() { return iterator(cachemap.end()); }
+  typedef ConstCacheIterator<ID, CONTENT> const_iterator;
+  iterator begin() const { return const_iterator(cachemap.begin()); }
+  iterator end() const { return const_iterator(cachemap.end()); }
 
   //------------------------------------------------------------------------
   // Clear all content
@@ -468,6 +500,35 @@ template <class ID, class CONTENT> struct PointerCacheIterator
   const ID& id() const { return map_iterator->first; }
 };
 
+// Const equivalent
+template <class ID, class CONTENT> struct ConstPointerCacheIterator
+{
+  typedef CONTENT *value_type;
+  typedef CONTENT& reference;
+  typedef CONTENT *pointer;
+  typedef map<ID, MapContent<PointerContent<CONTENT> > > MapType;
+  typedef typename MapType::const_iterator MapIteratorType;
+  MapIteratorType map_iterator;
+  ConstPointerCacheIterator() {}
+  ConstPointerCacheIterator(const MapIteratorType& mi): map_iterator(mi) {}
+  ConstPointerCacheIterator(const ConstPointerCacheIterator& ci):
+    map_iterator(ci.map_iterator) {}
+  ConstPointerCacheIterator& operator++() { map_iterator++; return *this; }
+  ConstPointerCacheIterator operator++(int)
+  { ConstPointerCacheIterator t = *this; map_iterator++; return t; }
+
+  ConstPointerCacheIterator& operator--() { map_iterator--; return *this; }
+  ConstPointerCacheIterator operator--(int)
+  { ConstPointerCacheIterator t = *this; map_iterator--; return t; }
+  bool operator==(const ConstPointerCacheIterator& o) const
+  { return map_iterator == o.map_iterator; }
+  bool operator!=(const ConstPointerCacheIterator& o) const
+  { return map_iterator != o.map_iterator; }
+  pointer operator->() const { return map_iterator->second.content.ptr; }
+  reference operator*() const { return *(operator->()); }
+  const ID& id() const { return map_iterator->first; }
+};
+
 //==========================================================================
 // PointerCache template
 // Like Cache, but assuming larger objects requiring dynamic allocation
@@ -517,10 +578,10 @@ public:
   // Returns pointer to content of a given ID in the map
   // Pointer found, or 0 if not in cache
   // Pointer returned is owned by cache and will be deleted by it
-  CONTENT *lookup(const ID& id)
+  CONTENT *lookup(const ID& id) const
   {
     MT::RWReadLock lock(this->mutex);
-    MapIterator p = this->cachemap.find(id);
+    const auto p = this->cachemap.find(id);
     if (p != this->cachemap.end())
       return p->second.content.ptr;
     else
@@ -664,6 +725,11 @@ public:
   typedef PointerCacheIterator<ID, CONTENT> iterator;
   iterator begin() { return iterator(this->cachemap.begin()); }
   iterator end() { return iterator(this->cachemap.end()); }
+  typedef ConstPointerCacheIterator<ID, CONTENT> const_iterator;
+  const_iterator begin() const
+  { return const_iterator(this->cachemap.begin()); }
+  const_iterator end() const { return const_iterator(this->cachemap.end()); }
+
 
   //------------------------------------------------------------------------
   // Clear all content

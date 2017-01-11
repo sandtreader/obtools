@@ -58,4 +58,5 @@ fi
 dpkg-buildpackage -uc -b $FAKEROOT -tc
 mv ../${NAME}_${VERSION}-${REVISION}_${ARCH}.deb ./
 rm ../${NAME}_${VERSION}-${REVISION}_*.changes
+rm -f ../${NAME}_${VERSION}-${REVISION}_*.buildinfo
 rm -rf $DEBDIR

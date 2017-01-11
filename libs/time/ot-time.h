@@ -116,6 +116,10 @@ public:
   double seconds() const { return t; }
 
   //------------------------------------------------------------------------
+  // Convert to milliseconds
+  uint64_t milliseconds() const { return t * 1000; }
+
+  //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
   ntp_stamp_t ntp() const
   {
