@@ -194,6 +194,15 @@ ostream& operator<<(ostream& s, const MaskedAddress& ip)
 // End-points
 
 //--------------------------------------------------------------------------
+// As a string
+string EndPoint::str() const
+{
+  ostringstream oss;
+  oss << *this;
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
 // Output to given stream
 void EndPoint::output(ostream& s) const
 {

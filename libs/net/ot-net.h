@@ -257,6 +257,10 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // As a string
+  string str() const;
+
+  //------------------------------------------------------------------------
   // Output to given stream
   void output(ostream& s) const;
 
@@ -451,24 +455,24 @@ public:
   // Only works if socket is bound or connected.
   // Because of multihoming, IP address may only be available if connected
   // to a specific remote host
-  EndPoint local();
+  EndPoint local() const;
 
   //------------------------------------------------------------------------
   // Get remote address
   // Only works if socket is connected.
-  EndPoint remote();
+  EndPoint remote() const;
 
   //------------------------------------------------------------------------
   // Get MAC address from ARP for any address (upper case hex with colons)
   // Device name (e.g. "eth0") can be specified - if not given, all interfaces
   // are searched
   // Returns empty string if it can't find it
-  string get_mac(IPAddress ip, const string& device_name="");
+  string get_mac(IPAddress ip, const string& device_name="") const;
 
   //------------------------------------------------------------------------
   // Get MAC address of all Ethernet interfaces as upper-case hex strings
   // with colons
-  set<string> get_host_macs();
+  set<string> get_host_macs() const;
 };
 
 //==========================================================================

@@ -286,7 +286,7 @@ bool Socket::wait_writeable(int timeout)
 // Only works if socket is bound or connected.
 // Because of multihoming, IP address may only be available if connected
 // to a specific remote host
-EndPoint Socket::local()
+EndPoint Socket::local() const
 {
   struct sockaddr_in name;
   socklen_t namelen = sizeof(name);
@@ -300,7 +300,7 @@ EndPoint Socket::local()
 //--------------------------------------------------------------------------
 // Get remote address
 // Only works if socket is connected.
-EndPoint Socket::remote()
+EndPoint Socket::remote() const
 {
   struct sockaddr_in name;
   socklen_t namelen = sizeof(name);
@@ -316,7 +316,7 @@ EndPoint Socket::remote()
 // Device name (e.g. "eth0") can be specified - if not given, all interfaces
 // are searched
 // Returns empty string if it can't find it
-string Socket::get_mac(IPAddress ip, const string& device_name)
+string Socket::get_mac(IPAddress ip, const string& device_name) const
 {
 #if defined(__WIN32__) || defined(__APPLE__)
 #warning get_mac not implemented
@@ -380,7 +380,7 @@ string Socket::get_mac(IPAddress ip, const string& device_name)
 //--------------------------------------------------------------------------
 // Get MAC address of all Ethernet interfaces as upper-case hex strings
 // with colons
-set<string> Socket::get_host_macs()
+set<string> Socket::get_host_macs() const
 {
   set<string> macs;
 
