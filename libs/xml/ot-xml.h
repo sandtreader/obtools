@@ -173,6 +173,7 @@ public:
   /// \note Don't use \code(e!=Element::none)\endcode - that compares values!
   /// \note We don't provide an operator bool due to problems with ambiguity
   /// of [] operator
+  operator bool() const { return valid(); }
   bool valid() const { return this!=&none; }
   bool operator!() const { return !valid(); }  ///< Invalidity check
 
@@ -400,6 +401,7 @@ public:
 
   //------------------------------------------------------------------------
   // Handy [] operator to get attribute values
+  string operator[](const char *attr) const { return get_attr(attr); }
   string operator[](const string& attr) const { return get_attr(attr); }
 
   //------------------------------------------------------------------------

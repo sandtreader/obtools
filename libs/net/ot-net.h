@@ -83,6 +83,7 @@ public:
   //------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return address==BADADDR; }
+  operator bool() const { return address != BADADDR; }
 
   //------------------------------------------------------------------------
   // Check for broadcast
@@ -267,6 +268,7 @@ public:
   //------------------------------------------------------------------------
   // Test for badness
   bool operator!() const { return !host; }
+  operator bool() const { return host; }
 
   //------------------------------------------------------------------------
   // == operator
