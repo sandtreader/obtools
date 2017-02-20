@@ -106,6 +106,9 @@ int Shell::start(int argc, char **argv)
     return 2;
   }
 
+  // Process <include> in config
+  config.process_includes();
+
 #if defined(DEBUG)
   bool go_daemon = config.get_value_bool("background/@daemon", false);
 #else
