@@ -6,6 +6,6 @@
 
 NAME    = ot-xml
 TYPE    = lib
-DEPENDS = ot-file
+DEPENDS = ot-file ot-log
 
 include_rules

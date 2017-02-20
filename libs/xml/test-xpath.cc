@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XML: test-xpath-gtest.cc
+// ObTools::XML: test-xpath.cc
 //
 // Test harness for ObTools XPath processor using gtest
 //

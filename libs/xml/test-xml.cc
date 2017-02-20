@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::XML: test-xml-gtest.cc
+// ObTools::XML: test-xml.cc
 //
 // Test harness for ObTools XML Parser using gtest
 //
