@@ -239,7 +239,7 @@ public:
   // the original. This happens recursively through the element's children.
   // An identifier attribute can be specified to determine uniqueness by. If
   // left empty, the element name is used.
-  void superimpose(const Element& source, const string& identifier);
+  void superimpose(const Element& source, const string& identifier="");
 
   //------------------------------------------------------------------------
   // Merge with another element
@@ -952,6 +952,19 @@ public:
   // Reload configuration file as the same element as before
   // Returns whether successful
   bool reload();
+
+  //--------------------------------------------------------------------------
+  // Superimpose XML from the given file
+  void superimpose_file(const string& fn, bool allow_includes=false);
+
+  //--------------------------------------------------------------------------
+  // Process include files
+  // Reads
+  //   <include file="..."/>
+  // from top level of document.  File can be relative to this file's path
+  // and can contain a leaf wildcard.
+  // XML from included files is superimposed in order
+  void process_includes();
 
   //------------------------------------------------------------------------
   // Get root element

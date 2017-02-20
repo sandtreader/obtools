@@ -100,6 +100,61 @@ bool Configuration::reload()
 }
 
 //--------------------------------------------------------------------------
+// Superimpose XML from the given file
+void Configuration::superimpose_file(const string& fn, bool allow_includes)
+{
+  Configuration subc(fn);
+  if (subc.read())
+  {
+    if (allow_includes) subc.process_includes();
+
+    auto& my_root = get_root();
+    const auto& sub_root = subc.get_root();
+    if (my_root.name == sub_root.name)
+      my_root.superimpose(sub_root);
+    else
+      serr << "Included config file with wrong top-level element '"
+           << sub_root.name << "' ignored\n";
+  }
+  else serr << "Can't read included config file " << fn << endl;
+}
+
+//--------------------------------------------------------------------------
+// Process include files
+// Reads
+//   <include file="..."/>/
+// from top level of document.  File can be relative to this file's path
+// and can contain a leaf wildcard.
+// XML from included files is superimposed in order
+void Configuration::process_includes()
+{
+  const auto includes = get_elements("include");
+  for(const auto& include: includes)
+  {
+    const string& fn = include->get_attr("file");
+    File::Path subf(fn);
+
+    // Use first/only master file to resolve against
+    if (!filenames.empty())
+    {
+      File::Path topf(filenames.front());
+      subf = topf.resolve(subf);
+    }
+
+    list<File::Path> paths;
+    if (fn.find('*') != string::npos)
+    {
+      File::Directory subdir{subf.dirname()};
+      subdir.inspect(paths, subf.leafname());
+    }
+    else paths.push_back(subf);
+
+    for(const auto& path: paths)
+      superimpose_file(path.str(), true);
+  }
+}
+
+//--------------------------------------------------------------------------
 // Element list fetch - all elements matching final child step.
 // Only first element of intermediate steps is used - list is not merged!
 list<Element *> Configuration::get_elements(const string& path) const
@@ -398,4 +453,3 @@ bool Configuration::write()
 
   return true;
 }
-

@@ -20,14 +20,38 @@ using namespace ObTools;
 
 const auto test_dir = string{"/tmp/ot-config"};
 const auto toplevel_config_file = test_dir + "/toplevel.xml";
+const auto sub1_config_file = test_dir + "/sub1.xml";
+const auto sub2_config_file = test_dir + "/sub2.xml";
 
 const auto toplevel_config = R"(
-<!--
-  Test config
--->
-
 <toplevel>
   <element attr="foo"/>
+</toplevel>
+)";
+
+const auto toplevel_config_with_include = R"(
+<toplevel>
+  <include file="sub1.xml"/>
+  <element attr="foo"/>
+</toplevel>
+)";
+
+const auto toplevel_config_with_pattern = R"(
+<toplevel>
+  <include file="sub*.xml"/>
+  <element attr="foo"/>
+</toplevel>
+)";
+
+const auto sub1_config = R"(
+<toplevel>
+  <element attr="bar"/>
+</toplevel>
+)";
+
+const auto sub2_config = R"(
+<toplevel>
+  <element attr2="bar2"/>
 </toplevel>
 )";
 
@@ -37,11 +61,8 @@ protected:
 
   virtual void SetUp()
   {
-    // Create state dirs
     File::Directory dir(test_dir);
     dir.ensure(true);
-    File::Path toplevel_path(toplevel_config_file);
-    toplevel_path.write_all(toplevel_config);
   }
 
   virtual void TearDown()
@@ -56,12 +77,47 @@ public:
 
 TEST_F(ConfigurationTest, TestReadConfig)
 {
+  File::Path toplevel_path(toplevel_config_file);
+  toplevel_path.write_all(toplevel_config);
+
   Log::Streams log;
   XML::Configuration config(toplevel_config_file, log.error);
   ASSERT_TRUE(config.read("toplevel"));
   EXPECT_EQ("foo", config["element/@attr"]);
 }
 
+TEST_F(ConfigurationTest, TestIncludeSub1Config)
+{
+  File::Path toplevel_path(toplevel_config_file);
+  toplevel_path.write_all(toplevel_config_with_include);
+  File::Path sub1_path(sub1_config_file);
+  sub1_path.write_all(sub1_config);
+
+  Log::Streams log;
+  XML::Configuration config(toplevel_config_file, log.error);
+  ASSERT_TRUE(config.read("toplevel"));
+
+  config.process_includes();
+  EXPECT_EQ("bar", config["element/@attr"]);
+}
+
+TEST_F(ConfigurationTest, TestIncludePatternConfig)
+{
+  File::Path toplevel_path(toplevel_config_file);
+  toplevel_path.write_all(toplevel_config_with_pattern);
+  File::Path sub1_path(sub1_config_file);
+  sub1_path.write_all(sub1_config);
+  File::Path sub2_path(sub2_config_file);
+  sub2_path.write_all(sub2_config);
+
+  Log::Streams log;
+  XML::Configuration config(toplevel_config_file, log.error);
+  ASSERT_TRUE(config.read("toplevel"));
+
+  config.process_includes();
+  EXPECT_EQ("bar", config["element/@attr"]);
+  EXPECT_EQ("bar2", config["element/@attr2"]);
+}
 
 } // anonymous namespace
 
