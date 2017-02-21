@@ -148,9 +148,14 @@ void Configuration::process_includes(const string& id_attr)
     {
       File::Directory subdir{subf.dirname()};
       subdir.inspect(paths, subf.leafname());
+
+      // Sort by leafname
+      paths.sort([](const File::Path& a, const File::Path& b)
+                 { return a.leafname() < b.leafname(); });
     }
     else paths.push_back(subf);
 
+    // Superimpose in order
     for(const auto& path: paths)
       superimpose_file(path.str(), id_attr, true);
   }
