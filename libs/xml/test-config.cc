@@ -51,7 +51,8 @@ const auto sub1_config = R"(
 
 const auto sub2_config = R"(
 <toplevel>
-  <element attr2="bar2"/>
+  <element id="different" attr="NOTME"/>
+  <element2 attr2="bar2"/>
 </toplevel>
 )";
 
@@ -116,7 +117,7 @@ TEST_F(ConfigurationTest, TestIncludePatternConfig)
 
   config.process_includes();
   EXPECT_EQ("bar", config["element/@attr"]);
-  EXPECT_EQ("bar2", config["element/@attr2"]);
+  EXPECT_EQ("bar2", config["element2/@attr2"]);
 }
 
 } // anonymous namespace

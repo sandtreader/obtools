@@ -955,7 +955,8 @@ public:
 
   //--------------------------------------------------------------------------
   // Superimpose XML from the given file
-  void superimpose_file(const string& fn, bool allow_includes=false);
+  void superimpose_file(const string& fn, const string& id_attr="id",
+                        bool allow_includes=false);
 
   //--------------------------------------------------------------------------
   // Process include files
@@ -964,7 +965,8 @@ public:
   // from top level of document.  File can be relative to this file's path
   // and can contain a leaf wildcard.
   // XML from included files is superimposed in order
-  void process_includes();
+  // id_attr is used to distinguish multiple elements of the same name
+  void process_includes(const string& id_attr="id");
 
   //------------------------------------------------------------------------
   // Get root element

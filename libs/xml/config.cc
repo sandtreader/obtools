@@ -101,7 +101,9 @@ bool Configuration::reload()
 
 //--------------------------------------------------------------------------
 // Superimpose XML from the given file
-void Configuration::superimpose_file(const string& fn, bool allow_includes)
+void Configuration::superimpose_file(const string& fn,
+                                     const string& id_attr,
+                                     bool allow_includes)
 {
   Configuration subc(fn);
   if (subc.read())
@@ -111,7 +113,7 @@ void Configuration::superimpose_file(const string& fn, bool allow_includes)
     auto& my_root = get_root();
     const auto& sub_root = subc.get_root();
     if (my_root.name == sub_root.name)
-      my_root.superimpose(sub_root);
+      my_root.superimpose(sub_root, id_attr);
     else
       serr << "Included config file with wrong top-level element '"
            << sub_root.name << "' ignored\n";
@@ -126,7 +128,7 @@ void Configuration::superimpose_file(const string& fn, bool allow_includes)
 // from top level of document.  File can be relative to this file's path
 // and can contain a leaf wildcard.
 // XML from included files is superimposed in order
-void Configuration::process_includes()
+void Configuration::process_includes(const string& id_attr)
 {
   const auto includes = get_elements("include");
   for(const auto& include: includes)
@@ -150,7 +152,7 @@ void Configuration::process_includes()
     else paths.push_back(subf);
 
     for(const auto& path: paths)
-      superimpose_file(path.str(), true);
+      superimpose_file(path.str(), id_attr, true);
   }
 }
 
