@@ -4,12 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-include_rules
-
+DEPENDS  = xmlmesh-send xmlmesh-receive
 PACKAGE  = ot-xmlmesh-cli
 VERSION  = 2.2.1
 REVISION = 1
 
-ifdef RELEASE
-  : send/<xmlmesh-send> receive/<xmlmesh-receive> |> !package |>
-endif
+include_rules

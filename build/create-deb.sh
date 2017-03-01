@@ -2,10 +2,19 @@
 
 set -e
 
-NAME=$1
-VERSION=$2
-REVISION=$3
-ARCH=$4
+VERSION=$1
+REVISION=$2
+NAMES=""
+NAME=""
+while [ "$#" -gt 2 ]
+do
+  if [ "$NAME" = "" ]
+  then
+    NAME=$3
+  fi
+  NAMES=$NAMES" "$3
+  shift
+done
 
 DEBDIR=debian
 
@@ -56,7 +65,10 @@ if [ `id -u` -eq 0 ]; then
 fi
 
 dpkg-buildpackage -uc -b $FAKEROOT -tc
-mv ../${NAME}_${VERSION}-${REVISION}_${ARCH}.deb ./
-rm ../${NAME}_${VERSION}-${REVISION}_*.changes
-rm -f ../${NAME}_${VERSION}-${REVISION}_*.buildinfo
+for NAME in $NAMES
+do
+  mv ../${NAME}_${VERSION}-${REVISION}_*.deb ./
+  rm ../${NAME}_${VERSION}-${REVISION}_*.changes
+  rm -f ../${NAME}_${VERSION}-${REVISION}_*.buildinfo
+done
 rm -rf $DEBDIR
