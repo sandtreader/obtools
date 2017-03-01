@@ -4,7 +4,7 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-xmlmesh
+NAME    = ot-xmlmesh-core
 TYPE    = lib
 DEPENDS = ot-net ot-soap
 

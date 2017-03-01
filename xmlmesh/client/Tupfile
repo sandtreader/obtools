@@ -6,6 +6,6 @@
 
 NAME    = ot-xmlmesh-client
 TYPE    = lib
-DEPENDS = ot-net ot-log ot-msg ot-xmlmesh ot-xmlmesh-otmp
+DEPENDS = ot-net ot-log ot-msg ot-xmlmesh-core ot-xmlmesh-otmp
 
 include_rules
