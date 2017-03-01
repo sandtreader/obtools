@@ -1,9 +1,9 @@
 #!/bin/sh
 
 BUILD_DIR=`dirname $0`
-ln -s $BUILD_DIR/Tuprules.tup
-ln -s $BUILD_DIR/Tuprules.lua
-ln -s $BUILD_DIR/create-deb.sh
+ln -sf $BUILD_DIR/Tuprules.tup
+ln -sf $BUILD_DIR/Tuprules.lua
+ln -sf $BUILD_DIR/create-deb.sh
 
 while getopts ":t:" opt; do
   case $opt in
