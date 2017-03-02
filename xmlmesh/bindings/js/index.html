@@ -11,12 +11,12 @@
     <script>
       var xmlmesh = new $.xmlmesh("http://localhost:29180", console);
 
-      function simple_send()
+      function simple_send(subject)
       {
         console.log("=== Simple notification ===");
         xmlmesh.send(
         {
-          subject: "test.foo",
+          subject: subject,
           message: "<foo/>",
           completion: function(result)
           {
@@ -117,27 +117,24 @@
       function subscribe_and_poll()
       {
         console.log("=== Subscribe and poll ===");
-        xmlmesh.subscribe_and_poll("test.*",
+        xmlmesh.subscribeAndPoll("test.*",
           function(xml, id)
           {
-            if (xml)
-            {
-              var stop = xml.attr("stop");
-              console.log("Polled "+id+":");
-              console.log(new XMLSerializer().serializeToString(xml[0]));
-              return stop != "true";
-            }
-            else
-            {
-              console.log("Timed out "+id);
-              return true;
-            }
+            console.log("1: Polled "+id+":");
+            console.log(new XMLSerializer().serializeToString(xml[0]));
           }, 1234);
+        xmlmesh.subscribeAndPoll("test2.*",
+          function(xml, id)
+          {
+            console.log("2: Polled "+id+":");
+            console.log(new XMLSerializer().serializeToString(xml[0]));
+          }, 1235);
       }
 
     </script>
 
-    <button onclick="javascript:simple_send()">Simple send</button>
+    <button onclick="javascript:simple_send('test.foo')">Send test.foo</button>
+    <button onclick="javascript:simple_send('test2.foo')">Send test2.foo</button>
     <button onclick="javascript:send_stop()">Send stop</button>
     <button onclick="javascript:request_response()">Request/response</button>
     <button onclick="javascript:subscribe()">Subscribe</button>
