@@ -1,6 +1,5 @@
 .tup/
-Tupdepends.lua
 Tuprules.tup
-Tupsources.lua
+Tuprules.lua
 create-deb.sh
 build-*
