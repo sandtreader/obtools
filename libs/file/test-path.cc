@@ -188,11 +188,11 @@ TEST_F(PathTest, TestTouch)
   int f = open(p.c_str(), O_CREAT | O_WRONLY, 0644);
   write(f, "0123456789", 10);
   close(f);
-  this_thread::sleep_for(chrono::seconds(1));
 
   File::Path path(p);
 
   time_t old_last_modified = path.last_modified();
+  this_thread::sleep_for(chrono::seconds(1));
   int old_length = path.length();
   int touchsuccess = path.touch();
   time_t new_last_modified = path.last_modified();
