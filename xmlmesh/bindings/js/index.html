@@ -120,14 +120,25 @@
         xmlmesh.subscribeAndPoll("test.*",
           function(xml, id)
           {
-            console.log("1: Polled "+id+":");
-            console.log(new XMLSerializer().serializeToString(xml[0]));
+            if (xml)
+            {
+              var stop = xml.attr("stop");
+              console.log("1: Polled "+id+":");
+              console.log(new XMLSerializer().serializeToString(xml[0]));
+              return stop != "true";
+            }
+            else return true;
           }, 1234);
         xmlmesh.subscribeAndPoll("test2.*",
           function(xml, id)
           {
-            console.log("2: Polled "+id+":");
-            console.log(new XMLSerializer().serializeToString(xml[0]));
+            if (xml)
+            {
+              console.log("1: Polled "+id+":");
+              console.log(new XMLSerializer().serializeToString(xml[0]));
+              return true;
+            }
+            else return false; // unsubscribe after first timeout
           }, 1235);
       }
 

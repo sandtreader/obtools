@@ -6,7 +6,8 @@
 //
 //   var xmlmesh = new $.xmlmesh("http://localhost:29180");
 //
-// All methods take a parameters object with at minimum a completion function:
+// All methods take a parameters object with at minimum an optional
+// completion function:
 // {
 //   completion: function(result) { ... }
 // }
@@ -24,8 +25,8 @@
 //
 // For poll(), the completion can return 'false' if it wants polling to stop
 // and will be called with success=false, error=null as the poll times out
-// Note this is not true of subscribeAndPoll - this is not informed of timeouts
-// and cannot stop the poller.
+// Likewise subscribeAndPoll - all subscribers will be called with null on
+// timeout, and can return false to unsubscribe (but the poller keeps running)
 
 (function($)
 {
@@ -138,7 +139,7 @@
           error:function(jqXHR, textStatus, errorThrown)
           {
             self.log("POST error: " + textStatus + " " + errorThrown);
-            params.completion(
+            if (params.completion) params.completion(
               {
                 success: false,
                 error: textStatus+" "+errorThrown
@@ -151,7 +152,7 @@
 
             var result = { success: true }
             if (params.rsvp) result.response = parseSOAP(response).body;
-            params.completion(result);
+            if (params.completion) params.completion(result);
           }
         });
     },
@@ -183,7 +184,7 @@
           error:function(jqXHR, textStatus, errorThrown)
           {
             self.log("Subscribe error: " + textStatus + " " + errorThrown);
-            params.completion(
+            if (params.completion) params.completion(
               {
                 success: false,
                 error: textStatus+" "+errorThrown
@@ -200,7 +201,54 @@
               ref: ref
             };
             if (params.rsvp) result.response = parseSOAP(response).body;
-            params.completion(result);
+            if (params.completion) params.completion(result);
+          }
+        });
+    },
+
+    // Unsubscribe for a subject pattern
+    // {
+    //   pattern:  Subject pattern with glob
+    //   ref:      Mandatory ref used in subscribe()
+    // }
+    unsubscribe: function(params)
+    {
+      this.log("Unsubscribing for "+params.pattern);
+      var message = "<x:leave subject='"+params.pattern+"'/>";
+      var soap = makeSOAP("xmlmesh.subscription.leave", true, message);
+      this.log(soap);
+
+      var ref = params.ref;
+      var url = this.url_prefix+"/unsubscribe/"+ref;
+      var self = this;
+      $.ajax(
+        {
+          type: "post",
+          url: url,
+          data: soap,
+          dataType: "text",
+
+          error:function(jqXHR, textStatus, errorThrown)
+          {
+            self.log("Unsubscribe error: " + textStatus + " " + errorThrown);
+            if (params.completion) params.completion(
+              {
+                success: false,
+                error: textStatus+" "+errorThrown
+              });
+          },
+
+          success: function(response)
+          {
+            self.log("Response: "+response);
+
+            var result =
+            {
+              success: true,
+              ref: ref
+            };
+            if (params.rsvp) result.response = parseSOAP(response).body;
+            if (params.completion) params.completion(result);
           }
         });
     },
@@ -213,6 +261,7 @@
     //   id:    poll ID returned to callback
     // }
     //
+    // params.completion is mandatory
     // result.success is false and result.error null if it just times out
     poll: function(params)
     {
@@ -275,7 +324,8 @@
     // Multiplexed subscribe - uses a single XMLMesh connection and
     // demultiplexes the results before passing back.  Handles its own
     // polling internally.
-    // callback is called with XML message body ($) and id, no return value
+    // callback is called with XML message body ($) and id, or null and id
+    // for a poll timeout - in either case return false to unsubscribe again
     subscribeAndPoll: function(pattern, callback, id)
     {
       var self=this;
@@ -310,6 +360,16 @@
 
             if (start_poller)
             {
+              function unsub(sub_index)
+              {
+                var sub = self.subscribers[sub_index];
+                self.unsubscribe({ pattern: sub.pattern,
+                                   ref: self.poller_ref });
+
+                // Remove from our list
+                self.subscribers.splice(sub_index, 1);
+              }
+
               // Start permanent poller
               self.poll({
                 ref: self.poller_ref,
@@ -323,8 +383,9 @@
                     {
                       var sub = self.subscribers[i];
 
-                      if (glob(sub.pattern, poll_result.subject))
-                        sub.callback(poll_result.response, sub.id);
+                      if (glob(sub.pattern, poll_result.subject)
+                          && !sub.callback(poll_result.response, sub.id))
+                        unsub(i);
                     }
                     return true;  // Always keep running
                   }
@@ -336,8 +397,16 @@
                   }
                   else // Poll timed out
                   {
-                    // Normal behaviour - would only care if we wanted
-                    // to stop it, but we don't (currently)
+                    // Call all subscribers with null so they get a chance
+                    // to unsubscribe
+                    for(var i=0; i<self.subscribers.length; i++)
+                    {
+                      var sub = self.subscribers[i];
+                      if (!sub.callback(null, sub.id))
+                        unsub(i);
+                    }
+
+                    // But continue the poller anyway
                     return true;
                   }
 
