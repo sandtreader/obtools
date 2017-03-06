@@ -25,7 +25,7 @@
 //
 // For poll(), the completion can return 'false' if it wants polling to stop
 // and will be called with success=false, error=null as the poll times out
-// Likewise subscribeAndPoll - all subscribers will be called with null on
+// Likewise pollAndSubscribe - all subscribers will be called with null on
 // timeout, and can return false to unsubscribe (but the poller keeps running)
 
 (function($)
