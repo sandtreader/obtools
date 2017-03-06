@@ -6,7 +6,8 @@
 //
 //   var xmlmesh = new $.xmlmesh("http://localhost:29180");
 //
-// All methods take a parameters object with at minimum a completion function:
+// All methods take a parameters object with at minimum an optional
+// completion function:
 // {
 //   completion: function(result) { ... }
 // }
@@ -18,11 +19,14 @@
 //   success:  true/false
 //   error:    Error message if failed
 //   response: Response XML JQuery if any
+//   subject:  Response subject if any
 //   id:       Poll ID for polls
 // }
 //
 // For poll(), the completion can return 'false' if it wants polling to stop
 // and will be called with success=false, error=null as the poll times out
+// Likewise pollAndSubscribe - all subscribers will be called with null on
+// timeout, and can return false to unsubscribe (but the poller keeps running)
 
 (function($)
 {
@@ -33,6 +37,9 @@
   {
     this.url_prefix = url_prefix;
     this.console = console;
+    this.poller_ref = null;
+    this.poller_started = false;
+    this.subscribers = [];
     this.log("Created new client interface on "+url_prefix);
   }
 
@@ -72,12 +79,28 @@
     return soap;
   }
 
-  // Parse the response SOAP and return the response body
+  // Parse the response SOAP and return the response body and subject as
+  // {body: , subject: }
   function parseSOAP(soap)
   {
     var doc = $.parseXML(soap);
-    var body = $(doc).find("env\\:Body, body");
-    return body.children();
+    var body = $(doc).find("env\\:Body, body").children();
+    var routing = $(doc).find("x\\:routing, routing");
+    var subject = routing.attr("x:subject") || routing.attr("subject");
+    return { body: body, subject: subject };
+  }
+
+  // Very basic glob match using regular expressions
+  function glob(pattern, input)
+  {
+    // Escape everything interesting in pattern _except_ *
+    pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+
+    // Replace * with .*
+    pattern = pattern.replace(/\*/g, '.*');
+
+    // Use regex to test
+    return new RegExp(pattern).test(input);
   }
 
   // --------------------------------------------------------------------------
@@ -116,7 +139,7 @@
           error:function(jqXHR, textStatus, errorThrown)
           {
             self.log("POST error: " + textStatus + " " + errorThrown);
-            params.completion(
+            if (params.completion) params.completion(
               {
                 success: false,
                 error: textStatus+" "+errorThrown
@@ -128,74 +151,28 @@
             self.log("Response: "+response);
 
             var result = { success: true }
-            if (params.rsvp) result.response = parseSOAP(response);
-            params.completion(result);
+            if (params.rsvp) result.response = parseSOAP(response).body;
+            if (params.completion) params.completion(result);
           }
         });
     },
 
-    // Subscribe for a subject pattern with an optional ID
+    // Set up a message poller
+    // Must be in place before subscribes can be issued (with the same ref)
     // {
-    //   pattern:  Subject pattern with glob
-    // }
-    // Also returns result.ref which is unique reference used
-    subscribe: function(params)
-    {
-      this.log("Subscribing for "+params.pattern);
-      var message = "<x:join subject='"+params.pattern+"'/>";
-      var soap = makeSOAP("xmlmesh.subscription.join", true, message);
-      this.log(soap);
-
-      var ref = uniqueID();
-      this.last_ref = ref;
-      var url = this.url_prefix+"/subscribe/"+ref;
-      var self = this;
-      $.ajax(
-        {
-          type: "post",
-          url: url,
-          data: soap,
-          dataType: "text",
-
-          error:function(jqXHR, textStatus, errorThrown)
-          {
-            self.log("Subscribe error: " + textStatus + " " + errorThrown);
-            params.completion(
-              {
-                success: false,
-                error: textStatus+" "+errorThrown
-              });
-          },
-
-          success: function(response)
-          {
-            self.log("Response: "+response);
-
-            var result =
-            {
-              success: true,
-              ref: ref
-            };
-            if (params.rsvp) result.response = parseSOAP(response);
-            params.completion(result);
-          }
-        });
-    },
-
-    // Poll for a message from an earlier subscribe()
-    // {
-    //   ref:   Optional ref from subscribe, otherwise uses last ref
-    //          subscribed with
+    //   ref:   Optional ref (or random one invented)
     //   retry: true to automatically retry polls
     //   id:    poll ID returned to callback
     // }
     //
+    // params.completion is mandatory
     // result.success is false and result.error null if it just times out
     poll: function(params)
     {
       this.log("Polling"+(params.id?" ID "+params.id:"")
                         +(params.retry?" with retry":""));
-      var ref = params.ref || this.last_ref || "unknown";
+      var ref = params.ref || uniqueID();
+      this.last_ref = ref;
       var url = this.url_prefix+"/poll/"+ref;
       var self = this;
       $.ajax(
@@ -220,10 +197,13 @@
             if (response.length)
             {
               self.log("Polled response: "+response);
+              var soap = parseSOAP(response);
+              self.log("Subject: "+soap.subject);
               if (params.completion(
                 {
                   success:  true,
-                  response: parseSOAP(response),
+                  response: soap.body,
+                  subject:  soap.subject,
                   id:       params.id
                 }) === false) retry = false;
             }
@@ -246,54 +226,191 @@
         });
     },
 
-    // Subscribe-and-poll - simple interface which sets up a subscribe,
-    // polls it and calls back to callback function with each received
-    // message ($ on XML), logging any errors and retrying automatically
-    // If callback returns false (specifically) it will stop polling
-    // callback is called with null when poll times out, to give it the
-    // chance to cancel it
-    // id is passed back to callback
-    subscribe_and_poll: function(pattern, callback, id)
+    // Subscribe for a subject pattern with an optional ID
+    // {
+    //   pattern:  Subject pattern with glob
+    //   ref:      Optional ref, defaults to last poll() ref
+    // }
+    subscribe: function(params)
+    {
+      this.log("Subscribing for "+params.pattern);
+      var message = "<x:join subject='"+params.pattern+"'/>";
+      var soap = makeSOAP("xmlmesh.subscription.join", true, message);
+      this.log(soap);
+
+      var ref = params.ref || this.last_ref;
+      var url = this.url_prefix+"/subscribe/"+ref;
+      var self = this;
+      $.ajax(
+        {
+          type: "post",
+          url: url,
+          data: soap,
+          dataType: "text",
+
+          error:function(jqXHR, textStatus, errorThrown)
+          {
+            self.log("Subscribe error: " + textStatus + " " + errorThrown);
+            if (params.completion) params.completion(
+              {
+                success: false,
+                error: textStatus+" "+errorThrown
+              });
+          },
+
+          success: function(response)
+          {
+            self.log("Response: "+response);
+
+            var result =
+            {
+              success: true
+            };
+            if (params.rsvp) result.response = parseSOAP(response).body;
+            if (params.completion) params.completion(result);
+          }
+        });
+    },
+
+    // Unsubscribe for a subject pattern
+    // {
+    //   pattern:  Subject pattern with glob
+    //   ref:      Optional ref, defaults to last poll() ref
+    // }
+    unsubscribe: function(params)
+    {
+      this.log("Unsubscribing for "+params.pattern);
+      var message = "<x:leave subject='"+params.pattern+"'/>";
+      var soap = makeSOAP("xmlmesh.subscription.leave", true, message);
+      this.log(soap);
+
+      var ref = params.ref || this.last_ref;
+      var url = this.url_prefix+"/unsubscribe/"+ref;
+      var self = this;
+      $.ajax(
+        {
+          type: "post",
+          url: url,
+          data: soap,
+          dataType: "text",
+
+          error:function(jqXHR, textStatus, errorThrown)
+          {
+            self.log("Unsubscribe error: " + textStatus + " " + errorThrown);
+            if (params.completion) params.completion(
+              {
+                success: false,
+                error: textStatus+" "+errorThrown
+              });
+          },
+
+          success: function(response)
+          {
+            self.log("Response: "+response);
+
+            var result =
+            {
+              success: true
+            };
+            if (params.rsvp) result.response = parseSOAP(response).body;
+            if (params.completion) params.completion(result);
+          }
+        });
+    },
+
+    // Multiplexed subscribe - uses a single XMLMesh connection and
+    // demultiplexes the results before passing back.  Handles its own
+    // polling internally.
+    // callback is called with XML message body ($) and id, or null and id
+    // for a poll timeout - in either case return false to unsubscribe again
+    pollAndSubscribe: function(pattern, callback, id)
     {
       var self=this;
+
+      // Invent poller ref if not already done -
+      // will be used for all subscribes as well
+      if (!this.poller_ref) this.poller_ref = uniqueID();
+
+      // Function to unsubscribe, given index in subscriptions array
+      function unsub(sub_index)
+      {
+        var sub = self.subscribers[sub_index];
+        self.unsubscribe({ pattern: sub.pattern,
+                           ref: self.poller_ref });
+
+        // Remove from our list
+        self.subscribers.splice(sub_index, 1);
+      }
+
+      // Start poller if not already done
+      if (!this.poller_started)
+      {
+        // Start permanent poller
+        self.poll({
+          ref: self.poller_ref,
+          retry: true,
+          completion: function(poll_result)
+          {
+            if (poll_result.success)
+            {
+              // Call any matching subscribers with this message
+              for(var i=0; i<self.subscribers.length; i++)
+              {
+                var sub = self.subscribers[i];
+
+                if (glob(sub.pattern, poll_result.subject)
+                    && !sub.callback(poll_result.response, sub.id))
+                  unsub(i);
+              }
+              return true;  // Always keep running
+            }
+            else if (poll_result.error)
+            {
+              self.log("Poll failed: "+poll_result.error);
+              self.poller_started = false;
+              return false;  // Forget this one, try again
+            }
+            else // Poll timed out
+            {
+              // Call all subscribers with null so they get a chance
+              // to unsubscribe
+              for(var i=0; i<self.subscribers.length; i++)
+              {
+                var sub = self.subscribers[i];
+                if (!sub.callback(null, sub.id))
+                  unsub(i);
+              }
+
+              // But continue the poller anyway
+              return true;
+            }
+          }
+        });
+
+        start_poller = true;
+        this.poller_started = true;
+      }
+
+      // Subscribe
       this.subscribe({
         pattern: pattern,
+        ref: this.poller_ref,
         completion: function(sub_result)
         {
           if (sub_result.success)
           {
-            self.poll({
-              ref: sub_result.ref,
-              retry: true,
-              completion: function(poll_result)
-              {
-                if (poll_result.success)
-                {
-                  return callback(poll_result.response, id);
-                }
-                else if (poll_result.error)
-                {
-                  self.log("Poll failed: "+poll_result.error);
-
-                  // Resubscribe and restart
-                  self.subscribe_and_poll(pattern, callback, id);
-
-                  return false;  // Don't continue this poll
-                }
-                else // Poll timed out
-                {
-                  return callback(null, id);
-                }
-              }
-            });
+            // Add to subscribers
+            self.subscribers.push({ pattern: pattern,
+                                    callback: callback,
+                                    id: id });
           }
           else
           {
-            self.log("Subscription failed: "+sub_result.error);
+            self.log("Subscription failed: "+sub_result.error)
 
             // Try again after a reasonable timeout
             setTimeout(function()
-                       { self.subscribe_and_poll(pattern, callback, id); },
+                       { self.pollAndSubscribe(pattern, callback, id); },
                        5000); // ? make optional parameter?
           }
         }

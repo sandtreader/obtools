@@ -9,8 +9,8 @@ TYPE     = exe
 DEPENDS  = ot-net ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
 
 PACKAGE  = $(NAME)
-VERSION  = 3.2.0
-REVISION = 1
+VERSION  = 3.3.0
+REVISION = 1~dev1
 
 ifdef RELEASE
   CFLAGS += -DDAEMON
