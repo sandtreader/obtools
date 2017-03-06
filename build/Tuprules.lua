@@ -303,7 +303,7 @@ function run_test(name, test_products, dep_shared_libs)
   inputs += dep_shared_libs
   tup.definerule{
     inputs = inputs,
-    command = "^ TEST %f^ ./" .. name,
+    command = "^ TEST " .. name .. "^ ./" .. name,
     outputs = {}
   }
 end
