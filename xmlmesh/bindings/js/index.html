@@ -67,22 +67,6 @@
         });
       }
 
-      function subscribe()
-      {
-        console.log("=== Subscribe ===");
-        xmlmesh.subscribe(
-        {
-          pattern: "test.*",
-          completion: function(result)
-          {
-            if (result.success)
-              console.log("Success!");
-            else
-              console.log("FAILED: "+result.error);
-          }
-        });
-      }
-
       function poll(retry)
       {
         console.log("=== Poll ===");
@@ -114,10 +98,26 @@
         });
       }
 
-      function subscribe_and_poll()
+      function subscribe()
       {
-        console.log("=== Subscribe and poll ===");
-        xmlmesh.subscribeAndPoll("test.*",
+        console.log("=== Subscribe ===");
+        xmlmesh.subscribe(
+        {
+          pattern: "test.*",
+          completion: function(result)
+          {
+            if (result.success)
+              console.log("Success!");
+            else
+              console.log("FAILED: "+result.error);
+          }
+        });
+      }
+
+      function poll_and_subscribe()
+      {
+        console.log("=== Poll and subscribe ===");
+        xmlmesh.pollAndSubscribe("test.*",
           function(xml, id)
           {
             if (xml)
@@ -129,7 +129,7 @@
             }
             else return true;
           }, 1234);
-        xmlmesh.subscribeAndPoll("test2.*",
+        xmlmesh.pollAndSubscribe("test2.*",
           function(xml, id)
           {
             if (xml)
@@ -148,10 +148,10 @@
     <button onclick="javascript:simple_send('test2.foo')">Send test2.foo</button>
     <button onclick="javascript:send_stop()">Send stop</button>
     <button onclick="javascript:request_response()">Request/response</button>
-    <button onclick="javascript:subscribe()">Subscribe</button>
     <button onclick="javascript:poll(false)">Poll</button>
     <button onclick="javascript:poll(true)">Poll with retry</button>
-    <button onclick="javascript:subscribe_and_poll()">Subscribe and poll</button>
+    <button onclick="javascript:subscribe()">Subscribe</button>
+    <button onclick="javascript:poll_and_subscribe()">Poll and subscribe</button>
   </body>
 </html>
 
