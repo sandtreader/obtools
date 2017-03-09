@@ -135,6 +135,11 @@ public:
   bool send(Message& req)
   { return client?client->send(req):false; }
 
+  MultiClient *get_client() const
+  {
+    return client;
+  }
+
   //------------------------------------------------------------------------
   // Destructor - destroys message interface
   ~OTMPMessageInterface()
