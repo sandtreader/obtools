@@ -69,13 +69,24 @@ public:
 
   //------------------------------------------------------------------------
   // Wait on the condition to become as desired, or for given period
-  template< class Rep, class Period >
-    void wait_for(const std::chrono::duration<Rep,Period>& time,
+  template <class Rep, class Period>
+    void wait_for(const std::chrono::duration<Rep, Period>& time,
                   bool desired = true)
   {
     unique_lock<mutex> lock{m};
     if (flag != desired)
       cv.wait_for(lock, time);
+  }
+
+  //------------------------------------------------------------------------
+  // Wait on the condition to become as desired, or until given time
+  template <class Clock, class Duration>
+    void wait_until(const std::chrono::time_point<Clock, Duration>& time,
+                  bool desired = true)
+  {
+    unique_lock<mutex> lock{m};
+    if (flag != desired)
+      cv.wait_until(lock, time);
   }
 
   //------------------------------------------------------------------------
@@ -131,10 +142,18 @@ protected:
 
   //------------------------------------------------------------------------
   // Sleep for a given period, or until thread told to stop
-  template< class Rep, class Period >
+  template <class Rep, class Period>
     void sleep_for(const std::chrono::duration<Rep,Period>& time)
   {
     running.wait_for(time, false);
+  }
+
+  //------------------------------------------------------------------------
+  // Sleep until a given time, or until thread told to stop
+  template <class Clock, class Duration>
+    void sleep_until(const std::chrono::time_point<Clock, Duration>& time)
+  {
+    running.wait_until(time, false);
   }
 
 public:
@@ -766,6 +785,14 @@ public:
     void sleep_for(const std::chrono::duration<Rep,Period>& time)
   {
     running.wait_for(time, false);
+  }
+
+  //------------------------------------------------------------------------
+  // Sleep until a given time, or until thread told to stop
+  template <class Clock, class Duration>
+    void sleep_until(const std::chrono::time_point<Clock, Duration>& time)
+  {
+    running.wait_until(time, false);
   }
 
   //------------------------------------------------------------------------

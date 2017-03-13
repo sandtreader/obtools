@@ -11,6 +11,7 @@
 #ifndef __OBTOOLS_TIME_H
 #define __OBTOOLS_TIME_H
 
+#include <chrono>
 #include <string>
 #include <map>
 #include <ctime>
@@ -230,6 +231,20 @@ public:
   bool valid() const { return t!=0; }
   bool operator!() const { return !t; }
   operator bool() const { return t; }
+
+  //------------------------------------------------------------------------
+  // As a chrono::time_point
+  operator chrono::high_resolution_clock::time_point() const
+  {
+    return chrono::high_resolution_clock::time_point{
+      chrono::nanoseconds{(NANO * ((t >> NTP_SHIFT) - EPOCH_1970)) +
+                          ((NANO * (t & 0xFFFFFFFF)) / 0x100000000)}};
+  }
+
+  chrono::high_resolution_clock::time_point time_point() const
+  {
+    return static_cast<chrono::high_resolution_clock::time_point>(*this);
+  }
 
   //------------------------------------------------------------------------
   // Convert to time_t
