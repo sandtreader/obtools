@@ -126,13 +126,13 @@ public:
 
   //------------------------------------------------------------------------
   // MultiClient methods exposed for outgoing messages
-  bool request(Message& req, Message& response)
+  bool request(const Message& req, Message& response)
   { return client?client->request(req, response):false; }
 
-  bool request(Message& req)
+  bool request(const Message& req)
   { return client?client->request(req):false; }
 
-  bool send(Message& req)
+  bool send(const Message& req)
   { return client?client->send(req):false; }
 
   MultiClient *get_client() const
