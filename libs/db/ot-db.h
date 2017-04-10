@@ -1075,6 +1075,8 @@ class ConnectionPool: MT::Thread
 
   // Background thread and timestamps
   map<Connection *, Time::Stamp> last_used;
+  static constexpr double default_reap_interval = 10.0;
+  Time::Duration reap_interval = default_reap_interval;
 
   // Internals
   void fill_to_minimum();
@@ -1097,6 +1099,25 @@ public:
   //------------------------------------------------------------------------
   // Release a connection after use
   void release(Connection *conn);
+
+  //------------------------------------------------------------------------
+  // Set the reap interval
+  void set_reap_interval(const Time::Duration &i) { reap_interval = i; }
+
+  //------------------------------------------------------------------------
+  // Get number of connections created
+  unsigned num_connections()
+  { MT::Lock lock(mutex); return connections.size(); }
+
+  //------------------------------------------------------------------------
+  // Get number of connections available
+  unsigned num_available()
+  { MT::Lock lock(mutex); return available.size(); }
+
+  //------------------------------------------------------------------------
+  // Get number of connections in use
+  unsigned num_in_use()
+  { MT::Lock lock(mutex); return connections.size()-available.size(); }
 
   //------------------------------------------------------------------------
   // Destructor

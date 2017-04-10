@@ -11,8 +11,6 @@
 #include "ot-log.h"
 #include <algorithm>
 
-#define BACKGROUND_SLEEP_TIME 10
-
 namespace ObTools { namespace DB {
 
 //--------------------------------------------------------------------------
@@ -233,7 +231,7 @@ void ConnectionPool::run()
       fill_to_minimum();
     }
 
-    sleep_for(chrono::seconds{BACKGROUND_SLEEP_TIME});
+    sleep_for(chrono::duration<double>{reap_interval.seconds()});
   }
 }
 
