@@ -143,7 +143,8 @@ TEST(DatabasePool, TestSecondConnectionWithOverlap)
 TEST(DatabasePool, TestReapIdleConnectionsToMinimum)
 {
   FakeConnectionFactory factory;
-  ConnectionPool pool(factory, 1, 6, Time::Duration(0.5));
+  ConnectionPool pool(factory, 1, 6, Time::Duration(0.3));
+  pool.set_reap_interval(Time::Duration(0.1));
   Connection *conn1 = pool.claim();
   ASSERT_TRUE(!!conn1);
 
@@ -158,7 +159,6 @@ TEST(DatabasePool, TestReapIdleConnectionsToMinimum)
   EXPECT_EQ(1, pool.num_in_use());
 
   // Sleep to allow pool to reap
-  pool.set_reap_interval(Time::Duration(0.1));
   sleep(1);
 
   EXPECT_EQ(1, pool.num_connections());
@@ -170,6 +170,39 @@ TEST(DatabasePool, TestReapIdleConnectionsToMinimum)
   EXPECT_EQ(1, pool.num_connections());
   EXPECT_EQ(1, pool.num_available());
   EXPECT_EQ(0, pool.num_in_use());
+}
+
+TEST(DatabasePool, TestBlockOnPoolEmpty)
+{
+  FakeConnectionFactory factory;
+  ConnectionPool pool(factory, 1, 1, Time::Duration(0.5));
+  Connection *conn1 = pool.claim();
+  ASSERT_TRUE(!!conn1);
+
+  // Start separate thread which will hold and then release the connection
+  thread thread1(
+    [&pool, &conn1]
+    {
+      sleep(1);
+      pool.release(conn1);
+    });
+
+  Connection *conn2 = pool.claim();
+  ASSERT_TRUE(!!conn2);
+  thread1.join();
+}
+
+TEST(DatabasePool, TestTimeoutOfBlockedClaims)
+{
+  FakeConnectionFactory factory;
+  ConnectionPool pool(factory, 1, 1, Time::Duration(0.5));
+  pool.set_reap_interval(Time::Duration(0.1));
+  pool.set_claim_timeout(Time::Duration(1));
+  Connection *conn1 = pool.claim();
+  ASSERT_TRUE(!!conn1);
+
+  Connection *conn2 = pool.claim();
+  ASSERT_TRUE(!conn2);  // Should fail after 1 second
 }
 
 int main(int argc, char **argv)
