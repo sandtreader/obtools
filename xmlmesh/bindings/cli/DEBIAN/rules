@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+PACKAGE = $(shell dh_listpackages)
+TMP     = $(CURDIR)/debian/$(PACKAGE)
+
+%:
+	dh $@
+
+override_dh_install:
+	dh_install
+	mv $(TMP)/usr/bin/xmlmesh-send $(TMP)/usr/bin/ot-xmlmesh-send
+	mv $(TMP)/usr/bin/xmlmesh-receive $(TMP)/usr/bin/ot-xmlmesh-receive
