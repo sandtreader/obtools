@@ -1073,8 +1073,21 @@ class ConnectionPool: MT::Thread
   list<Connection *> connections;  // All connections
   list<Connection *> available;    // Connections available for use
 
+  // Pending claim requests
+  struct PendingRequest
+  {
+    Time::Stamp started;           // When started
+    Connection *connection=0;      // Filled in when available
+    MT::Condition available;       // Signal availability
+  };
+  list<shared_ptr<PendingRequest> > pending_requests;
+  static constexpr double default_claim_timeout = 5.0;
+  Time::Duration claim_timeout = default_claim_timeout;
+
   // Background thread and timestamps
   map<Connection *, Time::Stamp> last_used;
+  static constexpr double default_reap_interval = 1.0;
+  Time::Duration reap_interval = default_reap_interval;
 
   // Internals
   void fill_to_minimum();
@@ -1097,6 +1110,29 @@ public:
   //------------------------------------------------------------------------
   // Release a connection after use
   void release(Connection *conn);
+
+  //------------------------------------------------------------------------
+  // Set the reap interval
+  void set_reap_interval(const Time::Duration &i) { reap_interval = i; }
+
+  //------------------------------------------------------------------------
+  // Set the claim timeout
+  void set_claim_timeout(const Time::Duration &t) { claim_timeout = t; }
+
+  //------------------------------------------------------------------------
+  // Get number of connections created
+  unsigned num_connections()
+  { MT::Lock lock(mutex); return connections.size(); }
+
+  //------------------------------------------------------------------------
+  // Get number of connections available
+  unsigned num_available()
+  { MT::Lock lock(mutex); return available.size(); }
+
+  //------------------------------------------------------------------------
+  // Get number of connections in use
+  unsigned num_in_use()
+  { MT::Lock lock(mutex); return connections.size()-available.size(); }
 
   //------------------------------------------------------------------------
   // Destructor

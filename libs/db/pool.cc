@@ -11,8 +11,6 @@
 #include "ot-log.h"
 #include <algorithm>
 
-#define BACKGROUND_SLEEP_TIME 10
-
 namespace ObTools { namespace DB {
 
 //--------------------------------------------------------------------------
@@ -80,67 +78,80 @@ void ConnectionPool::fill_to_minimum()
 // Returns connection, or 0 if one could not be created or all are active
 Connection *ConnectionPool::claim()
 {
-  MT::Lock lock(mutex);
-  Connection *conn;
+  Log::Streams log;
 
-  // Check if we have one available
-  while (available.size())
   {
-    conn = available.front();
-    available.pop_front();
+    MT::Lock lock(mutex);
+    Connection *conn;
 
-    // Check it's OK
-    if (*conn)
+    // Check if we have one available
+    while (available.size())
     {
-      last_used[conn] = Time::Stamp::now();
-      OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
-                           dlog.debug << "Database connection claimed - "
-                           << connections.size() << " total, "
-                           << available.size() << " available\n";)
-      return conn;
-    }
+      conn = available.front();
+      available.pop_front();
 
-    // Otherwise delete it
-    Log::Streams log;
-    log.error << "Database connection failed - deleting from pool\n";
-
-    map<Connection *, Time::Stamp>::iterator p = last_used.find(conn);
-    if (p!=last_used.end()) last_used.erase(p);
-    connections.remove(conn);
-    delete conn;
-  }
-
-  // Are we allowed to create any more?
-  if (connections.size() < max_connections)
-  {
-    // Try to create one
-    conn = factory.create();
-    if (conn)
-    {
+      // Check it's OK
       if (*conn)
       {
-        connections.push_back(conn);
         last_used[conn] = Time::Stamp::now();
-
-        OBTOOLS_LOG_IF_DEBUG(Log::Streams dlog;
-                             dlog.debug << "New database connection created - "
-                             << "now "<< connections.size() << " in total\n";)
+        OBTOOLS_LOG_IF_DEBUG(log.debug << "Database connection claimed - "
+                             << connections.size() << " total, "
+                             << available.size() << " available\n";)
         return conn;
       }
-      else
-      {
-        delete conn;
-        return 0;
-      }
+
+      // Otherwise delete it
+      log.error << "Database connection failed - deleting from pool\n";
+
+      map<Connection *, Time::Stamp>::iterator p = last_used.find(conn);
+      if (p!=last_used.end()) last_used.erase(p);
+      connections.remove(conn);
+      delete conn;
     }
-    else return 0;
+
+    // Are we allowed to create any more?
+    if (connections.size() < max_connections)
+    {
+      // Try to create one
+      conn = factory.create();
+      if (conn)
+      {
+        if (*conn)
+        {
+          connections.push_back(conn);
+          last_used[conn] = Time::Stamp::now();
+
+          OBTOOLS_LOG_IF_DEBUG(log.debug << "New database connection created - "
+                               << "now "<< connections.size() << " in total\n";)
+          return conn;
+        }
+        else
+        {
+          delete conn;
+          return 0;
+        }
+      }
+      else return 0;
+    }
+  } // out of mutex
+
+
+  log.error << "Database pool reached maximum size: " << max_connections
+            << " - waiting for release\n";
+  shared_ptr<PendingRequest> pr{new PendingRequest};
+  pr->started = Time::Stamp::now();
+  {
+    MT::Lock lock(mutex);
+    pending_requests.push_back(pr);
   }
 
-  Log::Streams log;
-  log.error << "Database pool reached maximum size: " << max_connections
-            << endl;
+  pr->available.wait();
 
-  return 0;
+  if (pr->connection)
+    log.summary << "Database connection returned - unblocking waiting request\n";
+  else
+    log.error << "No database connection returned - failing claim request\n";
+  return pr->connection;
 }
 
 //--------------------------------------------------------------------------
@@ -148,6 +159,16 @@ Connection *ConnectionPool::claim()
 void ConnectionPool::release(Connection *conn)
 {
   MT::Lock lock(mutex);
+
+  // Check if any pending requests could use it
+  if (pending_requests.size())
+  {
+    shared_ptr<PendingRequest> pr = pending_requests.front();
+    pending_requests.pop_front();
+    pr->connection = conn;
+    pr->available.signal();
+    return;
+  }
 
   // Check for double release
   if (find(available.begin(), available.end(), conn) == available.end())
@@ -169,6 +190,8 @@ void ConnectionPool::release(Connection *conn)
 // Run background timeout loop (called from internal thread)
 void ConnectionPool::run()
 {
+  // Short sleep to allow user to set reap_interval lower if required
+  sleep_for(chrono::milliseconds{10});
   Log::Streams log;
 
   while (is_running())
@@ -212,7 +235,7 @@ void ConnectionPool::run()
           // Check if it's the available list
           if (find(available.begin(), available.end(), conn)==available.end())
           {
-            log.error << "Claimed connection is inactive since "
+            log.error << "Claimed database connection is inactive since "
                       << t.iso() << " - ignoring\n";
             // Post back a last_used to suppress errors until next timeout
             q->second = now;
@@ -231,9 +254,21 @@ void ConnectionPool::run()
 
       // Refill in case any deleted
       fill_to_minimum();
+
+      // Check for blocked claim request timeout
+      if (pending_requests.size())
+      {
+        shared_ptr<PendingRequest> pr = pending_requests.front();
+        if (Time::Stamp::now() - pr->started > claim_timeout)
+        {
+          log.error << "Blocked database connection claim request timed out\n";
+          pr->available.signal();  // Not setting connection
+          pending_requests.pop_front();
+        }
+      }
     }
 
-    sleep_for(chrono::seconds{BACKGROUND_SLEEP_TIME});
+    sleep_for(chrono::duration<double>{reap_interval.seconds()});
   }
 }
 
