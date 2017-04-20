@@ -4,7 +4,7 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = xmlmesh-send
+NAME    = ot-xmlmesh-send
 TYPE    = exe
 DEPENDS = ot-xmlmesh-client
 

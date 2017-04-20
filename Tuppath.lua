@@ -1,9 +1,9 @@
 function get_dependency_path(name)
   if name == 'ot-xmlmesh' then
     return 'xmlmesh/core'
-  elseif name == 'xmlmesh-send' then
+  elseif name == 'ot-xmlmesh-send' then
     return 'xmlmesh/bindings/cli/send'
-  elseif name == 'xmlmesh-receive' then
+  elseif name == 'ot-xmlmesh-receive' then
     return 'xmlmesh/bindings/cli/receive'
   elseif string.sub(name, 1, 11) == 'ot-xmlmesh-' then
     return 'xmlmesh/' .. string.sub(name, 12)

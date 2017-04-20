@@ -4,7 +4,7 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-DEPENDS  = xmlmesh-send xmlmesh-receive
+DEPENDS  = ot-xmlmesh-send ot-xmlmesh-receive
 PACKAGE  = ot-xmlmesh-cli
 VERSION  = 2.2.1
 REVISION = 1

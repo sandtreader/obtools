@@ -1,2 +1,2 @@
-send/xmlmesh-send usr/bin
-receive/xmlmesh-receive usr/bin
+send/ot-xmlmesh-send usr/bin
+receive/ot-xmlmesh-receive usr/bin
