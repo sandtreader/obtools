@@ -112,6 +112,20 @@ TEST(XMLTest, TestGetChildElement)
   ASSERT_EQ("splat", splat.name);
 }
 
+TEST(XMLTest, TestIgnoreBOM)
+{
+  string xml="\xef\xbb\xbf<foo/>\n";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+}
+
+TEST(XMLTest, TestFailOnBogusBOM)
+{
+  string xml="\xef\xbf\xbb<foo/>\n";
+  XML::Parser parser;
+  ASSERT_THROW(parser.read_from(xml), XML::ParseFailed);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

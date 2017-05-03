@@ -634,6 +634,7 @@ private:
   //------------------------------------------------------------------------
   // Other private functions
   void parse_stream(istream &s) throw (ParseFailed);
+  void skip_bom(istream& s);
   bool read_tag(xmlchar c, istream &s) throw(ParseFailed);
   void read_end_tag(xmlchar c, istream &s) throw(ParseFailed);
   void read_content(xmlchar c, istream &s) throw(ParseFailed);

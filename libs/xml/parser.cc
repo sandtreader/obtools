@@ -25,6 +25,9 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
   if (root) delete root;
   root = 0;
 
+  // Skip optional Byte Order Mark
+  skip_bom(s);
+
   bool done=false;
   while (!done)
   {
@@ -127,6 +130,19 @@ void Parser::parse_stream(istream& s) throw (ParseFailed)
       fatal("Non-tag data at start of document");
     }
   }
+}
+
+//--------------------------------------------------------------------------
+// Check for and skip a BOM
+void Parser::skip_bom(istream& s)
+{
+  xmlchar c=0;
+  s.get(c);
+  if (c != '\xEF') { s.unget(); return; }
+  s.get(c);
+  if (c != '\xBB') { s.unget(); return; }
+  s.get(c);
+  if (c != '\xBF') { s.unget(); }
 }
 
 //--------------------------------------------------------------------------
