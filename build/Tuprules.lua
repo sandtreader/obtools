@@ -83,7 +83,7 @@ end
 ----------------------------------------------------------------------------
 -- Version
 if VERSION then
-  CFLAGS = CFLAGS .. " -DVERSION='\"" .. tup.getconfig("VERSION")
+  CFLAGS = CFLAGS .. " -DVERSION='\"" .. VERSION
   if tup.getconfig("DEBUG") == "y" then
     CFLAGS = CFLAGS .. " (debug)"
   elseif tup.getconfig("PROFILE") == "y" then
