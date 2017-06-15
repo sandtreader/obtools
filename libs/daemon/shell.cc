@@ -117,20 +117,23 @@ int Shell::start(int argc, char **argv)
 
   // Create log stream if daemon
   auto chan_out = static_cast<Log::Channel *>(nullptr);
-  if (config.get_value_bool("log/@syslog"))
+  if (go_daemon)
   {
-    chan_out = new Log::SyslogChannel;
-  }
-  else if (go_daemon)
-  {
-    string logfile = config.get_value("log/@file", default_log_file);
-    auto sout = new ofstream(logfile.c_str(), ios::app);
-    if (!*sout)
+    if (config.get_value_bool("log/@syslog"))
     {
-      cerr << argv[0] << ": Unable to open logfile " << logfile << endl;
-      return 2;
+      chan_out = new Log::SyslogChannel;
     }
-    chan_out = new Log::OwnedStreamChannel{sout};
+    else
+    {
+      string logfile = config.get_value("log/@file", default_log_file);
+      auto sout = new ofstream(logfile.c_str(), ios::app);
+      if (!*sout)
+      {
+        cerr << argv[0] << ": Unable to open logfile " << logfile << endl;
+        return 2;
+      }
+      chan_out = new Log::OwnedStreamChannel{sout};
+    }
   }
   else
   {
