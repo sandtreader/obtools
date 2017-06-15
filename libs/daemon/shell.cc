@@ -117,7 +117,11 @@ int Shell::start(int argc, char **argv)
 
   // Create log stream if daemon
   auto chan_out = static_cast<Log::Channel *>(nullptr);
-  if (go_daemon)
+  if (config.get_value_bool("log/@syslog"))
+  {
+    chan_out = new Log::SyslogChannel;
+  }
+  else if (go_daemon)
   {
     string logfile = config.get_value("log/@file", default_log_file);
     auto sout = new ofstream(logfile.c_str(), ios::app);

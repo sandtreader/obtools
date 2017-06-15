@@ -256,6 +256,20 @@ public:
 };
 
 //==========================================================================
+// Channel for syslog
+class SyslogChannel: public Channel
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  SyslogChannel() {}
+
+  //------------------------------------------------------------------------
+  // Logging function
+  void log(Message& msg);
+};
+
+//==========================================================================
 // Log distribution point
 // Also a channel, so they can be chained
 class Distributor: public Channel
