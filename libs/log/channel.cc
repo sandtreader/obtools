@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-log.h"
+#include <syslog.h>
 
 namespace ObTools { namespace Log {
 
@@ -40,5 +41,25 @@ void OwnedStreamChannel::log(Message& msg)
   *stream << msg.text << endl;
 }
 
+//==========================================================================
+// SyslogChannel
+
+//--------------------------------------------------------------------------
+// Logging function
+void SyslogChannel::log(Message& msg)
+{
+  int priority;
+  switch (msg.level)
+  {
+    case Log::Level::none:
+    case Log::Level::error:   priority = LOG_ERR; break;
+    case Log::Level::summary: priority = LOG_NOTICE; break;
+    case Log::Level::detail:  priority = LOG_INFO; break;
+    case Log::Level::debug:
+    case Log::Level::dump:    priority = LOG_DEBUG; break;
+  }
+
+  syslog(priority, "%s", msg.text.c_str());
+}
 
 }} // namespaces
