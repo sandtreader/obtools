@@ -158,6 +158,32 @@ TEST(AuthTest, TestGetAuthorizationHeader)
   ASSERT_EQ("AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41", header);
 }
 
+// Unsigned payload version - note no sample available for this, spec from
+// http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+TEST(AuthTest, CanonicalRequestWithUnsignedPayload)
+{
+  AWS::Authenticator auth(example_access_key_id, example_secret_key);
+  AWS::Authenticator::RequestInfo req;
+  req.method = "GET";
+  req.uri = "/test.txt";
+  req.headers.add("Host", "examplebucket.s3.amazonaws.com");
+  req.headers.add("Range", "bytes=0-9");
+  req.date = {"20130524T000000Z"};
+
+  // ------ Create canonical request -------
+  const auto creq = auth.create_canonical_request(req);
+  ASSERT_EQ(R"(GET
+/test.txt
+
+host:examplebucket.s3.amazonaws.com
+range:bytes=0-9
+x-amz-content-sha256:UNSIGNED-PAYLOAD
+x-amz-date:20130524T000000Z
+
+host;range;x-amz-content-sha256;x-amz-date
+UNSIGNED-PAYLOAD)", creq);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

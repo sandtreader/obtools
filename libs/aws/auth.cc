@@ -20,7 +20,7 @@ Misc::PropertyList Authenticator::get_canonical_headers(const RequestInfo& req)
   Misc::PropertyList canon_headers;
   for(const auto& p: req.headers)
     canon_headers.add(Text::tolower(p.first),
-                     Text::canonicalise_space(p.second));
+                      Text::canonicalise_space(p.second));
 
   // Add date
   canon_headers.add("x-amz-date", req.date.iso_minimal()+"Z");
@@ -33,7 +33,7 @@ Misc::PropertyList Authenticator::get_canonical_headers(const RequestInfo& req)
   }
   else
   {
-    // !!! Some way of indicating no signature!
+    canon_headers.add("x-amz-content-sha256", "UNSIGNED-PAYLOAD");
   }
   return canon_headers;
 }
