@@ -27,7 +27,7 @@ protected:
 
   virtual void SetUp()
   {
-    s3 = new AWS::S3Client(test_access_key_id, test_secret_key);
+    s3 = new AWS::S3Client(test_access_key_id, test_secret_key, "us-east-1");
   }
 
   virtual void TearDown()
@@ -42,8 +42,23 @@ public:
 
 TEST_F(S3ClientTest, TestBasicConnection)
 {
+  Web::URL url("http://test.buckets.packetship.com.s3.amazonaws.com/");
+  Web::HTTPMessage request("GET", url);
+  Web::HTTPMessage response;
+  ASSERT_TRUE(s3->do_request(request, response));
+  ASSERT_EQ(200, response.code);
 }
 
+TEST_F(S3ClientTest, TestListAllBuckets)
+{
+  Web::URL url("http://test.buckets.packetship.com.s3.amazonaws.com/?delimiter=/");
+  Web::HTTPMessage request("GET", url);
+  Web::HTTPMessage response;
+  ASSERT_TRUE(s3->do_request(request, response));
+  ASSERT_EQ(200, response.code);
+
+  // !!! Check response
+}
 
 } // anonymous namespace
 

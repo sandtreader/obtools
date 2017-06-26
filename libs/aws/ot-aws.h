@@ -25,15 +25,6 @@ using namespace std;
 class Authenticator
 {
  public:
-  struct CredentialScope
-  {
-    string region;
-    string service;
-
-    CredentialScope(const string& _region, const string& _service):
-      region(_region), service(_service) {}
-  };
-
   struct RequestInfo
   {
     string method;               // GET, POST etc.
@@ -41,21 +32,21 @@ class Authenticator
     Time::Stamp date;            // Time of request
     Misc::PropertyList query;    // Query parameters
     Web::MIMEHeaders& headers;   // HTTP headers (modifiable)
-    CredentialScope scope;       // Credential scope
     bool sign_payload;           // Whether to include payload in sig
     string payload;              // Optional payload to sign
 
   RequestInfo(const string& _method, const string& _uri,
               const Time::Stamp& _date, Web::MIMEHeaders& _headers,
-              const CredentialScope& _scope,
               bool _sign_payload=false, const string& _payload=""):
-    method(_method), uri(_uri), date(_date), headers(_headers), scope(_scope),
+    method(_method), uri(_uri), date(_date), headers(_headers),
     sign_payload(_sign_payload), payload(_payload) {}
   };
 
  private:
   string access_key_id;
   string secret_key;
+  string aws_region;
+  string aws_service;
 
   static Misc::PropertyList get_canonical_headers(const RequestInfo& req);
 
@@ -63,8 +54,11 @@ class Authenticator
   //------------------------------------------------------------------------
   // Constructor
   Authenticator(const string& _access_key_id,
-                const string& _secret_key):
-    access_key_id(_access_key_id), secret_key(_secret_key) {}
+                const string& _secret_key,
+                const string& _aws_region,
+                const string& _aws_service):
+    access_key_id(_access_key_id), secret_key(_secret_key),
+    aws_region(_aws_region), aws_service(_aws_service) {}
 
   //--------------------------------------------------------------------------
   // Add required aws-headers to the headers in the request
@@ -84,8 +78,7 @@ class Authenticator
 
   //--------------------------------------------------------------------------
   // Get a signing key (uses secret_key)
-  string get_signing_key(const Time::Stamp& date,
-                         const CredentialScope& scope);
+  string get_signing_key(const Time::Stamp& date);
 
   //--------------------------------------------------------------------------
   // Get the signature for the string
@@ -93,9 +86,8 @@ class Authenticator
 
   //--------------------------------------------------------------------------
   // Get a credential scope string
-  static string get_scope_string(const RequestInfo& req);
+  string get_scope_string(const Time::Stamp& date);
 
-  // === Combined signature operations ===
   //--------------------------------------------------------------------------
   // Get the signature for a request
   string get_signature(const RequestInfo& req);
@@ -104,6 +96,12 @@ class Authenticator
   // Get the Authorization headers for a request
   string get_authorization_header(const RequestInfo& req);
 
+  // === Combined operation to actually use ==
+
+  //--------------------------------------------------------------------------
+  // Add the necessary aws- and Authorization headers to a request
+  // Modifies req.headers
+  void sign(const RequestInfo& req);
 };
 
 //==========================================================================
@@ -111,7 +109,6 @@ class Authenticator
 class S3Client
 {
   Authenticator authenticator;
-  string s3_host;
 
  public:
   static constexpr auto default_s3_host = "s3.amazonaws.com";
@@ -120,8 +117,12 @@ class S3Client
   // Constructor
   S3Client(const string& _access_key_id,
            const string& _secret_key,
-           const string& _s3_host = default_s3_host):
-    authenticator(_access_key_id, _secret_key), s3_host(_s3_host) {}
+           const string& _aws_region):
+    authenticator(_access_key_id, _secret_key, _aws_region, "s3") {}
+
+  //--------------------------------------------------------------------------
+  // Do an HTTP request, with authentication
+  bool do_request(Web::HTTPMessage& request, Web::HTTPMessage &response);
 };
 
 //==========================================================================

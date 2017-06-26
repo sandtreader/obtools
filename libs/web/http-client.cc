@@ -76,8 +76,9 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 
   XML::XPathProcessor xpath(xml);
 
-  // Grab host for Host header (HTTP/1.1 like)
-  request.headers.put("Host", xpath["host"]);
+  // Grab host for Host header (HTTP/1.1 like) if not already there
+  if (!request.headers.has("host"))
+    request.headers.put("host", xpath["host"]);
 
   // Remove scheme, to suppress host as well
   xpath.delete_elements("scheme");
@@ -203,7 +204,8 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
     }
 
     OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
-                        response.write(log.dump);)
+                        response.write(log.dump);
+                        log.dump << endl;)
 
     // Take cookies if we have a jar
     if (cookie_jar) cookie_jar->take_cookies_from(response, request.url);

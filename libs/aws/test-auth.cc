@@ -22,7 +22,8 @@ using namespace ObTools;
 static constexpr auto example_access_key_id = "AKIAIOSFODNN7EXAMPLE";
 static constexpr auto example_secret_key =
   "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY";
-static AWS::Authenticator::CredentialScope example_scope("us-east-1", "s3");
+static constexpr auto example_region = "us-east-1";
+static constexpr auto example_service = "s3";
 
 // Example from
 // http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html
@@ -37,10 +38,10 @@ TEST(AuthTest, TestCreateSecretHex)
 // http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html
 TEST(AuthTest, TestDerivingSigningKey1)
 {
-  AWS::Authenticator auth(example_access_key_id, example_secret_key);
+  AWS::Authenticator auth(example_access_key_id, example_secret_key,
+                          example_region, "iam");
   Time::Stamp date("20120215T000000Z");
-  AWS::Authenticator::CredentialScope scope("us-east-1", "iam");
-  const auto key = auth.get_signing_key(date, scope);
+  const auto key = auth.get_signing_key(date);
   const auto hex_key = Text::btox(key);
   ASSERT_EQ("f4780e2d9f65fa895f9c67b32ce1baf0b0d8a43505a000a1a9e090d414db404d",
             hex_key);
@@ -50,10 +51,10 @@ TEST(AuthTest, TestDerivingSigningKey1)
 // http://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
 TEST(AuthTest, TestDerivingSigningKey2)
 {
-  AWS::Authenticator auth(example_access_key_id, example_secret_key);
+  AWS::Authenticator auth(example_access_key_id, example_secret_key,
+                          example_region, "iam");
   Time::Stamp date("20150830T000000Z");
-  AWS::Authenticator::CredentialScope scope("us-east-1", "iam");
-  const auto key = auth.get_signing_key(date, scope);
+  const auto key = auth.get_signing_key(date);
   const auto hex_key = Text::btox(key);
   ASSERT_EQ("c4afb1cc5771d871763a393e44b703571b55cc28424d1a5e86da6ed3c154a4b9",
             hex_key);
@@ -65,14 +66,14 @@ TEST(AuthTest, TestIndividualRequestSignatureOperations)
 {
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-  AWS::Authenticator auth(example_access_key_id, secret_key);
+  AWS::Authenticator auth(example_access_key_id, secret_key,
+                          example_region, example_service);
 
   Web::MIMEHeaders headers;
   headers.put("Host", "examplebucket.s3.amazonaws.com");
   headers.put("Range", "bytes=0-9");
   AWS::Authenticator::RequestInfo req("GET", "/test.txt", {"20130524T000000Z"},
-                                      headers, example_scope,
-                                      true);  // empty body, but signed
+                                      headers, true);  // empty body, but signed
   auth.add_aws_headers(req);
 
   // ------ Create canonical request -------
@@ -97,7 +98,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", creq);
 7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972)", sts);
 
   // ------- Signing key ---------
-  const auto key = auth.get_signing_key(req.date, example_scope);
+  const auto key = auth.get_signing_key(req.date);
   // ! Example doesn't say what this key should be
 
   // ------- Signature ---------
@@ -108,12 +109,9 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", creq);
 
 TEST(AuthTest, TestCredentialScope)
 {
-  AWS::Authenticator auth(example_access_key_id, example_secret_key);
-  Web::MIMEHeaders headers;
-  AWS::Authenticator::RequestInfo req("GET", "/test.txt", {"20130524T000000Z"},
-                                      headers, example_scope,
-                                      true);  // empty body, but signed
-  string scope = auth.get_scope_string(req);
+  AWS::Authenticator auth(example_access_key_id, example_secret_key,
+                          example_region, example_service);
+  string scope = auth.get_scope_string({"20130524T000000Z"});
   ASSERT_EQ("20130524/us-east-1/s3/aws4_request", scope);
 }
 
@@ -121,14 +119,14 @@ TEST(AuthTest, TestCombinedRequestSignature)
 {
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-  AWS::Authenticator auth(example_access_key_id, secret_key);
+  AWS::Authenticator auth(example_access_key_id, secret_key,
+                          example_region, example_service);
 
   Web::MIMEHeaders headers;
   headers.put("Host", "examplebucket.s3.amazonaws.com");
   headers.put("Range", "bytes=0-9");
   AWS::Authenticator::RequestInfo req("GET", "/test.txt", {"20130524T000000Z"},
-                                      headers, example_scope,
-                                      true);  // empty body, but signed
+                                      headers, true);  // empty body, but signed
   auth.add_aws_headers(req);
 
   const auto sig = auth.get_signature(req);
@@ -142,32 +140,57 @@ TEST(AuthTest, TestGetAuthorizationHeader)
 {
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
-  AWS::Authenticator auth(example_access_key_id, secret_key);
+  AWS::Authenticator auth(example_access_key_id, secret_key,
+                          example_region, example_service);
 
   Web::MIMEHeaders headers;
   headers.put("Host", "examplebucket.s3.amazonaws.com");
   headers.put("Range", "bytes=0-9");
   AWS::Authenticator::RequestInfo req("GET", "/test.txt", {"20130524T000000Z"},
-                                      headers, example_scope,
-                                      true);  // empty body, but signed
+                                      headers, true);  // empty body, but signed
   auth.add_aws_headers(req);
 
   const auto header = auth.get_authorization_header(req);
   ASSERT_EQ("AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41", header);
 }
 
-// Unsigned payload version - note no sample available for this, spec from
+// Complete test from:
 // http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
-TEST(AuthTest, CanonicalRequestWithUnsignedPayload)
+TEST(AuthTest, TestSignature)
 {
-  AWS::Authenticator auth(example_access_key_id, example_secret_key);
+  // Note!  In this example the key one character different!
+  string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+  AWS::Authenticator auth(example_access_key_id, secret_key,
+                          example_region, example_service);
 
   Web::MIMEHeaders headers;
   headers.put("Host", "examplebucket.s3.amazonaws.com");
   headers.put("Range", "bytes=0-9");
   AWS::Authenticator::RequestInfo req("GET", "/test.txt", {"20130524T000000Z"},
-                                      headers,
-                                      example_scope);  // not signing payload
+                                      headers, true);  // empty body, but signed
+  auth.sign(req);
+
+  string sha_h = headers.get("x-amz-content-sha256");
+  EXPECT_EQ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            sha_h);
+  string date_h = headers.get("x-amz-date");
+  EXPECT_EQ("20130524T000000Z", date_h);
+  string auth_h = headers.get("Authorization");
+  EXPECT_EQ("AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41", auth_h);
+}
+
+// Unsigned payload version - note no sample available for this, spec from
+// http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+TEST(AuthTest, CanonicalRequestWithUnsignedPayload)
+{
+  AWS::Authenticator auth(example_access_key_id, example_secret_key,
+                          example_region, example_service);
+
+  Web::MIMEHeaders headers;
+  headers.put("Host", "examplebucket.s3.amazonaws.com");
+  headers.put("Range", "bytes=0-9");
+  AWS::Authenticator::RequestInfo req("GET", "/test.txt", {"20130524T000000Z"},
+                                      headers);  // not signing payload
   auth.add_aws_headers(req);
 
   // ------ Create canonical request -------
