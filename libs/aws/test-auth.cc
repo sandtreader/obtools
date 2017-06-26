@@ -63,15 +63,18 @@ TEST(AuthTest, TestIndividualRequestSignatureOperations)
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
   AWS::Authenticator auth(example_access_key_id, secret_key);
-  Misc::PropertyList query, headers;
-  headers.add("Host", "examplebucket.s3.amazonaws.com");
-  headers.add("Range", "bytes=0-9");
-  Time::Stamp date("20130524T000000Z");
-  string payload; // empty
+
+  AWS::Authenticator::RequestInfo req;
+  req.method = "GET";
+  req.uri = "/test.txt";
+  req.headers.add("Host", "examplebucket.s3.amazonaws.com");
+  req.headers.add("Range", "bytes=0-9");
+  req.date = {"20130524T000000Z"};
+  string payload;
+  req.payload = &payload; // empty but valid
 
   // ------ Create canonical request -------
-  const auto req = auth.create_canonical_request("GET", "/test.txt", date,
-                                                 query, headers, payload);
+  const auto creq = auth.create_canonical_request(req);
   ASSERT_EQ(R"(GET
 /test.txt
 
@@ -81,10 +84,10 @@ x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
 x-amz-date:20130524T000000Z
 
 host;range;x-amz-content-sha256;x-amz-date
-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", req);
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", creq);
 
   // ------- Create string to sign --------
-  const auto sts = auth.get_string_to_sign(req, date,
+  const auto sts = auth.get_string_to_sign(creq, req.date,
                                        "20130524/us-east-1/s3/aws4_request");
   ASSERT_EQ(R"(AWS4-HMAC-SHA256
 20130524T000000Z
@@ -92,7 +95,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", req);
 7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972)", sts);
 
   // ------- Signing key ---------
-  const auto key = auth.get_signing_key(date, "us-east-1", "s3");
+  const auto key = auth.get_signing_key(req.date, "us-east-1", "s3");
   // ! Example doesn't say what this key should be
 
   // ------- Signature ---------
@@ -104,8 +107,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", req);
 TEST(AuthTest, TestCredentialScope)
 {
   AWS::Authenticator auth(example_access_key_id, example_secret_key);
-  Time::Stamp date("20130524T000000Z");
-  string scope = auth.get_scope(date, "us-east-1", "s3");
+  AWS::Authenticator::RequestInfo req;
+  req.date = {"20130524T000000Z"};
+  req.aws_region = "us-east-1";
+  req.aws_service = "s3";
+  string scope = auth.get_scope(req);
   ASSERT_EQ("20130524/us-east-1/s3/aws4_request", scope);
 }
 
@@ -114,15 +120,18 @@ TEST(AuthTest, TestCombinedRequestSignature)
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
   AWS::Authenticator auth(example_access_key_id, secret_key);
-  Misc::PropertyList query, headers;
-  headers.add("Host", "examplebucket.s3.amazonaws.com");
-  headers.add("Range", "bytes=0-9");
-  Time::Stamp date("20130524T000000Z");
-  string payload; // empty
+  AWS::Authenticator::RequestInfo req;
+  req.method = "GET";
+  req.uri = "/test.txt";
+  req.headers.add("Host", "examplebucket.s3.amazonaws.com");
+  req.headers.add("Range", "bytes=0-9");
+  req.date = {"20130524T000000Z"};
+  req.aws_region = "us-east-1";
+  req.aws_service = "s3";
+  string payload;
+  req.payload = &payload; // empty but valid
 
-  const auto sig = auth.get_signature("GET", "/test.txt", date,
-                                      query, headers, payload,
-                                      "us-east-1", "s3");
+  const auto sig = auth.get_signature(req);
   ASSERT_EQ("f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
             sig);
 }
@@ -134,15 +143,18 @@ TEST(AuthTest, TestGetAuthorizationHeader)
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
   AWS::Authenticator auth(example_access_key_id, secret_key);
-  Misc::PropertyList query, headers;
-  headers.add("Host", "examplebucket.s3.amazonaws.com");
-  headers.add("Range", "bytes=0-9");
-  Time::Stamp date("20130524T000000Z");
-  string payload; // empty
+  AWS::Authenticator::RequestInfo req;
+  req.method = "GET";
+  req.uri = "/test.txt";
+  req.headers.add("Host", "examplebucket.s3.amazonaws.com");
+  req.headers.add("Range", "bytes=0-9");
+  req.date = {"20130524T000000Z"};
+  req.aws_region = "us-east-1";
+  req.aws_service = "s3";
+  string payload;
+  req.payload = &payload; // empty but valid
 
-  const auto header = auth.get_authorization_header("GET", "/test.txt", date,
-                                                    query, headers, payload,
-                                                    "us-east-1", "s3");
+  const auto header = auth.get_authorization_header(req);
   ASSERT_EQ("AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41", header);
 }
 

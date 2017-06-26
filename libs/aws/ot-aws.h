@@ -24,12 +24,24 @@ using namespace std;
 // AWS Authenticator
 class Authenticator
 {
+ public:
+  struct RequestInfo
+  {
+    string method;               // GET, POST etc.
+    string uri;                  // Path part of URI - e.g. /index.html
+    Time::Stamp date;            // Time of request
+    Misc::PropertyList query;    // Query parameters
+    Misc::PropertyList headers;  // HTTP headers
+    string *payload{nullptr};    // Optional payload to sign
+    string aws_region;           // AWS Region (e.g. us-east-1)
+    string aws_service;          // AWS Service (e.g. s3)
+  };
+
+ private:
   string access_key_id;
   string secret_key;
 
-  Misc::PropertyList get_canonical_headers(const Time::Stamp& date,
-                                           const Misc::PropertyList& headers,
-                                           const string& payload);
+  Misc::PropertyList get_canonical_headers(const RequestInfo& req);
 
  public:
   //------------------------------------------------------------------------
@@ -42,12 +54,7 @@ class Authenticator
 
   //--------------------------------------------------------------------------
   // Create canonical request for initial signing
-  string create_canonical_request(const string& method,
-                                  const string& uri,
-                                  const Time::Stamp& date,
-                                  const Misc::PropertyList& query,
-                                  const Misc::PropertyList& headers,
-                                  const string& payload);
+  string create_canonical_request(const RequestInfo& req);
 
   //--------------------------------------------------------------------------
   // Get string to sign from a canonical request
@@ -67,32 +74,16 @@ class Authenticator
 
   //--------------------------------------------------------------------------
   // Get a credential scope string
-  string get_scope(const Time::Stamp& date,
-                   const string& aws_region,
-                   const string& aws_service);
+  string get_scope(const RequestInfo& req);
 
-  // === Combined signature operation ===
+  // === Combined signature operations ===
   //--------------------------------------------------------------------------
   // Get the signature for a request
-  string get_signature(const string& method,
-                       const string& uri,
-                       const Time::Stamp& date,
-                       const Misc::PropertyList& query,
-                       const Misc::PropertyList& headers,
-                       const string& payload,
-                       const string& aws_region,
-                       const string& aws_service);
+  string get_signature(const RequestInfo& req);
 
   //--------------------------------------------------------------------------
   // Get the Authorization headers for a request
-  string get_authorization_header(const string& method,
-                                  const string& uri,
-                                  const Time::Stamp& date,
-                                  const Misc::PropertyList& query,
-                                  const Misc::PropertyList& headers,
-                                  const string& payload,
-                                  const string& aws_region,
-                                  const string& aws_service);
+  string get_authorization_header(const RequestInfo& req);
 };
 
 //==========================================================================
