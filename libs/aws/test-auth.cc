@@ -101,6 +101,14 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", req);
             sig);
 }
 
+TEST(AuthTest, TestCredentialScope)
+{
+  AWS::Authenticator auth(example_access_key_id, example_secret_key);
+  Time::Stamp date("20130524T000000Z");
+  string scope = auth.get_scope(date, "us-east-1", "s3");
+  ASSERT_EQ("20130524/us-east-1/s3/aws4_request", scope);
+}
+
 TEST(AuthTest, TestCombinedRequestSignature)
 {
   // Note!  In this example the key one character different!
@@ -117,6 +125,25 @@ TEST(AuthTest, TestCombinedRequestSignature)
                                       "us-east-1", "s3");
   ASSERT_EQ("f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
             sig);
+}
+
+// Complete test from:
+// http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+TEST(AuthTest, TestGetAuthorizationHeader)
+{
+  // Note!  In this example the key one character different!
+  string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+  AWS::Authenticator auth(example_access_key_id, secret_key);
+  Misc::PropertyList query, headers;
+  headers.add("Host", "examplebucket.s3.amazonaws.com");
+  headers.add("Range", "bytes=0-9");
+  Time::Stamp date("20130524T000000Z");
+  string payload; // empty
+
+  const auto header = auth.get_authorization_header("GET", "/test.txt", date,
+                                                    query, headers, payload,
+                                                    "us-east-1", "s3");
+  ASSERT_EQ("AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,SignedHeaders=host;range;x-amz-content-sha256;x-amz-date,Signature=f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41", header);
 }
 
 } // anonymous namespace

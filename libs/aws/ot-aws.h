@@ -27,6 +27,10 @@ class Authenticator
   string access_key_id;
   string secret_key;
 
+  Misc::PropertyList get_canonical_headers(const Time::Stamp& date,
+                                           const Misc::PropertyList& headers,
+                                           const string& payload);
+
  public:
   //------------------------------------------------------------------------
   // Constructor
@@ -61,6 +65,12 @@ class Authenticator
   // Get the signature for the string
   string sign(const string& signing_key, const string& string_to_sign);
 
+  //--------------------------------------------------------------------------
+  // Get a credential scope string
+  string get_scope(const Time::Stamp& date,
+                   const string& aws_region,
+                   const string& aws_service);
+
   // === Combined signature operation ===
   //--------------------------------------------------------------------------
   // Get the signature for a request
@@ -73,6 +83,16 @@ class Authenticator
                        const string& aws_region,
                        const string& aws_service);
 
+  //--------------------------------------------------------------------------
+  // Get the Authorization headers for a request
+  string get_authorization_header(const string& method,
+                                  const string& uri,
+                                  const Time::Stamp& date,
+                                  const Misc::PropertyList& query,
+                                  const Misc::PropertyList& headers,
+                                  const string& payload,
+                                  const string& aws_region,
+                                  const string& aws_service);
 };
 
 //==========================================================================
