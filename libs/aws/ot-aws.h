@@ -34,6 +34,8 @@ class Authenticator
                 const string& _secret_key):
     access_key_id(_access_key_id), secret_key(_secret_key) {}
 
+  // === Partial operations exposed for testing ===
+
   //--------------------------------------------------------------------------
   // Create canonical request for initial signing
   string create_canonical_request(const string& method,
@@ -58,6 +60,19 @@ class Authenticator
   //--------------------------------------------------------------------------
   // Get the signature for the string
   string sign(const string& signing_key, const string& string_to_sign);
+
+  // === Combined signature operation ===
+  //--------------------------------------------------------------------------
+  // Get the signature for a request
+  string get_signature(const string& method,
+                       const string& uri,
+                       const Time::Stamp& date,
+                       const Misc::PropertyList& query,
+                       const Misc::PropertyList& headers,
+                       const string& payload,
+                       const string& aws_region,
+                       const string& aws_service);
+
 };
 
 //==========================================================================

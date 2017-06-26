@@ -58,7 +58,7 @@ TEST(AuthTest, TestDerivingSigningKey2)
 
 // Example from
 // http://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
-TEST(AuthTest, TestRequestSignature)
+TEST(AuthTest, TestIndividualRequestSignatureOperations)
 {
   // Note!  In this example the key one character different!
   string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
@@ -101,6 +101,23 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855)", req);
             sig);
 }
 
+TEST(AuthTest, TestCombinedRequestSignature)
+{
+  // Note!  In this example the key one character different!
+  string secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+  AWS::Authenticator auth(example_access_key_id, secret_key);
+  Misc::PropertyList query, headers;
+  headers.add("Host", "examplebucket.s3.amazonaws.com");
+  headers.add("Range", "bytes=0-9");
+  Time::Stamp date("20130524T000000Z");
+  string payload; // empty
+
+  const auto sig = auth.get_signature("GET", "/test.txt", date,
+                                      query, headers, payload,
+                                      "us-east-1", "s3");
+  ASSERT_EQ("f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
+            sig);
+}
 
 } // anonymous namespace
 

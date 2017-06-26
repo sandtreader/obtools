@@ -96,5 +96,23 @@ string Authenticator::sign(const string& signing_key,
   return Text::btox(Crypto::HMACSHA256::sign(signing_key, string_to_sign));
 }
 
+//--------------------------------------------------------------------------
+// Get the signature for a request
+string Authenticator::get_signature(const string& method,
+                                    const string& uri,
+                                    const Time::Stamp& date,
+                                    const Misc::PropertyList& query,
+                                    const Misc::PropertyList& headers,
+                                    const string& payload,
+                                    const string& aws_region,
+                                    const string& aws_service)
+{
+  string canon_request = create_canonical_request(method, uri, date,
+                                                  query, headers, payload);
+  string scope = date.iso_date(0)+"/"+aws_region+"/"+aws_service+"/aws4_request";
+  string sts = get_string_to_sign(canon_request, date, scope);
+  string key = get_signing_key(date, aws_region, aws_service);
+  return sign(key, sts);
+}
 
 }} // namespaces
