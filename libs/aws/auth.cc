@@ -14,27 +14,32 @@
 namespace ObTools { namespace AWS {
 
 //--------------------------------------------------------------------------
+// Add required aws-headers to the given headers
+void Authenticator::add_aws_headers(const RequestInfo& req)
+{
+  // Add date
+  req.headers.put("x-amz-date", req.date.iso_minimal()+"Z");
+
+  // Add payload hash if required
+  if (req.sign_payload)
+  {
+    const auto& payload_hash = Crypto::SHA256::digest_hex(req.payload);
+    req.headers.put("x-amz-content-sha256", payload_hash);
+  }
+  else
+  {
+    req.headers.put("x-amz-content-sha256", "UNSIGNED-PAYLOAD");
+  }
+}
+
+//--------------------------------------------------------------------------
 // Create canonical header list
 Misc::PropertyList Authenticator::get_canonical_headers(const RequestInfo& req)
 {
   Misc::PropertyList canon_headers;
-  for(const auto& p: req.headers)
-    canon_headers.add(Text::tolower(p.first),
-                      Text::canonicalise_space(p.second));
-
-  // Add date
-  canon_headers.add("x-amz-date", req.date.iso_minimal()+"Z");
-
-  // Add hash of payload
-  if (req.payload)
-  {
-    const auto& payload_hash = Crypto::SHA256::digest_hex(*req.payload);
-    canon_headers.add("x-amz-content-sha256", payload_hash);
-  }
-  else
-  {
-    canon_headers.add("x-amz-content-sha256", "UNSIGNED-PAYLOAD");
-  }
+  for(const auto& p: req.headers.xml.children)
+    canon_headers.add(Text::tolower(p->name),
+                      Text::canonicalise_space(**p));
   return canon_headers;
 }
 
@@ -87,12 +92,11 @@ string Authenticator::get_string_to_sign(
 //--------------------------------------------------------------------------
 // Get a signing key
 string Authenticator::get_signing_key(const Time::Stamp& date,
-                                      const string& aws_region,
-                                      const string& aws_service)
+                                      const CredentialScope& scope)
 {
   string key = Crypto::HMACSHA256::sign("AWS4"+secret_key, date.iso_date(0));
-  key = Crypto::HMACSHA256::sign(key, aws_region);
-  key = Crypto::HMACSHA256::sign(key, aws_service);
+  key = Crypto::HMACSHA256::sign(key, scope.region);
+  key = Crypto::HMACSHA256::sign(key, scope.service);
   return Crypto::HMACSHA256::sign(key, "aws4_request");
 }
 
@@ -106,10 +110,10 @@ string Authenticator::sign(const string& signing_key,
 
 //--------------------------------------------------------------------------
 // Get a credential scope string
-string Authenticator::get_scope(const RequestInfo& req)
+string Authenticator::get_scope_string(const RequestInfo& req)
 {
-  return req.date.iso_date(0)+"/"+req.aws_region+"/"
-        +req.aws_service+"/aws4_request";
+  return req.date.iso_date(0)+"/"+req.scope.region+"/"
+        +req.scope.service+"/aws4_request";
 }
 
 //--------------------------------------------------------------------------
@@ -117,9 +121,9 @@ string Authenticator::get_scope(const RequestInfo& req)
 string Authenticator::get_signature(const RequestInfo& req)
 {
   string canon_request = create_canonical_request(req);
-  string scope = get_scope(req);
+  string scope = get_scope_string(req);
   string sts = get_string_to_sign(canon_request, req.date, scope);
-  string key = get_signing_key(req.date, req.aws_region, req.aws_service);
+  string key = get_signing_key(req.date, req.scope);
   return sign(key, sts);
 }
 
@@ -129,7 +133,7 @@ string Authenticator::get_authorization_header(const RequestInfo& req)
 {
   ostringstream oss;
   oss << "AWS4-HMAC-SHA256 Credential=";
-  oss << access_key_id << '/' << get_scope(req);
+  oss << access_key_id << '/' << get_scope_string(req);
   oss << ",SignedHeaders=";
 
   Misc::PropertyList canon_headers = get_canonical_headers(req);

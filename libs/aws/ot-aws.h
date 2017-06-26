@@ -25,23 +25,39 @@ using namespace std;
 class Authenticator
 {
  public:
+  struct CredentialScope
+  {
+    string region;
+    string service;
+
+    CredentialScope(const string& _region, const string& _service):
+      region(_region), service(_service) {}
+  };
+
   struct RequestInfo
   {
     string method;               // GET, POST etc.
     string uri;                  // Path part of URI - e.g. /index.html
     Time::Stamp date;            // Time of request
     Misc::PropertyList query;    // Query parameters
-    Misc::PropertyList headers;  // HTTP headers
-    string *payload{nullptr};    // Optional payload to sign
-    string aws_region;           // AWS Region (e.g. us-east-1)
-    string aws_service;          // AWS Service (e.g. s3)
+    Web::MIMEHeaders& headers;   // HTTP headers (modifiable)
+    CredentialScope scope;       // Credential scope
+    bool sign_payload;           // Whether to include payload in sig
+    string payload;              // Optional payload to sign
+
+  RequestInfo(const string& _method, const string& _uri,
+              const Time::Stamp& _date, Web::MIMEHeaders& _headers,
+              const CredentialScope& _scope,
+              bool _sign_payload=false, const string& _payload=""):
+    method(_method), uri(_uri), date(_date), headers(_headers), scope(_scope),
+    sign_payload(_sign_payload), payload(_payload) {}
   };
 
  private:
   string access_key_id;
   string secret_key;
 
-  Misc::PropertyList get_canonical_headers(const RequestInfo& req);
+  static Misc::PropertyList get_canonical_headers(const RequestInfo& req);
 
  public:
   //------------------------------------------------------------------------
@@ -50,31 +66,34 @@ class Authenticator
                 const string& _secret_key):
     access_key_id(_access_key_id), secret_key(_secret_key) {}
 
+  //--------------------------------------------------------------------------
+  // Add required aws-headers to the headers in the request
+  static void add_aws_headers(const RequestInfo& req);
+
   // === Partial operations exposed for testing ===
 
   //--------------------------------------------------------------------------
   // Create canonical request for initial signing
-  string create_canonical_request(const RequestInfo& req);
+  static string create_canonical_request(const RequestInfo& req);
 
   //--------------------------------------------------------------------------
   // Get string to sign from a canonical request
-  string get_string_to_sign(const string& canonical_request,
-                            const Time::Stamp& date,
-                            const string& scope);
+  static string get_string_to_sign(const string& canonical_request,
+                                   const Time::Stamp& date,
+                                   const string& scope);
 
   //--------------------------------------------------------------------------
-  // Get a signing key
+  // Get a signing key (uses secret_key)
   string get_signing_key(const Time::Stamp& date,
-                         const string& aws_region,
-                         const string& aws_service);
+                         const CredentialScope& scope);
 
   //--------------------------------------------------------------------------
   // Get the signature for the string
-  string sign(const string& signing_key, const string& string_to_sign);
+  static string sign(const string& signing_key, const string& string_to_sign);
 
   //--------------------------------------------------------------------------
   // Get a credential scope string
-  string get_scope(const RequestInfo& req);
+  static string get_scope_string(const RequestInfo& req);
 
   // === Combined signature operations ===
   //--------------------------------------------------------------------------
@@ -84,6 +103,7 @@ class Authenticator
   //--------------------------------------------------------------------------
   // Get the Authorization headers for a request
   string get_authorization_header(const RequestInfo& req);
+
 };
 
 //==========================================================================
