@@ -131,21 +131,35 @@ TEST_F(S3ClientTest, TestCreateAndDeleteBucketInEURegion)
   ASSERT_TRUE(s3->delete_bucket("test-temp-eu.buckets.packetship.com"));
 }
 
-TEST_F(S3ClientTest, TestCreateAndDeleteObject)
+TEST_F(S3ClientTest, TestCreateGetAndDeleteObject)
 {
-  EXPECT_TRUE(s3->create_bucket("test-temp.buckets.packetship.com"));
-
   string data = "Mary had a little lamb";
   string key = "mary.txt";
-  EXPECT_TRUE(s3->create_object("test-temp.buckets.packetship.com", key, data));
+  EXPECT_TRUE(s3->create_object("test.buckets.packetship.com", key, data));
 
   string readback;
-  EXPECT_TRUE(s3->get_object("test-temp.buckets.packetship.com", key,
+  EXPECT_TRUE(s3->get_object("test.buckets.packetship.com", key,
                              readback));
   EXPECT_EQ(data, readback);
 
-  EXPECT_TRUE(s3->delete_object("test-temp.buckets.packetship.com", key));
-  ASSERT_TRUE(s3->delete_bucket("test-temp.buckets.packetship.com"));
+  EXPECT_TRUE(s3->delete_object("test.buckets.packetship.com", key));
+}
+
+TEST_F(S3ClientTest, TestPublicObjectsAreWorldReadable)
+{
+  string data = "Mary had a little lamb";
+  string key = "mary.txt";
+  EXPECT_TRUE(s3->create_object("test.buckets.packetship.com", key, data,
+                                "public-read"));
+
+  // Check readability with an ordinary HTTP client
+  Web::URL url("http://test.buckets.packetship.com.s3.amazonaws.com/mary.txt");
+  Web::HTTPClient http(url);
+  string readback;
+  EXPECT_EQ(200, http.get(url, readback));
+  EXPECT_EQ(data, readback);
+
+  EXPECT_TRUE(s3->delete_object("test.buckets.packetship.com", key));
 }
 
 } // anonymous namespace

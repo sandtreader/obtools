@@ -136,29 +136,27 @@ class S3Client
   //--------------------------------------------------------------------------
   // Do an HTTP request on the given URL, with string request and response
   bool do_request(const string& method, const Web::URL& url,
+                  const Misc::PropertyList& req_headers,
                   const string& req_s, string& resp_s);
-
-  //--------------------------------------------------------------------------
-  // Do an HTTP request on the given URL with no response (e.g. PUT)
-  bool do_request(const string& method, const Web::URL& url, const string& req_s)
-  { string r; return do_request(method, url, req_s, r); }
 
   //--------------------------------------------------------------------------
   // Do an HTTP request on the given URL with no request or response (e.g. DELETE)
   bool do_request(const string& method, const Web::URL& url)
-  { string r; return do_request(method, url, "", r); }
+  { string r; Misc::PropertyList h; return do_request(method, url, h, "", r); }
 
   //--------------------------------------------------------------------------
   // Do an XML HTTP request on the given URL.
   // If request is invalid (Element::none), no request body is sent
   bool do_request(const string& method, const Web::URL& url,
+                  const Misc::PropertyList& req_headers,
                   const XML::Element& req_xml, XML::Element& resp_xml);
 
   //--------------------------------------------------------------------------
   // Do an HTTP GET request on the given URL with XML response
   bool do_request(const Web::URL& url,
                   XML::Element& resp_xml)
-  { return do_request("GET", url, XML::Element::none, resp_xml); }
+  { Misc::PropertyList h;
+    return do_request("GET", url, h, XML::Element::none, resp_xml); }
 
   //--------------------------------------------------------------------------
   // Get S3 REST URL for a given bucket (or all buckets if empty) and object
@@ -185,8 +183,10 @@ class S3Client
 
   //--------------------------------------------------------------------------
   // Create an object
+  // acl can be 'public-read' etc., defaults to 'private'
   bool create_object(const string& bucket_name, const string& object_key,
-                     const string& object_data);
+                     const string& object_data,
+                     const string& acl="");
 
   //--------------------------------------------------------------------------
   // Get an object

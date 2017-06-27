@@ -39,6 +39,7 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
 // Do an HTTP request on the given URL, with string request and response
 bool S3Client::do_request(const string& method,
                           const Web::URL& url,
+                          const Misc::PropertyList& req_headers,
                           const string& req_s,
                           string& resp_s)
 {
@@ -51,6 +52,8 @@ bool S3Client::do_request(const string& method,
   {
     log.detail << "S3 " << method << " " << the_url << endl;
     Web::HTTPMessage request(method, the_url);
+    for(const auto& p: req_headers)
+      request.headers.put(p.first, p.second);
     request.body = req_s;
     OBTOOLS_LOG_IF_DEBUG(log.debug << request.body;)
 
@@ -100,13 +103,14 @@ bool S3Client::do_request(const string& method,
 // If request is invalid (Element::none), no request body is sent
 bool S3Client::do_request(const string& method,
                           const Web::URL& url,
+                          const Misc::PropertyList& req_headers,
                           const XML::Element& req_xml,
                           XML::Element& resp_xml)
 {
   string req_s = !req_xml?"":req_xml.to_string();
   string resp_s;
 
-  if (!do_request(method, url, req_s, resp_s)) return false;
+  if (!do_request(method, url, req_headers, req_s, resp_s)) return false;
 
   if (!resp_s.empty())
   {
@@ -186,7 +190,8 @@ bool S3Client::create_bucket(const string& bucket_name,
     XML::Element request("CreateBucketConfiguration");
     request.add("LocationConstraint", region);
     XML::Element response;
-    return do_request("PUT", get_url(bucket_name), request, response);
+    Misc::PropertyList headers;
+    return do_request("PUT", get_url(bucket_name), headers, request, response);
   }
 }
 
@@ -201,9 +206,14 @@ bool S3Client::delete_bucket(const string& bucket_name)
 // Create an object
 bool S3Client::create_object(const string& bucket_name,
                              const string& object_key,
-                             const string& object_data)
+                             const string& object_data,
+                             const string& acl)
 {
-  return do_request("PUT", get_url(bucket_name, object_key), object_data);
+  string response;
+  Misc::PropertyList headers;
+  if (!acl.empty()) headers.add("x-amz-acl", acl);
+  return do_request("PUT", get_url(bucket_name, object_key), headers,
+                    object_data, response);
 }
 
 //--------------------------------------------------------------------------
@@ -212,7 +222,9 @@ bool S3Client::get_object(const string& bucket_name,
                           const string& object_key,
                           string& object_data)
 {
-  return do_request("GET", get_url(bucket_name, object_key), "", object_data);
+  Misc::PropertyList headers;
+  return do_request("GET", get_url(bucket_name, object_key), headers,
+                    "", object_data);
 }
 
 //--------------------------------------------------------------------------
