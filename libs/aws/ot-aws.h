@@ -134,23 +134,31 @@ class S3Client
   bool do_request(Web::HTTPMessage& request, Web::HTTPMessage &response);
 
   //--------------------------------------------------------------------------
+  // Do an HTTP request on the given URL, with string request and response
+  bool do_request(const string& method, const Web::URL& url,
+                  const string& req_s, string& resp_s);
+
+  //--------------------------------------------------------------------------
+  // Do an HTTP request on the given URL with no response (e.g. PUT)
+  bool do_request(const string& method, const Web::URL& url, const string& req_s)
+  { string r; return do_request(method, url, req_s, r); }
+
+  //--------------------------------------------------------------------------
+  // Do an HTTP request on the given URL with no request or response (e.g. DELETE)
+  bool do_request(const string& method, const Web::URL& url)
+  { string r; return do_request(method, url, "", r); }
+
+  //--------------------------------------------------------------------------
   // Do an XML HTTP request on the given URL.
   // If request is invalid (Element::none), no request body is sent
-  bool do_request(const string& method,
-                  const Web::URL& url,
-                  const XML::Element& req_xml,
-                  XML::Element& resp_xml);
+  bool do_request(const string& method, const Web::URL& url,
+                  const XML::Element& req_xml, XML::Element& resp_xml);
 
   //--------------------------------------------------------------------------
   // Do an HTTP GET request on the given URL with XML response
   bool do_request(const Web::URL& url,
                   XML::Element& resp_xml)
   { return do_request("GET", url, XML::Element::none, resp_xml); }
-
-  //--------------------------------------------------------------------------
-  // Do an HTTP request on the given URL with no request or response (e.g. DELETE)
-  bool do_request(const string& method, const Web::URL& url)
-  { XML::Element r; return do_request(method, url, XML::Element::none, r); }
 
   //--------------------------------------------------------------------------
   // Get S3 REST URL for a given bucket (or all buckets if empty) and object
@@ -174,6 +182,20 @@ class S3Client
   //--------------------------------------------------------------------------
   // Delete a bucket
   bool delete_bucket(const string& bucket_name);
+
+  //--------------------------------------------------------------------------
+  // Create an object
+  bool create_object(const string& bucket_name, const string& object_key,
+                     const string& object_data);
+
+  //--------------------------------------------------------------------------
+  // Get an object
+  bool get_object(const string& bucket_name, const string& object_key,
+                  string& object_data);
+
+  //--------------------------------------------------------------------------
+  // Delete an object
+  bool delete_object(const string& bucket_name, const string& object_key);
 };
 
 //==========================================================================

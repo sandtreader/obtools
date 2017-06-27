@@ -131,6 +131,23 @@ TEST_F(S3ClientTest, TestCreateAndDeleteBucketInEURegion)
   ASSERT_TRUE(s3->delete_bucket("test-temp-eu.buckets.packetship.com"));
 }
 
+TEST_F(S3ClientTest, TestCreateAndDeleteObject)
+{
+  EXPECT_TRUE(s3->create_bucket("test-temp.buckets.packetship.com"));
+
+  string data = "Mary had a little lamb";
+  string key = "mary.txt";
+  EXPECT_TRUE(s3->create_object("test-temp.buckets.packetship.com", key, data));
+
+  string readback;
+  EXPECT_TRUE(s3->get_object("test-temp.buckets.packetship.com", key,
+                             readback));
+  EXPECT_EQ(data, readback);
+
+  EXPECT_TRUE(s3->delete_object("test-temp.buckets.packetship.com", key));
+  ASSERT_TRUE(s3->delete_bucket("test-temp.buckets.packetship.com"));
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

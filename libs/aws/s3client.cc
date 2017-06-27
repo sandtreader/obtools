@@ -36,12 +36,11 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
 }
 
 //--------------------------------------------------------------------------
-// Do an XML HTTP request on the given URL.
-// If request is invalid (Element::none), no request body is sent
+// Do an HTTP request on the given URL, with string request and response
 bool S3Client::do_request(const string& method,
                           const Web::URL& url,
-                          const XML::Element& req_xml,
-                          XML::Element& resp_xml)
+                          const string& req_s,
+                          string& resp_s)
 {
   Log::Streams log;
   Web::URL the_url = url;
@@ -52,14 +51,15 @@ bool S3Client::do_request(const string& method,
   {
     log.detail << "S3 " << method << " " << the_url << endl;
     Web::HTTPMessage request(method, the_url);
-    if (!!req_xml)
-    {
-      request.body = req_xml.to_string();
-      OBTOOLS_LOG_IF_DEBUG(log.debug << request.body;)
-    }
+    request.body = req_s;
+    OBTOOLS_LOG_IF_DEBUG(log.debug << request.body;)
+
     if (!do_request(request, response)) return false;
 
-    if (!response.body.empty())
+    resp_s = response.body;
+
+    // Check for 307 Redirects when switching region, but only allow once
+    if (!redirect && response.code == 307)
     {
       // Try to parse it
       XML::Parser parser(log.error);
@@ -73,14 +73,7 @@ bool S3Client::do_request(const string& method,
         return false;
       }
 
-      resp_xml = parser.get_root();  // Copy
-      OBTOOLS_LOG_IF_DEBUG(log.debug << resp_xml;)
-    }
-
-    // Check for 307 Redirects when switching region, but only allow once
-    if (!redirect && response.code == 307)
-    {
-      const string& endpoint = *resp_xml.get_child("Endpoint");
+      const string& endpoint = *parser.get_root().get_child("Endpoint");
       if (endpoint.empty()) break;
 
       log.detail << "S3 307 redirect to " << endpoint << endl;
@@ -96,9 +89,44 @@ bool S3Client::do_request(const string& method,
   {
     log.error << "S3 request " << method << " " << url << " failed:\n";
     log.error << response.code << " " << response.reason << endl;
-    log.error << resp_xml;
+    log.error << response.body;
     return false;
   }
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Do an XML HTTP request on the given URL.
+// If request is invalid (Element::none), no request body is sent
+bool S3Client::do_request(const string& method,
+                          const Web::URL& url,
+                          const XML::Element& req_xml,
+                          XML::Element& resp_xml)
+{
+  string req_s = !req_xml?"":req_xml.to_string();
+  string resp_s;
+
+  if (!do_request(method, url, req_s, resp_s)) return false;
+
+  if (!resp_s.empty())
+  {
+    Log::Streams log;
+    // Try to parse it
+    XML::Parser parser(log.error);
+    try
+    {
+      parser.read_from(resp_s);
+    }
+    catch (XML::ParseFailed)
+    {
+      log.error << "Bad XML in S3 response\n";
+      return false;
+    }
+
+    resp_xml = parser.get_root();  // Copy
+    OBTOOLS_LOG_IF_DEBUG(log.debug << resp_xml;)
+  }
+
   return true;
 }
 
@@ -167,6 +195,32 @@ bool S3Client::create_bucket(const string& bucket_name,
 bool S3Client::delete_bucket(const string& bucket_name)
 {
   return do_request("DELETE", get_url(bucket_name));
+}
+
+//--------------------------------------------------------------------------
+// Create an object
+bool S3Client::create_object(const string& bucket_name,
+                             const string& object_key,
+                             const string& object_data)
+{
+  return do_request("PUT", get_url(bucket_name, object_key), object_data);
+}
+
+//--------------------------------------------------------------------------
+// Get an object
+bool S3Client::get_object(const string& bucket_name,
+                          const string& object_key,
+                          string& object_data)
+{
+  return do_request("GET", get_url(bucket_name, object_key), "", object_data);
+}
+
+//--------------------------------------------------------------------------
+// Delete an object
+bool S3Client::delete_object(const string& bucket_name,
+                             const string& object_key)
+{
+  return do_request("DELETE", get_url(bucket_name, object_key));
 }
 
 }} // namespaces
