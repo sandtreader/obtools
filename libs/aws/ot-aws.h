@@ -114,6 +114,8 @@ class Authenticator
 class S3Client
 {
   Authenticator authenticator;
+  bool persistent{false};
+  auto_ptr<Web::HTTPClient> http;
 
  public:
   static constexpr auto s3_host = "s3.amazonaws.com";
@@ -128,6 +130,10 @@ class S3Client
   //--------------------------------------------------------------------------
   // Set region (for redirection after bucket creation)
   void set_region(const string& region) { authenticator.set_region(region); }
+
+  //--------------------------------------------------------------------------
+  // Enable persistent HTTP connections
+  void enable_persistence() { persistent = true; }
 
   //--------------------------------------------------------------------------
   // Do an HTTP request, with authentication

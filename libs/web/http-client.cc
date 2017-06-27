@@ -194,8 +194,10 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
   {
     // If progressive, just read the headers
     // otherwise, read all, allowing for EOF marker for end of body
+    // only if HTTP/1.0 - otherwise we fail if there is no Content-Length
+    // provided
     if (progressive?!response.read_headers(*stream)
-                   :!response.read(*stream, true))
+                   :!response.read(*stream, !http_1_1))
     {
       log.error << "HTTP: Can't fetch response from " << server << endl;
       delete stream; stream = 0;

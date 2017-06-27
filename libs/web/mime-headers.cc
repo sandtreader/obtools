@@ -34,7 +34,6 @@ bool MIMEHeaders::getline(istream& in, string& s)
   while (!in.fail())
   {
     int c = in.get();
-
     switch (c)
     {
       case EOF:  // Error - should end cleanly with blank line

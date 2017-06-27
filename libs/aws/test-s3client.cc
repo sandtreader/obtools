@@ -29,6 +29,7 @@ protected:
   virtual void SetUp()
   {
     s3 = new AWS::S3Client(test_access_key_id, test_secret_key, test_region);
+    s3->enable_persistence();
   }
 
   virtual void TearDown()
@@ -48,6 +49,20 @@ TEST_F(S3ClientTest, TestAuthListAllMyBuckets)
   Web::HTTPMessage response;
   ASSERT_TRUE(s3->do_request(request, response));
   ASSERT_EQ(200, response.code);
+}
+
+TEST_F(S3ClientTest, TestAuthListAllMyBucketsTwiceForPersistence)
+{
+  Web::URL url("http://s3.amazonaws.com/");
+  Web::HTTPMessage request1("GET", url);
+  Web::HTTPMessage response1;
+  ASSERT_TRUE(s3->do_request(request1, response1));
+  ASSERT_EQ(200, response1.code);
+
+  Web::HTTPMessage request2("GET", url);
+  Web::HTTPMessage response2;
+  ASSERT_TRUE(s3->do_request(request2, response2));
+  ASSERT_EQ(200, response2.code);
 }
 
 TEST_F(S3ClientTest, TestAuthListABucket)

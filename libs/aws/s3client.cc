@@ -15,7 +15,14 @@ namespace ObTools { namespace AWS {
 // Do an HTTP request, with authentication
 bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
 {
-  Web::HTTPClient http(request.url);
+  // Create persistent client if it doesn't already exist
+  if (!http.get())
+  {
+    Log::Detail log;
+    log << "S3 creating new HTTP client on " << request.url << endl;
+    http.reset(new Web::HTTPClient(request.url));
+    if (persistent) http->enable_persistence();
+  }
 
   // Add headers and authenticate
   request.headers.put("host", request.url.get_host());
@@ -32,7 +39,12 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
   authenticator.sign(req);
 
   // Do the fetch
-  return http.fetch(request, response);
+  bool result = http->fetch(request, response);
+
+  // Close down if not persistent
+  if (!persistent) http.reset();
+
+  return result;
 }
 
 //--------------------------------------------------------------------------
@@ -84,6 +96,9 @@ bool S3Client::do_request(const string& method,
       // Just substitute into URL
       the_url = Web::URL(Text::subst(the_url.str(), the_url.get_host(),
                                      endpoint));
+
+      // Shut down current HTTP client
+      http.reset();
     }
     else break;
   }
@@ -169,8 +184,11 @@ bool S3Client::list_bucket(const string& bucket_name,
   XML::Element response;
   if (!do_request(get_url(bucket_name), response)) return false;
   XML::XPathProcessor xpath(response);
-  for(const auto key_e: xpath.get_elements("Contents/Key"))
-    objects.insert(**key_e);
+  for(const auto contents_e: xpath.get_elements("Contents"))
+  {
+    const auto& key_e = contents_e->get_child("Key");
+    if (!!key_e) objects.insert(*key_e);
+  }
 
   return true;
 }
