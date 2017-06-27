@@ -12,6 +12,7 @@
 #define __OBTOOLS_AWS_H
 
 #include <string>
+#include <set>
 #include "ot-crypto.h"
 #include "ot-web.h"
 
@@ -59,6 +60,10 @@ class Authenticator
                 const string& _aws_service):
     access_key_id(_access_key_id), secret_key(_secret_key),
     aws_region(_aws_region), aws_service(_aws_service) {}
+
+  //--------------------------------------------------------------------------
+  // Set region (for redirection after bucket creation)
+  void set_region(const string& region) { aws_region = region; }
 
   //--------------------------------------------------------------------------
   // Add required aws-headers to the headers in the request
@@ -111,7 +116,7 @@ class S3Client
   Authenticator authenticator;
 
  public:
-  static constexpr auto default_s3_host = "s3.amazonaws.com";
+  static constexpr auto s3_host = "s3.amazonaws.com";
 
   //------------------------------------------------------------------------
   // Constructor
@@ -121,8 +126,54 @@ class S3Client
     authenticator(_access_key_id, _secret_key, _aws_region, "s3") {}
 
   //--------------------------------------------------------------------------
+  // Set region (for redirection after bucket creation)
+  void set_region(const string& region) { authenticator.set_region(region); }
+
+  //--------------------------------------------------------------------------
   // Do an HTTP request, with authentication
   bool do_request(Web::HTTPMessage& request, Web::HTTPMessage &response);
+
+  //--------------------------------------------------------------------------
+  // Do an XML HTTP request on the given URL.
+  // If request is invalid (Element::none), no request body is sent
+  bool do_request(const string& method,
+                  const Web::URL& url,
+                  const XML::Element& req_xml,
+                  XML::Element& resp_xml);
+
+  //--------------------------------------------------------------------------
+  // Do an HTTP GET request on the given URL with XML response
+  bool do_request(const Web::URL& url,
+                  XML::Element& resp_xml)
+  { return do_request("GET", url, XML::Element::none, resp_xml); }
+
+  //--------------------------------------------------------------------------
+  // Do an HTTP request on the given URL with no request or response (e.g. DELETE)
+  bool do_request(const string& method, const Web::URL& url)
+  { XML::Element r; return do_request(method, url, XML::Element::none, r); }
+
+  //--------------------------------------------------------------------------
+  // Get S3 REST URL for a given bucket (or all buckets if empty) and object
+  // (or all objects if empty)
+  Web::URL get_url(const string& bucket_name = "",
+                   const string& object_key = "");
+
+  //--------------------------------------------------------------------------
+  // List all buckets owned by the user
+  bool list_all_my_buckets(set<string>& buckets);
+
+  //--------------------------------------------------------------------------
+  // List a specific bucket
+  bool list_bucket(const string& bucket_name, set<string>& objects);
+
+  //--------------------------------------------------------------------------
+  // Create a bucket
+  // Empty region uses default (us-east-1)
+  bool create_bucket(const string& bucket_name, const string& region="");
+
+  //--------------------------------------------------------------------------
+  // Delete a bucket
+  bool delete_bucket(const string& bucket_name);
 };
 
 //==========================================================================
