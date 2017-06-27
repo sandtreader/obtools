@@ -174,8 +174,11 @@ class S3Client
 
   //--------------------------------------------------------------------------
   // Create a bucket
+  // acl can be 'public-read' etc., defaults to 'private'
   // Empty region uses default (us-east-1)
-  bool create_bucket(const string& bucket_name, const string& region="");
+  bool create_bucket(const string& bucket_name,
+                     const string& acl = "",
+                     const string& region="");
 
   //--------------------------------------------------------------------------
   // Delete a bucket

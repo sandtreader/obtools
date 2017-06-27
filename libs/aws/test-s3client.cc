@@ -116,10 +116,20 @@ TEST_F(S3ClientTest, TestCreateAndDeleteBucketInDefaultRegion)
   ASSERT_TRUE(s3->delete_bucket("test-temp.buckets.packetship.com"));
 }
 
+TEST_F(S3ClientTest, TestCreateAndDeletePublicBucketInDefaultRegion)
+{
+  EXPECT_TRUE(s3->create_bucket("test-temp.buckets.packetship.com",
+                                "public-read"));
+  set<string> objects;
+  EXPECT_TRUE(s3->list_bucket("test-temp.buckets.packetship.com", objects));
+  EXPECT_EQ(0, objects.size());
+  ASSERT_TRUE(s3->delete_bucket("test-temp.buckets.packetship.com"));
+}
+
 TEST_F(S3ClientTest, TestCreateAndDeleteBucketInEURegion)
 {
   // Note expect so if creation fails because it exists it can still be deleted
-  EXPECT_TRUE(s3->create_bucket("test-temp-eu.buckets.packetship.com",
+  EXPECT_TRUE(s3->create_bucket("test-temp-eu.buckets.packetship.com", "",
                                 "eu-west-1"));
 
   // Now we need to move to EU region for the rest

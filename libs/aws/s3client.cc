@@ -178,19 +178,23 @@ bool S3Client::list_bucket(const string& bucket_name,
 //--------------------------------------------------------------------------
 // Create a bucket
 bool S3Client::create_bucket(const string& bucket_name,
+                             const string& acl,
                              const string& region)
 {
+  Misc::PropertyList headers;
+  if (!acl.empty()) headers.add("x-amz-acl", acl);
+
   if (region.empty())
   {
     // Simple case - no request
-    return do_request("PUT", get_url(bucket_name));
+    string response;
+    return do_request("PUT", get_url(bucket_name), headers, "", response);
   }
   else
   {
     XML::Element request("CreateBucketConfiguration");
     request.add("LocationConstraint", region);
     XML::Element response;
-    Misc::PropertyList headers;
     return do_request("PUT", get_url(bucket_name), headers, request, response);
   }
 }
