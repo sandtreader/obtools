@@ -83,6 +83,10 @@ HMAC::~HMAC()
     unsigned int len;
     HMAC_Final(hmac_ctx.get(), &bucket[0], &len);
   }
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+  HMAC_CTX_cleanup(hmac_ctx.get());
+#endif
 }
 
 }} // namespaces
