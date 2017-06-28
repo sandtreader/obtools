@@ -116,6 +116,8 @@ class S3Client
   Authenticator authenticator;
   bool persistent{false};
   auto_ptr<Web::HTTPClient> http;
+  int max_requests_per_connection{50};  // AWS RSTs at 100
+  int requests_this_connection{0};
 
  public:
   static constexpr auto s3_host = "s3.amazonaws.com";
@@ -134,6 +136,11 @@ class S3Client
   //--------------------------------------------------------------------------
   // Enable persistent HTTP connections
   void enable_persistence() { persistent = true; }
+
+  //--------------------------------------------------------------------------
+  // Set maximum requests per connection
+  void set_max_requests_per_connection(int max)
+  { max_requests_per_connection = max; }
 
   //--------------------------------------------------------------------------
   // Do an HTTP request, with authentication
@@ -175,8 +182,9 @@ class S3Client
   bool list_all_my_buckets(set<string>& buckets);
 
   //--------------------------------------------------------------------------
-  // List a specific bucket
-  bool list_bucket(const string& bucket_name, set<string>& objects);
+  // List a specific bucket, with optional prefix
+  bool list_bucket(const string& bucket_name, set<string>& objects,
+                   const string& prefix = "");
 
   //--------------------------------------------------------------------------
   // Create a bucket
@@ -185,10 +193,6 @@ class S3Client
   bool create_bucket(const string& bucket_name,
                      const string& acl = "",
                      const string& region="");
-
-  //--------------------------------------------------------------------------
-  // Delete a bucket
-  bool delete_bucket(const string& bucket_name);
 
   //--------------------------------------------------------------------------
   // Create an object
@@ -205,6 +209,26 @@ class S3Client
   //--------------------------------------------------------------------------
   // Delete an object
   bool delete_object(const string& bucket_name, const string& object_key);
+
+  //--------------------------------------------------------------------------
+  // Delete multiple objects
+  // Set max_keys_per_request for testing
+  bool delete_multiple_objects(const string& bucket_name,
+                               set<string>& object_keys,
+                               int max_keys_per_request = 1000);
+
+  //--------------------------------------------------------------------------
+  // Delete all objects with a given prefix
+  bool delete_objects_with_prefix(const string& bucket_name,
+                                  const string& prefix);
+
+  //--------------------------------------------------------------------------
+  // Empty the bucket, deleting all objects
+  bool empty_bucket(const string& bucket_name);
+
+  //--------------------------------------------------------------------------
+  // Delete a bucket (must be empty)
+  bool delete_bucket(const string& bucket_name);
 };
 
 //==========================================================================

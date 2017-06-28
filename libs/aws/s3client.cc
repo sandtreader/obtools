@@ -8,6 +8,7 @@
 //==========================================================================
 
 #include "ot-aws.h"
+#include "ot-misc.h"
 
 namespace ObTools { namespace AWS {
 
@@ -22,10 +23,24 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
     log << "S3 creating new HTTP client on " << request.url << endl;
     http.reset(new Web::HTTPClient(request.url));
     if (persistent) http->enable_persistence();
+    requests_this_connection = 0;
   }
+
+  // Check for max requests and close if reached
+  bool close = ++requests_this_connection >= max_requests_per_connection;
+  if (close) http->close_persistence();
 
   // Add headers and authenticate
   request.headers.put("host", request.url.get_host());
+
+  // Content-MD5 required for multi-object delete for no apparent reason
+  // (body content is signed anyway) - add it for all
+  if (!request.body.empty())
+  {
+    Misc::MD5 md5;
+    request.headers.put("Content-MD5", md5.sum_base64(request.body));
+  }
+
   AWS::Authenticator::RequestInfo req(request.method,
                                       request.url.get_path(),
                                       Time::Stamp::now(),
@@ -42,7 +57,7 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
   bool result = http->fetch(request, response);
 
   // Close down if not persistent
-  if (!persistent) http.reset();
+  if (!persistent || close) http.reset();
 
   return result;
 }
@@ -179,18 +194,38 @@ bool S3Client::list_all_my_buckets(set<string>& buckets)
 //--------------------------------------------------------------------------
 // List a specific bucket
 bool S3Client::list_bucket(const string& bucket_name,
-                           set<string>& objects)
+                           set<string>& objects,
+                           const string& prefix)
 {
-  XML::Element response;
-  if (!do_request(get_url(bucket_name), response)) return false;
-  XML::XPathProcessor xpath(response);
-  for(const auto contents_e: xpath.get_elements("Contents"))
-  {
-    const auto& key_e = contents_e->get_child("Key");
-    if (!!key_e) objects.insert(*key_e);
-  }
+  Web::URL base_url = get_url(bucket_name);
+  Misc::PropertyList query;
+  if (!prefix.empty()) query.add("prefix", prefix);
 
-  return true;
+  for(;;) // Loop on truncated response
+  {
+    Web::URL url = base_url;
+    // Add query params if any
+    url.append(query);
+
+    // Add prefix if set
+    XML::Element response;
+    if (!do_request(url, response)) return false;
+    XML::XPathProcessor xpath(response);
+    for(const auto contents_e: xpath.get_elements("Contents"))
+    {
+      const auto& key_e = contents_e->get_child("Key");
+      if (!!key_e)
+      {
+        objects.insert(*key_e);
+        query.add("marker", *key_e);      // In case we're truncated
+      }
+    }
+
+    // If not truncated, we're done
+    if (!xpath.get_value_bool("IsTruncated")) return true;
+
+    // Go round again with marker set
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -215,13 +250,6 @@ bool S3Client::create_bucket(const string& bucket_name,
     XML::Element response;
     return do_request("PUT", get_url(bucket_name), headers, request, response);
   }
-}
-
-//--------------------------------------------------------------------------
-// Delete a bucket
-bool S3Client::delete_bucket(const string& bucket_name)
-{
-  return do_request("DELETE", get_url(bucket_name));
 }
 
 //--------------------------------------------------------------------------
@@ -255,6 +283,74 @@ bool S3Client::delete_object(const string& bucket_name,
                              const string& object_key)
 {
   return do_request("DELETE", get_url(bucket_name, object_key));
+}
+
+//--------------------------------------------------------------------------
+// Delete multiple objects
+// Set max_keys_per_request for testing
+bool S3Client::delete_multiple_objects(const string& bucket_name,
+                                       set<string>& object_keys,
+                                       int max_keys_per_request)
+{
+  Web::URL url = get_url(bucket_name);
+  url.append("?delete=1");  // Note just ?delete doesn't sign properly
+
+  // Shift keys into a vector so we can slice it
+  vector<string> keys;
+  for(const auto& key: object_keys)
+    keys.push_back(key);
+
+  int total = keys.size();
+  for(int start=0; start<total; start+=max_keys_per_request)
+  {
+    XML::Element request("Delete");
+    request.add("Quiet", "True");
+
+    int n = min(total-start, max_keys_per_request);
+    for(int i=start; i<start+n; i++)
+      request.add("Object").add("Key", keys[i]);
+
+    XML::Element response;
+    Misc::PropertyList headers;
+    if (!do_request("POST", url, headers, request, response))
+      return false;
+
+    // Check response for errors
+    if (!response.get_children("Error").empty())
+    {
+      Log::Error log;
+      log << "S3 multi-object delete failed:\n" << response;
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Delete all objects with a given prefix
+bool S3Client::delete_objects_with_prefix(const string& bucket_name,
+                                          const string& prefix)
+{
+  set<string> keys;
+  if (!list_bucket(bucket_name, keys, prefix)) return false;
+  return delete_multiple_objects(bucket_name, keys);
+}
+
+//--------------------------------------------------------------------------
+// Empty the bucket
+bool S3Client::empty_bucket(const string& bucket_name)
+{
+  set<string> keys;
+  if (!list_bucket(bucket_name, keys)) return false;
+  return delete_multiple_objects(bucket_name, keys);
+}
+
+//--------------------------------------------------------------------------
+// Delete a bucket
+bool S3Client::delete_bucket(const string& bucket_name)
+{
+  return do_request("DELETE", get_url(bucket_name));
 }
 
 }} // namespaces

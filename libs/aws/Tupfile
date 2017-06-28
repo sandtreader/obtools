@@ -6,6 +6,6 @@
 
 NAME    = ot-aws
 TYPE    = lib
-DEPENDS = ot-crypto ot-web
+DEPENDS = ot-crypto ot-web ot-misc
 
 include_rules

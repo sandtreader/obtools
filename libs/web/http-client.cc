@@ -228,7 +228,8 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
                            << (chunked?"chunked":"continuous")
                            << " length " << current_chunk_length << endl;)
     }
-    else if (!http_1_1 || http_1_1_close)
+    else if (!http_1_1 || http_1_1_close
+             || response.headers.get("connection") == "close")
     {
       socket->close();
       delete stream; stream = 0;

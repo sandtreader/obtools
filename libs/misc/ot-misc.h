@@ -68,6 +68,10 @@ public:
   // Re-initialises each time, so safe to reuse
   string sum(const string& text);
 
+  //--------------------------------------------------------------------------
+  // C++ friendly version: MD5 sum a string into Base64
+  string sum_base64(const string& text);
+
   //------------------------------------------------------------------------
   // C++ friendly version: MD5 sum a string, returning combination of digest
   // as an integer (read as two big-endian ints and XOR'ed)
