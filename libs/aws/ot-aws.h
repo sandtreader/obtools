@@ -118,16 +118,19 @@ class S3Client
   auto_ptr<Web::HTTPClient> http;
   int max_requests_per_connection{50};  // AWS RSTs at 100
   int requests_this_connection{0};
+  string s3_host;
 
  public:
-  static constexpr auto s3_host = "s3.amazonaws.com";
+  static constexpr auto default_s3_host = "s3.amazonaws.com";
 
   //------------------------------------------------------------------------
   // Constructor
   S3Client(const string& _access_key_id,
            const string& _secret_key,
-           const string& _aws_region):
-    authenticator(_access_key_id, _secret_key, _aws_region, "s3") {}
+           const string& _aws_region,
+           const string& _s3_host = default_s3_host):
+    authenticator(_access_key_id, _secret_key, _aws_region, "s3"),
+    s3_host(_s3_host) {}
 
   //--------------------------------------------------------------------------
   // Set region (for redirection after bucket creation)
