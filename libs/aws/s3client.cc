@@ -21,7 +21,8 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
   {
     Log::Detail log;
     log << "S3 creating new HTTP client on " << request.url << endl;
-    http.reset(new Web::HTTPClient(request.url));
+    http.reset(new Web::HTTPClient(request.url, 0, user_agent,
+                                   connection_timeout, operation_timeout));
     if (persistent) http->enable_persistence();
     requests_this_connection = 0;
   }

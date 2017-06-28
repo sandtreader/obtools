@@ -119,6 +119,9 @@ class S3Client
   int max_requests_per_connection{50};  // AWS RSTs at 100
   int requests_this_connection{0};
   string s3_host;
+  string user_agent{"ObTools S3 Client"};
+  int connection_timeout{10};
+  int operation_timeout{10};
 
  public:
   static constexpr auto default_s3_host = "s3.amazonaws.com";
@@ -139,6 +142,15 @@ class S3Client
   //--------------------------------------------------------------------------
   // Enable persistent HTTP connections
   void enable_persistence() { persistent = true; }
+
+  //--------------------------------------------------------------------------
+  // Set user-agent
+  void set_user_agent(const string& ua) { user_agent = ua; }
+
+  //--------------------------------------------------------------------------
+  // Set timeouts in seconds
+  void set_timeouts(int conn_t, int op_t)
+  { connection_timeout = conn_t; operation_timeout = op_t; }
 
   //--------------------------------------------------------------------------
   // Set maximum requests per connection
