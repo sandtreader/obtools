@@ -67,6 +67,15 @@ public:
   void clear() { text.clear(); }
 
   //------------------------------------------------------------------------
+  // Append a string to the URL
+  void append(const string& t) { text+=t; }
+
+  //------------------------------------------------------------------------
+  // Append a query string to the URL (if not empty)
+  void append(Misc::PropertyList& query)
+  { if (!query.empty()) text+='?'; text+=encode(query); }
+
+  //------------------------------------------------------------------------
   // Split text into XML
   // Pass in an empty element, and this will fill it up as above
   // Name of element is set to 'url'
@@ -233,7 +242,8 @@ public:
   // Returns whether successful
   // Skips the blank line delimiter, leaving stream ready to read message
   // body (if any)
-  bool read(istream& in);
+  // Clears existing headers unless append is set
+  bool read(istream& in, bool append=false);
 
   //------------------------------------------------------------------------
   // Generates headers to a stream

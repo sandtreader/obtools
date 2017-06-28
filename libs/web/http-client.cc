@@ -76,8 +76,9 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
 
   XML::XPathProcessor xpath(xml);
 
-  // Grab host for Host header (HTTP/1.1 like)
-  request.headers.put("Host", xpath["host"]);
+  // Grab host for Host header (HTTP/1.1 like) if not already there
+  if (!request.headers.has("host"))
+    request.headers.put("host", xpath["host"]);
 
   // Remove scheme, to suppress host as well
   xpath.delete_elements("scheme");
@@ -193,8 +194,10 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
   {
     // If progressive, just read the headers
     // otherwise, read all, allowing for EOF marker for end of body
+    // only if HTTP/1.0 - otherwise we fail if there is no Content-Length
+    // provided
     if (progressive?!response.read_headers(*stream)
-                   :!response.read(*stream, true))
+                   :!response.read(*stream, !http_1_1))
     {
       log.error << "HTTP: Can't fetch response from " << server << endl;
       delete stream; stream = 0;
@@ -203,7 +206,8 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
     }
 
     OBTOOLS_LOG_IF_DUMP(log.dump << "Response:\n";
-                        response.write(log.dump);)
+                        response.write(log.dump);
+                        log.dump << endl;)
 
     // Take cookies if we have a jar
     if (cookie_jar) cookie_jar->take_cookies_from(response, request.url);
@@ -224,7 +228,8 @@ int HTTPClient::do_receive(HTTPMessage& request, HTTPMessage& response)
                            << (chunked?"chunked":"continuous")
                            << " length " << current_chunk_length << endl;)
     }
-    else if (!http_1_1 || http_1_1_close)
+    else if (!http_1_1 || http_1_1_close
+             || response.headers.get("connection") == "close")
     {
       socket->close();
       delete stream; stream = 0;

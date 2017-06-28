@@ -1,11 +1,11 @@
 #===========================================================================
-# Tupfile for ObTools::Crypto library
+# Tupfile for ObTools::AWS library
 #
-# Copyright (c) 2016 Paul Clark. All rights reserved
+# Copyright (c) 2017 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-crypto
+NAME    = ot-aws
 TYPE    = lib
-DEPENDS = ot-mt ot-misc ot-text ext-crypto
+DEPENDS = ot-crypto ot-web ot-misc
 
 include_rules

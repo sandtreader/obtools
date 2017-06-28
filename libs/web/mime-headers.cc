@@ -34,7 +34,6 @@ bool MIMEHeaders::getline(istream& in, string& s)
   while (!in.fail())
   {
     int c = in.get();
-
     switch (c)
     {
       case EOF:  // Error - should end cleanly with blank line
@@ -183,10 +182,11 @@ Misc::PropertyList MIMEHeaders::split_parameters(string& value)
 // Returns whether successful
 // Skips the blank line delimiter, leaving stream ready to read message
 // body (if any)
-bool MIMEHeaders::read(istream& in)
+// Clears existing headers unless append is set
+bool MIMEHeaders::read(istream& in, bool append)
 {
   // Clear existing
-  xml.clear_children();
+  if (!append) xml.clear_children();
 
   // Read lines
   while (!in.fail())

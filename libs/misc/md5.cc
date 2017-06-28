@@ -310,6 +310,18 @@ string MD5::sum(const string& text)
 }
 
 //--------------------------------------------------------------------------
+// C++ friendly version: MD5 sum a string into Base64
+string MD5::sum_base64(const string& text)
+{
+  // Get the digest
+  unsigned char digest[16];
+  sum(text, digest);
+
+  Text::Base64 base64;
+  return base64.encode(digest, 16);
+}
+
+//--------------------------------------------------------------------------
 // C++ friendly version: MD5 sum a string, returning combination of digest
 // as an integer (read as two big-endian ints and XOR'ed)
 uint64_t MD5::hash_to_int(const string& text)

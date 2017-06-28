@@ -32,6 +32,7 @@
 #undef SSL
 
 #include "ot-mt.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace Crypto {
 
@@ -656,6 +657,61 @@ public:
 };
 
 //==========================================================================
+// SHA256 digest/hash support
+// Either use as an object for repeated partial blocks, or use the static
+// digest() to do an entire block
+class SHA256
+{
+private:
+  SHA256_CTX sha_ctx;
+  bool finished;
+
+public:
+  static const int DIGEST_LENGTH = SHA256_DIGEST_LENGTH;
+
+  //------------------------------------------------------------------------
+  // Constructor
+  SHA256();
+
+  //------------------------------------------------------------------------
+  // Update digest with a block of data
+  void update(const void *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // Get result - writes DIGEST_LENGTH bytes to result
+  void get_result(unsigned char *result);
+
+  //------------------------------------------------------------------------
+  // Get result as a hex string
+  string get_result();
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~SHA256();
+
+  //------------------------------------------------------------------------
+  // Static: Get hash of block of data.  Writes DIGEST_LENGTH bytes to result
+  static void digest(const void *data, size_t length,
+                     unsigned char *result);
+
+  //------------------------------------------------------------------------
+  // Digest returning binary string
+  static string digest(const void *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // Digest returning hex string
+  static string digest_hex(const void *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // C++-friendly versions of the above
+  static string digest(const string& text)
+  { return digest(text.data(), text.length()); }
+
+  static string digest_hex(const string& text)
+  { return digest_hex(text.data(), text.length()); }
+};
+
+//==========================================================================
 // HMAC hash support
 // Either use as an object for repeated partial blocks, or use the static
 // digest() to do an entire block
@@ -664,7 +720,7 @@ class HMAC
 {
 private:
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-  unique_ptr<HMAC_CTX> hmac_ctx{};
+  unique_ptr<HMAC_CTX> hmac_ctx{new HMAC_CTX};
 #else
   unique_ptr<HMAC_CTX, decltype(&HMAC_CTX_free)>
     hmac_ctx{HMAC_CTX_new(), HMAC_CTX_free};
@@ -695,6 +751,24 @@ public:
   void digest(const unsigned char *data, size_t length,
               unsigned char *result);
 
+  //--------------------------------------------------------------------------
+  // Digest returning binary string
+  string digest(const unsigned char *data, size_t length);
+
+  //--------------------------------------------------------------------------
+  // Digest returning hex string
+  string digest_hex(const unsigned char *data, size_t length);
+
+  //------------------------------------------------------------------------
+  // C++-friendly versions of the above
+  string digest(const string& text)
+  { return digest(reinterpret_cast<const unsigned char *>(text.data()),
+                  text.length()); }
+
+  string digest_hex(const string& text)
+  { return digest_hex(reinterpret_cast<const unsigned char *>(text.data()),
+                      text.length()); }
+
   //------------------------------------------------------------------------
   // Virtual Destructor
   virtual ~HMAC();
@@ -711,8 +785,29 @@ public:
     HMAC(key, key_len, EVP_sha1(), 20) {}
 
   //------------------------------------------------------------------------
+  // C++ friendly constructor
+  HMACSHA1(const string& key):
+    HMAC(key.data(), key.length(), EVP_sha1(), 20) {}
+
+  //------------------------------------------------------------------------
   // Virtual Destructor
   virtual ~HMACSHA1() {}
+
+  //------------------------------------------------------------------------
+  // Handy way to just sign with a key in a functional way
+  static string sign(const string& key, const string& data)
+  {
+    HMACSHA1 hmac(key);
+    return hmac.digest(data);
+  }
+
+  //------------------------------------------------------------------------
+  // Same with hex output
+  static string sign_hex(const string& key, const string& data)
+  {
+    HMACSHA1 hmac(key);
+    return Text::btox(hmac.digest(data));
+  }
 };
 
 //==========================================================================
@@ -726,8 +821,29 @@ public:
     HMAC(key, key_len, EVP_sha256(), 32) {}
 
   //------------------------------------------------------------------------
+  // C++ friendly constructor
+  HMACSHA256(const string& key):
+    HMAC(key.data(), key.length(), EVP_sha256(), 32) {}
+
+  //------------------------------------------------------------------------
   // Virtual Destructor
   virtual ~HMACSHA256() {}
+
+  //------------------------------------------------------------------------
+  // Handy way to just sign with a key in a functional way
+  static string sign(const string& key, const string& data)
+  {
+    HMACSHA256 hmac(key);
+    return hmac.digest(data);
+  }
+
+  //------------------------------------------------------------------------
+  // Same with hex output
+  static string sign_hex(const string& key, const string& data)
+  {
+    HMACSHA256 hmac(key);
+    return Text::btox(hmac.digest(data));
+  }
 };
 
 //==========================================================================

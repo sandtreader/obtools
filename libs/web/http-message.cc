@@ -224,7 +224,7 @@ bool HTTPMessage::read(istream &in, bool read_to_eof)
 
   // If chunked, read optional trailer headers again, including blank line
   // We allow this to fail, because (although unlikely) stream could end here
-  if (chunked) headers.read(in);
+  if (chunked) headers.read(in, true);  // appending to existing
 
   return true;
 }

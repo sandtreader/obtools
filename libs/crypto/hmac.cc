@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include "ot-crypto.h"
+#include "ot-text.h"
 
 namespace ObTools { namespace Crypto {
 
@@ -54,6 +55,24 @@ void HMAC::digest(const unsigned char *data, size_t length,
 }
 
 //--------------------------------------------------------------------------
+// Digest returning binary string
+string HMAC::digest(const unsigned char *data, size_t length)
+{
+  vector<unsigned char> buf(digest_length);
+  digest(data, length, buf.data());
+  return string(reinterpret_cast<char *>(buf.data()), digest_length);
+}
+
+//--------------------------------------------------------------------------
+// Digest returning hex string
+string HMAC::digest_hex(const unsigned char *data, size_t length)
+{
+  vector<unsigned char> buf(digest_length);
+  digest(data, length, buf.data());
+  return Text::btox(buf.data(), digest_length);
+}
+
+//--------------------------------------------------------------------------
 // Virtual Destructor
 HMAC::~HMAC()
 {
@@ -64,6 +83,10 @@ HMAC::~HMAC()
     unsigned int len;
     HMAC_Final(hmac_ctx.get(), &bucket[0], &len);
   }
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+  HMAC_CTX_cleanup(hmac_ctx.get());
+#endif
 }
 
 }} // namespaces
