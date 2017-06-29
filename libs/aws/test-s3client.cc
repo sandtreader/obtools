@@ -17,6 +17,9 @@ namespace {
 using namespace std;
 using namespace ObTools;
 
+// Switch between bucket name in path or in host name
+bool use_virtual_hosts = false;
+
 class S3ClientTest: public ::testing::Test
 {
   static constexpr auto test_access_key_id = "AKIAJL4EKQVW7RRLB23Q";
@@ -34,6 +37,7 @@ protected:
   {
     s3 = new AWS::S3Client(test_access_key_id, test_secret_key, test_region);
     s3->enable_persistence();
+    if (use_virtual_hosts) s3->enable_virtual_hosts();
   }
 
   virtual void TearDown()
@@ -100,14 +104,20 @@ TEST_F(S3ClientTest, TestGetBucketURLForAllBuckets)
 
 TEST_F(S3ClientTest, TestGetBucketURLForSpecificBucket)
 {
-  ASSERT_EQ("http://test.packetship.com.s3.amazonaws.com/",
-            s3->get_url("test.packetship.com").str());
+  string url = s3->get_url("test.packetship.com").str();
+  if (use_virtual_hosts)
+    ASSERT_EQ("http://test.packetship.com.s3.amazonaws.com/", url);
+  else
+    ASSERT_EQ("http://s3.amazonaws.com/test.packetship.com/", url);
 }
 
 TEST_F(S3ClientTest, TestGetBucketURLForSpecificBucketAndObject)
 {
-  ASSERT_EQ("http://test.packetship.com.s3.amazonaws.com/foo/bar",
-            s3->get_url("test.packetship.com", "foo/bar").str());
+  string url = s3->get_url("test.packetship.com", "foo/bar").str();
+  if (use_virtual_hosts)
+    ASSERT_EQ("http://test.packetship.com.s3.amazonaws.com/foo/bar", url);
+  else
+    ASSERT_EQ("http://s3.amazonaws.com/test.packetship.com/foo/bar", url);
 }
 
 TEST_F(S3ClientTest, TestListAllMyBuckets)
@@ -155,6 +165,10 @@ TEST_F(S3ClientTest, TestCreateAndDeletePublicBucketInDefaultRegion)
 
 TEST_F(S3ClientTest, TestCreateAndDeleteBucketInEURegion)
 {
+  // Doesn't work at all without virtual hosts because redirect always
+  // points to a virtual host name
+  if (!use_virtual_hosts) return;
+
   // Note expect so if creation fails because it exists it can still be deleted
   EXPECT_TRUE(s3->create_bucket("temp-eu.buckets.packetship.com", "",
                                 "eu-west-1"));
@@ -307,5 +321,14 @@ int main(int argc, char **argv)
   }
 
   ::testing::InitGoogleTest(&argc, argv);
+
+  // Run without virtual hosts first
+  cerr << "====== Tests without virtual host URLs =====\n";
+  int rc = RUN_ALL_TESTS();
+  if (rc) return rc;
+
+  // Then with
+  cerr << "====== Tests with virtual host URLs =====\n";
+  use_virtual_hosts = true;
   return RUN_ALL_TESTS();
 }

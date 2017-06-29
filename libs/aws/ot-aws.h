@@ -119,6 +119,7 @@ class S3Client
   int max_requests_per_connection{50};  // AWS RSTs at 100
   int requests_this_connection{0};
   string s3_host;
+  bool use_virtual_hosts{false};        // Use virtual bucket hosts
   string user_agent{"ObTools S3 Client"};
   int connection_timeout{10};
   int operation_timeout{10};
@@ -156,6 +157,11 @@ class S3Client
   // Set maximum requests per connection
   void set_max_requests_per_connection(int max)
   { max_requests_per_connection = max; }
+
+  //--------------------------------------------------------------------------
+  // Enable virtual hosts - e.g.  http//bucket.s3.amazonaws.com/...
+  // rather than http://s3.amazonaws.com/bucket/...
+  void enable_virtual_hosts() { use_virtual_hosts = true; }
 
   //--------------------------------------------------------------------------
   // Do an HTTP request, with authentication

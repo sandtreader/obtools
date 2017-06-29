@@ -173,8 +173,10 @@ Web::URL S3Client::get_url(const string& bucket_name,
 {
   if (bucket_name.empty())
     return Web::URL(string("http://")+s3_host+"/"+object_key);
-  else
+  else if (use_virtual_hosts)
     return Web::URL(string("http://")+bucket_name+"."+s3_host+"/"+object_key);
+  else
+    return Web::URL(string("http://")+s3_host+"/"+bucket_name+"/"+object_key);
 }
 
 //--------------------------------------------------------------------------
