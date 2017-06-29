@@ -174,7 +174,7 @@ class MIMEHeaders
 {
 private:
   static const unsigned int MAX_HEADER = 8000;  // Input DoS protection
-  static const unsigned int MAX_LINE   = 60;    // For output folding
+  unsigned int max_line = 0;  // Set to 60 for MIME
 
 public:
   XML::Element xml;
@@ -182,6 +182,10 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   MIMEHeaders(): xml("headers") {}
+
+  //------------------------------------------------------------------------
+  // Enable folding at the given width
+  void enable_folding(int _max_line = 60) { max_line = _max_line; }
 
   //------------------------------------------------------------------------
   // Check for presence of a header

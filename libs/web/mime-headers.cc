@@ -271,10 +271,10 @@ bool MIMEHeaders::write(ostream& out) const
     out << name << ": ";
 
     // Split value for long lines
-    while (value.size() > MAX_LINE)
+    while (value.size() > max_line)
     {
       // Look for a likely breakpoint - try commas first
-      string::size_type split = value.rfind(',', MAX_LINE);
+      string::size_type split = value.rfind(',', max_line);
 
       if (split != string::npos)
       {
@@ -290,7 +290,7 @@ bool MIMEHeaders::write(ostream& out) const
       if (split == string::npos)
       {
         // Failing that, try space
-        split = value.rfind(' ', MAX_LINE);
+        split = value.rfind(' ', max_line);
       }
 
       if (split != string::npos)
