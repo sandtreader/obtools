@@ -29,6 +29,27 @@ TEST(QueueTest, TestLimiting)
   EXPECT_EQ(9, q.wait());
 }
 
+TEST(QueueTest, TestContainsValue)
+{
+  MT::Queue<int> q;
+  for(auto i=0; i<10; i++) q.send(i);
+  ASSERT_TRUE(q.contains(5));
+  ASSERT_FALSE(q.contains(11));
+}
+
+TEST(QueueTest, TestContainsPointer)
+{
+  int one=1;
+  int two=2;
+  MT::Queue<int *> q;
+  q.send(&one);
+  q.send(&two);
+  int two2 = 2;
+  int three2 = 3;
+  ASSERT_TRUE(q.contains_ptr(&two2));
+  ASSERT_FALSE(q.contains_ptr(&three2));
+}
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)

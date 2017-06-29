@@ -42,6 +42,13 @@ public:
   {
     return one;
   }
+
+  //------------------------------------------------------------------------
+  // Compare action
+  virtual bool operator==(const ActionOne& o) const
+  {
+    return num == o.num;
+  }
 };
 
 //--------------------------------------------------------------------------
@@ -113,6 +120,8 @@ TEST(ActionTest, TestQueueLimit)
           tmp.erase(tmp.begin());
           tmp.push_back(i);
           break;
+        case Action::Manager<ActionType>::QueueResult::duplicate:
+          ASSERT_TRUE(false) << "Unexpected duplicate result!";
       }
     }
     expected.insert(expected.end(), tmp.begin(), tmp.end());
@@ -133,9 +142,12 @@ TEST(ActionTest, TestMultipleHandlers)
     Action::Manager<ActionType> manager;
     manager.add_handler(one, handler1);
     manager.add_handler(one, handler2);
-    manager.queue(new ActionOne(1));
-    manager.queue(new ActionOne(2));
-    manager.queue(new ActionOne(3));
+    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
+              manager.queue(new ActionOne(1)));
+    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
+              manager.queue(new ActionOne(2)));
+    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
+              manager.queue(new ActionOne(3)));
     // Allow actions to be handled
     this_thread::sleep_for(chrono::milliseconds{100});
   }
@@ -148,6 +160,29 @@ TEST(ActionTest, TestMultipleHandlers)
   EXPECT_EQ(expected, handler2.nums);
 }
 
+TEST(ActionTest, TestDeduplication)
+{
+  Handler handler;
+
+  {
+    Action::Manager<ActionType> manager;
+    manager.enable_dedup();
+    manager.add_handler(one, handler);
+    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
+              manager.queue(new ActionOne(1)));
+    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
+              manager.queue(new ActionOne(2)));
+    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::duplicate,
+              manager.queue(new ActionOne(1)));
+    // Allow actions to be handled
+    this_thread::sleep_for(chrono::milliseconds{100});
+  }
+
+  vector<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  ASSERT_EQ(expected, handler.nums);
+}
 
 } // anonymous namespace
 

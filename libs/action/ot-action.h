@@ -35,6 +35,12 @@ public:
   virtual T get_type() const = 0;
 
   //------------------------------------------------------------------------
+  // Compare actions for duplication test
+  // By default just compares type
+  virtual bool operator==(const Action<T>& o) const
+  { return get_type() == o.get_type(); }
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Action() {}
 };
@@ -67,6 +73,7 @@ private:
 
   MT::Queue<Action<T> *> actions;
   int queue_limit = 0;
+  bool dedup = false;
 
   class ActionTask: public MT::Task
   {
@@ -207,11 +214,16 @@ public:
   void set_queue_limit(int n) { queue_limit = n; }
 
   //------------------------------------------------------------------------
+  // Enable de-duplication of queued actions
+  void enable_dedup() { dedup = true; }
+
+  //------------------------------------------------------------------------
   // Queue Result
   enum class QueueResult
   {
     ok,
     replaced_old,
+    duplicate
   };
 
   //------------------------------------------------------------------------
@@ -219,6 +231,9 @@ public:
   // Returns whether any limit was applied
   QueueResult queue(Action<T> *action)
   {
+    if (dedup && actions.contains_ptr(action))
+      return QueueResult::duplicate;
+
     auto limited = false;
     if (queue_limit)
       limited = actions.limit(queue_limit-1);
