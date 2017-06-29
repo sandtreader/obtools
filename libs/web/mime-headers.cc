@@ -270,8 +270,8 @@ bool MIMEHeaders::write(ostream& out) const
     // Output header
     out << name << ": ";
 
-    // Split value for long lines
-    while (value.size() > max_line)
+    // Split value for long lines if enabled
+    while (max_line && value.size() > max_line)
     {
       // Look for a likely breakpoint - try commas first
       string::size_type split = value.rfind(',', max_line);
