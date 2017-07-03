@@ -20,7 +20,7 @@ using namespace ObTools;
 enum ActionType
 {
   one,
-  delay,
+  two,
 };
 
 //--------------------------------------------------------------------------
@@ -53,15 +53,6 @@ public:
 };
 
 //--------------------------------------------------------------------------
-// ActionDelay test action type - delays
-class ActionDelay: public Action::Action<ActionType>
-{
-public:
-  virtual ActionType get_type() const
-  { return delay; }
-};
-
-//--------------------------------------------------------------------------
 // Handler for ActionOne
 class Handler: public Action::Manager<ActionType>::Handler
 {
@@ -72,23 +63,12 @@ public:
   // Handle action
   void handle(const Action::Action<ActionType>& action)
   {
-    switch (action.get_type())
-    {
-      case one:
-      {
-        const ActionOne *p = dynamic_cast<const ActionOne *>(&action);
-        if (!p)
-          return;
+    const ActionOne *p = dynamic_cast<const ActionOne *>(&action);
+    if (!p)
+      return;
 
-        const ActionOne& one(*p);
-        nums.push_back(one.num);
-        break;
-      }
-
-      case delay:
-        this_thread::sleep_for(chrono::milliseconds{100});
-        break;
-    }
+    const ActionOne& one(*p);
+    nums.push_back(one.num);
   }
 };
 
@@ -189,8 +169,6 @@ TEST(ActionTest, TestDeduplication)
     Action::Manager<ActionType> manager;
     manager.enable_dedup();
     manager.add_handler(one, handler);
-    ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
-              manager.queue(new ActionDelay));
     ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
               manager.queue(new ActionOne(1)));
     ASSERT_EQ(Action::Manager<ActionType>::QueueResult::ok,
