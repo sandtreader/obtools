@@ -45,10 +45,9 @@ public:
 
   //------------------------------------------------------------------------
   // Compare action
-  bool operator==(const Action& o) const override
+  virtual bool operator==(const ActionOne& o) const
   {
-    const ActionOne *p = dynamic_cast<const ActionOne *>(&o);
-    return p?num == p->num:false;
+    return num == o.num;
   }
 };
 
