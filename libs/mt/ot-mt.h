@@ -457,7 +457,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check if the queue already contains the given message
-  // - matched by operator=
+  // - matched by operator==
   bool contains(const T msg)
   {
     unique_lock<mutex> lock{mymutex};
@@ -466,7 +466,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check if the queue already contains the given message, pointer version
-  // - matched by operator= on deref'ed pointers
+  // - matched by operator== on deref'ed pointers
   bool contains_ptr(const T msg_ptr)
   {
     unique_lock<mutex> lock{mymutex};
@@ -479,7 +479,7 @@ public:
   void flush()
   {
     unique_lock<mutex> lock{mymutex};
-    q = queue<T>();
+    q = list<T>();
   }
 };
 
