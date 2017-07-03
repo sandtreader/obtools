@@ -37,11 +37,12 @@ public:
   //------------------------------------------------------------------------
   // Compare actions for duplication test
   // By default just compares type
-  virtual bool operator==(const Action<T>& o) const
+  virtual bool operator==(const Action& o) const
   { return get_type() == o.get_type(); }
 
   //------------------------------------------------------------------------
   // Virtual destructor
+
   virtual ~Action() {}
 };
 
