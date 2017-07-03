@@ -18,7 +18,6 @@
 #include <queue>
 #include <list>
 #include <memory>
-#include <algorithm>
 #include <signal.h>
 #include <stdint.h>
 #include <ot-gen.h>
@@ -374,7 +373,7 @@ public:
 template<class T> class Queue
 {
 private:
-  list<T> q;
+  queue<T> q;
   mutex mymutex;
   condition_variable available;
 
@@ -396,7 +395,7 @@ public:
   void send(const T msg)
   {
     unique_lock<mutex> lock{mymutex};
-    q.push_back(msg);
+    q.push(msg);
     available.notify_one();
   }
 
@@ -425,7 +424,7 @@ public:
       if (!q.empty())
       {
         T msg = q.front();
-        q.pop_front();
+        q.pop();
 
         return msg;
       }
@@ -449,29 +448,10 @@ public:
     bool result = false;
     while (q.size() > n)
     {
-      q.pop_front();
+      q.pop();
       result = true;
     }
     return result;
-  }
-
-  //------------------------------------------------------------------------
-  // Check if the queue already contains the given message
-  // - matched by operator=
-  bool contains(const T msg)
-  {
-    unique_lock<mutex> lock{mymutex};
-    return find(q.begin(), q.end(), msg) != q.end();
-  }
-
-  //------------------------------------------------------------------------
-  // Check if the queue already contains the given message, pointer version
-  // - matched by operator= on deref'ed pointers
-  bool contains_ptr(const T msg_ptr)
-  {
-    unique_lock<mutex> lock{mymutex};
-    return find_if(q.begin(), q.end(),
-                   [msg_ptr](const T p) { return *p == *msg_ptr; }) != q.end();
   }
 
   //------------------------------------------------------------------------
