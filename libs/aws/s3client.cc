@@ -333,11 +333,12 @@ bool S3Client::delete_multiple_objects(const string& bucket_name,
 //--------------------------------------------------------------------------
 // Delete all objects with a given prefix
 bool S3Client::delete_objects_with_prefix(const string& bucket_name,
-                                          const string& prefix)
+                                          const string& prefix,
+                                          int max_keys_per_request)
 {
   set<string> keys;
   if (!list_bucket(bucket_name, keys, prefix)) return false;
-  return delete_multiple_objects(bucket_name, keys);
+  return delete_multiple_objects(bucket_name, keys, max_keys_per_request);
 }
 
 //--------------------------------------------------------------------------

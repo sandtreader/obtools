@@ -126,6 +126,7 @@ class S3Client
 
  public:
   static constexpr auto default_s3_host = "s3.amazonaws.com";
+  static const auto default_max_keys_per_delete_request = 1000;
 
   //------------------------------------------------------------------------
   // Constructor
@@ -236,12 +237,15 @@ class S3Client
   // Set max_keys_per_request for testing
   bool delete_multiple_objects(const string& bucket_name,
                                set<string>& object_keys,
-                               int max_keys_per_request = 1000);
+                               int max_keys_per_request
+                               = default_max_keys_per_delete_request);
 
   //--------------------------------------------------------------------------
   // Delete all objects with a given prefix
   bool delete_objects_with_prefix(const string& bucket_name,
-                                  const string& prefix);
+                                  const string& prefix,
+                                  int max_keys_per_request
+                                  = default_max_keys_per_delete_request);
 
   //--------------------------------------------------------------------------
   // Empty the bucket, deleting all objects
