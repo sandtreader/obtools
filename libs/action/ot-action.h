@@ -65,14 +65,14 @@ private:
   map<T, vector<Handler *> > handlers;
   MT::Mutex handlers_mutex;
 
-  MT::Queue<Action<T> *> actions;
+  MT::Queue<shared_ptr<Action<T>>> actions;
   int queue_limit = 0;
 
   class ActionTask: public MT::Task
   {
   private:
     MT::Condition condition;
-    Action<T> *action = nullptr;
+    shared_ptr<Action<T>> action;
     Handler *handler = nullptr;
 
   public:
@@ -95,7 +95,7 @@ private:
 
     //---------------------------------------------------------------------
     // Set the action to work upon
-    void set_action(Action<T> *new_action, Handler *new_handler)
+    void set_action(shared_ptr<Action<T>> new_action, Handler *new_handler)
     {
       action = new_action;
       handler = new_handler;
@@ -112,7 +112,7 @@ private:
 
   vector<shared_ptr<MT::TaskThread<ActionTask> > > threads;
 
-  class WorkerTask: public MT::Task
+  class DispatcherTask: public MT::Task
   {
   private:
     Manager& manager;
@@ -120,7 +120,7 @@ private:
   public:
     //----------------------------------------------------------------------
     // Constructor
-    WorkerTask(Manager& _manager):
+    DispatcherTask(Manager& _manager):
       manager(_manager)
     {
     }
@@ -141,18 +141,16 @@ private:
     }
   };
 
-  MT::TaskThread<WorkerTask> worker_thread;
-
-  friend class WorkerThread;
+  MT::TaskThread<DispatcherTask> dispatcher_thread;
 
   //------------------------------------------------------------------------
   // Handle next action on queue
   // Returns whether more to process
   bool next_action()
   {
-    auto action = unique_ptr<Action<T>>{actions.wait()};
+    auto action = actions.wait();
 
-    if (!action.get())
+    if (!action)
       return false;
 
     vector<shared_ptr<MT::TaskThread<ActionTask>>> active;
@@ -170,7 +168,7 @@ private:
                 new ActionTask{});
             threads.push_back(p);
           }
-          (*threads[i])->set_action(action.get(), handler);
+          (*threads[i])->set_action(action, handler);
           active.push_back(threads[i]);
           ++i;
         }
@@ -190,7 +188,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor
   Manager():
-    worker_thread(new WorkerTask(*this))
+    dispatcher_thread(new DispatcherTask(*this))
   {
   }
 
@@ -222,7 +220,7 @@ public:
     auto limited = false;
     if (queue_limit)
       limited = actions.limit(queue_limit-1);
-    actions.send(action);
+    actions.send(shared_ptr<Action<T>>{action});
     return limited ? QueueResult::replaced_old : QueueResult::ok;
   }
 
