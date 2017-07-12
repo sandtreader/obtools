@@ -444,12 +444,10 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
     client.prepare_shutdown();
 
     // Destroy subscribers
+    // Note MultiClient shutdown() deletes them
     for(list<XMLMesh::Subscriber *>::iterator p = subscribers.begin();
         p != subscribers.end(); ++p)
-    {
       (*p)->disconnect();
-      delete *p;
-    }
   }
 };
 
