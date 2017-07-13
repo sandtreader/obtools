@@ -1069,16 +1069,16 @@ class ConnectionPool: MT::Thread
   Time::Duration max_inactivity;
 
   // Current connections
-  MT::Mutex mutex;                 // On connection lists
+  mutable MT::Mutex mutex;         // On connection lists
   list<Connection *> connections;  // All connections
   list<Connection *> available;    // Connections available for use
 
   // Pending claim requests
   struct PendingRequest
   {
-    Time::Stamp started;           // When started
-    Connection *connection=0;      // Filled in when available
-    MT::Condition available;       // Signal availability
+    Time::Stamp started=Time::Stamp::now();  // When started
+    Connection *connection=nullptr;          // Filled in when available
+    MT::Condition available;                 // Signal availability
   };
   list<shared_ptr<PendingRequest> > pending_requests;
   static constexpr double default_claim_timeout = 5.0;
@@ -1121,17 +1121,17 @@ public:
 
   //------------------------------------------------------------------------
   // Get number of connections created
-  unsigned num_connections()
+  unsigned num_connections() const
   { MT::Lock lock(mutex); return connections.size(); }
 
   //------------------------------------------------------------------------
   // Get number of connections available
-  unsigned num_available()
+  unsigned num_available() const
   { MT::Lock lock(mutex); return available.size(); }
 
   //------------------------------------------------------------------------
   // Get number of connections in use
-  unsigned num_in_use()
+  unsigned num_in_use() const
   { MT::Lock lock(mutex); return connections.size()-available.size(); }
 
   //------------------------------------------------------------------------

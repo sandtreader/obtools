@@ -103,8 +103,7 @@ Connection *ConnectionPool::claim()
       // Otherwise delete it
       log.error << "Database connection failed - deleting from pool\n";
 
-      map<Connection *, Time::Stamp>::iterator p = last_used.find(conn);
-      if (p!=last_used.end()) last_used.erase(p);
+      last_used.erase(conn);
       connections.remove(conn);
       delete conn;
     }
@@ -139,7 +138,6 @@ Connection *ConnectionPool::claim()
   log.error << "Database pool reached maximum size: " << max_connections
             << " - waiting for release\n";
   shared_ptr<PendingRequest> pr{new PendingRequest};
-  pr->started = Time::Stamp::now();
   {
     MT::Lock lock(mutex);
     pending_requests.push_back(pr);
