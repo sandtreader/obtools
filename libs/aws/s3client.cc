@@ -27,10 +27,6 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
     requests_this_connection = 0;
   }
 
-  // Check for max requests and close if reached
-  bool close = ++requests_this_connection >= max_requests_per_connection;
-  if (close) http->close_persistence();
-
   // Add headers and authenticate
   request.headers.put("host", request.url.get_host());
 
@@ -53,6 +49,10 @@ bool S3Client::do_request(Web::HTTPMessage& request, Web::HTTPMessage &response)
 
   // Sign it
   authenticator.sign(req);
+
+  // Check for max requests and close if reached
+  bool close = ++requests_this_connection >= max_requests_per_connection;
+  if (close) http->close_persistence();
 
   // Do the fetch
   bool result = http->fetch(request, response);

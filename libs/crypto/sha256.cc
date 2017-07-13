@@ -49,7 +49,7 @@ string SHA256::get_result()
     finished = true;
     return Text::btox(buf, DIGEST_LENGTH);
   }
-  else return "REUSED SHA256!";
+  else throw logic_error("Reused SHA256 after get_result()");
 }
 
 //--------------------------------------------------------------------------

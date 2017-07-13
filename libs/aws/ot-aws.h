@@ -115,7 +115,7 @@ class S3Client
 {
   Authenticator authenticator;
   bool persistent{false};
-  auto_ptr<Web::HTTPClient> http;
+  unique_ptr<Web::HTTPClient> http;
   int max_requests_per_connection{50};  // AWS RSTs at 100
   int requests_this_connection{0};
   string s3_host;
