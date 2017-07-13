@@ -122,6 +122,66 @@ public:
 };
 
 //==========================================================================
+// Dijkstra Semaphore class
+class Semaphore
+{
+  mutex m;
+  condition_variable cv;
+  int count = 0;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  Semaphore() {}
+  Semaphore(int initial_count): count(initial_count) {}
+
+  //------------------------------------------------------------------------
+  // Signal (V) operation
+  void signal()
+  {
+    lock_guard<mutex> lock{m};
+    ++count;
+    cv.notify_one();
+  }
+
+  //------------------------------------------------------------------------
+  // Signal a number of times
+  // Ideally call at setup, although calling with waiters will work, it
+  // may be inefficient to use all the time
+  void signal(int n)
+  {
+    lock_guard<mutex> lock{m};
+    count+=n;
+    cv.notify_all(); // Note will be some false wakeups, but wait() will cope
+  }
+
+  //------------------------------------------------------------------------
+  // Wait (P) operation
+  void wait()
+  {
+    unique_lock<mutex> lock{m};
+    while (!count) cv.wait(lock);
+    --count;
+  }
+};
+
+//==========================================================================
+// RAII holder for Semaphore
+class SemaphoreHolder
+{
+  Semaphore& sem;
+
+ public:
+  //------------------------------------------------------------------------
+  // Constructor - waits
+  SemaphoreHolder(Semaphore& _sem): sem(_sem) { sem.wait(); }
+
+  //------------------------------------------------------------------------
+  // Destructor - signals
+  ~SemaphoreHolder() { sem.signal(); }
+};
+
+//==========================================================================
 // Abstract Thread class
 class Thread
 {

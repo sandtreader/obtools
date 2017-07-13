@@ -453,6 +453,16 @@ void MultiClient::shutdown()
     transport.shutdown();
     if (dispatch_thread) delete dispatch_thread;
     dispatch_thread = 0;
+
+    // Delete dead subscribers
+    // (undead ones, leave and complain when the user kills them)
+    for(auto p: subscribers)
+    {
+      if (p->dead)
+        delete p;
+      else
+        cerr << "XMLMesh subscriber not disconnected\n";
+    }
   }
 }
 
