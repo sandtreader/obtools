@@ -201,6 +201,13 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Get current length of queue
+  decltype(actions.waiting()) get_queue_length() const
+  {
+    return actions.waiting();
+  }
+
+  //------------------------------------------------------------------------
   // Set limit on queue length
   void set_queue_limit(int n) { queue_limit = n; }
 
