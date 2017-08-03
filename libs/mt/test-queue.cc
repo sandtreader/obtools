@@ -19,9 +19,9 @@ TEST(QueueTest, TestLimiting)
 {
   MT::Queue<int> q;
   for(auto i=0; i<10; i++) q.send(i);
-  ASSERT_EQ(10, q.count());
+  ASSERT_EQ(10, q.waiting());
   ASSERT_TRUE(q.limit(5));
-  ASSERT_EQ(5, q.count());
+  ASSERT_EQ(5, q.waiting());
   EXPECT_EQ(5, q.wait());
   EXPECT_EQ(6, q.wait());
   EXPECT_EQ(7, q.wait());

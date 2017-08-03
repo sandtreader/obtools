@@ -434,7 +434,7 @@ template<class T> class Queue
 {
 private:
   queue<T> q;
-  mutex mymutex;
+  mutable mutex mymutex;
   condition_variable available;
 
 public:
@@ -444,7 +444,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get current length
-  typename queue<T>::size_type waiting()
+  typename queue<T>::size_type waiting() const
   {
     unique_lock<mutex> lock{mymutex};
     return q.size();
@@ -489,14 +489,6 @@ public:
         return msg;
       }
     }
-  }
-
-  //------------------------------------------------------------------------
-  // Get count of messages left in queue
-  typename queue<T>::size_type count()
-  {
-    unique_lock<mutex> lock{mymutex};
-    return q.size();
   }
 
   //------------------------------------------------------------------------
