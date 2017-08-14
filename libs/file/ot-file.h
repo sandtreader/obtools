@@ -417,40 +417,65 @@ class OutStream: public ofstream
 // Buffered Output Stream
 // Has a similar, but reduced, interface to ofstream, and provides simple
 // buffering
+// Notes:
+// - the first write doesn't get buffered due to libstd++ implementation
+// - the buffer size cannot be set whilst a file is open
 class BufferedOutFileBuf: public filebuf
 {
+private:
+  vector<char> buffer;
+
 protected:
   //------------------------------------------------------------------------
   // Handle characters one at a time
   streamsize xsputn(const char *s, streamsize n);
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  BufferedOutFileBuf(uint64_t size);
+
+  //------------------------------------------------------------------------
+  // Resize buffer
+  void resize(uint64_t size);
+
+  //------------------------------------------------------------------------
+  // Get size of buffer
+  uint64_t size() const
+  {
+    return buffer.size();
+  }
 };
 
 class BufferedOutStream: public ostream
 {
 private:
   BufferedOutFileBuf file_buf;
-  vector<char> buffer;
 
 public:
   //------------------------------------------------------------------------
   // Constructors
   BufferedOutStream();
-  BufferedOutStream(const char *filename,
-                    ios_base::openmode mode = ios_base::out,
-                    uint64_t buffer_size = 0);
   BufferedOutStream(const string& filename,
+                    uint64_t buffer_size,
                     ios_base::openmode mode = ios_base::out
                                             | ios_base::trunc
-                                            | ios_base::binary,
-                    uint64_t buffer_size = 0);
+                                            | ios_base::binary);
 
   //------------------------------------------------------------------------
   // Set buffer size
-  void set_buffer_size(uint64_t buffer_size);
+  // Note: will not work if called whilst file open
+  void set_buffer_size(uint64_t buffer_size)
+  {
+    file_buf.resize(buffer_size);
+  }
 
   //------------------------------------------------------------------------
   // Get buffer size
-  uint64_t get_buffer_size() const;
+  uint64_t get_buffer_size() const
+  {
+    return file_buf.size();
+  }
 
   //------------------------------------------------------------------------
   // Test for file being open
@@ -519,6 +544,79 @@ public:
   //------------------------------------------------------------------------
   // Constructors
   MultiOutStream();
+
+  //------------------------------------------------------------------------
+  // Test for file being open
+  bool is_open() const;
+
+  //------------------------------------------------------------------------
+  // Open a file
+  void open(const char *filename, ios_base::openmode mode = ios_base::in
+                                                           | ios_base::out);
+
+  //------------------------------------------------------------------------
+  // Open a file with return of success or not
+  bool open_back(const char *filename, ios_base::openmode mode = ios_base::in
+                                                           | ios_base::out);
+
+  //------------------------------------------------------------------------
+  // Close file
+  void close();
+};
+
+//==========================================================================
+// Buffered Multi Output File Stream
+class BufferedMultiOutFileBuf: public streambuf
+{
+private:
+  vector<unique_ptr<BufferedOutFileBuf>>& file_bufs;
+
+protected:
+  //------------------------------------------------------------------------
+  // Put sequence of characters
+  streamsize xsputn(const char *s, streamsize n);
+
+  //------------------------------------------------------------------------
+  // Put character on overflow
+  int overflow(int c = EOF);
+
+  //------------------------------------------------------------------------
+  // Set internal position pointer to relative position
+  // Implemented for sake of MultiOutStream::tellp() functionality
+  streampos seekoff(streamoff off, ios_base::seekdir way,
+                    ios_base::openmode which = ios_base::in | ios_base::out);
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  BufferedMultiOutFileBuf(vector<unique_ptr<BufferedOutFileBuf>>& _file_bufs):
+    file_bufs{_file_bufs}
+  {}
+};
+
+class BufferedMultiOutStream: public ostream
+{
+private:
+  vector<unique_ptr<BufferedOutFileBuf>> file_bufs;
+  BufferedMultiOutFileBuf file_buf;
+  uint64_t buffer_size = 1 << 10; // "Measurement would reveal the best choice"
+
+public:
+  //------------------------------------------------------------------------
+  // Constructors
+  BufferedMultiOutStream(uint64_t _buffer_size);
+
+  //------------------------------------------------------------------------
+  // Set buffer size
+  // Note: will not work if called whilst file open
+  void set_buffer_size(uint64_t buffer_size);
+
+  //------------------------------------------------------------------------
+  // Get buffer size
+  uint64_t get_buffer_size() const
+  {
+    return buffer_size;
+  }
 
   //------------------------------------------------------------------------
   // Test for file being open
