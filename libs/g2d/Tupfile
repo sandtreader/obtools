@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::G2D library
+#
+# Copyright (c) 2017 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-g2d
+TYPE    = lib
+DEPENDS =
+
+include_rules
