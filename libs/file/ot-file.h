@@ -339,6 +339,14 @@ public:
   // Extend a path
   Directory& extend(const string& leaf);
   Directory& extend(const Path& path);
+
+  //--------------------------------------------------------------------------
+  // Resolve a path against a directory
+  //   If new path is absolute, return new path
+  //   If relative, make absolute path relative to within the directory
+  // Note difference with Path::resolve is that this works from the directory
+  // path itself, not its parent
+  Path resolve(const Path& new_path) const;
 };
 
 //==========================================================================

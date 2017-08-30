@@ -194,4 +194,27 @@ Directory& Directory::extend(const Path& p)
   return *this;
 }
 
+//--------------------------------------------------------------------------
+// Resolve a path against a directory
+//   If new path is absolute, return new path
+//   If relative, make absolute path relative to within the directory
+// Note difference with Path::resolve is that this works from the directory
+// path itself, not its parent
+Path Directory::resolve(const Path& new_path) const
+{
+  if (new_path.is_absolute()) return new_path;
+  string dn = path;
+  string nn = new_path.str();
+
+  // Strip ../ from new path and move up
+  while (nn.size() > 3 && nn[0] == '.' && nn[1] == '.' && is_sep_char(nn[2]))
+  {
+    nn = string(nn, 3);
+    dn = Path(dn).dirname();
+  }
+
+  return Path(dn, nn);
+}
+
+
 }} // namespaces
