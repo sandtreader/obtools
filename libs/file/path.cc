@@ -116,6 +116,8 @@ string Path::dirname() const
     if (alt_slash != string::npos && alt_slash > slash) slash = alt_slash;
   }
 
+  // Special case for root
+  if (!slash) return "/";
   return string(path, 0, slash);
 }
 

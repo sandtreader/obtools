@@ -16,6 +16,16 @@ namespace {
 using namespace std;
 using namespace ObTools;
 
+TEST(DirectoryTest, TestResolve)
+{
+  EXPECT_EQ("/foo/bar/splat",
+            File::Directory("/foo/bar").resolve(File::Path("splat")).str());
+  EXPECT_EQ("/splat",
+            File::Directory("/foo/bar").resolve(File::Path("/splat")).str());
+  EXPECT_EQ("/foo/splat",
+            File::Directory("/foo/bar").resolve(File::Path("../splat")).str());
+}
+
 TEST(DirectoryTest, TestRecursiveDirectoryDeletion)
 {
   auto test_dir = File::Directory{"./test-gubbins"};

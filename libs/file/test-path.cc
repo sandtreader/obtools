@@ -58,6 +58,8 @@ TEST_F(PathTest, TestDirName)
             File::Path("~relative/path/to/home/").dirname());
   EXPECT_EQ("./relative/to/here",
             File::Path("./relative/to/here/").dirname());
+  EXPECT_EQ("/",
+            File::Path("/absolute").dirname());
 }
 
 TEST_F(PathTest, TestLeafName)
@@ -83,6 +85,16 @@ TEST_F(PathTest, TestBasename)
   EXPECT_EQ("", File::Path("~/.emacs").basename());
   EXPECT_EQ("", File::Path(".bashrc").basename());
   EXPECT_EQ(".he.ll", File::Path("./n.as.ty./.pa.th/.he.ll.txt").basename());
+}
+
+TEST_F(PathTest, TestResolve)
+{
+  EXPECT_EQ("/foo/splat",
+            File::Path("/foo/bar").resolve(File::Path("splat")).str());
+  EXPECT_EQ("/splat",
+            File::Path("/foo/bar").resolve(File::Path("/splat")).str());
+  EXPECT_EQ("/splat",
+            File::Path("/foo/bar").resolve(File::Path("../splat")).str());
 }
 
 TEST_F(PathTest, TestExists)
