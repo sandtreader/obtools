@@ -636,10 +636,15 @@ private:
   int timeout;    // Socket inactivity timeout
   string version; // Version reported in Server: header
   string cors_origin;  // Pattern for Access-Control-Allow-Origin header
+  bool websocket_enabled{false};
 
   //------------------------------------------------------------------------
   // Implementation of worker process method
   void process(SSL::TCPSocket &s, const SSL::ClientDetails& client);
+
+  // Internals
+  bool do_websocket_handshake(const HTTPMessage& request,
+                              HTTPMessage& response);
 
 protected:
   //------------------------------------------------------------------------
@@ -674,6 +679,15 @@ protected:
                                     const SSL::ClientDetails& /*client*/,
                                     SSL::TCPSocket& /*socket*/,
                                     Net::TCPStream& /*stream*/) {}
+
+  //------------------------------------------------------------------------
+  // Interface to handle upgraded web socket - called after initial
+  // HTTP handshake with raw socket
+  // Do not return until socket closed down
+  virtual void handle_websocket(const HTTPMessage& /*request*/,
+                                const SSL::ClientDetails& /*client*/,
+                                SSL::TCPSocket& /*socket*/,
+                                Net::TCPStream& /*stream*/) {}
 
   //------------------------------------------------------------------------
   // Interface to clear per-connection state
@@ -723,6 +737,10 @@ public:
   {
     cors_origin = pattern;
   }
+
+  //------------------------------------------------------------------------
+  // Enable WebSocket upgrade
+  void enable_websocket() { websocket_enabled = true; }
 
   //------------------------------------------------------------------------
   // Virtual destructor
