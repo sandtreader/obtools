@@ -627,6 +627,70 @@ public:
 };
 
 //==========================================================================
+// WebSocket frame structure (websocket.cc)
+struct WebSocketFrame
+{
+  bool fin{true};
+  enum class Opcode
+  {
+    continuation = 0,
+    text         = 1,
+    binary       = 2,
+    close        = 8,
+    ping         = 9,
+    pong         = 10,
+  };
+  Opcode opcode{Opcode::binary};
+
+  // Note payload implicit in string length
+  // Note masking removed internally
+
+  string payload;
+
+  //------------------------------------------------------------------------
+  // Constructors
+  WebSocketFrame() {}
+  WebSocketFrame(Opcode _opcode): opcode(_opcode) {}
+  WebSocketFrame(Opcode _opcode, bool _fin): fin(_fin), opcode(_opcode) {}
+
+  //------------------------------------------------------------------------
+  // Read a WebSocket frame
+  // Returns whether successfully read
+  bool read(Net::TCPStream& stream);
+
+  //------------------------------------------------------------------------
+  // Write a WebSocket frame
+  // Returns whether successfully written
+  bool write(Net::TCPStream& stream);
+
+  //------------------------------------------------------------------------
+  // Dump a WebSocket frame to the given channel, optionally dumping payload
+  // too
+  void dump(ostream& sout, bool dump_payload = false);
+};
+
+//==========================================================================
+// WebSocket server protocol helper (websocket.cc)
+class WebSocketServer
+{
+  Net::TCPStream& stream;
+
+ public:
+  //------------------------------------------------------------------------
+  // Constructor - attach to a stream
+  WebSocketServer(Net::TCPStream& _stream): stream(_stream) {}
+
+  //------------------------------------------------------------------------
+  // Read a message - blocks waiting for a message (which may be multiple
+  // fragmented frames).  Returns whether a valid message received
+  bool read(string& msg);
+
+  //------------------------------------------------------------------------
+  // Write a message.  Returns whether able to write
+  bool write(string& msg);
+};
+
+//==========================================================================
 // HTTP Server abstract class (http-server.cc)
 // Multi-threaded server for HTTP - manages HTTP protocol state, and
 // passes request messages to subclasses
