@@ -170,6 +170,7 @@ bool WebSocketServer::read(string& msg)
 
         // Send the same back
         frame.write(stream);
+        stream.flush();
         return false;
       }
 
