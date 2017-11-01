@@ -63,7 +63,7 @@ bool WebSocketFrame::read(Net::TCPStream& stream)
 //------------------------------------------------------------------------
 // Write a WebSocket frame
 // Returns whether successfully written
-bool WebSocketFrame::write(Net::TCPStream& stream)
+bool WebSocketFrame::write(Net::TCPStream& stream) const
 {
   Channel::StreamWriter writer(stream);
 
@@ -103,7 +103,7 @@ bool WebSocketFrame::write(Net::TCPStream& stream)
 //------------------------------------------------------------------------
 // Dump a WebSocket frame to the given channel, optionally dumping payload
 // too
-void WebSocketFrame::dump(ostream& sout, bool dump_payload)
+void WebSocketFrame::dump(ostream& sout, bool dump_payload) const
 {
   sout << "WebSocket Frame " << (fin?"FIN ":"")
        << static_cast<int>(opcode) << " (";
@@ -169,8 +169,7 @@ bool WebSocketServer::read(string& msg)
         log << "WebSocket close received\n";
 
         // Send the same back
-        frame.write(stream);
-        stream.flush();
+        write(frame);
         return false;
       }
 
@@ -183,6 +182,17 @@ bool WebSocketServer::read(string& msg)
 }
 
 //------------------------------------------------------------------------
+// Write a frame, with mutex on stream, and flush it
+// Returns whether successfully written
+bool WebSocketServer::write(const WebSocketFrame& frame)
+{
+  MT::Lock lock(stream_mutex);
+  if (!frame.write(stream)) return false;
+  stream.flush();
+  return true;
+}
+
+//------------------------------------------------------------------------
 // Write a message.  Returns whether able to write
 bool WebSocketServer::write(string& msg)
 {
@@ -192,9 +202,7 @@ bool WebSocketServer::write(string& msg)
   OBTOOLS_LOG_IF_DEBUG(Log::Debug log; log << "WS sending:\n";
                        frame.dump(log, true);)
 
-  if (!frame.write(stream)) return false;
-  stream.flush();
-  return true;
+  return write(frame);
 }
 
 }} // namespaces

@@ -661,12 +661,12 @@ struct WebSocketFrame
   //------------------------------------------------------------------------
   // Write a WebSocket frame
   // Returns whether successfully written
-  bool write(Net::TCPStream& stream);
+  bool write(Net::TCPStream& stream) const;
 
   //------------------------------------------------------------------------
   // Dump a WebSocket frame to the given channel, optionally dumping payload
   // too
-  void dump(ostream& sout, bool dump_payload = false);
+  void dump(ostream& sout, bool dump_payload = false) const;
 };
 
 //==========================================================================
@@ -674,6 +674,10 @@ struct WebSocketFrame
 class WebSocketServer
 {
   Net::TCPStream& stream;
+  MT::Mutex stream_mutex;
+
+  // Internals
+  bool write(const WebSocketFrame& frame);
 
  public:
   //------------------------------------------------------------------------
