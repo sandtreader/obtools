@@ -173,12 +173,27 @@ bool WebSocketServer::read(string& msg)
         return false;
       }
 
-      default:;  // !!! Ping/pong?
+      case WebSocketFrame::Opcode::ping:
+      {
+        // Send back a pong with same payload
+        WebSocketFrame pong(WebSocketFrame::Opcode::pong);
+        pong.payload = frame.payload;
+        write(pong);
+      }
+      break;
+
+      case WebSocketFrame::Opcode::pong:
+        // Just ignore
+      break;
+
+      default:
+      {
+        Log::Error log;
+        log << "Unexpected WebSocket frame: ";
+        frame.dump(log);
+      }
     }
   }
-
-  // !!! Probably a background thread with a queue so we can send
-  // !!! responses to ping etc. etc.
 }
 
 //------------------------------------------------------------------------
