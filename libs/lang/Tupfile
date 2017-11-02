@@ -1,0 +1,10 @@
+#===========================================================================
+# Tupfile for ObTools::Lang library
+#
+# Copyright (c) 2017 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-lang
+TYPE    = lib
+
+include_rules
