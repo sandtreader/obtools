@@ -208,16 +208,38 @@ bool WebSocketServer::write(const WebSocketFrame& frame)
 }
 
 //------------------------------------------------------------------------
-// Write a message.  Returns whether able to write
+// Write a textual message.  Returns whether able to write
 bool WebSocketServer::write(string& msg)
 {
-  WebSocketFrame frame(WebSocketFrame::Opcode::text); // !!! For now
+  WebSocketFrame frame(WebSocketFrame::Opcode::text);
   frame.payload = msg;
 
   OBTOOLS_LOG_IF_DEBUG(Log::Debug log; log << "WS sending:\n";
                        frame.dump(log, true);)
 
   return write(frame);
+}
+
+//------------------------------------------------------------------------
+// Write a binary message.  Returns whether able to write
+bool WebSocketServer::write_binary(string& msg)
+{
+  WebSocketFrame frame(WebSocketFrame::Opcode::binary);
+  frame.payload = msg;
+
+  OBTOOLS_LOG_IF_DEBUG(Log::Debug log; log << "WS sending:\n";
+                       frame.dump(log, true);)
+
+  return write(frame);
+}
+
+//------------------------------------------------------------------------
+// Send a close
+void WebSocketServer::close()
+{
+  WebSocketFrame frame(WebSocketFrame::Opcode::close);
+  OBTOOLS_LOG_IF_DEBUG(Log::Debug log; log << "WS closing\n";)
+  write(frame);
 }
 
 }} // namespaces

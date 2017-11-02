@@ -690,8 +690,16 @@ class WebSocketServer
   bool read(string& msg);
 
   //------------------------------------------------------------------------
-  // Write a message.  Returns whether able to write
+  // Write a textual message.  Returns whether able to write
   bool write(string& msg);
+
+  //------------------------------------------------------------------------
+  // Write a binary message.  Returns whether able to write
+  bool write_binary(string& msg);
+
+  //------------------------------------------------------------------------
+  // Close down
+  void close();
 };
 
 //==========================================================================
