@@ -6,6 +6,6 @@
 
 NAME    = ot-web
 TYPE    = lib
-DEPENDS = ot-xml ot-misc ot-ssl
+DEPENDS = ot-xml ot-misc ot-ssl ot-crypto
 
 include_rules

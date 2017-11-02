@@ -9,9 +9,15 @@
 
 #include "ot-web.h"
 #include "ot-text.h"
+#include "ot-crypto.h"
 #include <sstream>
 
 namespace ObTools { namespace Web {
+
+namespace
+{
+  const auto websocket_key_guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+};
 
 //==========================================================================
 // Generic HTTP server
@@ -41,6 +47,7 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
     do
     {
       ObTools::Web::HTTPMessage request, response;
+      bool do_websocket{false};
 
       // Try to read a message, stop if not (probably connection dropped)
       // Don't wait for EOF in absence of Content-Length, just assume 0
@@ -88,7 +95,8 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         if (request.version == "HTTP/1.1")
         {
           // Check for Connection: close - otherwise, assume persistent
-          if (conn_hdr == "close")
+          // WebSocket upgrades are also non-persistent
+          if (conn_hdr == "close" || conn_hdr == "upgrade")
           {
             if (persistent)
               log.detail << "HTTP/1.1 persistent connection from "
@@ -145,6 +153,18 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         {
           response.headers.put("Allow", "GET, POST, HEAD");
         }
+        // Check for WebSocket upgrade
+        else if (websocket_enabled
+              && request.method == "GET"
+              && conn_hdr == "upgrade"
+              && Text::tolower(request.headers.get("upgrade")) == "websocket")
+        {
+          log.detail << "Upgrade to WebSocket requested\n";
+          if (do_websocket_handshake(request, response))
+            do_websocket = true;
+          else
+            error(response, 400, "Bad WebSocket request");
+        }
         // In all other cases call down to subclass implementation
         else if (!handle_request(request, response, client, s, ss))
         {
@@ -174,9 +194,17 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         log.error << "HTTP response failed\n";
       ss.flush();
 
-      // Allow subclasses to generate progressive data following on, if
-      // required
-      generate_progressive(request, response, client, s, ss);
+      // Do websocket if required
+      if (do_websocket)
+      {
+        handle_websocket(request, client, s, ss);
+      }
+      else
+      {
+        // Allow subclasses to generate progressive data following on, if
+        // required
+        generate_progressive(request, response, client, s, ss);
+      }
     }
     while (persistent);
 
@@ -190,6 +218,41 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
   {
     log.error << se << endl;
   }
+}
+
+//--------------------------------------------------------------------------
+// Implementation of general request handler
+bool HTTPServer::do_websocket_handshake(const HTTPMessage& request,
+                                        HTTPMessage& response)
+{
+  Log::Streams log;
+
+  // Check version
+  if (request.headers.get("sec-websocket-version") != "13")
+  {
+    log.error << "Bad WebSocket version\n";
+    response.headers.put("Sec-WebSocket-Version", "13");
+    return false;
+  }
+
+  string key = request.headers.get("sec-websocket-key");
+
+  // Add GUID
+  key += websocket_key_guid;
+
+  // SHA1 hash, base64'd
+  Crypto::SHA1 sha1;
+  string hash = sha1.digest(key);
+
+  Text::Base64 base64;
+  response.headers.put("Sec-WebSocket-Accept", base64.encode(hash, 0));
+
+  // Respond positively
+  response.code = 101;
+  response.reason = "Switching Protocols";
+  response.headers.put("Connection", "Upgrade");
+  response.headers.put("Upgrade", "websocket");
+  return true;
 }
 
 //==========================================================================
