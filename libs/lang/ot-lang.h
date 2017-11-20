@@ -529,6 +529,14 @@ Language iso_639_2_to_lang(const string& iso);
 // Convert a language to an ISO 639-2 (3 character)
 string lang_to_iso_639_2_to_lang(Language lang);
 
+//--------------------------------------------------------------------------
+// Convert a language to a string
+string lang_to_string(Language lang);
+
+//--------------------------------------------------------------------------
+// Write a language to a stream
+ostream& operator<<(ostream& s, Language lang);
+
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_LANG_H
