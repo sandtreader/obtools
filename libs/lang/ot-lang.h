@@ -510,6 +510,10 @@ enum class Language
 };
 
 //--------------------------------------------------------------------------
+// Convert an ISO 629 code to a language
+Language iso_639_to_lang(const string& iso);
+
+//--------------------------------------------------------------------------
 // Convert an ISO 639-1 (2 character) code to a language
 Language iso_639_1_to_lang(const string& iso);
 

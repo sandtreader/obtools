@@ -1390,6 +1390,21 @@ const auto lang_to_iso_639_2_table = map<Language, string>
 }
 
 //--------------------------------------------------------------------------
+// Convert an ISO 639 code to a language
+Language iso_639_to_lang(const string& iso)
+{
+  switch (iso.size())
+  {
+    case 2:
+      return iso_639_1_to_lang(iso);
+    case 3:
+      return iso_639_2_to_lang(iso);
+    default:
+      return Language::unknown;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Convert an ISO 639-1 (2 character) code to a language
 Language iso_639_1_to_lang(const string& iso)
 {
