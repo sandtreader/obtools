@@ -519,7 +519,7 @@ Language iso_639_1_to_lang(const string& iso);
 
 //--------------------------------------------------------------------------
 // Convert a language to an ISO 639-1 (2 character)
-string lang_to_iso_639_1_to_lang(Language lang);
+string lang_to_iso_639_1(Language lang);
 
 //--------------------------------------------------------------------------
 // Convert an ISO 639-2 (3 character) code to a language
@@ -527,7 +527,7 @@ Language iso_639_2_to_lang(const string& iso);
 
 //--------------------------------------------------------------------------
 // Convert a language to an ISO 639-2 (3 character)
-string lang_to_iso_639_2_to_lang(Language lang);
+string lang_to_iso_639_2(Language lang);
 
 //--------------------------------------------------------------------------
 // Convert a language to a string
