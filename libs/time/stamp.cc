@@ -676,6 +676,17 @@ string Stamp::format(const char *format) const
 }
 
 //--------------------------------------------------------------------------
+// Get just the date part
+Stamp Stamp::date() const
+{
+  auto sp = split();
+  sp.hour = 0;
+  sp.min = 0;
+  sp.sec = 0;
+  return Stamp{sp};
+}
+
+//--------------------------------------------------------------------------
 // Get the day of the week (Monday=1, Sunday=7)
 int Stamp::weekday() const
 {

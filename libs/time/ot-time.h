@@ -320,6 +320,10 @@ public:
   Split split() const { return split(t); }
 
   //------------------------------------------------------------------------
+  // Get just the date part
+  Stamp date() const;
+
+  //------------------------------------------------------------------------
   // Get the day of the week (Monday=1, Sunday=7)
   int weekday() const;
 
