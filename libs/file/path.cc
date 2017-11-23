@@ -679,4 +679,17 @@ ostream& operator<<(ostream& s, const Path& p)
   s<<p.str(); return s;
 }
 
+//--------------------------------------------------------------------------
+// Sanitise leaf name
+string Path::sanitise_leaf(const string& leaf)
+{
+  auto sanitised = leaf;
+  for (auto& c: sanitised)
+  {
+    if (!isalnum(c) && c != '.' && c != '_' && c != '-' && c != '+')
+      c = '_';
+  }
+  return sanitised;
+}
+
 }} // namespaces

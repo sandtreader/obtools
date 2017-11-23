@@ -283,6 +283,10 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Sanitise leaf name
+  static string sanitise_leaf(const string& leaf);
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Path() {}
 };
