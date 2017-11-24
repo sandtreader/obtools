@@ -1,0 +1,6 @@
+libobtools-xmlmesh-perl (__VERSION__) stable; urgency=low
+
+  * initial build
+
+ -- Jon Barber (Packet Ship Technologies) <jon@packetship.com>  __DATE__
+
