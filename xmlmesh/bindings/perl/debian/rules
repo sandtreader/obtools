@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+# -*- mode: makefile; coding: utf-8 -*-
+# Copyright (C) 2007 Rick Clark <rick.clark@ubuntu.com>
+include /usr/share/cdbs/1/rules/buildcore.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+

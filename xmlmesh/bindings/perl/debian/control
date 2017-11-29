@@ -1,0 +1,10 @@
+Source: libobtools-xmlmesh-perl
+Priority: optional
+Maintainer: ObTools <support@packetship.com>
+Section: non-free/net
+
+Package: libobtools-xmlmesh-perl
+Architecture: all
+Depends: libxml-libxml-perl, libdata-uuid-perl
+Description:  ObTools XMLMesh perl client
+ ObTools XMLMesh perl client
