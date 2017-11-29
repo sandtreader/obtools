@@ -18,6 +18,7 @@
 #include <queue>
 #include <list>
 #include <memory>
+#include <map>
 #include <signal.h>
 #include <stdint.h>
 #include <ot-gen.h>
@@ -179,6 +180,28 @@ class SemaphoreHolder
   //------------------------------------------------------------------------
   // Destructor - signals
   ~SemaphoreHolder() { sem.signal(); }
+};
+
+//==========================================================================
+// Semaphore map
+// Keeps a map of semaphores by name - provides central place to register
+// them without dependency on modules
+class SemaphoreMap
+{
+  mutable mutex m;
+  map<string, MT::Semaphore> semaphores;
+
+public:
+  //------------------------------------------------------------------------
+  // Get a semaphore for the given use, with optional initial count if not
+  // already there
+  MT::Semaphore& get_semaphore(const string& use, int initial_count = 0)
+  {
+    unique_lock<mutex> lock{m};
+    if (semaphores.find(use) == semaphores.end())
+      semaphores[use].signal(initial_count);
+    return semaphores[use];
+  }
 };
 
 //==========================================================================
