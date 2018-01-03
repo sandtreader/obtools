@@ -387,7 +387,6 @@
           }
         });
 
-        start_poller = true;
         this.poller_started = true;
       }
 
