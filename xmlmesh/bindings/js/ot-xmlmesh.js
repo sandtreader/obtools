@@ -342,56 +342,53 @@
         self.subscribers.splice(sub_index, 1);
       }
 
-      function ensure_poller()
+      // Start poller if not already done
+      if (!this.poller_started)
       {
-        // Start poller if not already done
-        if (!self.poller_started)
-        {
-          // Start permanent poller
-          self.poll({
-            ref: self.poller_ref,
-            retry: true,
-            completion: function(poll_result)
+        // Start permanent poller
+        self.poll({
+          ref: self.poller_ref,
+          retry: true,
+          completion: function(poll_result)
+          {
+            if (poll_result.success)
             {
-              if (poll_result.success)
+              // Call any matching subscribers with this message
+              for(var i=0; i<self.subscribers.length; i++)
               {
-                // Call any matching subscribers with this message
-                for(var i=0; i<self.subscribers.length; i++)
-                {
-                  var sub = self.subscribers[i];
+                var sub = self.subscribers[i];
 
-                  if (glob(sub.pattern, poll_result.subject)
-                      && !sub.callback(poll_result.response, sub.id))
-                    unsub(i);
-                }
-                return true;  // Always keep running
+                if (glob(sub.pattern, poll_result.subject)
+                    && !sub.callback(poll_result.response, sub.id))
+                  unsub(i);
               }
-              else if (poll_result.error)
-              {
-                self.log("Poll failed: "+poll_result.error);
-                self.poller_started = false;
-                return false;  // Forget this one, try again
-              }
-              else // Poll timed out
-              {
-                // Call all subscribers with null so they get a chance
-                // to unsubscribe
-                for(var i=0; i<self.subscribers.length; i++)
-                {
-                  var sub = self.subscribers[i];
-                  if (!sub.callback(null, sub.id))
-                    unsub(i);
-                }
-
-                // But continue the poller anyway
-                return true;
-              }
+              return true;  // Always keep running
             }
-          });
+            else if (poll_result.error)
+            {
+              self.log("Poll failed: "+poll_result.error);
+              self.poller_started = false;
+              return false;  // Forget this one, try again
+            }
+            else // Poll timed out
+            {
+              // Call all subscribers with null so they get a chance
+              // to unsubscribe
+              for(var i=0; i<self.subscribers.length; i++)
+              {
+                var sub = self.subscribers[i];
+                if (!sub.callback(null, sub.id))
+                  unsub(i);
+              }
 
-          start_poller = true;
-          self.poller_started = true;
-        }
+              // But continue the poller anyway
+              return true;
+            }
+          }
+        });
+
+        start_poller = true;
+        this.poller_started = true;
       }
 
       // Subscribe
@@ -406,9 +403,6 @@
             self.subscribers.push({ pattern: pattern,
                                     callback: callback,
                                     id: id });
-
-            // Start the poller now there is a subscription to poll
-            ensure_poller();
           }
           else
           {
