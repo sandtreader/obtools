@@ -124,6 +124,7 @@ public:
   MessagePath path;            // Path through the internal services
                                // - built up for requests, stripped back for
                                //   responses
+  string subscriber_id;        // Optional subscriber ID (used in HTTP)
   MessageTracker *tracker;     // Tracker following this message, or 0
 
   //------------------------------------------------------------------------
@@ -141,8 +142,10 @@ public:
   //------------------------------------------------------------------------
   // Constructor for informational types (CONNECTION, DISCONNECTION) with
   // no message or path (yet)
-  RoutingMessage(Type _type, const MessagePath& _path):
-    type(_type), reversing(false), path(_path), tracker(0)
+ RoutingMessage(Type _type, const MessagePath& _path,
+                const string& _subscriber_id = ""):
+    type(_type), reversing(false), path(_path),
+    subscriber_id(_subscriber_id), tracker(0)
   {}
 
   //------------------------------------------------------------------------
@@ -150,7 +153,8 @@ public:
   // Piecewise copy, except tells tracker that it was copied, too
   RoutingMessage(const RoutingMessage& orig):
     type(orig.type), message(orig.message), reversing(orig.reversing),
-    path(orig.path), tracker(orig.tracker)
+    path(orig.path), subscriber_id(orig.subscriber_id),
+    tracker(orig.tracker)
   {
     // Attach new copy to tracker, if any
     if (tracker) tracker->attach(this);

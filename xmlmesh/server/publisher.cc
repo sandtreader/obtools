@@ -24,9 +24,11 @@ struct Subscription
 {
   const string subject;          // Subject pattern
   const string path;             // Client return path
+  const string subscriber_id;    // Subscriber ID (optional)
 
-  Subscription(const string& _subject, const string& _path):
-    subject(_subject), path(_path)
+  Subscription(const string& _subject, const string& _path,
+               const string& _subscriber_id):
+    subject(_subject), path(_path), subscriber_id(_subscriber_id)
   {}
 };
 
@@ -40,9 +42,11 @@ private:
   list<Subscription> subscriptions;
 
   bool handle_subscription(RoutingMessage& msg);
-  bool subscribe(const string& subject, const string& path);
-  void unsubscribe(const string& subject, const string& path);
-  void unsubscribe_all(const string& path);
+  bool subscribe(const string& subject, const string& path,
+                 const string& subscriber_id);
+  void unsubscribe(const string& subject, const string& path,
+                   const string& subscriber_id);
+  void unsubscribe_all(const string& path, const string& subscriber_id);
 
 public:
   //------------------------------------------------------------------------
@@ -103,6 +107,9 @@ bool Publisher::handle(RoutingMessage& msg)
           const MessagePath path(sub.path);
           RoutingMessage submsg(msg.message, path);
 
+          // Reflect the subscription ID
+          submsg.subscriber_id = sub.subscriber_id;
+
           // If old message was being tracked, attach new one as well
           if (msg.tracker) submsg.track(msg.tracker);
 
@@ -115,7 +122,7 @@ bool Publisher::handle(RoutingMessage& msg)
     case RoutingMessage::DISCONNECTION:
     {
       // Unsubscribe everything that uses this
-      unsubscribe_all(msg.path.to_string());
+      unsubscribe_all(msg.path.to_string(), msg.subscriber_id);
     }
     break;
   }
@@ -147,7 +154,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
   switch (smsg.operation)
   {
     case SubscriptionMessage::JOIN:
-      if (subscribe(smsg.subject, path))
+      if (subscribe(smsg.subject, path, msg.subscriber_id))
       {
         respond(msg);
         return false;  // Take it
@@ -155,7 +162,7 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
       break;
 
     case SubscriptionMessage::LEAVE:
-      unsubscribe(smsg.subject, path);
+      unsubscribe(smsg.subject, path, msg.subscriber_id);
       respond(msg);
       return false;
 
@@ -171,19 +178,22 @@ bool Publisher::handle_subscription(RoutingMessage& msg)
 //--------------------------------------------------------------------------
 // Subscribe a client
 bool Publisher::subscribe(const string& subject,
-                          const string& path)
+                          const string& path,
+                          const string& subscriber_id)
 {
   // Check pattern is one we can accept subscription for
   if (Text::pattern_match(subject_pattern, subject))
   {
     // Unsubscribe from this first
-    unsubscribe(subject, path);
+    unsubscribe(subject, path, subscriber_id);
 
     // (Re)subscribe
-    const Subscription sub(subject, path);
+    const Subscription sub(subject, path, subscriber_id);
 
     Log::Detail log;
-    log << "Client " << path << " subscribed to " << subject << endl;
+    log << "Client " << path << " subscribed to " << subject;
+    if (!subscriber_id.empty()) log  << " with ID " << subscriber_id;
+    log << endl;
 
     MT::RWWriteLock lock(mutex);
     subscriptions.push_back(sub);
@@ -197,7 +207,8 @@ bool Publisher::subscribe(const string& subject,
 // Uses pattern match to allow general unsubscribe
 // E.g. foo.* unsubscribes foo.blah.*, foo.splat as well as foo.*
 void Publisher::unsubscribe(const string& subject,
-                            const string& path)
+                            const string& path,
+                            const string& subscriber_id)
 {
   MT::RWWriteLock lock(mutex);  // Require write now because may need it later
   for(list<Subscription>::iterator p = subscriptions.begin();
@@ -207,11 +218,15 @@ void Publisher::unsubscribe(const string& subject,
     list<Subscription>::iterator q = p++;  // Move safely before deletion
     const Subscription& sub = *q;
 
-    if (sub.path == path
+    if ((subscriber_id.empty()?(sub.path == path)
+                                :(sub.subscriber_id == subscriber_id))
         && Text::pattern_match(subject, sub.subject))
     {
       Log::Detail log;
-      log << "Client " << path << " unsubscribed from " << sub.subject << endl;
+      log << "Client " << path << " unsubscribed from " << sub.subject;
+      if (!subscriber_id.empty()) log  << " with ID " << subscriber_id;
+      log << endl;
+
       subscriptions.erase(q);
     }
   }
@@ -219,7 +234,8 @@ void Publisher::unsubscribe(const string& subject,
 
 //--------------------------------------------------------------------------
 // Unsubscribe a client entirely
-void Publisher::unsubscribe_all(const string& path)
+void Publisher::unsubscribe_all(const string& path,
+                                const string& subscriber_id)
 {
   MT::RWWriteLock lock(mutex);  // Require write now because may need it later
   for(list<Subscription>::iterator p = subscriptions.begin();
@@ -228,10 +244,13 @@ void Publisher::unsubscribe_all(const string& path)
   {
     list<Subscription>::iterator q = p++;  // Move safely before deletion
     const Subscription& sub = *q;
-    if (sub.path == path)
+    if (subscriber_id.empty()?(sub.path == path)
+                               :(sub.subscriber_id == subscriber_id))
     {
       Log::Detail log;
-      log << "Client " << path << " unsubscribed from " << sub.subject << endl;
+      log << "Client " << path << " unsubscribed from " << sub.subject;
+      if (!subscriber_id.empty()) log  << " with ID " << subscriber_id;
+      log << endl;
 
       subscriptions.erase(q);
     }
