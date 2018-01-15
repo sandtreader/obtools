@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+for i in {1..100}; do ./test-http-subscribe $i; done;
+for i in {1..100}; do (./test-http-poll $i &); done;
+sleep 5
+./test-http-send 

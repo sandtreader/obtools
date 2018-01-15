@@ -1,4 +1,4 @@
 #!/bin/bash
 
-wget -q -O - http://localhost:29180/poll/foo
+wget -q -O - http://localhost:29180/poll/foo$1
 
