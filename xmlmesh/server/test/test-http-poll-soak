@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+for i in {1..500}
+do
+ ./test-http-subscribe $i; 
+ (while :; do ./test-http-poll $i; done) &
+done
+
+while :
+do
+  sleep 30
+  ./test-http-send 
+done
+
