@@ -1,14 +1,15 @@
 #!/bin/bash
 set -e
+PREFIX=${1:-}
 for i in {1..500}
 do
- ./test-http-subscribe $i; 
- (while :; do ./test-http-poll $i; done) &
+ ./test-http-subscribe $PREFIX$i;
+ (while :; do ./test-http-poll $PREFIX$i; done) &
 done
 
 while :
 do
-  sleep 30
+  sleep 5
   ./test-http-send 
 done
 

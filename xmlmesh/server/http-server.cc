@@ -429,7 +429,6 @@ void HTTPServerService::tick()
 {
   client_request_map.tidy();
   active_poller_map.tidy();
-  client_poll_map.tidy();
 }
 
 //--------------------------------------------------------------------------
