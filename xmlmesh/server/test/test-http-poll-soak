@@ -1,15 +1,31 @@
 #!/bin/bash
+# Soak test for HTTP polling - simulates 500 clients subscribing to a
+# message, then dying and resubscribing with a new ID.
+# First parameter is number of polling clients (default 500)
+# Second parameter is number of resubscribe iterations (about 1 minute each)
+# - default 60, so it runs for roughly an hour
+# Third parameter is number of messages to send per cycle, at 5 sec intervals
+# - default 12, so one minute per cycle
 set -e
-PREFIX=${1:-}
-for i in {1..500}
-do
- ./test-http-subscribe $PREFIX$i;
- (while :; do ./test-http-poll $PREFIX$i; done) &
-done
+CLIENTS=${1:-500}
+ITERATIONS=${2:-60}
+MESSAGES=${3:-12}
 
-while :
+for (( i=1; i<=$ITERATIONS; i++))
 do
-  sleep 5
-  ./test-http-send 
+  for (( j=1; j<=$CLIENTS; j++ ))
+  do
+   ./test-http-subscribe -$i-$j;
+  done
+
+  for (( m=1; m<=$MESSAGES; m++ ))
+  do
+    for (( j=1; j<=$CLIENTS; j++ ))
+    do
+      ./test-http-poll -$i-$j &
+    done
+    sleep 5
+    ./test-http-send
+  done
 done
 
