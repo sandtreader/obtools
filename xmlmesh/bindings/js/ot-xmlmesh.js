@@ -323,6 +323,7 @@
     // polling internally.
     // callback is called with XML message body ($) and id, or null and id
     // for a poll timeout - in either case return false to unsubscribe again
+    // pattern="" is called internally to resubscribe everything
     pollAndSubscribe: function(pattern, callback, id)
     {
       var self=this;
@@ -368,7 +369,11 @@
             {
               self.log("Poll failed: "+poll_result.error);
               self.poller_started = false;
-              return false;  // Forget this one, try again
+
+              // Try again resubscribing everything after a reasonable timeout
+              setTimeout(function()
+                       { self.pollAndSubscribe("", callback, id); },
+                       5000);
             }
             else // Poll timed out
             {
@@ -390,30 +395,40 @@
         this.poller_started = true;
       }
 
-      // Subscribe
-      this.subscribe({
-        pattern: pattern,
-        ref: this.poller_ref,
-        completion: function(sub_result)
+      if (pattern == "")
+      {
+        // Special case - resubscribe all existing subscribers
+        this.log("Resubscribing all subscribers");
+        for(var i=0; i<this.subscribers.length; i++)
         {
-          if (sub_result.success)
-          {
-            // Add to subscribers
-            self.subscribers.push({ pattern: pattern,
-                                    callback: callback,
-                                    id: id });
-          }
-          else
-          {
-            self.log("Subscription failed: "+sub_result.error)
-
-            // Try again after a reasonable timeout
-            setTimeout(function()
-                       { self.pollAndSubscribe(pattern, callback, id); },
-                       5000); // ? make optional parameter?
-          }
+          var sub = this.subscribers[i];
+          this.subscribe({
+            pattern: sub.pattern,
+            ref: this.poller_ref,
+            completion: function(sub_result)
+            {
+              if (!sub_result.success)
+                self.log("Re-subscription failed: "+sub_result.error)
+            }
+          });
         }
-      });
+      }
+      else
+      {
+        // Normal case - subscribe for a particular pattern
+        self.subscribers.push({ pattern: pattern,
+                                callback: callback,
+                                id: id });
+        this.subscribe({
+          pattern: pattern,
+          ref: this.poller_ref,
+          completion: function(sub_result)
+          {
+            if (!sub_result.success)
+              self.log("Subscription failed: "+sub_result.error);
+          }
+        });
+      }
     }
   });
 }(jQuery));

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-wget -q --post-file=test-subscribe.xml -O - http://localhost:29180/subscribe/foo
+wget -q --post-file=test-subscribe.xml -O - http://localhost:29180/subscribe/foo$1

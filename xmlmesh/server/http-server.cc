@@ -153,6 +153,7 @@ private:
 
   int active_poller_map_timeout;
   ActivePollerMap active_poller_map;
+  list<string> timed_out_subscribers;
 
 public:
   //------------------------------------------------------------------------
@@ -429,6 +430,22 @@ void HTTPServerService::tick()
 {
   client_request_map.tidy();
   active_poller_map.tidy();
+  client_poll_map.tidy();
+
+  // Send disconnection messages outside tidy() lock to avoid mutual
+  // deadlock where we lock client_poll_map mutex and then Publisher mutex
+  // to do the unsubscribe_all(), while an incoming message does the reverse
+  // Note we are safe to do this without mutex on timed_out_subscribers
+  // because this function (and its call to client_poll_map.tidy()) is
+  // the only thing that ever touches it
+  for(const auto& id: timed_out_subscribers)
+  {
+    // Send DISCONNECTION routing message with this ID, empty path
+    MessagePath path;
+    RoutingMessage rmsg(RoutingMessage::DISCONNECTION, path, id);
+    originate(rmsg);
+  }
+  timed_out_subscribers.clear();
 }
 
 //--------------------------------------------------------------------------
@@ -437,11 +454,7 @@ void HTTPServerService::client_poll_timeout(const string& subscriber_id)
 {
   Log::Detail log;
   log << "HTTP server poll ID " << subscriber_id << " timed out\n";
-
-  // Send DISCONNECTION routing message with this ID, empty path
-  MessagePath path;
-  RoutingMessage rmsg(RoutingMessage::DISCONNECTION, path, subscriber_id);
-  originate(rmsg);
+  timed_out_subscribers.push_back(subscriber_id);
 }
 
 //--------------------------------------------------------------------------
