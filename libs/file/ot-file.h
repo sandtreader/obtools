@@ -457,6 +457,14 @@ public:
   {
     return buffer.size();
   }
+
+  //------------------------------------------------------------------------
+  // Virtual destructor
+  ~BufferedOutFileBuf()
+  {
+    // Make sure to close (and therefore write) before freeing buffer
+    close();
+  }
 };
 
 class BufferedOutStream: public ostream
