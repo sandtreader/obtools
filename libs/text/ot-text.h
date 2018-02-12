@@ -72,6 +72,12 @@ string remove_line(string& text);
 // Text is canonicalised before splitting
 vector<string> split_words(const string& text);
 
+//--------------------------------------------------------------------------
+// Split text into lines
+// Newlines are removed
+// Must be Unix (LF only) format
+vector<string> split_lines(const string& text, bool remove_blanks = false);
+
 //==========================================================================
 // Record split functions (split.cc)
 

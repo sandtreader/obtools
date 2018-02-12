@@ -317,4 +317,31 @@ vector<string> split_words(const string& text)
   return l;
 }
 
+//--------------------------------------------------------------------------
+// Split text into lines
+// Newlines are removed
+// CR-LF also accepted and CR removed
+vector<string> split_lines(const string& text, bool remove_blanks)
+{
+  string::size_type pos{0};
+  string::size_type len = text.size();
+  vector<string> lines;
+
+  while (pos < len)
+  {
+    // Find first newline of text
+    string::size_type nl = text.find('\n', pos);
+    if (nl == string::npos) nl = len;
+    string::size_type end = nl;
+    string::size_type last = nl-1;
+    if (last>=pos && text[last] == '\r') end--;
+    if (end>pos || !remove_blanks)
+      lines.push_back(string(text, pos, end-pos));
+    pos = nl+1;  // still after nl
+  }
+
+  return lines;
+}
+
+
 }} // namespaces
