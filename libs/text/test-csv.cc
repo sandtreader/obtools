@@ -44,6 +44,16 @@ TEST(CSVTest, TestReadQuotedVar)
   EXPECT_EQ("foo", vars[0]);
 }
 
+TEST(CSVTest, TestEmptyQuotedVar)
+{
+  const string line("\"\"");
+  Text::CSV csv;
+  vector<string> vars;
+  csv.read_line(line, vars);
+  ASSERT_EQ(1, vars.size());
+  EXPECT_EQ("", vars[0]);
+}
+
 TEST(CSVTest, TestReadCommaSeparatedVars)
 {
   const string line("foo,bar,splat");
