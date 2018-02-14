@@ -323,6 +323,29 @@ public:
 };
 
 //==========================================================================
+// CSV reader
+class CSV
+{
+  char sep;            // Separator character (',' by default)
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  CSV(char _sep=','): sep(_sep) {}
+
+  //--------------------------------------------------------------------------
+  // Read a line of CSV into the given vars
+  // Won't fail, will try to fix up errors
+  void read_line(const string& line, vector<string>& vars);
+
+  //--------------------------------------------------------------------------
+  // Read multiline CSV into a vector of vector of vars
+  // Won't fail, will try to fix up errors
+  void read(const string& text, vector<vector<string> >& data,
+            bool skip_header = false);
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
 
