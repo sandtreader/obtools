@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include "ot-gen.h"
 
 namespace ObTools { namespace Text {
 
@@ -210,6 +211,14 @@ public:
   // line_end is string to split with, and indent for next line
   string encode(const unsigned char *block, size_t length,
                 int split=76, const string& line_end = "\r\n");
+
+  //------------------------------------------------------------------------
+  // Encode a vector of bytes
+  string encode(const vector<byte>& data, int split = 76,
+                const string& line_end = "\r\n")
+  {
+    return encode(&data[0], data.size(), split, line_end);
+  }
 
   //------------------------------------------------------------------------
   // Encode a 64-bit integer, top byte first (big-endian)
