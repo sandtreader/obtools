@@ -319,9 +319,15 @@ public:
   // Encode a vector of unicode characters to a UTF8 string
   static string encode(const vector<wchar_t>& unicode);
 
+  //--------------------------------------------------------------------------
+  // Encode an ISO-Latin1 8-bit string into a UTF8 string
+  static string encode(const string& isolatin1);
+
   //------------------------------------------------------------------------
   // Decode a UTF8 string into a wide char vector
   static void decode(const string& utf8, vector<wchar_t>& unicode);
+
+  // Note: Decode to ISO-Latin1 isn't safe!
 
   //------------------------------------------------------------------------
   // Squash diacritics (accents) from a UTF8 string

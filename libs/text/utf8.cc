@@ -66,6 +66,16 @@ string UTF8::encode(const vector<wchar_t>& unicode)
 }
 
 //--------------------------------------------------------------------------
+// Encode an ISO-Latin1 8-bit string into a UTF8 string
+string UTF8::encode(const string& isolatin1)
+{
+  string utf8;
+  for (unsigned char c: isolatin1)
+    append(utf8, static_cast<wchar_t>(c));
+  return utf8;
+}
+
+//--------------------------------------------------------------------------
 // Decode a UTF8 string into a wide char vector
 void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
 {
