@@ -73,6 +73,12 @@ string remove_line(string& text);
 // Text is canonicalised before splitting
 vector<string> split_words(const string& text);
 
+//--------------------------------------------------------------------------
+// Split text into lines
+// Newlines are removed
+// Must be Unix (LF only) format
+vector<string> split_lines(const string& text, bool remove_blanks = false);
+
 //==========================================================================
 // Record split functions (split.cc)
 
@@ -323,6 +329,29 @@ public:
   // character.  Any other non-ASCII printable characters are replaced with
   // the fallback character given
   static string strip_diacritics(const string& utf8, char fallback='_');
+};
+
+//==========================================================================
+// CSV reader
+class CSV
+{
+  char sep;            // Separator character (',' by default)
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  CSV(char _sep=','): sep(_sep) {}
+
+  //--------------------------------------------------------------------------
+  // Read a line of CSV into the given vars
+  // Won't fail, will try to fix up errors
+  void read_line(const string& line, vector<string>& vars);
+
+  //--------------------------------------------------------------------------
+  // Read multiline CSV into a vector of vector of vars
+  // Won't fail, will try to fix up errors
+  void read(const string& text, vector<vector<string> >& data,
+            bool skip_header = false);
 };
 
 //==========================================================================

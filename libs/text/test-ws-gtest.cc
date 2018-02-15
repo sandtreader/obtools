@@ -20,6 +20,34 @@ TEST(WSTest, TestRemoveSpace)
   ASSERT_EQ("foo", Text::remove_space(" \tf\n\r  oo\r\n "));
 }
 
+TEST(WSTest, TestSplitLinesWithBlanks)
+{
+  string text = "first line\n\nthird line\n";
+  vector<string> lines = Text::split_lines(text);
+  ASSERT_EQ(3, lines.size());
+  EXPECT_EQ("first line", lines[0]);
+  EXPECT_EQ("", lines[1]);
+  EXPECT_EQ("third line", lines[2]);
+}
+
+TEST(WSTest, TestSplitLinesWithoutBlanks)
+{
+  string text = "first line\n\nthird line";
+  vector<string> lines = Text::split_lines(text, true);
+  ASSERT_EQ(2, lines.size());
+  EXPECT_EQ("first line", lines[0]);
+  EXPECT_EQ("third line", lines[1]);
+}
+
+TEST(WSTest, TestSplitLinesWithCRLF)
+{
+  string text = "first line\r\n\r\nthird line";
+  vector<string> lines = Text::split_lines(text);
+  ASSERT_EQ(3, lines.size());
+  EXPECT_EQ("first line", lines[0]);
+  EXPECT_EQ("", lines[1]);
+  EXPECT_EQ("third line", lines[2]);
+}
 
 } // anonymous namespace
 
