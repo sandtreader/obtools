@@ -119,6 +119,10 @@ public:
   string get_query_parameter(const string& name) const;
 
   //------------------------------------------------------------------------
+  // Set an individual parameter on query, keeping existing
+  void set_query_parameter(const string& name, const string& value);
+
+  //------------------------------------------------------------------------
   // Resolve against a base URL
   // Returns the resolved URL
   // Handles absolute, relative and .. forms

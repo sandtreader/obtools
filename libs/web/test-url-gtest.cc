@@ -45,6 +45,46 @@ TEST(URLTest, TestXMLSplitForFullURL)
 }
 
 //==========================================================================
+// Set parameter tests
+TEST(URLTest, TestSetParameterFromScratch)
+{
+  Web::URL url("http://user:password@server/path/path2#frag");
+  url.set_query_parameter("foo", "bar");
+  ASSERT_EQ("http://user:password@server/path/path2?foo=bar#frag", url.str());
+}
+
+TEST(URLTest, TestSetParameterReplacingExisting)
+{
+  Web::URL url("http://user:password@server/path/path2?foo=bar#frag");
+  url.set_query_parameter("foo", "splat");
+  ASSERT_EQ("http://user:password@server/path/path2?foo=splat#frag", url.str());
+}
+
+TEST(URLTest, TestSetParameterAddingToExisting)
+{
+  Web::URL url("http://user:password@server/path/path2?foo=bar#frag");
+  url.set_query_parameter("wibble", "splat");
+  ASSERT_EQ("http://user:password@server/path/path2?foo=bar&wibble=splat#frag",
+            url.str());
+}
+
+TEST(URLTest, TestSetParameterWithSpaces)
+{
+  Web::URL url("http://user:password@server/path/path2#frag");
+  url.set_query_parameter("foo", "bar bar");
+  ASSERT_EQ("http://user:password@server/path/path2?foo=bar+bar#frag",
+            url.str());
+}
+
+TEST(URLTest, TestSetParameterWithEscaping)
+{
+  Web::URL url("http://user:password@server/path/path2#frag");
+  url.set_query_parameter("foo", "bar&bar");
+  ASSERT_EQ("http://user:password@server/path/path2?foo=bar%26bar#frag",
+            url.str());
+}
+
+//==========================================================================
 // URL resolution tests
 TEST(URLTest, TestResolveRelativeURL)
 {

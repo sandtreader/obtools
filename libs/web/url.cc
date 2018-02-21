@@ -231,6 +231,26 @@ string URL::get_query_parameter(const string& name) const
   return params[name];
 }
 
+//------------------------------------------------------------------------
+// Set an individual parameter on query, keeping existing
+void URL::set_query_parameter(const string& name, const string& value)
+{
+  XML::Element xml;
+  if (!split(xml)) return;
+
+  // Split existing query into props
+  Misc::PropertyList params;
+  decode(xml.get_child("query").content, params, true);
+
+  // Set new one
+  params.add(name, value);
+
+  // Encode back query string, with %
+  string new_query = encode(params, true);
+  xml.make_child("query").content = new_query;
+  *this = URL(xml);  // Replace text
+}
+
 //--------------------------------------------------------------------------
 // Quick access to fragment of URL
 // Returns fragment or "" if can't read it
