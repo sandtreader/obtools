@@ -118,7 +118,7 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
   // Add cookies if we have a jar
   if (cookie_jar) cookie_jar->add_cookies_to(request);
 
-  OBTOOLS_LOG_IF_DUMP(request.write(log.dump);)
+  OBTOOLS_LOG_IF_DUMP(request.write(log.dump); log.dump << endl; )
 
   // Get a socket if we don't already have one
   if (!socket)
