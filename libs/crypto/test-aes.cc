@@ -39,6 +39,37 @@ TEST(AESTests, TestSetAESCTR)
   EXPECT_EQ(expected, data);
 }
 
+TEST(AESTests, TestSetAESCTRWithGatherBuffer)
+{
+  auto key = Crypto::AESKey{Crypto::AESKey::BITS_128};
+  key.set_from_int(42);
+  ASSERT_TRUE(key.valid);
+
+  auto iv = Crypto::AESKey{Crypto::AESKey::BITS_128, false};
+  iv.set_from_int(958259);
+  ASSERT_TRUE(iv.valid);
+
+  auto data1 = vector<unsigned char>{'H', 'e', 'l', 'l', 'o', ',', ' '};
+  auto data2 = vector<unsigned char>{'w', 'o', 'r', 'l', 'd', '!'};
+  Gather::Buffer buffer;
+  buffer.add(data1.data(), data1.size());
+  buffer.add(data2.data(), data2.size());
+
+  auto aes = Crypto::AES{};
+  aes.set_key(key);
+  aes.set_iv(iv);
+  aes.set_ctr(true);
+  aes.encrypt(buffer);
+
+  const auto expected = vector<unsigned char>{0x41, 0x1f, 0x41, 0x26,
+                                              0xe1, 0x7f, 0x46, 0xc7,
+                                              0x63, 0xf7, 0x8a, 0x36,
+                                              0xd4};
+  vector<unsigned char> data(expected.size());
+  auto len = buffer.copy(data.data(), 0, expected.size());
+  ASSERT_EQ(expected.size(), len);
+  ASSERT_EQ(expected, data);
+}
 
 int main(int argc, char **argv)
 {

@@ -185,6 +185,41 @@ bool AES::decrypt(AESKey& key)
   return true;
 }
 
+//------------------------------------------------------------------------
+// Encrypt/decrypt a gather buffer in place - only for CTR mode
+bool AES::encrypt(Gather::Buffer& buffer, bool /*encryption*/)
+{
+  // Note encryption/decryption in CTR is symmetric so we ignore parameter,
+  // but kept in place in case we implement it for CBC etc. later
+
+  // Can only be done with CTR stream cipher at the moment
+  if (!ctr || key.size != AESKey::BITS_128 || !iv.valid)
+    return false;
+  AES_KEY aes_key;
+  int enc;
+
+  // Set up AES key - same for both encrypt and decrypt
+  AES_set_encrypt_key(&key.key[0], key.size, &aes_key);
+  enc = AES_ENCRYPT;
+
+  // Set up EVP
+  unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)>
+    ctx{EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free};
+  EVP_EncryptInit_ex(ctx.get(), EVP_aes_128_ctr(), nullptr, key.key, iv.key);
+
+  // Update each segment
+  auto segment = buffer.get_segments();
+  for(auto i=0u; i<buffer.get_count(); i++, segment++)
+  {
+    int enc_len;
+    EVP_EncryptUpdate(ctx.get(), segment->data, &enc_len,
+                      segment->data, segment->length);
+  }
+
+  //?? EVP_EncryptFinal_ex(ctx.get(), data + enc_len, &enc_len);
+  return true;
+}
+
 }} // namespaces
 
 

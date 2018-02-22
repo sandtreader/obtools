@@ -33,6 +33,7 @@
 
 #include "ot-mt.h"
 #include "ot-text.h"
+#include "ot-gather.h"
 
 namespace ObTools { namespace Crypto {
 
@@ -290,6 +291,14 @@ public:
   // Decrypt a key in place, unpadding
   // Only works for 128-bit keys encrypted to 256 bits
   bool decrypt(AESKey& key);
+
+  //------------------------------------------------------------------------
+  // Encrypt/decrypt a gather buffer in place - only for CTR mode
+  bool encrypt(Gather::Buffer& buffer, bool encryption);
+
+  // Sugaring for the above
+  bool encrypt(Gather::Buffer& buffer) { return encrypt(buffer, true); }
+  bool decrypt(Gather::Buffer& buffer) { return encrypt(buffer, false); }
 };
 
 //==========================================================================

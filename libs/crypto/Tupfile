@@ -6,6 +6,6 @@
 
 NAME    = ot-crypto
 TYPE    = lib
-DEPENDS = ot-mt ot-misc ot-text ext-crypto
+DEPENDS = ot-mt ot-misc ot-text ot-gather ext-crypto
 
 include_rules
