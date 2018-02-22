@@ -273,7 +273,7 @@ bool HTTPMessage::write(ostream &out, bool headers_only) const
     if (method == "$")
       out << "[Binary data, " << body.size() << " bytes]\n";
     else
-      out << body << endl;
+      out << body;
   }
 
   return !out.fail();
