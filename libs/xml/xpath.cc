@@ -224,15 +224,16 @@ int BaseXPathProcessor<ELEMENT>::get_value_int(const string& path,
 // Hex value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-template int
-  BaseXPathProcessor<Element>::get_value_hex(const string& path, int def) const;
-template int
+template unsigned int
+  BaseXPathProcessor<Element>::get_value_hex(const string& path,
+                                             unsigned int def) const;
+template unsigned int
   BaseXPathProcessor<const Element>::get_value_hex(const string& path,
-                                                   int def) const;
+                                                   unsigned int def) const;
 
 template<typename ELEMENT>
-int BaseXPathProcessor<ELEMENT>::get_value_hex(const string& path,
-                                               int def) const
+unsigned int BaseXPathProcessor<ELEMENT>::get_value_hex(const string& path,
+                                                        unsigned int def) const
 {
   string v = get_value(path);
   if (!v.empty()) sscanf(v.c_str(), "%x", &def);

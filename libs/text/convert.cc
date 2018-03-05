@@ -134,7 +134,7 @@ string itox(unsigned int i)
 // Hex to integer (0 default)
 unsigned int xtoi(const string& s)
 {
-  int n = 0;
+  unsigned int n = 0;
   sscanf(s.c_str(), "%x", &n);
   return n;
 }
@@ -217,7 +217,7 @@ unsigned int xtob(const string& hex, unsigned char *data,
     char buf[3];
     memcpy(buf, s+2*i, 2);
     buf[2] = 0;
-    int n;
+    unsigned int n;
     sscanf(buf, "%x", &n);
     data[i] = static_cast<unsigned char>(n);
   }

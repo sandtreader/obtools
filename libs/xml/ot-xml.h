@@ -627,9 +627,16 @@ private:
   // Equivalent to s >> c, but with line counting
   // Existing character can be passed in for counting, too
   xmlchar skip_ws(istream &s, xmlchar c=0)
-  { if (c=='\n') line++;
-    for(;;) { c=0; s.get(c);
-              if (!is_ascii_space(c)) return c; if (c=='\n') line++; } }
+  {
+    if (c=='\n') line++;
+    for(;;)
+    {
+      c=0;
+      s.get(c);
+      if (!is_ascii_space(c)) return c;
+      if (c=='\n') line++;
+    }
+  }
 
   //------------------------------------------------------------------------
   // Other private functions
@@ -793,7 +800,7 @@ public:
   // Hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_hex(const string& path, int def=0) const;
+  unsigned int get_value_hex(const string& path, unsigned int def=0) const;
 
   //------------------------------------------------------------------------
   // 64-bit integer value fetch
@@ -1015,7 +1022,7 @@ public:
   // Integer hex value fetch
   // Defaults to default value given (or 0) if not present
   // Returns 0 if present but bogus
-  int get_value_hex(const string& path, int def=0) const;
+  unsigned int get_value_hex(const string& path, unsigned int def=0) const;
 
   //------------------------------------------------------------------------
   // 64-bit integer value fetch

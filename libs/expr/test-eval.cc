@@ -142,7 +142,7 @@ TEST(Evaluator, TestPropertyListVariables)
   });
 
   ASSERT_THROW(evaluator.evaluate("wombat"), Expression::Exception);
-};
+}
 
 int main(int argc, char **argv)
 {

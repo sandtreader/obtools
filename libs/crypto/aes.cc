@@ -196,11 +196,9 @@ bool AES::encrypt(Gather::Buffer& buffer, bool /*encryption*/)
   if (!ctr || key.size != AESKey::BITS_128 || !iv.valid)
     return false;
   AES_KEY aes_key;
-  int enc;
 
   // Set up AES key - same for both encrypt and decrypt
   AES_set_encrypt_key(&key.key[0], key.size, &aes_key);
-  enc = AES_ENCRYPT;
 
   // Set up EVP
   unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)>

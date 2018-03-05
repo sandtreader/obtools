@@ -130,7 +130,7 @@ void MD5::finalise(unsigned char digest[16])
   /* Set the first char of padding to 0x80.  This is safe since there is
      always at least one byte free */
   p = ctx_in + count;
-  *p++ = 0x80;
+  *p++ = static_cast<char>(0x80);
 
   /* Bytes of padding needed to make 64 bytes */
   count = 64 - 1 - count;
@@ -340,6 +340,6 @@ uint64_t MD5::hash_to_int(const string& text)
 MD5::~MD5()
 {
   memset(ctx_in, 0, 64);
-};
+}
 
 }} // namespaces

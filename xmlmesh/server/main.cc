@@ -25,7 +25,7 @@ namespace
   static const string DEFAULT_LOGFILE = "/var/log/obtools/xmlmesh.log";
   static const string DEFAULT_TIMESTAMP = "%a %d %b %H:%M:%*S [%*L]: ";
   static const string PID_FILE = "/var/run/ot-xmlmesh.pid";
-};
+}
 
 // Global server instance
 Server ObTools::XMLMesh::server;

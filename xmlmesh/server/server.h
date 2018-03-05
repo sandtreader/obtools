@@ -370,7 +370,7 @@ extern Server server;
 // Macro for auto-registration of services into registry
 #define OT_XMLMESH_REGISTER_SERVICE(_subclass, _name)  \
 static Init::AutoRegister<Service, _subclass> \
-  __ar(server.service_registry, _name);
+  __ar(server.service_registry, _name)
 
 //==========================================================================
 }} //namespaces

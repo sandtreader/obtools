@@ -212,7 +212,8 @@ int Configuration::get_value_int(const string& path, int def) const
 // Integer hex value fetch
 // Defaults to default value given (or 0) if not present
 // Returns 0 if present but bogus
-int Configuration::get_value_hex(const string& path, int def) const
+unsigned int Configuration::get_value_hex(const string& path,
+                                          unsigned int def) const
 {
   XPathProcessor xpath(get_root());
   return xpath.get_value_hex(path, def);
