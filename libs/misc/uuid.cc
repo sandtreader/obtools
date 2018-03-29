@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::Text: uuid.cc
+// ObTools::Misc: uuid.cc
 //
 // UUID class
 //
@@ -8,9 +8,10 @@
 //==========================================================================
 
 #include "ot-text.h"
+#include "ot-misc.h"
 #include <algorithm>
 
-namespace ObTools { namespace Text {
+namespace ObTools { namespace Misc {
 
 //--------------------------------------------------------------------------
 // Construction from a string
@@ -19,7 +20,7 @@ UUID::UUID(string str):
                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}
 {
   str.erase(remove(str.begin(), str.end(), '-'), str.end());
-  xtob(str, &(*this)[0], size());
+  Text::xtob(str, &(*this)[0], size());
 }
 
 //--------------------------------------------------------------------------
@@ -38,7 +39,7 @@ string UUID::get_str() const
 // Get as plain hex string
 string UUID::get_hex_str() const
 {
-  return btox(&(*this)[0], size());
+  return Text::btox(&(*this)[0], size());
 }
 
 //--------------------------------------------------------------------------
@@ -47,6 +48,14 @@ string UUID::get_base64_str() const
 {
   Text::Base64 base64;
   return base64.encode(&(*this)[0], size(), 0);
+}
+
+//--------------------------------------------------------------------------
+// Set to a random value
+void UUID::randomise()
+{
+  Misc::Random random;
+  random.generate_binary(&(*this)[0], size());
 }
 
 }} // namespaces

@@ -7,14 +7,14 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
-#include "ot-text.h"
+#include "ot-misc.h"
 #include <gtest/gtest.h>
 
 namespace {
 
 using namespace std;
 using namespace ObTools;
-using namespace ObTools::Text;
+using namespace ObTools::Misc;
 
 TEST(UUIDTest, TestBasicConstruction)
 {
@@ -69,6 +69,19 @@ TEST(UUIDTest, TestAsBase64String)
                            0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
   const auto expected = string{"AQIDBAUGBwgJCgsMDQ4PEA=="};
   EXPECT_EQ(expected, actual.get_base64_str());
+}
+
+TEST(UUIDTest, TestRandomisation)
+{
+  auto uuid = UUID{};
+  auto previous = vector<UUID>{};
+  for (auto i = 0; i < 1000; ++i)
+  {
+    previous.push_back(uuid);
+    uuid.randomise();
+    for (const auto& p: previous)
+      ASSERT_NE(p, uuid);
+  }
 }
 
 } // anonymous namespace

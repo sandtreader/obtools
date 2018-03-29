@@ -361,38 +361,6 @@ public:
 };
 
 //==========================================================================
-// UUID class
-class UUID: public array<byte, 16>
-{
-public:
-  //------------------------------------------------------------------------
-  // Constructors
-  UUID():
-    array<byte, 16>{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}
-  {}
-  UUID(byte b0, byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7,
-       byte b8, byte b9, byte ba, byte bb, byte bc, byte bd, byte be, byte bf):
-    array<byte, 16>{{b0, b1, b2, b3, b4, b5, b6, b7,
-                    b8, b9, ba, bb, bc, bd, be, bf}}
-  {}
-  // From a string - hex or uuid style
-  UUID(string str);
-
-  //------------------------------------------------------------------------
-  // Get as string
-  string get_str() const;
-
-  //------------------------------------------------------------------------
-  // Get as plain hex string
-  string get_hex_str() const;
-
-  //------------------------------------------------------------------------
-  // Get as base64
-  string get_base64_str() const;
-};
-
-//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_TEXT_H
 
