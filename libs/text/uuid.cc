@@ -45,4 +45,12 @@ string UUID::get_hex_str() const
   return btox(&(*this)[0], size());
 }
 
+//--------------------------------------------------------------------------
+// Get as base64
+string UUID::get_base64_str() const
+{
+  Text::Base64 base64;
+  return base64.encode(&(*this)[0], size(), 0);
+}
+
 }} // namespaces

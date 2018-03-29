@@ -85,6 +85,10 @@ public:
   virtual void read_to_eof(vector<unsigned char>& buf, size_t limit);
 
   //------------------------------------------------------------------------
+  // Read data into buf until EOF or limit encountered
+  virtual void read_to_eof(byte *buf, size_t limit);
+
+  //------------------------------------------------------------------------
   // Read data into buf until EOF
   virtual void read_to_eof(vector<unsigned char>& buf);
 

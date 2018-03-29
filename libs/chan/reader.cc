@@ -122,6 +122,30 @@ void Reader::read_to_eof(vector<unsigned char>& buffer, size_t limit)
 }
 
 //--------------------------------------------------------------------------
+// Read data into buf until EOF or limit encountered
+void Reader::read_to_eof(byte *buffer, size_t limit)
+{
+  char buf[CHANNEL_BUFFER_SIZE+1];
+  size_t done = 0;
+
+  while (done < limit)
+  {
+    // Limit read to buffer size, or what's wanted
+    size_t n = CHANNEL_BUFFER_SIZE;
+    if (limit-done < n) n = limit-done;
+
+    size_t size = basic_read(buf, n);
+    if (size)
+    {
+      copy(&buf[0], &buf[size], buffer + done);
+      done += size;
+    }
+    else
+      return;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Read data into buf until EOF
 void Reader::read_to_eof(vector<unsigned char>& buffer)
 {
