@@ -23,18 +23,14 @@ UUID::UUID(string str):
 }
 
 //--------------------------------------------------------------------------
-// Get as string
+// Get as UUID style string
 string UUID::get_str() const
 {
   auto str = get_hex_str();
-  auto p = str.begin() + 2 * 4;
-  str.insert(p, '-');
-  p += 1 + 2 * 2;
-  str.insert(p, '-');
-  p += 1 + 2 * 2;
-  str.insert(p, '-');
-  p += 1 + 2 * 2;
-  str.insert(p, '-');
+  str.insert(20, "-");
+  str.insert(16, "-");
+  str.insert(12, "-");
+  str.insert(8, "-");
   return str;
 }
 
