@@ -1046,6 +1046,10 @@ public:
   bool operator!() const;
 };
 
+//--------------------------------------------------------------------------
+// << operator to write UUID to ostream
+ostream& operator<<(ostream& s, const UUID& uuid);
+
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_MISC_H

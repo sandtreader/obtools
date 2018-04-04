@@ -72,4 +72,12 @@ bool UUID::operator!() const
   return true;
 }
 
+//--------------------------------------------------------------------------
+// << operator to write UUID to ostream
+ostream& operator<<(ostream& s, const UUID& uuid)
+{
+  s << uuid.get_str();
+  return s;
+}
+
 }} // namespaces
