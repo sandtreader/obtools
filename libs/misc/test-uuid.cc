@@ -84,6 +84,15 @@ TEST(UUIDTest, TestRandomisation)
   }
 }
 
+TEST(UUIDTest, TestValidity)
+{
+  auto uuid = UUID{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  EXPECT_EQ(true, !uuid);
+  uuid.randomise();
+  EXPECT_EQ(false, !uuid);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

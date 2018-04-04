@@ -55,7 +55,21 @@ string UUID::get_base64_str() const
 void UUID::randomise()
 {
   Misc::Random random;
-  random.generate_binary(&(*this)[0], size());
+  do
+  {
+    random.generate_binary(&(*this)[0], size());
+  }
+  while (operator!());
+}
+
+//--------------------------------------------------------------------------
+// Test has a value
+bool UUID::operator!() const
+{
+  for (auto i = 0u; i < size(); ++i)
+    if ((*this)[i])
+      return false;
+  return true;
 }
 
 }} // namespaces
