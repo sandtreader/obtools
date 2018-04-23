@@ -59,17 +59,17 @@ void UUID::randomise()
   {
     random.generate_binary(&(*this)[0], size());
   }
-  while (operator!());
+  while (!*this);
 }
 
 //--------------------------------------------------------------------------
 // Test has a value
-bool UUID::operator!() const
+UUID::operator bool() const
 {
   for (auto i = 0u; i < size(); ++i)
     if ((*this)[i])
-      return false;
-  return true;
+      return true;
+  return false;
 }
 
 //--------------------------------------------------------------------------
