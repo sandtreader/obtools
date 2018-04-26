@@ -19,8 +19,23 @@ UUID::UUID(string str):
   array<byte, 16>{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}
 {
-  str.erase(remove(str.begin(), str.end(), '-'), str.end());
-  Text::xtob(str, &(*this)[0], size());
+  switch (str.size())
+  {
+    case 16: // raw data
+      copy(str.begin(), str.end(), begin());
+      break;
+
+    case 36: // GUID format
+      str.erase(remove(str.begin(), str.end(), '-'), str.end());
+      // Fall through
+
+    case 32: // hex format
+      Text::xtob(str, &(*this)[0], size());
+      break;
+
+    default:
+      break;
+  }
 }
 
 //--------------------------------------------------------------------------
