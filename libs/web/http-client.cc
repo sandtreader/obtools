@@ -40,6 +40,7 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
       {
         Log::Streams log;
         log.error << "HTTPS requested but no SSL context given\n";
+        return;
       }
     }
     else
@@ -67,8 +68,10 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
   Log::Streams log;
 
   // Remove host from URL and regenerate, to get server-relative one
+  // Also if server port not set in constructor - e.g. because we
+  // don't have SSL context for https, bail
   XML::Element xml;
-  if(!request.url.split(xml))
+  if(!server.port || !request.url.split(xml))
   {
     log.error << "HTTP: Bad URL " << request.url << endl;
     return 1;
