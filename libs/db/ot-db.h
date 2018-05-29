@@ -813,6 +813,16 @@ public:
   uint64_t insert64(const string& table, Row& row, const string& id_field="id",
                     bool in_transaction=false);
 
+  //--------------------------------------------------------------------------
+  // Do an INSERT or UPDATE if it already exists (violates unique key)
+  // Uses INSERT ... ON DUPLICATE KEY UPDATE
+  // Each field in the row is inserted by name
+  // update_row gives the list of fields from row which are updated (not
+  // part of the unique key)
+  // Note: All fields are escaped on insertion
+  // Returns whether successful
+  bool insert_or_update(const string& table, Row& row, Row& update_row);
+
   //------------------------------------------------------------------------
   // INSERT into a join table with two foreign ID fields
   // Returns whether successful
@@ -1171,6 +1181,9 @@ struct AutoConnection
   int insert(const string& table, Row& row, const string& id_field="id",
              bool in_transaction=false)
   { return conn?conn->insert(table, row, id_field, in_transaction):0; }
+
+  bool insert_or_update(const string& table, Row& row, Row& update_row)
+  { return conn?conn->insert_or_update(table, row, update_row):false; }
 
   bool insert_join(const string& table, const string& field1, int id1,
                    const string& field2, int id2)
