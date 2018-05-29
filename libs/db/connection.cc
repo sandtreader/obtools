@@ -212,6 +212,26 @@ uint64_t Connection::insert64(const string& table, Row& row,
 }
 
 //--------------------------------------------------------------------------
+// Do an INSERT or UPDATE if it already exists (violates unique key)
+// Uses INSERT ... ON DUPLICATE KEY UPDATE
+// Each field in the row is inserted by name
+// update_row gives the list of fields from row which are updated (not
+// part of the unique key)
+// Note: All fields are escaped on insertion
+// Returns whether successful
+bool Connection::insert_or_update(const string& table, Row& row,
+                                 Row& update_row)
+{
+  ostringstream oss;
+  oss << "INSERT INTO " << table;
+  oss << " (" << row.get_fields() << ")";
+  oss << " VALUES (" << row.get_escaped_values() << ")";
+  oss << " ON DUPLICATE KEY UPDATE "
+      << update_row.get_fields_set_to_own_values();
+  return exec(oss.str());
+}
+
+//--------------------------------------------------------------------------
 // INSERT into a join table with two foreign ID fields
 // Returns whether successful
 bool Connection::insert_join(const string& table,
