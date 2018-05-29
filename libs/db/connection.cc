@@ -226,7 +226,8 @@ bool Connection::insert_or_update(const string& table, Row& row,
   oss << "INSERT INTO " << table;
   oss << " (" << row.get_fields() << ")";
   oss << " VALUES (" << row.get_escaped_values() << ")";
-  oss << " ON DUPLICATE KEY UPDATE " << update_row.get_escaped_assignments();
+  oss << " ON DUPLICATE KEY UPDATE "
+      << update_row.get_fields_set_to_own_values();
   return exec(oss.str());
 }
 

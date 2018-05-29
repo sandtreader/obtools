@@ -86,6 +86,23 @@ string Row::get_fields() const
 
 //--------------------------------------------------------------------------
 // Get string with field values in order, separated by commas and spaces,
+// with assigment back to VALUES(name) - e.g. x=VALUES(x), y=VALUES(y)
+// (e.g. for INSERT .. ON DUPLICATE KEY UPDATE)
+string Row::get_fields_set_to_own_values() const
+{
+  string result;
+  for(map<string, FieldValue>::const_iterator p = fields.begin();
+      p!=fields.end(); ++p)
+  {
+    if (!result.empty()) result += ", ";
+    result += p->first + " = VALUES(" + p->first + ")";
+  }
+
+  return result;
+}
+
+//--------------------------------------------------------------------------
+// Get string with field values in order, separated by commas and spaces,
 // each delimited with single quotes (e.g. for INSERT)
 string Row::get_escaped_values() const
 {

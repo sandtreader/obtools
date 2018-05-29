@@ -319,6 +319,12 @@ public:
   // Get string with field names in order, separated by commas and spaces
   string get_fields() const;
 
+  //--------------------------------------------------------------------------
+  // Get string with field values in order, separated by commas and spaces,
+  // with assigment back to VALUES(name) - e.g. x=VALUES(x), y=VALUES(y)
+  // (e.g. for INSERT .. ON DUPLICATE KEY UPDATE)
+  string get_fields_set_to_own_values() const;
+
   //------------------------------------------------------------------------
   // Get string with field values in order, separated by commas and spaces,
   // each escaped and delimited with single quotes (e.g. for INSERT)
