@@ -105,7 +105,8 @@ void Configuration::superimpose_file(const string& fn,
                                      const string& id_attr,
                                      bool allow_includes)
 {
-  Configuration subc(fn);
+  Configuration subc(fn, cerr, XML::PARSER_OPTIMISE_CONTENT
+                               | XML::PARSER_PRESERVE_WHITESPACE);
   if (subc.read())
   {
     if (allow_includes) subc.process_includes();
