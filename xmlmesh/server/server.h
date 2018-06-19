@@ -321,6 +321,10 @@ public:
   // Tick function - does nothing by default, can be overridden
   virtual void tick() {}
 
+  //--------------------------------------------------------------------------
+  // Clean shutdown - does nothing by default
+  virtual void shutdown() {}
+
   //------------------------------------------------------------------------
   // Virtual destructor - does nothing here
   virtual ~Service() {}
@@ -358,6 +362,10 @@ public:
   //------------------------------------------------------------------------
   // Run method - never returns
   void run();
+
+  //--------------------------------------------------------------------------
+  // Clean shutdown
+  void shutdown();
 
   //------------------------------------------------------------------------
   // Destructor

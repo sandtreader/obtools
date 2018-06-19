@@ -151,6 +151,7 @@ int main(int argc, char **argv)
   server.run();
 
 shutdown:
+  server.shutdown();
   return 0;
 }
 

@@ -125,6 +125,10 @@ public:
   // e.g. client.unsubscribe("*");
   // Returns whether successful
   bool unsubscribe(const string& subject);
+
+  //------------------------------------------------------------------------
+  // Shut down cleanly
+  void shutdown() { transport.shutdown(); }
 };
 
 //==========================================================================
