@@ -21,8 +21,8 @@ void Server::configure(const XML::Configuration& config)
   const XML::Element& root = config.get_root();
 
   // Read all services
-  const XML::Element& services = root.get_child("services");
-  for(XML::Element::iterator p(services.children); p; ++p)
+  const XML::Element& service_es = root.get_child("services");
+  for(XML::Element::iterator p(service_es.children); p; ++p)
   {
     if (!create_service(*p))
       log << "Failed to create service from XML:\n" << *p;
@@ -135,6 +135,14 @@ void Server::run()
       }
     }
   }
+}
+
+//--------------------------------------------------------------------------
+// Clean shutdown
+void Server::shutdown()
+{
+  // Shutdown all attached services
+  for(auto s: services) s->shutdown();
 }
 
 //--------------------------------------------------------------------------

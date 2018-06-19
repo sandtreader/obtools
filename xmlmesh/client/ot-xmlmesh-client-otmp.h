@@ -51,7 +51,6 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - take server address
-  // port=0 means use default port for protocol
   OTMPClient(Net::EndPoint server): Client(transport), transport(server) {}
 };
 

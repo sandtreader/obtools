@@ -36,13 +36,22 @@ class OTMPClientService: public Service
 {
 private:
   const Net::EndPoint host;
-  OTMPClient client;
+  list<string> subjects;
+  unique_ptr<OTMPClient> client;
   OTMPClientThread  client_thread;
+
+  void shutdown();
 
 public:
   //------------------------------------------------------------------------
   // Constructor
   OTMPClientService(const XML::Element& cfg);
+
+  //--------------------------------------------------------------------------
+  // OTMP Subscriber
+  // Subscribe all requested subjects
+  // Note:  May block, so called at start of background thread
+  void subscribe();
 
   //------------------------------------------------------------------------
   // OTMP Message dispatcher
@@ -60,26 +69,40 @@ OTMPClientService::OTMPClientService(const XML::Element& cfg):
   Service(cfg),
   host(Net::IPAddress(cfg["server"]),
        cfg.get_attr_int("port", OTMP::DEFAULT_PORT)),
-  client(host),
   client_thread(*this)
 {
-  Log::Streams log;
-  log.summary << "OTMP Client '" << id << "' to " << host << " started\n";
-
+  // Get subjects
   for(XML::Element::const_iterator p(cfg.get_children("subscription")); p; ++p)
   {
     const XML::Element& sube = *p;
-    const string& subject = sube["subject"];
-    if (client.subscribe(subject))
+    subjects.push_back(sube["subject"]);
+  }
+
+  // Start background thread
+  client_thread.start();
+}
+
+//--------------------------------------------------------------------------
+// OTMP Subscriber
+// Subscribe all requested subjects
+// Note:  May block, so called at start of background thread
+void OTMPClientService::subscribe()
+{
+  Log::Streams log;
+
+  // Connect client
+  log.summary << "OTMP Client '" << id << "' connecting to " << host << endl;
+  client.reset(new OTMPClient(host));
+
+  // Subscribe
+  for(const auto& subject: subjects)
+  {
+    if (client->subscribe(subject))
       log.summary << "  Subscribed to " << subject << " at " << host << endl;
     else
       log.error << "OTMP Client to " << host << " can't subscribe to "
                 << subject << endl;
   }
-
-  // Start waiter thread *after* subscription done so it doesn't race for
-  // OK response
-  client_thread.start();
 }
 
 //--------------------------------------------------------------------------
@@ -89,7 +112,7 @@ void OTMPClientService::dispatch()
 {
   Message msg;
 
-  if (client.wait(msg))
+  if (client->wait(msg))
   {
     // Convert to routing message
     RoutingMessage rmsg(msg);
@@ -112,7 +135,7 @@ bool OTMPClientService::handle(RoutingMessage& msg)
   {
     case RoutingMessage::MESSAGE:
     {
-      if (client.send(msg.message))
+      if (client->send(msg.message))
       {
         // Tell tracker the message has been forwarded, so it can call off
         // the dogs locally
@@ -132,10 +155,20 @@ bool OTMPClientService::handle(RoutingMessage& msg)
   return false;  // Nowhere else to go
 }
 
+//--------------------------------------------------------------------------
+// Shut down
+void OTMPClientService::shutdown()
+{
+  client->shutdown();
+  client.reset();
+}
+
 //==========================================================================
 // client thread run
 void OTMPClientThread::run()
 {
+  // Subscribe before running dispatcher to avoid OK results getting stolen
+  service.subscribe();
   for(;;) service.dispatch();
 }
 
