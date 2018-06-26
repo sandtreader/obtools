@@ -21,7 +21,7 @@ Token Analyser::read_name_token(char c)
   for(;;)
   {
     c = peek();
-    if (isalpha(c) || isdigit(c) || c=='_')
+    if (isalpha(c) || (isdigit(c) && allow_alphanum_names) || c=='_')
     {
       c = get();
       name += c;
@@ -35,7 +35,7 @@ Token Analyser::read_name_token(char c)
 // Read a number token
 Token Analyser::read_number_token(char c)
 {
-  // Read a string value - c is digit or -
+  // Read a string value - c is digit, - or .
   string value;
   value += c;
 
@@ -233,6 +233,15 @@ Token Analyser::read_token()
   else if (c=='"')
     return read_string_token();
   else if (c=='-')
+  {
+    // Treated as symbol unless followed by digit or .
+    char d = peek();
+    if (isdigit(d) || d == '.')
+      return read_number_token(c);
+    else
+      return read_symbol_token(c);
+  }
+  else if (c=='.')
   {
     // Treated as symbol unless followed by digit
     if (isdigit(peek()))

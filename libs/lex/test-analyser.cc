@@ -81,6 +81,21 @@ TEST(Analyser, TestComplexName)
   ASSERT_EQ("Fred_123", token.value);
 }
 
+TEST(Analyser, TestDisallowedAlphaNumSplitsComplexName)
+{
+  string s("Fred_123");
+  istringstream input(s);
+  Analyser analyser(input);
+  analyser.disallow_alphanum_names();
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NAME, token.type);
+  ASSERT_EQ("Fred_", token.value);
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("123", token.value);
+}
+
 TEST(Analyser, TestIntegerGivesNumberThenEND)
 {
   string s("1234");
@@ -132,6 +147,34 @@ TEST(Analyser, TestNegativeFloatGivesNumberThenEND)
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::NUMBER, token.type);
   ASSERT_EQ("-1234.56", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
+TEST(Analyser, TestFloatWithNothingBeforePointGivesNumberThenEND)
+{
+  string s(".56");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ(".56", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
+TEST(Analyser, TestNegativeFloatWithNothingBeforePointGivesNumberThenEND)
+{
+  string s("-.56");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("-.56", token.value);
 
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::END, token.type);
