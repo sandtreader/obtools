@@ -56,7 +56,9 @@ struct Exception
 // Lexical analyser
 class Analyser
 {
+ private:
   istream& input;
+  bool allow_alphanum_names{true};
   list<string> symbols;
   Token pending_token;
 
@@ -79,6 +81,10 @@ public:
   //------------------------------------------------------------------------
   // Add a symbol - symbols are greedy matched
   void add_symbol(const string& symbol) { symbols.push_back(symbol); }
+
+  //------------------------------------------------------------------------
+  // Disallow alphanumeric names (letters and _ only)
+  void disallow_alphanum_names() { allow_alphanum_names = false; }
 
   //------------------------------------------------------------------------
   // Put back a token to be read next time (lookahead)
