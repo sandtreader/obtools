@@ -38,6 +38,7 @@ const unsigned int NANO  = 1000000000;
 
 // Conversion constants
 const unsigned long EPOCH_1970 = 2208988800UL;  // 1970-1900
+const auto EPOCH_JDN = 2415021.5L; // JDN at 1 Jan 1900
 
 // NTP format
 const unsigned int NTP_SHIFT = 32;
@@ -227,6 +228,13 @@ public:
   Stamp(const string& text, bool lenient = false);
 
   //------------------------------------------------------------------------
+  // Constructor from Julian day number
+  Stamp(double _t):
+    // Mulitply by 2^16 as double twice for good precision
+    t{static_cast<ntp_stamp_t>((_t - EPOCH_JDN) * DAY * 65536.0L * 65536.0L)}
+  {}
+
+  //------------------------------------------------------------------------
   // Validity checks - NTP 0 is not valid
   bool valid() const { return t!=0; }
   bool operator!() const { return !t; }
@@ -310,6 +318,13 @@ public:
   // Convert to RFC822 string
   // Generates Wdy, DD-Mon-YYYY HH:MM:SS GMT, empty if invalid
   string rfc822() const;
+
+  //------------------------------------------------------------------------
+  // Convert to Julian Days
+  double jdn() const
+  {
+    return (t / 65536.0L / 65536.0L / DAY) + EPOCH_JDN;
+  }
 
   //------------------------------------------------------------------------
   // Split the timestamp into individual items
