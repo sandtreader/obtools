@@ -229,7 +229,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from Julian day number
-  Stamp(double _t):
+ Stamp(double _t, bool):
     // Mulitply by 2^16 as double twice for good precision
     t{static_cast<ntp_stamp_t>((_t - EPOCH_JDN) * DAY * 65536.0L * 65536.0L)}
   {}
