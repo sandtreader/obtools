@@ -121,6 +121,31 @@ bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
 }
 
 //--------------------------------------------------------------------------
+// Get list of directory contents, as full paths prefixed by directory path
+// Recursing to subdirectories
+// Other parameters as above
+// Returns whether successful (directory readable)
+// Fills in paths if so
+bool Directory::inspect_recursive(list<Path>& paths, const string& pattern,
+                                  bool all)
+{
+  // Look in this directory directly
+  if (!inspect(paths, pattern, all)) return false;
+
+  // Now look in all subdirs
+  list<Path> subdirs;
+  if (!inspect(subdirs)) return true;  // Own listing worked above
+
+  for(const auto& p: subdirs)
+  {
+    File::Directory dir(p);
+    if (dir.is_dir()) dir.inspect_recursive(paths, pattern, all);
+  }
+
+  return true;
+}
+
+//--------------------------------------------------------------------------
 // Does the directory exist and is it actually dir?
 bool Directory::exists() const
 {

@@ -331,6 +331,15 @@ public:
   // Fills in paths if so
   bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
 
+  //--------------------------------------------------------------------------
+  // Get list of directory contents, as full paths prefixed by directory path
+  // Recursing to subdirectories
+  // Other parameters as above
+  // Returns whether successful (directory readable)
+  // Fills in paths if so
+  bool inspect_recursive(list<Path>& paths, const string& pattern="*",
+                         bool all=false);
+
   //------------------------------------------------------------------------
   // Does the directory exist and is it actually dir?
   bool exists() const;
