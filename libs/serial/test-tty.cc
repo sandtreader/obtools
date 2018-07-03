@@ -103,7 +103,7 @@ TEST(SerialTest, TestTTYGetLine)
   write(master_fd, expected.c_str(), expected.size());
   write(master_fd, "\n", 1);
   auto actual = string{};
-  EXPECT_TRUE(tty.get_line(actual));
+  EXPECT_EQ(Serial::TTY::GetLineResult::ok, tty.get_line(actual));
   EXPECT_EQ(expected, actual);
   close(master_fd);
 }

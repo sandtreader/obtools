@@ -11,7 +11,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
-#include <iostream>
 
 namespace ObTools { namespace Serial {
 
@@ -267,10 +266,12 @@ bool TTY::set_parameters(const Parameters& params)
 
 //--------------------------------------------------------------------------
 // Get a line from the device
-bool TTY::get_line(string& line, const chrono::microseconds& timeout)
+TTY::GetLineResult TTY::get_line(string& line,
+                                 const chrono::microseconds& timeout)
 {
   if (fd < 0)
-    return false;
+    return GetLineResult::fail;
+
   if (timeout.count())
   {
     // Read timeout is set, so wait for input up to it
@@ -278,16 +279,27 @@ bool TTY::get_line(string& line, const chrono::microseconds& timeout)
     auto tv = timeval{timeout.count() / 1000000, timeout.count() % 1000000};
     FD_ZERO(&fds);
     FD_SET(fd, &fds);
-    select(fd + 1, &fds, nullptr, nullptr, &tv);
-    auto response = FD_ISSET(fd, &fds);
-    if (!response)
-      return false;
+    const auto result = select(fd + 1, &fds, nullptr, nullptr, &tv);
+    if (result < 0)
+    {
+      if (errno == -EINTR)
+        // We were interrupted
+        return GetLineResult::interrupt;
+      else
+        // Failure of some kind
+        return GetLineResult::fail;
+    }
+    else if (!result)
+    {
+      // Timeout
+      return GetLineResult::timeout;
+    }
   }
   line.clear();
   auto c = char{};
   while (read(fd, &c, 1) && c != '\n')
     line += c;
-  return true;
+  return GetLineResult::ok;
 }
 
 //--------------------------------------------------------------------------

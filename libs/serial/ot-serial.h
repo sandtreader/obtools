@@ -305,8 +305,15 @@ public:
 
   //------------------------------------------------------------------------
   // Get a line from the device
-  bool get_line(string& line,
-                const chrono::microseconds& timeout = chrono::microseconds{0});
+  enum class GetLineResult
+  {
+    ok,
+    fail,
+    timeout,
+    interrupt,
+  };
+  GetLineResult get_line(string& line,
+             const chrono::microseconds& timeout = chrono::microseconds{0});
 
   //------------------------------------------------------------------------
   // Write a line to the device
