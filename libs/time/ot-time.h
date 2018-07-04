@@ -209,10 +209,14 @@ public:
   Stamp(): t(0) {}
 
   //------------------------------------------------------------------------
-  // Constructor from time_t
-  Stamp(time_t _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
-  // Disambiguating constructor from int
-  Stamp(int t): Stamp(static_cast<time_t>(t)) {}
+  // Constructor from time_t (note: using long rather than time_t here to avoid
+  // errors from redefined constructors in case compiling where time_t is
+  // another kind of int)
+  Stamp(long _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
+  // Disambiguating constructors from other ints
+  Stamp(int t): Stamp(static_cast<long>(t)) {}
+  Stamp(unsigned int t): Stamp(static_cast<long>(t)) {}
+  Stamp(unsigned long t): Stamp(static_cast<long>(t)) {}
 
   //------------------------------------------------------------------------
   // Constructor from split time
