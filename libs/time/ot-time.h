@@ -211,6 +211,8 @@ public:
   //------------------------------------------------------------------------
   // Constructor from time_t
   Stamp(time_t _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
+  // Disambiguating constructor from int
+  Stamp(int t): Stamp(static_cast<time_t>(t)) {}
 
   //------------------------------------------------------------------------
   // Constructor from split time
@@ -229,7 +231,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from Julian day number
- Stamp(double _t, bool):
+ Stamp(double _t):
     // Mulitply by 2^16 as double twice for good precision
     t{static_cast<ntp_stamp_t>((_t - EPOCH_JDN) * DAY * 65536.0L * 65536.0L)}
   {}
