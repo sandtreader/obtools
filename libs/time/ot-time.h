@@ -209,14 +209,8 @@ public:
   Stamp(): t(0) {}
 
   //------------------------------------------------------------------------
-  // Constructor from time_t (note: using long rather than time_t here to avoid
-  // errors from redefined constructors in case compiling where time_t is
-  // another kind of int)
-  Stamp(long _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
-  // Disambiguating constructors from other ints
-  Stamp(int t): Stamp(static_cast<long>(t)) {}
-  Stamp(unsigned int t): Stamp(static_cast<long>(t)) {}
-  Stamp(unsigned long t): Stamp(static_cast<long>(t)) {}
+  // Constructor from time_t
+  Stamp(time_t _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
 
   //------------------------------------------------------------------------
   // Constructor from split time
@@ -232,13 +226,6 @@ public:
   // The lenient flag allows the time parts to be omitted from the string
   // and zero value assumed for those parts (ISO only)
   Stamp(const string& text, bool lenient = false);
-
-  //------------------------------------------------------------------------
-  // Constructor from Julian day number
- Stamp(double _t):
-    // Mulitply by 2^16 as double twice for good precision
-    t{static_cast<ntp_stamp_t>((_t - EPOCH_JDN) * DAY * 65536.0L * 65536.0L)}
-  {}
 
   //------------------------------------------------------------------------
   // Validity checks - NTP 0 is not valid
@@ -362,6 +349,16 @@ public:
   // Static constructor-like function from NTP timestamp
   // (done this way to avoid ambiguity with time_t version)
   static Stamp from_ntp(ntp_stamp_t n) { Stamp s; s.t = n; return s; }
+
+  //------------------------------------------------------------------------
+  // Constructor from Julian day number
+  static Stamp from_jdn(double j)
+  {
+    Stamp s;
+    // Mulitply by 2^16 as double twice for good precision
+    s.t = (j - EPOCH_JDN) * DAY * 65536.0L * 65536.0L;
+    return s;
+  }
 
   //------------------------------------------------------------------------
   // Static constructor-like function for time now

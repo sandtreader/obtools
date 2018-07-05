@@ -15,10 +15,12 @@ using namespace ObTools;
 
 TEST(StampTest, TestCreateFromJulianDays)
 {
-  EXPECT_EQ(Time::Stamp{}, Time::Stamp(2415021.5));
-  EXPECT_EQ(Time::Stamp{time_t{0}}, Time::Stamp(2440588.5));
-  EXPECT_EQ(Time::Stamp{"1972-01-01T00:00:00Z"}, Time::Stamp(2441318.5));
-  EXPECT_EQ(Time::Stamp{"2036-02-07T00:00:00Z"}, Time::Stamp(2464731.5));
+  EXPECT_EQ(Time::Stamp{}, Time::Stamp::from_jdn(2415021.5));
+  EXPECT_EQ(Time::Stamp{time_t{0}}, Time::Stamp::from_jdn(2440588.5));
+  EXPECT_EQ(Time::Stamp{"1972-01-01T00:00:00Z"},
+            Time::Stamp::from_jdn(2441318.5));
+  EXPECT_EQ(Time::Stamp{"2036-02-07T00:00:00Z"},
+            Time::Stamp::from_jdn(2464731.5));
 }
 
 TEST(StampTest, TestCreateToJulianDays)
