@@ -92,6 +92,26 @@ public:
   bool fetch(string& value) override;
 
   //------------------------------------------------------------------------
+  // Move to next row
+  bool next() override;
+
+  //------------------------------------------------------------------------
+  // Fetch field as string
+  string get_string(int col) override;
+
+  //------------------------------------------------------------------------
+  // Fetch field as int
+  uint64_t get_int(int col) override;
+
+  //------------------------------------------------------------------------
+  // Fetch field as double
+  double get_real(int col) override;
+
+  //------------------------------------------------------------------------
+  // Fetch field as Time::Stamp
+  Time::Stamp get_time(int col) override;
+
+  //------------------------------------------------------------------------
   // Is valid?
   operator bool() const override
   {

@@ -443,6 +443,26 @@ public:
   virtual bool execute() = 0;
 
   //------------------------------------------------------------------------
+  // Move to next row
+  virtual bool next() = 0;
+
+  //------------------------------------------------------------------------
+  // Fetch field as string
+  virtual string get_string(int col) = 0;
+
+  //------------------------------------------------------------------------
+  // Fetch field as int
+  virtual uint64_t get_int(int col) = 0;
+
+  //------------------------------------------------------------------------
+  // Fetch field as double
+  virtual double get_real(int col) = 0;
+
+  //------------------------------------------------------------------------
+  // Fetch field as Time::Stamp
+  virtual Time::Stamp get_time(int col) = 0;
+
+  //------------------------------------------------------------------------
   // Is valid?
   virtual operator bool() const = 0;
 };
@@ -555,6 +575,40 @@ public:
     return statement && statement->fetch(value);
   }
 
+  //------------------------------------------------------------------------
+  // Move to next row
+  bool next() override
+  {
+    return statement && statement->next();
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as string
+  string get_string(int col) override
+  {
+    return statement ? statement->get_string(col) : "";
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as int
+  uint64_t get_int(int col) override
+  {
+    return statement ? statement->get_int(col) : 0;
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as double
+  double get_real(int col) override
+  {
+    return statement ? statement->get_real(col) : 0;
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as Time::Stamp
+  Time::Stamp get_time(int col) override
+  {
+    return statement ? statement->get_time(col) : Time::Stamp{};
+  }
 };
 
 //==========================================================================
@@ -672,6 +726,41 @@ public:
   bool fetch(string& value) override
   {
     return statement && statement->fetch(value);
+  }
+
+  //------------------------------------------------------------------------
+  // Move to next row
+  bool next() override
+  {
+    return statement && statement->next();
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as string
+  string get_string(int col) override
+  {
+    return statement ? statement->get_string(col) : "";
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as int
+  uint64_t get_int(int col) override
+  {
+    return statement ? statement->get_int(col) : 0;
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as double
+  double get_real(int col) override
+  {
+    return statement ? statement->get_real(col) : 0;
+  }
+
+  //------------------------------------------------------------------------
+  // Fetch field as Time::Stamp
+  Time::Stamp get_time(int col) override
+  {
+    return statement ? statement->get_time(col) : Time::Stamp{};
   }
 
   //------------------------------------------------------------------------

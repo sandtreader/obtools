@@ -124,6 +124,47 @@ bool PreparedStatement::fetch(string& value)
   return true;
 }
 
+//--------------------------------------------------------------------------
+// Move to next row
+bool PreparedStatement::next()
+{
+  return sqlite3_step(stmt.get()) == SQLITE_ROW;
+}
+
+//--------------------------------------------------------------------------
+// Fetch field as string
+string PreparedStatement::get_string(int col)
+{
+  auto v = sqlite3_column_text(stmt.get(), col);
+  if (v == nullptr)
+    return {};
+  return reinterpret_cast<const char *>(v);
+}
+
+//--------------------------------------------------------------------------
+// Fetch field as int
+uint64_t PreparedStatement::get_int(int col)
+{
+  return sqlite3_column_int64(stmt.get(), col);
+}
+
+//--------------------------------------------------------------------------
+// Fetch field as double
+double PreparedStatement::get_real(int col)
+{
+  return sqlite3_column_double(stmt.get(), col);
+}
+
+//--------------------------------------------------------------------------
+// Fetch field as Time::Stamp
+Time::Stamp PreparedStatement::get_time(int col)
+{
+  auto v = sqlite3_column_text(stmt.get(), col);
+  if (v == nullptr)
+    return {};
+  return Time::Stamp{string{reinterpret_cast<const char *>(v)}};
+}
+
 //==========================================================================
 // SQLite connection class
 
