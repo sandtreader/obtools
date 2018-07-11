@@ -126,6 +126,19 @@ TEST(XMLTest, TestFailOnBogusBOM)
   ASSERT_THROW(parser.read_from(xml), XML::ParseFailed);
 }
 
+TEST(XMLTest, TestGetPrefixedAttributes)
+{
+  XML::Element e("foo");
+  e.set_attr("prefix-x", "X");
+  e.set_attr("prefix-y", "Y");
+  e.set_attr("ignore", "bar");
+
+  auto attrs = e.get_attrs_with_prefix("prefix-");
+  ASSERT_EQ(2, attrs.size());
+  EXPECT_EQ("X", attrs["x"]);
+  EXPECT_EQ("Y", attrs["y"]);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

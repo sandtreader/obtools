@@ -765,6 +765,20 @@ bool Element::has_attr(const string& attname) const
     return true;
 }
 
+//------------------------------------------------------------------------
+// Get a map of attributes with a given prefix (which is removed)
+// e.g. <foo item-x="x" item-y="y"/> with prefix "item-"
+//  -> { { "x": "x" }, { "y": "y" } }
+map<string, string> Element::get_attrs_with_prefix(const string& prefix)
+{
+  map<string,string> result;
+  size_t prefix_len = prefix.size();
+  for(const auto& it: attrs)
+    if (string(it.first, 0, prefix_len) == prefix)
+      result[string(it.first, prefix_len)] = it.second;
+  return result;
+}
+
 //--------------------------------------------------------------------------
 // Set an attribute (string)
 Element& Element::set_attr(const string& attname, const string& value)
