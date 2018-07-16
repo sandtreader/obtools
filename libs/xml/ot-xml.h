@@ -453,6 +453,12 @@ public:
   bool has_attr(const string& attname) const;
 
   //------------------------------------------------------------------------
+  // Get a map of attributes with a given prefix (which is removed)
+  // e.g. <foo item-x="x" item-y="y"/> with prefix "item-"
+  //  -> { { "x": "x" }, { "y": "y" } }
+  map<string, string> get_attrs_with_prefix(const string& prefix);
+
+  //------------------------------------------------------------------------
   // Set an attribute (string)
   // Note:  All set_attr_xxx methods return *this, to allow chaining
   Element& set_attr(const string& attname, const string& value);
