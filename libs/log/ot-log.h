@@ -323,22 +323,10 @@ class Stream: public ostream
 public:
   // Constructor - like ofstream
   Stream(Channel &channel, Level level):
-    ostream(new StreamBuf(channel, level))
-  {
-  }
-
-  //------------------------------------------------------------------------
-  // Move constructor
-  Stream(Stream&& s):
-    ostream(std::move(s)) // Had to use std namespace
-                          // - wtf is the other move()?
-  {
-    set_rdbuf(rdbuf());
-    s.set_rdbuf(nullptr);
-  }
+    ostream(new StreamBuf(channel, level)) {}
 
   // Destructor
-  ~Stream() { if (rdbuf()) delete rdbuf(); }
+  ~Stream() { delete rdbuf(); }
 
   // Close - pass on to StreamBuf to do
   void close() { static_cast<StreamBuf *>(rdbuf())->close(); }
@@ -386,21 +374,18 @@ class Error: public Stream
 {
 public:
   Error(): Stream(logger, Level::error) {}
-  Error(Error&& e): Stream(std::move(e)) {}
 };
 
 class Summary: public Stream
 {
 public:
   Summary(): Stream(logger, Level::summary) {}
-  Summary(Summary&& s): Stream(std::move(s)) {}
 };
 
 class Detail: public Stream
 {
 public:
   Detail(): Stream(logger, Level::detail) {}
-  Detail(Detail&& d): Stream(std::move(d)) {}
 };
 
 #if OBTOOLS_LOG_DEBUG
@@ -408,7 +393,6 @@ class Debug: public Stream
 {
 public:
   Debug(): Stream(logger, Level::debug) {}
-  Debug(Debug&& d): Stream(std::move(d)) {}
 };
 #endif
 
@@ -417,7 +401,6 @@ class Dump: public Stream
 {
 public:
   Dump(): Stream(logger, Level::dump) {}
-  Dump(Dump&& d): Stream(std::move(d)) {}
 };
 #endif
 
