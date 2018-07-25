@@ -39,6 +39,7 @@ private:
   list<string> subjects;
   unique_ptr<OTMPClient> client;
   OTMPClientThread  client_thread;
+  bool running{true};
 
   void shutdown();
 
@@ -56,7 +57,8 @@ public:
   //------------------------------------------------------------------------
   // OTMP Message dispatcher
   // Fetch OTMP messages and send them up as internal messages
-  void dispatch();
+  // Returns whether still running
+  bool dispatch();
 
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
@@ -108,7 +110,7 @@ void OTMPClientService::subscribe()
 //--------------------------------------------------------------------------
 // OTMP Message dispatcher
 // Fetch OTMP messages and send into the system
-void OTMPClientService::dispatch()
+bool OTMPClientService::dispatch()
 {
   Message msg;
 
@@ -125,6 +127,8 @@ void OTMPClientService::dispatch()
     Log::Error log;
     log << "OTMP Client connection restarted\n";
   }
+
+  return running;
 }
 
 //--------------------------------------------------------------------------
@@ -159,7 +163,9 @@ bool OTMPClientService::handle(RoutingMessage& msg)
 // Shut down
 void OTMPClientService::shutdown()
 {
-  client->shutdown();
+  running = false;
+  if (!!client) client->shutdown();
+  client_thread.join();
   client.reset();
 }
 
@@ -169,7 +175,8 @@ void OTMPClientThread::run()
 {
   // Subscribe before running dispatcher to avoid OK results getting stolen
   service.subscribe();
-  for(;;) service.dispatch();
+  while (service.dispatch())
+    ;
 }
 
 //==========================================================================
