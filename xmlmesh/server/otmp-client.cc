@@ -13,6 +13,7 @@
 
 #include <unistd.h>
 #include <sstream>
+#include <atomic>
 
 namespace ObTools { namespace XMLMesh {
 
@@ -39,7 +40,7 @@ private:
   list<string> subjects;
   unique_ptr<OTMPClient> client;
   OTMPClientThread  client_thread;
-  bool running{true};
+  atomic<bool> running{true};
 
   void shutdown();
 
@@ -164,7 +165,7 @@ bool OTMPClientService::handle(RoutingMessage& msg)
 void OTMPClientService::shutdown()
 {
   running = false;
-  if (!!client) client->shutdown();
+  if (client) client->shutdown();
   client_thread.join();
   client.reset();
 }
