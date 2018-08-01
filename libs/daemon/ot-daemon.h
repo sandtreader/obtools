@@ -15,6 +15,7 @@
 #include "ot-mt.h"
 #include "ot-log.h"
 #include "ot-xml.h"
+#include <atomic>
 
 namespace ObTools { namespace Daemon {
 
@@ -85,6 +86,8 @@ class Shell
 
   // Internal
   int drop_privileges();
+  atomic<bool> trigger_reload{false};
+  atomic<bool> trigger_shutdown{false};
 
 protected:
   bool shut_down;              // Shut down requested
@@ -120,12 +123,26 @@ public:
   int start(int argc, char **argv);
 
   //------------------------------------------------------------------------
-  // Signal to shut down
+  // Run shut down
   void shutdown();
 
   //------------------------------------------------------------------------
-  // Signal to reload config
+  // Reload config
   void reload();
+
+  //------------------------------------------------------------------------
+  // Signal to shut down
+  void signal_shutdown()
+  {
+    trigger_shutdown = true;
+  }
+
+  //------------------------------------------------------------------------
+  // Signal to reload config
+  void signal_reload()
+  {
+    trigger_reload = true;
+  }
 
   //------------------------------------------------------------------------
   // Handle a failure signal

@@ -38,21 +38,21 @@ const sighandler_t sig_dfl(SIG_DFL);
 // SIGTERM:  Clean shutdown
 void sigterm(int)
 {
-  if (the_shell) the_shell->shutdown();
+  if (the_shell) the_shell->signal_shutdown();
   signal(SIGTERM, sig_ign);
 }
 
 // SIGQUIT:  Quit from keyboard
 void sigquit(int)
 {
-  if (the_shell) the_shell->shutdown();
+  if (the_shell) the_shell->signal_shutdown();
   signal(SIGQUIT, sig_ign);
 }
 
 // SIGHUP:  Reload config
 void sighup(int)
 {
-  if (the_shell) the_shell->reload();
+  if (the_shell) the_shell->signal_reload();
   signal(SIGHUP, sighup);
 }
 
@@ -81,6 +81,15 @@ int Shell::run()
     int wait = application.tick_wait();
     if (wait)
       this_thread::sleep_for(chrono::microseconds{wait});
+    if (trigger_shutdown)
+    {
+      shutdown();
+    }
+    else if (trigger_reload)
+    {
+      reload();
+      trigger_reload = false;
+    }
   }
 
   return 0;
@@ -339,22 +348,20 @@ int Shell::drop_privileges()
 }
 
 //--------------------------------------------------------------------------
-// Signal to shut down - called from SIGTERM handler first in master and then
-// (because this passes it down) in slave
+// Shut down - indirectly called from SIGTERM handler first in master and
+// then (because this passes it down) in slave
 void Shell::shutdown()
 {
   // Stop our restart loop (master) and any loop in the slave
   shut_down=true;
-
-  Log::Streams log;
 
   // Tell the slave to stop, if we're the master
   if (slave_pid) kill(slave_pid, SIGTERM);
 }
 
 //--------------------------------------------------------------------------
-// Signal to reload config - called from SIGHUP handler first in master and then
-// (because this passes it down) in slave
+// Reload config - indirectly called from SIGHUP handler first in master and
+// then (because this passes it down) in slave
 void Shell::reload()
 {
   Log::Streams log;
