@@ -214,7 +214,8 @@ bool AES::encrypt(Gather::Buffer& buffer, bool /*encryption*/)
                       segment->data, segment->length);
   }
 
-  //?? EVP_EncryptFinal_ex(ctx.get(), data + enc_len, &enc_len);
+  // Don't call EVP_EncryptFinal_ex since nothing to call it on and
+  // there is no padding in CTR anyway
   return true;
 }
 
