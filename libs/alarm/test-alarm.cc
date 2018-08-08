@@ -71,14 +71,14 @@ public:
 // Tests
 TEST(AlarmTest, TestAlarm)
 {
-  const Time::Duration resolution(0.001);
+  const Time::Duration resolution(0.02);
   const Time::Duration max_expected_drift(1.1 * resolution.seconds());
   Observer observer;
   Alarm::Clock clock(resolution);
   Time::Stamp alarm_time = Time::Stamp::now();
   alarm_time += Time::Duration(0.2);
   ASSERT_TRUE(clock.add_alarm(alarm_time, &observer));
-  this_thread::sleep_for(chrono::milliseconds{210});
+  this_thread::sleep_for(chrono::milliseconds{250});
   ASSERT_TRUE(observer.got_alarm());
   Time::Stamp actual_time(observer.get_actual_alarm_time());
   Time::Stamp reported_time(observer.get_reported_alarm_time());
