@@ -224,6 +224,12 @@ public:
   // Throws Error on failure
   void write(const string& s);
 
+  //--------------------------------------------------------------------------
+  // Write a string to the channel to a fixed-length field, either limiting to
+  // the given length or padding (after) with the given character
+  // Throws Error on failure
+  void write_fixed(const string& s, size_t length, unsigned char pad=0);
+
   //------------------------------------------------------------------------
   // Write the given C string to the channel
   // Throws Error on failure

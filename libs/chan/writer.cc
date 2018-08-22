@@ -28,6 +28,17 @@ void Writer::write(const string& s)
 }
 
 //--------------------------------------------------------------------------
+// Write a string to the channel to a fixed-length field, either limiting to
+// the given length or padding (after) with the given character
+// Throws Error on failure
+void Writer::write_fixed(const string& s, size_t length, unsigned char pad)
+{
+  size_t len = min(length, s.size());
+  basic_write(s.c_str(), len);
+  for(; len < length; len++) basic_write(&pad, 1);
+}
+
+//--------------------------------------------------------------------------
 // Write a vector of unsigned chars to the channel
 // Throws Error on failure
 void Writer::write(const vector<unsigned char>& v)
