@@ -348,39 +348,24 @@ int Shell::drop_privileges()
 }
 
 //--------------------------------------------------------------------------
-// Shut down - indirectly called from SIGTERM handler first in master and
-// then (because this passes it down) in slave
+// Shut down - indirectly called from SIGTERM handler
 void Shell::shutdown()
 {
   // Stop our restart loop (master) and any loop in the slave
   shut_down=true;
-
-  // Tell the slave to stop, if we're the master
-  if (slave_pid) kill(slave_pid, SIGTERM);
 }
 
 //--------------------------------------------------------------------------
-// Reload config - indirectly called from SIGHUP handler first in master and
-// then (because this passes it down) in slave
+// Reload config - indirectly called from SIGHUP handler
 void Shell::reload()
 {
   Log::Streams log;
-
-  // Tell the slave to reload, if we're the master
-  if (slave_pid)
-  {
-    log.summary << "SIGHUP received in master process\n";
-    kill(slave_pid, SIGHUP);
-  }
+  log.summary << "SIGHUP received\n";
+  if (config.read(config_element))
+    application.read_config(config);
   else
-  {
-    log.summary << "SIGHUP received in slave process\n";
-    if (config.read(config_element))
-      application.read_config(config);
-    else
-      log.error << "Failed to re-read config, using existing" << endl;
-    application.reconfigure();
-  }
+    log.error << "Failed to re-read config, using existing" << endl;
+  application.reconfigure();
 }
 
 //--------------------------------------------------------------------------
