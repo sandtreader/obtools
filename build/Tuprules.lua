@@ -316,6 +316,24 @@ function package(products, package_dir, dep_products)
   inputs += dep_products
   local outputs = {}
 
+  local suffix = ".deb"
+  local noarch = "all"
+  local version_separator = "_"
+  local arch_separator = "_"
+
+  local f = io.popen("lsb_release -s -i")
+  local distro = string.gsub(f:read("*a"),"\n","")
+  f:close()
+  if distro == "CentOS" then
+    suffix = ".rpm"
+    noarch = "noarch"
+    version_separator = "-"
+    arch_separator = "."
+    if ARCH == "amd64" then
+      ARCH = "x86_64"
+    end
+  end
+
   -- Read Debian control file to get a list of package names
   local f = io.open(package_dir .. "/control", "r")
   if f == nil then
@@ -332,11 +350,11 @@ function package(products, package_dir, dep_products)
     local a = line:match("Architecture: (.*)")
     if a ~= nil then
       if a == "all" then
-        outputs += last_name .. "_" .. VERSION .. "-" .. REVISION ..
-                   "_all.deb"
+        outputs += last_name .. version_separator .. VERSION .. "-" .. REVISION ..
+                   arch_separator .. noarch .. suffix
       else
-        outputs += last_name .. "_" .. VERSION .. "-" .. REVISION ..
-                   "_" ..  ARCH .. ".deb"
+        outputs += last_name .. version_separator .. VERSION .. "-" .. REVISION ..
+                   arch_separator ..  ARCH .. suffix
       end
     end
   end
