@@ -28,7 +28,8 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - take server address
-  OTMPClientTransport(Net::EndPoint server): otmp(server)
+  OTMPClientTransport(Net::EndPoint server, bool fail_on_no_conn):
+    otmp(server, fail_on_no_conn)
   {
     otmp.start();
   }
@@ -51,7 +52,8 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - take server address
-  OTMPClient(Net::EndPoint server): Client(transport), transport(server) {}
+  OTMPClient(Net::EndPoint server):
+    Client(transport), transport(server, false) {}
 };
 
 //==========================================================================
@@ -67,14 +69,15 @@ public:
   // port=0 means use default port for protocol
   // NB: MultiClient is constructed before transport whatever we say
   // - therefore leave starting it to constructor body
-  OTMPMultiClient(Net::EndPoint server):
-    MultiClient(transport), transport(server) { start(); }
+  OTMPMultiClient(Net::EndPoint server, bool fail_on_no_conn = false):
+    MultiClient(transport), transport(server, fail_on_no_conn) { start(); }
 
   // Constructor specifying workers
   OTMPMultiClient(Net::EndPoint server,
-                  int min_spare_workers, int max_workers):
+                  int min_spare_workers, int max_workers,
+                  bool fail_on_no_conn = false):
     MultiClient(transport, min_spare_workers, max_workers),
-    transport(server) { start(); }
+    transport(server, fail_on_no_conn) { start(); }
 
   //------------------------------------------------------------------------
   // Destructor - force shutdown early so we can shutdown MultiClient dispatch
@@ -93,7 +96,8 @@ public:
   //------------------------------------------------------------------------
   // Constructor, taking 'xmlmesh' element
   OTMPMessageInterface(CONTEXT& context, const XML::Element& config,
-                       ObTools::Message::Broker<CONTEXT>& broker):
+                       ObTools::Message::Broker<CONTEXT>& broker,
+                       bool fail_on_no_conn = false):
     client(0)
   {
     Log::Streams log;
@@ -117,7 +121,7 @@ public:
     log.summary << "Connecting to XMLMesh at " << ep << endl;
 
     // Start mesh client
-    client = new OTMPMultiClient(ep);
+    client = new OTMPMultiClient(ep, fail_on_no_conn);
 
     // Register our transport into server message broker
     broker.add_transport(new MessageTransport<CONTEXT>(context, *client));

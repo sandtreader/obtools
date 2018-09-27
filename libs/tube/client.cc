@@ -275,9 +275,10 @@ bool Client::send_messages(Log::Streams& log)
 
 //--------------------------------------------------------------------------
 // Constructor - no SSL
-Client::Client(const Net::EndPoint& _server, const string& _name):
-  server(_server), ctx(0), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
-  alive(true), name(_name)
+Client::Client(const Net::EndPoint& _server, const string& _name,
+               bool _fail_on_no_conn):
+  server(_server), ctx(0), fail_on_no_conn{_fail_on_no_conn},
+  max_send_queue(DEFAULT_MAX_SEND_QUEUE), alive(true), name(_name)
 {
   socket = 0;
 
@@ -294,9 +295,9 @@ Client::Client(const Net::EndPoint& _server, const string& _name):
 //--------------------------------------------------------------------------
 // Constructor with SSL
 Client::Client(const Net::EndPoint& _server, SSL::Context *_ctx,
-               const string& _name):
-  server(_server), ctx(_ctx), max_send_queue(DEFAULT_MAX_SEND_QUEUE),
-  alive(true), name(_name)
+               const string& _name, bool _fail_on_no_conn):
+  server(_server), ctx(_ctx), fail_on_no_conn{_fail_on_no_conn},
+  max_send_queue(DEFAULT_MAX_SEND_QUEUE), alive(true), name(_name)
 {
   socket = 0;
 
@@ -323,12 +324,16 @@ void Client::start()
 //--------------------------------------------------------------------------
 // Send a message
 // Can busy-wait if send queue is more than max_send_queue
-void Client::send(Message& msg)
+bool Client::send(Message& msg)
 {
+  if (fail_on_no_conn && !check_socket())
+    return false;
+
   while (send_q.waiting() > max_send_queue)  // Must allow zero to work
     this_thread::sleep_for(chrono::milliseconds{SEND_BUSY_WAIT_TIME});
 
   send_q.send(msg);
+  return true;
 }
 
 //--------------------------------------------------------------------------

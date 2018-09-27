@@ -136,6 +136,7 @@ protected:
   Net::EndPoint server;
   SSL::Context *ctx;           // 0 for plain TCP
   SSL::TCPClient *socket;
+  const bool fail_on_no_conn = false;
 
   // Thread and queue stuff
   MT::Mutex mutex;             // Global client mutex used for socket
@@ -167,12 +168,13 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port) and optional name
-  Client(const Net::EndPoint& _server, const string& _name="Tube");
+  Client(const Net::EndPoint& _server, const string& _name="Tube",
+         bool fail_on_no_conn = false);
 
   //------------------------------------------------------------------------
   // Constructor with SSL
   Client(const Net::EndPoint& _server, SSL::Context *_ctx,
-         const string& _name="Tube");
+         const string& _name="Tube", bool fail_on_no_conn = false);
 
   //------------------------------------------------------------------------
   // Start send and receive threads
@@ -198,7 +200,7 @@ public:
   //------------------------------------------------------------------------
   // Send a message
   // Can busy-wait if send queue is more than max_send_queue
-  void send(Message& msg);
+  bool send(Message& msg);
 
   //------------------------------------------------------------------------
   // Check whether a message is available before blocking in wait()

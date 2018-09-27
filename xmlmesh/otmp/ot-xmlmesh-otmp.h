@@ -60,7 +60,8 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor - takes server endpoint (address+port)
-  Client(const Net::EndPoint& _server): Tube::Client(_server, "OTMP") {}
+  Client(const Net::EndPoint& _server, bool fail_on_no_conn):
+    Tube::Client(_server, "OTMP", fail_on_no_conn) {}
 };
 
 //==========================================================================

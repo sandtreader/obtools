@@ -21,8 +21,7 @@ namespace ObTools { namespace XMLMesh {
 bool OTMPClientTransport::send(const string& data)
 {
   OTMP::Message otmp_msg(data);
-  otmp.send(otmp_msg);
-  return true;
+  return otmp.send(otmp_msg);
 }
 
 //--------------------------------------------------------------------------
