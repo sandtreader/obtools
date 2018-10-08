@@ -11,6 +11,9 @@
 ### END INIT INFO
 
 
+. /lib/lsb/init-functions
+NAME=ot-xmlmesh
+
 test -f /usr/sbin/ot-xmlmesh || exit 0
 
 case "$1" in
@@ -27,6 +30,9 @@ restart|force-reload) echo -n "Restarting ObTools XMLMesh server"
 	sleep 2
         start-stop-daemon --start --quiet --pidfile /var/run/ot-xmlmesh.pid --name ot-xmlmesh --startas /usr/sbin/ot-xmlmesh
         echo "."
+        ;;
+status)
+        status_of_proc /usr/sbin/$NAME $NAME
         ;;
 *)	echo "Usage: /etc/init.d/ot-xmlmesh start|stop|restart|force-reload"
         exit 1 

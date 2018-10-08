@@ -8,7 +8,7 @@ Homepage: http://www.obtools.com/
 
 Package: ot-xmlmesh
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends},lsb-base
 Description: ObTools XMLMesh message bus server
  XMLMesh is a SOAP-based XML message bus for integration of distributed
  components using simple XML messages
