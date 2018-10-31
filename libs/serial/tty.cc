@@ -276,7 +276,8 @@ TTY::GetLineResult TTY::get_line(string& line,
   {
     // Read timeout is set, so wait for input up to it
     auto fds = fd_set{};
-    auto tv = timeval{timeout.count() / 1000000, timeout.count() % 1000000};
+    auto tv = timeval{static_cast<time_t>(timeout.count() / 1000000),
+                      static_cast<suseconds_t>(timeout.count() % 1000000)};
     FD_ZERO(&fds);
     FD_SET(fd, &fds);
     const auto result = select(fd + 1, &fds, nullptr, nullptr, &tv);
