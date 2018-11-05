@@ -51,13 +51,15 @@ LINKER = COMPILER
 
 ----------------------------------------------------------------------------
 -- Basic compiler options
-CFLAGS = CFLAGS .. " --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC"
-LFLAGS = LFLAGS .. " --std=c++11"
+CFLAGS = CFLAGS .. " --std=c++14 -pedantic -Wall -Wextra -Werror -fPIC"
+LFLAGS = LFLAGS .. " --std=c++14"
 
 ----------------------------------------------------------------------------
 -- Debug settings
 if tup.getconfig("DEBUG") == "y" then
-  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG"
+  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG -fstandalone-debug"
+  -- rdynamic for mutrace
+  LFLAGS = LFLAGS .. " -rdynamic"
 end
 
 ----------------------------------------------------------------------------
@@ -427,7 +429,7 @@ end
 ----------------------------------------------------------------------------
 -- Make packages
 if tup.getconfig("RELEASE") == "y" then
-  local package_dir = tup.getprocessingdir() .. "/" .. PACKAGEDIR
+  local package_dir = tup:getprocessingdir() .. "/" .. PACKAGEDIR
   local d = io.open(package_dir, "r")
   if d ~= nil then
     package(products, package_dir, dep_products)
