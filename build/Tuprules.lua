@@ -51,8 +51,8 @@ LINKER = COMPILER
 
 ----------------------------------------------------------------------------
 -- Basic compiler options
-CFLAGS = CFLAGS .. " --std=c++14 -pedantic -Wall -Wextra -Werror -fPIC"
-LFLAGS = LFLAGS .. " --std=c++14"
+CFLAGS = CFLAGS .. " --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC"
+LFLAGS = LFLAGS .. " --std=c++11"
 
 ----------------------------------------------------------------------------
 -- Debug settings
@@ -429,7 +429,7 @@ end
 ----------------------------------------------------------------------------
 -- Make packages
 if tup.getconfig("RELEASE") == "y" then
-  local package_dir = tup:getprocessingdir() .. "/" .. PACKAGEDIR
+  local package_dir = tup.getprocessingdir() .. "/" .. PACKAGEDIR
   local d = io.open(package_dir, "r")
   if d ~= nil then
     package(products, package_dir, dep_products)
