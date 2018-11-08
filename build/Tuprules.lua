@@ -58,8 +58,6 @@ LFLAGS = LFLAGS .. " --std=c++11"
 -- Debug settings
 if tup.getconfig("DEBUG") == "y" then
   CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG -fstandalone-debug"
-  -- rdynamic for mutrace
-  LFLAGS = LFLAGS .. " -rdynamic"
 end
 
 ----------------------------------------------------------------------------
