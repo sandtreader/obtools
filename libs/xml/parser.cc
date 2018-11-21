@@ -278,7 +278,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
       oss << "Mis-nested tags - expected </" << e->name
           << ">, opened at line " << e->line << ", but got </"
           << name << ">";
-      error(oss.str());
+      fatal(oss.str());
     }
   }
   else
