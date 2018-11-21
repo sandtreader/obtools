@@ -187,6 +187,13 @@ public:
 };
 
 //--------------------------------------------------------------------------
+// Arithmetic operators the other way
+Duration operator-(double n, const Duration& d);
+Duration operator+(double n, const Duration& d);
+Duration operator*(double n, const Duration& d);
+Duration operator/(double n, const Duration& d);
+
+//--------------------------------------------------------------------------
 // << operator to write Duration to ostream
 ostream& operator<<(ostream& s, const Duration& d);
 

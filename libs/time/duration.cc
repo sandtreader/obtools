@@ -272,4 +272,26 @@ ostream& operator<<(ostream& s, const Duration& d)
   return s;
 }
 
+//--------------------------------------------------------------------------
+// Arithmetic operators the other way
+Duration operator-(double n, const Duration& d)
+{
+  return d - n;
+}
+
+Duration operator+(double n, const Duration& d)
+{
+  return d + n;
+}
+
+Duration operator*(double n, const Duration& d)
+{
+  return d * n;
+}
+
+Duration operator/(double n, const Duration& d)
+{
+  return d / n;
+}
+
 }} // namespaces
