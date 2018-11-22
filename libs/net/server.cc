@@ -73,8 +73,8 @@ void TCPServer::run()
     // backlog
     TCPWorkerThread *thread = threadpool.wait();
 
-    fd_t new_fd = ::accept(fd, reinterpret_cast<struct sockaddr *>(&saddr),
-                           &len);
+    fd_t new_fd = ::accept4(fd, reinterpret_cast<struct sockaddr *>(&saddr),
+                            &len, SOCK_CLOEXEC);
     if (alive && new_fd != INVALID_FD)
     {
       EndPoint client(saddr);

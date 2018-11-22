@@ -45,7 +45,7 @@ TCPSocket *TCPSingleServer::wait(int timeout)
   if (timeout && !wait_readable(timeout)) return 0;
 
   // Accept connection
-  fd_t new_fd = ::accept(fd, 0, 0);
+  fd_t new_fd = ::accept4(fd, 0, 0, SOCK_CLOEXEC);
   if (new_fd != INVALID_FD)
     return new TCPSocket(new_fd);
   else
