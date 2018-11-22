@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for XMLMesh Javascript JQuery plugin Package
+#
+# Copyright (c) 2018 Paul Clark. All rights reserved
+#===========================================================================
+
+PACKAGE  = libjs-jquery-ot-xmlmesh
+VERSION  = 1.0.0
+REVISION = 1~rc1
+
+include_rules

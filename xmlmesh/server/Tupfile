@@ -10,7 +10,7 @@ DEPENDS  = ot-net ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
 
 PACKAGE  = $(NAME)
 VERSION  = 3.3.1
-REVISION = 1
+REVISION = 2~dev1
 
 ifdef RELEASE
   CFLAGS += -DDAEMON

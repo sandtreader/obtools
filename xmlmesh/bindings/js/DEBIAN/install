@@ -1,0 +1,2 @@
+#!/usr/bin/dh-exec
+ot-xmlmesh.js => /usr/share/javascript/jquery-ot-xmlmesh/jquery.ot-xmlmesh.js
