@@ -35,18 +35,13 @@ static Shell *the_shell = 0;
 const sighandler_t sig_ign(SIG_IGN);
 const sighandler_t sig_dfl(SIG_DFL);
 
-// SIGTERM:  Clean shutdown
-void sigterm(int)
+// Clean shutdown signals
+void sigshutdown(int)
 {
   if (the_shell) the_shell->signal_shutdown();
   signal(SIGTERM, sig_ign);
-}
-
-// SIGQUIT:  Quit from keyboard
-void sigquit(int)
-{
-  if (the_shell) the_shell->signal_shutdown();
   signal(SIGQUIT, sig_ign);
+  signal(SIGINT, sig_ign);
 }
 
 // SIGHUP:  Reload config
@@ -183,8 +178,9 @@ int Shell::start(int argc, char **argv)
 
   // Register signal handlers - same for both master and slave
   the_shell = this;
-  signal(SIGTERM, sigterm);
-  if (!go_daemon) signal(SIGQUIT, sigquit); // quit from Ctrl-backslash
+  signal(SIGTERM, sigshutdown);
+  signal(SIGQUIT, sigshutdown); // quit from Ctrl-backslash
+  signal(SIGINT,  sigshutdown); // quit from Ctrl-C
   signal(SIGHUP,  sighup);
   signal(SIGSEGV, sigevil);
   signal(SIGILL,  sigevil);
