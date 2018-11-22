@@ -450,7 +450,7 @@ ostream& operator<<(ostream& s, const SocketError& e)
 // Constructor - allocates socket
 TCPSocket::TCPSocket()
 {
-  fd = socket(PF_INET, SOCK_STREAM, 0);
+  fd = socket(PF_INET, SOCK_STREAM|SOCK_CLOEXEC, 0);
 }
 
 //--------------------------------------------------------------------------
@@ -736,14 +736,14 @@ void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
 // Constructor - allocates socket
 UDPSocket::UDPSocket()
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0);
+  fd = socket(PF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
 }
 
 //--------------------------------------------------------------------------
 // Constructor - allocates socket and binds to local port (UDP server)
 UDPSocket::UDPSocket(int port)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0);
+  fd = socket(PF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
   if (!Socket::bind(port)) close();
 }
 
@@ -754,7 +754,7 @@ UDPSocket::UDPSocket(int port)
 //                listeners)
 UDPSocket::UDPSocket(EndPoint local, bool, bool reuse)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0);
+  fd = socket(PF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
   if (reuse)
     enable_reuse();
   if (!Socket::bind(local)) close();
@@ -765,7 +765,7 @@ UDPSocket::UDPSocket(EndPoint local, bool, bool reuse)
 // Use this to obtain local addressing for packets sent to this endpoint
 UDPSocket::UDPSocket(EndPoint remote)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0);
+  fd = socket(PF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
 
   struct sockaddr_in saddr;
   remote.set(saddr);
@@ -781,7 +781,7 @@ UDPSocket::UDPSocket(EndPoint remote)
 // and then connects to remote port (UDP client)
 UDPSocket::UDPSocket(EndPoint local, EndPoint remote)
 {
-  fd = socket(PF_INET, SOCK_DGRAM, 0);
+  fd = socket(PF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
   if (!Socket::bind(local)) close();
 
   struct sockaddr_in saddr;
