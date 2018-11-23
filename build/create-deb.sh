@@ -57,6 +57,10 @@ EOF
 fi
 
 FAKEROOT=-rfakeroot-ng
+
+[ -x /usr/bin/fakeroot ] && FAKEROOT=-r/usr/bin/fakeroot
+[ -x /usr/local/bin/fakeroot ] && FAKEROOT=-r/usr/bin/local/fakeroot
+
 if [ -f /usr/local/bin/pseudo ]; then
   export PSEUDO_PREFIX=/usr/local
   FAKEROOT=-rpseudo
