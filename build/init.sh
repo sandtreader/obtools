@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 BUILD_DIR=`dirname $0`
 ln -sf $BUILD_DIR/Tuprules.tup
@@ -25,23 +25,38 @@ if [ "$buildtype" ]; then
   HOSTTYPE=`uname -m`
   TARGARCH=i386
 
+  if [ "${HOSTTYPE:0:3}" =  "arm" ]; then
+    TARGARCH=armhf
+  fi
+
   if [ "$HOSTTYPE" =  "x86_64" ]; then
     TARGARCH=amd64
   fi
 
-  for config in $buildtype.$TARGARCH $buildtype
-  do
-    if [ -f $BUILD_DIR/tup.config.$config ]; then
-      mkdir build-$buildtype
-      cp $BUILD_DIR/tup.config.$config build-$buildtype/tup.config
+  mkdir build-$buildtype
+
+  TUPCONFIG=build-$buildtype/tup.config
+  GENERIC=$BUILD_DIR/tup.config.$buildtype
+  SPECIFIC=$GENERIC.$TARGARCH
+
+  FOUNDCONFIG=
+
+  # try most specific first
+  if [ -f $SPECIFIC ]; then
+    cp $SPECIFIC $TUPCONFIG
+    FOUNDCONFIG=1
+  else
+    if [ -f $GENERIC ]; then
+      cp $GENERIC $TUPCONFIG
+      echo CONFIG_ARCH=$TARGARCH >> $TUPCONFIG
       FOUNDCONFIG=1
-      break
     fi
-  done
+  fi
+
   if [ $FOUNDCONFIG ]; then
     tup init
   else
-    echo "`basename $0`: can't find config for $buildtype"
+    echo "`basename $0`: can't find config for $buildtype, architecture $TARGARCH"
   fi
 fi
 
