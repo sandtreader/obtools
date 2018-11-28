@@ -18,7 +18,7 @@ namespace ObTools { namespace Log {
 
 //--------------------------------------------------------------------------
 // Logging function
-void StreamChannel::log(Message& msg)
+void StreamChannel::log(const Message& msg)
 {
   // If stream is in bad/failed state, attempt to clear
   // This can be useful if e.g. the disk was full but now has some free space
@@ -32,7 +32,7 @@ void StreamChannel::log(Message& msg)
 
 //--------------------------------------------------------------------------
 // Logging function
-void OwnedStreamChannel::log(Message& msg)
+void OwnedStreamChannel::log(const Message& msg)
 {
   // If stream is in bad/failed state, attempt to clear
   // This can be useful if e.g. the disk was full but now has some free space
@@ -46,7 +46,7 @@ void OwnedStreamChannel::log(Message& msg)
 
 //--------------------------------------------------------------------------
 // Logging function
-void SyslogChannel::log(Message& msg)
+void SyslogChannel::log(const Message& msg)
 {
   int priority;
   switch (msg.level)

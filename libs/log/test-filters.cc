@@ -17,7 +17,7 @@ class Collector: public Log::Channel
 {
 public:
   vector<string> msgs;
-  void log(Log::Message& msg) { msgs.push_back(msg.text); }
+  void log(const Log::Message& msg) { msgs.push_back(msg.text); }
 };
 
 TEST(LogFilters, TestLevelFilterDoesNotAlterMessage)

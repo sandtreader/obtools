@@ -33,7 +33,7 @@ void Distributor::connect_full(Channel *channel, Level level,
 
 //--------------------------------------------------------------------------
 // Log a message
-void Distributor::log(Message& msg)
+void Distributor::log(const Message& msg)
 {
   MT::Lock lock(mutex);
   // Send to all channels

@@ -83,6 +83,8 @@ public:
   Message(): level(Level::none) {}
   Message(Level l, const string& t): level(l), text(t)
   { timestamp=Time::Stamp::now(); }
+  Message(Level l, const Time::Stamp& ts, const string& t):
+  level(l), timestamp(ts), text(t) {}
 };
 
 //==========================================================================
@@ -94,7 +96,7 @@ class Channel
 public:
   //------------------------------------------------------------------------
   // Abstract virtual logging function
-  virtual void log(Message& msg) = 0;
+  virtual void log(const Message& msg) = 0;
 
   //------------------------------------------------------------------------
   // Virtual destructor
@@ -130,7 +132,7 @@ public:
 
   //------------------------------------------------------------------------
   // Log a message
-  void log(Message& msg) override
+  void log(const Message& msg) override
   {
     if (msg.level <= level) next->log(msg);
   }
@@ -152,7 +154,7 @@ public:
 
   //------------------------------------------------------------------------
   // Log a message
-  void log(Message& msg) override;
+  void log(const Message& msg) override;
 };
 
 //==========================================================================
@@ -174,7 +176,7 @@ public:
 
   //------------------------------------------------------------------------
   // Log a message
-  void log(Message& msg) override;
+  void log(const Message& msg) override;
 };
 
 //==========================================================================
@@ -196,7 +198,7 @@ public:
 
   //------------------------------------------------------------------------
   // Log a message
-  void log(Message& msg) override;
+  void log(const Message& msg) override;
 };
 
 //==========================================================================
@@ -213,7 +215,7 @@ public:
 
   //------------------------------------------------------------------------
   // Logging function
-  void log(Message& msg);
+  void log(const Message& msg);
 };
 
 //==========================================================================
@@ -230,7 +232,7 @@ public:
 
   //------------------------------------------------------------------------
   // Logging function
-  void log(Message& msg);
+  void log(const Message& msg);
 };
 
 //==========================================================================
@@ -247,7 +249,7 @@ public:
 
   //------------------------------------------------------------------------
   // Logging function
-  void log(Message& msg)
+  void log(const Message& msg)
   {
     channel.log(msg);
   }
@@ -264,7 +266,7 @@ public:
 
   //------------------------------------------------------------------------
   // Logging function
-  void log(Message& msg);
+  void log(const Message& msg);
 };
 
 //==========================================================================
@@ -289,7 +291,7 @@ public:
 
   //------------------------------------------------------------------------
   // Log a message
-  void log(Message& msg) override;
+  void log(const Message& msg) override;
 };
 
 //==========================================================================

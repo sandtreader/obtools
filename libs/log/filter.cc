@@ -15,7 +15,7 @@ namespace ObTools { namespace Log {
 
 //==========================================================================
 // Pattern filter
-void PatternFilter::log(Message& msg)
+void PatternFilter::log(const Message& msg)
 {
   if (Text::pattern_match(pattern, msg.text))
     next->log(msg);
@@ -23,7 +23,7 @@ void PatternFilter::log(Message& msg)
 
 //==========================================================================
 // Timestamp filter
-void TimestampFilter::log(Message& msg)
+void TimestampFilter::log(const Message& msg)
 {
   // Process the string for our extensions first
   // ! If there are any more of these, do it more efficiently!
@@ -47,16 +47,13 @@ void TimestampFilter::log(Message& msg)
   strftime(stm, 80, tmp_format.c_str(), localtime_r(&time, &tm));
 #endif
 
-  string nmsg(stm);
-  nmsg += msg.text;
-  msg.text = nmsg;
-
-  next->log(msg);
+  Message nmsg(msg.level, msg.timestamp, stm+msg.text);
+  next->log(nmsg);
 }
 
 //==========================================================================
 // RepeatedMessage filter
-void RepeatedMessageFilter::log(Message& msg)
+void RepeatedMessageFilter::log(const Message& msg)
 {
   bool same = msg.text == last_msg.text;
   bool within_hold_time = msg.timestamp-last_msg.timestamp < hold_time;
