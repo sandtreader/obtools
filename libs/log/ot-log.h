@@ -189,6 +189,7 @@ private:
   Time::Duration hold_time;
   Message last_msg;
   int repeats{0};
+  Time::Stamp last_repeat_timestamp;
 
 public:
   //------------------------------------------------------------------------

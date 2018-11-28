@@ -143,7 +143,7 @@ TEST(LogFilters, TestRepeatedMessageFilterSuppressesSameMessage)
   ASSERT_EQ("Hello!", collector.msgs[0]);
 }
 
-TEST(LogFilters, TestRepeatedMessageFilterShowsCountOnChange)
+TEST(LogFilters, TestRepeatedMessageFilterPreservesMessageOnOnlyOneRepeat)
 {
   auto collector = Collector{};
   auto filter = Log::RepeatedMessageFilter{&collector};
@@ -155,7 +155,24 @@ TEST(LogFilters, TestRepeatedMessageFilterShowsCountOnChange)
   filter.log(msg2);
   ASSERT_EQ(3, collector.msgs.size());
   ASSERT_EQ("Hello!", collector.msgs[0]);
-  ASSERT_EQ("(1 identical messages suppressed)", collector.msgs[1]);
+  ASSERT_EQ("Hello!", collector.msgs[1]);
+  ASSERT_EQ("Goodbye!", collector.msgs[2]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterShowsReportOnMoreThanOneRepeat)
+{
+  auto collector = Collector{};
+  auto filter = Log::RepeatedMessageFilter{&collector};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  auto msg2 = Log::Message{Log::Level::detail, "Goodbye!"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg2);
+  ASSERT_EQ(3, collector.msgs.size());
+  ASSERT_EQ("Hello!", collector.msgs[0]);
+  ASSERT_EQ("(2 identical messages suppressed)", collector.msgs[1]);
   ASSERT_EQ("Goodbye!", collector.msgs[2]);
 }
 
@@ -170,10 +187,11 @@ TEST(LogFilters, TestRepeatedMessageFilterReportsAfterHoldTime)
 
   filter.log(msg1);
   filter.log(msg1);
+  filter.log(msg1);
   filter.log(msg2);
   ASSERT_EQ(2, collector.msgs.size());
   ASSERT_EQ("Hello!", collector.msgs[0]);
-  ASSERT_EQ("(1 identical messages suppressed)", collector.msgs[1]);
+  ASSERT_EQ("(2 identical messages suppressed)", collector.msgs[1]);
 }
 
 int main(int argc, char **argv)

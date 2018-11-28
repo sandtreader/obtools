@@ -60,16 +60,25 @@ void RepeatedMessageFilter::log(const Message& msg)
   if (same && within_hold_time)
   {
     repeats++;
+    last_repeat_timestamp = msg.timestamp;
   }
   else
   {
-    if (repeats)
+    if (repeats > 1)
     {
-      Message report(msg.level,
+      Message report(msg.level, last_repeat_timestamp,
                      "("+Text::itos(repeats)+" identical messages suppressed)");
       next->log(report);
       repeats = 0;
     }
+    else if (repeats == 1)
+    {
+      // Just re-output the last message, with timestamp fixed
+      Message omsg(last_msg.level, last_repeat_timestamp, last_msg.text);
+      next->log(omsg);
+      repeats = 0;
+    }
+
     if (!same)
     {
       next->log(msg);
