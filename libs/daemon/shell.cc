@@ -23,6 +23,7 @@
 #endif
 
 #define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
+#define DEFAULT_HOLD_TIME "1 min"
 #define FIRST_WATCHDOG_SLEEP_TIME 1
 #define MAX_WATCHDOG_SLEEP_TIME 60
 
@@ -148,7 +149,8 @@ int Shell::start(int argc, char **argv)
                                         static_cast<int>(Log::Level::summary));
   auto level_out = static_cast<Log::Level>(log_level);
   auto time_format = config.get_value("log/@timestamp", DEFAULT_TIMESTAMP);
-  Log::logger.connect_full(chan_out, level_out, time_format);
+  auto hold_time = config.get_value("log/@hold-time", DEFAULT_HOLD_TIME);
+  Log::logger.connect_full(chan_out, level_out, time_format, hold_time);
   Log::Streams log;
   log.summary << name << " version " << version << " starting\n";
 

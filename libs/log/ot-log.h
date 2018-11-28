@@ -80,6 +80,7 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor
+  Message(): level(Level::none) {}
   Message(Level l, const string& t): level(l), text(t)
   { timestamp=Time::Stamp::now(); }
 };
@@ -102,43 +103,16 @@ public:
 
 //==========================================================================
 // Abstract Filter
-// Modifies, drops or passes message
-class Filter
-{
-public:
-  //------------------------------------------------------------------------
-  // Pass a message - returns true if message should be passed on
-  virtual bool pass(Message& msg) = 0;
-
-  //------------------------------------------------------------------------
-  // Virtual destructor
-  virtual ~Filter() {}
-};
-
-//==========================================================================
-// Abtract Filter channel
-// Does something to the message and passes it on, or drops it
-class FilteredChannel: public Channel
+// Drops, modifies or adds messages passed to another channel
+class Filter: public Channel
 {
 protected:
-  list<unique_ptr<Filter>> filters;
-  unique_ptr<Channel> output;
+  Channel *next;
 
 public:
   //------------------------------------------------------------------------
-  // Constructor (takes ownership of output channel)
-  FilteredChannel(Channel *_output): output{_output} {}
-
-  //------------------------------------------------------------------------
-  // Add a filter (takes ownership of filter)
-  void append_filter(Filter *filter)
-  {
-    filters.emplace_back(filter);
-  }
-
-  //------------------------------------------------------------------------
-  // Log message
-  void log(Message& msg) override;
+  // Constructor
+  Filter(Channel *_next): Channel(), next(_next) {}
 };
 
 //==========================================================================
@@ -152,13 +126,13 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  LevelFilter(Level _level): level{_level} {}
+  LevelFilter(Channel *_next, Level _level): Filter(_next), level{_level} {}
 
   //------------------------------------------------------------------------
-  // Pass a message - returns true if message should be passed on
-  bool pass(Message& msg) override
+  // Log a message
+  void log(Message& msg) override
   {
-    return msg.level <= level;
+    if (msg.level <= level) next->log(msg);
   }
 };
 
@@ -173,11 +147,12 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor takes Text::pattern_match (glob) format
-  PatternFilter(const string& _pattern): pattern{_pattern} {}
+ PatternFilter(Channel *_next, const string& _pattern):
+  Filter(_next), pattern{_pattern} {}
 
   //------------------------------------------------------------------------
-  // Pass a message - returns true if message should be passed on
-  bool pass(Message& msg) override;
+  // Log a message
+  void log(Message& msg) override;
 };
 
 //==========================================================================
@@ -194,11 +169,34 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor takes strftime format
-  TimestampFilter(const string& _format): format{_format} {}
+  TimestampFilter(Channel *_next, const string& _format):
+    Filter(_next), format{_format} {}
 
   //------------------------------------------------------------------------
-  // Pass a message - returns true if message should be passed on
-  bool pass(Message& msg) override;
+  // Log a message
+  void log(Message& msg) override;
+};
+
+//==========================================================================
+// RepeatedMessageFilter
+// Suppresses repeated messages and logs a count once they change or a given
+// time has past
+class RepeatedMessageFilter: public Filter
+{
+private:
+  Time::Duration hold_time;
+  Message last_msg;
+  int repeats{0};
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  RepeatedMessageFilter(Channel *_next, Time::Duration _hold_time=10):
+    Filter(_next), hold_time{_hold_time} {}
+
+  //------------------------------------------------------------------------
+  // Log a message
+  void log(Message& msg) override;
 };
 
 //==========================================================================
@@ -285,7 +283,9 @@ public:
 
   //------------------------------------------------------------------------
   // Connect a channel with timestamp and level logging (takes ownership)
-  void connect_full(Channel *channel, Level level, const string& time_format);
+  // repeated message suppression turned off by default
+  void connect_full(Channel *channel, Level level, const string& time_format,
+                    Time::Duration repeated_message_hold_time = 0);
 
   //------------------------------------------------------------------------
   // Log a message

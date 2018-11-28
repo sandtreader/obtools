@@ -13,79 +13,167 @@
 using namespace std;
 using namespace ObTools;
 
+class Collector: public Log::Channel
+{
+public:
+  vector<string> msgs;
+  void log(Log::Message& msg) { msgs.push_back(msg.text); }
+};
+
 TEST(LogFilters, TestLevelFilterDoesNotAlterMessage)
 {
-  auto filter = Log::LevelFilter{Log::Level::detail};
+  auto collector = Collector{};
+  auto filter = Log::LevelFilter{&collector, Log::Level::detail};
   const auto expected = "Hello!";
   auto msg = Log::Message{Log::Level::detail, expected};
-  filter.pass(msg);
-  ASSERT_EQ(expected, msg.text);
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ(expected, collector.msgs[0]);
 }
 
 TEST(LogFilters, TestLevelFilterAllowsHighEnoughMessage)
 {
-  auto filter = Log::LevelFilter{Log::Level::detail};
+  auto collector = Collector{};
+  auto filter = Log::LevelFilter{&collector, Log::Level::detail};
+  const auto expected = "Hello!";
   auto msg = Log::Message{Log::Level::summary, "Hello!"};
-  ASSERT_TRUE(filter.pass(msg));
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ(expected, collector.msgs[0]);
 }
 
 TEST(LogFilters, TestLevelFilterDropsTooLowMessage)
 {
-  auto filter = Log::LevelFilter{Log::Level::summary};
+  auto collector = Collector{};
+  auto filter = Log::LevelFilter{&collector, Log::Level::summary};
   auto msg = Log::Message{Log::Level::detail, "Hello!"};
-  ASSERT_FALSE(filter.pass(msg));
+  filter.log(msg);
+  ASSERT_TRUE(collector.msgs.empty());
 }
 
 TEST(LogFilters, TestPatternFilterDoesNotAlterMessage)
 {
-  auto filter = Log::PatternFilter{"H*"};
+  auto collector = Collector{};
+  auto filter = Log::PatternFilter{&collector, "H*"};
   const auto expected = "Hello!";
   auto msg = Log::Message{Log::Level::detail, expected};
-  filter.pass(msg);
-  ASSERT_EQ(expected, msg.text);
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ(expected, collector.msgs[0]);
 }
 
 TEST(LogFilters, TestPatternFilterAllowsMatchingMessage)
 {
-  auto filter = Log::PatternFilter{"H*"};
+  auto collector = Collector{};
+  auto filter = Log::PatternFilter{&collector, "H*"};
+  const auto expected = "Hello!";
   auto msg = Log::Message{Log::Level::detail, "Hello!"};
-  ASSERT_TRUE(filter.pass(msg));
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ(expected, collector.msgs[0]);
 }
 
 TEST(LogFilters, TestPatternFilterDropsNonMatchingMessage)
 {
-  auto filter = Log::PatternFilter{"F*"};
+  auto collector = Collector{};
+  auto filter = Log::PatternFilter{&collector, "F*"};
   auto msg = Log::Message{Log::Level::detail, "Hello!"};
-  ASSERT_FALSE(filter.pass(msg));
+  filter.log(msg);
+  ASSERT_TRUE(collector.msgs.empty());
 }
 
 TEST(LogFilters, TestTimeStampFilterAddsTimestamp)
 {
-  auto filter = Log::TimestampFilter{"%H:%M:%*S %a %d %b %Y: "};
+  auto collector = Collector{};
+  auto filter = Log::TimestampFilter{&collector, "%H:%M:%*S %a %d %b %Y: "};
   auto msg = Log::Message{Log::Level::detail, "Hello!"};
   msg.timestamp = Time::Stamp{"1967-01-29 06:01:45"};
 
-  filter.pass(msg);
-  ASSERT_EQ("06:01:45.000 Sun 29 Jan 1967: Hello!", msg.text);
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ("06:01:45.000 Sun 29 Jan 1967: Hello!", collector.msgs[0]);
 }
 
 TEST(LogFilters, TestTimeStampFilterAddsLogLevelMaybeItShouldntThough)
 {
-  auto filter = Log::TimestampFilter{"[%*L]: "};
+  auto collector = Collector{};
+  auto filter = Log::TimestampFilter{&collector, "[%*L]: "};
   auto msg = Log::Message{Log::Level::detail, "Hello!"};
 
-  filter.pass(msg);
-  ASSERT_EQ("[3]: Hello!", msg.text);
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ("[3]: Hello!", collector.msgs[0]);
 }
 
 TEST(LogFilters, TestTimeStampFilterSecondsRoundedDown)
 {
-  auto filter = Log::TimestampFilter{"%*S: "};
+  auto collector = Collector{};
+  auto filter = Log::TimestampFilter{&collector, "%*S: "};
   auto msg = Log::Message{Log::Level::detail, "Hello!"};
   msg.timestamp = Time::Stamp{"1967-01-29 05:59:59.9997"};
 
-  filter.pass(msg);
-  ASSERT_EQ("59.999: Hello!", msg.text);
+  filter.log(msg);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ("59.999: Hello!", collector.msgs[0]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterPassesDifferentMessages)
+{
+  auto collector = Collector{};
+  auto filter = Log::RepeatedMessageFilter{&collector};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  auto msg2 = Log::Message{Log::Level::detail, "Goodbye!"};
+
+  filter.log(msg1);
+  filter.log(msg2);
+  ASSERT_EQ(2, collector.msgs.size());
+  ASSERT_EQ("Hello!", collector.msgs[0]);
+  ASSERT_EQ("Goodbye!", collector.msgs[1]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterSuppressesSameMessage)
+{
+  auto collector = Collector{};
+  auto filter = Log::RepeatedMessageFilter{&collector};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  ASSERT_EQ(1, collector.msgs.size());
+  ASSERT_EQ("Hello!", collector.msgs[0]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterShowsCountOnChange)
+{
+  auto collector = Collector{};
+  auto filter = Log::RepeatedMessageFilter{&collector};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  auto msg2 = Log::Message{Log::Level::detail, "Goodbye!"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg2);
+  ASSERT_EQ(3, collector.msgs.size());
+  ASSERT_EQ("Hello!", collector.msgs[0]);
+  ASSERT_EQ("(1 identical messages suppressed)", collector.msgs[1]);
+  ASSERT_EQ("Goodbye!", collector.msgs[2]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterReportsAfterHoldTime)
+{
+  auto collector = Collector{};
+  auto filter = Log::RepeatedMessageFilter{&collector};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  msg1.timestamp = Time::Stamp{"1967-01-29 06:00:00"};
+  auto msg2 = Log::Message{Log::Level::detail, "Hello!"};
+  msg2.timestamp = Time::Stamp{"1967-01-29 06:00:10"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg2);
+  ASSERT_EQ(2, collector.msgs.size());
+  ASSERT_EQ("Hello!", collector.msgs[0]);
+  ASSERT_EQ("(1 identical messages suppressed)", collector.msgs[1]);
 }
 
 int main(int argc, char **argv)

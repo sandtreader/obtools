@@ -22,12 +22,13 @@ void Distributor::connect(Channel *channel)
 //--------------------------------------------------------------------------
 // Connect channel with timestamp and level logging (takes ownership)
 void Distributor::connect_full(Channel *channel, Level level,
-                               const string& time_format)
+                               const string& time_format,
+                               Time::Duration repeated_message_hold_time)
 {
-  auto fc = new FilteredChannel{channel};
-  fc->append_filter(new LevelFilter{level});
-  fc->append_filter(new TimestampFilter{time_format});
-  connect(fc);
+  auto tf = new TimestampFilter{channel, time_format};
+  auto rf = new RepeatedMessageFilter{tf, repeated_message_hold_time};
+  auto lf = new LevelFilter{rf, level};
+  connect(lf);
 }
 
 //--------------------------------------------------------------------------

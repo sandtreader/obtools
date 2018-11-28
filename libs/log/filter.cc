@@ -14,28 +14,16 @@
 namespace ObTools { namespace Log {
 
 //==========================================================================
-// Filtered Channel
-void FilteredChannel::log(Message& msg)
-{
-  for (auto& filter: filters)
-  {
-    if (!filter->pass(msg))
-      return;
-  }
-  output->log(msg);
-}
-
-//==========================================================================
 // Pattern filter
-bool PatternFilter::pass(Message& msg)
+void PatternFilter::log(Message& msg)
 {
-  return Text::pattern_match(pattern, msg.text);
+  if (Text::pattern_match(pattern, msg.text))
+    next->log(msg);
 }
 
 //==========================================================================
 // Timestamp filter
-
-bool TimestampFilter::pass(Message& msg)
+void TimestampFilter::log(Message& msg)
 {
   // Process the string for our extensions first
   // ! If there are any more of these, do it more efficiently!
@@ -63,7 +51,34 @@ bool TimestampFilter::pass(Message& msg)
   nmsg += msg.text;
   msg.text = nmsg;
 
-  return true;
+  next->log(msg);
+}
+
+//==========================================================================
+// RepeatedMessage filter
+void RepeatedMessageFilter::log(Message& msg)
+{
+  bool same = msg.text == last_msg.text;
+  bool within_hold_time = msg.timestamp-last_msg.timestamp < hold_time;
+  if (same && within_hold_time)
+  {
+    repeats++;
+  }
+  else
+  {
+    if (repeats)
+    {
+      Message report(msg.level,
+                     "("+Text::itos(repeats)+" identical messages suppressed)");
+      next->log(report);
+      repeats = 0;
+    }
+    if (!same)
+    {
+      next->log(msg);
+      last_msg = msg;
+    }
+  }
 }
 
 }} // namespaces

@@ -47,8 +47,7 @@ int main(int argc, char **argv)
   if (argc > 1 && string(argv[1]) == "-v")
   {
     auto chan_out = new Log::StreamChannel{&cout};
-    auto level_out = new Log::FilteredChannel{chan_out};
-    level_out->append_filter(new Log::LevelFilter{Log::Level::detail});
+    auto level_out = new Log::LevelFilter{chan_out, Log::Level::detail};
     Log::logger.connect(level_out);
   }
 
