@@ -3,7 +3,7 @@
 //
 // Implementation of XMLMesh server object
 //
-// Copyright (c) 2003-2015 Paul Clark.  All rights reserved
+// Copyright (c) 2003-2018 Paul Clark.  All rights reserved
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
@@ -13,28 +13,62 @@
 
 namespace ObTools { namespace XMLMesh {
 
+Server server;
+
+//--------------------------------------------------------------------------
+// Read settings from configuration
+void Server::read_config(const XML::Configuration& config)
+{
+  // Copy config for later service creation
+  config_xml = config.get_root();
+}
+
+//--------------------------------------------------------------------------
+// Pre-run
+int Server::pre_run()
+{
+  Log::Streams log;
+  log.summary << "Configuring server permanent state\n";
+
+  // Configure permanent and transient state
+  if (!configure())
+  {
+    log.error << "Cannot configure server" << endl;
+    return 2;
+  }
+
+  return 0;
+}
+
 //--------------------------------------------------------------------------
 // Load modules etc. from XML config
-void Server::configure(const XML::Configuration& config)
+bool Server::configure()
 {
   Log::Error log;
-  const XML::Element& root = config.get_root();
 
   // Read all services
-  const XML::Element& service_es = root.get_child("services");
+  const XML::Element& service_es = config_xml.get_child("services");
   for(XML::Element::iterator p(service_es.children); p; ++p)
   {
-    if (!create_service(*p))
+    if (!p->name.empty() && !create_service(*p))
+    {
       log << "Failed to create service from XML:\n" << *p;
+      return false;
+    }
   }
 
   // Read all routes
-  const XML::Element& routes = root.get_child("routes");
+  const XML::Element& routes = config_xml.get_child("routes");
   for(XML::Element::const_iterator p(routes.get_children("route")); p; ++p)
   {
-    if (!create_route(*p))
+    if (!p->name.empty() && !create_route(*p))
+    {
       log << "Failed to create route from XML:\n" << *p;
+      return false;
+    }
   }
+
+  return true;
 }
 
 //--------------------------------------------------------------------------
@@ -111,36 +145,36 @@ Service *Server::lookup_service(const string& name) const
 }
 
 //--------------------------------------------------------------------------
-// Server run method
-void Server::run()
+// Server tick method
+int Server::tick()
 {
-  for(;;)
+  // Tick all services
+  for(list<Service *>::iterator p=services.begin();
+      p!=services.end();
+      p++)
   {
-    this_thread::sleep_for(chrono::seconds{1});
-
-    // Tick all services
-    for(list<Service *>::iterator p=services.begin();
-        p!=services.end();
-        p++)
+    Service *s = *p;
+    if (s->started())
+      s->tick();
+    else
     {
-      Service *s = *p;
-      if (s->started())
-        s->tick();
-      else
-      {
-        Log::Error log;
-        log << "Service " << s->get_id()
-            << " failed to start - shutting down\n";
-        return;
-      }
+      Log::Error log;
+      log << "Service " << s->get_id()
+          << " failed to start - shutting down\n";
+      return 2;
     }
   }
+
+  return 0;
 }
 
 //--------------------------------------------------------------------------
-// Clean shutdown
-void Server::shutdown()
+// Clean up
+void Server::cleanup()
 {
+  Log::Summary log;
+  log << "Shutting down\n";
+
   // Shutdown all attached services
   for(auto s: services) s->shutdown();
 }

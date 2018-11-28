@@ -24,7 +24,7 @@
        with extensions: %*S = seconds+milliseconds, %*L = log level
        Plain text can also be added.  If empty, nothing is added
   -->
-  <log level="2" file="/var/log/obtools/xmlmesh.log"
+  <log level="4" file="/var/log/obtools/xmlmesh.log"
        timestamp="%a %d %b %H:%M:%*S [%*L]: "/>
 
   <!-- Drop to ordinary user privileges -->

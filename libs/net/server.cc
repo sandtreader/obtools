@@ -195,7 +195,16 @@ void TCPWorkerThread::run()
 // Force socket to close on being asked to die
 void TCPWorkerThread::die(bool wait)
 {
-  if (client_fd >= 0) ::SOCKCLOSE(client_fd);
+  if (client_fd >= 0)
+  {
+#if defined(__WIN32__)
+    ::shutdown(client_fd, SD_BOTH);
+#else
+    ::shutdown(client_fd, SHUT_RDWR);
+#endif
+    ::SOCKCLOSE(client_fd);
+  }
+
   MT::PoolThread::die(wait);
 }
 

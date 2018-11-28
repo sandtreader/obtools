@@ -17,6 +17,7 @@
 #include "ot-cache.h"
 #include "ot-xmlmesh.h"
 #include "ot-init.h"
+#include "ot-daemon.h"
 
 namespace ObTools { namespace XMLMesh {
 
@@ -332,14 +333,18 @@ public:
 
 //==========================================================================
 // General XML Bus server using any number of transports
-class Server
+class Server: public Daemon::Application
 {
 private:
+  // Configuration read from file
+  XML::Element config_xml;
+
   // List of active modules
   list<Service *> services;                 // List of active services
   map<string, Service *> service_ids;       // Map of service ids
 
   // Internal functions
+  bool configure();
   bool create_service(const XML::Element& xml);
   bool create_route(const XML::Element& xml);
 
@@ -352,20 +357,29 @@ public:
   Server() {}
 
   //------------------------------------------------------------------------
+  // Read configuration
+  virtual void read_config(const XML::Configuration&);
+
+ //------------------------------------------------------------------------
   // Look up a service by id
   Service *lookup_service(const string& id) const;
 
   //------------------------------------------------------------------------
-  // Load modules etc. from XML config
-  void configure(const XML::Configuration& config);
+  // Pre main loop function
+  virtual int pre_run();
 
   //------------------------------------------------------------------------
-  // Run method - never returns
-  void run();
+  // Time to sleep until next tick
+  // Return value in microseconds
+  virtual int tick_wait() { return 1000000; }
 
-  //--------------------------------------------------------------------------
-  // Clean shutdown
-  void shutdown();
+  //------------------------------------------------------------------------
+  // Main loop iteration function
+  virtual int tick();
+
+  //------------------------------------------------------------------------
+  // Clean up
+  void cleanup();
 
   //------------------------------------------------------------------------
   // Destructor

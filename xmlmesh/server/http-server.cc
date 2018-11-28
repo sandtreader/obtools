@@ -190,6 +190,10 @@ public:
   // Callback from active_poller_map when a poller is timed out
   void poller_timeout(const string& subscriber_id,
                       PollQueuePtr& response_queue);
+
+  //--------------------------------------------------------------------------
+  // Clean shutdown
+  void shutdown();
 };
 
 //==========================================================================
@@ -471,6 +475,13 @@ void HTTPServerService::poller_timeout(const string& subscriber_id,
 
   // Send an empty message on the poll queue to unblock it
   poll_queue->send(string());
+}
+
+//--------------------------------------------------------------------------
+// Clean shutdown
+void HTTPServerService::shutdown()
+{
+  http_server.shutdown();
 }
 
 //==========================================================================

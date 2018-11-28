@@ -38,6 +38,14 @@ bool Server::handle_message(const Tube::ClientMessage& msg)
   return true;
 }
 
+//--------------------------------------------------------------------------
+// Shutdown
+void Server::shutdown()
+{
+  receive_q.send(ClientMessage(Tube::ClientMessage::SHUTDOWN));
+  Tube::Server::shutdown();
+}
+
 
 }}} // namespaces
 

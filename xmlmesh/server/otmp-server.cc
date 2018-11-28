@@ -31,7 +31,7 @@ class OTMPServerThread: public MT::Thread
     server.run();
 
     Log::Error log;
-    log << "OTMP server exited: Can't listen on port?\n";
+    log << "OTMP server shut down";
   }
 
 public:
@@ -80,11 +80,16 @@ public:
   //------------------------------------------------------------------------
   // OTMP Message dispatcher
   // Fetch OTMP messages and send them up as internal messages
-  void dispatch();
+  // Returns false when exiting
+  bool dispatch();
 
   //------------------------------------------------------------------------
   // Implementation of Service virtual interface - q.v. server.h
   bool handle(RoutingMessage& msg);
+
+  //--------------------------------------------------------------------------
+  // Clean shutdown
+  void shutdown();
 };
 
 //--------------------------------------------------------------------------
@@ -142,7 +147,8 @@ bool OTMPServer::started() const
 //--------------------------------------------------------------------------
 // OTMP Message dispatcher
 // Fetch OTMP messages and send into the system
-void OTMPServer::dispatch()
+// Returns false when exiting
+bool OTMPServer::dispatch()
 {
   const OTMP::ClientMessage otmp_msg = receive_q.wait();
 
@@ -180,7 +186,12 @@ void OTMPServer::dispatch()
       originate(rmsg);
     }
     break;
+
+    case OTMP::ClientMessage::SHUTDOWN:
+      return false; // exit thread
   }
+
+  return true;
 }
 
 //--------------------------------------------------------------------------
@@ -240,11 +251,19 @@ bool OTMPServer::handle(RoutingMessage& msg)
   return false;  // Nowhere else to go
 }
 
+//--------------------------------------------------------------------------
+// Clean shutdown
+void OTMPServer::shutdown()
+{
+  otmp.shutdown();
+}
+
 //==========================================================================
 // Message thread run
 void OTMPMessageThread::run()
 {
-  for(;;) service.dispatch();
+  while (service.dispatch())
+    ;
 }
 
 //==========================================================================

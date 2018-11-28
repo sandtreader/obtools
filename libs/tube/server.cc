@@ -278,6 +278,15 @@ bool Server::send(ClientMessage& msg)
   return false;
 }
 
+//------------------------------------------------------------------------
+// Shutdown
+void Server::shutdown()
+{
+  alive = false;
+  SSL::TCPServer::shutdown();
+}
+
+
 }} // namespaces
 
 

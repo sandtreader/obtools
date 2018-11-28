@@ -434,7 +434,8 @@ struct ClientMessage
   {
     STARTED,
     MESSAGE_DATA, // Was MESSAGE, but windows.h defines as macro >:-(
-    FINISHED
+    FINISHED,
+    SHUTDOWN
   };
 
   const Action action;
@@ -447,6 +448,9 @@ struct ClientMessage
   // Constructor for other action
   ClientMessage(const SSL::ClientDetails& _client, Action _action):
     client(_client), msg(), action(_action) {}
+
+  // Constructor for SHUTDOWN
+  ClientMessage(Action _action): action(_action) {}
 };
 
 //==========================================================================
@@ -472,7 +476,7 @@ private:
   // Whether connection should be allowed to continue
   virtual bool handle_message(const ClientMessage& msg)=0;
 
-protected:
+ protected:
   SessionMap client_sessions;   // Map of sessions (used by BiSyncServer)
   unsigned max_send_queue;      // Maximum send queue before we block send()
 
@@ -553,6 +557,10 @@ public:
   // Note:  It is safe to call this inside the handle_message() method
   // Whether message queued (client still connected)
   bool send(ClientMessage& msg);
+
+  //------------------------------------------------------------------------
+  // Shutdown
+  void shutdown();
 };
 
 //==========================================================================

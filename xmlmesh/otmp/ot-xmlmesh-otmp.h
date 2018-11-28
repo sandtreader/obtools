@@ -45,6 +45,10 @@ struct ClientMessage: public Tube::ClientMessage
   ClientMessage(const SSL::ClientDetails& _client,
                 const string& _data="", Tube::flags_t _flags=0):
     Tube::ClientMessage(_client, TAG_MESSAGE, _data, _flags) {}
+
+  // Constructor for shutdown
+  ClientMessage(Tube::ClientMessage::Action action):
+    Tube::ClientMessage(action) {}
 };
 
 //==========================================================================
@@ -98,6 +102,10 @@ public:
   Server(ClientMessageQueue& receive_queue,
          int port=0, int backlog=5,
          int min_spare_threads=1, int max_threads=10, int timeout=0);
+
+  //--------------------------------------------------------------------------
+  // Shutdown
+  void shutdown();
 };
 
 //==========================================================================

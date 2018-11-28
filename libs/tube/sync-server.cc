@@ -52,6 +52,8 @@ bool SyncServer::handle_message(const ClientMessage& msg)
         return handle_async_message(msg);
       }
     }
+
+    case ClientMessage::SHUTDOWN:;
   }
 
   return false;

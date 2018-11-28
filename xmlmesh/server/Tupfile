@@ -6,11 +6,11 @@
 
 NAME     = ot-xmlmesh
 TYPE     = exe
-DEPENDS  = ot-net ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
+DEPENDS  = ot-net ot-daemon ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
 
 PACKAGE  = $(NAME)
-VERSION  = 3.3.1
-REVISION = 2~dev1
+VERSION  = 4.0.0
+REVISION = 1~dev1
 
 ifdef RELEASE
   CFLAGS += -DDAEMON
