@@ -108,9 +108,8 @@ int main(int argc, char **argv)
 
   // Set up logging
   auto chan_out = new Log::StreamChannel{&cout};
-  auto filtered_out = new Log::FilteredChannel{chan_out};
-  filtered_out->append_filter(new Log::LevelFilter{log_level});
-  Log::logger.connect(filtered_out);
+  auto level_out = new Log::LevelFilter{chan_out, log_level};
+  Log::logger.connect(level_out);
   Log::Streams log;
 
   // Resolve name
