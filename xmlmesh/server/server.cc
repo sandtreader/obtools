@@ -149,11 +149,8 @@ Service *Server::lookup_service(const string& name) const
 int Server::tick()
 {
   // Tick all services
-  for(list<Service *>::iterator p=services.begin();
-      p!=services.end();
-      p++)
+  for(auto& s: services)
   {
-    Service *s = *p;
     if (s->started())
       s->tick();
     else

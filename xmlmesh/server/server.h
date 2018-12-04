@@ -358,7 +358,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read configuration
-  virtual void read_config(const XML::Configuration&);
+  void read_config(const XML::Configuration&) override;
 
  //------------------------------------------------------------------------
   // Look up a service by id
@@ -366,20 +366,20 @@ public:
 
   //------------------------------------------------------------------------
   // Pre main loop function
-  virtual int pre_run();
+  int pre_run() override;
 
   //------------------------------------------------------------------------
   // Time to sleep until next tick
   // Return value in microseconds
-  virtual int tick_wait() { return 1000000; }
+  int tick_wait() override { return 1000000; }
 
   //------------------------------------------------------------------------
   // Main loop iteration function
-  virtual int tick();
+  int tick() override;
 
   //------------------------------------------------------------------------
   // Clean up
-  void cleanup();
+  void cleanup() override;
 
   //------------------------------------------------------------------------
   // Destructor

@@ -476,7 +476,7 @@ private:
   // Whether connection should be allowed to continue
   virtual bool handle_message(const ClientMessage& msg)=0;
 
- protected:
+protected:
   SessionMap client_sessions;   // Map of sessions (used by BiSyncServer)
   unsigned max_send_queue;      // Maximum send queue before we block send()
 
