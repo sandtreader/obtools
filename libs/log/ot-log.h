@@ -278,6 +278,7 @@ class Distributor: public Channel
 private:
   MT::Mutex mutex;
   list<unique_ptr<Channel>> channels;
+  unique_ptr<Channel> original_channel;
   unique_ptr<Filter> timestamp_filter;
   unique_ptr<Filter> repeated_message_filter;
 
