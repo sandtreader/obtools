@@ -191,7 +191,71 @@ TEST(LogFilters, TestRepeatedMessageFilterReportsAfterHoldTime)
   filter.log(msg2);
   ASSERT_EQ(2, collector.msgs.size());
   ASSERT_EQ("Hello!", collector.msgs[0]);
-  ASSERT_EQ("(2 identical messages suppressed)", collector.msgs[1]);
+  ASSERT_EQ("(3 identical messages suppressed)", collector.msgs[1]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterReportsAfterHoldTimeAndContinues)
+{
+  auto collector = Collector{};
+  auto filter = Log::RepeatedMessageFilter{&collector};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  msg1.timestamp = Time::Stamp{"1967-01-29 06:00:00"};
+  auto msg2 = Log::Message{Log::Level::detail, "Hello!"};
+  msg2.timestamp = Time::Stamp{"1967-01-29 06:00:10"};
+  auto msg3 = Log::Message{Log::Level::detail, "Hello!"};
+  msg3.timestamp = Time::Stamp{"1967-01-29 06:00:20"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg2);
+  filter.log(msg2);
+  filter.log(msg2);
+  filter.log(msg3);
+  ASSERT_EQ(3, collector.msgs.size());
+  ASSERT_EQ("Hello!", collector.msgs[0]);
+  ASSERT_EQ("(3 identical messages suppressed)", collector.msgs[1]);
+  ASSERT_EQ("(3 identical messages suppressed)", collector.msgs[2]);
+}
+
+TEST(LogFilters,
+     TestRepeatedMessageFilterSetsTimestampToLastSuppressedWhenDifferent)
+{
+  auto collector = Collector{};
+  auto tsfilter = Log::TimestampFilter{&collector, "%H:%M:%S "};
+  auto filter = Log::RepeatedMessageFilter{&tsfilter};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  msg1.timestamp = Time::Stamp{"1967-01-29 06:00:00"};
+  auto msg2 = Log::Message{Log::Level::detail, "Goodbye!"};
+  msg2.timestamp = Time::Stamp{"1967-01-29 06:00:10"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg2);
+  ASSERT_EQ(3, collector.msgs.size());
+  ASSERT_EQ("06:00:00 Hello!", collector.msgs[0]);
+  ASSERT_EQ("06:00:00 (2 identical messages suppressed)", collector.msgs[1]);
+  ASSERT_EQ("06:00:10 Goodbye!", collector.msgs[2]);
+}
+
+TEST(LogFilters, TestRepeatedMessageFilterSetsTimestampToCurrentWhenSame)
+{
+  auto collector = Collector{};
+  auto tsfilter = Log::TimestampFilter{&collector, "%H:%M:%S "};
+  auto filter = Log::RepeatedMessageFilter{&tsfilter};
+  auto msg1 = Log::Message{Log::Level::detail, "Hello!"};
+  msg1.timestamp = Time::Stamp{"1967-01-29 06:00:00"};
+  auto msg2 = Log::Message{Log::Level::detail, "Hello!"};
+  msg2.timestamp = Time::Stamp{"1967-01-29 06:00:10"};
+
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg1);
+  filter.log(msg2);
+  ASSERT_EQ(2, collector.msgs.size());
+  ASSERT_EQ("06:00:00 Hello!", collector.msgs[0]);
+  ASSERT_EQ("06:00:10 (3 identical messages suppressed)", collector.msgs[1]);
 }
 
 int main(int argc, char **argv)

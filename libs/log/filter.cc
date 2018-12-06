@@ -57,12 +57,13 @@ void RepeatedMessageFilter::log(const Message& msg)
 {
   bool same = msg.text == last_msg.text;
   bool within_hold_time = msg.timestamp-last_msg.timestamp < hold_time;
-  if (same && within_hold_time)
+  if (same)
   {
     repeats++;
     last_repeat_timestamp = msg.timestamp;
   }
-  else
+
+  if (!same || !within_hold_time)
   {
     if (repeats > 1)
     {
@@ -79,11 +80,8 @@ void RepeatedMessageFilter::log(const Message& msg)
       repeats = 0;
     }
 
-    if (!same)
-    {
-      next->log(msg);
-      last_msg = msg;
-    }
+    if (!same) next->log(msg);
+    last_msg = msg;
   }
 }
 
