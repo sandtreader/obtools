@@ -25,10 +25,11 @@ void Distributor::connect_full(Channel *channel, Level level,
                                const string& time_format,
                                Time::Duration repeated_message_hold_time)
 {
-  auto tf = new TimestampFilter{channel, time_format};
-  auto rf = new RepeatedMessageFilter{tf, repeated_message_hold_time};
-  auto lf = new LevelFilter{rf, level};
-  connect(lf);
+  timestamp_filter.reset(new TimestampFilter{channel, time_format});
+  repeated_message_filter.reset(new RepeatedMessageFilter{
+                                                 timestamp_filter.get(),
+                                                   repeated_message_hold_time});
+  connect(new LevelFilter{repeated_message_filter.get(), level});
 }
 
 //--------------------------------------------------------------------------
