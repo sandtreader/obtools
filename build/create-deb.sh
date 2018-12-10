@@ -69,9 +69,10 @@ fi
 
 if [ "$DISTRO" = "CentOS" ]; then
   FAKEROOT=-rfakeroot
-  sed  -i 's/^Build-Depends: debhelper (>= 9)$/#Build-Depends:/g' debian/control
+  sed  -i 's/^Build-Depends: debhelper (>= 9)/#Build-Depends:/g' debian/control
   cat <<EOF >> $RULES
 override_dh_shlibdeps:
+override_dh_strip_nondeterminism:
 EOF
 
   # find build (scripts) directory
