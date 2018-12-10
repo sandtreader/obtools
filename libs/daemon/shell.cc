@@ -252,6 +252,9 @@ int Shell::start(int argc, char **argv)
             shut_down = true;
           }
         }
+
+        // However it exited, if shutdown is requested, stop
+        if (trigger_shutdown) shut_down = true;
       }
       else
       {
