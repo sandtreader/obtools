@@ -108,7 +108,7 @@ TEST_F(DBSQLiteTest, TestPreparedStatement)
   ASSERT_TRUE(conn->exec("insert into test (id, name) values (123, 'foo')"));
 
   auto statement = conn->prepare("select name from test where id = ?");
-  ASSERT_TRUE(statement);
+  ASSERT_TRUE(!!statement);
   ASSERT_TRUE(statement.bind(1, uint64_t{123}));
   auto value = string{};
   ASSERT_TRUE(statement.fetch(value));
@@ -124,7 +124,7 @@ TEST_F(DBSQLiteTest, TestPreparedStatementReuse)
   ASSERT_TRUE(conn->exec("insert into test (id, name) values (456, 'bar')"));
 
   auto statement = conn->prepare("select name from test where id = ?");
-  ASSERT_TRUE(statement);
+  ASSERT_TRUE(!!statement);
   ASSERT_TRUE(statement.bind(1, uint64_t{123}));
   auto value = string{};
   ASSERT_TRUE(statement.fetch(value));
@@ -143,7 +143,7 @@ TEST_F(DBSQLiteTest, TestHeldPreparedStatementDoesNotHoldLock)
 
   auto trans = DB::Transaction{*conn};
   auto statement = conn->prepare("insert into test(id, name) values (?, ?)");
-  ASSERT_TRUE(statement);
+  ASSERT_TRUE(!!statement);
   ASSERT_TRUE(statement.bind(1, uint64_t{123}));
   ASSERT_TRUE(statement.bind(1, "foo"));
   ASSERT_TRUE(statement.execute());
