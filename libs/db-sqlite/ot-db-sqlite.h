@@ -113,7 +113,7 @@ public:
 
   //------------------------------------------------------------------------
   // Is valid?
-  operator bool() const override
+  explicit operator bool() const override
   {
     return stmt.get();
   }
@@ -146,7 +146,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check if connection is really OK
-  operator bool() override;
+  explicit operator bool() override;
 
   //------------------------------------------------------------------------
   // Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)

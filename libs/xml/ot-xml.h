@@ -57,7 +57,7 @@ struct ElementIterator
   //------------------------------------------------------------------------
   /// Validity check
   bool valid() { return it != elements.end(); }
-  operator bool() { return valid(); }     ///< Cast to bool - checks validity
+  explicit operator bool() { return valid(); } // Cast to bool - checks validity
   bool operator!() { return !valid(); }   ///< Not operator - checks invalidity
 
   //------------------------------------------------------------------------
@@ -81,7 +81,7 @@ struct ConstElementIterator
   ConstElementIterator(const ConstElementIterator& o):
     elements(o.elements), it(elements.begin()) {}
   bool valid() { return it != elements.end(); }
-  operator bool() { return valid(); }
+  explicit operator bool() { return valid(); }
   bool operator!() { return !valid(); }
   ConstElementIterator& operator++() { it++; return *this; }
   const Element& operator*() const { return **it; }
@@ -171,9 +171,7 @@ public:
   /// Validity check.
   /// Easy way of checking if you've got Element::none
   /// \note Don't use \code(e!=Element::none)\endcode - that compares values!
-  /// \note We don't provide an operator bool due to problems with ambiguity
-  /// of [] operator
-  operator bool() const { return valid(); }
+  explicit operator bool() const { return valid(); }
   bool valid() const { return this!=&none; }
   bool operator!() const { return !valid(); }  ///< Invalidity check
 

@@ -33,7 +33,7 @@ bool Thread::start()
   });
   if (!mythread)
     running.signal(false);
-  return running;
+  return !!running;
 }
 
 //--------------------------------------------------------------------------

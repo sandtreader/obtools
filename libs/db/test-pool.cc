@@ -27,7 +27,7 @@ public:
     Log::Summary log;
     log << "Creating connection " << serial << endl;
   }
-  virtual operator bool() { return true; }
+  virtual explicit operator bool() { return true; }
   virtual bool exec(const string&) { return true; }
   virtual Result query(const string&) { return Result(); }
   virtual Statement prepare(const string&) { return Statement(); }

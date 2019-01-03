@@ -384,7 +384,7 @@ public:
 
   //------------------------------------------------------------------------
   // Handy bool cast to check for (in)validity
-  operator bool() const { return rset.get(); }
+  explicit operator bool() const { return rset.get(); }
 
   //------------------------------------------------------------------------
   // Get number of rows in result set
@@ -464,7 +464,7 @@ public:
 
   //------------------------------------------------------------------------
   // Is valid?
-  virtual operator bool() const = 0;
+  virtual explicit operator bool() const = 0;
 };
 
 //==========================================================================
@@ -484,9 +484,9 @@ public:
 
   //------------------------------------------------------------------------
   // Is valid
-  operator bool() const override
+  explicit operator bool() const override
   {
-    return *statement;
+    return !!*statement;
   }
 
   //------------------------------------------------------------------------
@@ -637,7 +637,7 @@ public:
 
   //------------------------------------------------------------------------
   // Is valid
-  operator bool() const override
+  explicit operator bool() const override
   {
     return statement && *statement;
   }
@@ -784,7 +784,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check if connection is really OK
-  virtual operator bool() = 0;
+  virtual explicit operator bool() = 0;
 
   //------------------------------------------------------------------------
   // Execute a command, not expecting any result (e.g. INSERT, UPDATE, DELETE)
@@ -1186,13 +1186,11 @@ class ConnectionPool: MT::Thread
     MT::Condition available;                 // Signal availability
   };
   list<shared_ptr<PendingRequest> > pending_requests;
-  static constexpr double default_claim_timeout = 5.0;
-  Time::Duration claim_timeout = default_claim_timeout;
+  Time::Duration claim_timeout{5.0};
 
   // Background thread and timestamps
   map<Connection *, Time::Stamp> last_used;
-  static constexpr double default_reap_interval = 1.0;
-  Time::Duration reap_interval = default_reap_interval;
+  Time::Duration reap_interval{1.0};
 
   // Internals
   void fill_to_minimum();
@@ -1265,7 +1263,7 @@ struct AutoConnection
 
   //------------------------------------------------------------------------
   // Check if connection is valid
-  operator bool() const { return conn; }
+  explicit operator bool() const { return conn; }
 
   //------------------------------------------------------------------------
   // Stub functions for every connection operation - see above

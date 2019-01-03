@@ -321,7 +321,7 @@ public:
 
   //------------------------------------------------------------------------
   // Validity check
-  inline operator bool() const
+  inline explicit operator bool() const
   {
     return fd >= 0;
   }

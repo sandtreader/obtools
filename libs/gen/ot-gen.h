@@ -68,7 +68,7 @@ public:
 
   //------------------------------------------------------------------------
   // Validity check by bool cast
-  operator bool() const
+  explicit operator bool() const
   {
     return !empty();
   }

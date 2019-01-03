@@ -53,7 +53,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get the current value
-  operator bool() const
+  explicit operator bool() const
   {
     unique_lock<mutex> lock{m};
     return flag;
@@ -221,7 +221,7 @@ protected:
   //------------------------------------------------------------------------
   // Test if running
   bool is_running() const
-  { return running; }
+  { return !!running; }
 
   //------------------------------------------------------------------------
   // Sleep for a given period, or until thread told to stop
@@ -851,7 +851,7 @@ public:
   // Check that thread hasn't been asked to shutdown
   bool is_running() const
   {
-    return running;
+    return !!running;
   }
 
   //------------------------------------------------------------------------

@@ -194,7 +194,8 @@ private:
 public:
   //------------------------------------------------------------------------
   // Constructor
-  RepeatedMessageFilter(Channel *_next, Time::Duration _hold_time=10):
+  RepeatedMessageFilter(Channel *_next,
+                        Time::Duration _hold_time = Time::Duration{10}):
     Filter(_next), hold_time{_hold_time} {}
 
   //------------------------------------------------------------------------
@@ -291,7 +292,8 @@ public:
   // Connect a channel with timestamp and level logging (takes ownership)
   // repeated message suppression turned off by default
   void connect_full(Channel *channel, Level level, const string& time_format,
-                    Time::Duration repeated_message_hold_time = 0);
+                    Time::Duration repeated_message_hold_time =
+                      Time::Duration{10});
 
   //------------------------------------------------------------------------
   // Log a message
