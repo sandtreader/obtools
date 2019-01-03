@@ -19,6 +19,12 @@ TEST(DurationTest, TestConvertToNTP)
   EXPECT_EQ(15461882265600ULL, d.ntp());
 }
 
+TEST(DurationTest, TestConvertToNTPNegative)
+{
+  Time::Duration d(-3600);
+  EXPECT_EQ(18446728611827286016ULL, d.ntp());
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
