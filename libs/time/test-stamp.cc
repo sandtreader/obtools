@@ -31,6 +31,43 @@ TEST(StampTest, TestCreateToJulianDays)
   EXPECT_EQ(2464731.5, Time::Stamp{"2036-02-07T00:00:00Z"}.jdn());
 }
 
+TEST(StampTest, TestStampSubtraction)
+{
+  Time::Stamp s1{"1967-01-29T06:00:00Z"};
+  Time::Stamp s2{"1967-01-29T07:30:00Z"};
+  Time::Duration d = s2-s1;
+  EXPECT_EQ(5400.0, d.seconds());
+}
+
+TEST(StampTest, TestStampAdditionOfDuration)
+{
+  Time::Stamp s1{"1967-01-29T06:00:00Z"};
+  Time::Stamp s2{"1967-01-29T07:30:00Z"};
+  Time::Duration d(5400.0);
+  EXPECT_EQ(s2, s1+d);
+  s1+=d;
+  EXPECT_EQ(s2, s1);
+}
+
+TEST(StampTest, TestStampSubtractionOfDuration)
+{
+  Time::Stamp s1{"1967-01-29T06:00:00Z"};
+  Time::Stamp s2{"1967-01-29T07:30:00Z"};
+  Time::Duration d(5400.0);
+  EXPECT_EQ(s1, s2-d);
+  s2-=d;
+  EXPECT_EQ(s1, s2);
+}
+
+TEST(StampTest, TestStampAdditionOfNegativeDuration)
+{
+  Time::Stamp s1{"1967-01-29T06:00:00Z"};
+  Time::Stamp s2{"1967-01-29T07:30:00Z"};
+  Time::Duration d(-5400.0);
+  EXPECT_EQ(s1, s2+d);
+  s2+=d;
+  EXPECT_EQ(s1, s2);
+}
 
 int main(int argc, char **argv)
 {
