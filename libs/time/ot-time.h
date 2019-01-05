@@ -408,7 +408,7 @@ public:
     return static_cast<int64_t>(s * (1ULL<<NTP_SHIFT));
   }
 
-  static double ntp_to_seconds(int64_t n)
+  static double ntp_to_seconds(uint64_t n)
   {
     return static_cast<double>(n) / (1ULL<<NTP_SHIFT);
   }
