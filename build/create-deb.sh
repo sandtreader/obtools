@@ -75,17 +75,7 @@ override_dh_shlibdeps:
 override_dh_strip_nondeterminism:
 EOF
 
-  # find build (scripts) directory
-  RPM_DIR_DEPTH=0
-  RPM_MAX_DEPTH=5
-  RPM_MID=..
-  while [ ! -d ${RPM_MID}/build -a $RPM_DIR_DEPTH -lt $RPM_MAX_DEPTH ]
-  do
-    RPM_MID=${RPM_MID}/..
-    RPM_DIR_DEPTH=$(( ${RPM_DIR_DEPTH} + 1 ))
-  done
-
-  BUILD_DIR=${RPM_MID}/build
+  TOP_DIR=${PWD%%/.tup/*}
 fi
 
 if [ `id -u` -eq 0 ]; then
@@ -102,7 +92,7 @@ do
   rm -f ../${NAME}_${VERSION}-${REVISION}_*.buildinfo
 
   if [ "$DISTRO" = "CentOS" ]; then
-    . $BUILD_DIR/create-rpm.sh
+    . $TOP_DIR/create-rpm.sh
     rm $PACKAGE
   fi
 done
