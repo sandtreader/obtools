@@ -74,7 +74,8 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from double
-  Duration(double _t): t(_t) {}
+  explicit Duration(double _t): t(_t) {}
+  explicit Duration(int _t): t(_t) {}
 
   //------------------------------------------------------------------------
   // Constructor from string
@@ -114,6 +115,10 @@ public:
   explicit operator bool() const { return t; }
 
   //------------------------------------------------------------------------
+  // Check if negative
+  bool is_negative() const { return t < 0; }
+
+  //------------------------------------------------------------------------
   // Convert to floating point seconds (e.g. for NTP timestamp in text)
   double seconds() const { return t; }
 
@@ -142,10 +147,12 @@ public:
 
   //------------------------------------------------------------------------
   // Arithmetic operators, so far as it makes sense
+  Duration operator-() const { return Duration(0.0-t); }
   Duration operator-(const Duration& o) const { return Duration(t-o.t); }
   Duration operator+(const Duration& o) const { return Duration(t+o.t); }
   Duration operator*(double n) const { return Duration(t*n); }
   Duration operator/(double n) const { return Duration(t/n); }
+  double operator/(const Time::Duration& o) const { return t/o.t; }
 
   //------------------------------------------------------------------------
   // Arithmetic assignments
@@ -162,18 +169,10 @@ public:
   bool operator>(const Duration& o) const { return t>o.t; }
   bool operator<=(const Duration& o) const { return t<=o.t; }
   bool operator>=(const Duration& o) const { return t>=o.t; }
-  bool operator==(double n) const { return t==n; }
-  bool operator!=(double n) const { return t!=n; }
-  bool operator<(double n) const { return t<n; }
-  bool operator>(double n) const { return t>n; }
-  bool operator<=(double n) const { return t<=n; }
-  bool operator>=(double n) const { return t>=n; }
-  bool operator==(int n) const { return t==n; }
-  bool operator!=(int n) const { return t!=n; }
-  bool operator<(int n) const { return t<n; }
-  bool operator>(int n) const { return t>n; }
-  bool operator<=(int n) const { return t<=n; }
-  bool operator>=(int n) const { return t>=n; }
+
+  //------------------------------------------------------------------------
+  // Get absolute value
+  Duration abs() const { return is_negative() ? -*this : *this; }
 
   //------------------------------------------------------------------------
   // Constructor-like static function to return monotonic clock - baseline
@@ -185,10 +184,6 @@ public:
 //--------------------------------------------------------------------------
 // Arithmetic operators the other way
 Duration operator*(double n, const Duration& d);
-
-//--------------------------------------------------------------------------
-// << operator to write Duration to ostream
-ostream& operator<<(ostream& s, const Duration& d);
 
 //==========================================================================
 // Stamp - fixed moment in absolute time

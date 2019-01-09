@@ -265,14 +265,6 @@ Duration Duration::clock()
 }
 
 //--------------------------------------------------------------------------
-// << operator to write Duration to ostream
-ostream& operator<<(ostream& s, const Duration& d)
-{
-  s << d.hms();
-  return s;
-}
-
-//--------------------------------------------------------------------------
 // Arithmetic operators the other way
 Duration operator*(double n, const Duration& d)
 {
