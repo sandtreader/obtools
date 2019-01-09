@@ -72,6 +72,7 @@ void TCPServer::run()
     // resulting connection - this forces overload connections into the
     // backlog
     TCPWorkerThread *thread = threadpool.wait();
+    if (!thread) break;  // only at shutdown
 
     fd_t new_fd = ::accept4(fd, reinterpret_cast<struct sockaddr *>(&saddr),
                             &len, SOCK_CLOEXEC);
@@ -112,6 +113,7 @@ Socket::fd_t TCPServer::initiate(EndPoint remote_address, int timeout)
 {
   // Get a thread first
   TCPWorkerThread *thread = threadpool.wait();
+  if (!thread) return INVALID_FD;
 
   // Try to connect
   TCPClient client(address, remote_address, timeout);
@@ -142,6 +144,7 @@ void TCPServer::take_over(int fd, Net::EndPoint remote_address)
 {
   // Get a thread first
   TCPWorkerThread *thread = threadpool.wait();
+  if (!thread) return;
 
   thread->server         = this;
   thread->client_fd      = fd;

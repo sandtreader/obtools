@@ -733,18 +733,19 @@ public:
 
   //------------------------------------------------------------------------
   // Wait for a thread from the pool
-  // Guarantees to return one eventually
+  // Guarantees to return one eventually, unless it's being shut down
   T *wait()
   {
     // Busy wait if nothing available
     // !!! Should provide a CondVar to allow us to block here
-    for(;;)
+    while (!shutting_down)
     {
       auto t = remove();
       if (t)
         return t;
       this_thread::sleep_for(chrono::milliseconds{10});
     }
+    return nullptr;
   }
 
   //------------------------------------------------------------------------

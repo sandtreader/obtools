@@ -103,12 +103,6 @@ public:
   Duration(const string& text);
 
   //------------------------------------------------------------------------
-  // Static constructor-like function from NTP timestamp
-  // (done this way to avoid ambiguity with time_t version)
-  static Duration from_ntp(ntp_stamp_t n)
-  { return Duration(static_cast<double>(n)/(1ULL<<NTP_SHIFT)); }
-
-  //------------------------------------------------------------------------
   // Validity checks - 0 time is not valid
   bool valid() const { return t!=0; }
   bool operator!() const { return !t; }
@@ -125,13 +119,6 @@ public:
   //------------------------------------------------------------------------
   // Convert to milliseconds
   uint64_t milliseconds() const { return t * 1000; }
-
-  //------------------------------------------------------------------------
-  // Convert to NTP timestamp - whole 64 bits, fixed point at 32
-  ntp_stamp_t ntp() const
-  {
-    return static_cast<uint64_t>(t * (1ULL<<NTP_SHIFT));
-  }
 
   //------------------------------------------------------------------------
   // Convert to HH:MM:SS string - never goes into days or higher
@@ -364,15 +351,15 @@ public:
   // Beware if they could be misordered - duration returned will be very
   // large, not negative!
   Duration operator-(const Stamp& o) const
-  { return Duration::from_ntp(t-o.t); }
+  { return Duration(ntp_to_seconds(t-o.t)); }
 
   //------------------------------------------------------------------------
   // Add a Duration to a stamp
   Stamp operator+(const Duration& d) const
-  { return Stamp::from_ntp(t+d.ntp()); }
+  { return Stamp::from_ntp(t+seconds_to_ntp(d.seconds())); }
 
   Stamp& operator+=(const Duration& d)
-  { t += d.ntp(); return *this; }
+  { t += seconds_to_ntp(d.seconds()); return *this; }
 
   Stamp operator+(double d) const
   { return operator+(Duration{d}); }
@@ -383,10 +370,10 @@ public:
   //------------------------------------------------------------------------
   // Subtract a Duration from a stamp
   Stamp operator-(const Duration& d) const
-  { return Stamp::from_ntp(t-d.ntp()); }
+  { return Stamp::from_ntp(t-seconds_to_ntp(d.seconds())); }
 
   Stamp& operator-=(const Duration& d)
-  { t -= d.ntp(); return *this; }
+  { t -= seconds_to_ntp(d.seconds()); return *this; }
 
   Stamp operator-(double d) const
   { return operator-(Duration{d}); }
@@ -407,6 +394,19 @@ public:
   bool operator>(const Stamp& o) const { return t>o.t; }
   bool operator<=(const Stamp& o) const { return t<=o.t; }
   bool operator>=(const Stamp& o) const { return t>=o.t; }
+
+  //------------------------------------------------------------------------
+  // Helper functions to convert double seconds to/from NTP 64-bit
+  // Note negative numbers are OK (this limits the range)
+  static int64_t seconds_to_ntp(double s)
+  {
+    return static_cast<int64_t>(s * (1ULL<<NTP_SHIFT));
+  }
+
+  static double ntp_to_seconds(uint64_t n)
+  {
+    return static_cast<double>(n) / (1ULL<<NTP_SHIFT);
+  }
 };
 
 //--------------------------------------------------------------------------

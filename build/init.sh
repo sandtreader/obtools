@@ -4,6 +4,7 @@ BUILD_DIR=`dirname $0`
 ln -sf $BUILD_DIR/Tuprules.tup
 ln -sf $BUILD_DIR/Tuprules.lua
 ln -sf $BUILD_DIR/create-deb.sh
+ln -sf $BUILD_DIR/create-rpm.sh
 
 while getopts ":t:" opt; do
   case $opt in
