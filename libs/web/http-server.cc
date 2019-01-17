@@ -11,6 +11,7 @@
 #include "ot-text.h"
 #include "ot-crypto.h"
 #include <sstream>
+#include <algorithm>
 
 namespace ObTools { namespace Web {
 
@@ -90,13 +91,17 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
       if (request.version == "HTTP/1.0" || request.version == "HTTP/1.1")
       {
         string conn_hdr = Text::tolower(request.headers.get("connection"));
+        const auto conn_opts = Text::split(conn_hdr);
 
         // Check for HTTP/1.1
         if (request.version == "HTTP/1.1")
         {
           // Check for Connection: close - otherwise, assume persistent
           // WebSocket upgrades are also non-persistent
-          if (conn_hdr == "close" || conn_hdr == "upgrade")
+          if (find(conn_opts.begin(), conn_opts.end(), "close")
+              != conn_opts.end() ||
+              find(conn_opts.begin(), conn_opts.end(), "upgrade")
+              != conn_opts.end())
           {
             if (persistent)
               log.detail << "HTTP/1.1 persistent connection from "
@@ -118,7 +123,8 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         else
         {
           // Check for old-style HTTP/1.0 Keep-Alive
-          if (conn_hdr == "keep-alive")
+          if (find(conn_opts.begin(), conn_opts.end(), "keep-alive")
+              != conn_opts.end())
           {
             if (persistent)
               log.detail << "HTTP/1.0 persistent connection from "
@@ -156,7 +162,8 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         // Check for WebSocket upgrade
         else if (websocket_enabled
               && request.method == "GET"
-              && conn_hdr == "upgrade"
+              && find(conn_opts.begin(), conn_opts.end(), "upgrade")
+              != conn_opts.end()
               && Text::tolower(request.headers.get("upgrade")) == "websocket")
         {
           log.detail << "Upgrade to WebSocket requested\n";
