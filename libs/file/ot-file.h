@@ -236,6 +236,11 @@ public:
   string write_all(const string& s);
 
   //------------------------------------------------------------------------
+  // Replace the entire file with byte vector
+  // Returns error string, or "" if successful
+  string write_all(const vector<byte>& d);
+
+  //------------------------------------------------------------------------
   // Handy octal conversion functions for file modes
   // Convert integer to octal string
   static string itoo(int mode_i);
