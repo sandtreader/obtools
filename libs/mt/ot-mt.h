@@ -19,6 +19,8 @@
 #include <list>
 #include <memory>
 #include <map>
+#include <functional>
+#include <future>
 #include <signal.h>
 #include <stdint.h>
 #include <ot-gen.h>
@@ -947,6 +949,65 @@ public:
     if (int signal = task->shutdown_signal())
       thread.kill(signal);
     thread.join();
+  }
+};
+
+//==========================================================================
+// Function Pool
+// A class that runs functions asynchronously on pooled threads
+class FunctionPoolThread: public PoolThread
+{
+public:
+  function<void()> f;
+
+  //------------------------------------------------------------------------
+  // Constructor - automatically starts thread in !in_use state
+  FunctionPoolThread(IPoolReplacer& replacer):
+    PoolThread{replacer}
+  {}
+
+  //------------------------------------------------------------------------
+  // Run the function
+  void run() override { f(); }
+};
+
+class FunctionPool: public ThreadPool<FunctionPoolThread>
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  // min-max is range of number of threads the pool will keep alive
+  FunctionPool(unsigned int min_spares = 1, unsigned int max_threads = 10,
+               bool realtime = false):
+    ThreadPool{min_spares, max_threads, realtime}
+  {}
+
+  //------------------------------------------------------------------------
+  // Run function on a pool thread
+  bool run(function<void()> f)
+  {
+    auto t = wait();
+    if (!t)
+      return false;
+    t->f = f;
+    t->kick();
+    return true;
+  }
+
+  //------------------------------------------------------------------------
+  // Run a list of function on a pool thread (blocks until all complete)
+  void run_and_wait(vector<function<void()>>& vf)
+  {
+    auto promises = list<promise<void>>{};
+    for (auto& f: vf)
+    {
+      promises.emplace_back();
+      auto& p = promises.back();
+      if (!run([&f, &p]() { f(); p.set_value(); }))
+        promises.pop_back();
+    }
+    for (auto& p: promises)
+      p.get_future().wait();
   }
 };
 
