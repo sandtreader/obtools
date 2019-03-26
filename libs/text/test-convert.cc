@@ -30,7 +30,24 @@ TEST(ConvertTest, TestStringToFloat)
   ASSERT_EQ(12345.6789, Text::stof("12345.6789"));
 }
 
-TEST(ConvertTest, TestFloatToString)
+TEST(ConvertTest, TestStringToBool)
+{
+  EXPECT_FALSE(Text::stob(""));
+  EXPECT_FALSE(Text::stob("foo"));
+  EXPECT_FALSE(Text::stob("no"));
+  EXPECT_FALSE(Text::stob("No"));
+  EXPECT_FALSE(Text::stob("false"));
+  EXPECT_FALSE(Text::stob("FALSE"));
+  EXPECT_FALSE(Text::stob("0"));
+
+  EXPECT_TRUE(Text::stob("yes"));
+  EXPECT_TRUE(Text::stob("Yes"));
+  EXPECT_TRUE(Text::stob("true"));
+  EXPECT_TRUE(Text::stob("TRUE"));
+  EXPECT_TRUE(Text::stob("1"));
+}
+
+  TEST(ConvertTest, TestFloatToString)
 {
   ASSERT_EQ("12345.6789", Text::ftos(12345.6789, 0, 4, false));
   ASSERT_EQ("12345.68", Text::ftos(12345.6789, 0, 2, false));
