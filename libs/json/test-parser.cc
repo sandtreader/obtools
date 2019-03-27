@@ -26,13 +26,24 @@ TEST(Parser, TestEmptyStringGivesNULL)
 
 TEST(Parser, TestIntegerGivesInteger)
 {
-  string s("12345678901234567890");
+  string s("1234567890123456789");
   istringstream input(s);
   Parser parser(input);
   Value value;
   ASSERT_NO_THROW(value = parser.read_value());
   ASSERT_EQ(Value::INTEGER, value.type);
-  ASSERT_EQ(12345678901234567890ULL, value.n);
+  ASSERT_EQ(1234567890123456789LL, value.n);
+}
+
+TEST(Parser, TestNegativeIntegerGivesInteger)
+{
+  string s("-1");
+  istringstream input(s);
+  Parser parser(input);
+  Value value;
+  ASSERT_NO_THROW(value = parser.read_value());
+  ASSERT_EQ(Value::INTEGER, value.type);
+  ASSERT_EQ(-1, value.n);
 }
 
 TEST(Parser, TestNumberGivesNumber)
