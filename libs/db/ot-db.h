@@ -268,7 +268,7 @@ public:
   void add_time_or_null(const string& fieldname, const Time::Stamp& value)
   {
     if (value.valid())
-      fields[fieldname] = FieldValue{value.iso()};
+      fields[fieldname] = FieldValue{value.sql()};
     else
       fields[fieldname] = FieldValue{};
   }
@@ -279,7 +279,7 @@ public:
                         const Time::DateStamp& value)
   {
     if (value.valid())
-      fields[fieldname] = FieldValue{value.iso()};
+      fields[fieldname] = FieldValue{value.sql()};
     else
       fields[fieldname] = FieldValue{};
   }

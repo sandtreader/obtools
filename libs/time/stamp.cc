@@ -635,6 +635,34 @@ string Stamp::iso_time(char sep, bool with_secs) const
 }
 
 //--------------------------------------------------------------------------
+// Convert SQL string
+string Stamp::sql() const
+{
+  if (!t) return "";  // Empty if invalid
+
+  ostringstream oss;
+  Split sp = split(t);
+
+  // Fudge to pad floating seconds, because setw() won't do it
+  const char *pad = "";
+  if (sp.sec < 10) pad = "0";
+
+  // Fix precision for small values
+  int prec = 11;
+  if (sp.sec < 10) prec--;
+  if (sp.sec < 1) prec--;
+
+  oss << setw(2) << setfill('0') << sp.year  << '-'
+      << setw(2) << setfill('0') << sp.month << '-'
+      << setw(2) << setfill('0') << sp.day   << ' '
+      << setw(2) << setfill('0') << sp.hour  << ':'
+      << setw(2) << setfill('0') << sp.min   << ':'
+      << pad << setprecision(prec) << sp.sec;
+
+  return oss.str();
+}
+
+//--------------------------------------------------------------------------
 // Get the locale-specific date format
 string Stamp::locale_date() const
 {
