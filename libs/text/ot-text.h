@@ -169,6 +169,11 @@ string ftos(double f, int width=0, int prec=0, bool zero_pad=false);
 double stof(const string& s);
 
 //--------------------------------------------------------------------------
+// String to boolean (false default)
+// Accepts [TtYy1]* as true
+bool stob(const string& s);
+
+//--------------------------------------------------------------------------
 // Integer to hex
 string itox(unsigned int i);
 

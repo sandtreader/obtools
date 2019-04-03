@@ -30,7 +30,15 @@ class Application
 public:
   //------------------------------------------------------------------------
   // Read configuration
+
+  // Old version with no filename
   virtual void read_config(const XML::Configuration&) {}
+
+  // New version with config filename, calls down to old version but can
+  // be overridden if you want the filename, e.g. for relative paths
+  virtual void read_config(const XML::Configuration& config,
+                           const string& /* config_filename */)
+  { read_config(config); }
 
   //------------------------------------------------------------------------
   // Preconfigure function

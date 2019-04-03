@@ -121,6 +121,24 @@ double stof(const string& s)
 }
 
 //--------------------------------------------------------------------------
+// String to boolean (false default)
+// Accepts [TtYy1]* as true
+bool stob(const string& s)
+{
+  if (s.empty()) return false;
+  switch(s[0])
+  {
+    case 'T': case 't':
+    case 'Y': case 'y':
+    case '1':
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Integer to hex
 string itox(unsigned int i)
 {

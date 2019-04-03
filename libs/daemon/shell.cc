@@ -155,7 +155,7 @@ int Shell::start(int argc, char **argv)
   log.summary << name << " version " << version << " starting\n";
 
   // Tell application to read config settings
-  application.read_config(config);
+  application.read_config(config, cf);
 
   // Call preconfigure before we go daemon - e.g. asking for SSL passphrase
   int rc = application.preconfigure();

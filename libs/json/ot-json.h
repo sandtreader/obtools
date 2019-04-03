@@ -48,7 +48,7 @@ public:
   } type;
 
   double f;
-  uint64_t n;
+  int64_t n;
   string s;
   map <string, Value> o;
   vector<Value> a;
@@ -57,7 +57,7 @@ public:
   Value(): type(UNSET), n(0) {}
   Value(Type _type): type(_type), n(0) {}
   Value(Type, double _f): type(NUMBER), f(_f) {} // note type included so not..
-  Value(uint64_t _n): type(INTEGER), n(_n) {}    // ..ambiguous with this
+  Value(int64_t _n): type(INTEGER), n(_n) {}    // ..ambiguous with this
   Value(const string& _s): type(STRING), n(0), s(_s) {}
 
   //------------------------------------------------------------------------
@@ -73,7 +73,7 @@ public:
   Value& add(const Value& v) { a.push_back(v); return a.back(); }
 
   // Special cases for int, string as above
-  void add(uint64_t _n) { add(Value(_n)); }
+  void add(int64_t _n) { add(Value(_n)); }
   void add(const string& _s) { add(Value(_s)); }
 
   //------------------------------------------------------------------------
@@ -113,7 +113,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read as an integer value with the given default
-  uint64_t as_int(uint64_t def=0) const { return (type==INTEGER)?n:def; }
+  int64_t as_int(int64_t def=0) const { return (type==INTEGER)?n:def; }
 
   //------------------------------------------------------------------------
   // Read as a float value with the given default - also promotes integers

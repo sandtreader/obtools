@@ -500,6 +500,18 @@ string Path::write_all(const string& s)
 }
 
 //--------------------------------------------------------------------------
+// Replace the entire file with a byte vector
+// Returns error string, or "" if successful
+string Path::write_all(const vector<byte>& d)
+{
+  OutStream f(path);
+  if (!f) return strerror(errno);
+
+  f.write(reinterpret_cast<const char *>(&d[0]), d.size());
+  return "";
+}
+
+//--------------------------------------------------------------------------
 // Convert integer to octal string
 string Path::itoo(int mode_i)
 {
