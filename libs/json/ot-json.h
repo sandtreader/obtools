@@ -88,18 +88,24 @@ public:
   // Get a value from the given object property
   // Returns Value::none if this is not an object or property doesn't exist
   const Value& get(const string& property) const;
+  Value& get(const string& property);
 
   // [] operator using the above
   const Value& operator[](const string& property) const
+  { return get(property); }
+  Value& operator[](const string& property)
   { return get(property); }
 
   //------------------------------------------------------------------------
   // Get a value from the given array index
   // Returns Value::none if this is not an array or index doesn't exist
   const Value& get(unsigned int index) const;
+  Value& get(unsigned int index);
 
   // [] operator using the above
   const Value& operator[](unsigned int index) const
+  { return get(index); }
+  Value& operator[](unsigned int index)
   { return get(index); }
 
   //------------------------------------------------------------------------
