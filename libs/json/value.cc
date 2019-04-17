@@ -157,7 +157,7 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
 
 //--------------------------------------------------------------------------
 // Output value as a string, with optional prettiness
-string Value::str(bool pretty)
+string Value::str(bool pretty) const
 {
   ostringstream oss;
   write_to(oss, pretty);

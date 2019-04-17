@@ -133,7 +133,7 @@ public:
 
   //------------------------------------------------------------------------
   // Output value as a string, with optional prettiness
-  string str(bool pretty=false);
+  string str(bool pretty=false) const;
 };
 
 //--------------------------------------------------------------------------
