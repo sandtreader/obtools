@@ -113,7 +113,7 @@ void UInt64RangeSet::add_to_xml(XML::Element& parent,
 
 //--------------------------------------------------------------------------
 // Read as binary from a channel;  format as below
-void UInt64RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
+void UInt64RangeSet::read(Channel::Reader& chan)
 {
   end_offset = chan.read_nbo_64();
   uint32_t n = chan.read_nbo_32();
@@ -130,7 +130,7 @@ void UInt64RangeSet::read(Channel::Reader& chan) throw(Channel::Error)
 // Format is 64-bit total length, then 4-byte count of entries,
 // then alternating 64-bit offset, length
 // All values NBO
-void UInt64RangeSet::write(Channel::Writer& chan) const throw(Channel::Error)
+void UInt64RangeSet::write(Channel::Writer& chan) const
 {
   chan.write_nbo_64(end_offset);
   chan.write_nbo_32(ranges.size());

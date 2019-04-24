@@ -168,11 +168,11 @@ public:
 
   //------------------------------------------------------------------------
   // Read from channel (8 binary bytes)
-  void read(Channel::Reader& reader) throw (Channel::Error);
+  void read(Channel::Reader& reader);
 
   //------------------------------------------------------------------------
   // Write to channel (8 binary bytes)
-  void write(Channel::Writer& writer) const throw (Channel::Error);
+  void write(Channel::Writer& writer) const;
 #endif
 };
 
@@ -371,11 +371,11 @@ public:
 
   //------------------------------------------------------------------------
   // Read from channel (8 binary bytes)
-  void read(Channel::Reader& reader) throw (Channel::Error);
+  void read(Channel::Reader& reader);
 
   //------------------------------------------------------------------------
   // Write to channel (8 binary bytes)
-  void write(Channel::Writer& writer) const throw (Channel::Error);
+  void write(Channel::Writer& writer) const;
 #endif
 };
 

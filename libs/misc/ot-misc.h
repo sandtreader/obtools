@@ -988,13 +988,13 @@ public:
 
   //------------------------------------------------------------------------
   // Read as binary from a channel;  format as below
-  void read(Channel::Reader& chan) throw(Channel::Error);
+  void read(Channel::Reader& chan);
 
   //------------------------------------------------------------------------
   // Write as binary to a channel
   // Format is 4-byte count of entries, then alternating 64-bit offset, length
   // All values NBO
-  void write(Channel::Writer& chan) const throw(Channel::Error);
+  void write(Channel::Writer& chan) const;
 
   //------------------------------------------------------------------------
   // Dump the set to the given output, one line per range, in form

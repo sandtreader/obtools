@@ -17,7 +17,7 @@ using namespace ObTools::XML;
 // This is the main document-level parser
 //
 // Throws XML::ParseFailed if unsuccessful
-void Parser::parse_stream(istream& s) throw (ParseFailed)
+void Parser::parse_stream(istream& s)
 {
   // Clear stacks and root
   elements.clear();
@@ -149,7 +149,7 @@ void Parser::skip_bom(istream& s)
 // Read a tag and attributes
 // c is first character already read
 // Returns whether element read is empty
-bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
+bool Parser::read_tag(xmlchar c, istream &s)
 {
   Element *e = new Element();
   read_rest_of_name(c, s, e->name);
@@ -248,7 +248,7 @@ bool Parser::read_tag(xmlchar c, istream &s) throw (ParseFailed)
 //--------------------------------------------------------------------------
 // Read an end tag
 // c is first character already read
-void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
+void Parser::read_end_tag(xmlchar c, istream &s)
 {
   const string& name = read_rest_of_name(c, s);
 
@@ -292,7 +292,7 @@ void Parser::read_end_tag(xmlchar c, istream &s) throw (ParseFailed)
 // Read data content
 // Handles whitespace compression and tail stripping
 // c is first character already read
-void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
+void Parser::read_content(xmlchar c, istream &s)
 {
   // Read until non-escaped '<'
   string content;
@@ -372,7 +372,7 @@ void Parser::read_content(xmlchar c, istream &s) throw (ParseFailed)
 // Read a reference (CharRef or EntityRef)
 // Assumes & has been read.  Allows &#nn; &#xXX; and &ent;
 // text is string to add to (note can be multiple chars if UTF8)
-void Parser::read_ref(string& text, istream &s) throw (ParseFailed)
+void Parser::read_ref(string& text, istream &s)
 {
   xmlchar c=0;
   s.get(c);
@@ -498,7 +498,7 @@ string Parser::read_rest_of_name(xmlchar& c, istream& s)
 
 //--------------------------------------------------------------------------
 // Read to end of !DOCTYPE etc - just look for '>'
-void Parser::skip_to_gt(istream &s) throw (ParseFailed)
+void Parser::skip_to_gt(istream &s)
 {
   for(;;)
   {
@@ -512,7 +512,7 @@ void Parser::skip_to_gt(istream &s) throw (ParseFailed)
 
 //--------------------------------------------------------------------------
 // Read to end of comment - look for -->
-void Parser::skip_comment(istream &s) throw (ParseFailed)
+void Parser::skip_comment(istream &s)
 {
   for(;;)
   {
@@ -538,7 +538,7 @@ void Parser::skip_comment(istream &s) throw (ParseFailed)
 
 //--------------------------------------------------------------------------
 // Read to end of PI - look for ?>
-void Parser::skip_pi(istream &s) throw (ParseFailed)
+void Parser::skip_pi(istream &s)
 {
   for(;;)
   {
@@ -567,7 +567,7 @@ void Parser::error(const string& s)
 
 //--------------------------------------------------------------------------
 // Log a fatal error and throw exception
-void Parser::fatal(const string& s) throw (ParseFailed)
+void Parser::fatal(const string& s)
 {
   errors++;
   serr << "XML Fatal Error: " << s << " at line " << line << endl;
@@ -770,14 +770,14 @@ Parser::~Parser()
 
 //--------------------------------------------------------------------------
 // Parse from given stream
-void Parser::read_from(istream &s) throw (ParseFailed)
+void Parser::read_from(istream &s)
 {
   parse_stream(s);
 }
 
 //--------------------------------------------------------------------------
 // Parse from given string
-void Parser::read_from(const string &s) throw (ParseFailed)
+void Parser::read_from(const string &s)
 {
   istringstream iss(s);
   parse_stream(iss);
@@ -785,7 +785,7 @@ void Parser::read_from(const string &s) throw (ParseFailed)
 
 //--------------------------------------------------------------------------
 // >> operator to read from istream
-istream& ObTools::XML::operator>>(istream& s, Parser& p) throw (ParseFailed)
+istream& ObTools::XML::operator>>(istream& s, Parser& p)
 {
   p.read_from(s);
   return s;

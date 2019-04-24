@@ -15,7 +15,7 @@ namespace ObTools { namespace Gather {
 // Gather reader
 
 // Read implementation
-size_t Reader::basic_read(void *buf, size_t count) throw (Channel::Error)
+size_t Reader::basic_read(void *buf, size_t count)
 {
   if (count)
   {
@@ -27,7 +27,7 @@ size_t Reader::basic_read(void *buf, size_t count) throw (Channel::Error)
 }
 
 // Skip N bytes
-void Reader::skip(size_t n) throw (Channel::Error)
+void Reader::skip(size_t n)
 {
   if (offset + n > buffer.get_length())
     throw Channel::Error(1, "Skip beyond end of block");
@@ -37,7 +37,7 @@ void Reader::skip(size_t n) throw (Channel::Error)
 }
 
 // Rewind implementation
-void Reader::rewind(size_t n) throw (Channel::Error)
+void Reader::rewind(size_t n)
 {
   if (n <= offset)
   {

@@ -163,14 +163,14 @@ string AESKey::str() const
 
 //--------------------------------------------------------------------------
 // Read from channel (binary bytes)
-void AESKey::read(Channel::Reader& reader) throw (Channel::Error)
+void AESKey::read(Channel::Reader& reader)
 {
   reader.read(key, size / 8);
 }
 
 //--------------------------------------------------------------------------
 // Write to channel (binary bytes)
-void AESKey::write(Channel::Writer& writer) const throw (Channel::Error)
+void AESKey::write(Channel::Writer& writer) const
 {
   writer.write(key, size / 8);
 }

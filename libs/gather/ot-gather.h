@@ -461,11 +461,11 @@ public:
 
   //------------------------------------------------------------------------
   // Read implementations - see ot-chan.h for details
-  virtual size_t basic_read(void *buf, size_t count) throw (Channel::Error);
-  virtual void skip(size_t n) throw (Channel::Error);
+  virtual size_t basic_read(void *buf, size_t count);
+  virtual void skip(size_t n);
   virtual bool rewindable() { return true; }
-  virtual void rewind(size_t n) throw (Channel::Error);
-  virtual void rewind() throw (Channel::Error) { Channel::Reader::rewind(); }
+  virtual void rewind(size_t n);
+  virtual void rewind() { Channel::Reader::rewind(); }
 
   //------------------------------------------------------------------------
   // Virtual destructor

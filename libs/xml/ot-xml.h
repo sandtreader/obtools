@@ -644,19 +644,19 @@ private:
 
   //------------------------------------------------------------------------
   // Other private functions
-  void parse_stream(istream &s) throw (ParseFailed);
+  void parse_stream(istream &s);
   void skip_bom(istream& s);
-  bool read_tag(xmlchar c, istream &s) throw(ParseFailed);
-  void read_end_tag(xmlchar c, istream &s) throw(ParseFailed);
-  void read_content(xmlchar c, istream &s) throw(ParseFailed);
-  void read_ref(string& text, istream &s) throw (ParseFailed);
+  bool read_tag(xmlchar c, istream &s);
+  void read_end_tag(xmlchar c, istream &s);
+  void read_content(xmlchar c, istream &s);
+  void read_ref(string& text, istream &s);
   void read_rest_of_name(xmlchar& c, istream& s, string& name);
   string read_rest_of_name(xmlchar& c, istream& s);
-  void skip_comment(istream &s) throw (ParseFailed);
-  void skip_to_gt(istream &s) throw (ParseFailed);
-  void skip_pi(istream &s) throw (ParseFailed);
+  void skip_comment(istream &s);
+  void skip_to_gt(istream &s);
+  void skip_pi(istream &s);
   void error(const string& s);
-  void fatal(const string& s) throw (ParseFailed);
+  void fatal(const string& s);
   void initial_processing(Element *e);
   void final_processing(Element *e);
   void substitute_name(string& name, bool usedef=false);
@@ -702,12 +702,12 @@ public:
   // Parse from given input stream
   // Throws ParseFailed if parse fails for any fatal reason
   // See also istream operator >> below, which is nicer
-  void read_from(istream& s) throw (ParseFailed);
+  void read_from(istream& s);
 
   //------------------------------------------------------------------------
   // Parse from given string
   // Throws ParseFailed if parse fails for any fatal reason
-  void read_from(const string& s) throw (ParseFailed);
+  void read_from(const string& s);
 
   //------------------------------------------------------------------------
   // Get root element
@@ -737,7 +737,7 @@ public:
 // e.g. cin >> parser;
 //
 // Throws ParseFailed if bad XML received
-istream& operator>>(istream& s, Parser& p) throw (ParseFailed);
+istream& operator>>(istream& s, Parser& p);
 
 //--------------------------------------------------------------------------
 // << operator to write Element to ostream

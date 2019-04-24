@@ -127,7 +127,7 @@ string DESKey::str() const
 
 //--------------------------------------------------------------------------
 // Read from channel (8 binary bytes)
-void DESKey::read(Channel::Reader& reader) throw (Channel::Error)
+void DESKey::read(Channel::Reader& reader)
 {
   reader.read(key, 8);
   load();
@@ -135,7 +135,7 @@ void DESKey::read(Channel::Reader& reader) throw (Channel::Error)
 
 //--------------------------------------------------------------------------
 // Write to channel (8 binary bytes)
-void DESKey::write(Channel::Writer& writer) const throw (Channel::Error)
+void DESKey::write(Channel::Writer& writer) const
 {
   writer.write(key, 8);
 }
