@@ -507,7 +507,7 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 // Safe stream read wrapper
 // Returns amount actually read - not necessarily all required!
 // Throws SocketError on failure
-ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
+ssize_t TCPSocket::read(void *buf, size_t count)
 {
   ssize_t size = cread(buf, count);
   if (size < 0) throw SocketError(SOCKERRNO);
@@ -517,7 +517,7 @@ ssize_t TCPSocket::read(void *buf, size_t count) throw (SocketError)
 //--------------------------------------------------------------------------
 // Safe stream write wrapper
 // Throws SocketError on failure
-void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
+void TCPSocket::write(const void *buf, size_t count)
 {
   ssize_t size = cwrite(buf, count);
   if (size!=static_cast<ssize_t>(count)) throw SocketError(SOCKERRNO);
@@ -528,7 +528,7 @@ void TCPSocket::write(const void *buf, size_t count) throw (SocketError)
 // Appends whatever read data is available to the given string
 // Returns whether successful (socket hasn't closed)
 // Throws SocketError on failure
-bool TCPSocket::read(string& s) throw (SocketError)
+bool TCPSocket::read(string& s)
 {
   char buf[SOCKET_BUFFER_SIZE+1];
   ssize_t size = read(buf, SOCKET_BUFFER_SIZE);
@@ -544,7 +544,7 @@ bool TCPSocket::read(string& s) throw (SocketError)
 // Read exact amount of data from the socket into a string
 // Returns whether data was all read, or stream closed (last size was zero)
 // Throws SocketError on failure
-bool TCPSocket::read(string& s, size_t count) throw (SocketError)
+bool TCPSocket::read(string& s, size_t count)
 {
   char buf[SOCKET_BUFFER_SIZE+1];
   size_t done = 0;
@@ -571,7 +571,7 @@ bool TCPSocket::read(string& s, size_t count) throw (SocketError)
 // Read exact amount of data from the socket into a buffer
 // Returns whether data was all read, or stream closed (last size was zero)
 // Throws SocketError on failure
-bool TCPSocket::read_exact(void *buf, size_t count) throw (SocketError)
+bool TCPSocket::read_exact(void *buf, size_t count)
 {
   size_t done = 0;
   unsigned char *cbuf = static_cast<unsigned char *>(buf);
@@ -591,7 +591,7 @@ bool TCPSocket::read_exact(void *buf, size_t count) throw (SocketError)
 //--------------------------------------------------------------------------
 // Read everything to stream close, blocking until finished
 // Throws SocketError on failure
-void TCPSocket::readall(string& s) throw (SocketError)
+void TCPSocket::readall(string& s)
 {
   while (read(s))
     ;
@@ -600,7 +600,7 @@ void TCPSocket::readall(string& s) throw (SocketError)
 //--------------------------------------------------------------------------
 // Write the given string to the socket, blocking until finished
 // Throws SocketError on failure
-void TCPSocket::write(const string &s) throw(SocketError)
+void TCPSocket::write(const string &s)
 {
   const char *p = s.data();
   write(p, s.size());
@@ -609,7 +609,7 @@ void TCPSocket::write(const string &s) throw(SocketError)
 //--------------------------------------------------------------------------
 // Write the given C string to the socket, blocking until finished
 // Throws SocketError on failure
-void TCPSocket::write(const char *p) throw(SocketError)
+void TCPSocket::write(const char *p)
 {
   write(p, strlen(p));
 }
@@ -671,7 +671,6 @@ int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
 // Safe stream sendmsg wrapper
 // Throws SocketError on failure
 ssize_t TCPSocket::sendmsg(struct iovec *gathers, int ngathers, int flags)
-  throw (SocketError)
 {
   int res = csendmsg(gathers, ngathers, flags);
   if (res < 0) throw SocketError(errno);
@@ -703,7 +702,7 @@ bool operator>>(TCPSocket& s, string& t)
 //--------------------------------------------------------------------------
 // Read a network byte order (MSB-first) 4-byte integer from the socket
 // Throws SocketError on failure or EOF
-uint32_t TCPSocket::read_nbo_int() throw (SocketError)
+uint32_t TCPSocket::read_nbo_int()
 {
   uint32_t n;
   if (!read_exact(&n, 4)) throw SocketError();
@@ -713,7 +712,7 @@ uint32_t TCPSocket::read_nbo_int() throw (SocketError)
 //--------------------------------------------------------------------------
 // Ditto, but allowing the possibility of failure at EOF
 // Throws SocketError on non-EOF failure
-bool TCPSocket::read_nbo_int(uint32_t& n) throw (SocketError)
+bool TCPSocket::read_nbo_int(uint32_t& n)
 {
   if (!read_exact(&n, 4)) return false;
   n=ntohl(n);
@@ -723,7 +722,7 @@ bool TCPSocket::read_nbo_int(uint32_t& n) throw (SocketError)
 //--------------------------------------------------------------------------
 // Write a network byte order (MSB-first) 4-byte integer to the socket
 // Throws SocketError on failure
-void TCPSocket::write_nbo_int(uint32_t i) throw (SocketError)
+void TCPSocket::write_nbo_int(uint32_t i)
 {
   uint32_t n = htonl(i);
   write(&n, 4);
@@ -935,7 +934,7 @@ int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
 //--------------------------------------------------------------------------
 // Safe datagram recv wrapper
 // Throws SocketError on failure
-ssize_t UDPSocket::recv(void *buf, size_t len, int flags) throw (SocketError)
+ssize_t UDPSocket::recv(void *buf, size_t len, int flags)
 {
   ssize_t size = crecv(buf, len, flags);
   if (size < 0) throw SocketError(errno);
@@ -946,7 +945,6 @@ ssize_t UDPSocket::recv(void *buf, size_t len, int flags) throw (SocketError)
 // Safe datagram send wrapper
 // Throws SocketError on failure
 int UDPSocket::send(const void *buf, size_t len, int flags)
-  throw (SocketError)
 {
   int res = csend(buf, len, flags);
   if (res < 0) throw SocketError(errno);
@@ -959,7 +957,6 @@ int UDPSocket::send(const void *buf, size_t len, int flags)
 // Throws SocketError on failure
 ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
                             EndPoint *endpoint_p)
-                               throw (SocketError)
 {
   ssize_t size = crecvfrom(buf, len, flags, endpoint_p);
   if (size < 0) throw SocketError(errno);
@@ -971,7 +968,6 @@ ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
 // Throws SocketError on failure
 ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
                           EndPoint endpoint)
-                             throw (SocketError)
 {
   int res = csendto(buf, len, flags, endpoint);
   if (res < 0) throw SocketError(errno);
@@ -983,7 +979,6 @@ ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
 // Throws SocketError on failure
 ssize_t UDPSocket::sendmsg(struct iovec *gathers, int ngathers, int flags,
                           EndPoint endpoint)
-                             throw (SocketError)
 {
   int res = csendmsg(gathers, ngathers, flags, endpoint);
   if (res < 0) throw SocketError(errno);
