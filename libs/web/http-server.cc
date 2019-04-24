@@ -157,7 +157,10 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         // (we have already set access-control header above)
         if (request.method == "OPTIONS")
         {
-          response.headers.put("Allow", "GET, POST, PUT, DELETE, HEAD");
+          response.headers.put("Allow",
+                               "GET, POST, PUT, DELETE, HEAD, OPTIONS");
+          response.headers.put("Access-Control-Allow-Methods",
+                               "GET, POST, PUT, DELETE, HEAD, OPTIONS");
           response.headers.put("Access-Control-Allow-Headers", "user-agent");
         }
         // Check for WebSocket upgrade
