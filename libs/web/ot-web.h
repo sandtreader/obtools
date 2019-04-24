@@ -596,7 +596,13 @@ public:
   //------------------------------------------------------------------------
   // Simple DELETE operation on a URL
   // Returns result code, fills in body if provided, reason code if not
-  int del(const URL& url, string& body);
+  int del(const URL& url, string& body)
+  { return simple("DELETE", url, body); }
+
+  //------------------------------------------------------------------------
+  // Simple operation on a URL
+  // Returns result code, fills in body if provided, reason code if not
+  int simple(const string& op, const URL& url, string& body);
 
   //------------------------------------------------------------------------
   // Simple POST operation on a URL

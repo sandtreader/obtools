@@ -282,11 +282,11 @@ int HTTPClient::get(const URL& url, string& body)
 }
 
 //--------------------------------------------------------------------------
-// Simple DELETE operation on a URL
+// Simple operation on a URL
 // Returns result code, fills in body if provided, reason code if not
-int HTTPClient::del(const URL& url, string& body)
+int HTTPClient::simple(const string& op, const URL& url, string& body)
 {
-  HTTPMessage request("DELETE", url);
+  HTTPMessage request(op, url);
   HTTPMessage response;
 
   int result(0);

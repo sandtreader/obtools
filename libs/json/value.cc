@@ -157,7 +157,7 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
 
 //--------------------------------------------------------------------------
 // Output value as a string, with optional prettiness
-string Value::str(bool pretty)
+string Value::str(bool pretty) const
 {
   ostringstream oss;
   write_to(oss, pretty);
@@ -175,10 +175,27 @@ const Value& Value::get(const string& property) const
   return none;
 }
 
+// Same, non-const
+Value& Value::get(const string& property)
+{
+  if (type != OBJECT) return none;
+  map<string, Value>::iterator p = o.find(property);
+  if (p != o.end()) return p->second;
+  return none;
+}
+
 //--------------------------------------------------------------------------
 // Get a value from the given array index
 // Returns Value::none if this is not an array or index doesn't exist
 const Value& Value::get(unsigned int index) const
+{
+  if (type != ARRAY) return none;
+  if (index >= a.size()) return none;
+  return a[index];
+}
+
+// Same, non const
+Value& Value::get(unsigned int index)
 {
   if (type != ARRAY) return none;
   if (index >= a.size()) return none;

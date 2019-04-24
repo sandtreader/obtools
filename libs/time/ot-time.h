@@ -274,6 +274,10 @@ public:
   string iso_time(char sep=':', bool with_secs=false) const;
 
   //------------------------------------------------------------------------
+  // Convert to SQL format
+  string sql() const;
+
+  //------------------------------------------------------------------------
   // Format according to strftime format (max 40 chars)
   string format(const char *format) const;
 

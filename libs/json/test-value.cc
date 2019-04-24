@@ -164,8 +164,14 @@ TEST(Value, TestWritingNumber)
 
 TEST(Value, TestWritingBigIntegerStaysIntegral)
 {
-  Value value(12345678901234567890ULL);
-  ASSERT_EQ("12345678901234567890", value.str());
+  Value value(1234567890123456789LL);
+  ASSERT_EQ("1234567890123456789", value.str());
+}
+
+TEST(Value, TestWritingNegativeIntegerStaysNegative)
+{
+  Value value(-1);
+  ASSERT_EQ("-1", value.str());
 }
 
 TEST(Value, TestWritingString)
