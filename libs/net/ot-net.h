@@ -521,46 +521,46 @@ public:
   // Safe stream read wrapper
   // Returns amount actually read - not necessarily all required!
   // Throws SocketError on failure
-  ssize_t read(void *buf, size_t count) throw (SocketError);
+  ssize_t read(void *buf, size_t count);
 
   //------------------------------------------------------------------------
   // Safe stream write wrapper
   // Throws SocketError on failure
-  void write(const void *buf, size_t count) throw (SocketError);
+  void write(const void *buf, size_t count);
 
   //------------------------------------------------------------------------
   // Read data from the socket into a string
   // Appends whatever read data is available to the given string
   // Returns whether successful (socket hasn't closed)
   // Throws SocketError on failure
-  bool read(string& s) throw (SocketError);
+  bool read(string& s);
 
   //------------------------------------------------------------------------
   // Read exact amount of data from the socket into a string
   // Whether successful - all data was read before socket closed
   // Throws SocketError on failure
-  bool read(string& s, size_t count) throw (SocketError);
+  bool read(string& s, size_t count);
 
   //------------------------------------------------------------------------
   // Read exact amount of data from the socket into a buffer
   // Returns whether data was all read, or stream closed (last size was zero)
   // Throws SocketError on failure
-  bool read_exact(void *buf, size_t count) throw (SocketError);
+  bool read_exact(void *buf, size_t count);
 
   //------------------------------------------------------------------------
   // Read everything to stream close, blocking until finished
   // Throws SocketError on failure
-  void readall(string& s) throw (SocketError);
+  void readall(string& s);
 
   //------------------------------------------------------------------------
   // Write the given string to the socket, blocking until finished
   // Throws SocketError on failure
-  void write(const string &s) throw(SocketError);
+  void write(const string &s);
 
   //------------------------------------------------------------------------
   // Write the given C string to the socket, blocking until finished
   // Throws SocketError on failure
-  void write(const char *p) throw(SocketError);
+  void write(const char *p);
 
   //------------------------------------------------------------------------
   // Raw stream sendmsg wrapper
@@ -569,23 +569,22 @@ public:
   //------------------------------------------------------------------------
   // Safe stream sendmsg wrapper
   // Throws SocketError on failure
-  ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags=0)
-    throw (SocketError);
+  ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags=0);
 
   //------------------------------------------------------------------------
   // Read a network byte order (MSB-first) 4-byte integer from the socket
   // Throws SocketError on failure or EOF
-  uint32_t read_nbo_int() throw (SocketError);
+  uint32_t read_nbo_int();
 
   //------------------------------------------------------------------------
   // Ditto, but allowing the possibility of failure at EOF
   // Throws SocketError on non-EOF failure
-  bool read_nbo_int(uint32_t& n) throw (SocketError);
+  bool read_nbo_int(uint32_t& n);
 
   //------------------------------------------------------------------------
   // Write a network byte order (MSB-first) 4-byte integer to the socket
   // Throws SocketError on failure
-  void write_nbo_int(uint32_t i) throw (SocketError);
+  void write_nbo_int(uint32_t i);
 };
 
 //--------------------------------------------------------------------------
@@ -714,34 +713,29 @@ public:
   //------------------------------------------------------------------------
   // Safe datagram recv wrapper
   // Throws SocketError on failure
-  ssize_t recv(void *buf, size_t len, int flags=0)
-    throw (SocketError);
+  ssize_t recv(void *buf, size_t len, int flags=0);
 
   //------------------------------------------------------------------------
   // Safe datagram send wrapper
   // Throws SocketError on failure
-  int send(const void *buf, size_t len, int flags=0)
-    throw (SocketError);
+  int send(const void *buf, size_t len, int flags=0);
 
   //------------------------------------------------------------------------
   // Safe datagram recvfrom wrapper
   // If endpoint_p is non-null, sets it to the source of the datagram
   // Throws SocketError on failure
-  ssize_t recvfrom(void *buf, size_t len, int flags, EndPoint *endpoint_p)
-    throw (SocketError);
+  ssize_t recvfrom(void *buf, size_t len, int flags, EndPoint *endpoint_p);
 
   //------------------------------------------------------------------------
   // Safe datagram sendto wrapper
   // Throws SocketError on failure
-  ssize_t sendto(const void *buf, size_t len, int flags, EndPoint endpoint)
-    throw (SocketError);
+  ssize_t sendto(const void *buf, size_t len, int flags, EndPoint endpoint);
 
   //------------------------------------------------------------------------
   // Safe datagram sendmsg wrapper
   // Throws SocketError on failure
   ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags,
-                  EndPoint endpoint)
-    throw (SocketError);
+                  EndPoint endpoint);
 
 };
 
