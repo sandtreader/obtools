@@ -44,7 +44,7 @@ bool HTTPMessage::get_first_line(istream& in, string& s)
           s+=c;  // Just use this as string
           return true;
         }
-        // Otherwise falling to default...
+        // Fallthrough
 
       default:
         if (++count < MAX_FIRST_LINE)  // DOS protection
