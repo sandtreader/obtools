@@ -8,7 +8,9 @@
 //==========================================================================
 
 #include "ot-log.h"
+#ifndef __WIN32__
 #include <syslog.h>
+#endif
 
 namespace ObTools { namespace Log {
 
@@ -41,6 +43,7 @@ void OwnedStreamChannel::log(const Message& msg)
   *stream << msg.text << endl;
 }
 
+#ifndef __WIN32__
 //==========================================================================
 // SyslogChannel
 
@@ -61,5 +64,6 @@ void SyslogChannel::log(const Message& msg)
 
   syslog(priority, "%s", msg.text.c_str());
 }
+#endif
 
 }} // namespaces

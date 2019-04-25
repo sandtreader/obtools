@@ -257,6 +257,7 @@ public:
   }
 };
 
+#ifndef __WIN32__
 //==========================================================================
 // Channel for syslog
 class SyslogChannel: public Channel
@@ -270,6 +271,7 @@ public:
   // Logging function
   void log(const Message& msg);
 };
+#endif
 
 //==========================================================================
 // Log distribution point
