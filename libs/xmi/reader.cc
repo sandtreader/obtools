@@ -36,7 +36,6 @@ void Reader::warning(const char *warn, const string& detail)
 //--------------------------------------------------------------------------
 // Fatal error handler
 void Reader::error(const char *err, const string& detail)
-     throw (ParseFailed)
 {
   serr << err << detail << endl;
   throw ParseFailed();
@@ -194,7 +193,7 @@ void Reader::upgrade_xmi_to_1_1(XML::Element &root)
 
 //--------------------------------------------------------------------------
 // Parse from given input stream
-void Reader::read_from(istream& s) throw (ParseFailed)
+void Reader::read_from(istream& s)
 {
   try
   {
@@ -250,7 +249,7 @@ void Reader::read_from(istream& s) throw (ParseFailed)
 
 //--------------------------------------------------------------------------
 // >> operator to read from istream
-istream& ObTools::XMI::operator>>(istream& s, Reader& p) throw (ParseFailed)
+istream& ObTools::XMI::operator>>(istream& s, Reader& p)
 {
   p.read_from(s);
   return s;

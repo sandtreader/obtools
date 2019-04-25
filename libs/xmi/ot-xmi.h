@@ -67,7 +67,7 @@ public:
   // Parse from given input stream
   // Throws ParseFailed if parse fails for any fatal reason
   // See also istream operator >> below, which is nicer
-  void read_from(istream& s) throw (ParseFailed);
+  void read_from(istream& s);
 
   //------------------------------------------------------------------------
   // Log a warning
@@ -75,7 +75,7 @@ public:
 
   //------------------------------------------------------------------------
   // Log an error and bomb out
-  void error(const char *err, const string& detail="") throw (ParseFailed);
+  void error(const char *err, const string& detail="");
 
   //------------------------------------------------------------------------
   // Record an ID to UML element mappimg
@@ -104,7 +104,7 @@ public:
 // e.g. cin >> reader;
 //
 // Throws ParseFailed if bad XML received
-istream& operator>>(istream& s, Reader& p) throw (ParseFailed);
+istream& operator>>(istream& s, Reader& p);
 
 //==========================================================================
 }} //namespaces
