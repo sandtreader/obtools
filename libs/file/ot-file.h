@@ -277,7 +277,7 @@ public:
   //------------------------------------------------------------------------
   // Windows only - helper function to convert a wide character filename
   // (e.g. returned from FindNextFileW) to a UTF8 one
-  string wide_to_utf8(const wstring& wide);
+  string wide_to_utf8(const wstring& wide) const;
 #endif
 
   //------------------------------------------------------------------------

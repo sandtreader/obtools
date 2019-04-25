@@ -29,11 +29,13 @@
 #define CHMOD _wchmod
 #define UNLINK _wunlink
 #define ACCESS _waccess
+#define FUTIME _futime
 #define O_LARGEFILE 0
 #include <windows.h>
 #include <fcntl.h>
 #include <io.h>
 #include <ext/stdio_filebuf.h>
+#include <shellapi.h>
 #else
 #if defined(__APPLE__)
 // No LARGEFILE, otherwise sensible
@@ -47,6 +49,7 @@
 #define CHMOD chmod
 #define UNLINK unlink
 #define ACCESS access
+#define FUTIME futimes
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
@@ -245,11 +248,8 @@ bool Path::writeable() const
     return !ACCESS(CPATH, 02);
 
   // The file is non-existant so check the directory is writeable instead
-  const auto& d = dirname();
-  if (d.empty())
-    return !ACCESS(".", 02);
-  else
-    return !ACCESS(d.CPATH, 02);
+  const auto& d = Directory{dirname().empty() ? "." : dirname()};
+  return !ACCESS(d.CPATH, 02);
 }
 
 //--------------------------------------------------------------------------
@@ -328,6 +328,8 @@ gid_t Path::group() const
 bool Path::set_ownership(uid_t owner, uid_t group) const
 {
 #if defined(__WIN32__) // Meaningless in Windows
+  (void)owner;
+  (void)group;
   return true;
 #else
   return !chown(CPATH, owner, group);
@@ -364,6 +366,7 @@ bool Path::erase() const
       false, 0, L""
     };
     return !SHFileOperationW(&op);
+
 #else
     auto result = true;
     auto dirs = stack<Path>{};
@@ -438,7 +441,7 @@ bool Path::touch(mode_t mode) const
 {
   int fd = OPEN(CPATH, O_CREAT|O_WRONLY, mode);
   if (fd < 0) return false;
-  if ( futimes(fd,NULL) ) return false;
+  if ( FUTIME(fd,NULL) ) return false;
   close(fd);
   return true;
 }
@@ -535,6 +538,7 @@ int Path::otoi(const string& mode_s)
 string Path::user_id_to_name(uid_t uid)
 {
 #if defined(__WIN32__) // Meaningless in Windows
+  (void)uid;
   return "?";
 #else
   // Painful reentrant way of doing this!
@@ -560,6 +564,7 @@ string Path::user_id_to_name(uid_t uid)
 int Path::user_name_to_id(const string& uname)
 {
 #if defined(__WIN32__) // Meaningless in Windows
+  (void)uname;
   return -1;
 #else
   // Even more painful reentrant way of doing this, given we never use
@@ -585,6 +590,7 @@ int Path::user_name_to_id(const string& uname)
 string Path::group_id_to_name(gid_t gid)
 {
 #if defined(__WIN32__) // Meaningless in Windows
+  (void)gid;
   return "?";
 #else
   // Painful reentrant way of doing this!
@@ -610,6 +616,7 @@ string Path::group_id_to_name(gid_t gid)
 int Path::group_name_to_id(const string& gname)
 {
 #if defined(__WIN32__) // Meaningless in Windows
+  (void)gname;
   return -1;
 #else
   // Even more painful reentrant way of doing this, given we never use
@@ -660,7 +667,7 @@ wstring Path::utf8_to_wide(const string& utf8)
 //--------------------------------------------------------------------------
 // Windows only - helper function to convert a wide character filename
 // (e.g. returned from FindNextFileW) to a UTF8 one
-string Path::wide_to_utf8(const wstring& wide)
+string Path::wide_to_utf8(const wstring& wide) const
 {
   const wchar_t *wfn = wide.c_str();
   int wlen = wide.size();

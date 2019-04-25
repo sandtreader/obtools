@@ -24,7 +24,7 @@
 #include <fcntl.h>
 #define O_BINARY 0
 #define CPATH(fn) fn.c_str()
-#define OPEN ::open
+#define OPEN open
 #endif
 #include <iostream>
 #include <memory>
@@ -96,7 +96,7 @@ BufferedOutStream::BufferedOutStream(const string& filename,
   file_buf{buffer_size}
 {
   init(&file_buf);
-  open(CPATH(filename), mode);
+  OPEN(CPATH(filename), mode);
 }
 
 //==========================================================================
