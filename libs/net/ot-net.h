@@ -353,7 +353,7 @@ protected:
   fd_t fd;
 
   // Simple constructor - subclasses provide the fd
-  Socket(int _fd): fd(_fd) {}
+  Socket(fd_t _fd): fd(_fd) {}
 
   // Default constructor - set bad initially
   Socket(): fd(INVALID_FD) {}
@@ -505,7 +505,7 @@ public:
 
   //------------------------------------------------------------------------
   // Explicit constructor - for use when (e.g.) accept() created an fd already
-  TCPSocket(int _fd): Socket(_fd) {}
+  TCPSocket(fd_t _fd): Socket(_fd) {}
 
   //------------------------------------------------------------------------
   // Raw stream read wrapper
