@@ -345,7 +345,7 @@ namespace
           if (!read_timezone_offset(text, size, p, tz_offset))
             return false;
 
-          // Falling!
+          // Fallthrough!
 
         case 'Z':    // Offset is still 0
           size = p;  // Truncate time and stop
