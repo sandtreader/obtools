@@ -30,8 +30,13 @@ typedef const void *sockopt_t;
 #include <errno.h>
 #include <stdint.h>
 #include <cstdio>
+#include <cassert>
 
 #define SOCKET_BUFFER_SIZE 1024
+
+#ifdef __WIN32__
+const auto SOCK_CLOEXEC = 0;
+#endif
 
 namespace ObTools { namespace Net {
 
@@ -99,8 +104,8 @@ void Socket::go_blocking()
 void Socket::enable_keepalive()
 {
   int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, static_cast<sockopt_t>(&one),
-             sizeof(int));
+  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<sockopt_t>(&one),
+             sizeof(one));
 }
 
 //--------------------------------------------------------------------------
@@ -108,24 +113,24 @@ void Socket::enable_keepalive()
 void Socket::enable_reuse()
 {
   int one = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, static_cast<sockopt_t>(&one),
-             sizeof(int));
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<sockopt_t>(&one),
+             sizeof(one));
 }
 
 //--------------------------------------------------------------------------
 // Set socket TTL
 void Socket::set_ttl(int hops)
 {
-  setsockopt(fd, IPPROTO_IP, IP_TTL, static_cast<sockopt_t>(&hops),
-             sizeof(int));
+  setsockopt(fd, IPPROTO_IP, IP_TTL, reinterpret_cast<sockopt_t>(&hops),
+             sizeof(hops));
 }
 
 //--------------------------------------------------------------------------
 // Set socket multicast TTL
 void Socket::set_multicast_ttl(int hops)
 {
-  setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL, static_cast<sockopt_t>(&hops),
-             sizeof(int));
+  setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
+             reinterpret_cast<sockopt_t>(&hops), sizeof(hops));
 }
 
 //--------------------------------------------------------------------------
@@ -154,7 +159,8 @@ void Socket::set_timeout(int secs, int usecs)
 void Socket::set_priority(int prio)
 {
 #if defined(__WIN32__) || defined(__APPLE__)
-#warning set_priority not implemented
+  assert(false); // set_priority not implemented
+  (void)prio;
 #else
   unsigned long n = static_cast<unsigned long>(prio);
 
@@ -167,7 +173,8 @@ void Socket::set_priority(int prio)
 void Socket::set_tos(int tos)
 {
 #ifdef __WIN32__
-#warning set_tos not implemented in Windows
+  assert(false); // set_tos not implemented in Windows
+  (void)tos;
 #else
   unsigned long n = static_cast<unsigned long>(tos);
 
@@ -180,7 +187,8 @@ void Socket::set_tos(int tos)
 bool Socket::join_multicast(IPAddress address)
 {
 #ifdef __WIN32__
-#warning join_multicast not implemented in Windows
+  assert(false); // join_multicast not implemented in Windows
+  (void)address;
   return false;
 #else
 #ifdef __BSD__
@@ -202,7 +210,8 @@ bool Socket::join_multicast(IPAddress address)
 bool Socket::leave_multicast(IPAddress address)
 {
 #ifdef __WIN32__
-#warning leave_multicast not implemented in Windows
+  assert(false); // leave_multicast not implemented in Windows
+  (void)address;
   return false;
 #else
 #ifdef __BSD__
@@ -319,7 +328,9 @@ EndPoint Socket::remote() const
 string Socket::get_mac(IPAddress ip, const string& device_name) const
 {
 #if defined(__WIN32__) || defined(__APPLE__)
-#warning get_mac not implemented
+  assert(false); // get_mac not implemented
+  (void)ip;
+  (void)device_name;
   return "";
 #else
   // Check if device specified - if not, lookup all Ethernet interfaces
@@ -385,7 +396,7 @@ set<string> Socket::get_host_macs() const
   set<string> macs;
 
 #if defined(__WIN32__) || defined(__APPLE__)
-#warning get_host_macs not implemented
+  assert(false); // get_host_macs not implemented
   return macs;
 #else
   struct if_nameindex *ifs = if_nameindex();
@@ -619,7 +630,10 @@ void TCPSocket::write(const char *p)
 int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
 {
 #ifdef __WIN32__
-#warning No idea if this works in Windows
+  assert(false); // No idea if this works in Windows
+  (void)gathers;
+  (void)ngathers;
+  (void)flags;
   return -99;
 #else
   struct msghdr mh;
@@ -796,10 +810,10 @@ UDPSocket::UDPSocket(EndPoint local, EndPoint remote)
 // Enable broadcast on this socket
 void UDPSocket::enable_broadcast()
 {
-  unsigned long n = 1;
+  int n = 1;
 
-  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, static_cast<sockopt_t>(&n),
-             sizeof(unsigned long));
+  setsockopt(fd, SOL_SOCKET, SO_BROADCAST, reinterpret_cast<sockopt_t>(&n),
+             sizeof(n));
 }
 
 //--------------------------------------------------------------------------
@@ -909,7 +923,10 @@ int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
   int res;
 
 #ifdef __WIN32__
-#warning No idea if this works in Windows
+  assert(false); // #warning No idea if this works in Windows
+  (void)gathers;
+  (void)ngathers;
+  (void)flags;
   return -99;
 #else
   struct msghdr mh;

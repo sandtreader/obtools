@@ -74,8 +74,13 @@ void TCPServer::run()
     TCPWorkerThread *thread = threadpool.wait();
     if (!thread) break;  // only at shutdown
 
+#ifdef __WIN32__
+    fd_t new_fd = ::accept(fd, reinterpret_cast<struct sockaddr *>(&saddr),
+                           &len);
+#else
     fd_t new_fd = ::accept4(fd, reinterpret_cast<struct sockaddr *>(&saddr),
                             &len, SOCK_CLOEXEC);
+#endif
     if (alive && new_fd != INVALID_FD)
     {
       EndPoint client(saddr);

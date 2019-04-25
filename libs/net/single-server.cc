@@ -45,7 +45,11 @@ TCPSocket *TCPSingleServer::wait(int timeout)
   if (timeout && !wait_readable(timeout)) return 0;
 
   // Accept connection
+#ifdef __WIN32__
+  fd_t new_fd = ::accept(fd, 0, 0);
+#else
   fd_t new_fd = ::accept4(fd, 0, 0, SOCK_CLOEXEC);
+#endif
   if (new_fd != INVALID_FD)
     return new TCPSocket(new_fd);
   else
