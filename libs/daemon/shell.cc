@@ -12,14 +12,17 @@
 #include "ot-misc.h"
 #include "ot-init.h"
 #include "ot-file.h"
-#include <execinfo.h>
 #include <errno.h>
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <fstream>
 #ifndef __WIN32__
+#include <execinfo.h>
+#include <sys/wait.h>
 #include <unistd.h>
+#else
+#include <dbghelp.h>
+typedef __p_sig_fn_t sighandler_t;
 #endif
 
 #define DEFAULT_TIMESTAMP "%a %d %b %H:%M:%*S [%*L]: "
@@ -41,16 +44,20 @@ void sigshutdown(int)
 {
   if (the_shell) the_shell->signal_shutdown();
   signal(SIGTERM, sig_ign);
-  signal(SIGQUIT, sig_ign);
   signal(SIGINT, sig_ign);
+#ifndef __WIN32__
+  signal(SIGQUIT, sig_ign);
+#endif
 }
 
+#ifndef __WIN32__
 // SIGHUP:  Reload config
 void sighup(int)
 {
   if (the_shell) the_shell->signal_reload();
   signal(SIGHUP, sighup);
 }
+#endif
 
 // Various bad things!
 void sigevil(int sig)
@@ -124,12 +131,14 @@ int Shell::start(int argc, char **argv)
   auto chan_out = static_cast<Log::Channel *>(nullptr);
   if (go_daemon)
   {
+#ifndef __WIN32__
     if (config.get_value_bool("log/@syslog"))
     {
       chan_out = new Log::SyslogChannel;
     }
     else
     {
+#endif
       string logfile = config.get_value("log/@file", default_log_file);
       auto sout = new ofstream(logfile.c_str(), ios::app);
       if (!*sout)
@@ -138,7 +147,9 @@ int Shell::start(int argc, char **argv)
         return 2;
       }
       chan_out = new Log::OwnedStreamChannel{sout};
+#ifndef __WIN32__
     }
+#endif
   }
   else
   {
@@ -165,6 +176,7 @@ int Shell::start(int argc, char **argv)
     return rc;
   }
 
+#ifndef __WIN32__
   // Full background daemon
   if (go_daemon)
   {
@@ -177,21 +189,24 @@ int Shell::start(int argc, char **argv)
     pidfile << getpid() << endl;
     pidfile.close();
   }
+#endif
 
   // Register signal handlers - same for both master and slave
   the_shell = this;
   signal(SIGTERM, sigshutdown);
-  signal(SIGQUIT, sigshutdown); // quit from Ctrl-backslash
   signal(SIGINT,  sigshutdown); // quit from Ctrl-C
+#ifndef __WIN32__
+  signal(SIGQUIT, sigshutdown); // quit from Ctrl-backslash
   signal(SIGHUP,  sighup);
+  // Ignore SIGPIPE from closed sockets etc.
+  signal(SIGPIPE, sig_ign);
+#endif
   signal(SIGSEGV, sigevil);
   signal(SIGILL,  sigevil);
   signal(SIGFPE,  sigevil);
   signal(SIGABRT, sigevil);
 
-  // Ignore SIGPIPE from closed sockets etc.
-  signal(SIGPIPE, sig_ign);
-
+#ifndef __WIN32__
   // Watchdog? Master/slave processes...
   bool enable_watchdog = config.get_value_bool("watchdog/@restart", true);
   int sleep_time = FIRST_WATCHDOG_SLEEP_TIME;
@@ -278,6 +293,7 @@ int Shell::start(int argc, char **argv)
   }
   else
   {
+#endif
     // Just run directly
     rc = application.run_priv();
     if (rc) return rc;
@@ -286,7 +302,9 @@ int Shell::start(int argc, char **argv)
     rc = run();
     application.cleanup();
     return rc;
+#ifndef __WIN32__
   }
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -294,6 +312,9 @@ int Shell::start(int argc, char **argv)
 // Returns 0 on success, rc if not
 int Shell::drop_privileges()
 {
+#ifdef __WIN32__
+  return -99;
+#else
   // Drop privileges if root
   if (!getuid())
   {
@@ -346,6 +367,7 @@ int Shell::drop_privileges()
   }
 
   return 0;
+#endif
 }
 
 //--------------------------------------------------------------------------
@@ -389,7 +411,31 @@ void Shell::log_evil(int sig)
 
   // Do a backtrace
 #define MAXTRACE 100
+#define MAXNAMELEN 1024
   void *buffer[MAXTRACE];
+#ifdef __WIN32__
+  const auto frames = CaptureStackBackTrace(1, MAXTRACE, buffer, nullptr);
+  if (frames)
+  {
+    log.error << "--- backtrace:\n";
+    for (auto i = 0; i < frames; ++i)
+    {
+      auto sumbuff = vector<uint64_t>(sizeof(SYMBOL_INFO) + MAXNAMELEN
+                                      + sizeof(uint64_t) - 1);
+      auto *info = reinterpret_cast<SYMBOL_INFO *>(&sumbuff[0]);
+      info->SizeOfStruct = sizeof(SYMBOL_INFO);
+      info->MaxNameLen = 1024;
+
+      auto displacement = uint64_t{};
+      if (SymFromAddr(GetCurrentProcess(), (DWORD64)buffer[i], &displacement,
+                      info))
+      {
+        log.error << "- " << string(info->Name, info->NameLen) << endl;
+      }
+    }
+    log.error << "---\n";
+  }
+#else
   int n = backtrace(buffer, MAXTRACE);
   char **strings = backtrace_symbols(buffer, n);
   if (strings)
@@ -400,6 +446,7 @@ void Shell::log_evil(int sig)
     log.error << "---\n";
     free(strings);
   }
+#endif
 }
 
 }} // namespaces

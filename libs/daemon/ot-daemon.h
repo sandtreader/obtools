@@ -143,7 +143,9 @@ public:
   void signal_shutdown()
   {
     trigger_shutdown = true;
+#ifndef __WIN32__
     if (slave_pid) kill(slave_pid, SIGTERM);
+#endif
   }
 
   //------------------------------------------------------------------------
@@ -151,7 +153,9 @@ public:
   void signal_reload()
   {
     trigger_reload = true;
+#ifndef __WIN32__
     if (slave_pid) kill(slave_pid, SIGHUP);
+#endif
   }
 
   //------------------------------------------------------------------------
