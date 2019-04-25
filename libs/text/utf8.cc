@@ -22,6 +22,7 @@ void UTF8::append(string& utf8, wchar_t unicode)
     utf8 += (0xc0 | (0x1f & (unicode >> 6)));
     utf8 += (0x80 | (0x3f & unicode));
   }
+#ifndef __WIN32__
   else if (unicode < 0x00010000)
   {
     utf8 += (0xe0 | (0x0f & (unicode >> 12)));
@@ -52,6 +53,7 @@ void UTF8::append(string& utf8, wchar_t unicode)
     utf8 += (0x80 | (0x3f & (unicode >> 6)));
     utf8 += (0x80 | (0x3f & unicode));
   }
+#endif
 }
 
 //--------------------------------------------------------------------------
