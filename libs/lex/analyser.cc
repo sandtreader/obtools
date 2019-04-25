@@ -156,7 +156,7 @@ Token Analyser::read_string_token()
           default:
             throw Exception(string("Unrecognised string escape '")+c+"'");
         }
-        // Falling
+        // Fallthrough
 
       default:
         if (c) value += c;  // Can be dropped in Unicode parse above
