@@ -14,7 +14,7 @@ namespace ObTools { namespace Expression {
 
 //--------------------------------------------------------------------------
 // Read a token from the input
-Token Tokeniser::read_token() throw (Exception)
+Token Tokeniser::read_token()
 {
   char c = getc();
 

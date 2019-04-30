@@ -113,7 +113,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read a token from the input
-  Token read_token() throw (Exception);
+  Token read_token();
 };
 
 //==========================================================================
@@ -124,18 +124,18 @@ class Evaluator
   Tokeniser tokeniser;
   Token token;
 
-  void next() throw (Exception);
-  double read_factor() throw (Exception);
-  double read_term() throw (Exception);
-  double read_side() throw (Exception);
-  double read_predicate() throw (Exception);
-  double read_expression() throw (Exception);
+  void next();
+  double read_factor();
+  double read_term();
+  double read_side();
+  double read_predicate();
+  double read_expression();
 
 protected:
   //------------------------------------------------------------------------
   // Get value for a name in the expression
   // By default just errors and returns 0 - override if variables required
-  virtual double get_value_for_name(const string& name) throw (Exception);
+  virtual double get_value_for_name(const string& name);
 
 public:
   //------------------------------------------------------------------------
@@ -144,7 +144,7 @@ public:
 
   //------------------------------------------------------------------------
   // Evaluate an expression
-  double evaluate(const string& expr) throw (Exception);
+  double evaluate(const string& expr);
 
   //------------------------------------------------------------------------
   // Virtual destructor to keep compiler happy!
@@ -158,7 +158,7 @@ class PropertyListEvaluator: public Evaluator
   Misc::PropertyList& vars;
 
   // Implementation of get value
-  double get_value_for_name(const string& name) throw (Exception)
+  double get_value_for_name(const string& name)
   {
     if (vars.has(name)) return vars.get_real(name);
     throw Exception(string("No such variable '")+name+"'");

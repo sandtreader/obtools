@@ -14,7 +14,7 @@ namespace ObTools { namespace Expression {
 //--------------------------------------------------------------------------
 // Get value for a name in the expression
 // By default just errors and returns 0 - override if variables required
-double Evaluator::get_value_for_name(const string& name) throw (Exception)
+double Evaluator::get_value_for_name(const string& name)
 {
   throw Exception("Variable name lookup for '" + name + "' not implemented");
   return 0;
@@ -22,14 +22,14 @@ double Evaluator::get_value_for_name(const string& name) throw (Exception)
 
 //--------------------------------------------------------------------------
 // Get next token
-void Evaluator::next() throw (Exception)
+void Evaluator::next()
 {
   token = tokeniser.read_token();
 }
 
 //--------------------------------------------------------------------------
 // Read a factor
-double Evaluator::read_factor() throw (Exception)
+double Evaluator::read_factor()
 {
   switch (token.type)
   {
@@ -78,7 +78,7 @@ double Evaluator::read_factor() throw (Exception)
 
 //--------------------------------------------------------------------------
 // Read a term
-double Evaluator::read_term() throw (Exception)
+double Evaluator::read_term()
 {
   double v = read_factor();
   for(;;)
@@ -106,7 +106,7 @@ double Evaluator::read_term() throw (Exception)
 
 //--------------------------------------------------------------------------
 // Read a side (of conditional)
-double Evaluator::read_side() throw (Exception)
+double Evaluator::read_side()
 {
   double v = read_term();
   for(;;)
@@ -134,7 +134,7 @@ double Evaluator::read_side() throw (Exception)
 
 //--------------------------------------------------------------------------
 // Read a predicate (comparison)
-double Evaluator::read_predicate() throw (Exception)
+double Evaluator::read_predicate()
 {
   double v = read_side();
 
@@ -170,7 +170,7 @@ double Evaluator::read_predicate() throw (Exception)
 
 //--------------------------------------------------------------------------
 // Read an expression
-double Evaluator::read_expression() throw (Exception)
+double Evaluator::read_expression()
 {
   double v = read_predicate();
   for(;;)
@@ -200,7 +200,7 @@ double Evaluator::read_expression() throw (Exception)
 
 //--------------------------------------------------------------------------
 // Evaluate an expression
-double Evaluator::evaluate(const string& expr) throw (Exception)
+double Evaluator::evaluate(const string& expr)
 {
   tokeniser.reset(expr);
   next();
