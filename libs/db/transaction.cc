@@ -10,7 +10,9 @@
 #include "ot-db.h"
 #ifdef DEBUG
 #include "ot-log.h"
+#ifndef __WIN32__
 #include <execinfo.h>
+#endif
 #endif
 
 namespace ObTools { namespace DB {
@@ -62,6 +64,17 @@ bool Transaction::commit()
   if (spent > chrono::milliseconds{1000})
   {
     Log::Error log;
+#ifdef __WIN32__
+    log << "Slow transaction ("
+        << chrono::duration_cast<chrono::milliseconds>(spent).count()
+        << "ms "
+        << "/ begun at "
+        << chrono::duration_cast<chrono::milliseconds>(begun_at).count()
+        << "ms "
+        << "/ commit at "
+        << chrono::duration_cast<chrono::milliseconds>(commit_at).count()
+        << "ms)" << endl;
+#else
     constexpr auto buff_size = 2;
     void *buffer[buff_size];
     auto n = backtrace(buffer, buff_size);
@@ -82,6 +95,7 @@ bool Transaction::commit()
         << "/ commit at "
         << chrono::duration_cast<chrono::milliseconds>(commit_at).count()
         << "ms): " << line << endl;
+#endif
   }
 #endif
   return committed;
