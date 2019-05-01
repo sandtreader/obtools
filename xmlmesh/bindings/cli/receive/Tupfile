@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-xmlmesh-receive
-TYPE    = exe
-DEPENDS = ot-xmlmesh-client
+NAME      = ot-xmlmesh-receive
+TYPE      = exe
+DEPENDS   = ot-xmlmesh-client
+PLATFORMS = linux
 
 include_rules
