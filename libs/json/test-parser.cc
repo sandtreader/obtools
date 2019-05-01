@@ -85,7 +85,7 @@ TEST(Parser, TesttrueGivesTRUE)
   Parser parser(input);
   Value value;
   ASSERT_NO_THROW(value = parser.read_value());
-  ASSERT_EQ(Value::TRUE, value.type);
+  ASSERT_EQ(Value::TRUE_, value.type);
 }
 
 TEST(Parser, TestfalseGivesFALSE)
@@ -95,7 +95,7 @@ TEST(Parser, TestfalseGivesFALSE)
   Parser parser(input);
   Value value;
   ASSERT_NO_THROW(value = parser.read_value());
-  ASSERT_EQ(Value::FALSE, value.type);
+  ASSERT_EQ(Value::FALSE_, value.type);
 }
 
 TEST(Parser, TestRandomBarewordFails)
@@ -145,7 +145,7 @@ TEST(Parser, TestObjectWithTwoProperties)
   ASSERT_EQ(Value::STRING, v1.type);
   ASSERT_EQ("FOO", v1.s);
   Value v2 = value.o["bar"];
-  ASSERT_EQ(Value::TRUE, v2.type);
+  ASSERT_EQ(Value::TRUE_, v2.type);
 }
 
 TEST(Parser, TestUnclosedObjectFails)
@@ -222,7 +222,7 @@ TEST(Parser, TestArrayWithTwoElements)
   ASSERT_EQ(Value::STRING, v1.type);
   ASSERT_EQ("foo", v1.s);
   Value v2 = value.a[1];
-  ASSERT_EQ(Value::TRUE, v2.type);
+  ASSERT_EQ(Value::TRUE_, v2.type);
 }
 
 TEST(Parser, TestArrayMissingCommaFails)

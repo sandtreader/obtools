@@ -133,9 +133,9 @@ Value Parser::read_value()
         if (token.value == "null")
           return Value(Value::NULL_);
         else if (token.value == "true")
-          return Value(Value::TRUE);
+          return Value(Value::TRUE_);
         else if (token.value == "false")
-          return Value(Value::FALSE);
+          return Value(Value::FALSE_);
         else
           throw Exception(string("Unrecognised bare name ")+token.value);
 

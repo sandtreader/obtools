@@ -43,8 +43,8 @@ public:
     STRING,  // Quoted string
     OBJECT,  // Object with properties
     ARRAY,   // Array of values
-    TRUE,    // Boolean true
-    FALSE    // Boolean value
+    TRUE_,    // Boolean true
+    FALSE_    // Boolean value
   } type;
 
   double f;
@@ -82,7 +82,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check whether a value is true - TRUE or non-zero INTEGER accepted
-  bool is_true() const { return type == TRUE || (type == INTEGER && n); }
+  bool is_true() const { return type == TRUE_ || (type == INTEGER && n); }
 
   //------------------------------------------------------------------------
   // Get a value from the given object property

@@ -26,9 +26,9 @@ TEST(Value, TestIsTrue)
 {
   Value nv;
   ASSERT_FALSE(nv.is_true());
-  Value tv(Value::TRUE);
+  Value tv(Value::TRUE_);
   ASSERT_TRUE(tv.is_true());
-  Value fv(Value::FALSE);
+  Value fv(Value::FALSE_);
   ASSERT_FALSE(fv.is_true());
   Value v1(1);
   ASSERT_TRUE(v1.is_true());
@@ -146,13 +146,13 @@ TEST(Value, TestWritingNull)
 
 TEST(Value, TestWritingTrue)
 {
-  Value value(Value::TRUE);
+  Value value(Value::TRUE_);
   ASSERT_EQ("true", value.str());
 }
 
 TEST(Value, TestWritingFalse)
 {
-  Value value(Value::FALSE);
+  Value value(Value::FALSE_);
   ASSERT_EQ("false", value.str());
 }
 

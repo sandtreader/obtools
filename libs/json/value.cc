@@ -40,10 +40,14 @@ void Value::write_string_to(ostream& out) const
       default:
         if (c > 0x7f)
         {
+#ifdef __WIN32__
+          out << "\\u" << setw(4) << setfill('0') << hex << c;
+#else
           if (c < 0x10000)
             out << "\\u" << setw(4) << setfill('0') << hex << c;
           else
             out << "\\u++++";
+#endif
         }
         else
           out << static_cast<char>(c);
@@ -150,8 +154,8 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
     case STRING:  write_string_to(out);                 break;
     case OBJECT:  write_object_to(out, pretty, indent); break;
     case ARRAY:   write_array_to(out, pretty, indent);  break;
-    case TRUE:    out << "true";                        break;
-    case FALSE:   out << "false";                       break;
+    case TRUE_:   out << "true";                        break;
+    case FALSE_:  out << "false";                       break;
   }
 }
 
