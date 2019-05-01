@@ -11,7 +11,9 @@
 #include "ot-text.h"
 #include <unistd.h>
 #include <sys/types.h>
+#ifndef __WIN32__
 #include <sys/wait.h>
+#endif
 #include <errno.h>
 #include <string.h>
 #include <sstream>
@@ -72,6 +74,12 @@ bool Command::execute(const string& input, string& output_p)
 {
   Log::Streams log;
 
+#ifdef __WIN32__
+  log.error << "Command execution unsupported on this platform" <<endl;
+  (void)input;
+  (void)output_p;
+  return false;
+#else
   // Create pipes - named relative to child process
   int stdin_pipe[2];
   int stdout_pipe[2];
@@ -191,6 +199,7 @@ bool Command::execute(const string& input, string& output_p)
     cerr << "Can't exec " << argv[0] << ": " << strerror(errno) << endl;
     _exit(2);  // Hard exit, don't try to clean up
   }
+#endif
 }
 
 }} // namespaces

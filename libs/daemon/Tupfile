@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-daemon
-TYPE    = lib
-DEPENDS = ot-net ot-log ot-xml ot-misc ot-init
+NAME            = ot-daemon
+TYPE            = lib
+DEPENDS         = ot-net ot-log ot-xml ot-misc ot-init
+WINDOWS-DEPENDS = ext-dbghelp
 
 include_rules
