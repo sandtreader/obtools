@@ -41,23 +41,59 @@ local REVISION = flatten(REVISION)
 local CFLAGS = flatten(CFLAGS)
 local LFLAGS = flatten(LFLAGS)
 
+local PLATFORM = tup.getconfig("PLATFORM")
 local ARCH = tup.getconfig("ARCH")
 
 ----------------------------------------------------------------------------
+-- If platforms are specified, then ensure configured platform is in list
+if PLATFORMS ~= nil then
+  local found = false
+  for x, value in ipairs(PLATFORMS) do
+    if value == PLATFORM then
+      found = true
+    end
+  end
+  if found == false then
+    return
+  end
+end
+
+----------------------------------------------------------------------------
 -- Tools
-COMPILER = "clang++"
-ARCHIVER = "ar"
-LINKER = COMPILER
+
+if PLATFORM == "linux" then
+  COMPILER = "clang++"
+  ARCHIVER = "ar"
+  LINKER = COMPILER
+  PLATFORM_CFLAGS = ""
+  PLATFORM_LFLAGS = ""
+  PLATFORM_LIB_EXT = ".a"
+  PLATFORM_SHARED_FLAGS = "-rdynamic"
+  PLATFORM_SHARED_EXT = ".so"
+  PLATFORM_EXE_EXT = ""
+elseif PLATFORM == "windows" then
+  COMPILER = "x86_64-w64-mingw32-g++"
+  ARCHIVER = "x86_64-w64-mingw32-ar"
+  LINKER = COMPILER
+  PLATFORM_CFLAGS = "-I" .. tup.getcwd() .. "/mingw/include"
+                    .. " -DWIN32_LEAN_AND_MEAN"
+  PLATFORM_LFLAGS = "-L" .. tup.getcwd() .. "/mingw/lib"
+  PLATFORM_LIB_EXT = ".a"
+  PLATFORM_SHARED_FLAGS = ""
+  PLATFORM_SHARED_EXT = ".dll"
+  PLATFORM_EXE_EXT = ".exe"
+end
 
 ----------------------------------------------------------------------------
 -- Basic compiler options
-CFLAGS = CFLAGS .. " --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC"
-LFLAGS = LFLAGS .. " --std=c++11"
+CFLAGS = CFLAGS .. " --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC "
+                .. PLATFORM_CFLAGS
+LFLAGS = LFLAGS .. " --std=c++11 " .. PLATFORM_LFLAGS
 
 ----------------------------------------------------------------------------
 -- Debug settings
 if tup.getconfig("DEBUG") == "y" then
-  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG -fstandalone-debug"
+  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG"
 end
 
 ----------------------------------------------------------------------------
@@ -131,7 +167,7 @@ end
 -- Calculate the complete dependency list for this pacakge
 local full_depends = {};
 
-function get_deps(name, depends)
+function get_deps(name, depends, platform)
   if depends[name] == nil then
     depends[name] = {}
     local libdir = get_dependency_path(name)
@@ -145,22 +181,23 @@ function get_deps(name, depends)
       for line in f:lines() do
         if cont then
           for n in line:gmatch("([^\\ ]+)") do
-            get_deps(n, depends)
+            get_deps(n, depends, platform)
           end
           if line:sub(-1) ~= "\\" then
             cont = false
           end
         else
-          local d = line:match("DEPENDS[ ]*=(.*)")
+          line = line:gsub("^" .. platform:upper() .. "%-", "")
+          local d = line:match("^DEPENDS[ ]*=(.*)")
           if d ~= nil then
             for n in d:gmatch("([^\\ ]+)") do
-              get_deps(n, depends)
+              get_deps(n, depends, platform)
             end
             if d:sub(-1) == "\\" then
               cont = true
             end
           else
-            local t = line:match("TYPE[ ]*=[ ]*(.*)")
+            local t = line:match("^TYPE[ ]*=[ ]*(.*)")
             if t ~= nil then
               depends[name]["type"] = t
             end
@@ -175,7 +212,7 @@ end
 if DEPENDS then
   if not (next(DEPENDS) == nil) then
     for index, dep in pairs(DEPENDS) do
-      get_deps(dep, full_depends)
+      get_deps(dep, full_depends, PLATFORM)
     end
   end
 end
@@ -210,12 +247,12 @@ for index, dep in ipairs(full_deps) do
     local libdir = tup.getcwd() .. "/" .. full_depends[dep]["dir"]
     dep_includes += "-I" .. libdir
     if full_depends[dep]["type"] == "lib" then
-      dep_static_libs += libdir .. "/" .. dep .. ".a"
+      dep_static_libs += libdir .. "/" .. dep .. PLATFORM_LIB_EXT
     elseif full_depends[dep]["type"] == "shared" then
-      dep_shared_libs += libdir .. "/" .. dep .. ".so"
-      dep_products += libdir .. "/" .. dep .. ".so"
+      dep_shared_libs += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT
+      dep_products += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT
     elseif full_depends[dep]["type"] == "exe" then
-      dep_products += libdir .. "/" .. dep
+      dep_products += libdir .. "/" .. dep .. PLATFORM_EXE_EXT
     end
   end
 end
@@ -241,7 +278,7 @@ end
 ----------------------------------------------------------------------------
 -- Link a static library
 function link_static_lib(name, objects)
-  local output = name .. ".a"
+  local output = name .. PLATFORM_LIB_EXT
   tup.definerule{
     inputs = objects,
     command = "^ AR %o^ " .. ARCHIVER .. " crs " .. output .. " " ..
@@ -255,8 +292,9 @@ end
 -- Link a shared library
 function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
                          ext_shared_libs)
-  local output = name .. ".so"
+  local output = name .. PLATFORM_SHARED_EXT
   local inputs = {}
+  local opts = " -shared " .. PLATFORM_SHARED_FLAGS
   inputs += objects
   inputs += dep_static_libs
   inputs += dep_shared_libs
@@ -267,7 +305,7 @@ function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
               " -Wl,-\\( " .. table.concat(dep_static_libs, " ") ..
               " -Wl,-\\)" ..
               " -Wl,--as-needed " ..  table.concat(ext_shared_libs, " ") ..
-              " -shared -rdynamic -o " .. output,
+              opts .. " -o " .. output,
     outputs = {output}
   }
   return output
@@ -277,7 +315,7 @@ end
 -- Link an executable
 function link_executable(name, objects, dep_static_libs, dep_shared_libs,
                          ext_shared_libs)
-  local output = name
+  local output = name .. PLATFORM_EXE_EXT
   local inputs = {}
   inputs += objects
   inputs += dep_static_libs
@@ -408,7 +446,7 @@ if tup.getconfig("TEST") == "y" then
     if TYPE == "lib" then
       -- Optimisation because linking against .a is quicker than multiple .o
       -- files
-      test_objects += NAME .. ".a"
+      test_objects += NAME .. PLATFORM_LIB_EXT
     else
       test_objects += objects
     end
@@ -416,7 +454,7 @@ if tup.getconfig("TEST") == "y" then
                     test_ext_shared_libs)
     local test_products = {}
     if TYPE == "shared" then
-      test_products += NAME .. ".so"
+      test_products += NAME .. PLATFORM_SHARED_EXT
     elseif TYPE == "exe" then
       test_products += NAME
     end
