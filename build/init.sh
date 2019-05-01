@@ -6,10 +6,15 @@ ln -sf $BUILD_DIR/Tuprules.lua
 ln -sf $BUILD_DIR/create-deb.sh
 ln -sf $BUILD_DIR/create-rpm.sh
 
-while getopts ":t:" opt; do
+platform=linux
+
+while getopts ":t:p:" opt; do
   case $opt in
     t)
       buildtype=$OPTARG
+      ;;
+    p)
+      platform=$OPTARG
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -45,11 +50,13 @@ if [ "$buildtype" ]; then
   # try most specific first
   if [ -f $SPECIFIC ]; then
     cp $SPECIFIC $TUPCONFIG
+    echo PLATFORM=$platform >> $TUPCONFIG
     FOUNDCONFIG=1
   else
     if [ -f $GENERIC ]; then
       cp $GENERIC $TUPCONFIG
       echo CONFIG_ARCH=$TARGARCH >> $TUPCONFIG
+      echo PLATFORM=$platform >> $TUPCONFIG
       FOUNDCONFIG=1
     fi
   fi
