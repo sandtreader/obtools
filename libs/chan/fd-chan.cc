@@ -12,11 +12,17 @@
 #include <errno.h>
 #ifndef __WIN32__
 #include <unistd.h>
+#else
+#include <io.h>
 #endif
 
 #define SKIP_BUF_SIZE 4096
 
 namespace ObTools { namespace Channel {
+
+#ifdef __WIN32__
+const auto read = _read;
+#endif
 
 //==========================================================================
 // FD Reader
