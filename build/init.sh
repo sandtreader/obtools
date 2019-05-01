@@ -50,13 +50,13 @@ if [ "$buildtype" ]; then
   # try most specific first
   if [ -f $SPECIFIC ]; then
     cp $SPECIFIC $TUPCONFIG
-    echo PLATFORM=$platform >> $TUPCONFIG
+    echo CONFIG_PLATFORM=$platform >> $TUPCONFIG
     FOUNDCONFIG=1
   else
     if [ -f $GENERIC ]; then
       cp $GENERIC $TUPCONFIG
       echo CONFIG_ARCH=$TARGARCH >> $TUPCONFIG
-      echo PLATFORM=$platform >> $TUPCONFIG
+      echo CONFIG_PLATFORM=$platform >> $TUPCONFIG
       FOUNDCONFIG=1
     fi
   fi
