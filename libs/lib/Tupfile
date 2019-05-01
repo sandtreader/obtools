@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Lib library
+#
+# Copyright (c) 2019 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME          = ot-library
+TYPE          = headers
+LINUX-DEPENDS = ext-dl
+
+include_rules
