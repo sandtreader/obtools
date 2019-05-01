@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-db-mysql
-TYPE    = lib
-DEPENDS = ot-db ext-mysqlclient
+NAME      = ot-db-mysql
+TYPE      = lib
+DEPENDS   = ot-db ext-mysqlclient
+PLATFORMS = linux
 
 include_rules

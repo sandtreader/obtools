@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-db-sqlite
-TYPE    = lib
-DEPENDS = ot-db ot-file ext-pkg-sqlite3
+NAME      = ot-db-sqlite
+TYPE      = lib
+DEPENDS   = ot-db ot-file ext-pkg-sqlite3
+PLATFORMS = linux
 
 include_rules

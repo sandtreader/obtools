@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-db-pgsql
-TYPE    = lib
-DEPENDS = ot-db ext-pkg-libpq
+NAME      = ot-db-pgsql
+TYPE      = lib
+DEPENDS   = ot-db ext-pkg-libpq
+PLATFORMS = linux
 
 include_rules

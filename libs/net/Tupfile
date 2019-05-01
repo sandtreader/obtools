@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-net
-TYPE    = lib
-DEPENDS = ot-mt
+NAME            = ot-net
+TYPE            = lib
+DEPENDS         = ot-mt
+WINDOWS-DEPENDS = ext-wsock32
 
 include_rules

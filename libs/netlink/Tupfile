@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME        = ot-netlink
-TYPE        = lib
-DEPENDS     = ext-pkg-libnl-3.0 ext-pkg-libnl-genl-3.0
+NAME      = ot-netlink
+TYPE      = lib
+DEPENDS   = ext-pkg-libnl-3.0 ext-pkg-libnl-genl-3.0
+PLATFORMS = linux
 
 include_rules
