@@ -47,11 +47,11 @@ public:
 
   //------------------------------------------------------------------------
   /// Load an object
-  Object *load(object_id_t id) throw (Exception);
+  Object *load(object_id_t id);
 
   //------------------------------------------------------------------------
   /// Save an object
-  void save(Object *ob) throw (Exception);
+  void save(Object *ob);
 };
 
 //==========================================================================
@@ -61,12 +61,11 @@ class Storer
 public:
   //------------------------------------------------------------------------
   /// Interface to load an object from the given DB connection
-  virtual Object *load(object_id_t id, DB::AutoConnection& db)
-    throw (Exception) = 0;
+  virtual Object *load(object_id_t id, DB::AutoConnection& db);
 
   //------------------------------------------------------------------------
   /// Interface to save an object to the given DB connection
-  virtual void save(Object *ob, DB::AutoConnection& db) throw (Exception) = 0;
+  virtual void save(Object *ob, DB::AutoConnection& db) = 0;
 
   //------------------------------------------------------------------------
   // Virtual destructor

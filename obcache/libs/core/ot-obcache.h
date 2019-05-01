@@ -63,12 +63,12 @@ public:
   //------------------------------------------------------------------------
   /// Load a real object from an ID (create new object)
   /// Throw Exception if it can't be loaded
-  virtual Object *load(object_id_t id) throw (Exception) = 0;
+  virtual Object *load(object_id_t id) = 0;
 
   //------------------------------------------------------------------------
   /// Save a real object
   /// Throw Exception if it can't be saved
-  virtual void save(Object* ob) throw (Exception) = 0;
+  virtual void save(Object* ob) = 0;
 
   //------------------------------------------------------------------------
   /// Virtual destructor
@@ -88,7 +88,7 @@ class Stub
 protected:
   //------------------------------------------------------------------------
   /// Get real object, loading if necessary
-  Object *real_object() throw (Exception)
+  Object *real_object()
   {
     if (!real) real = storage.load(id);
     return real;
@@ -122,7 +122,7 @@ public:
 
   //------------------------------------------------------------------------
   /// Load and cache an object
-  Object *load(object_id_t id) throw (Exception)
+  Object *load(object_id_t id)
   {
     // !!! For now, just pass straight to storage and don't cache at all!
     return storage.load(id);
@@ -130,7 +130,7 @@ public:
 
   //------------------------------------------------------------------------
   /// Save an object from cache
-  void save(Object* ob) throw (Exception)
+  void save(Object* ob)
   {
     storage.save(ob);
   }

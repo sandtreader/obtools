@@ -15,7 +15,7 @@ namespace ObTools { namespace ObCache { namespace SQL {
 
 //--------------------------------------------------------------------------
 // Load an object
-Object *Storage::load(object_id_t id) throw (Exception)
+Object *Storage::load(object_id_t id)
 {
   // Get DB connection
   DB::AutoConnection db(db_pool);
@@ -40,7 +40,7 @@ Object *Storage::load(object_id_t id) throw (Exception)
 
 //--------------------------------------------------------------------------
 // Save an object
-void Storage::save(Object * /*ob*/) throw (Exception)
+void Storage::save(Object * /*ob*/)
 {
   // !!! Get type name from object get_name
   // !!! Look up storer interface
