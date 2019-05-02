@@ -9,8 +9,11 @@
 
 #include "ot-net.h"
 #if defined(PLATFORM_WINDOWS)
+#include <sstream>
+#include <iomanip>
 #include <io.h>
 #include <ws2tcpip.h>
+#include <iphlpapi.h>
 #define SOCKCLOSE closesocket
 #define SOCKIOCTL ioctlsocket
 #define SOCKERRNO WSAGetLastError()
@@ -328,9 +331,31 @@ EndPoint Socket::remote() const
 string Socket::get_mac(IPAddress ip, const string& device_name) const
 {
 #if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
-  assert(false); // get_mac not implemented
-  (void)ip;
   (void)device_name;
+
+  IP_ADAPTER_INFO adapter_info[16];
+  ULONG buf_len = sizeof(adapter_info);
+  auto status = GetAdaptersInfo(adapter_info, &buf_len);
+  if (status != ERROR_SUCCESS)
+    return "";
+
+  PIP_ADAPTER_INFO info = adapter_info;
+  do
+  {
+    if (ip.get_dotted_quad() == info->IpAddressList.IpAddress.String)
+    {
+      auto mac = ostringstream{};
+      for (auto i = 0u; i < info->AddressLength; ++i)
+      {
+        if (i)
+          mac << ':';
+        mac << hex << setfill('0') << setw(2) << info->Address[i];
+      }
+      return mac.str();
+    }
+    info = info->Next;
+  } while (info);
+
   return "";
 #else
   // Check if device specified - if not, lookup all Ethernet interfaces

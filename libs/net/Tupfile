@@ -7,6 +7,6 @@
 NAME            = ot-net
 TYPE            = lib
 DEPENDS         = ot-mt
-WINDOWS-DEPENDS = ext-wsock32
+WINDOWS-DEPENDS = ext-wsock32 ext-iphlpapi
 
 include_rules
