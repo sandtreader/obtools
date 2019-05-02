@@ -297,8 +297,10 @@ int Shell::start(int argc, char **argv)
     // Just run directly
     rc = application.run_priv();
     if (rc) return rc;
+#if !defined(PLATFORM_WINDOWS)
     rc = drop_privileges();
     if (rc) return rc;
+#endif
     rc = run();
     application.cleanup();
     return rc;
