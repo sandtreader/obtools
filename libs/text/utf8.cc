@@ -68,6 +68,19 @@ string UTF8::encode(const vector<wchar_t>& unicode)
 }
 
 //--------------------------------------------------------------------------
+// Encode a null terminated wide char to a UTF8 string
+string UTF8::encode(const wchar_t *unicode)
+{
+  string utf8;
+  while (*unicode)
+  {
+    append(utf8, *unicode);
+    ++unicode;
+  }
+  return utf8;
+}
+
+//--------------------------------------------------------------------------
 // Encode an ISO-Latin1 8-bit string into a UTF8 string
 string UTF8::encode(const string& isolatin1)
 {

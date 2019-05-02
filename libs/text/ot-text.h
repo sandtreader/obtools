@@ -324,6 +324,10 @@ public:
   // Encode a vector of unicode characters to a UTF8 string
   static string encode(const vector<wchar_t>& unicode);
 
+  //------------------------------------------------------------------------
+  // Encode a null terminated string of unicode characters to a UTF8 string
+  static string encode(const wchar_t *unicode);
+
   //--------------------------------------------------------------------------
   // Encode an ISO-Latin1 8-bit string into a UTF8 string
   static string encode(const string& isolatin1);
