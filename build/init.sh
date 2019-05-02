@@ -60,7 +60,7 @@ if [ "$buildtype" ]; then
   fi
 
   if [ $FOUNDCONFIG ]; then
-    echo PLATFORM=$platform >> $TUPCONFIG
+    echo CONFIG_PLATFORM=$platform >> $TUPCONFIG
     tup init
   else
     echo "`basename $0`: can't find config for $buildtype, architecture $TARGARCH"
