@@ -65,7 +65,7 @@ if PLATFORM == "linux" then
   COMPILER = "clang++"
   ARCHIVER = "ar"
   LINKER = COMPILER
-  PLATFORM_CFLAGS = ""
+  PLATFORM_CFLAGS = "-DPLATFORM_LINUX"
   PLATFORM_LFLAGS = ""
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = "-rdynamic"
@@ -75,13 +75,14 @@ elseif PLATFORM == "windows" then
   COMPILER = "x86_64-w64-mingw32-g++"
   ARCHIVER = "x86_64-w64-mingw32-ar"
   LINKER = COMPILER
-  PLATFORM_CFLAGS = "-I" .. tup.getcwd() .. "/mingw/include"
-                    .. " -DWIN32_LEAN_AND_MEAN"
-  PLATFORM_LFLAGS = "-L" .. tup.getcwd() .. "/mingw/lib"
+  PLATFORM_CFLAGS = "-DPLATFORM_WINDOWS -DWIN32_LEAN_AND_MEAN"
+  PLATFORM_LFLAGS = ""
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = ""
   PLATFORM_SHARED_EXT = ".dll"
   PLATFORM_EXE_EXT = ".exe"
+else
+  error("Unhandled platform: '" .. PLATFORM .. "'")
 end
 
 ----------------------------------------------------------------------------
