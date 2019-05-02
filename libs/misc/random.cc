@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <stdlib.h>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include <windows.h>
 #include <time.h>
 #else
@@ -56,7 +56,7 @@ void Random::generate_binary(unsigned char *p, int n)
 
     // Initialise from time
     {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
       FILETIME ft;
       GetSystemTimeAsFileTime(&ft);
       w ^= ft.dwHighDateTime^ft.dwLowDateTime;

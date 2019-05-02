@@ -14,7 +14,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include <windows.h>
 #endif
 
@@ -39,7 +39,7 @@ bool Directory::ensure(bool parents, int mode) const
     if (!ppath.ensure(parents, mode)) return false;
   }
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   if (_wmkdir(wide_path().c_str())) return false;
   return !_wchmod(wide_path().c_str(), mode);
 #else
@@ -61,7 +61,7 @@ bool Directory::ensure(bool parents, int mode) const
 bool Directory::inspect(list<string>& leaves, const string& pattern,
                         bool all)
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   // Use full '*' search, so we can use full pattern format without
   // worrying whether Windows implements it natively
   Path pat_path(*this, "*");
@@ -158,7 +158,7 @@ bool Directory::empty() const
 {
   bool result(true);
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   // Use full '*' search, so we can use full pattern format without
   // worrying whether Windows implements it natively
   Path pat_path(*this, "*");

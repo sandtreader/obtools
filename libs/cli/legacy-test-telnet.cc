@@ -30,7 +30,7 @@ public:
 
 int main()
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #endif
 

@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
   int port = atoi(argv[1]);
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #endif
 

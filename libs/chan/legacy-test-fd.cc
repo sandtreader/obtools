@@ -10,7 +10,7 @@
 #include "ot-chan.h"
 #include <fcntl.h>
 #include <errno.h>
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <unistd.h>
 #endif
 

@@ -26,12 +26,12 @@
 #include <stdexcept>
 #include <memory>
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <glob.h>
 #endif
 
 // Define uid_t and gid_t in Windows to make build easier
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 
 // Undefine in case someone defined it as (e.g.) int (e.g. wxWindows!)
 #undef uid_t
@@ -46,7 +46,7 @@ typedef int gid_t;
 
 // Fix 64-bit file operations in BSD (e.g. OS-X) - it does them natively
 // and doesn't provide '64' variants
-#if defined(__BSD__)
+#if defined(PLATFORM_BSD)
 typedef off_t off64_t;
 #define lseek64 lseek
 #define open64 open
@@ -65,7 +65,7 @@ class Path
 protected:
   string path;
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   static const char SEPCHAR = '\\';
   static const char ALTSEPCHAR = '/';
 #else
@@ -264,7 +264,7 @@ public:
   // Returns -1 if failed
   static int group_name_to_id(const string& gname);
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   //------------------------------------------------------------------------
   // Windows only - helper function to convert a UTF8 filename into a
   // wide character one
@@ -370,7 +370,7 @@ public:
 //==========================================================================
 // Stream classes - provides unified view of file streams which still works
 // with Windows wide-character filenames
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 // Windows version - they are streams created from underlying _wopen FD
 class InStream: public istream
 {
@@ -675,7 +675,7 @@ public:
 // Glob class
 // Perform actions on multiple files specified by a glob
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 class Glob
 {
 private:

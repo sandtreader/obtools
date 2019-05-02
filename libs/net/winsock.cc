@@ -7,7 +7,7 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include "ot-net.h"
 
 //--------------------------------------------------------------------------

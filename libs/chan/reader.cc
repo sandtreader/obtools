@@ -11,7 +11,7 @@
 #include "math.h"
 
 // Network headers for ntohl
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include <winsock.h>
 #else
 #include <netinet/in.h>

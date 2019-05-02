@@ -17,7 +17,7 @@
 #include <string.h>
 #include <set>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 
 // Windows headers & fixes
 #include <winsock2.h>
@@ -343,7 +343,7 @@ ostream& operator<<(ostream& s, const Port& p);
 class Socket
 {
 protected:
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   typedef SOCKET fd_t;
   static const fd_t INVALID_FD = INVALID_SOCKET;
 #else

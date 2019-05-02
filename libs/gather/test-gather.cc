@@ -331,7 +331,7 @@ TEST(GatherTest, TestDump)
   ASSERT_EQ(actual.str(), expect.str());
 }
 
-#if !defined(__WIN32__)
+#if !defined(PLATFORM_WINDOWS)
 TEST(GatherTest, TestFill)
 {
   Gather::Buffer buffer(1);

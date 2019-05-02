@@ -10,13 +10,13 @@
 #include "ot-file.h"
 #include <algorithm>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 // Note: stati versions, still 32-bit time_t
 #define CPATH(fn) Path::utf8_to_wide(fn).c_str()
 #define OPEN _wopen
 #include <windows.h>
 #else
-#if defined(__APPLE__)
+#if defined(PLATFORM_MACOS)
 // No LARGEFILE, otherwise sensible
 #define O_LARGEFILE 0
 #endif

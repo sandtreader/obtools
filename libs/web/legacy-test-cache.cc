@@ -26,7 +26,7 @@ using namespace ObTools;
 
 int main(int argc, char **argv)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #endif
 

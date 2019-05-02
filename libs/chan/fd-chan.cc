@@ -10,7 +10,7 @@
 #include "ot-chan.h"
 #include "ot-net.h"
 #include <errno.h>
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <unistd.h>
 #else
 #include <io.h>
@@ -20,7 +20,7 @@
 
 namespace ObTools { namespace Channel {
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
 const auto read = _read;
 #endif
 

@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
   Log::Streams log;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #endif
 

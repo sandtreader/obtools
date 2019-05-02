@@ -11,7 +11,7 @@
 #ifndef __OBTOOLS_LIB_H
 #define __OBTOOLS_LIB_H
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
 #include <windef.h>
 #else
 #include <dlfcn.h>
@@ -27,7 +27,7 @@ using namespace std;
 class Library
 {
 private:
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   HINSTANCE lib = nullptr;
 #else
   void *lib = nullptr;
@@ -37,7 +37,7 @@ public:
   // Constructors
   Library(const string& path)
   {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
     lib = LoadLibrary(path.c_str());
 #else
     lib = dlopen(path.c_str(), RTLD_NOW);
@@ -58,7 +58,7 @@ public:
   {
     if (!lib)
       return nullptr;
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
     // Windows assigns a type (FARPROC) to the result of GetProcAddress()
     // and GCC warns about casting it away from that
 #pragma GCC diagnostic push
@@ -74,7 +74,7 @@ public:
   // Get error
   string get_error() const
   {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
     return "unknown";
 #else
     return dlerror();
@@ -87,7 +87,7 @@ public:
   {
     if (!lib)
       return;
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
     FreeLibrary(lib);
 #else
     dlclose(lib);

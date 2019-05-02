@@ -38,7 +38,7 @@ void TimestampFilter::log(const Message& msg)
   // Now do strftime on what's left
   char stm[81];
   time_t time = msg.timestamp.time();
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   // Hope that localtime is reentrant!
   strftime(stm, 80, tmp_format.c_str(), localtime(&time));
 #else

@@ -11,7 +11,7 @@
 #include "ot-log.h"
 #include "ot-chan.h"
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include "windows.h"
 #include "windns.h"
 #else
@@ -33,7 +33,7 @@ Resolver::Resolver()
 }
 
 
-#if !defined(__WIN32__)
+#if !defined(PLATFORM_WINDOWS)
 //--------------------------------------------------------------------------
 // Skip a DNS 'name'
 static void skip_name(Channel::Reader& r)
@@ -65,7 +65,7 @@ string Resolver::query(const string& domain, Type type,
   Log::Streams log;
   log.detail << "DNS resolver: " << domain << " (" << type_name << ")\n";
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   PDNS_RECORD rr;
   DNS_STATUS status = DnsQuery(domain.c_str(), type, DNS_QUERY_STANDARD,
                                0, &rr, 0);

@@ -8,7 +8,7 @@
 //==========================================================================
 
 #include "ot-net.h"
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
 #include <io.h>
 #include <ws2tcpip.h>
 #define SOCKCLOSE closesocket
@@ -34,7 +34,7 @@ typedef const void *sockopt_t;
 
 #define SOCKET_BUFFER_SIZE 1024
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
 const auto SOCK_CLOEXEC = 0;
 #endif
 
@@ -54,7 +54,7 @@ Socket::~Socket()
 // Graceful shutdown
 void Socket::shutdown()
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   ::shutdown(fd, SD_BOTH);
 #else
   ::shutdown(fd, SHUT_RDWR);
@@ -65,7 +65,7 @@ void Socket::shutdown()
 // Finish sending, but keep read-side open to receive results (e.g. HTTP)
 void Socket::finish()
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   ::shutdown(fd, SD_SEND);
 #else
   ::shutdown(fd, SHUT_WR);
@@ -137,7 +137,7 @@ void Socket::set_multicast_ttl(int hops)
 // Set timeout (receive and send) in seconds and optional microseconds
 void Socket::set_timeout(int secs, int usecs)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   // Windows has it as an integer milliseconds (!)
   int ms = secs*1000 + usecs/1000;
   setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&ms, sizeof(ms));
@@ -158,7 +158,7 @@ void Socket::set_timeout(int secs, int usecs)
 // Set socket priority (0-7)
 void Socket::set_priority(int prio)
 {
-#if defined(__WIN32__) || defined(__APPLE__)
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
   assert(false); // set_priority not implemented
   (void)prio;
 #else
@@ -172,7 +172,7 @@ void Socket::set_priority(int prio)
 // Set IP TOS field
 void Socket::set_tos(int tos)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   assert(false); // set_tos not implemented in Windows
   (void)tos;
 #else
@@ -186,12 +186,12 @@ void Socket::set_tos(int tos)
 // Join a multicast group address (IP_ADD_MEMBERSHIP)
 bool Socket::join_multicast(IPAddress address)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   assert(false); // join_multicast not implemented in Windows
   (void)address;
   return false;
 #else
-#ifdef __BSD__
+#if defined(PLATFORM_BSD)
   struct ip_mreq mreq;
   mreq.imr_interface.s_addr = inaddr_any;
 #else
@@ -209,12 +209,12 @@ bool Socket::join_multicast(IPAddress address)
 // Leave a multicast group address (IP_DROP_MEMBERSHIP)
 bool Socket::leave_multicast(IPAddress address)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   assert(false); // leave_multicast not implemented in Windows
   (void)address;
   return false;
 #else
-#ifdef __BSD__
+#if defined(PLATFORM_BSD)
   struct ip_mreq mreq;
   mreq.imr_interface.s_addr = inaddr_any;
 #else
@@ -327,7 +327,7 @@ EndPoint Socket::remote() const
 // Returns empty string if it can't find it
 string Socket::get_mac(IPAddress ip, const string& device_name) const
 {
-#if defined(__WIN32__) || defined(__APPLE__)
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
   assert(false); // get_mac not implemented
   (void)ip;
   (void)device_name;
@@ -395,7 +395,7 @@ set<string> Socket::get_host_macs() const
 {
   set<string> macs;
 
-#if defined(__WIN32__) || defined(__APPLE__)
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
   assert(false); // get_host_macs not implemented
   return macs;
 #else
@@ -472,7 +472,7 @@ ssize_t TCPSocket::cread(void *buf, size_t count)
 
   ssize_t size;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   size = ::recv(fd, (char *)buf, count, 0);
   if (size == SOCKET_ERROR) size = -1;
 #else
@@ -495,14 +495,14 @@ ssize_t TCPSocket::cwrite(const void *buf, size_t count)
 
   ssize_t size;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   size = ::send(fd, (const char *)buf, count, 0);
   if (size == SOCKET_ERROR) size = -1;
 #else
   // Silently loop on EINTR
   do
   {
-#ifdef __BSD__
+#if defined(PLATFORM_BSD)
     size = ::send(fd, buf, count, 0);
 #else
     size = ::send(fd, buf, count, MSG_NOSIGNAL);
@@ -629,7 +629,7 @@ void TCPSocket::write(const char *p)
 // Raw stream sendmsg wrapper
 int TCPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   assert(false); // No idea if this works in Windows
   (void)gathers;
   (void)ngathers;
@@ -822,7 +822,7 @@ ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
 {
   ssize_t size;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   size = ::recv(fd, (char *)buf, len, flags);
   if (size == SOCKET_ERROR) size = -1;
 #else
@@ -843,7 +843,7 @@ int UDPSocket::csend(const void *msg, size_t len, int flags)
 {
   int res;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   res = ::send(fd, (const char *)msg, len, flags);
   if (res == SOCKET_ERROR) res = -1;
 #else
@@ -869,7 +869,7 @@ ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
   socklen_t slen = sizeof(saddr);
   ssize_t size;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   size = ::recvfrom(fd, (char *)buf, len, flags,
                     (struct sockaddr *)&saddr, &slen);
   if (size == SOCKET_ERROR) size = -1;
@@ -897,7 +897,7 @@ int UDPSocket::csendto(const void *msg, size_t len, int flags,
   endpoint.set(saddr);
   int res;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   res = ::sendto(fd, (const char *)msg, len, flags,
                   (struct sockaddr *)&saddr, sizeof(saddr));
   if (res == SOCKET_ERROR) res = -1;
@@ -922,7 +922,7 @@ int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
   endpoint.set(saddr);
   int res;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   assert(false); // #warning No idea if this works in Windows
   (void)gathers;
   (void)ngathers;

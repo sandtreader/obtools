@@ -10,7 +10,7 @@
 #include "ot-db.h"
 #ifdef DEBUG
 #include "ot-log.h"
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <execinfo.h>
 #endif
 #endif
@@ -64,7 +64,7 @@ bool Transaction::commit()
   if (spent > chrono::milliseconds{1000})
   {
     Log::Error log;
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
     log << "Slow transaction ("
         << chrono::duration_cast<chrono::milliseconds>(spent).count()
         << "ms "

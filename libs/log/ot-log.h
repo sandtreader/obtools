@@ -257,7 +257,7 @@ public:
   }
 };
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 //==========================================================================
 // Channel for syslog
 class SyslogChannel: public Channel

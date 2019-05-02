@@ -10,7 +10,7 @@
 #include "ot-net.h"
 #include <memory>
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
 #include <io.h>
 #define SOCKCLOSE closesocket
 #else
@@ -36,7 +36,7 @@ void TCPServer::start()
   // Don't use on Windows because it's too powerful - allows double bind
   // to the same explicit port even if something else is actively listening
   // to it.
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
   enable_reuse();
 #endif
 
@@ -74,7 +74,7 @@ void TCPServer::run()
     TCPWorkerThread *thread = threadpool.wait();
     if (!thread) break;  // only at shutdown
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
     fd_t new_fd = ::accept(fd, reinterpret_cast<struct sockaddr *>(&saddr),
                            &len);
 #else
@@ -205,7 +205,7 @@ void TCPWorkerThread::die(bool wait)
 {
   if (client_fd >= 0)
   {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
     ::shutdown(client_fd, SD_BOTH);
 #else
     ::shutdown(client_fd, SHUT_RDWR);

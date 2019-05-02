@@ -12,12 +12,12 @@
 #include "ot-misc.h"
 #include <stdint.h>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 // Assume Windows is always little-endian
 #define __LITTLE_ENDIAN 1
 #define __BYTE_ORDER __LITTLE_ENDIAN
 #else
-#if defined(__BSD__)
+#if defined(PLATFORM_BSD)
 #include <machine/endian.h>
 #else
 #include <endian.h>

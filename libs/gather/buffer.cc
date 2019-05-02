@@ -139,7 +139,7 @@ length_t Buffer::copy(data_t *data, const BufferIterator& offset,
   return data_read;
 }
 
-#if !defined(__WIN32__)
+#if !defined(PLATFORM_WINDOWS)
 //--------------------------------------------------------------------------
 // Fill an iovec array with the data
 // iovec must be pre-allocated to the maximum segments of the buffer (size)

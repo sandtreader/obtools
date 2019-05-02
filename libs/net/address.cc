@@ -12,7 +12,7 @@
 #include <sstream>
 #include <stdlib.h>
 
-#if !defined(__WIN32__)
+#if !defined(PLATFORM_WINDOWS)
 #include <netdb.h>
 #include <arpa/inet.h>
 #endif
@@ -36,7 +36,7 @@ IPAddress::IPAddress(const string& hostname_s)
   }
   else
   {
-#if defined(__WIN32__) || defined(__APPLE__)
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
     // Believed to be threadsafe (using TLS for result), but doesn't
     // provide gethostbyname_r anyway
     struct hostent *host;
@@ -77,7 +77,7 @@ string IPAddress::get_hostname() const
 {
   uint32_t nbo_addr = nbo();
 
-#if defined(__WIN32__) || defined(__APPLE__)
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MACOS)
   // Believed to be threadsafe (using TLS for result), but doesn't
   // provide gethostbyaddr_r anyway
   struct hostent *host;

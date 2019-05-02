@@ -15,7 +15,7 @@
 #include <vector>
 #include <ot-text.h>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include <windows.h>
 // Widely-quoted difference between Windows filetime and Unix time_t epochs
 #define FILETIME_UNIX_EPOCH_DIFF 11644473600ULL
@@ -734,7 +734,7 @@ Stamp Stamp::localise() const
   // entire complexity of TZ, DST, databases etc.
   time_t t = time();
   struct tm tm;
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   // Windows doesn't have localtime_r, but localtime is supposed to use
   // a thread-local buffer, so it's OK to use it directly
   tm = *localtime(&t);
@@ -788,7 +788,7 @@ Stamp Stamp::globalise() const
 Stamp Stamp::now()
 {
   Stamp s;
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   FILETIME ft;
   GetSystemTimeAsFileTime(&ft);
 

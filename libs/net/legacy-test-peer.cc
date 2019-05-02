@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   string local = "0.0.0.0";
   if (argc > 3) local = argv[3];
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #endif
 

@@ -19,7 +19,7 @@
 #include <ostream>
 #include "ot-chan.h"
 
-#if !defined(__WIN32__)
+#if !defined(PLATFORM_WINDOWS)
 #include "sys/uio.h"
 #endif
 
@@ -384,7 +384,7 @@ public:
   length_t copy(data_t *data, const BufferIterator& offset,
                 length_t len) const;
 
-#if !defined(__WIN32__)
+#if !defined(PLATFORM_WINDOWS)
   //------------------------------------------------------------------------
   // Fill an iovec array with the data
   // iovec must be pre-allocated to the maximum segments of the buffer (size)

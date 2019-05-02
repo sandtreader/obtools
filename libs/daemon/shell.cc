@@ -16,7 +16,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fstream>
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <execinfo.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -45,12 +45,12 @@ void sigshutdown(int)
   if (the_shell) the_shell->signal_shutdown();
   signal(SIGTERM, sig_ign);
   signal(SIGINT, sig_ign);
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
   signal(SIGQUIT, sig_ign);
 #endif
 }
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 // SIGHUP:  Reload config
 void sighup(int)
 {
@@ -131,7 +131,7 @@ int Shell::start(int argc, char **argv)
   auto chan_out = static_cast<Log::Channel *>(nullptr);
   if (go_daemon)
   {
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
     if (config.get_value_bool("log/@syslog"))
     {
       chan_out = new Log::SyslogChannel;
@@ -147,7 +147,7 @@ int Shell::start(int argc, char **argv)
         return 2;
       }
       chan_out = new Log::OwnedStreamChannel{sout};
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
     }
 #endif
   }
@@ -176,7 +176,7 @@ int Shell::start(int argc, char **argv)
     return rc;
   }
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
   // Full background daemon
   if (go_daemon)
   {
@@ -195,7 +195,7 @@ int Shell::start(int argc, char **argv)
   the_shell = this;
   signal(SIGTERM, sigshutdown);
   signal(SIGINT,  sigshutdown); // quit from Ctrl-C
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
   signal(SIGQUIT, sigshutdown); // quit from Ctrl-backslash
   signal(SIGHUP,  sighup);
   // Ignore SIGPIPE from closed sockets etc.
@@ -206,7 +206,7 @@ int Shell::start(int argc, char **argv)
   signal(SIGFPE,  sigevil);
   signal(SIGABRT, sigevil);
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
   // Watchdog? Master/slave processes...
   bool enable_watchdog = config.get_value_bool("watchdog/@restart", true);
   int sleep_time = FIRST_WATCHDOG_SLEEP_TIME;
@@ -302,7 +302,7 @@ int Shell::start(int argc, char **argv)
     rc = run();
     application.cleanup();
     return rc;
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
   }
 #endif
 }
@@ -312,7 +312,7 @@ int Shell::start(int argc, char **argv)
 // Returns 0 on success, rc if not
 int Shell::drop_privileges()
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   return -99;
 #else
   // Drop privileges if root
@@ -413,7 +413,7 @@ void Shell::log_evil(int sig)
 #define MAXTRACE 100
 #define MAXNAMELEN 1024
   void *buffer[MAXTRACE];
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   const auto frames = CaptureStackBackTrace(1, MAXTRACE, buffer, nullptr);
   if (frames)
   {

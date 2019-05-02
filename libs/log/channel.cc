@@ -8,7 +8,7 @@
 //==========================================================================
 
 #include "ot-log.h"
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <syslog.h>
 #endif
 
@@ -43,7 +43,7 @@ void OwnedStreamChannel::log(const Message& msg)
   *stream << msg.text << endl;
 }
 
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 //==========================================================================
 // SyslogChannel
 

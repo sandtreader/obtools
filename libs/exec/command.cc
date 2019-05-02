@@ -11,7 +11,7 @@
 #include "ot-text.h"
 #include <unistd.h>
 #include <sys/types.h>
-#ifndef __WIN32__
+#if !defined(PLATFORM_WINDOWS)
 #include <sys/wait.h>
 #endif
 #include <errno.h>
@@ -74,7 +74,7 @@ bool Command::execute(const string& input, string& output_p)
 {
   Log::Streams log;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   log.error << "Command execution unsupported on this platform" <<endl;
   (void)input;
   (void)output_p;

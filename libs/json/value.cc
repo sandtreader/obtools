@@ -40,7 +40,7 @@ void Value::write_string_to(ostream& out) const
       default:
         if (c > 0x7f)
         {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
           out << "\\u" << setw(4) << setfill('0') << hex << c;
 #else
           if (c < 0x10000)

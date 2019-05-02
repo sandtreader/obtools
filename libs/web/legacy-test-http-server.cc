@@ -75,7 +75,7 @@ const sighandler_t sig_ign(SIG_IGN);
 #pragma GCC diagnostic pop
 int main(int argc, char **argv)
 {
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #else
   // Force ignore for SIGPIPE

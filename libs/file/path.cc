@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 // Note: stati versions, still 32-bit time_t
 #define STRUCT_STAT struct _stati64
 #define STAT _wstati64
@@ -37,7 +37,7 @@
 #include <ext/stdio_filebuf.h>
 #include <shellapi.h>
 #else
-#if defined(__APPLE__)
+#if defined(PLATFORM_MACOS)
 // No LARGEFILE, otherwise sensible
 #define O_LARGEFILE 0
 #endif
@@ -87,7 +87,7 @@ Path::Path(const Path& _path, const string& leaf)
 // Find whether it's an absolute path
 bool Path::is_absolute() const
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   // Allow for c:\xxx form
   return !path.empty() && (is_sep_char(path[0])
                            ||(path.size()>=3
@@ -210,7 +210,7 @@ Path Path::resolve(const Path& new_path) const
 // Use to convert '/'-separated paths (e.g. URLs) to local separator
 void Path::fix_slashes()
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   for(string::iterator p=path.begin(); p!=path.end(); ++p)
     if (*p == '/') *p = SEPCHAR;
 #endif
@@ -274,7 +274,7 @@ time_t Path::last_modified() const
 // Returns whether successful
 bool Path::set_last_modified(time_t t) const
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   struct _utimbuf utb;
 #else
   struct utimbuf utb;
@@ -303,7 +303,7 @@ bool Path::set_mode(mode_t mode) const
 // Get the file's owner
 uid_t Path::owner() const
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   return 0;
 #else
   STRUCT_STAT sb;
@@ -315,7 +315,7 @@ uid_t Path::owner() const
 // Get the file's group
 gid_t Path::group() const
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   return 0;
 #else
   STRUCT_STAT sb;
@@ -327,7 +327,7 @@ gid_t Path::group() const
 // Get the file's owner & group
 bool Path::set_ownership(uid_t owner, uid_t group) const
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   (void)owner;
   (void)group;
   return true;
@@ -353,7 +353,7 @@ bool Path::erase() const
 {
   if (is_dir())
   {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
     // Note: Shelling out to rmdir opens a console window
 
     // Create string with extra null on the end, plus manual null in case
@@ -451,7 +451,7 @@ bool Path::touch(mode_t mode) const
 // Note: You probably can't rename between filing systems
 bool Path::rename(const Path& new_path) const
 {
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
   // Try supposedly atomic MoveFileEx (NT+)
   if (MoveFileExW(CPATH, new_path.wide_path().c_str(),
                   MOVEFILE_REPLACE_EXISTING))
@@ -537,7 +537,7 @@ int Path::otoi(const string& mode_s)
 // Get user name from uid
 string Path::user_id_to_name(uid_t uid)
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   (void)uid;
   return "?";
 #else
@@ -563,7 +563,7 @@ string Path::user_id_to_name(uid_t uid)
 // Returns -1 if it fails
 int Path::user_name_to_id(const string& uname)
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   (void)uname;
   return -1;
 #else
@@ -589,7 +589,7 @@ int Path::user_name_to_id(const string& uname)
 // Get group name from gid
 string Path::group_id_to_name(gid_t gid)
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   (void)gid;
   return "?";
 #else
@@ -615,7 +615,7 @@ string Path::group_id_to_name(gid_t gid)
 // Returns -1 if it fails
 int Path::group_name_to_id(const string& gname)
 {
-#if defined(__WIN32__) // Meaningless in Windows
+#if defined(PLATFORM_WINDOWS) // Meaningless in Windows
   (void)gname;
   return -1;
 #else
@@ -637,7 +637,7 @@ int Path::group_name_to_id(const string& gname)
 #endif
 }
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 //--------------------------------------------------------------------------
 // Windows only - helper function to convert a UTF8 filename into a
 // wide character one

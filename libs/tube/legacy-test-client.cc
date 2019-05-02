@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#if defined(__WIN32__)
+#if defined(PLATFORM_WINDOWS)
 #include <windows.h>
 #endif
 
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
   Log::logger.connect(level_out);
   Log::Streams log;
 
-#ifdef __WIN32__
+#if defined(PLATFORM_WINDOWS)
   winsock_initialise();
 #else
   // Ignore SIGPIPE (not quite why we're getting them!)
