@@ -47,8 +47,8 @@ public:
     FALSE_    // Boolean value
   } type;
 
-  double f;
-  int64_t n;
+  double f = 0.0;
+  int64_t n = 0;
   string s;
   map <string, Value> o;
   vector<Value> a;
