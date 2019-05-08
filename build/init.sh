@@ -5,6 +5,7 @@ ln -sf $BUILD_DIR/Tuprules.tup
 ln -sf $BUILD_DIR/Tuprules.lua
 ln -sf $BUILD_DIR/create-deb.sh
 ln -sf $BUILD_DIR/create-rpm.sh
+ln -sf $BUILD_DIR/create-nsis.sh
 
 platform=linux
 

@@ -71,6 +71,7 @@ if PLATFORM == "linux" then
   PLATFORM_SHARED_FLAGS = "-rdynamic"
   PLATFORM_SHARED_EXT = ".so"
   PLATFORM_EXE_EXT = ""
+  PACKAGEDIR = "DEBIAN"
 elseif PLATFORM == "windows" then
   COMPILER = "x86_64-w64-mingw32-g++"
   ARCHIVER = "x86_64-w64-mingw32-ar"
@@ -81,6 +82,7 @@ elseif PLATFORM == "windows" then
   PLATFORM_SHARED_FLAGS = ""
   PLATFORM_SHARED_EXT = ".dll"
   PLATFORM_EXE_EXT = ".exe"
+  PACKAGEDIR = "WINDOWS"
 else
   error("Unhandled platform: '" .. PLATFORM .. "'")
 end
@@ -128,10 +130,6 @@ if VERSION then
   end
   CFLAGS = CFLAGS .. "\"'"
 end
-
-----------------------------------------------------------------------------
--- Debian package directory name
-local PACKAGEDIR = "DEBIAN"
 
 --==========================================================================
 -- Sort source files into groups
@@ -348,8 +346,8 @@ function run_test(name, test_products, dep_shared_libs)
 end
 
 ----------------------------------------------------------------------------
--- Package
-function package(products, package_dir, dep_products)
+-- Package (Linux)
+function package_linux(products, package_dir, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
@@ -405,6 +403,29 @@ function package(products, package_dir, dep_products)
               table.concat(package_names, " "),
     outputs = outputs
   }
+end
+
+----------------------------------------------------------------------------
+-- Package (Windows)
+function package_windows(products, package_dir, dep_products)
+  local inputs = tup.glob(PACKAGEDIR .. "/*")
+  inputs += products
+  inputs += dep_products
+  local output = NAME .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
+                 "installer.exe"
+
+  tup.definerule{
+    inputs = inputs,
+    command = "^ PACKAGE %o^ " .. tup.getcwd() .. "/create-nsis.sh " ..
+              VERSION .. " " .. REVISION .. " " .. output,
+    outputs = {output}
+  }
+end
+
+if PLATFORM == "linux" then
+  package = package_linux
+elseif PLATFORM == "windows" then
+  package = package_windows
 end
 
 --==========================================================================
