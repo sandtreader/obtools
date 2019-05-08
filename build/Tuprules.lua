@@ -417,7 +417,8 @@ function package_windows(products, package_dir, dep_products)
   local f = io.open(package_dir .. "/files", "r")
   if f ~= nil then
     for line in f:lines() do
-      inputs += line
+      i = line:match("[^ ]+", 1)
+      inputs += i
     end
   end
 

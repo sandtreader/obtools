@@ -11,29 +11,31 @@ OUTFILE=$3
 INSTALL=""
 UNINSTALL=""
 
-if [ -e WINDOWS/files ]
-then
-  while read l;
-  do
-    INSTALL="$INSTALL
-  File $l"
-    f=$(basename $l)
-    UNINSTALL="$UNINSTALL
+for file in WINDOWS/files WINDOWS/external-files
+do
+  if [ -e $file ]
+  then
+    while read l;
+    do
+      set $l
+      f=$(basename $1)
+      if [ -z "$2" ]
+      then
+        INSTALL="$INSTALL
+  SetOutPath \"\$INSTDIR\"
+  File $1"
+        UNINSTALL="$UNINSTALL
   Delete \"\$INSTDIR\\$f\""
-  done < WINDOWS/files
-fi
-
-if [ -e WINDOWS/external-files ]
-then
-  while read l;
-  do
-    INSTALL="$INSTALL
-  File $l"
-    f=$(basename $l)
-    UNINSTALL="$UNINSTALL
-  Delete \"\$INSTDIR\\$f\""
-  done < WINDOWS/external-files
-fi
+      else
+      INSTALL="$INSTALL
+  SetOutPath \"\$INSTDIR\\$2\"
+  File $1"
+      UNINSTALL="$UNINSTALL
+  Delete \"\$INSTDIR\\$2\\$f\""
+      fi
+    done < $file
+  fi
+done
 
 makensis - <<EOF
 !define APPNAME "$APPNAME"
