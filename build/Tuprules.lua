@@ -414,6 +414,13 @@ function package_windows(products, package_dir, dep_products)
   local output = NAME .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
                  "installer.exe"
 
+  local f = io.open(package_dir .. "/files", "r")
+  if f ~= nil then
+    for line in f:lines() do
+      inputs += line
+    end
+  end
+
   tup.definerule{
     inputs = inputs,
     command = "^ PACKAGE %o^ " .. tup.getcwd() .. "/create-nsis.sh " ..
