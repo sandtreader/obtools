@@ -59,6 +59,21 @@ if PLATFORMS ~= nil then
 end
 
 ----------------------------------------------------------------------------
+-- Add platform specific dependencies into main table
+local platform_depends = _G[PLATFORM:upper() .. "-DEPENDS"]
+if platform_depends ~= nil
+then
+  if DEPENDS == nil
+  then
+    DEPENDS = {}
+  end
+  for k, v in pairs(_G[PLATFORM:upper() .. "-DEPENDS"])
+  do
+    table.insert(DEPENDS, v)
+  end
+end
+
+----------------------------------------------------------------------------
 -- Tools
 
 if PLATFORM == "linux" then
