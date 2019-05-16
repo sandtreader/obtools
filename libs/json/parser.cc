@@ -122,7 +122,7 @@ Value Parser::read_value()
 
       case Lex::Token::NUMBER:
         if (token.value.find('.') != string::npos)
-          return Value(Value::NUMBER, Text::stof(token.value));
+          return Value(Text::stof(token.value));
         else
           return Value(Text::stoi64(token.value));
 

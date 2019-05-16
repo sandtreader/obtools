@@ -54,32 +54,28 @@ public:
   vector<Value> a;
 
   // Constructors
-  Value(): type(UNSET), n(0) {}
-  Value(Type _type): type(_type), n(0) {}
-  Value(Type, double _f): type(NUMBER), f(_f) {} // note type included so not..
-  Value(int64_t _n): type(INTEGER), n(_n) {}    // ..ambiguous with this
-  Value(const string& _s): type(STRING), n(0), s(_s) {}
+  Value(): type(UNSET) {}
+  Value(Type _type): type(_type) {}
+  Value(float _f): type(NUMBER), f(_f) {}
+  Value(double _f): type(NUMBER), f(_f) {}
+  Value(int32_t _n): type(INTEGER), n(_n) {}
+  Value(uint32_t _n): type(INTEGER), n(_n) {}
+  Value(int64_t _n): type(INTEGER), n(_n) {}
+  Value(uint64_t _n): type(INTEGER), n(_n) {}
+  Value(const string& _s): type(STRING), s(_s) {}
+  Value(const char *_s): type(STRING), s(_s) {}
 
   //------------------------------------------------------------------------
-  // Set a property on an object value
-  Value& set(const string& name, const Value& v) { return (o[name] = v); }
-
-  // Special explicit cases for int, double and string to remove ambiguity on
-  // 0 and to make chainable - note returns *this not the added value
-  Value& set(const string& name, uint64_t _n)
-  { set(name, Value(_n)); return *this; }
-  Value& setd(const string& name, double _d)
-  { set(name, Value(NUMBER, _d)); return *this; }
-  Value& set(const string& name, const string& _s)
-  { set(name, Value(_s)); return *this; }
+  // Set a constructed property on an object value - returns the Value added
+  Value& put(const string& name, const Value& v) { return (o[name] = v); }
 
   //------------------------------------------------------------------------
-  // Add an element to an array value
+  // Set a property on an object value - returns *this for chaining
+  Value& set(const string& name, const Value& v) { o[name] = v; return *this; }
+
+  //------------------------------------------------------------------------
+  // Add an element to an array value - returns the Value added
   Value& add(const Value& v) { a.push_back(v); return a.back(); }
-
-  // Special cases for int, string as above
-  void add(int64_t _n) { add(Value(_n)); }
-  void add(const string& _s) { add(Value(_s)); }
 
   //------------------------------------------------------------------------
   // Check whether a value is valid - NB FALSE, NULL and 0 are still valid!

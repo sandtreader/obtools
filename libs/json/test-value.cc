@@ -56,7 +56,7 @@ TEST(Value, TestAsInt)
 
 TEST(Value, TestAsFloat)
 {
-  Value vf(Value::NUMBER, 42.9);
+  Value vf(42.9);
   ASSERT_EQ(42.9, vf.as_float());
 
   Value vi(42);
@@ -158,13 +158,13 @@ TEST(Value, TestWritingFalse)
 
 TEST(Value, TestWritingNumber)
 {
-  Value value(Value::NUMBER, 3.1415);
+  Value value(3.1415);
   ASSERT_EQ("3.1415", value.str());
 }
 
 TEST(Value, TestWritingBigIntegerStaysIntegral)
 {
-  Value value(1234567890123456789LL);
+  Value value(int64_t{1234567890123456789LL});
   ASSERT_EQ("1234567890123456789", value.str());
 }
 
