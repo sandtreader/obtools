@@ -64,9 +64,14 @@ public:
   // Set a property on an object value
   Value& set(const string& name, const Value& v) { return (o[name] = v); }
 
-  // Special explicit cases for int and string to remove ambiguity on 0
-  void set(const string& name, uint64_t _n) { set(name, Value(_n)); }
-  void set(const string& name, const string& _s) { set(name, Value(_s)); }
+  // Special explicit cases for int, double and string to remove ambiguity on
+  // 0 and to make chainable - note returns *this not the added value
+  Value& set(const string& name, uint64_t _n)
+  { set(name, Value(_n)); return *this; }
+  Value& setd(const string& name, double _d)
+  { set(name, Value(NUMBER, _d)); return *this; }
+  Value& set(const string& name, const string& _s)
+  { set(name, Value(_s)); return *this; }
 
   //------------------------------------------------------------------------
   // Add an element to an array value
