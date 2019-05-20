@@ -142,6 +142,10 @@ public:
   string basename() const;
 
   //------------------------------------------------------------------------
+  // Get the canonicalised absolute pathname
+  File::Path realpath() const;
+
+  //------------------------------------------------------------------------
   // Fix a path to local directory separator type
   // Use to convert '/'-separated paths (e.g. URLs) to local separator
   void fix_slashes();

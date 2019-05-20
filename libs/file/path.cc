@@ -9,6 +9,7 @@
 //==========================================================================
 
 #include "ot-file.h"
+#include "ot-text.h"
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <utime.h>
@@ -164,6 +165,23 @@ string Path::basename() const
   string::size_type dot = leaf.rfind(EXTCHAR);
   if (dot == string::npos) return leaf;
   return string(leaf, 0, dot);
+}
+
+//--------------------------------------------------------------------------
+// Get the canonicalised absolute pathname
+File::Path Path::realpath() const
+{
+#if defined(PLATFORM_WINDOWS)
+  wchar_t buff[_MAX_PATH];
+  if (!_wfullpath(buff, CPATH, sizeof(buff)))
+    return {};
+  return {Text::UTF8::encode(buff)};
+#else
+  char buff[PATH_MAX];
+  if (!::realpath(CPATH, buff))
+    return {};
+  return {buff};
+#endif
 }
 
 //--------------------------------------------------------------------------
