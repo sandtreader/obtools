@@ -173,9 +173,9 @@ File::Path Path::realpath() const
 {
 #if defined(PLATFORM_WINDOWS)
   wchar_t buff[_MAX_PATH];
-  if (!_wfullpath(buff, CPATH, sizeof(buff)))
+  if (!_wfullpath(buff, CPATH, _MAX_PATH))
     return {};
-  return {Text::UTF8::encode(buff)};
+  return File::Path{Text::UTF8::encode(buff)};
 #else
   char buff[PATH_MAX];
   if (!::realpath(CPATH, buff))
