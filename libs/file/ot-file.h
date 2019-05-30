@@ -95,6 +95,7 @@ public:
   //------------------------------------------------------------------------
   // Constructor from directory and leaf
   // If directory is empty or ends with slash already, doesn't add a slash
+  // If directory is '.', just returns leaf
   Path(const string& dir, const string& leaf);
 
   //------------------------------------------------------------------------

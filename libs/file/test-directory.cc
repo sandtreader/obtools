@@ -16,6 +16,11 @@ namespace {
 using namespace std;
 using namespace ObTools;
 
+TEST(DirectoryTest, TestCombineConstructor)
+{
+  EXPECT_EQ("foo/bar", File::Directory("foo", "bar").str());
+}
+
 TEST(DirectoryTest, TestResolve)
 {
   EXPECT_EQ("/foo/bar/splat",
@@ -24,6 +29,12 @@ TEST(DirectoryTest, TestResolve)
             File::Directory("/foo/bar").resolve(File::Path("/splat")).str());
   EXPECT_EQ("/foo/splat",
             File::Directory("/foo/bar").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("../splat",
+            File::Directory(".").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("splat",
+            File::Directory("foo").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("splat",
+            File::Directory("./foo").resolve(File::Path("../splat")).str());
 }
 
 TEST(DirectoryTest, TestRecursiveDirectoryDeletion)

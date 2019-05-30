@@ -97,6 +97,12 @@ TEST_F(PathTest, TestResolve)
             File::Path("/foo/bar").resolve(File::Path("/splat")).str());
   EXPECT_EQ("/splat",
             File::Path("/foo/bar").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("../splat",
+            File::Path(".").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("splat",
+            File::Path("foo/bar").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("splat",
+            File::Path("./foo/bar").resolve(File::Path("../splat")).str());
 }
 
 TEST_F(PathTest, TestExists)

@@ -227,18 +227,7 @@ Directory& Directory::extend(const Path& p)
 // path itself, not its parent
 Path Directory::resolve(const Path& new_path) const
 {
-  if (new_path.is_absolute()) return new_path;
-  string dn = path;
-  string nn = new_path.str();
-
-  // Strip ../ from new path and move up
-  while (nn.size() > 3 && nn[0] == '.' && nn[1] == '.' && is_sep_char(nn[2]))
-  {
-    nn = string(nn, 3);
-    dn = Path(dn).dirname();
-  }
-
-  return Path(dn, nn);
+  return Path(path+"/.").resolve(new_path);  // Create fake leaf in path
 }
 
 

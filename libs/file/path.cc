@@ -65,9 +65,12 @@ namespace ObTools { namespace File {
 //--------------------------------------------------------------------------
 // Constructor from directory and leaf
 // If directory is empty or ends with slash already, doesn't add a slash
+// If directory is '.', just returns leaf
 Path::Path(const string& dir, const string& leaf)
 {
-  if (dir.empty() || is_sep_char(dir[dir.size()-1]))
+  if (dir == ".")
+    path = leaf;
+  else if (dir.empty() || is_sep_char(dir[dir.size()-1]))
     path = dir + leaf;
   else
     path = dir + SEPCHAR + leaf;
@@ -75,14 +78,8 @@ Path::Path(const string& dir, const string& leaf)
 
 //--------------------------------------------------------------------------
 // Constructor from existing path and leaf (combines as above)
-Path::Path(const Path& _path, const string& leaf)
-{
-  string dir = _path.str();
-  if (dir.empty() || is_sep_char(dir[dir.size()-1]))
-    path = dir + leaf;
-  else
-    path = dir + SEPCHAR + leaf;
-}
+Path::Path(const Path& _path, const string& leaf):
+  Path(_path.str(), leaf) {}
 
 //--------------------------------------------------------------------------
 // Find whether it's an absolute path
@@ -216,6 +213,7 @@ Path Path::resolve(const Path& new_path) const
   // Strip ../ from new path and move up
   while (nn.size() > 3 && nn[0] == '.' && nn[1] == '.' && is_sep_char(nn[2]))
   {
+    if (dn == ".") return {nn};  // Stop if we reach .
     nn = string(nn, 3);
     dn = Path(dn).dirname();
   }
