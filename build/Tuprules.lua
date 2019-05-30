@@ -426,7 +426,19 @@ function package_windows(products, package_dir, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
-  local output = NAME .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
+  local name = NAME
+
+  local f = io.open(package_dir .. "/control", "r")
+  if f ~= nil then
+    for line in f:lines() do
+      n = line:match("^APPNAME=\"(.*)\"", 1)
+      if n then
+        name = n:gsub(" ", "-")
+      end
+    end
+  end
+
+  local output = name .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
                  "installer.exe"
 
   local f = io.open(package_dir .. "/files", "r")
