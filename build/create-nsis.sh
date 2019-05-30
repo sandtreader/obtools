@@ -10,12 +10,14 @@ OUTFILE=$3
 
 INSTALL=""
 UNINSTALL=""
+DIRS=""
+PLUGINDIRS=""
 
 for file in WINDOWS/files WINDOWS/external-files
 do
   if [ -e $file ]
   then
-    while read l;
+    while read l
     do
       set $l
       f=$(basename $1)
@@ -27,17 +29,41 @@ do
         UNINSTALL="$UNINSTALL
   Delete \"\$INSTDIR\\$f\""
       else
-      INSTALL="$INSTALL
+        DIRS="$DIRS
+$2"
+        INSTALL="$INSTALL
   SetOutPath \"\$INSTDIR\\$2\"
   File $1"
-      UNINSTALL="$UNINSTALL
+        UNINSTALL="$UNINSTALL
   Delete \"\$INSTDIR\\$2\\$f\""
       fi
     done < $file
   fi
 done
 
+if [ -e WINDOWS/services ]
+then
+  PLUGINDIRS="$PLUGINDIRS
+!AddPluginDir /home/shared/tools/windows/nsis/simple-service/"
+  while read l
+  do
+    set $l
+    INSTALL="$INSTALL
+  SimpleSC::InstallService \"$APPNAME\" \"$APPNAME\" \"16\" \"2\" \"\$INSTDIR\\$1\" \"\" \"\" \"\""
+    UNINSTALL="SimpleSC::RemoveService \"$APPNAME\"
+$UNINSTALL"
+  done < WINDOWS/services
+fi
+
+RMDIRS=""
+for dir in `echo "$DIRS" | sort -ur -`
+do
+  RMDIRS="$RMDIRS
+  RmDir \$INSTDIR\\$dir"
+done
+
 makensis - <<EOF
+$PLUGINDIRS
 !define APPNAME "$APPNAME"
 
 Outfile $OUTFILE
@@ -53,6 +79,7 @@ SectionEnd
 Section "Uninstall"
 $UNINSTALL
   Delete "\$INSTDIR\\uninstall.exe"
+$RMDIRS
   RmDir \$INSTDIR
 SectionEnd
 EOF
