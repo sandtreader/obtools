@@ -60,6 +60,8 @@ TEST_F(PathTest, TestDirName)
             File::Path("./relative/to/here/").dirname());
   EXPECT_EQ("/",
             File::Path("/absolute").dirname());
+  EXPECT_EQ(".",
+            File::Path("foo").dirname());
 }
 
 TEST_F(PathTest, TestLeafName)
@@ -95,6 +97,12 @@ TEST_F(PathTest, TestResolve)
             File::Path("/foo/bar").resolve(File::Path("/splat")).str());
   EXPECT_EQ("/splat",
             File::Path("/foo/bar").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("../splat",
+            File::Path(".").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("splat",
+            File::Path("foo/bar").resolve(File::Path("../splat")).str());
+  EXPECT_EQ("splat",
+            File::Path("./foo/bar").resolve(File::Path("../splat")).str());
 }
 
 TEST_F(PathTest, TestExists)
