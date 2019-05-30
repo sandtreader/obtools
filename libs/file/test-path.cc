@@ -60,6 +60,8 @@ TEST_F(PathTest, TestDirName)
             File::Path("./relative/to/here/").dirname());
   EXPECT_EQ("/",
             File::Path("/absolute").dirname());
+  EXPECT_EQ(".",
+            File::Path("foo").dirname());
 }
 
 TEST_F(PathTest, TestLeafName)

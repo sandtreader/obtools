@@ -110,7 +110,7 @@ string Path::dirname() const
   {
     // No normal separator - check for ALTSEPCHAR (/ in Windows) instead
     if (ALTSEPCHAR) slash = path.rfind(ALTSEPCHAR);
-    if (slash == string::npos) return "";
+    if (slash == string::npos) return ".";
   }
   else
   {

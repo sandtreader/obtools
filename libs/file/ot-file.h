@@ -126,7 +126,7 @@ public:
 
   //------------------------------------------------------------------------
   // Get directory: everything before last slash, if any, not including
-  // trailing slash.  If no slashes, returns empty path
+  // trailing slash.  If no slashes, returns "."
   string dirname() const;
 
   //------------------------------------------------------------------------
