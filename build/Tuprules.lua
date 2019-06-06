@@ -90,6 +90,7 @@ if PLATFORM == "linux" then
 elseif PLATFORM == "windows" then
   COMPILER = "x86_64-w64-mingw32-g++"
   ARCHIVER = "x86_64-w64-mingw32-ar"
+  WINDRES = "x86_64-w64-mingw32-windres"
   LINKER = COMPILER
   PLATFORM_CFLAGS = "-DPLATFORM_WINDOWS -DWIN32_LEAN_AND_MEAN"
   PLATFORM_LFLAGS = ""
@@ -181,6 +182,17 @@ add_sources_for_dir(".", sources, test_sources)
 if SUBDIRS then
   for index, dir in ipairs(SUBDIRS) do
     add_sources_for_dir(dir, sources, test_sources)
+  end
+end
+
+--==========================================================================
+-- Check for windows resources
+local windows_resources = {}
+
+if PLATFORM == "windows" then
+  local glob = '*.rc'
+  for index, filename in ipairs(tup.glob(glob)) do
+    windows_resources += filename
   end
 end
 
@@ -291,6 +303,19 @@ function compile(source, dep_includes, ext_includes)
               table.concat(dep_includes, " ") .. " " ..
               table.concat(ext_includes, " ") ..
               " -c " .. source ..  " -o " .. output,
+    outputs = {output}
+  }
+  return output
+end
+
+----------------------------------------------------------------------------
+-- Build a windows resource
+function windres(resource)
+  local output = resource:gsub("%.(.-)$", ".res")
+  tup.definerule{
+    inputs = {resource},
+    command = "^ WINDRES %f^ " .. WINDRES .. " " .. resource ..
+              " -O coff -o " .. output,
     outputs = {output}
   }
   return output
@@ -479,6 +504,13 @@ local objects = {};
 for index, source in pairs(sources) do
   local output = tup.base(source)
   objects += compile(source, dep_includes, ext_includes)
+end
+
+----------------------------------------------------------------------------
+-- Build windows resources
+for index, resource in pairs(windows_resources) do
+  local output = tup.base(resource)
+  objects += windres(resource)
 end
 
 ----------------------------------------------------------------------------
