@@ -212,9 +212,54 @@ public:
   virtual ~Process() {}
 };
 
+#if defined(PLATFORM_WINDOWS)
+//==========================================================================
+// Windows Shell
+class WindowsShell: public Shell
+{
+private:
+  class WindowThread: public MT::Thread
+  {
+  private:
+    function<void()> on_run;
+    function<void()> on_close;
+
+    //----------------------------------------------------------------------
+    // Run
+    void run()
+    {
+      on_run();
+      on_close();
+    }
+
+  public:
+    //----------------------------------------------------------------------
+    // Constructor
+    WindowThread(function<void()> _on_run, function<void()> _on_close):
+      on_run{_on_run}, on_close{_on_close}
+    {}
+  };
+
+  unique_ptr<WindowThread> window_thread;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  WindowsShell(Application& application, const string& name,
+               const string& version,
+               function<void()> on_run,
+               const string& default_config_file, const string& config_element,
+               const string& default_log_file, const string& default_pid_file):
+    Shell{application, name, version, default_config_file, config_element,
+          default_log_file, default_pid_file},
+    window_thread{new WindowThread{on_run,
+                                   [this]() { this->signal_shutdown(); }}}
+  {
+    window_thread->start();
+  }
+};
+#endif
+
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_DAEMON_H
-
-
-
