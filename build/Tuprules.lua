@@ -103,6 +103,13 @@ else
 end
 
 ----------------------------------------------------------------------------
+-- Add platform specific flags
+PLATFORM_CFLAGS = PLATFORM_CFLAGS .. " "
+                  .. flatten(_G[PLATFORM:upper() .. "-CFLAGS"])
+PLATFORM_LFLAGS = PLATFORM_LFLAGS .. " "
+                  .. flatten(_G[PLATFORM:upper() .. "-LFLAGS"])
+
+----------------------------------------------------------------------------
 -- Basic compiler options
 CFLAGS = CFLAGS .. " --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC "
                 .. PLATFORM_CFLAGS
