@@ -19,7 +19,7 @@ do
   then
     while read l
     do
-      set $l
+      set -o noglob $l
       f=$(basename $1)
       if [ -z "$2" ]
       then
@@ -62,7 +62,7 @@ do
   RmDir \$INSTDIR\\$dir"
 done
 
-makensis - <<EOF
+makensis -V4 - <<EOF
 $PLUGINDIRS
 !define APPNAME "$APPNAME"
 
