@@ -12,6 +12,7 @@ INSTALL=""
 UNINSTALL=""
 DIRS=""
 PLUGINDIRS=""
+MAINEXE=""
 
 for file in WINDOWS/files WINDOWS/external-files
 do
@@ -21,6 +22,10 @@ do
     do
       set -o noglob $l
       f=$(basename $1)
+      if [ -z "$MAINEXE" ]
+      then
+        MAINEXE="$1"
+      fi
       if [ -z "$2" ]
       then
         INSTALL="$INSTALL
@@ -62,9 +67,11 @@ do
   RmDir \$INSTDIR\\$dir"
 done
 
+UNINSTREG="Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\\${APPNAME}"
 makensis -V4 - <<EOF
 $PLUGINDIRS
 !define APPNAME "$APPNAME"
+!include "FileFunc.nsh"
 
 Outfile $OUTFILE
 
@@ -73,10 +80,25 @@ InstallDir "\$PROGRAMFILES64\\\${APPNAME}"
 Section "Install"
   SetOutPath \$INSTDIR
 $INSTALL
+  SetShellVarContext all
+  CreateShortCut "\$SMPROGRAMS\\\${APPNAME}.lnk" "\$INSTDIR\\$MAINEXE"
   WriteUninstaller "\$INSTDIR\\uninstall.exe"
+  WriteRegStr HKLM "$UNINSTREG" "DisplayName" "\${APPNAME}"
+  WriteRegStr HKLM "$UNINSTREG" "UninstallString" "$\\"\$INSTDIR\\uninstall.exe$\\""
+  WriteRegStr HKLM "$UNINSTREG" "QuietUninstallString" "$\\"\$INSTDIR\\uninstall.exe$\\" /S"
+  WriteRegStr HKLM "$UNINSTREG" "InstallLocation" "\$INSTDIR"
+  WriteRegStr HKLM "$UNINSTREG" "Publisher" "$PUBLISHER"
+  WriteRegStr HKLM "$UNINSTREG" "DisplayVersion" "$VERSION"
+  WriteRegStr HKLM "$UNINSTREG" "DisplayIcon" "\$INSTDIR\\$MAINEXE"
+  \${GetSize} "\$INSTDIR" "/S=0K" \$0 \$1 \$2
+  IntFmt \$0 "0x%08X" \$0
+  WriteRegDWORD HKLM "$UNINSTREG" "EstimatedSize" "\$0"
 SectionEnd
 
 Section "Uninstall"
+  SetShellVarContext all
+  Delete "\$SMPROGRAMS\\${APPNAME}.lnk"
+  DeleteRegKey HKLM "$UNINSTREG"
 $UNINSTALL
   Delete "\$INSTDIR\\uninstall.exe"
 $RMDIRS
