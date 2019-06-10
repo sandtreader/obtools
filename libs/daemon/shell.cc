@@ -139,7 +139,8 @@ int Shell::start(int argc, char **argv)
     else
     {
 #endif
-      string logfile = config.get_value("log/@file", default_log_file);
+      auto logfile = File::Path{cf}.resolve(config.get_value("log/@file",
+                                                             default_log_file));
       auto sout = new ofstream(logfile.c_str(), ios::app);
       if (!*sout)
       {
