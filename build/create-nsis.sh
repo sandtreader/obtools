@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -18,7 +18,7 @@ for file in WINDOWS/files WINDOWS/external-files
 do
   if [ -e $file ]
   then
-    while read l
+    while read -r l
     do
       set -o noglob $l
       f=$(basename $1)
@@ -34,8 +34,15 @@ do
         UNINSTALL="$UNINSTALL
   Delete \"\$INSTDIR\\$f\""
       else
-        DIRS="$DIRS
-$2"
+        d="$2"
+        while [ "$d" != "." ]
+        do
+          DIRS="$DIRS
+$d"
+          d=${d//\\/\/}
+          d=$(dirname "$d")
+          d=${d//\//\\}
+        done
         INSTALL="$INSTALL
   SetOutPath \"\$INSTDIR\\$2\"
   File $1"
@@ -61,6 +68,7 @@ $UNINSTALL"
 fi
 
 RMDIRS=""
+echo $DIRS
 for dir in `echo "$DIRS" | sort -ur -`
 do
   RMDIRS="$RMDIRS
