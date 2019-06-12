@@ -139,8 +139,17 @@ int Shell::start(int argc, char **argv)
     else
     {
 #endif
-      auto logfile = File::Path{cf}.resolve(config.get_value("log/@file",
-                                                             default_log_file));
+      const auto log_conf = File::Path{config.get_value("log/@file",
+                                                        default_log_file)};
+      const auto log_exp = log_conf.expand();
+      const auto logfile = File::Path{cf}.resolve(log_exp);
+      const auto log_dir = logfile.dir();
+      if (!log_dir.ensure(true))
+      {
+        cerr << argv[0] << ": Logfile directory can not be created: "
+             << log_dir << endl;
+        return 2;
+      }
       auto sout = new ofstream(logfile.c_str(), ios::app);
       if (!*sout)
       {
