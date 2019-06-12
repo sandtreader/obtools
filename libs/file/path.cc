@@ -98,6 +98,13 @@ bool Path::is_absolute() const
 }
 
 //--------------------------------------------------------------------------
+// Get directory based on dirname()
+Directory Path::dir() const
+{
+  return {dirname()};
+}
+
+//--------------------------------------------------------------------------
 // Get directory: everything before last slash, if any, not including
 // trailing slash.  If no slashes, returns empty path
 string Path::dirname() const
@@ -219,6 +226,34 @@ Path Path::resolve(const Path& new_path) const
   }
 
   return Path(dn, nn);
+}
+
+
+//--------------------------------------------------------------------------
+// Expand special parts of path
+// e.g. On windows, expand environment variables at the beginning
+Path Path::expand() const
+{
+#if defined(PLATFORM_WINDOWS)
+  if (path.size() > 2 && path[0] == '%')
+  {
+    auto pos = path.find('%', 1);
+    if (pos != string::npos && pos > 1)
+    {
+      const auto var_name = path.substr(1, pos - 1);
+      char buff[32767]; // Max size of environment variable
+      const auto result = GetEnvironmentVariable(var_name.c_str(), buff,
+                                                 sizeof(buff));
+      if (result)
+      {
+        auto expanded = *this;
+        expanded.path.replace(0, pos + 1, buff, result);
+        return expanded;
+      }
+    }
+  }
+#endif
+  return *this;
 }
 
 //--------------------------------------------------------------------------

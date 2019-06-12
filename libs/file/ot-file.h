@@ -58,6 +58,8 @@ namespace ObTools { namespace File {
 // Make our lives easier without polluting anyone else
 using namespace std;
 
+class Directory;
+
 //==========================================================================
 // Path class
 class Path
@@ -126,6 +128,10 @@ public:
   bool is_absolute() const;
 
   //------------------------------------------------------------------------
+  // Get directory based on dirname()
+  Directory dir() const;
+
+  //------------------------------------------------------------------------
   // Get directory: everything before last slash, if any, not including
   // trailing slash.  If no slashes, returns "."
   string dirname() const;
@@ -144,21 +150,26 @@ public:
 
   //------------------------------------------------------------------------
   // Get the canonicalised absolute pathname
-  File::Path realpath() const;
+  Path realpath() const;
 
   //------------------------------------------------------------------------
   // Fix a path to local directory separator type
   // Use to convert '/'-separated paths (e.g. URLs) to local separator
   void fix_slashes();
 
-  // Methods to resolve paths ------------------------------------------------
+  // Methods to resolve paths ----------------------------------------------
   //------------------------------------------------------------------------
   // Resolve one path against another:
   //   If new path is absolute, return new path
   //   If relative, make absolute path relative to dirname of old path
   Path resolve(const Path& new_path) const;
 
-  // Methods to get file information -----------------------------------------
+  //------------------------------------------------------------------------
+  // Expand special parts of path
+  // e.g. On windows, expand environment variables at the beginning
+  Path expand() const;
+
+  // Methods to get file information ---------------------------------------
   //------------------------------------------------------------------------
   // Does the file exist?
   virtual bool exists() const;
@@ -332,14 +343,15 @@ public:
   // Return whether successful (directory readable)
   // Fills in leaves if so
   bool inspect(list<string>& leaves, const string& pattern="*",
-               bool all=false);
+               bool all=false) const;
 
   //------------------------------------------------------------------------
   // Get list of directory contents, as full paths prefixed by directory path
   // Other parameters as above
   // Returns whether successful (directory readable)
   // Fills in paths if so
-  bool inspect(list<Path>& paths, const string& pattern="*", bool all=false);
+  bool inspect(list<Path>& paths, const string& pattern="*",
+               bool all=false) const;
 
   //--------------------------------------------------------------------------
   // Get list of directory contents, as full paths prefixed by directory path
@@ -348,7 +360,7 @@ public:
   // Returns whether successful (directory readable)
   // Fills in paths if so
   bool inspect_recursive(list<Path>& paths, const string& pattern="*",
-                         bool all=false);
+                         bool all=false) const;
 
   //------------------------------------------------------------------------
   // Does the directory exist and is it actually dir?
@@ -370,6 +382,11 @@ public:
   // Note difference with Path::resolve is that this works from the directory
   // path itself, not its parent
   Path resolve(const Path& new_path) const;
+
+  //------------------------------------------------------------------------
+  // Expand special parts of path
+  // e.g. On windows, expand environment variables at the beginning
+  Directory expand() const { return Path::expand(); }
 };
 
 //==========================================================================

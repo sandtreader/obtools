@@ -59,7 +59,7 @@ bool Directory::ensure(bool parents, int mode) const
 // Return whether successful (directory readable)
 // Fills in leaves if so
 bool Directory::inspect(list<string>& leaves, const string& pattern,
-                        bool all)
+                        bool all) const
 {
 #if defined(PLATFORM_WINDOWS)
   // Use full '*' search, so we can use full pattern format without
@@ -102,7 +102,8 @@ bool Directory::inspect(list<string>& leaves, const string& pattern,
 // Other parameters as above
 // Returns whether successful (directory readable)
 // Fills in paths if so
-bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
+bool Directory::inspect(list<Path>& paths, const string& pattern,
+                        bool all) const
 {
   // Get leaves
   list<string> leaves;
@@ -127,7 +128,7 @@ bool Directory::inspect(list<Path>& paths, const string& pattern, bool all)
 // Returns whether successful (directory readable)
 // Fills in paths if so
 bool Directory::inspect_recursive(list<Path>& paths, const string& pattern,
-                                  bool all)
+                                  bool all) const
 {
   // Look in this directory directly
   if (!inspect(paths, pattern, all)) return false;
