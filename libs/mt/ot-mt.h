@@ -650,7 +650,7 @@ public:
 template<class T> class ThreadPool
 {
 private:
-  mutex mymutex;
+  mutable mutex mymutex;
   unsigned int min_spares;
   unsigned int max_threads;
   bool realtime;
@@ -689,6 +689,39 @@ public:
     replacer{*this}, shutting_down{false}
   {
     fill();
+  }
+
+  //------------------------------------------------------------------------
+  // Get min spares
+  unsigned int get_min_spares() const
+  {
+    unique_lock<mutex> lock(mymutex);
+    return min_spares;
+  }
+
+  //------------------------------------------------------------------------
+  // Set min spares
+  void set_min_spares(unsigned int _min_spares)
+  {
+    unique_lock<mutex> lock(mymutex);
+    min_spares = _min_spares;
+    fill();
+  }
+
+  //------------------------------------------------------------------------
+  // Get max threads
+  unsigned int get_max_threads() const
+  {
+    unique_lock<mutex> lock(mymutex);
+    return max_threads;
+  }
+
+  //------------------------------------------------------------------------
+  // Set max threads
+  void set_max_threads(unsigned int _max_threads)
+  {
+    unique_lock<mutex> lock(mymutex);
+    max_threads = _max_threads;
   }
 
   //------------------------------------------------------------------------
