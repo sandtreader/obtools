@@ -43,6 +43,10 @@ local LFLAGS = flatten(LFLAGS)
 
 local PLATFORM = tup.getconfig("PLATFORM")
 local ARCH = tup.getconfig("ARCH")
+local CPPSTD = tup.getconfig("CPPSTD")
+if CPPSTD == nil or CPPSTD == "" then
+  CPPSTD = 11
+end
 
 ----------------------------------------------------------------------------
 -- If platforms are specified, then ensure configured platform is in list
@@ -112,14 +116,15 @@ PLATFORM_LFLAGS = PLATFORM_LFLAGS .. " "
 
 ----------------------------------------------------------------------------
 -- Basic compiler options
-CFLAGS = CFLAGS .. " --std=c++11 -pedantic -Wall -Wextra -Werror -fPIC "
+CFLAGS = CFLAGS .. " --std=c++" .. CPPSTD ..
+                " -pedantic -Wall -Wextra -Werror -fPIC "
                 .. PLATFORM_CFLAGS
-LFLAGS = LFLAGS .. " --std=c++11 " .. PLATFORM_LFLAGS
+LFLAGS = LFLAGS .. " --std=c++" .. CPPSTD .. " " .. PLATFORM_LFLAGS
 
 ----------------------------------------------------------------------------
 -- Debug settings
 if tup.getconfig("DEBUG") == "y" then
-  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG"
+  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG -D_GLIBCXX_DEBUG"
 end
 
 ----------------------------------------------------------------------------
