@@ -134,6 +134,12 @@ bool AES::encrypt(vector<unsigned char>& data)
 // Sugared version of decrypt with binary  strings and PKCS7 unpadding
 bool AES::decrypt(const string& ciphertext, string& plaintext_p)
 {
+  if (ciphertext.empty())
+  {
+    plaintext_p = "";
+    return true;
+  }
+
   int length = ciphertext.size();
 
   // Copy to safe buffer
