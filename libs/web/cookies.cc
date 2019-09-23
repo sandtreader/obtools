@@ -247,7 +247,7 @@ void CookieJar::prune(bool session_ended)
 {
   Time::Stamp now = Time::Stamp::now();
   MT::RWWriteLock lock(mutex);
-  for(list<Cookie>::iterator p = cookies.begin(); p!=cookies.end(); ++p)
+  for(list<Cookie>::iterator p = cookies.begin(); p!=cookies.end();)
   {
     const Cookie& cookie = *p;
 
@@ -255,6 +255,8 @@ void CookieJar::prune(bool session_ended)
     if ((session_ended && !cookie.expires)
      || (!!cookie.expires && now >= cookie.expires))
       p = cookies.erase(p);
+    else
+      ++p;
   }
 }
 
