@@ -632,8 +632,7 @@ public:
 
     // Find the first range which starts immediately before the range
     iterator it = ranges.lower_bound(range);
-    if (it != ranges.begin() &&
-        (it == ranges.end() || (it != ranges.end() && it->start > start)))
+    if (it != ranges.begin() && (it == ranges.end() || it->start > start))
       --it;
 
     // Eat any existing ranges that overlap with the range
