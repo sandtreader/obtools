@@ -126,6 +126,11 @@ public:
   string hms() const;
 
   //------------------------------------------------------------------------
+  // Convert to unit-based string - e.g. "1 hour", "3 min 4 sec"
+  // Note, doesn't handle fractional seconds, only goes up to days.
+  string unit() const;
+
+  //------------------------------------------------------------------------
   // Convert to ISO duration string
   // Generates P[n]DT[n]H[n]M[n]S form or empty if invalid
   // This format is also compatible with XML

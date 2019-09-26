@@ -105,6 +105,24 @@ P1DT12H|129600
   }
 }
 
+TEST(DurationTest, TestDurationUnitString)
+{
+  Time::Duration d1("1 hour");
+  EXPECT_EQ("1 hour", d1.unit());
+
+  Time::Duration d2("1 hour 30 min");
+  EXPECT_EQ("1 hour 30 min", d2.unit());
+
+  Time::Duration d3("3661");
+  EXPECT_EQ("1 hour 1 min 1 sec", d3.unit());
+
+  Time::Duration d4("24 hours");
+  EXPECT_EQ("1 day", d4.unit());
+
+  Time::Duration d5("73 hours");
+  EXPECT_EQ("3 days 1 hour", d5.unit());
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

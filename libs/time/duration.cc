@@ -246,6 +246,31 @@ string Duration::iso() const
   return oss.str();
 }
 
+//------------------------------------------------------------------------
+// Convert to unit-based string - e.g. "1 hour", "3 min 4 sec"
+// Note, doesn't handle fractional seconds, only goes up to days.
+string Duration::unit() const
+{
+  ostringstream oss;
+  // Round seconds to milliseconds, to avoid unfortunate combinations
+  // (e.g.) 59.999999 -> 00:00:60
+  double rt = floor(t*MILLI+0.5)/MILLI;
+
+  int days = static_cast<int>(rt/DAY);
+  rt -= days*DAY;
+  int hours = static_cast<int>(rt/HOUR);
+  rt -= hours*HOUR;
+  int mins  = static_cast<int>(rt/MINUTE);
+  rt -= mins*MINUTE;
+  int secs = static_cast<int>(rt);
+
+  if (days) oss << days << " day" << (days>1?"s":"") << " ";
+  if (hours) oss << hours << " hour" << (hours>1?"s":"") << " ";
+  if (mins) oss << mins << " min ";
+  if (secs) oss << secs << " sec";
+  return Text::canonicalise_space(oss.str());
+}
+
 //--------------------------------------------------------------------------
 // Constructor-like static function to return monotonic clock - baseline
 // unknown, but guaranteed never to get mangled by ntpd, DST et al.
