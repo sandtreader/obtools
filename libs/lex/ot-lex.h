@@ -60,7 +60,8 @@ class Analyser
   istream& input;
   bool allow_alphanum_names{true};
   list<string> symbols;
-  Token pending_token;
+  list<Token> pending_tokens;
+  string line_comment_symbol;
 
   // Tidied up get/peek - returns 0 for EOF
   char get() const { char c; return input.get(c)?c:0; }
@@ -83,12 +84,19 @@ public:
   void add_symbol(const string& symbol) { symbols.push_back(symbol); }
 
   //------------------------------------------------------------------------
+  // Set symbol for a line comment - all input following this will be
+  // ignored until end of line
+  void add_line_comment_symbol(const string& symbol)
+  { add_symbol(symbol); line_comment_symbol = symbol; }
+
+  //------------------------------------------------------------------------
   // Disallow alphanumeric names (letters and _ only)
   void disallow_alphanum_names() { allow_alphanum_names = false; }
 
   //------------------------------------------------------------------------
   // Put back a token to be read next time (lookahead)
-  void put_back(const Token& token) { pending_token = token; }
+  // Can be used multiple times, tokens are stacked
+  void put_back(const Token& token) { pending_tokens.push_front(token); }
 
   //------------------------------------------------------------------------
   // Read a token from the input

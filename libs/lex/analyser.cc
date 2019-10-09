@@ -210,47 +210,61 @@ Token Analyser::read_symbol_token(char c)
 // Read a token from the input
 Token Analyser::read_token()
 {
-  if (pending_token.type != Token::UNKNOWN)
+  if (!pending_tokens.empty())
   {
-    Token result = pending_token;
-    pending_token = Token();
+    Token result = pending_tokens.front();
+    pending_tokens.pop_front();
     return result;
   }
 
-  if (!input) return Token(Token::END);
-  char c = get();
-
-  // Ignore whitespace
-  while (isspace(c)) c=get();
-
-  // End of input
-  if (!c) return Token(Token::END);
-
-  if (isalpha(c) || c=='_')
-    return read_name_token(c);
-  else if (isdigit(c))
-    return read_number_token(c);
-  else if (c=='"')
-    return read_string_token();
-  else if (c=='-')
+  for(;;) // looping after comment
   {
-    // Treated as symbol unless followed by digit or .
-    char d = peek();
-    if (isdigit(d) || d == '.')
+    if (!input) return Token(Token::END);
+
+    char c = get();
+
+    // Ignore whitespace
+    while (isspace(c)) c=get();
+
+    // End of input
+    if (!c) return Token(Token::END);
+
+    if (isalpha(c) || c=='_')
+      return read_name_token(c);
+    else if (isdigit(c))
       return read_number_token(c);
+    else if (c=='"')
+      return read_string_token();
+    else if (c=='-')
+    {
+      // Treated as symbol unless followed by digit or .
+      char d = peek();
+      if (isdigit(d) || d == '.')
+        return read_number_token(c);
+      else
+        return read_symbol_token(c);
+    }
+    else if (c=='.')
+    {
+      // Treated as symbol unless followed by digit
+      if (isdigit(peek()))
+        return read_number_token(c);
+      else
+        return read_symbol_token(c);
+    }
     else
-      return read_symbol_token(c);
+    {
+      Token token = read_symbol_token(c);
+      if (token.type == Token::SYMBOL && token.value == line_comment_symbol)
+      {
+        // Read to end of line
+        do { c = get(); } while (c && c != '\n');
+
+        // Loop to try again
+      }
+      else return token;
+    }
   }
-  else if (c=='.')
-  {
-    // Treated as symbol unless followed by digit
-    if (isdigit(peek()))
-      return read_number_token(c);
-    else
-      return read_symbol_token(c);
-  }
-  else
-    return read_symbol_token(c);
 }
 
 

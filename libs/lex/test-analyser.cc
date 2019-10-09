@@ -48,6 +48,21 @@ TEST(Analyser, TestNameGivesNameThenEND)
   ASSERT_EQ(Token::END, token.type);
 }
 
+TEST(Analyser, TestLineCommentsAreIgnored)
+{
+  string s("#comment\nfred#comment\n#");
+  istringstream input(s);
+  Analyser analyser(input);
+  analyser.add_line_comment_symbol("#");
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NAME, token.type);
+  ASSERT_EQ("fred", token.value);
+
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
 TEST(Analyser, TestNameBeginningUnderscore)
 {
   string s("_fred");
@@ -496,6 +511,38 @@ TEST(Analyser, TestPutBack)
   ASSERT_NO_THROW(token = analyser.read_token());
   ASSERT_EQ(Token::END, token.type);
 
+}
+
+TEST(Analyser, TestMultiplePutBack)
+{
+  string s("1 2");
+  istringstream input(s);
+  Analyser analyser(input);
+  Token token1;
+  ASSERT_NO_THROW(token1 = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token1.type);
+  ASSERT_EQ("1", token1.value);
+
+  Token token2;
+  ASSERT_NO_THROW(token2 = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token2.type);
+  ASSERT_EQ("2", token2.value);
+
+  // Put back - note order!
+  analyser.put_back(token2);
+  analyser.put_back(token1);
+
+  ASSERT_NO_THROW(token1 = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token1.type);
+  ASSERT_EQ("1", token1.value);
+
+  ASSERT_NO_THROW(token2 = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token2.type);
+  ASSERT_EQ("2", token2.value);
+
+  // and it's cleared again
+  ASSERT_NO_THROW(token1 = analyser.read_token());
+  ASSERT_EQ(Token::END, token1.type);
 }
 
 int main(int argc, char **argv)
