@@ -21,7 +21,8 @@ Token Analyser::read_name_token(char c)
   for(;;)
   {
     c = peek();
-    if (isalpha(c) || (isdigit(c) && allow_alphanum_names) || c=='_')
+    if (isalpha(c) || (isdigit(c) && allow_alphanum_names) || c=='_'
+        || (allow_dash_in_names && c=='-'))
     {
       c = get();
       name += c;

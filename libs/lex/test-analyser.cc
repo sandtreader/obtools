@@ -111,6 +111,36 @@ TEST(Analyser, TestDisallowedAlphaNumSplitsComplexName)
   ASSERT_EQ("123", token.value);
 }
 
+TEST(Analyser, TestNotAllowingDashSplitsDashedName)
+{
+  string s("Fred-123");
+  istringstream input(s);
+  Analyser analyser(input);
+  analyser.add_symbol("-");
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NAME, token.type);
+  ASSERT_EQ("Fred", token.value);
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NUMBER, token.type);
+  ASSERT_EQ("-123", token.value);
+}
+
+TEST(Analyser, TestAllowingDashDoesntSplitDashedName)
+{
+  string s("Fred-123");
+  istringstream input(s);
+  Analyser analyser(input);
+  analyser.add_symbol("-");
+  analyser.allow_dashed_names();
+  Token token;
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::NAME, token.type);
+  ASSERT_EQ("Fred-123", token.value);
+  ASSERT_NO_THROW(token = analyser.read_token());
+  ASSERT_EQ(Token::END, token.type);
+}
+
 TEST(Analyser, TestIntegerGivesNumberThenEND)
 {
   string s("1234");

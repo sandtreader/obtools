@@ -59,6 +59,7 @@ class Analyser
  private:
   istream& input;
   bool allow_alphanum_names{true};
+  bool allow_dash_in_names{false};
   list<string> symbols;
   list<Token> pending_tokens;
   string line_comment_symbol;
@@ -92,6 +93,10 @@ public:
   //------------------------------------------------------------------------
   // Disallow alphanumeric names (letters and _ only)
   void disallow_alphanum_names() { allow_alphanum_names = false; }
+
+  //------------------------------------------------------------------------
+  // Allow dashes ('-') in names (not at start)
+  void allow_dashed_names() { allow_dash_in_names = true; }
 
   //------------------------------------------------------------------------
   // Put back a token to be read next time (lookahead)
