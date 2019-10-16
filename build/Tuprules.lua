@@ -45,7 +45,7 @@ local PLATFORM = tup.getconfig("PLATFORM")
 local ARCH = tup.getconfig("ARCH")
 local CPPSTD = tup.getconfig("CPPSTD")
 if CPPSTD == nil or CPPSTD == "" then
-  CPPSTD = 11
+  CPPSTD = 14
 end
 
 ----------------------------------------------------------------------------
