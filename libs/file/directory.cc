@@ -228,7 +228,8 @@ Directory& Directory::extend(const Path& p)
 // path itself, not its parent
 Path Directory::resolve(const Path& new_path) const
 {
-  return Path(path+"/.").resolve(new_path);  // Create fake leaf in path
+  // Create fake leaf in path
+  return Path((path.empty() ? "." : path)+"/.").resolve(new_path);
 }
 
 
