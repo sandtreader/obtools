@@ -244,7 +244,7 @@ public:
   //------------------------------------------------------------------------
   // Read the entire file into a string
   // Returns whether successful.  If not, the string contains the error
-  bool read_all(string& s);
+  bool read_all(string& s) const;
 
   //------------------------------------------------------------------------
   // Replace the entire file with a string

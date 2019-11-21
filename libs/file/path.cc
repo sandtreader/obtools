@@ -522,7 +522,7 @@ bool Path::rename(const Path& new_path) const
 //--------------------------------------------------------------------------
 // Read the entire file into a string
 // Returns whether successful.  If not, the string contains the error
-bool Path::read_all(string& s)
+bool Path::read_all(string& s) const
 {
   InStream f(path);
   if (!f)
