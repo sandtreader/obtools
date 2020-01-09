@@ -485,6 +485,16 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Emplace message - send but constructs in place
+  template<typename... Args>
+  void emplace(Args... args)
+  {
+    unique_lock<mutex> lock{mymutex};
+    q.emplace(args...);
+    available.notify_one();
+  }
+
+  //------------------------------------------------------------------------
   // See if any message is available before potentially blocking on wait()
   bool poll()
   {
