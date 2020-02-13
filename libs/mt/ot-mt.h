@@ -37,6 +37,57 @@ using RLock = unique_lock<recursive_mutex>;
 using BasicCondVar = condition_variable;
 
 //==========================================================================
+// Spin Mutex
+class SpinMutex
+{
+private:
+  atomic_flag mutex = ATOMIC_FLAG_INIT;
+
+public:
+  //------------------------------------------------------------------------
+  // Lock
+  void lock()
+  {
+    while (mutex.test_and_set(memory_order_acquire))
+      ; // spin
+  }
+
+  //------------------------------------------------------------------------
+  // Unlock
+  void unlock()
+  {
+    mutex.clear(memory_order_release);
+  }
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~SpinMutex() { unlock(); }
+};
+
+//==========================================================================
+// Spin Lock
+class SpinLock
+{
+private:
+  SpinMutex& mutex;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  SpinLock(SpinMutex& _mutex): mutex{_mutex}
+  {
+    mutex.lock();
+  }
+
+  //------------------------------------------------------------------------
+  // Destructor
+  ~SpinLock()
+  {
+    mutex.unlock();
+  }
+};
+
+//==========================================================================
 // Condition variable class (boolean condition)
 // Implements safe signalling on a simple boolean variable
 class Condition
