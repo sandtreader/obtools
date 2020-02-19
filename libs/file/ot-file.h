@@ -254,7 +254,7 @@ public:
   //------------------------------------------------------------------------
   // Replace the entire file with byte vector
   // Returns error string, or "" if successful
-  string write_all(const vector<byte>& d);
+  string write_all(const vector<unsigned char>& d);
 
   //------------------------------------------------------------------------
   // Handy octal conversion functions for file modes

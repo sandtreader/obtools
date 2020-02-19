@@ -30,8 +30,6 @@ std::unique_ptr<T> make_unique(Args&& ...args)
 }
 #endif
 
-using byte = unsigned char;
-
 } // std namespace
 
 namespace ObTools { namespace Gen {

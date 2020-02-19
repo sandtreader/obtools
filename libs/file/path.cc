@@ -556,7 +556,7 @@ string Path::write_all(const string& s)
 //--------------------------------------------------------------------------
 // Replace the entire file with a byte vector
 // Returns error string, or "" if successful
-string Path::write_all(const vector<byte>& d)
+string Path::write_all(const vector<unsigned char>& d)
 {
   OutStream f(path);
   if (!f) return strerror(errno);

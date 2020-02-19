@@ -225,7 +225,7 @@ public:
 
   //------------------------------------------------------------------------
   // Encode a vector of bytes
-  string encode(const vector<byte>& data, int split = 76,
+  string encode(const vector<unsigned char>& data, int split = 76,
                 const string& line_end = "\r\n")
   {
     return encode(&data[0], data.size(), split, line_end);

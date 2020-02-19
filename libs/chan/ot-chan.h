@@ -86,7 +86,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read data into buf until EOF or limit encountered
-  virtual void read_to_eof(byte *buf, size_t limit);
+  virtual void read_to_eof(unsigned char *buf, size_t limit);
 
   //------------------------------------------------------------------------
   // Read data into buf until EOF
