@@ -83,6 +83,7 @@ end
 if PLATFORM == "linux" then
   COMPILER = "clang++"
   ARCHIVER = "ar"
+  QTRCC = "rcc"
   LINKER = COMPILER
   PLATFORM_CFLAGS = "-DPLATFORM_LINUX"
   PLATFORM_LFLAGS = ""
@@ -94,6 +95,7 @@ if PLATFORM == "linux" then
 elseif PLATFORM == "windows" then
   COMPILER = "x86_64-w64-mingw32-g++"
   ARCHIVER = "x86_64-w64-mingw32-ar"
+  QTRCC = "rcc"
   WINDRES = "x86_64-w64-mingw32-windres"
   LINKER = COMPILER
   PLATFORM_CFLAGS = "-DPLATFORM_WINDOWS -DWIN32_LEAN_AND_MEAN -D_GLIBCXX_HAVE_TLS"
@@ -188,6 +190,15 @@ if SUBDIRS then
   for index, dir in ipairs(SUBDIRS) do
     add_sources_for_dir(dir, sources, test_sources)
   end
+end
+
+--==========================================================================
+-- Check for Qt resources
+local qt_resources = {}
+
+local glob = '*.qrc'
+for index, filename in ipairs(tup.glob(glob)) do
+  qt_resources += filename
 end
 
 --==========================================================================
@@ -308,6 +319,19 @@ function compile(source, dep_includes, ext_includes)
               table.concat(dep_includes, " ") .. " " ..
               table.concat(ext_includes, " ") ..
               " -c " .. source ..  " -o " .. output,
+    outputs = {output}
+  }
+  return output
+end
+
+----------------------------------------------------------------------------
+-- Build a Qt resource
+function qtrcc(resource)
+  local output = resource:gsub("%.(.-)$", ".cc")
+  tup.definerule{
+    inputs = {resource},
+    command = "^ QTRCC %f^ " .. QTRCC .. " " .. resource ..
+              " -o " .. output,
     outputs = {output}
   }
   return output
@@ -502,6 +526,13 @@ end
 
 --==========================================================================
 -- It's time to actually do some building
+
+----------------------------------------------------------------------------
+-- Build Qt resources (produces source files)
+for index, resource in pairs(qt_resources) do
+  local output = tup.base(resource)
+  sources += qtrcc(resource)
+end
 
 ----------------------------------------------------------------------------
 -- Compile sources
