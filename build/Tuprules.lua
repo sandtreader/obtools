@@ -48,6 +48,10 @@ if CPPSTD == nil or CPPSTD == "" then
   CPPSTD = 14
 end
 
+local PLATFORM_GROUPS = {
+  ["posix"] = {"linux", "windows"}
+}
+
 ----------------------------------------------------------------------------
 -- If platforms are specified, then ensure configured platform is in list
 if PLATFORMS ~= nil then
@@ -55,6 +59,17 @@ if PLATFORMS ~= nil then
   for x, value in ipairs(PLATFORMS) do
     if value == PLATFORM then
       found = true
+      break
+    end
+    for pg, pgvalue in pairs(PLATFORM_GROUPS) do
+      if value == pg then
+        for p, pvalue in ipairs(pgvalue) do
+          if pvalue == PLATFORM then
+            found = true
+            break
+          end
+        end
+      end
     end
   end
   if found == false then
@@ -105,6 +120,18 @@ elseif PLATFORM == "windows" then
   PLATFORM_SHARED_EXT = ".dll"
   PLATFORM_EXE_EXT = ".exe"
   PACKAGEDIR = "WINDOWS"
+elseif PLATFORM == "web" then
+  COMPILER = "em++"
+  ARCHIVER = "emar"
+  QTRCC = ""
+  WINDRES = ""
+  LINKER = COMPILER
+  PLATFORM_CFLAGS = "-DPLATFORM_WEB"
+  PLATFORM_LFLAGS = ""
+  PLATFORM_LIB_EXT = ".a"
+  PLATFORM_SHARED_FLAGS = ""
+  PLATFORM_SHARED_EXT = ".so"
+  PLATFORM_EXE_EXT = ""
 else
   error("Unhandled platform: '" .. PLATFORM .. "'")
 end
@@ -377,8 +404,8 @@ function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
     inputs = inputs,
     command = "^ LINK %o^ " .. LINKER .. " " .. LFLAGS .. " " ..
               table.concat(objects, " ") ..
-              " -Wl,-\\( " .. table.concat(dep_static_libs, " ") ..
-              " -Wl,-\\)" ..
+              " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
+              " -Wl,--end-group" ..
               " -Wl,--as-needed " ..  table.concat(ext_shared_libs, " ") ..
               opts .. " -o " .. output,
     outputs = {output}
@@ -399,8 +426,8 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
     inputs = inputs,
     command = "^ LINK %o^ " .. LINKER .. " " .. LFLAGS .. " " ..
               table.concat(objects, " ") .. " " ..
-              " -Wl,-\\( " .. table.concat(dep_static_libs, " ") ..
-              " -Wl,-\\)" ..
+              " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
+              " -Wl,--end-group" ..
               " -Wl,--as-needed " .. table.concat(ext_shared_libs, " ") ..
               " -o " .. output,
     outputs = {output}
