@@ -105,6 +105,7 @@ if PLATFORM == "linux" then
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = "-rdynamic"
   PLATFORM_SHARED_EXT = ".so"
+  PLATFORM_EXE_FLAGS = ""
   PLATFORM_EXE_EXT = ""
   PACKAGEDIR = "DEBIAN"
 elseif PLATFORM == "windows" then
@@ -118,6 +119,7 @@ elseif PLATFORM == "windows" then
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = ""
   PLATFORM_SHARED_EXT = ".dll"
+  PLATFORM_EXE_FLAGS = ""
   PLATFORM_EXE_EXT = ".exe"
   PACKAGEDIR = "WINDOWS"
 elseif PLATFORM == "web" then
@@ -131,7 +133,8 @@ elseif PLATFORM == "web" then
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = ""
   PLATFORM_SHARED_EXT = ".so"
-  PLATFORM_EXE_EXT = ""
+  PLATFORM_EXE_FLAGS = " -s SINGLE_FILE=1"
+  PLATFORM_EXE_EXT = ".html"
 else
   error("Unhandled platform: '" .. PLATFORM .. "'")
 end
@@ -419,6 +422,7 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
                          ext_shared_libs)
   local output = name .. PLATFORM_EXE_EXT
   local inputs = {}
+  local opts = " " .. PLATFORM_EXE_FLAGS
   inputs += objects
   inputs += dep_static_libs
   inputs += dep_shared_libs
@@ -429,7 +433,7 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
               " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
               " -Wl,--end-group" ..
               " -Wl,--as-needed " .. table.concat(ext_shared_libs, " ") ..
-              " -o " .. output,
+              opts .. " -o " .. output,
     outputs = {output}
   }
   return output
