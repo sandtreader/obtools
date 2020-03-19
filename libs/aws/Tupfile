@@ -4,8 +4,9 @@
 # Copyright (c) 2017 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-aws
-TYPE    = lib
-DEPENDS = ot-crypto ot-web ot-misc
+NAME      = ot-aws
+TYPE      = lib
+DEPENDS   = ot-crypto ot-web ot-misc
+PLATFORMS = posix
 
 include_rules

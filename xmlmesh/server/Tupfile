@@ -4,9 +4,10 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME     = ot-xmlmesh
-TYPE     = exe
-DEPENDS  = ot-net ot-daemon ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
+NAME      = ot-xmlmesh
+TYPE      = exe
+DEPENDS   = ot-net ot-daemon ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
+PLATFORMS = posix
 
 PACKAGE  = $(NAME)
 VERSION  = 4.0.0

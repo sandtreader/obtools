@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-ssl-openssl
-TYPE    = lib
-DEPENDS = ot-ssl ot-crypto ext-pkg-openssl
+NAME      = ot-ssl-openssl
+TYPE      = lib
+DEPENDS   = ot-ssl ot-crypto ext-pkg-openssl
+PLATFORMS = posix
 
 include_rules

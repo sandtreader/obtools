@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-web
-TYPE    = lib
-DEPENDS = ot-xml ot-misc ot-ssl ot-crypto
+NAME      = ot-web
+TYPE      = lib
+DEPENDS   = ot-xml ot-misc ot-ssl ot-crypto
+PLATFORMS = posix
 
 include_rules

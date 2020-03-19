@@ -7,6 +7,7 @@
 NAME            = ot-daemon
 TYPE            = lib
 DEPENDS         = ot-net ot-log ot-xml ot-misc ot-init
+PLATFORMS       = posix
 WINDOWS-DEPENDS = ext-dbghelp
 
 include_rules

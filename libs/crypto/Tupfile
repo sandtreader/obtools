@@ -4,8 +4,9 @@
 # Copyright (c) 2016 Paul Clark. All rights reserved
 #===========================================================================
 
-NAME    = ot-crypto
-TYPE    = lib
-DEPENDS = ot-mt ot-misc ot-text ot-gather ext-crypto
+NAME      = ot-crypto
+TYPE      = lib
+DEPENDS   = ot-mt ot-misc ot-text ot-gather ext-crypto
+PLATFORMS = posix
 
 include_rules
