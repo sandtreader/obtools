@@ -45,7 +45,7 @@ bool Thread::set_priority(int priority, bool realtime)
   if (!mythread)
     return false;
 
-  auto param = sched_param{0};
+  auto param = sched_param{};
   param.sched_priority = priority;
   return !pthread_setschedparam(mythread->native_handle(),
                                 realtime ? SCHED_RR : SCHED_OTHER,

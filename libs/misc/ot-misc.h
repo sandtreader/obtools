@@ -14,6 +14,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <array>
 #include <stdint.h>
 #include <stdlib.h>
 #include <iostream>

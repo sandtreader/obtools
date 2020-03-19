@@ -35,6 +35,9 @@ struct Context
 
   // Copy constructor
   Context(const Context& o): vars(o.vars) {}
+
+  // Copy assignment
+  Context& operator=(const Context& o) { vars = o.vars; return *this; }
 };
 
 //==========================================================================
