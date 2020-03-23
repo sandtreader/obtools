@@ -128,13 +128,15 @@ elseif PLATFORM == "web" then
   QTRCC = ""
   WINDRES = ""
   LINKER = COMPILER
-  PLATFORM_CFLAGS = "-DPLATFORM_WEB"
-  PLATFORM_LFLAGS = ""
+  PLATFORM_CFLAGS = "-DPLATFORM_WEB -s DISABLE_EXCEPTION_CATCHING=0"
+  PLATFORM_LFLAGS = "-s DISABLE_EXCEPTION_CATCHING=0 -s FORCE_FILESYSTEM=1"
   PLATFORM_LIB_EXT = ".a"
-  PLATFORM_SHARED_FLAGS = ""
-  PLATFORM_SHARED_EXT = ".so"
-  PLATFORM_EXE_FLAGS = " -s SINGLE_FILE=1"
-  PLATFORM_EXE_EXT = ".html"
+  PLATFORM_SHARED_FLAGS = "-s SIDE_MODULE=1 -s EXPORT_ALL=1"
+  PLATFORM_SHARED_EXT = ".wasm"
+  PLATFORM_EXE_FLAGS = "-s MAIN_MODULE=1 -s EXPORT_ALL=1 -s WASM=1"
+  PLATFORM_EXE_EXT = ".js"
+  PLATFORM_EXE_EXTRA_OUTPUTS = ".wasm"
+  PACKAGEDIR = "WEB"
 else
   error("Unhandled platform: '" .. PLATFORM .. "'")
 end
@@ -332,6 +334,11 @@ for index, dep in ipairs(full_deps) do
       dep_products += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT
     elseif full_depends[dep]["type"] == "exe" then
       dep_products += libdir .. "/" .. dep .. PLATFORM_EXE_EXT
+      if PLATFORM_EXE_EXTRA_OUTPUTS != nil then
+        for e in PLATFORM_EXE_EXTRA_OUTPUTS:gmatch("%S+") do
+          dep_products += libdir .. "/" .. dep .. e
+        end
+      end
     end
   end
 end
@@ -421,6 +428,12 @@ end
 function link_executable(name, objects, dep_static_libs, dep_shared_libs,
                          ext_shared_libs)
   local output = name .. PLATFORM_EXE_EXT
+  local outputs = {output}
+  if PLATFORM_EXE_EXTRA_OUTPUTS != nil then
+    for e in PLATFORM_EXE_EXTRA_OUTPUTS:gmatch("%S+") do
+      outputs += name .. e
+    end
+  end
   local inputs = {}
   local opts = " " .. PLATFORM_EXE_FLAGS
   inputs += objects
@@ -434,7 +447,7 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
               " -Wl,--end-group" ..
               " -Wl,--as-needed " .. table.concat(ext_shared_libs, " ") ..
               opts .. " -o " .. output,
-    outputs = {output}
+    outputs = outputs
   }
   return output
 end
@@ -549,10 +562,39 @@ function package_windows(products, package_dir, dep_products)
   }
 end
 
+----------------------------------------------------------------------------
+-- Package (Web)
+function package_web(products, package_dir, dep_products)
+  local inputs = tup.glob(PACKAGEDIR .. "/*")
+  inputs += products
+  inputs += dep_products
+  local name = NAME
+  local versioned_name = name .. "-" .. VERSION .. "-" .. REVISION
+
+  local outputs = {versioned_name .. ".js", versioned_name .. ".data"}
+
+  local f = io.open(package_dir .. "/files", "r")
+  if f ~= nil then
+    for line in f:lines() do
+      i = line:match("[^ ]+", 1)
+      inputs += i
+    end
+  end
+
+  tup.definerule{
+    inputs = inputs,
+    command = "^ PACKAGE %o^ " .. tup.getcwd() .. "/create-wasm.sh " ..
+              VERSION .. " " .. REVISION .. " " .. name,
+    outputs = outputs
+  }
+end
+
 if PLATFORM == "linux" then
   package = package_linux
 elseif PLATFORM == "windows" then
   package = package_windows
+elseif PLATFORM == "web" then
+  package = package_web
 end
 
 --==========================================================================
