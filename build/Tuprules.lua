@@ -424,6 +424,34 @@ function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
 end
 
 ----------------------------------------------------------------------------
+-- Link a shared library from source
+function link_shared_lib_from_source(name, sources,
+                                     dep_includes, ext_includes,
+                                     dep_static_libs, dep_shared_libs,
+                                     ext_shared_libs)
+  local output = name .. PLATFORM_SHARED_EXT
+  local inputs = {}
+  local opts = PLATFORM_SHARED_FLAGS
+  inputs += sources
+  inputs += dep_static_libs
+  inputs += dep_shared_libs
+  tup.definerule{
+    inputs = inputs,
+    command = "^ LINK %o^ " .. LINKER .. " " .. CFLAGS ..
+              " " .. LFLAGS .. " " ..
+              table.concat(sources, " ") .. " " ..
+              table.concat(dep_includes, " ") .. " " ..
+              table.concat(ext_includes, " ") ..
+              " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
+              " -Wl,--end-group" ..
+              " " ..  table.concat(ext_shared_libs, " ") .. " " ..
+              opts .. " -o " .. output,
+    outputs = {output}
+  }
+  return output
+end
+
+----------------------------------------------------------------------------
 -- Link an executable
 function link_executable(name, objects, dep_static_libs, dep_shared_libs,
                          ext_shared_libs)
@@ -628,8 +656,15 @@ local products = {};
 if TYPE == "lib" then
   products += link_static_lib(NAME, objects)
 elseif TYPE == "shared" then
-  products += link_shared_lib(NAME, objects, dep_static_libs, dep_shared_libs,
-                              ext_shared_libs)
+  if PLATFORM == "web" then
+    products += link_shared_lib_from_source(NAME, sources,
+                                            dep_includes, ext_includes,
+                                            dep_static_libs, dep_shared_libs,
+                                            ext_shared_libs)
+  else
+    products += link_shared_lib(NAME, objects, dep_static_libs, dep_shared_libs,
+                                ext_shared_libs)
+  end
 elseif TYPE == "exe" then
   local exe_objects = {}
   exe_objects += objects
