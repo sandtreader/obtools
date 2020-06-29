@@ -53,6 +53,10 @@ public:
   string get_peer_cn();
 
   //------------------------------------------------------------------------
+  // Set the SNI hostname for the connection
+  void set_sni_hostname(const string& host);
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Connection();
 };
@@ -62,6 +66,7 @@ public:
 class Context: public SSL::Context
 {
   SSL_CTX *ctx;  // OpenSSL library context
+  string sni_hostname;
 
 public:
   string verify_common_name;
@@ -113,6 +118,10 @@ public:
   //------------------------------------------------------------------------
   // Set session ID context
   void set_session_id_context(const string& s);
+
+  //------------------------------------------------------------------------
+  // Set SNI hostname
+  void set_sni_hostname(const string& host) { sni_hostname = host; }
 
   //------------------------------------------------------------------------
   // Create a new SSL connection from the context and bind it to the given fd

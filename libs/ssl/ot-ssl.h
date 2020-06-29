@@ -67,6 +67,10 @@ public:
   virtual Connection *connect_connection(int fd) = 0;
 
   //------------------------------------------------------------------------
+  // Set the SNI hostname for the context
+  virtual void set_sni_hostname(const string& host) = 0;
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Context() {}
 

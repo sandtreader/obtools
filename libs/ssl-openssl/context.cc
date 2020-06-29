@@ -232,6 +232,10 @@ Connection *Context::connect_connection(int fd)
       return 0;
     }
 
+    // Set SNI hostname, if known
+    if (!sni_hostname.empty())
+      SSL_set_tlsext_host_name(ssl, sni_hostname.c_str());
+
     int ret = SSL_connect(ssl);
     if (ret < 1)
     {

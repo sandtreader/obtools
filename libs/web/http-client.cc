@@ -42,6 +42,8 @@ HTTPClient::HTTPClient(const URL& url, SSL::Context *_ctx, const string& _ua,
         log.error << "HTTPS requested but no SSL context given\n";
         return;
       }
+
+      ssl_ctx->set_sni_hostname(host);
     }
     else
     {
