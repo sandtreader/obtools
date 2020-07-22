@@ -40,9 +40,12 @@ local VERSION = flatten(VERSION)
 local REVISION = flatten(REVISION)
 local CFLAGS = flatten(CFLAGS)
 local LFLAGS = flatten(LFLAGS)
+local ARCH = flatten(ARCH)
 
 local PLATFORM = tup.getconfig("PLATFORM")
-local ARCH = tup.getconfig("ARCH")
+if ARCH == "" then
+  ARCH = tup.getconfig("ARCH")
+end
 local CPPSTD = tup.getconfig("CPPSTD")
 if CPPSTD == nil or CPPSTD == "" then
   CPPSTD = 14
@@ -495,7 +498,7 @@ end
 
 ----------------------------------------------------------------------------
 -- Package (Linux)
-function package_linux(products, package_dir, dep_products)
+function package_linux(products, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
@@ -519,43 +522,25 @@ function package_linux(products, package_dir, dep_products)
     end
   end
 
-  -- Read Debian control file to get a list of package names
-  local f = io.open(package_dir .. "/control", "r")
-  if f == nil then
-    error("Could not open Debian control file in " .. package_dir)
-  end
-  local package_names = {}
-  local last_name = ""
-  for line in f:lines() do
-    local p = line:match("Package: (.*)")
-    if p ~= nil then
-      package_names += p
-      last_name = p
-    end
-    local a = line:match("Architecture: (.*)")
-    if a ~= nil then
-      if a == "all" then
-        outputs += last_name .. version_separator .. VERSION .. "-" .. REVISION ..
-                   arch_separator .. noarch .. suffix
-      else
-        outputs += last_name .. version_separator .. VERSION .. "-" .. REVISION ..
-                   arch_separator ..  ARCH .. suffix
-      end
-    end
+  if ARCH == "all" then
+    outputs += PACKAGE .. version_separator .. VERSION .. "-" .. REVISION ..
+               arch_separator .. noarch .. suffix
+  else
+    outputs += PACKAGE .. version_separator .. VERSION .. "-" .. REVISION ..
+               arch_separator ..  ARCH .. suffix
   end
 
   tup.definerule{
     inputs = inputs,
     command = "^ PACKAGE %o^ " .. tup.getcwd() .. "/create-deb.sh " ..
-              VERSION .. " " .. REVISION .. " " ..
-              table.concat(package_names, " "),
+              VERSION .. " " .. REVISION .. " " .. PACKAGE,
     outputs = outputs
   }
 end
 
 ----------------------------------------------------------------------------
 -- Package (Windows)
-function package_windows(products, package_dir, dep_products)
+function package_windows(products, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
@@ -705,10 +690,8 @@ end
 ----------------------------------------------------------------------------
 -- Make packages
 if tup.getconfig("RELEASE") == "y" then
-  local package_dir = tup.getprocessingdir() .. "/" .. PACKAGEDIR
-  local d = io.open(package_dir, "r")
-  if d ~= nil then
-    package(products, package_dir, dep_products)
+  if PACKAGE ~= "" then
+    package(products, dep_products)
   end
 end
 
