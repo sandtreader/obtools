@@ -41,6 +41,7 @@ local REVISION = flatten(REVISION)
 local CFLAGS = flatten(CFLAGS)
 local LFLAGS = flatten(LFLAGS)
 local ARCH = flatten(ARCH)
+local APPNAME = flatten(APPNAME)
 
 local PLATFORM = tup.getconfig("PLATFORM")
 if ARCH == "" then
@@ -541,31 +542,20 @@ end
 ----------------------------------------------------------------------------
 -- Package (Windows)
 function package_windows(products, dep_products)
+  if APPNAME == "" then
+    return
+  end
+
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
-  local name = NAME
-
-  local f = io.open(package_dir .. "/control", "r")
-  if f ~= nil then
-    for line in f:lines() do
-      n = line:match("^APPNAME=\"(.*)\"", 1)
-      if n then
-        name = n:gsub(" ", "-")
-      end
-    end
-  end
+  local name = APPNAME
+  name = name:gsub(" ", "-")
 
   local output = name .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
                  "installer.exe"
 
-  local f = io.open(package_dir .. "/files", "r")
-  if f ~= nil then
-    for line in f:lines() do
-      i = line:match("[^ ]+", 1)
-      inputs += i
-    end
-  end
+  -- !!! Need to expand inputs with contents of WINDOWS/files somehow
 
   tup.definerule{
     inputs = inputs,
