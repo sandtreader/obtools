@@ -3,7 +3,7 @@ C++ utility libraries
 
 These libraries were started in 2003 by Paul Clark (@sandtreader) for use across multiple consultancy projects.  They became the foundation of [Packet Ship](https://packetship.com)'s streaming media products, a custom digital coin architecture, an e-commerce retail offering and more recently the [ViGraph](https://vigraph.com) creative media platform.  
 
-Alex Woods and Jon Barber of Packet Ship also contributed significant new functionality between 2010 and 2020.  In 2020, Paul made ObTools Open Source under LGPLv2.1.
+Alex Woods and Jon Barber of Packet Ship also contributed significant new functionality between 2010 and 2020.  In 2020, Paul made ObTools Open Source under a permissive MIT licence.
 
 ## Functionality
 
