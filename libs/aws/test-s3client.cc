@@ -12,6 +12,13 @@
 #include <gtest/gtest.h>
 #include <iomanip>
 
+// Uncomment and define with bucket credentials for testing
+// DO NOT CHECK REAL KEYS INTO PUBLIC REPO - AWS will rightly disable them
+// pretty much instantly
+// #define KEY_ID "MY-ACCESS-KEY"
+// #define SECRET_KEY "MY-SECRET-KEY-BASE64"
+// #define BUCKETS_ROOT "my.bucket.domain"
+
 namespace {
 
 using namespace std;
@@ -20,16 +27,18 @@ using namespace ObTools;
 // Switch between bucket name in path or in host name
 bool use_virtual_hosts = false;
 
+// All tests disabled until KEY_ID, SECRET_KEY, BUCKETS_ROOT defined above
+#ifdef KEY_ID
+
 class S3ClientTest: public ::testing::Test
 {
-  static constexpr auto test_access_key_id = "AKIAJL4EKQVW7RRLB23Q";
-  static constexpr auto test_secret_key =
-    "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";
+  static constexpr auto test_access_key_id = KEY_ID;
+  static constexpr auto test_secret_key = SECRET_KEY;
   static constexpr auto test_region = "us-east-1";
 
 protected:
-  static constexpr auto test_bucket = "test.buckets.packetship.com";
-  static constexpr auto temp_bucket = "temp.buckets.packetship.com";
+  static constexpr auto test_bucket = "test." BUCKETS_ROOT;
+  static constexpr auto temp_bucket = "temp." BUCKETS_ROOT;
 
   AWS::S3Client *s3;
 
@@ -75,7 +84,7 @@ TEST_F(S3ClientTest, TestAuthListAllMyBucketsTwiceForPersistence)
 
 TEST_F(S3ClientTest, TestAuthListABucket)
 {
-  Web::URL url("http://test.buckets.packetship.com.s3.amazonaws.com/?delimiter=/");
+  Web::URL url("http://test." BUCKETS_ROOT ".s3.amazonaws.com/?delimiter=/");
   Web::HTTPMessage request("GET", url);
   Web::HTTPMessage response;
   ASSERT_TRUE(s3->do_request(request, response));
@@ -104,20 +113,20 @@ TEST_F(S3ClientTest, TestGetBucketURLForAllBuckets)
 
 TEST_F(S3ClientTest, TestGetBucketURLForSpecificBucket)
 {
-  string url = s3->get_url("test.packetship.com").str();
+  string url = s3->get_url("test." BUCKETS_ROOT).str();
   if (use_virtual_hosts)
-    ASSERT_EQ("http://test.packetship.com.s3.amazonaws.com/", url);
+    ASSERT_EQ("http://test." BUCKETS_ROOT ".s3.amazonaws.com/", url);
   else
-    ASSERT_EQ("http://s3.amazonaws.com/test.packetship.com/", url);
+    ASSERT_EQ("http://s3.amazonaws.com/test." BUCKETS_ROOT "/", url);
 }
 
 TEST_F(S3ClientTest, TestGetBucketURLForSpecificBucketAndObject)
 {
-  string url = s3->get_url("test.packetship.com", "foo/bar").str();
+  string url = s3->get_url("test." BUCKETS_ROOT, "foo/bar").str();
   if (use_virtual_hosts)
-    ASSERT_EQ("http://test.packetship.com.s3.amazonaws.com/foo/bar", url);
+    ASSERT_EQ("http://test." BUCKETS_ROOT ".s3.amazonaws.com/foo/bar", url);
   else
-    ASSERT_EQ("http://s3.amazonaws.com/test.packetship.com/foo/bar", url);
+    ASSERT_EQ("http://s3.amazonaws.com/test." BUCKETS_ROOT "/foo/bar", url);
 }
 
 TEST_F(S3ClientTest, TestListAllMyBuckets)
@@ -170,16 +179,16 @@ TEST_F(S3ClientTest, TestCreateAndDeleteBucketInEURegion)
   if (!use_virtual_hosts) return;
 
   // Note expect so if creation fails because it exists it can still be deleted
-  EXPECT_TRUE(s3->create_bucket("temp-eu.buckets.packetship.com", "",
+  EXPECT_TRUE(s3->create_bucket("temp-eu." BUCKETS_ROOT, "",
                                 "eu-west-1"));
 
   // Now we need to move to EU region for the rest
   s3->set_region("eu-west-1");
 
   set<string> objects;
-  EXPECT_TRUE(s3->list_bucket("temp-eu.buckets.packetship.com", objects));
+  EXPECT_TRUE(s3->list_bucket("temp-eu." BUCKETS_ROOT, objects));
   EXPECT_EQ(0, objects.size());
-  ASSERT_TRUE(s3->delete_bucket("temp-eu.buckets.packetship.com"));
+  ASSERT_TRUE(s3->delete_bucket("temp-eu." BUCKETS_ROOT));
 }
 
 TEST_F(S3ClientTest, TestCreateGetAndDeleteObject)
@@ -204,7 +213,7 @@ TEST_F(S3ClientTest, TestPublicObjectsAreWorldReadable)
                                 "public-read"));
 
   // Check readability with an ordinary HTTP client
-  Web::URL url("http://test.buckets.packetship.com.s3.amazonaws.com/mary.txt");
+  Web::URL url("http://test." BUCKETS_ROOT ".s3.amazonaws.com/mary.txt");
   Web::HTTPClient http(url);
   string readback;
   EXPECT_EQ(200, http.get(url, readback));
@@ -215,7 +224,7 @@ TEST_F(S3ClientTest, TestPublicObjectsAreWorldReadable)
 
 TEST_F(S3ClientTest, TestCreateAndList1500Objects)
 {
-  const string bucket_name("test-1500.buckets.packetship.com");
+  const string bucket_name("test-1500." BUCKETS_ROOT);
   // Check if bucket exists - if not, create it and add objects
   set<string> buckets;
   ASSERT_TRUE(s3->list_all_my_buckets(buckets));
@@ -309,6 +318,8 @@ TEST_F(S3ClientTest, TestEmptyBucket)
   EXPECT_EQ(0, objects.size());
   ASSERT_TRUE(s3->delete_bucket(temp_bucket));
 }
+
+#endif // KEY_ID defined
 
 } // anonymous namespace
 
