@@ -23,6 +23,8 @@ The libraries (obtools/libs) include:
 * Logging
 * ... and lots of other handy stuff
 
+XMLMesh (obtools/xmlmesh) is an XML-based publish-subscribe system with clients / bindings for C, C++, PHP, Perl and Javascript.
+
 The tools in obtools/tools should be considered an early experiment in automated ORM code generation in C++ direct from XMI.  If you don't know what that is, it's unlikely you will need it :-)
 
 ## Building
