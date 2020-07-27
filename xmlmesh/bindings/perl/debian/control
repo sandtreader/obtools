@@ -1,6 +1,7 @@
 Source: libobtools-xmlmesh-perl
 Priority: optional
 Maintainer: ObTools <support@packetship.com>
+Rules-Requires-Root: no
 Section: non-free/net
 
 Package: libobtools-xmlmesh-perl
