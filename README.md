@@ -77,7 +77,7 @@ The build only produces individual static libraries (`.a`) rather than a combine
 
 The simplest way to use the libraries is within the same build system - see the Tupfile in `xmlmesh/server` for an example.  You just have to name the libraries you are directly dependent on - further dependencies within the libraries are handled automagically.
 
-If you want to use the libraries in your own build system, you'll need to explicitly include the individual `ot-xxx.a`'s from build-debug/build-release, and include the `ot-xxx.h` header files from each library.  The Tupfiles in each library say what other libraries it depends on.
+If you want to use the libraries in your own build system, you'll need to explicitly include the individual `ot-xxx.a`'s from `build-debug/libs/xxx` or `build-release/libs/xxx`, and include the `ot-xxx.h` header files from each library.  The Tupfiles in each library say what other libraries it depends on.
 
 
 
