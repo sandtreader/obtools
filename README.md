@@ -79,6 +79,15 @@ The simplest way to use the libraries is within the same build system - see the 
 
 If you want to use the libraries in your own build system, you'll need to explicitly include the individual `ot-xxx.a`'s from `build-debug/libs/xxx` or `build-release/libs/xxx`, and include the `ot-xxx.h` header files from each library.  The Tupfiles in each library say what other libraries it depends on.
 
+## Contributions
+
+Yes please!
+
+If it's a bug-fix, test or tidy, please just go ahead and send a PR.  If it's anything major, please discuss it with me first...
+
+I ask all contributors to sign a standard, FSF-approved [Contributor License Agreement](http://contributoragreements.org/) to make the project easier to manage.  You can sign it when you generate a PR, or in advance [here](https://cla-assistant.io/sandtreader/obtools).
+
+Thanks!
 
 
 
