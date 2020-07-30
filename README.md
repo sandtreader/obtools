@@ -37,9 +37,10 @@ The libraries are in portable C++14 (using `clang`), primarily designed for Linu
 
 To build ObTools you'll need the following packages on top of the standard Ubuntu 20.04 or Debian 10 install:
 
-       $ sudo apt install build-essential tup clang git pkg-config debhelper dh-exec libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev
+       $ sudo apt install build-essential tup clang git pkg-config debhelper dh-exec
+       $ sudo apt install libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev
 
-If using another or older distribution which doesn't have Tup, you can build it yourself from the [Tup sources](http://gittup.org/tup/).  Why Tup?  It's blindingly fast and intelligent - I used to have a deep set of recursive Makefiles which took ages and you could never quite trust for library changes - not any more!
+If using another or older distribution which doesn't have Tup, you can build it yourself from the [Tup sources](http://gittup.org/tup/).  Why Tup?  It's blindingly fast and intelligent - I used to have a set of arcane [recursive Makefiles](https://www.cse.iitb.ac.in/~soumen/teach/1999.2A.CS699/make.html) which took ages and you could never quite trust for deep library changes - not any more!
 
 ### How to build debug versions (with automated tests):
 
