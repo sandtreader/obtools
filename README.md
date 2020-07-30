@@ -33,6 +33,14 @@ The tools in `obtools/obcache` and `obtools/tools` should be considered an early
 
 The libraries are in portable C++14 (using `clang`), primarily designed for Linux and use [Tup](http://gittup.org/tup/) to build.  A cross-compilation to Windows using MinGW is also possible.  Native build on MacOS has worked in the past, and could probably easily be added again, but isn't currently supported.  Compilation to JavaScript through emscripten is a Work In Progress!
 
+### Dependencies
+
+To build ObTools you'll need the following packages on top of the standard Ubuntu 20.04 or Debian 10 install:
+
+       $ sudo apt install build-essential tup clang git pkg-config debhelper dh-exec libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev
+
+If using another or older distribution which doesn't have Tup, you can build it yourself from the [Tup sources](http://gittup.org/tup/).  Why Tup?  It's blindingly fast and intelligent - I used to have a deep set of recursive Makefiles which took ages and you could never quite trust for library changes - not any more!
+
 ### How to build debug versions (with automated tests):
 
 1. Clone this repo, e.g.
@@ -85,7 +93,7 @@ Yes please!
 
 If it's a bug-fix, test or tidy, please just go ahead and send a PR.  If it's anything major, please discuss it with me first...
 
-I ask all contributors to sign a standard, FSF-approved [Contributor License Agreement](http://contributoragreements.org/) to make the project easier to manage.  You can sign it when you generate a PR, or in advance [here](https://cla-assistant.io/sandtreader/obtools).
+I ask all contributors to sign a standard, FSF-approved [Contributor License Agreement](http://contributoragreements.org/) to make the project easier to manage.  You can sign it when you generate a PR, or in advance [here](https://cla-assistant.io/sandtreader/obtools).  
 
 Thanks!
 
