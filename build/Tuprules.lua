@@ -555,7 +555,15 @@ function package_windows(products, dep_products)
   local output = name .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
                  "installer.exe"
 
-  -- !!! Need to expand inputs with contents of WINDOWS/files somehow
+  local fn = flatten(_G["WINDOWS-FILES"]);
+  local f = io.open(fn, "r")
+  if f ~= nil then
+    for line in f:lines() do
+      i = line:match("[^ ]+", 1)
+      print (i)
+      inputs += i
+    end
+  end
 
   tup.definerule{
     inputs = inputs,
@@ -567,7 +575,7 @@ end
 
 ----------------------------------------------------------------------------
 -- Package (Web)
-function package_web(products, package_dir, dep_products)
+function package_web(products, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
@@ -576,7 +584,8 @@ function package_web(products, package_dir, dep_products)
 
   local outputs = {versioned_name .. ".js", versioned_name .. ".data"}
 
-  local f = io.open(package_dir .. "/files", "r")
+  local fn = flatten(_G["WEB-FILES"]);
+  local f = io.open(fn, "r")
   if f ~= nil then
     for line in f:lines() do
       i = line:match("[^ ]+", 1)
