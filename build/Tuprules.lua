@@ -106,6 +106,7 @@ if PLATFORM == "linux" then
   LINKER = COMPILER
   PLATFORM_CFLAGS = "-DPLATFORM_LINUX"
   PLATFORM_LFLAGS = ""
+  PLATFORM_LIB_PREFIX = "lib"
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = "-rdynamic -Wl,--as-needed"
   PLATFORM_SHARED_EXT = ".so"
@@ -120,6 +121,7 @@ elseif PLATFORM == "windows" then
   LINKER = COMPILER
   PLATFORM_CFLAGS = "-DPLATFORM_WINDOWS -DWIN32_LEAN_AND_MEAN -D_GLIBCXX_HAVE_TLS"
   PLATFORM_LFLAGS = ""
+  PLATFORM_LIB_PREFIX = ""
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = "-Wl,--as-needed"
   PLATFORM_SHARED_EXT = ".dll"
@@ -134,6 +136,7 @@ elseif PLATFORM == "web" then
   LINKER = COMPILER
   PLATFORM_CFLAGS = "-DPLATFORM_WEB -s DISABLE_EXCEPTION_CATCHING=0"
   PLATFORM_LFLAGS = "-s DISABLE_EXCEPTION_CATCHING=0 -s FORCE_FILESYSTEM=1"
+  PLATFORM_LIB_PREFIX = ""
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = "-s SIDE_MODULE=1 -s EXPORT_ALL=1"
   PLATFORM_SHARED_EXT = ".wasm"
@@ -332,8 +335,8 @@ for index, dep in ipairs(full_deps) do
     local libdir = tup.getcwd() .. "/" .. full_depends[dep]["dir"]
     dep_includes += "-I" .. libdir
     if full_depends[dep]["type"] == "lib" then
-      dep_static_libs += libdir .. "/" .. dep .. PLATFORM_LIB_EXT
-      dep_products += libdir .. "/" .. dep .. PLATFORM_LIB_EXT
+      dep_static_libs += libdir .. "/" .. PLATFORM_LIB_PREFIX .. dep .. PLATFORM_LIB_EXT
+      dep_products += libdir .. "/" .. PLATFORM_LIB_PREFIX .. dep .. PLATFORM_LIB_EXT
     elseif full_depends[dep]["type"] == "shared" then
       dep_shared_libs += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT
       dep_products += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT
@@ -395,7 +398,7 @@ end
 ----------------------------------------------------------------------------
 -- Link a static library
 function link_static_lib(name, objects)
-  local output = name .. PLATFORM_LIB_EXT
+  local output = PLATFORM_LIB_PREFIX .. name .. PLATFORM_LIB_EXT
   tup.definerule{
     inputs = objects,
     command = "^ AR %o^ " .. ARCHIVER .. " crs " .. output .. " " ..
@@ -671,7 +674,7 @@ if tup.getconfig("TEST") == "y" then
     if TYPE == "lib" then
       -- Optimisation because linking against .a is quicker than multiple .o
       -- files
-      test_objects += NAME .. PLATFORM_LIB_EXT
+      test_objects += PLATFORM_LIB_PREFIX .. NAME .. PLATFORM_LIB_EXT
     else
       test_objects += objects
     end
