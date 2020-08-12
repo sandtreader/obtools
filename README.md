@@ -27,11 +27,20 @@ The libraries (`obtools/libs`) include:
 
 XMLMesh (`obtools/xmlmesh`) is an XML-based publish-subscribe system with clients / bindings for C, C++, PHP, Perl and Javascript.
 
-The tools in `obtools/obcache` and `obtools/tools` should be considered an early experiment in automated ORM code generation in C++ direct from XMI.  If you don't know what that is, it's unlikely you will need it :-)
+The tools in `obtools/obcache` and `obtools/tools` should be considered an early experiment in automated ORM code generation in C++ direct from XMI.  If you don't know what that is, it's unlikely you will need it 😀
 
 ## Building
 
 The libraries are in portable C++14 (using `clang`), primarily designed for Linux and use [Tup](http://gittup.org/tup/) to build.  A cross-compilation to Windows using MinGW is also possible.  Native build on MacOS has worked in the past, and could probably easily be added again, but isn't currently supported.  Compilation to JavaScript through emscripten is a Work In Progress!
+
+### Dependencies
+
+To build ObTools you'll need the following packages on top of the standard Ubuntu 20.04 or Debian 10 install:
+
+       $ sudo apt install build-essential tup clang git pkg-config debhelper dh-exec
+       $ sudo apt install libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev
+
+If using another or older distribution which doesn't have Tup, you can build it yourself from the [Tup sources](http://gittup.org/tup/).  Why Tup?  It's blindingly fast and intelligent - I used to have a set of arcane [recursive Makefiles](https://www.cse.iitb.ac.in/~soumen/teach/1999.2A.CS699/make.html) which took ages and you could never quite trust for deep library changes - not any more!
 
 ### How to build debug versions (with automated tests):
 
@@ -77,7 +86,7 @@ The build only produces individual static libraries (`.a`) rather than a combine
 
 The simplest way to use the libraries is within the same build system - see the Tupfile in `xmlmesh/server` for an example.  You just have to name the libraries you are directly dependent on - further dependencies within the libraries are handled automagically.
 
-If you want to use the libraries in your own build system, you'll need to explicitly include the individual `ot-xxx.a`'s from `build-debug/libs/xxx` or `build-release/libs/xxx`, and include the `ot-xxx.h` header files from each library.  The Tupfiles in each library say what other libraries it depends on.
+If you want to use the libraries in your own build system, you'll need to explicitly link with the individual `ot-xxx.a`'s from `build-debug/libs/xxx` or `build-release/libs/xxx`, and include the `ot-xxx.h` header files from each library.  The Tupfiles in each library say what other libraries it depends on.
 
 ## Contributions
 
@@ -85,7 +94,7 @@ Yes please!
 
 If it's a bug-fix, test or tidy, please just go ahead and send a PR.  If it's anything major, please discuss it with me first...
 
-I ask all contributors to sign a standard, FSF-approved [Contributor License Agreement](http://contributoragreements.org/) to make the project easier to manage.  You can sign it when you generate a PR, or in advance [here](https://cla-assistant.io/sandtreader/obtools).
+I ask all contributors to sign a standard, FSF-approved [Contributor License Agreement](http://contributoragreements.org/) to make the project easier to manage.  You can sign it when you generate a PR, or in advance [here](https://cla-assistant.io/sandtreader/obtools).  
 
 Thanks!
 

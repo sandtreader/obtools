@@ -107,9 +107,9 @@ if PLATFORM == "linux" then
   PLATFORM_CFLAGS = "-DPLATFORM_LINUX"
   PLATFORM_LFLAGS = ""
   PLATFORM_LIB_EXT = ".a"
-  PLATFORM_SHARED_FLAGS = "-rdynamic"
+  PLATFORM_SHARED_FLAGS = "-rdynamic -Wl,--as-needed"
   PLATFORM_SHARED_EXT = ".so"
-  PLATFORM_EXE_FLAGS = ""
+  PLATFORM_EXE_FLAGS = "-Wl,--as-needed"
   PLATFORM_EXE_EXT = ""
   PACKAGEDIR = "DEBIAN"
 elseif PLATFORM == "windows" then
@@ -121,9 +121,9 @@ elseif PLATFORM == "windows" then
   PLATFORM_CFLAGS = "-DPLATFORM_WINDOWS -DWIN32_LEAN_AND_MEAN -D_GLIBCXX_HAVE_TLS"
   PLATFORM_LFLAGS = ""
   PLATFORM_LIB_EXT = ".a"
-  PLATFORM_SHARED_FLAGS = ""
+  PLATFORM_SHARED_FLAGS = "-Wl,--as-needed"
   PLATFORM_SHARED_EXT = ".dll"
-  PLATFORM_EXE_FLAGS = ""
+  PLATFORM_EXE_FLAGS = "-Wl,--as-needed"
   PLATFORM_EXE_EXT = ".exe"
   PACKAGEDIR = "WINDOWS"
 elseif PLATFORM == "web" then
@@ -421,7 +421,7 @@ function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
               table.concat(objects, " ") ..
               " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
               " -Wl,--end-group" ..
-              " -Wl,--as-needed " ..  table.concat(ext_shared_libs, " ") ..
+              " " ..  table.concat(ext_shared_libs, " ") ..
               opts .. " -o " .. output,
     outputs = {output}
   }
@@ -478,7 +478,7 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
               table.concat(objects, " ") .. " " ..
               " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
               " -Wl,--end-group" ..
-              " -Wl,--as-needed " .. table.concat(ext_shared_libs, " ") ..
+              " " .. table.concat(ext_shared_libs, " ") ..
               opts .. " -o " .. output,
     outputs = outputs
   }
@@ -556,7 +556,15 @@ function package_windows(products, dep_products)
   local output = name .. "-" .. VERSION .. "-" .. REVISION .. "-" ..
                  "installer.exe"
 
-  -- !!! Need to expand inputs with contents of WINDOWS/files somehow
+  local fn = flatten(_G["WINDOWS-FILES"]);
+  local f = io.open(fn, "r")
+  if f ~= nil then
+    for line in f:lines() do
+      i = line:match("[^ ]+", 1)
+      print (i)
+      inputs += i
+    end
+  end
 
   tup.definerule{
     inputs = inputs,
@@ -568,7 +576,7 @@ end
 
 ----------------------------------------------------------------------------
 -- Package (Web)
-function package_web(products, package_dir, dep_products)
+function package_web(products, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products
@@ -577,7 +585,8 @@ function package_web(products, package_dir, dep_products)
 
   local outputs = {versioned_name .. ".js", versioned_name .. ".data"}
 
-  local f = io.open(package_dir .. "/files", "r")
+  local fn = flatten(_G["WEB-FILES"]);
+  local f = io.open(fn, "r")
   if f ~= nil then
     for line in f:lines() do
       i = line:match("[^ ]+", 1)

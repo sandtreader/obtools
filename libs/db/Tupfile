@@ -7,5 +7,6 @@
 NAME    = ot-db
 TYPE    = lib
 DEPENDS = ot-time ot-mt ot-log
+PLATFORMS = posix
 
 include_rules
