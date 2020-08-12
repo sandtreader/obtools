@@ -1,0 +1,16 @@
+Source: libot-dev
+Section: Devel
+Priority: optional
+Maintainer:  Paul Clark <paul@sandtreader.com>
+Build-Depends: debhelper (>= 9)
+Rules-Requires-Root: no
+Standards-Version: 3.9.6
+Homepage: https://github.com/sandtreader/obtools
+
+Package: libot-dev
+Architecture: any
+Description: C++ utility libraries for server daemons
+ Libraries for building high-performance network servers,
+ with threading, database, XML, network, JSON, HTTP,
+ crypto, parsing etc.
+

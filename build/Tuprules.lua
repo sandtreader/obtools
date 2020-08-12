@@ -333,6 +333,7 @@ for index, dep in ipairs(full_deps) do
     dep_includes += "-I" .. libdir
     if full_depends[dep]["type"] == "lib" then
       dep_static_libs += libdir .. "/" .. dep .. PLATFORM_LIB_EXT
+      dep_products += libdir .. "/" .. dep .. PLATFORM_LIB_EXT
     elseif full_depends[dep]["type"] == "shared" then
       dep_shared_libs += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT
       dep_products += libdir .. "/" .. dep .. PLATFORM_SHARED_EXT

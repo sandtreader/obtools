@@ -1,0 +1,62 @@
+#===========================================================================
+# Master Tupfile for ObTools library package
+#
+# Copyright (c) 2020 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME     = libot-dev
+TYPE     = package
+DEPENDS  = ot-access \
+           ot-action \
+           ot-alarm \
+           ot-aws \
+           ot-cache \
+           ot-chan \
+           ot-cli \
+           ot-cppt \
+           ot-crypto \
+           ot-daemon \
+           ot-db \
+           ot-db-mysql \
+           ot-db-pgsql \
+           ot-db-sqlite \
+           ot-dns \
+           ot-exec \
+           ot-expr \
+           ot-file \
+           ot-g2d \
+           ot-gather \
+           ot-gen \
+           ot-gnuplot \
+           ot-hash \
+           ot-huffman \
+           ot-init \
+           ot-json \
+           ot-lang \
+           ot-lex \
+           ot-lib \
+           ot-log \
+           ot-misc \
+           ot-msg \
+           ot-mt \
+           ot-net \
+           ot-netlink \
+           ot-regen \
+           ot-ring \
+           ot-script \
+           ot-serial \
+           ot-soap \
+           ot-ssl \
+           ot-ssl-openssl \
+           ot-text \
+           ot-time \
+           ot-tube \
+           ot-web \
+           ot-xmi \
+           ot-xml
+
+PACKAGE  = $(NAME)
+VERSION  = 3.0.0
+REVISION = 1~dev1
+
+include_rules
