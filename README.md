@@ -86,6 +86,8 @@ The build only produces individual static libraries (`.a`) rather than a combine
 
 The simplest way to use the libraries is within the same build system - see the Tupfile in `xmlmesh/server` for an example.  You just have to name the libraries you are directly dependent on - further dependencies within the libraries are handled automagically.
 
+If you're using it in a separate project, you probably want to make ObTools a sub-module, then run `obtools/build/init.sh/` at your top-level.  You'll need to provide a `Tuppath.lua` at the top level to direct the build system to the right paths for both the ObTools libraries and any of your own which are used as dependencies.  You can see this all in operation in the [ViGraph server source](https://github.com/vigraph/vg-server)
+
 If you want to use the libraries in your own build system, you'll need to explicitly link with the individual `ot-xxx.a`'s from `build-debug/libs/xxx` or `build-release/libs/xxx`, and include the `ot-xxx.h` header files from each library.  The Tupfiles in each library say what other libraries it depends on.
 
 ## Contributions
