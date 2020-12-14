@@ -86,7 +86,7 @@ The build only produces individual static libraries (`.a`) rather than a combine
 
 The simplest way to use the libraries is within the same build system - see the Tupfile in `xmlmesh/server` for an example.  You just have to name the libraries you are directly dependent on - further dependencies within the libraries are handled automagically.
 
-If you're using it in a separate project, you probably want to make ObTools a sub-module, then run `obtools/build/init.sh/` at your top-level.  You'll need to provide a `Tuppath.lua` at the top level to direct the build system to the right paths for both the ObTools libraries and any of your own which are used as dependencies.
+If you're using it in a separate project, you probably want to make ObTools a sub-module, then run `obtools/build/init.sh/` at your top-level.  You'll need to provide a `Tuppath.lua` at the top level to direct the build system to the right paths for both the ObTools libraries and any of your own which are used as dependencies.  You'll probably want to grab ObTools' `.gitignore` too.
 
        $ cd myproject
        $ git submodule add git@github.com:sandtreader/obtools.git
@@ -116,6 +116,9 @@ If you're using it in a separate project, you probably want to make ObTools a su
     
        $ obtools/build/init.sh -t debug
        $ tup
+          --- should build successfully! ---
+       $ cp obtools/.gitignore .
+       $ git add .gitignore Tuppath.lua
        
 You can see this all in operation in the [ViGraph server source](https://github.com/vigraph/vg-server)
  
