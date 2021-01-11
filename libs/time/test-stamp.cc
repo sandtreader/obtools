@@ -77,6 +77,13 @@ TEST(StampTest, TestStampAdditionOfNegativeDuration)
   EXPECT_EQ(s1, s2);
 }
 
+TEST(StampTest, TestDateStampsRoundToMidnight)
+{
+  Time::DateStamp s1{"1967-01-29T06:00:00Z"};
+  Time::DateStamp s2{"1967-01-29T07:30:00Z"};
+  EXPECT_EQ(s1, s2);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

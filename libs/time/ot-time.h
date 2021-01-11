@@ -424,24 +424,26 @@ ostream& operator<<(ostream& s, const Stamp& st);
 
 //==========================================================================
 // DateStamp - fixed date in absolute time
-// As per Stamp, but can be constructed from just a date
+// As per Stamp, but rounded back to midnight, and displays just date
 class DateStamp: public Stamp
 {
+  void fix_to_midnight() { t = date().ntp(); }
+
 public:
   // Default constructor
   DateStamp() {}
 
   //------------------------------------------------------------------------
   // Constructor from time_t
-  DateStamp(time_t _t): Stamp(_t) {}
+  DateStamp(time_t _t): Stamp(_t) { fix_to_midnight(); }
 
   //------------------------------------------------------------------------
   // Constructor from split time
-  DateStamp(const Split& split): Stamp(split) {}
+  DateStamp(const Split& split): Stamp(split) { fix_to_midnight(); }
 
   //------------------------------------------------------------------------
   // Constructor from Stamp
-  DateStamp(const Stamp& stamp): Stamp(stamp) {}
+  DateStamp(const Stamp& stamp): Stamp(stamp) { fix_to_midnight(); }
 
   //------------------------------------------------------------------------
   // Constructor from string
