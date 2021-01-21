@@ -39,6 +39,14 @@ TEST(StampTest, TestStampSubtraction)
   EXPECT_EQ(5400.0, d.seconds());
 }
 
+TEST(StampTest, TestStampSubtractionReversed)
+{
+  Time::Stamp s1{"1967-01-29T06:00:00Z"};
+  Time::Stamp s2{"1967-01-29T07:30:00Z"};
+  Time::Duration d = s1-s2;
+  EXPECT_EQ(-5400.0, d.seconds());
+}
+
 TEST(StampTest, TestStampSubtractionHuge)
 {
   Time::Stamp s1;

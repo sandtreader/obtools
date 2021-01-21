@@ -357,10 +357,8 @@ public:
 
   //------------------------------------------------------------------------
   // Subtract two stamps to get duration between
-  // Beware if they could be misordered - duration returned will be very
-  // large, not negative!
   Duration operator-(const Stamp& o) const
-  { return Duration(ntp_to_seconds(t-o.t)); }
+  { return Duration(t<o.t ? -ntp_to_seconds(o.t-t) : ntp_to_seconds(t-o.t)); }
 
   //------------------------------------------------------------------------
   // Add a Duration to a stamp
