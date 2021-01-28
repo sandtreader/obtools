@@ -97,7 +97,7 @@ static int verify_common_name_callback(int preverify_ok,
 
   if (x509_ctx)
   {
-    OpenSSL *ssl = reinterpret_cast<OpenSSL *>(X509_STORE_CTX_get_ex_data(
+    ::SSL *ssl = reinterpret_cast<::SSL *>(X509_STORE_CTX_get_ex_data(
           x509_ctx, SSL_get_ex_data_X509_STORE_CTX_idx()));
     SSL_CTX *ssl_ctx = SSL_get_SSL_CTX(ssl);
     Context *ctx = reinterpret_cast<Context *>(SSL_CTX_get_ex_data(ssl_ctx,
@@ -184,7 +184,7 @@ Connection *Context::accept_connection(int fd)
 {
   if (!ctx) return 0;
 
-  OpenSSL *ssl = SSL_new(ctx);
+  ::SSL *ssl = SSL_new(ctx);
   if (ssl)
   {
     // Attach to fd
@@ -221,7 +221,7 @@ Connection *Context::connect_connection(int fd)
 {
   if (!ctx) return 0;
 
-  OpenSSL *ssl = SSL_new(ctx);
+  ::SSL *ssl = SSL_new(ctx);
   if (ssl)
   {
     // Attach to fd

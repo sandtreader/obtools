@@ -11,17 +11,11 @@
 #ifndef __OBTOOLS_SSL_OPENSSL_H
 #define __OBTOOLS_SSL_OPENSSL_H
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include "ot-ssl.h"
 #include "ot-crypto.h"
-
-// This is rather ugly...  We want to use SSL as a namespace, but
-// OpenSSL defines it as a struct.  Hence we redefine SSL here to
-// expand to OpenSSL for the duration of the OpenSSL header
-#define SSL OpenSSL
-#include <openssl/ssl.h>
-#undef SSL
-
-#include <openssl/err.h>
 
 namespace ObTools { namespace SSL_OpenSSL {
 
@@ -33,12 +27,12 @@ using namespace std;
 class Connection: public SSL::Connection
 {
 private:
-  OpenSSL *ssl;
+  ::SSL *ssl;
 
 public:
   //------------------------------------------------------------------------
-  // Constructor, takes OpenSSL (=SSL) object
-  Connection(OpenSSL *_ssl): ssl(_ssl) {}
+  // Constructor, takes SSL object
+  Connection(::SSL *_ssl): ssl(_ssl) {}
 
   //------------------------------------------------------------------------
   // Raw stream read wrapper
@@ -65,7 +59,7 @@ public:
 // SSL application context
 class Context: public SSL::Context
 {
-  SSL_CTX *ctx;  // OpenSSL library context
+  SSL_CTX *ctx;  // SSL library context
   string sni_hostname;
 
 public:

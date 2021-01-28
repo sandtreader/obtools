@@ -56,7 +56,7 @@ DEPENDS  = ot-access \
            ot-xml
 
 PACKAGE  = $(NAME)
-VERSION  = 3.0.0
-REVISION = 1~dev2
+VERSION  = 3.0.1
+REVISION = 1~dev1
 
 include_rules
