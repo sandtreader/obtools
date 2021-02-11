@@ -261,12 +261,14 @@ bool Connection::insert_join64(const string& table,
 // Do a SELECT for all fields in the given row in the given table
 // with the given WHERE clause
 // If where is empty, doesn't add a WHERE at all
+// If distinct is set, does SELECT DISTINCT
 // Returns query result as query()
 Result Connection::select(const string& table, const Row& row,
-                          const string& where)
+                          const string& where, bool distinct)
 {
   ostringstream oss;
-  oss << "SELECT " << row.get_fields() << " FROM " << table;
+  oss << "SELECT " << (distinct?"DISTINCT ":"")
+      << row.get_fields() << " FROM " << table;
   if (!where.empty()) oss << " WHERE " << where;
   return query(oss.str());
 }
@@ -274,11 +276,12 @@ Result Connection::select(const string& table, const Row& row,
 //--------------------------------------------------------------------------
 // Do a SELECT for all fields in the given row in the given table
 // matching the list of values in where_row
+// If distinct is set, does SELECT DISTINCT
 // Returns query result as query()
 Result Connection::select(const string& table, const Row& row,
-                          const Row& where_row)
+                          const Row& where_row, bool distinct)
 {
-  return select(table, row, where_row.get_where_clause());
+  return select(table, row, where_row.get_where_clause(), distinct);
 }
 
 //--------------------------------------------------------------------------

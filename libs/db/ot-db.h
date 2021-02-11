@@ -932,14 +932,18 @@ public:
   // Do a SELECT for all fields in the given row in the given table
   // with the given WHERE clause
   // If where is empty, doesn't add a WHERE at all
+  // If distinct is set, does SELECT DISTINCT
   // Returns query result as query()
-  Result select(const string& table, const Row& row, const string& where="");
+  Result select(const string& table, const Row& row, const string& where="",
+                bool distinct = false);
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table
   // matching the list of values in where_row
+  // If distinct is set, does SELECT DISTINCT
   // Returns query result as query()
-  Result select(const string& table, const Row& row, const Row& where_row);
+  Result select(const string& table, const Row& row, const Row& where_row,
+                bool distinct = false);
 
   //------------------------------------------------------------------------
   // Do a SELECT for all fields in the given row in the given table
