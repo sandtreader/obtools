@@ -86,6 +86,11 @@ public:
   bool is_true() const { return type == TRUE_ || (type == INTEGER && n); }
 
   //------------------------------------------------------------------------
+  // Comparators
+  bool operator==(const Value& v) const;
+  bool operator!=(const Value& v) const { return !(*this == v); }
+
+  //------------------------------------------------------------------------
   // Get a value from the given object property
   // Returns Value::none if this is not an object or property doesn't exist
   const Value& get(const string& property) const;
