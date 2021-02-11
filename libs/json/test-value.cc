@@ -50,6 +50,9 @@ TEST(Value, TestAsInt)
   Value v(42);
   ASSERT_EQ(42, v.as_int());
 
+  Value vs("42");
+  ASSERT_EQ(42, vs.as_int());
+
   Value nv;
   ASSERT_EQ(99, nv.as_int(99));
 }
@@ -61,6 +64,9 @@ TEST(Value, TestAsFloat)
 
   Value vi(42);
   ASSERT_EQ(42.0, vi.as_float());
+
+  Value vs("42.9");
+  ASSERT_EQ(42.9, vs.as_float());
 
   Value nv;
   ASSERT_EQ(99.9, nv.as_float(99.9));

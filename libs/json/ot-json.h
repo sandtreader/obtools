@@ -120,12 +120,18 @@ public:
 
   //------------------------------------------------------------------------
   // Read as an integer value with the given default
-  int64_t as_int(int64_t def=0) const { return (type==INTEGER)?n:def; }
+  // Will cast numeric strings
+  int64_t as_int(int64_t def=0) const
+  { return (type==INTEGER)?n:
+      ((type==STRING)?Text::stoi(s):def); }
 
   //------------------------------------------------------------------------
   // Read as a float value with the given default - also promotes integers
+  // Will cast numeric strings
   double as_float(double def=0.0) const
-  { return (type==NUMBER)?f:((type==INTEGER)?n:def); }
+  { return (type==NUMBER)?f:
+      ((type==INTEGER)?n:
+       ((type==STRING)?Text::stof(s):def)); }
 
   //------------------------------------------------------------------------
   // Write the value to the given stream
