@@ -23,11 +23,11 @@ bool Value::operator==(const Value& v) const
   if (type != v.type) return false;
   switch (type)
   {
-    case NUMBER:  return f != v.f;
-    case INTEGER: return n != v.n;
-    case STRING:  return s != v.s;
-    case OBJECT:  return o != v.o;
-    case ARRAY:   return a != v.a;
+    case NUMBER:  return f == v.f;
+    case INTEGER: return n == v.n;
+    case STRING:  return s == v.s;
+    case OBJECT:  return o == v.o;
+    case ARRAY:   return a == v.a;
     default:      return true;
   }
 }

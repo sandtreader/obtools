@@ -320,6 +320,114 @@ TEST(Value, TestWritingPrettyNestedArray)
             value.str(true));  // pretty
 }
 
+TEST(Value, TestCompareSimpleValues)
+{
+  Value f1(Value::FALSE_);
+  Value f2(Value::FALSE_);
+  Value t1(Value::TRUE_);
+  Value t2(Value::TRUE_);
+  Value n1(Value::NULL_);
+  Value n2(Value::NULL_);
+  Value u1;
+  Value u2;
+
+  EXPECT_EQ(f1, f2);
+  EXPECT_EQ(t1, t2);
+  EXPECT_EQ(n1, n2);
+  EXPECT_EQ(u1, u2);
+
+  EXPECT_NE(f1, t1);
+  EXPECT_NE(t1, n1);
+  EXPECT_NE(n1, u2);
+  EXPECT_NE(u2, f1);
+}
+
+TEST(Value, TestCompareNumbers)
+{
+  Value n1(42.0);
+  Value n2(42.0);
+  Value n3(99.0);
+  Value u;
+
+  EXPECT_EQ(n1, n2);
+  EXPECT_NE(n1, n3);
+  EXPECT_NE(n1, u);
+}
+
+TEST(Value, TestCompareIntegers)
+{
+  Value i1(42);
+  Value i2(42);
+  Value i3(99);
+  Value u;
+
+  EXPECT_EQ(i1, i2);
+  EXPECT_NE(i1, i3);
+  EXPECT_NE(i1, u);
+}
+
+TEST(Value, TestCompareStrings)
+{
+  Value s1("foo");
+  Value s2("foo");
+  Value s3("bar");
+  Value u;
+
+  EXPECT_EQ(s1, s2);
+  EXPECT_NE(s1, s3);
+  EXPECT_NE(s1, u);
+}
+
+TEST(Value, TestCompareObjects)
+{
+  Value u;
+  Value o1(Value::OBJECT);
+  o1.set("foo", 42);
+
+  Value o2(Value::OBJECT);
+  o2.set("foo", 42);
+
+  Value o3(Value::OBJECT);
+  o3.set("foo", 99);
+
+  Value o4(Value::OBJECT);
+  o4.set("foo", 42);
+  o4.set("bar", 42);
+
+  Value o5(Value::OBJECT);
+
+  EXPECT_EQ(o1, o2);
+  EXPECT_NE(o1, o3);
+  EXPECT_NE(o1, o4);
+  EXPECT_NE(o1, o5);
+  EXPECT_NE(o1, u);
+}
+
+TEST(Value, TestCompareArrays)
+{
+  Value u;
+  Value a1(Value::ARRAY);
+  a1.add("foo");
+
+  Value a2(Value::ARRAY);
+  a2.add("foo");
+
+  Value a3(Value::ARRAY);
+  a3.add("bar");
+
+  Value a4(Value::ARRAY);
+  a4.add("foo");
+  a4.add("bar");
+
+  Value a5(Value::ARRAY);
+
+  EXPECT_EQ(a1, a2);
+  EXPECT_NE(a1, a3);
+  EXPECT_NE(a1, a4);
+  EXPECT_NE(a1, a5);
+  EXPECT_NE(a1, u);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
