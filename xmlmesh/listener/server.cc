@@ -107,7 +107,7 @@ void Server::reconfigure()
     log.summary << "Reading actions from " << actions_dir << ":\n";
   list<File::Path> paths;
   actions_dir.inspect(paths);
-  for(const auto path: paths)
+  for(const auto& path: paths)
   {
     if (old_actions.size())
       log.detail << " - " << path << endl;
@@ -152,7 +152,7 @@ void Server::reconfigure()
   }
 
   // Remove any remaining dead actions
-  for(const auto it: old_actions)
+  for(const auto& it: old_actions)
   {
     log.summary << "Removing dead action on subject '" << it.first << "'\n";
     auto ait = actions.find(it.first);
