@@ -34,7 +34,7 @@ $NAME ($VERSION-$REVISION) stable; urgency=low
 
   * See documentation.
 
- -- PacketShip Support <support@packetship.com>  `date -R`
+ -- ObTools support <support@obtools.com>  `date -R`
 EOF
 fi
 
