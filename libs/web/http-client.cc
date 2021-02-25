@@ -9,10 +9,17 @@
 
 #include "ot-web.h"
 #include "ot-text.h"
+#include "ot-misc.h"
 #include "ot-log.h"
+#include "ot-crypto.h"
 #include <sstream>
 
 namespace ObTools { namespace Web {
+
+namespace
+{
+  const auto websocket_key_guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+}
 
 //--------------------------------------------------------------------------
 // Constructor from URL - extracts server from host/port parts
@@ -381,6 +388,76 @@ int HTTPClient::put(const URL& url, const string& content_type,
 }
 
 //--------------------------------------------------------------------------
+// Convert to websocket
+// Returns result code, fills in the TCPStream to use if 101
+int HTTPClient::open_websocket(const URL& url, Net::TCPStream*& stream_p)
+{
+  Log::Error log;
+
+  HTTPMessage request("GET", url);
+  request.headers.put("Upgrade", "websocket");
+  request.headers.put("Connection", "Upgrade");
+  request.headers.put("Sec-WebSocket-Version", "13");
+
+  // Generate a random key
+  unsigned char binary[16];
+  Misc::Random random;
+  random.generate_binary(binary, 16);
+  Text::Base64 base64;
+  string key = base64.encode(binary, 16);
+  request.headers.put("Sec-WebSocket-Key", key);
+
+  HTTPMessage response;
+  http_1_1 = true;
+  progressive = true;
+  int result = do_fetch(request, response);
+
+  if (!result)
+  {
+    // Check result code
+    if (response.code != 101)
+    {
+      log << "Websocket open failed: " << response.code
+          << ": " << response.body << endl;
+      return response.code;
+    }
+
+    // Check response headers
+    if (response.headers.get("upgrade") != "websocket")
+    {
+      log << "Bad Upgrade header returned\n";
+      return 500;
+    }
+
+    if (response.headers.get("connection") != "Upgrade")
+    {
+      log << "Bad Connection header returned\n";
+      return 500;
+    }
+
+    // Check returned hash
+    key += websocket_key_guid;
+    Crypto::SHA1 sha1;
+    string hash = sha1.digest(key);
+
+    string rhash = response.headers.get("sec-websocket-accept");
+    if (base64.encode(hash, 0) != rhash)
+    {
+      log << "Bad Sec-WebSocket-Accept hash returned\n";
+      return 500;
+    }
+
+    stream_p = stream;
+    return response.code;
+  }
+  else
+  {
+    log << "Websocket open failed: " << result << ": " << response.body << endl;
+    return result;
+  }
+}
+
+//--------------------------------------------------------------------------
 // Read a block of data from a progressive fetch
 // Returns the actual amount read
 unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
@@ -479,7 +556,6 @@ unsigned long HTTPClient::write(unsigned char *data, unsigned long length)
     return 0;
   }
 }
-
 
 //--------------------------------------------------------------------------
 // Destructor

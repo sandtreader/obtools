@@ -617,6 +617,11 @@ public:
   int put(const URL& url, const string& content_type,
           istream& is, string& response_body);
 
+  //--------------------------------------------------------------------------
+  // Convert to websocket
+  // Returns result code, fills in the TCPStream to use if 101
+  int open_websocket(const URL& url, Net::TCPStream*& stream_p);
+
   //------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
   // Returns the actual amount read
