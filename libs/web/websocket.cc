@@ -209,7 +209,7 @@ bool WebSocketServer::write(const WebSocketFrame& frame)
 
 //------------------------------------------------------------------------
 // Write a textual message.  Returns whether able to write
-bool WebSocketServer::write(string& msg)
+bool WebSocketServer::write(const string& msg)
 {
   WebSocketFrame frame(WebSocketFrame::Opcode::text);
   frame.payload = msg;

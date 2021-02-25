@@ -701,7 +701,7 @@ class WebSocketServer
 
   //------------------------------------------------------------------------
   // Write a textual message.  Returns whether able to write
-  bool write(string& msg);
+  bool write(const string& msg);
 
   //------------------------------------------------------------------------
   // Write a binary message.  Returns whether able to write
