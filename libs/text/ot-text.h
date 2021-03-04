@@ -108,10 +108,15 @@ vector<string> split(const string& text, char delim=',',
 //        \        Escapes following character special character
 //
 //           cased gives whether case sensitive match (true)
+// Adds any strings (including empty) matched by '*' into the given vector
 bool pattern_match(const char *pattern, const char *text,
-                   bool cased=true);
+                   vector<string>& matches, bool cased=true);
 
-// More C++ friendly version
+// More C++ friendly version, with matches
+bool pattern_match(const string& pattern, const string& text,
+                   vector<string>& matches, bool cased=true);
+
+// More C++ friendly version, without matches
 bool pattern_match(const string& pattern, const string& text,
                    bool cased=true);
 

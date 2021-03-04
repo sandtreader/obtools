@@ -23,7 +23,9 @@ namespace ObTools { namespace Text {
 //        \        Escapes following character special character
 //
 //           cased gives whether case sensitive match (true)
-bool pattern_match(const char *pattern, const char *text, bool cased)
+// Adds any strings (including empty) matched by '*' into the given vector
+bool pattern_match(const char *pattern, const char *text,
+                   vector<string>& matches, bool cased)
 {
   const char *p, *q;
   char c, d;
@@ -53,12 +55,14 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
         if (c!=d) return false;
         break;
 
-      case '?':                        /* Single char - musn't have finished text */
+      case '?':                  /* Single char - musn't have finished text */
         if (!d) return false;
         break;
 
-      case '*':                        /* Span - match up to next pattern character,
-                                         or recurse if another special */
+      case '*':                  /* Span - match up to next pattern character,
+                                    or recurse if another special */
+      {
+        string match;
         c = *p;
         if (c != '\\' && c != '?' && c != '*' && c != '[')
         {
@@ -66,6 +70,7 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
           while (d != c)
           {
             if (!d) return false;  /* Ran out of text */
+            match += d;
             d = *q++;
             if (!cased) d = ::tolower(d);
           }
@@ -76,10 +81,17 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
         q--;
         do
         {
-          if (pattern_match(p, q, cased)) return true;
+          if (pattern_match(p, q, matches, cased))
+          {
+            matches.insert(matches.begin(), match);  // Note tail recursive
+            return true;
+          }
+
+          match += *q;
         } while (*q++);
 
         return false;
+      }
 
       case '[':
       {
@@ -138,11 +150,18 @@ bool pattern_match(const char *pattern, const char *text, bool cased)
   }
 }
 
-// More C++ friendly version
-bool pattern_match(const string& pattern, const string& text, bool cased)
+// More C++ friendly version, with matches
+bool pattern_match(const string& pattern, const string& text,
+                   vector<string>& matches, bool cased)
 {
-  return pattern_match(pattern.c_str(), text.c_str(), cased);
+  return pattern_match(pattern.c_str(), text.c_str(), matches, cased);
 }
 
+// More C++ friendly version, without matches
+bool pattern_match(const string& pattern, const string& text, bool cased)
+{
+  vector<string> matches;
+  return pattern_match(pattern.c_str(), text.c_str(), matches, cased);
+}
 
 }} // namespaces
