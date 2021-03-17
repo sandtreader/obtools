@@ -56,6 +56,38 @@ string DateInterval::str() const
 }
 
 //--------------------------------------------------------------------------
+// Add to a Split
+void DateInterval::add_to(Split& sp) const
+{
+  switch (unit)
+  {
+    case days:   sp.day += number;   break;
+    case weeks:  sp.day += 7*number; break;
+    case months: sp.month += number; break;
+    case years:  sp.year += number;  break;
+    default:;
+  }
+
+  sp.normalise();
+}
+
+//--------------------------------------------------------------------------
+// Subtract from a split
+void DateInterval::subtract_from(Split &sp) const
+{
+  switch (unit)
+  {
+    case days:   sp.day -= number;   break;
+    case weeks:  sp.day -= 7*number; break;
+    case months: sp.month -= number; break;
+    case years:  sp.year -= number;  break;
+    default:;
+  }
+
+  sp.normalise();
+}
+
+//--------------------------------------------------------------------------
 // << operator to write DateInterval to ostream
 ostream& operator<<(ostream& s, const DateInterval& di)
 {

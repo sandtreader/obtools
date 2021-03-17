@@ -31,7 +31,7 @@ void Split::normalise()
   // Days we have to do the full works, because months are variable length
   if (day < 1)
   {
-    Time::Duration diff((day?-day:1-day) * DAY);
+    Time::Duration diff((1-day) * DAY);
     day = 1;
     (Time::Stamp(*this) - diff).split(*this);
   }

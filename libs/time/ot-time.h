@@ -473,6 +473,12 @@ struct DateInterval
   // Convert to a string
   string str() const;
 
+  // Add to a Split
+  void add_to(Split& sp) const;
+
+  // Subtract from a split
+  void subtract_from(Split &sp) const;
+
   // Get unit from a string
   static Unit get_unit(const string& str);
 };
@@ -503,6 +509,20 @@ public:
   //------------------------------------------------------------------------
   // Constructor from Stamp
   DateStamp(const Stamp& stamp): Stamp(stamp) { fix_to_midnight(); }
+
+  //------------------------------------------------------------------------
+  // Add a DateInterval
+  DateStamp& operator+=(const DateInterval& di)
+  { Split sp = split(); di.add_to(sp); t=combine(sp); return *this; }
+  DateStamp operator+(const DateInterval& di)
+  { Split sp = split(); di.add_to(sp); return DateStamp(sp); }
+
+  //------------------------------------------------------------------------
+  // Subtract a DateInterval
+  DateStamp& operator-=(const DateInterval& di)
+  { Split sp = split(); di.subtract_from(sp); t=combine(sp); return *this; }
+  DateStamp operator-(const DateInterval& di)
+  { Split sp = split(); di.subtract_from(sp); return DateStamp(sp); }
 
   //------------------------------------------------------------------------
   // Constructor from string

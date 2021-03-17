@@ -144,7 +144,7 @@ TEST(SplitTests, Test_normalisation_overflow_hours)
 
 TEST(SplitTests, Test_normalisation_negative_days_31_month)
 {
-  Time::Split split1(1967, 2, -3, 6, 42, 01);
+  Time::Split split1(1967, 2, -2, 6, 42, 01);
   Time::Split split2(1967, 1, 29, 6, 42, 01);
   split1.normalise();
   EXPECT_EQ(split2, split1);
@@ -160,7 +160,7 @@ TEST(SplitTests, Test_normalisation_overflow_days_31_month)
 
 TEST(SplitTests, Test_normalisation_negative_days_28_month)
 {
-  Time::Split split1(1967, 3, -3, 6, 42, 01);
+  Time::Split split1(1967, 3, -2, 6, 42, 01);
   Time::Split split2(1967, 2, 26, 6, 42, 01);
   split1.normalise();
   EXPECT_EQ(split2, split1);
@@ -176,7 +176,7 @@ TEST(SplitTests, Test_normalisation_overflow_days_28_month)
 
 TEST(SplitTests, Test_normalisation_negative_days_leap_year)
 {
-  Time::Split split1(2000, 3, -3, 6, 42, 01);
+  Time::Split split1(2000, 3, -2, 6, 42, 01);
   Time::Split split2(2000, 2, 27, 6, 42, 01);
   split1.normalise();
   EXPECT_EQ(split2, split1);
