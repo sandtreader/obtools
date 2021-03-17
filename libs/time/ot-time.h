@@ -421,6 +421,48 @@ public:
 ostream& operator<<(ostream& s, const Stamp& st);
 
 //==========================================================================
+// DateInterval - separated unit and value representation of date interval
+// (because months and years are variable length, so Duration doesn't work)
+struct DateInterval
+{
+  int number{0};
+
+  enum Unit
+  {
+    invalid,
+    days,
+    weeks,
+    months,
+    years
+  };
+  Unit unit{invalid};
+
+  // Basic constructors
+  DateInterval() {}
+  DateInterval(int _number, Unit _unit): number(_number), unit(_unit) {}
+
+  // Construct from unit name and number
+  DateInterval(int _number, const string& _unit_str):
+    number(_number), unit(get_unit(_unit_str)) {}
+
+  // Construct from a string "<n> <unit>"
+  DateInterval(const string& str);
+
+  // Check for validity
+  bool operator!() { return unit == invalid; }
+
+  // Convert to a string
+  string str() const;
+
+  // Get unit from a string
+  static Unit get_unit(const string& str);
+};
+
+//--------------------------------------------------------------------------
+// << operator to write DateInterval to ostream
+ostream& operator<<(ostream& s, const DateInterval& si);
+
+//==========================================================================
 // DateStamp - fixed date in absolute time
 // As per Stamp, but rounded back to midnight, and displays just date
 class DateStamp: public Stamp
