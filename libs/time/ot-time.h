@@ -468,7 +468,7 @@ struct DateInterval
   DateInterval(const string& str);
 
   // Check for validity
-  bool operator!() { return unit == invalid; }
+  bool operator!() const { return unit == invalid; }
 
   // Convert to a string
   string str() const;
@@ -514,15 +514,21 @@ public:
   // Add a DateInterval
   DateStamp& operator+=(const DateInterval& di)
   { Split sp = split(); di.add_to(sp); t=combine(sp); return *this; }
-  DateStamp operator+(const DateInterval& di)
+  using Stamp::operator+=;  // Otherwise we hide the Duration ones
+
+  DateStamp operator+(const DateInterval& di) const
   { Split sp = split(); di.add_to(sp); return DateStamp(sp); }
+  using Stamp::operator+;
 
   //------------------------------------------------------------------------
   // Subtract a DateInterval
   DateStamp& operator-=(const DateInterval& di)
   { Split sp = split(); di.subtract_from(sp); t=combine(sp); return *this; }
-  DateStamp operator-(const DateInterval& di)
+  using Stamp::operator-=;
+
+  DateStamp operator-(const DateInterval& di) const
   { Split sp = split(); di.subtract_from(sp); return DateStamp(sp); }
+  using Stamp::operator-;
 
   //------------------------------------------------------------------------
   // Constructor from string
