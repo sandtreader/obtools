@@ -86,6 +86,142 @@ TEST(SplitTests, TestTimes)
   test_split("2011-09-29T24:00:00", 2011, 9, 30, 00, 00, 00);
 }
 
+TEST(SplitTests, Test_normalisation_when_not_required)
+{
+  Time::Split split1(1967, 1, 29, 6, 42, 1);  // Already normalised
+  Time::Split split2 = split1;
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_seconds)
+{
+  Time::Split split1(1967, 1, 29, 6, 42, -61);
+  Time::Split split2(1967, 1, 29, 6, 40, 59);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_seconds)
+{
+  Time::Split split1(1967, 1, 29, 6, 42, 61);
+  Time::Split split2(1967, 1, 29, 6, 43, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_minutes)
+{
+  Time::Split split1(1967, 1, 29, 6, -61, 01);
+  Time::Split split2(1967, 1, 29, 4, 59, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_minutes)
+{
+  Time::Split split1(1967, 1, 29, 6, 102, 01);
+  Time::Split split2(1967, 1, 29, 7, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_hours)
+{
+  Time::Split split1(1967, 1, 29, -6, 42, 01);
+  Time::Split split2(1967, 1, 28, 18, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_hours)
+{
+  Time::Split split1(1967, 1, 29, 30, 42, 01);
+  Time::Split split2(1967, 1, 30, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_days_31_month)
+{
+  Time::Split split1(1967, 2, -3, 6, 42, 01);
+  Time::Split split2(1967, 1, 29, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_days_31_month)
+{
+  Time::Split split1(1967, 1, 32, 6, 42, 01);
+  Time::Split split2(1967, 2, 01, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_days_28_month)
+{
+  Time::Split split1(1967, 3, -3, 6, 42, 01);
+  Time::Split split2(1967, 2, 26, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_days_28_month)
+{
+  Time::Split split1(1967, 2, 32, 6, 42, 01);
+  Time::Split split2(1967, 3, 4, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_days_leap_year)
+{
+  Time::Split split1(2000, 3, -3, 6, 42, 01);
+  Time::Split split2(2000, 2, 27, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_days_leap_year)
+{
+  Time::Split split1(2000, 2, 32, 6, 42, 01);
+  Time::Split split2(2000, 3, 3, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_months)
+{
+  Time::Split split1(1967, -9, 29, 6, 42, 01);
+  Time::Split split2(1966, 3, 29, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_months)
+{
+  Time::Split split1(1967, 601, 29, 6, 42, 01);
+  Time::Split split2(2017, 1, 29, 6, 42, 01);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_negative_ripple)
+{
+  Time::Split split1(2000, 1, 1, 0, 0, -1);
+  Time::Split split2(1999, 12, 31, 23, 59, 59);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
+TEST(SplitTests, Test_normalisation_overflow_ripple)
+{
+  Time::Split split1(1999, 12, 31, 23, 59, 60);
+  Time::Split split2(2000, 1, 1, 0, 0, 0);
+  split1.normalise();
+  EXPECT_EQ(split2, split1);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

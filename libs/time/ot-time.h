@@ -55,9 +55,29 @@ struct Split
   int min;    // 0-59
   double sec; // 0-59.999999
 
-  Split():
-    year(1900), month(1), day(1), hour(0), min(0), sec(0) {}
+  //------------------------------------------------------------------------
+  // Constructors
+  Split(): year(1900), month(1), day(1), hour(0), min(0), sec(0) {}
+
+  Split(int _year, int _month, int _day,
+        int _hour=0, int _min=0, int _sec=0):
+    year(_year), month(_month), day(_day), hour(_hour), min(_min), sec(_sec)
+  {}
+
+  //------------------------------------------------------------------------
+  // Comparator
+  bool operator==(const Split& o) const
+  { return year==o.year && month==o.month && day==o.day
+        && hour==o.hour && min==o.min && sec==o.sec; }
+
+  //------------------------------------------------------------------------
+  // Normalise negative or out-of-range numbers
+  void normalise();
 };
+
+//--------------------------------------------------------------------------
+// << operator to write Split to ostream
+ostream& operator<<(ostream& s, const Split& st);
 
 //==========================================================================
 // Duration - a length of time, not fixed at any one moment
@@ -75,7 +95,6 @@ public:
   //------------------------------------------------------------------------
   // Constructor from double
   explicit Duration(double _t): t(_t) {}
-  explicit Duration(int _t): t(_t) {}
 
   //------------------------------------------------------------------------
   // Constructor from string
