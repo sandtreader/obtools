@@ -92,6 +92,14 @@ TEST(StampTest, TestDateStampsRoundToMidnight)
   EXPECT_EQ(s1, s2);
 }
 
+TEST(StampTest, TestDateStampsToJulianDays)
+{
+  EXPECT_EQ(2415021, Time::DateStamp{}.jdn());
+  EXPECT_EQ(2440588, Time::DateStamp{time_t{0}}.jdn());
+  EXPECT_EQ(2441318, Time::DateStamp{"1972-01-01"}.jdn());
+  EXPECT_EQ(2464731, Time::DateStamp{"2036-02-07"}.jdn());
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

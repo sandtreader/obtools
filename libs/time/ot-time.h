@@ -537,6 +537,11 @@ public:
   DateStamp(const string& text);
 
   //------------------------------------------------------------------------
+  // Convert to Julian Day - JDN of the noon of the day before, hence the
+  // JDN this midnight falls in
+  int jdn() const { return static_cast<int>(Stamp::jdn()); }
+
+  //------------------------------------------------------------------------
   // Convert to ISO date string
   string iso() const
   {
