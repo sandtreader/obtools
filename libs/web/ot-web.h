@@ -1019,6 +1019,10 @@ struct JWT
   bool verify(const string& secret);
 
   //------------------------------------------------------------------------
+  // Check expiry
+  bool expired();
+
+  //------------------------------------------------------------------------
   // Sign it
   void sign(const string& secret);
 

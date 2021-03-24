@@ -99,7 +99,24 @@ bool JWT::verify(const string& secret)
   Crypto::HMACSHA256 hs256(secret);
   string digest = hs256.digest(header_b64+"."+payload_b64);
   Text::Base64URL base64;
-  return signature_b64 == base64.encode(digest);
+  if (signature_b64 != base64.encode(digest))
+  {
+    Log::Error log;
+    log << "Bad JWT signature\n";
+    return false;
+  }
+
+  return true;
+}
+
+//------------------------------------------------------------------------
+// Check expiry
+bool JWT::expired()
+{
+  // Is expiry specified?  Check it
+  auto expiry = payload["exp"].as_int();
+  if (expiry && time(NULL) > expiry) return true;
+  return false;
 }
 
 //------------------------------------------------------------------------

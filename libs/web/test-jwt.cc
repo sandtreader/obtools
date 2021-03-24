@@ -90,6 +90,22 @@ TEST(JWTTest, TestJSONSignStrAndReverify)
   EXPECT_TRUE(jwt.verify("secret"));
 }
 
+TEST(JWTTest, TestExpiryWhenExpired)
+{
+  JSON::Value payload(JSON::Value::OBJECT);
+  payload.set("exp", time(NULL)-10);
+  Web::JWT jwt(payload);
+  EXPECT_TRUE(jwt.expired());
+}
+
+TEST(JWTTest, TestExpiryWhenNotExpired)
+{
+  JSON::Value payload(JSON::Value::OBJECT);
+  payload.set("exp", time(NULL)+10);
+  Web::JWT jwt(payload);
+  EXPECT_FALSE(jwt.expired());
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
