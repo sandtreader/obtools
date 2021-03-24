@@ -4,8 +4,7 @@
 // Public definitions for ObTools::Web
 // Web protocols parsers, helpers and client/server
 //
-// Copyright (c) 2005-2012 Paul Clark.  All rights reserved
-// This code comes with NO WARRANTY and is subject to licence agreement
+// Copyright (c) 2005-2021 Paul Clark.
 //==========================================================================
 
 #ifndef __OBTOOLS_WEB_H
@@ -21,6 +20,7 @@
 #include "ot-mt.h"
 #include "ot-log.h"
 #include "ot-file.h"
+#include "ot-json.h"
 
 namespace ObTools { namespace Web {
 
@@ -977,6 +977,32 @@ class Cache
   void update();
 
 };
+
+//==========================================================================
+// JSON Web token
+// see https://jwt.io
+struct JWT
+{
+  string header_b64;
+  string payload_b64;
+  string signature_b64;
+
+  JSON::Value header;
+  JSON::Value payload;
+
+  //------------------------------------------------------------------------
+  // Construct from a 3 part string
+  JWT(const string& text);
+
+  //------------------------------------------------------------------------
+  // Check basic structure from parsing
+  bool operator!() { return !header || !payload || signature_b64.empty(); }
+
+  //------------------------------------------------------------------------
+  // Verify signature
+  bool verify(const string& secret);
+};
+
 
 //==========================================================================
 }} //namespaces
