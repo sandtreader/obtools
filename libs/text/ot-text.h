@@ -272,6 +272,18 @@ public:
 };
 
 //==========================================================================
+// Base64URL encoder/decoder - special version with URL safe characters
+class Base64URL: public Base64
+{
+public:
+  // Constructor
+  Base64URL(): Base64(0, '-', '_') {}
+
+  // Encode with no line splits
+  string encode(const string& s) { return Base64::encode(s, 0); }
+};
+
+//==========================================================================
 // Base36 encoder/decoder
 class Base36
 {
