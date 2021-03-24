@@ -69,6 +69,27 @@ TEST(JWTTest, TestVerificationRFC7519)
   ASSERT_TRUE(jwt.verify(key));
 }
 
+TEST(JWTTest, TestJSONConstruction)
+{
+  JSON::Value payload(JSON::Value::OBJECT);
+  payload.set("claim", "CLAIM");
+  Web::JWT jwt(payload);
+  ASSERT_TRUE(!jwt);  // Because not signed
+  EXPECT_EQ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", jwt.header_b64);
+  EXPECT_EQ("eyJjbGFpbSI6IkNMQUlNIn0", jwt.payload_b64);
+}
+
+TEST(JWTTest, TestJSONSignStrAndReverify)
+{
+  JSON::Value payload(JSON::Value::OBJECT);
+  payload.set("claim", "CLAIM");
+  Web::JWT jwt(payload);
+  jwt.sign("secret");
+  EXPECT_EQ("P-BD4ngX0SQm0b4s8SFjlwEXc2fABcrYKSfXXq7uNLw", jwt.signature_b64);
+  EXPECT_EQ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFpbSI6IkNMQUlNIn0.P-BD4ngX0SQm0b4s8SFjlwEXc2fABcrYKSfXXq7uNLw", jwt.str());
+  EXPECT_TRUE(jwt.verify("secret"));
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

@@ -390,7 +390,9 @@ int HTTPClient::put(const URL& url, const string& content_type,
 //--------------------------------------------------------------------------
 // Convert to websocket
 // Returns result code, fills in the TCPStream to use if 101
-int HTTPClient::open_websocket(const URL& url, Net::TCPStream*& stream_p)
+int HTTPClient::open_websocket(const URL& url,
+                               Net::TCPStream*& stream_p,
+                               const string& auth_header)
 {
   Log::Error log;
 
@@ -398,6 +400,8 @@ int HTTPClient::open_websocket(const URL& url, Net::TCPStream*& stream_p)
   request.headers.put("Upgrade", "websocket");
   request.headers.put("Connection", "Upgrade");
   request.headers.put("Sec-WebSocket-Version", "13");
+  if (!auth_header.empty())
+    request.headers.put("Authorization", auth_header);
 
   // Generate a random key
   unsigned char binary[16];

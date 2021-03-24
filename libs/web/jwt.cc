@@ -64,6 +64,21 @@ JWT::JWT(const string& text)
 }
 
 //------------------------------------------------------------------------
+// Construct from JSON payload for writing
+JWT::JWT(const JSON::Value& _payload): payload(_payload)
+{
+  // Standard header
+  header = JSON::Value(JSON::Value::OBJECT);
+  header.set("typ", "JWT");
+  header.set("alg", "HS256");
+
+  // Encode header & payload
+  Text::Base64URL base64;
+  header_b64 = base64.encode(header.str());
+  payload_b64 = base64.encode(payload.str());
+}
+
+//------------------------------------------------------------------------
 // Verify signature
 bool JWT::verify(const string& secret)
 {
@@ -86,6 +101,24 @@ bool JWT::verify(const string& secret)
   Text::Base64URL base64;
   return signature_b64 == base64.encode(digest);
 }
+
+//------------------------------------------------------------------------
+// Sign it
+void JWT::sign(const string& secret)
+{
+  Crypto::HMACSHA256 hs256(secret);
+  string digest = hs256.digest(header_b64+"."+payload_b64);
+  Text::Base64URL base64;
+  signature_b64 = base64.encode(digest);
+}
+
+//------------------------------------------------------------------------
+// Get string version
+string JWT::str()
+{
+  return header_b64 + "." + payload_b64 + "." + signature_b64;
+}
+
 
 
 }} // namespaces

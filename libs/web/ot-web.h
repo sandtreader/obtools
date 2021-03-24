@@ -620,7 +620,8 @@ public:
   //--------------------------------------------------------------------------
   // Convert to websocket
   // Returns result code, fills in the TCPStream to use if 101
-  int open_websocket(const URL& url, Net::TCPStream*& stream_p);
+  int open_websocket(const URL& url, Net::TCPStream*& stream_p,
+                     const string& auth_header = "");
 
   //------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
@@ -1002,8 +1003,12 @@ struct JWT
   JSON::Value payload;
 
   //------------------------------------------------------------------------
-  // Construct from a 3 part string
+  // Construct from a 3 part string for reading
   JWT(const string& text);
+
+  //------------------------------------------------------------------------
+  // Construct from JSON payload for writing
+  JWT(const JSON::Value& _payload);
 
   //------------------------------------------------------------------------
   // Check basic structure from parsing
@@ -1012,6 +1017,14 @@ struct JWT
   //------------------------------------------------------------------------
   // Verify signature
   bool verify(const string& secret);
+
+  //------------------------------------------------------------------------
+  // Sign it
+  void sign(const string& secret);
+
+  //------------------------------------------------------------------------
+  // Get string version
+  string str();
 };
 
 
