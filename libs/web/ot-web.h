@@ -748,6 +748,16 @@ protected:
   }
 
   //------------------------------------------------------------------------
+  // Downcall to check authentication / authorisation
+  // Return true if OK, return false and optionally fill in response if not
+  // If you return false and response.code is left as 200, the server will
+  // automatically convert it to 403 Forbidden
+  virtual bool check_auth(const HTTPMessage& /*request*/,
+                          HTTPMessage& /*response*/,
+                          const SSL::ClientDetails& /*client*/)
+  { return true; }
+
+  //------------------------------------------------------------------------
   // Abstract interface to handle requests
   // Return whether handled - fill in response for normal errors, only
   // return false if things are really bad, and we'll return 500
@@ -873,6 +883,7 @@ class SimpleHTTPServer: public HTTPServer
   MT::RWMutex mutex;               // Around global state
   list<URLHandler *> handlers;
 
+protected:
   // Implementation of general request handler
   bool handle_request(const HTTPMessage& request, HTTPMessage& response,
                       const SSL::ClientDetails& client, SSL::TCPSocket& socket,

@@ -153,9 +153,19 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         response.code = 200;
         response.reason = "OK";
 
+        // Check authentication / authorisation
+        if (!check_auth(request, response, client))
+        {
+          // If they set it, leave it alone
+          if (response.code == 200)
+          {
+            response.code = 403;
+            response.reason = "Forbidden";
+          }
+        }
         // Check for OPTIONS request - mainly for CORS
         // (we have already set access-control header above)
-        if (request.method == "OPTIONS")
+        else if (request.method == "OPTIONS")
         {
           response.headers.put("Allow",
                                "GET, POST, PUT, DELETE, HEAD, OPTIONS");
