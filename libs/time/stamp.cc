@@ -32,7 +32,7 @@ static const int monthdays[] = {   0,  31,  59,  90, 120, 151,
 
 //--------------------------------------------------------------------------
 // Helper function to convert a split time into an internal timestamp
-ntp_stamp_t Stamp::combine(const Split& split)
+internal_stamp_t Stamp::combine(const Split& split)
 {
   // One would have thought you could use the standard C library time
   // functions for this, but there is no portable way I know of for
@@ -41,9 +41,9 @@ ntp_stamp_t Stamp::combine(const Split& split)
   // uninterested in what this machine's TZ is, it seems safer to do
   // it ourselves...
 
-  // Accumulate seconds initially, then worry about shifting up to NTP
-  // at the end - time_t should be safe for this
-  time_t seconds;
+  // Accumulate seconds initially, then worry about shifting up to internal
+  // fixed point at the end
+  internal_stamp_t seconds;
 
   // First work out leapdays since 1900 - one every 4, lose one every 100,
   // gain one every 400 from 2000.  Note - we're using year from zero here!
@@ -62,7 +62,8 @@ ntp_stamp_t Stamp::combine(const Split& split)
   // 1900, then?  We need to know how many happened (would have happened)
   // up to 1900... It's magic number, left as an exercise for the reader...
   leapdays -= 460;
-  seconds = ((split.year-1900) * 365 + leapdays) * DAY;
+  seconds = static_cast<internal_stamp_t>((split.year-1900) * 365 + leapdays)
+          * DAY;
 
   // Check month and convert
   if (split.month<1 || split.month>12) return 0;
@@ -73,17 +74,17 @@ ntp_stamp_t Stamp::combine(const Split& split)
   seconds += split.hour*HOUR;
   seconds += split.min*MINUTE;
 
-  // Now upshift this to NTP form and add float seconds (do it in this
+  // Now upshift this to internal form and add float seconds (do it in this
   // order to preserve precision)
-  ntp_stamp_t ts = static_cast<ntp_stamp_t>(seconds) << NTP_SHIFT;
-  ts += static_cast<ntp_stamp_t>(split.sec * (1ULL << NTP_SHIFT));
+  auto ts = seconds << INTERNAL_SHIFT;
+  ts += static_cast<internal_stamp_t>(split.sec * (1ULL << INTERNAL_SHIFT));
 
   return ts;
 }
 
 //--------------------------------------------------------------------------
 // Helper function to split an internal timestamp into a split time
-Split Stamp::split(ntp_stamp_t ts)
+Split Stamp::split(internal_stamp_t ts)
 {
   // For this we could use gmtime, in theory, but it's not threadsafe!
   // So, we're back to doing it ourselves...
@@ -91,11 +92,12 @@ Split Stamp::split(ntp_stamp_t ts)
 
   // First we downgrade to integer to make life easier - we'll add
   // back the fractional part later.
-  unsigned long seconds = static_cast<unsigned long>(ts>>NTP_SHIFT);
+  auto seconds = ts>>INTERNAL_SHIFT;
 
   // Get estimate of years - near enough for NTP validity timeframe
-  int years = static_cast<int>(seconds/(365.24*DAY));
-  int leapdays = years/4;
+  // Note keeping these in internal_stamp_t forces calcs lower down to be 64bit
+  auto years = static_cast<internal_stamp_t>(seconds/(365.24*DAY));
+  auto leapdays = years/4;
   leapdays-=years/100;             // Chop off centuries
   leapdays+=(years+300)/400;       // Add back 400's, allowing for 1900 start
 
@@ -114,7 +116,7 @@ Split Stamp::split(ntp_stamp_t ts)
 
   // Now we can do the year calculation again with corrected time
   sp.year = seconds/(365*DAY);
-  seconds -= sp.year*(365*DAY);
+  seconds -= static_cast<internal_stamp_t>(sp.year)*(365*DAY);
   sp.year += 1900;
 
   // Get year day (0-365), and find month it's in - but think about whether
@@ -154,9 +156,10 @@ Split Stamp::split(ntp_stamp_t ts)
   seconds -= sp.min*MINUTE;
 
   // Get integer part of seconds, then add back float part by masking off
-  // lower 32 bits and dividing down
+  // lower bits and dividing down
   sp.sec = seconds;
-  sp.sec += static_cast<double>(ts & ((1ULL<<NTP_SHIFT)-1))/(1ULL<<NTP_SHIFT);
+  sp.sec += static_cast<double>(ts & (INTERNAL_MULTIPLIER-1))
+                                /INTERNAL_MULTIPLIER;
 
   return sp;
 }
@@ -429,12 +432,8 @@ namespace
     // Year
     split.year = Text::stoi(bits[2]);
     if (!split.year) return false;
-    // Arbitary split to guess century - based on the fact that NTP
-    // (which is our core storage format) can't go beyond 2036 anyway
-    if (split.year < 37)
-      split.year += 2000;
-    else
-      split.year += 1900;
+    // Assume all 2 digit dates are post Y2K now
+    if (split.year < 100) split.year += 2000;
 
     // Read time
     string::size_type pos=0;
@@ -514,7 +513,7 @@ Stamp::Stamp(const string& text, bool lenient)
     if (!read_http(text, split)) return;
   }
 
-  // Combined to NTP timestamp
+  // Combined to internal timestamp
   t = combine(split);
 
   // Modify for timezone - positive timezones are subtracted
@@ -537,7 +536,7 @@ string Stamp::iso() const
   if (sp.sec < 10) pad = "0";
 
   // Fix precision for small values
-  int prec = 11;
+  int prec = 5;  // Up to 2 digits LHS, 3 (to ms) RHS
   if (sp.sec < 10) prec--;
   if (sp.sec < 1) prec--;
 
@@ -719,7 +718,7 @@ Stamp Stamp::date() const
 int Stamp::weekday() const
 {
   // Get days since epoch
-  unsigned long seconds = static_cast<unsigned long>(t>>NTP_SHIFT);
+  unsigned long seconds = static_cast<unsigned long>(t>>INTERNAL_SHIFT);
   unsigned long days = seconds/3600/24;
 
   // 1st January 1900 was a Monday, so..
@@ -804,13 +803,13 @@ Stamp Stamp::now()
   secs += EPOCH_1970;
 
   // Now form NTP shifted version
-  s.t = (secs<<NTP_SHIFT) + (usecs<<NTP_SHIFT)/MICRO;
+  s.t = (secs<<INTERNAL_SHIFT) + (usecs<<INTERNAL_SHIFT)/MICRO;
 #else
   struct timeval tv;
   gettimeofday(&tv, 0);
 
-  s.t = static_cast<ntp_stamp_t>(tv.tv_sec + EPOCH_1970) << NTP_SHIFT;
-  s.t += (static_cast<ntp_stamp_t>(tv.tv_usec) << NTP_SHIFT)/MICRO;
+  s.t = static_cast<ntp_stamp_t>(tv.tv_sec + EPOCH_1970) << INTERNAL_SHIFT;
+  s.t += (static_cast<ntp_stamp_t>(tv.tv_usec) << INTERNAL_SHIFT)/MICRO;
 #endif
 
   return s;

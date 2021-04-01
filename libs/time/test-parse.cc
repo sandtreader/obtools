@@ -22,9 +22,23 @@ TEST(ParseTests, TestParseISO8601)
   ASSERT_EQ(iso8601, stamp.iso());
 }
 
+TEST(ParseTests, TestParseISO8601AfterNTPRollover)
+{
+  const string iso8601 = "2036-02-08T10:34:52Z";
+  Time::Stamp stamp(iso8601);
+  ASSERT_EQ(iso8601, stamp.iso());
+}
+
+TEST(ParseTests, TestParseISO8601AfterTimeTRollover)
+{
+  const string iso8601 = "2040-02-08T10:34:52Z";
+  Time::Stamp stamp(iso8601);
+  ASSERT_EQ(iso8601, stamp.iso());
+}
+
 TEST(ParseTests, TestParseISO8601HighPrecision)
 {
-  const string iso8601 = "2011-11-23T10:34:52.7429Z";
+  const string iso8601 = "2011-11-23T10:34:52.743Z";
   Time::Stamp stamp(iso8601);
   ASSERT_EQ(iso8601, stamp.iso());
 }
@@ -152,7 +166,8 @@ TEST(ParseTests, TestParseRFC850)
 {
   const string rfc850 = "Sunday, 06-Nov-94 08:49:37 GMT";
   Time::Stamp stamp(rfc850);
-  ASSERT_EQ("1994-11-06T08:49:37Z", stamp.iso());
+  // We assume all 2 digit years are 2000 now
+  ASSERT_EQ("2094-11-06T08:49:37Z", stamp.iso());
 }
 
 TEST(ParseTests, TestParseRFC850MissingGMT)
@@ -160,21 +175,6 @@ TEST(ParseTests, TestParseRFC850MissingGMT)
   const string rfc850 = "Sunday, 06-Nov-94 08:49:37";
   Time::Stamp stamp(rfc850);
   ASSERT_TRUE(!stamp);
-}
-
-TEST(ParseTests, TestParseRFC850Y2K1900)
-{
-  const string rfc850 = "Sunday, 07-Feb-37 06:28:15 GMT";
-  Time::Stamp stamp(rfc850);
-  ASSERT_EQ("1937-02-07T06:28:15Z", stamp.iso());
-}
-
-TEST(ParseTests, TestParseRFC850Y2K2000)
-{
-  // Max NTP timestamp
-  const string rfc850 = "Sunday, 07-Feb-36 06:28:15 GMT";
-  Time::Stamp stamp(rfc850);
-  ASSERT_EQ("2036-02-07T06:28:15Z", stamp.iso());
 }
 
 TEST(ParseTests, TestParseAsctime)

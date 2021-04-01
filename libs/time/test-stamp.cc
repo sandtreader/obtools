@@ -21,6 +21,8 @@ TEST(StampTest, TestCreateFromJulianDays)
             Time::Stamp::from_jdn(2441318.5));
   EXPECT_EQ(Time::Stamp{"2036-02-07T00:00:00Z"},
             Time::Stamp::from_jdn(2464731.5));
+  EXPECT_EQ(Time::Stamp{"2036-02-08T00:00:00Z"}, // Post NTP rollover
+            Time::Stamp::from_jdn(2464732.5));
 }
 
 TEST(StampTest, TestCreateToJulianDays)
@@ -29,6 +31,7 @@ TEST(StampTest, TestCreateToJulianDays)
   EXPECT_EQ(2440588.5, Time::Stamp{time_t{0}}.jdn());
   EXPECT_EQ(2441318.5, Time::Stamp{"1972-01-01T00:00:00Z"}.jdn());
   EXPECT_EQ(2464731.5, Time::Stamp{"2036-02-07T00:00:00Z"}.jdn());
+  EXPECT_EQ(2464732.5, Time::Stamp{"2036-02-08T00:00:00Z"}.jdn()); // post NTP
 }
 
 TEST(StampTest, TestStampSubtraction)
@@ -98,6 +101,14 @@ TEST(StampTest, TestDateStampsToJulianDays)
   EXPECT_EQ(2440588, Time::DateStamp{time_t{0}}.jdn());
   EXPECT_EQ(2441318, Time::DateStamp{"1972-01-01"}.jdn());
   EXPECT_EQ(2464731, Time::DateStamp{"2036-02-07"}.jdn());
+}
+
+TEST(StampTest, TestStampsRolloverIn2036)
+{
+  Time::Stamp s1{"2036-02-07T00:00:00Z"};
+  Time::Stamp s2{"2036-02-08T00:00:00Z"};
+  Time::Duration d = s2-s1;
+  EXPECT_EQ(3600.0*24, d.seconds());
 }
 
 int main(int argc, char **argv)

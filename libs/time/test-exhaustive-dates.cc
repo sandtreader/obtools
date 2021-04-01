@@ -20,17 +20,18 @@ TEST(SplitTests, TestExhaustiveDates)
   Time::Stamp original;
   Time::Duration a_day("1 day");
 
-  // Number of days from 1900 to 2036 end of NTP time we can test
-  int ndays = UINT_MAX / Time::DAY;
+  // Number of days from 1900 to 2036 end of NTP time we can test,
+  // and then some to test rollover then, and in 2037
+  int ndays = UINT_MAX / Time::DAY + 1000;
 
   for(int i=0; i<ndays; i++)
   {
     Time::Split split;
     original.split(split);
 
-    EXPECT_EQ(split.hour, 0);
-    EXPECT_EQ(split.min,  0);
-    EXPECT_EQ(split.sec,  0);
+    EXPECT_EQ(split.hour, 0) << original.iso();
+    EXPECT_EQ(split.min,  0) << original.iso();
+    EXPECT_EQ(split.sec,  0) << original.iso();
 
     Time::Stamp recombined(split);
 

@@ -40,7 +40,14 @@ const unsigned int NANO  = 1000000000;
 const unsigned long EPOCH_1970 = 2208988800UL;  // 1970-1900
 const auto EPOCH_JDN = 2415021.5L; // JDN at 1 Jan 1900
 
-// NTP format
+// Internal format - we store as fixed point seconds from 1-1-1900
+// with 20 bits of fraction
+const unsigned int INTERNAL_SHIFT = 20;
+const unsigned int INTERNAL_MULTIPLIER = 1048576;  // 2^20
+typedef uint64_t internal_stamp_t;
+
+// NTP shift - same baseline but 32 bits of fraction, which causes
+// a rollover in 2036
 const unsigned int NTP_SHIFT = 32;
 typedef uint64_t ntp_stamp_t;
 
@@ -132,7 +139,7 @@ public:
   bool is_negative() const { return t < 0; }
 
   //------------------------------------------------------------------------
-  // Convert to floating point seconds (e.g. for NTP timestamp in text)
+  // Convert to floating point seconds
   double seconds() const { return t; }
 
   //------------------------------------------------------------------------
@@ -196,17 +203,37 @@ public:
 // Arithmetic operators the other way
 Duration operator*(double n, const Duration& d);
 
+class DateStamp;  // Forward
+
 //==========================================================================
 // Stamp - fixed moment in absolute time
 // Timestamps are stored in GMT (UTC, Z), and converted from local time on
 // creation.
-// Internal format 64-bit NTP timestamp
+// Internal format 64-bit seconds from 1-1-1900 with 20 bits fixed point frac
 class Stamp
 {
+  friend class DateStamp;
+
+  // Constructor-like from internal stamp (disambiguates from Stamp(time_t) )
+  static Stamp from_internal(internal_stamp_t t)
+  { Stamp s; s.t = t; return s; }
+
+  // Helper functions to convert double seconds to/from internal 64-bit
+  // Note negative numbers are OK (this limits the range)
+  static int64_t seconds_to_internal(double s)
+  {
+    return static_cast<int64_t>(s * (1ULL<<INTERNAL_SHIFT));
+  }
+
+  static double internal_to_seconds(uint64_t n)
+  {
+    return static_cast<double>(n) / (1ULL<<INTERNAL_SHIFT);
+  }
+
 protected:
-  ntp_stamp_t t;
-  static ntp_stamp_t combine(const Split& split);
-  static Split split(ntp_stamp_t ts);
+  internal_stamp_t t;
+  static internal_stamp_t combine(const Split& split);
+  static Split split(internal_stamp_t ts);
   void get_tm(struct tm& tm) const;
 
 public:
@@ -216,7 +243,8 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor from time_t
-  Stamp(time_t _t): t(static_cast<ntp_stamp_t>(_t+EPOCH_1970)<<NTP_SHIFT) {}
+  Stamp(time_t _t):
+    t(static_cast<internal_stamp_t>(_t+EPOCH_1970)<<INTERNAL_SHIFT) {}
 
   //------------------------------------------------------------------------
   // Constructor from split time
@@ -244,8 +272,8 @@ public:
   operator chrono::high_resolution_clock::time_point() const
   {
     return chrono::high_resolution_clock::time_point{
-      chrono::nanoseconds{(NANO * ((t >> NTP_SHIFT) - EPOCH_1970)) +
-                          ((NANO * (t & 0xFFFFFFFF)) / 0x100000000)}};
+      chrono::nanoseconds{(NANO * ((t >> INTERNAL_SHIFT) - EPOCH_1970)) +
+             ((NANO * (t & (INTERNAL_MULTIPLIER-1))) / INTERNAL_MULTIPLIER)}};
   }
 
   chrono::high_resolution_clock::time_point time_point() const
@@ -255,17 +283,18 @@ public:
 
   //------------------------------------------------------------------------
   // Convert to time_t
-  time_t time() const { return static_cast<time_t>(t>>NTP_SHIFT)-EPOCH_1970; }
+  time_t time() const
+  { return static_cast<time_t>(t>>INTERNAL_SHIFT)-EPOCH_1970; }
 
   //------------------------------------------------------------------------
   // Get more accurate partial seconds count (0-59.999')
   double seconds() const
-  { ntp_stamp_t s = t%(60ULL<<NTP_SHIFT);  // Partial seconds
-    return static_cast<double>(s)/(1ULL<<NTP_SHIFT); }
+  { ntp_stamp_t s = t%(60ULL<<INTERNAL_SHIFT);  // Partial seconds
+    return static_cast<double>(s)/(1ULL<<INTERNAL_SHIFT); }
 
   //------------------------------------------------------------------------
   // Convert to NTP timestamp - whole 64 bits, fixed point at 32
-  ntp_stamp_t ntp() const { return t; }
+  ntp_stamp_t ntp() const { return t << (NTP_SHIFT-INTERNAL_SHIFT); }
 
   //------------------------------------------------------------------------
   // Convert to ISO timestamp string
@@ -326,7 +355,7 @@ public:
   // Convert to Julian Days
   double jdn() const
   {
-    return (t / 65536.0L / 65536.0L / DAY) + EPOCH_JDN;
+    return (static_cast<double>(t) / INTERNAL_MULTIPLIER / DAY) + EPOCH_JDN;
   }
 
   //------------------------------------------------------------------------
@@ -358,15 +387,15 @@ public:
   //------------------------------------------------------------------------
   // Static constructor-like function from NTP timestamp
   // (done this way to avoid ambiguity with time_t version)
-  static Stamp from_ntp(ntp_stamp_t n) { Stamp s; s.t = n; return s; }
+  static Stamp from_ntp(ntp_stamp_t n)
+  { Stamp s; s.t = n >> (NTP_SHIFT - INTERNAL_SHIFT); return s; }
 
   //------------------------------------------------------------------------
   // Constructor from Julian day number
   static Stamp from_jdn(double j)
   {
     Stamp s;
-    // Mulitply by 2^16 as double twice for good precision
-    s.t = (j - EPOCH_JDN) * DAY * 65536.0L * 65536.0L;
+    s.t = (j - EPOCH_JDN) * DAY * INTERNAL_MULTIPLIER;
     return s;
   }
 
@@ -377,15 +406,16 @@ public:
   //------------------------------------------------------------------------
   // Subtract two stamps to get duration between
   Duration operator-(const Stamp& o) const
-  { return Duration(t<o.t ? -ntp_to_seconds(o.t-t) : ntp_to_seconds(t-o.t)); }
+  { return Duration(t<o.t ? -internal_to_seconds(o.t-t)
+                          : internal_to_seconds(t-o.t)); }
 
   //------------------------------------------------------------------------
   // Add a Duration to a stamp
   Stamp operator+(const Duration& d) const
-  { return Stamp::from_ntp(t+seconds_to_ntp(d.seconds())); }
+  { return Stamp::from_internal(t+seconds_to_internal(d.seconds())); }
 
   Stamp& operator+=(const Duration& d)
-  { t += seconds_to_ntp(d.seconds()); return *this; }
+  { t += seconds_to_internal(d.seconds()); return *this; }
 
   Stamp operator+(double d) const
   { return operator+(Duration{d}); }
@@ -396,10 +426,10 @@ public:
   //------------------------------------------------------------------------
   // Subtract a Duration from a stamp
   Stamp operator-(const Duration& d) const
-  { return Stamp::from_ntp(t-seconds_to_ntp(d.seconds())); }
+  { return Stamp::from_internal(t-seconds_to_internal(d.seconds())); }
 
   Stamp& operator-=(const Duration& d)
-  { t -= seconds_to_ntp(d.seconds()); return *this; }
+  { t -= seconds_to_internal(d.seconds()); return *this; }
 
   Stamp operator-(double d) const
   { return operator-(Duration{d}); }
@@ -420,19 +450,6 @@ public:
   bool operator>(const Stamp& o) const { return t>o.t; }
   bool operator<=(const Stamp& o) const { return t<=o.t; }
   bool operator>=(const Stamp& o) const { return t>=o.t; }
-
-  //------------------------------------------------------------------------
-  // Helper functions to convert double seconds to/from NTP 64-bit
-  // Note negative numbers are OK (this limits the range)
-  static int64_t seconds_to_ntp(double s)
-  {
-    return static_cast<int64_t>(s * (1ULL<<NTP_SHIFT));
-  }
-
-  static double ntp_to_seconds(uint64_t n)
-  {
-    return static_cast<double>(n) / (1ULL<<NTP_SHIFT);
-  }
 };
 
 //--------------------------------------------------------------------------
@@ -492,7 +509,7 @@ ostream& operator<<(ostream& s, const DateInterval& si);
 // As per Stamp, but rounded back to midnight, and displays just date
 class DateStamp: public Stamp
 {
-  void fix_to_midnight() { t = date().ntp(); }
+  void fix_to_midnight() { t = date().t; }
 
 public:
   // Default constructor

@@ -79,6 +79,21 @@ TEST(SplitTests, TestLeapDay)
   test_split("2012-02-29", 2012, 2, 29);
 }
 
+TEST(SplitTests, TestAfterNTPRollover)
+{
+  test_split("2036-02-08", 2036, 2, 8);
+}
+
+TEST(SplitTests, TestAfterTimeTRollover)
+{
+  test_split("2038-01-01", 2038, 1, 1);
+}
+
+TEST(SplitTests, TestAVeryLongTimeAway)
+{
+  test_split("4000-01-01", 4000, 1, 1);
+}
+
 TEST(SplitTests, TestTimes)
 {
   test_split("2011-09-29T17:14:23", 2011, 9, 29, 17, 14, 23);
