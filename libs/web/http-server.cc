@@ -156,11 +156,12 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         // Check authentication / authorisation
         if (!check_auth(request, response, client))
         {
-          // If they set it, leave it alone
+          // If they set it, leave response code alone
           if (response.code == 200)
           {
-            response.code = 403;
-            response.reason = "Forbidden";
+            // Otherwise generic 401, hope they have set WWW-Authenticate
+            response.code = 401;
+            response.reason = "Unauthorized";
           }
         }
         // Check for OPTIONS request - mainly for CORS
