@@ -312,7 +312,7 @@ namespace
 
     // Read year
     int y = read_part(text, size, pos, 4);
-    if (y < 0) return false;
+    if (y < 1900) return false;
     split.year = y;
 
     // Check for dash

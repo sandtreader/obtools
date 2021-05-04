@@ -111,6 +111,12 @@ TEST(StampTest, TestStampsRolloverIn2036)
   EXPECT_EQ(3600.0*24, d.seconds());
 }
 
+TEST(StampTest, TestStampParseBadYear)
+{
+  Time::Stamp s{"0017-09-29T15:38:53Z"};
+  EXPECT_EQ("", s.iso());
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
