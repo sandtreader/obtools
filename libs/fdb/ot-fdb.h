@@ -49,5 +49,95 @@ public:
 };
 
 //==========================================================================
+// Future object
+class Future
+{
+  FDBFuture *future{nullptr};
+
+public:
+  // Constructor
+  Future(FDBFuture* _future): future(_future) {}
+
+  // Move constructor so we can pass these around
+  Future(Future&& o): future(exchange(o.future, nullptr)) {}
+
+  // Check validity
+  bool operator!() { return !future; }
+
+  // Check if it's ready (polling)
+  bool poll() { return fdb_future_is_ready(future); }
+
+  // Wait for it to be ready (blocking)
+  bool wait() { return !fdb_future_block_until_ready(future); }
+
+  // Get any error
+  fdb_error_t get_error() { return future?fdb_future_get_error(future):-1; }
+
+  // Get a string value
+  string get_string(const string& def = "");
+
+  // Cancel the future
+  void cancel() { fdb_future_cancel(future); }
+
+  // Destructor
+  ~Future() { fdb_future_destroy(future); }
+};
+
+//==========================================================================
+// Transaction object
+class Transaction
+{
+  FDBTransaction *transaction{nullptr};
+
+public:
+  // Constructor
+  Transaction(FDBTransaction *_transaction): transaction(_transaction) {}
+
+  // Move constructor so we can pass these around
+  Transaction(Transaction&& o): transaction(exchange(o.transaction, nullptr)) {}
+
+  // Check validity
+  bool operator!() { return !transaction; }
+
+  // Get a value
+  Future get(const string& key, bool snapshot = false);
+
+  // Set a value
+  bool set(const string& key, const string& value);
+
+  // Clear a key
+  bool clear(const string& key);
+
+  // Commit - returns a Future with no value
+  Future commit();
+
+  // Destructor
+  ~Transaction();
+};
+
+//==========================================================================
+// Database object
+class Database
+{
+  FDBDatabase *database{nullptr};
+
+public:
+  // Constructor
+  Database(const string& cluster_file_path = "");
+
+  // Move constructor so we can pass these around
+  Database(Database&& o): database(exchange(o.database, nullptr)) {}
+
+  // Check validity
+  bool operator!() { return !database; }
+
+  // Create a transaction
+  Transaction create_transaction();
+
+  // Destructor
+  ~Database();
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_FDB_H

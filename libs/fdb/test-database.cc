@@ -1,7 +1,7 @@
 //==========================================================================
-// ObTools::FDB: test-client.cc
+// ObTools::FDB: test-database.cc
 //
-// Test harness for FDB C++ binding, overall client
+// Test harness for FDB C++ binding, database connection & transactions
 //
 // Copyright (c) 2021 Paul Clark.  All rights reserved
 //==========================================================================
@@ -15,12 +15,18 @@ using namespace ObTools;
 
 //--------------------------------------------------------------------------
 // Tests
-TEST(FDBClientTest, client_starts_and_stops)
+TEST(FDBDatabaseTest, database_connects_and_disconnects)
 {
-  FDB::Client client;
-  ASSERT_TRUE(client.start());
-  sleep(3);
-  client.stop();
+  FDB::Database database;
+  ASSERT_FALSE(!database);
+}
+
+TEST(FDBDatabaseTest, database_creates_a_transaction)
+{
+  FDB::Database database;
+  ASSERT_FALSE(!database);
+  FDB::Transaction transaction = database.create_transaction();
+  ASSERT_FALSE(!transaction);
 }
 
 //--------------------------------------------------------------------------
@@ -33,6 +39,9 @@ int main(int argc, char **argv)
     Log::logger.connect(chan_err);
   }
 
+  FDB::Client client;
+  client.start();
+
   ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+  return RUN_ALL_TESTS();
 }
