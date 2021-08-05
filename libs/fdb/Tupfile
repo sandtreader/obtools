@@ -6,7 +6,7 @@
 
 NAME      = ot-fdb
 TYPE      = lib
-DEPENDS   = ot-log
+DEPENDS   = ot-log ext-pkg-foundationdb-client
 PLATFORMS = linux
 
 include_rules
