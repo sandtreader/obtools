@@ -450,6 +450,19 @@ public:
   bool operator>(const Stamp& o) const { return t>o.t; }
   bool operator<=(const Stamp& o) const { return t<=o.t; }
   bool operator>=(const Stamp& o) const { return t>=o.t; }
+
+  //------------------------------------------------------------------------
+  // Helper functions to convert double seconds to/from NTP 64-bit
+  // Note negative numbers are OK (this limits the range)
+  static int64_t seconds_to_ntp(double s)
+  {
+    return static_cast<int64_t>(s * (1ULL<<NTP_SHIFT));
+  }
+
+  static double ntp_to_seconds(uint64_t n)
+  {
+    return static_cast<double>(n) / (1ULL<<NTP_SHIFT);
+  }
 };
 
 //--------------------------------------------------------------------------
