@@ -54,12 +54,14 @@ class Id: public string
 {
 public:
   //------------------------------------------------------------------------
-  // Constructors
+  // Constructors & copy assignment
   Id()
   {}
   Id(const Id<T>& id):
     string(id)
   {}
+  Id& operator=(const Id<T>& id)
+  { assign(id); return *this; }
   explicit Id(const string& id):
     string(id)
   {}
