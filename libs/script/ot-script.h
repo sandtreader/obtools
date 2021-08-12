@@ -339,6 +339,7 @@ class DelayAction: public Action
 {
   Time::Stamp start;
   Time::Duration time;
+  static unsigned int rand_seed;
 
 public:
   //------------------------------------------------------------------------

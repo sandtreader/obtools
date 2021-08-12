@@ -16,6 +16,8 @@
 
 namespace ObTools { namespace Script {
 
+unsigned int DelayAction::rand_seed{0};
+
 //--------------------------------------------------------------------------
 // Constructor
 DelayAction::DelayAction(const CP& cp): Action(cp)
@@ -25,8 +27,12 @@ DelayAction::DelayAction(const CP& cp): Action(cp)
 
   // Check for randomisation
   if (xml.get_attr_bool("random") && !!time)
-    time = Time::Duration(static_cast<double>(
-                              rand() % static_cast<int>(time.seconds())));
+  {
+    // Reset random seed the first time across instances
+    if (!rand_seed) rand_seed = ::time(NULL);
+    time = Time::Duration(static_cast<double>(rand_r(&rand_seed))
+                          / RAND_MAX * time.seconds());
+  }
 }
 
 
