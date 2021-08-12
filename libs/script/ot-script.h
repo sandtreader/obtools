@@ -413,10 +413,6 @@ public:
   // Instantiate an action from the given script and XML element
   // Returns 0 if it fails
   Action *create_action(Script& script, XML::Element& xml);
-
-  //------------------------------------------------------------------------
-  // Run the script to the end
-  void run();
 };
 
 //==========================================================================
