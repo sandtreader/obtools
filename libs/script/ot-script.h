@@ -48,7 +48,7 @@ class Action
 {
 protected:
   Script& script;         // Top-level script we're a part of
-  XML::Element& xml;      // XML element we were created from
+  const XML::Element& xml;      // XML element we were created from
 
 public:
   //------------------------------------------------------------------------
@@ -57,8 +57,9 @@ public:
   struct CP
   {
     Script& script;
-    XML::Element& xml;
-    CP(Script& _script, XML::Element& _xml): script(_script), xml(_xml) {}
+    const XML::Element& xml;
+    CP(Script& _script, const XML::Element& _xml):
+      script(_script), xml(_xml) {}
   };
   Action(const CP& cp): script(cp.script), xml(cp.xml) {}
 
@@ -113,7 +114,7 @@ public:
 class SequenceAction: public Action
 {
 protected:
-  list<XML::Element *>::iterator it;
+  list<XML::Element *>::const_iterator it;
   Action *current;
 
   // Internals
@@ -412,7 +413,7 @@ public:
   //------------------------------------------------------------------------
   // Instantiate an action from the given script and XML element
   // Returns 0 if it fails
-  Action *create_action(Script& script, XML::Element& xml);
+  Action *create_action(Script& script, const XML::Element& xml);
 };
 
 //==========================================================================
@@ -449,12 +450,12 @@ public:
 
   //------------------------------------------------------------------------
   // Constructor - takes language and top-level <script> XML element
-  Script(Language& _language, XML::Element& _xml);
+  Script(Language& _language, const XML::Element& _xml);
 
   //------------------------------------------------------------------------
   // Instantiate an action from the given XML element
   // Returns 0 if it fails
-  Action *create_action(XML::Element& xml)
+  Action *create_action(const XML::Element& xml)
   { return language.create_action(*this, xml); }
 
   //------------------------------------------------------------------------
