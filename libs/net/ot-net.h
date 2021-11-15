@@ -247,6 +247,9 @@ public:
   EndPoint(const struct sockaddr_in& saddr):
     host(ntohl(saddr.sin_addr.s_addr)), port(ntohs(saddr.sin_port)) {}
 
+  // Constructor from host:port format
+  EndPoint(const string& combined);
+
   //------------------------------------------------------------------------
   // Export to sockaddr_in - note htonl/htons here!
   void set(struct sockaddr_in& saddr)

@@ -194,6 +194,21 @@ ostream& operator<<(ostream& s, const MaskedAddress& ip)
 // End-points
 
 //--------------------------------------------------------------------------
+// Constructor from host:port format
+EndPoint::EndPoint(const string& combined)
+{
+  string::size_type p = combined.find(':');
+  if (p != string::npos)
+  {
+    string addr_s(combined, 0, p);
+    host = IPAddress(addr_s);
+
+    string port_s(combined, p+1);
+    port = atoi(port_s.c_str());
+  }
+}
+
+//--------------------------------------------------------------------------
 // As a string
 string EndPoint::str() const
 {
