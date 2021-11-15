@@ -23,10 +23,10 @@ ParallelAction::ParallelAction(const CP& cp, bool _race):
 bool ParallelAction::start(Context& con)
 {
   // If not started, start all children actions simultaneously
-  for(list<XML::Element *>::iterator p = xml.children.begin();
+  for(list<XML::Element *>::const_iterator p = xml.children.begin();
       p!=xml.children.end(); ++p)
   {
-    XML::Element& child = **p;
+    const XML::Element& child = **p;
     Action *a = script.create_action(child);
     if (a)
     {
