@@ -71,12 +71,13 @@ public:
 
   //------------------------------------------------------------------------
   // Use the given certificate
-  void use_certificate(Crypto::Certificate& cert);
+  // Set 'is_extra' if it forms part of the extra certificate chain
+  void use_certificate(Crypto::Certificate& cert, bool is_extra = false);
 
   //------------------------------------------------------------------------
   // Use a certificate from a PEM-format string
   // Returns whether valid
-  bool use_certificate(const string& pem);
+  bool use_certificate(const string& pem, bool is_extra = false);
 
   //------------------------------------------------------------------------
   // Use the given RSA private key

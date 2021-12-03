@@ -27,29 +27,39 @@ Context::Context()
   }
 
   // Provide all the options
-  ctx = SSL_CTX_new(SSLv23_method());
+  ctx = SSL_CTX_new(TLS_method());
 
   if (!ctx) log_errors("Can't create SSL context");
 }
 
 //--------------------------------------------------------------------------
 // Use the given certificate
-void Context::use_certificate(Crypto::Certificate& cert)
+void Context::use_certificate(Crypto::Certificate& cert, bool is_extra)
 {
-  if (ctx) SSL_CTX_use_certificate(ctx, cert.get_x509());
+  if (ctx)
+  {
+    if (is_extra)
+      SSL_CTX_use_certificate(ctx, cert.get_x509());
+    else
+      SSL_CTX_add_extra_chain_cert(ctx, cert.get_x509());
+
+    Log::Detail log;
+    log << "Loaded " << (is_extra?"extra":"main") << " certificate for "
+        << cert.get_cn() << endl;
+  }
 }
 
 //--------------------------------------------------------------------------
 // Use a certificate from a PEM-format string
 // Returns whether valid
-bool Context::use_certificate(const string& pem)
+bool Context::use_certificate(const string& pem, bool is_extra)
 {
   if (!ctx) return false;
 
   Crypto::Certificate cert(pem);
   if (!cert) return false;
 
-  use_certificate(cert);
+  use_certificate(cert, is_extra);
   return true;
 }
 
@@ -324,38 +334,44 @@ Context *Context::create(const XML::Element& ssl_e, string pass_phrase)
     cin >> pass_phrase;
   }
 
+  Context *ssl_ctx = new Context();
+
   // Get private key, strip blank lines, indent
   string key = xpath.get_value("private-key");
   key = Text::strip_blank_lines(key);
   key = Text::remove_indent(key, Text::get_common_indent(key));
-
-  // Test the key
-  Crypto::RSAKey rsa(key, true, pass_phrase);
-  if (!rsa.valid)
+  if (!key.empty())
   {
-    log.error << "Invalid RSA private key or pass phrase - giving up\n";
-    return 0;
-  }
-
-  log.summary << "RSA key loaded OK\n";
-
-  Context *ssl_ctx = new Context();
-  ssl_ctx->use_private_key(rsa);
-
-  // Get certificate
-  string cert = xpath.get_value("certificate");
-  cert = Text::strip_blank_lines(cert);
-  cert = Text::remove_indent(cert, Text::get_common_indent(cert));
-
-  if (ssl_ctx->use_certificate(cert))
-  {
-    log.summary << "SSL context initialised OK\n";
-  }
-  else
-  {
-    log.error << "Can't use SSL certificate - disabling\n";
-    delete ssl_ctx;
+    // Test the key
+    Crypto::RSAKey rsa(key, true, pass_phrase);
+    if (!rsa.valid)
+    {
+      log.error << "Invalid RSA private key or pass phrase - giving up\n";
       return 0;
+    }
+
+    log.summary << "RSA key loaded OK\n";
+
+    ssl_ctx->use_private_key(rsa);
+  }
+
+  // Get certificates
+  auto certs = xpath.get_elements("certificate");
+  bool is_extra = false;
+  for(auto cert_e: certs)
+  {
+    string cert = **cert_e;
+    cert = Text::strip_blank_lines(cert);
+    cert = Text::remove_indent(cert, Text::get_common_indent(cert));
+
+    if (!ssl_ctx->use_certificate(cert, is_extra))
+    {
+      log.error << "Can't use SSL certificate - disabling\n";
+      delete ssl_ctx;
+      return 0;
+    }
+
+    is_extra = true;
   }
 
   configure_verification(ssl_ctx, ssl_e);
@@ -363,6 +379,7 @@ Context *Context::create(const XML::Element& ssl_e, string pass_phrase)
   // Set up session ID context
   ssl_ctx->set_session_id_context(xpath.get_value("session/@context", "pst"));
 
+  log.summary << "SSL context initialised OK\n";
   return ssl_ctx;
 }
 
