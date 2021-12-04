@@ -48,10 +48,21 @@ void Context::use_certificate(const Crypto::Certificate& cert, bool is_extra)
       // this version frees when the context is destroyed, up the ref
       // so our free doesn't
       // (yes this is horrible inconsistency, and took a day to find!)
-      X509_up_ref(x509);
+
+      // This is a nasty replica of X509_up_ref which builds in SSL1.0.2
+      auto x509_stack = sk_X509_new_null();
+      sk_X509_push(x509_stack, x509);
+      sk_X509_free(X509_chain_up_ref(x509_stack)); // It copies the stack too
+      sk_X509_free(x509_stack);
+
       SSL_CTX_add_extra_chain_cert(ctx, x509);
     }
-    else SSL_CTX_use_certificate(ctx, x509);
+    else
+    {
+      // This version either ups the ref itself or copies, so it's safe
+      // to pass in a transient
+      SSL_CTX_use_certificate(ctx, x509);
+    }
   }
 }
 
