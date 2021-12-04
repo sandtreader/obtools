@@ -27,7 +27,7 @@ Context::Context()
   }
 
   // Provide all the options
-  ctx = SSL_CTX_new(TLS_method());
+  ctx = SSL_CTX_new(SSLv23_method());
 
   if (!ctx) log_errors("Can't create SSL context");
 }
