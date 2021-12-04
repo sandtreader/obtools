@@ -34,7 +34,6 @@ Context::Context()
 
 //--------------------------------------------------------------------------
 // Use the given certificate
-// Note cert must outlive the context
 void Context::use_certificate(const Crypto::Certificate& cert, bool is_extra)
 {
   if (ctx)
@@ -43,10 +42,16 @@ void Context::use_certificate(const Crypto::Certificate& cert, bool is_extra)
     log << "Loading " << (is_extra?"extra":"main") << " certificate for "
         << cert.get_cn() << endl;
 
+    auto x509 = cert.get_x509();
     if (is_extra)
-      SSL_CTX_add_extra_chain_cert(ctx, cert.get_x509());
-    else
-      SSL_CTX_use_certificate(ctx, cert.get_x509());
+    {
+      // this version frees when the context is destroyed, up the ref
+      // so our free doesn't
+      // (yes this is horrible inconsistency, and took a day to find!)
+      X509_up_ref(x509);
+      SSL_CTX_add_extra_chain_cert(ctx, x509);
+    }
+    else SSL_CTX_use_certificate(ctx, x509);
   }
 }
 
@@ -57,11 +62,10 @@ bool Context::use_certificate(const string& pem, bool is_extra)
 {
   if (!ctx) return false;
 
-  auto cert = make_shared<Crypto::Certificate>(pem);
-  if (!*cert) return false;
+  Crypto::Certificate cert(pem);
+  if (!cert) return false;
 
-  certificates.push_back(cert);
-  use_certificate(*cert, is_extra);
+  use_certificate(cert, is_extra);
   return true;
 }
 
