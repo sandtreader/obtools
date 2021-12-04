@@ -897,8 +897,12 @@ public:
   bool operator!() const { return !x509; }
 
   //------------------------------------------------------------------------
-  // Get raw X509 structure (e.g. for SSL).  Can be 0.
+  // Get raw X.509 structure (e.g. for SSL).  Can be 0.  Still owned by this.
   X509 *get_x509() const { return x509; }
+
+  //------------------------------------------------------------------------
+  // Detach raw X.509 structure, for use beyond the lifetime of this object
+  X509 *detach_x509() { auto x = x509; x509 = nullptr; return x; }
 
   //------------------------------------------------------------------------
   // Get common name

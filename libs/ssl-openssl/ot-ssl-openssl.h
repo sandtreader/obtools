@@ -61,6 +61,7 @@ class Context: public SSL::Context
 {
   SSL_CTX *ctx;  // SSL library context
   string sni_hostname;
+  list<shared_ptr<Crypto::Certificate>> certificates;
 
 public:
   string verify_common_name;
@@ -72,7 +73,8 @@ public:
   //------------------------------------------------------------------------
   // Use the given certificate
   // Set 'is_extra' if it forms part of the extra certificate chain
-  void use_certificate(Crypto::Certificate& cert, bool is_extra = false);
+  // Note cert must outlive the context
+  void use_certificate(const Crypto::Certificate& cert, bool is_extra = false);
 
   //------------------------------------------------------------------------
   // Use a certificate from a PEM-format string

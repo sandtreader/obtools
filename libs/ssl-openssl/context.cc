@@ -34,18 +34,19 @@ Context::Context()
 
 //--------------------------------------------------------------------------
 // Use the given certificate
-void Context::use_certificate(Crypto::Certificate& cert, bool is_extra)
+// Note cert must outlive the context
+void Context::use_certificate(const Crypto::Certificate& cert, bool is_extra)
 {
   if (ctx)
   {
+    Log::Detail log;
+    log << "Loading " << (is_extra?"extra":"main") << " certificate for "
+        << cert.get_cn() << endl;
+
     if (is_extra)
       SSL_CTX_add_extra_chain_cert(ctx, cert.get_x509());
     else
       SSL_CTX_use_certificate(ctx, cert.get_x509());
-
-    Log::Detail log;
-    log << "Loaded " << (is_extra?"extra":"main") << " certificate for "
-        << cert.get_cn() << endl;
   }
 }
 
@@ -56,10 +57,11 @@ bool Context::use_certificate(const string& pem, bool is_extra)
 {
   if (!ctx) return false;
 
-  Crypto::Certificate cert(pem);
-  if (!cert) return false;
+  auto cert = make_shared<Crypto::Certificate>(pem);
+  if (!*cert) return false;
 
-  use_certificate(cert, is_extra);
+  certificates.push_back(cert);
+  use_certificate(*cert, is_extra);
   return true;
 }
 
