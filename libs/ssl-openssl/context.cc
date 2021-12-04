@@ -39,9 +39,9 @@ void Context::use_certificate(Crypto::Certificate& cert, bool is_extra)
   if (ctx)
   {
     if (is_extra)
-      SSL_CTX_use_certificate(ctx, cert.get_x509());
-    else
       SSL_CTX_add_extra_chain_cert(ctx, cert.get_x509());
+    else
+      SSL_CTX_use_certificate(ctx, cert.get_x509());
 
     Log::Detail log;
     log << "Loaded " << (is_extra?"extra":"main") << " certificate for "
@@ -351,7 +351,6 @@ Context *Context::create(const XML::Element& ssl_e, string pass_phrase)
     }
 
     log.summary << "RSA key loaded OK\n";
-
     ssl_ctx->use_private_key(rsa);
   }
 
