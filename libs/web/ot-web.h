@@ -623,6 +623,10 @@ public:
   int open_websocket(const URL& url, Net::TCPStream*& stream_p,
                      const string& auth_header = "");
 
+  //-------------------------------------------------------------------------
+  // Enable keepalives for long-running receive-only sockets - e.g. WebSockets
+  void enable_keepalive();
+
   //------------------------------------------------------------------------
   // Read a block of data from a progressive fetch
   // Returns the actual amount read

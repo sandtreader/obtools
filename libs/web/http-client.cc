@@ -462,6 +462,13 @@ int HTTPClient::open_websocket(const URL& url,
 }
 
 //--------------------------------------------------------------------------
+// Enable keepalives for long-running receive-only sockets - e.g. WebSockets
+void HTTPClient::enable_keepalive()
+{
+  if (socket) socket->enable_keepalive();
+}
+
+//--------------------------------------------------------------------------
 // Read a block of data from a progressive fetch
 // Returns the actual amount read
 unsigned long HTTPClient::read(unsigned char *data, unsigned long length)
