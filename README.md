@@ -42,6 +42,18 @@ To build ObTools you'll need the following packages on top of the standard Ubunt
 
 If using another or older distribution which doesn't have Tup, you can build it yourself from the [Tup sources](http://gittup.org/tup/).  Why Tup?  It's blindingly fast and intelligent - I used to have a set of arcane [recursive Makefiles](https://www.cse.iitb.ac.in/~soumen/teach/1999.2A.CS699/make.html) which took ages and you could never quite trust for deep library changes - not any more!
 
+If you have a newer distribution with MariaDB instead of MySql, you'll need `libmariadb-dev-compat` instead of `libmysqlclient-dev` in the above.
+
+### Installing gtest
+
+The unit tests in ObTools use GTest, which you need to build yourself:
+
+        $ sudo apt install libgtest-dev cmake
+		$ cd /usr/src/gtest
+		$ sudo cmake CMakeLists.txt
+		$ sudo make
+		$ sudo cp lib/*.a /usr/lib/
+
 ### How to build debug versions (with automated tests):
 
 1. Clone this repo, e.g.
