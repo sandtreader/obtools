@@ -49,10 +49,10 @@ If you have a newer distribution with MariaDB instead of MySql, you'll need `lib
 The unit tests in ObTools use GTest, which you need to build yourself:
 
         $ sudo apt install libgtest-dev cmake
-		$ cd /usr/src/gtest
-		$ sudo cmake CMakeLists.txt
-		$ sudo make
-		$ sudo cp lib/*.a /usr/lib/
+        $ cd /usr/src/gtest
+        $ sudo cmake CMakeLists.txt
+        $ sudo make
+        $ sudo cp lib/*.a /usr/lib/
 
 ### How to build debug versions (with automated tests):
 
