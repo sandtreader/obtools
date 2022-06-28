@@ -593,6 +593,14 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Set cors origin for HTTP servers
+  void set_cors_origin(const string& pattern = "*")
+  {
+    if (http_server) http_server->set_cors_origin(pattern);
+    if (https_server) https_server->set_cors_origin(pattern);
+  }
+
+  //------------------------------------------------------------------------
   // Clean shutdown
   void shutdown()
   {
