@@ -732,6 +732,7 @@ private:
   int timeout;    // Socket inactivity timeout
   string version; // Version reported in Server: header
   string cors_origin;  // Pattern for Access-Control-Allow-Origin header
+  map<string, string> response_headers;  // Headers to add on responses
   bool websocket_enabled{false};
 
   //------------------------------------------------------------------------
@@ -842,6 +843,13 @@ public:
   void set_cors_origin(const string& pattern = "*")
   {
     cors_origin = pattern;
+  }
+
+  //------------------------------------------------------------------------
+  // Add a header on responses
+  void add_response_header(const string& name, const string& value)
+  {
+    response_headers[name] = value;
   }
 
   //------------------------------------------------------------------------

@@ -201,6 +201,11 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
         error(response, 505, "HTTP Version not supported");
       }
 
+      // Add any other custom headers - note after all the above so
+      // we can override them
+      for(const auto& p: response_headers)
+        response.headers.put(p.first, p.second);
+
       // Log response
       log.detail << "Response: " << response.code << " "
                  << response.reason << endl;
