@@ -70,6 +70,15 @@ TEST(PropertyListTests, TestInterpolation)
   EXPECT_EQ(pl.interpolate("$not;"), "$not;");
 }
 
+TEST(PropertyListTests, TestFromEnvironment)
+{
+  Misc::PropertyList pl;
+  pl.fill_from_environment();
+  EXPECT_FALSE(pl.empty());
+  EXPECT_TRUE(pl.has("PWD"));
+  EXPECT_TRUE(pl.has("PATH"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

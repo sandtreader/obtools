@@ -11,6 +11,11 @@
 #include "ot-text.h"
 #include <ctype.h>
 #include <sstream>
+#include <stdlib.h>
+
+#if !defined(PLATFORM_WINDOWS)
+extern char **environ;
+#endif
 
 namespace ObTools { namespace Misc {
 
@@ -202,6 +207,23 @@ retry:
   }
 
   return result;
+}
+
+//--------------------------------------------------------------------------
+// Fill a property list with all the process environment variables
+void PropertyList::fill_from_environment()
+{
+  char **env;
+#if defined(PLATFORM_WINDOWS)
+  env = *__p__environ();  // From SO, not tested!
+#else
+  env = environ;
+#endif
+  for (; *env; ++env)
+  {
+    auto bits = Text::split(*env, '=', true);
+    if (bits.size() == 2) add(bits[0], bits[1]);
+  }
 }
 
 

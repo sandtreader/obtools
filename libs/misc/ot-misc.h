@@ -323,6 +323,9 @@ public:
   // Convert to delimited string
   string str(char sep=',', char quote='"');
 
+  //--------------------------------------------------------------------------
+  // Fill a property list with all the process environment variables
+  void fill_from_environment();
 };
 
 //--------------------------------------------------------------------------
