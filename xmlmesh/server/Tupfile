@@ -10,8 +10,8 @@ DEPENDS   = ot-net ot-daemon ot-log ot-cache ot-xmlmesh-otmp ot-xmlmesh-client
 PLATFORMS = posix
 
 PACKAGE  = $(NAME)
-VERSION  = 4.0.0
-REVISION = 1~dev1
+VERSION  = 4.1.0
+REVISION = 1
 
 ifdef RELEASE
   CFLAGS += -DDAEMON

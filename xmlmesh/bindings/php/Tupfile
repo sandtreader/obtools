@@ -5,8 +5,8 @@
 #===========================================================================
 
 PACKAGE  = ot-xmlmesh-php-native
-VERSION  = 0.3.1
-REVISION = 2
+VERSION  = 4.1.0
+REVISION = 1
 ARCH = all
 
 include_rules
