@@ -56,6 +56,11 @@ local PLATFORM_GROUPS = {
   ["posix"] = {"linux", "windows"}
 }
 
+local CPP_EXT = flatten(CPP_EXT)
+if CPP_EXT == "" then
+  CPP_EXT = ".cc"
+end
+
 ----------------------------------------------------------------------------
 -- If platforms are specified, then ensure configured platform is in list
 if PLATFORMS ~= nil then
@@ -206,12 +211,12 @@ local sources = {}
 local test_sources = {}
 
 function add_sources_for_dir(dir, sources, test_sources)
-  local glob = '*.cc'
+  local glob = '*' .. CPP_EXT
   if dir ~= "." then
-    glob = dir .. '/*.cc'
+    glob = dir .. '/*' .. CPP_EXT
   end
   for index, filename in ipairs(tup.glob(glob)) do
-    local basename = filename:match("([^/]+).cc$")
+    local basename = filename:match("([^/]+)" .. CPP_EXT .. "$")
     if basename:sub(1, 1) ~= "." then
       if basename:sub(1, 5) == "test-" then
         test_sources += filename
