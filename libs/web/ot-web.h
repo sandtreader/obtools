@@ -422,7 +422,7 @@ struct Cookie
 
   //------------------------------------------------------------------------
   // Comparison (for evicting existing)
-  bool operator==(const Cookie& c)
+  bool operator==(const Cookie& c) const
   { return name==c.name && domain==c.domain && path==c.path; }
 
   //------------------------------------------------------------------------
