@@ -139,6 +139,19 @@ TEST(XMLTest, TestGetPrefixedAttributes)
   EXPECT_EQ("Y", attrs["y"]);
 }
 
+TEST(XMLTest, TestAddPrefix)
+{
+  XML::Element a("root");
+  XML::Element &a_c1 = a.add("child");
+  XML::Element &a_c2 = a.add("foo:child");
+
+  a.add_prefix("foo:");
+
+  ASSERT_EQ("foo:root", a.name);
+  ASSERT_EQ("foo:child", a_c1.name);
+  ASSERT_EQ("foo:child", a_c2.name);
+}
+
 TEST(XMLTest, TestRemovePrefix)
 {
   XML::Element a("foo:root");

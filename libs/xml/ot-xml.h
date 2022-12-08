@@ -530,11 +530,16 @@ public:
   bool translate(map<string, string>& trans_map);
 
   //--------------------------------------------------------------------------
+  // Add a prefix (e.g. a namespace prefix) to all element names,
+  // recursively
+  void add_prefix(const string& prefix);
+
+  //--------------------------------------------------------------------------
   // Remove a prefix (e.g. a namespace prefix) from all element names,
   // recursively
   void remove_prefix(const string& prefix);
 
-//------------------------------------------------------------------------
+  //------------------------------------------------------------------------
   // Detach from parent
   void detach();
 

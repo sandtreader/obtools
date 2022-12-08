@@ -943,6 +943,19 @@ bool Element::translate(map<string, string>& trans_map)
 }
 
 //--------------------------------------------------------------------------
+// Add a prefix (e.g. a namespace prefix) to all element names,
+// recursively, if it isn't already present
+void Element::add_prefix(const string& prefix)
+{
+  // Check if we already have it
+  if (name.compare(0, prefix.size(), prefix))
+    name = prefix + name;
+
+  for(auto child: children)
+    child->add_prefix(prefix);
+}
+
+//--------------------------------------------------------------------------
 // Remove a prefix (e.g. a namespace prefix) from all element names,
 // recursively
 void Element::remove_prefix(const string& prefix)
