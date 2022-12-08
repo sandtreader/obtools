@@ -139,6 +139,21 @@ TEST(XMLTest, TestGetPrefixedAttributes)
   EXPECT_EQ("Y", attrs["y"]);
 }
 
+TEST(XMLTest, TestRemovePrefix)
+{
+  XML::Element a("foo:root");
+  XML::Element &a_c1 = a.add("foo:child");
+  XML::Element &a_c2 = a.add("bar:child");
+  XML::Element &a_c3 = a.add("foo:");
+
+  a.remove_prefix("foo:");
+
+  ASSERT_EQ("root", a.name);
+  ASSERT_EQ("child", a_c1.name);
+  ASSERT_EQ("bar:child", a_c2.name);
+  ASSERT_EQ("", a_c3.name);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

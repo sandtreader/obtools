@@ -943,6 +943,19 @@ bool Element::translate(map<string, string>& trans_map)
 }
 
 //--------------------------------------------------------------------------
+// Remove a prefix (e.g. a namespace prefix) from all element names,
+// recursively
+void Element::remove_prefix(const string& prefix)
+{
+  // Check our name
+  if (!name.compare(0, prefix.size(), prefix))
+    name = string(name, prefix.size());
+
+  for(auto child: children)
+    child->remove_prefix(prefix);
+}
+
+//--------------------------------------------------------------------------
 // Detach from parent
 void Element::detach()
 {
