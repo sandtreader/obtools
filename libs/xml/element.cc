@@ -947,8 +947,8 @@ bool Element::translate(map<string, string>& trans_map)
 // recursively, if it isn't already present
 void Element::add_prefix(const string& prefix)
 {
-  // Check if we already have it
-  if (name.compare(0, prefix.size(), prefix))
+  // Check if we already have it (if we have a name at all)
+  if (!name.empty() && name.compare(0, prefix.size(), prefix))
     name = prefix + name;
 
   for(auto child: children)
