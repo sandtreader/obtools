@@ -72,28 +72,29 @@ TEST(XMLTest, TestSuperimpose)
   XML::Element &a_c1 = a.add("child", "id", "1");
   XML::Element &a_c2 = a.add("child", "id", "2");
   a_c1.set_attr("name", "pickle");
+  a_c1.add("colour", "yellow");
   a_c2.set_attr("name", "sprout");
-  a_c2.add("colour", "name", "green");
+  a_c2.add("colour", "green");
   XML::Element b("root");
   b.set_attr("name", "bar");
   XML::Element &b_c1 = b.add("child", "id", "1");
   XML::Element &b_c3 = b.add("child", "id", "3");
   b_c1.set_attr("name", "apricot");
   b_c3.set_attr("name", "plum");
-  b_c1.add("colour", "name", "orange");
-  b_c3.add("colour", "name", "purple");
+  b_c1.add("colour", "orange");
+  b_c3.add("colour", "purple");
 
   a.superimpose(b, "id");
 
   string expected = "<root name=\"bar\">\n"
                     "  <child id=\"1\" name=\"apricot\">\n"
-                    "    <colour name=\"orange\"/>\n"
+                    "    <colour>orange</colour>\n"
                     "  </child>\n"
                     "  <child id=\"2\" name=\"sprout\">\n"
-                    "    <colour name=\"green\"/>\n"
+                    "    <colour>green</colour>\n"
                     "  </child>\n"
                     "  <child id=\"3\" name=\"plum\">\n"
-                    "    <colour name=\"purple\"/>\n"
+                    "    <colour>purple</colour>\n"
                     "  </child>\n"
                     "</root>\n";
   ASSERT_EQ(expected, a.to_string());

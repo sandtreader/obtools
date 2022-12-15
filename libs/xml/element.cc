@@ -48,6 +48,9 @@ void Element::superimpose(const Element& source, const string& identifier)
        p = source.attrs.begin(); p != source.attrs.end(); ++p)
     attrs[p->first] = p->second;
 
+  // Copy over text content, if any
+  if (!source.content.empty()) content = source.content;
+
   // Loop through children and add if not present in original, else
   // superimpose
   for (list<Element *>::const_iterator
