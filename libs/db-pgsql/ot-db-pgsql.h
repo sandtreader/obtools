@@ -97,6 +97,11 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Expression to get current datetime in UTC
+  string utc_timestamp() override
+  { return "current_timestamp at time zone 'UTC'"; }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Connection();
 };

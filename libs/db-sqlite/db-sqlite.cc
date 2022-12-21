@@ -11,6 +11,7 @@
 #include "ot-log.h"
 #include <sqlite3.h>
 #include <cmath>
+#include <sstream>
 
 namespace ObTools { namespace DB { namespace SQLite {
 
@@ -268,6 +269,27 @@ Statement Connection::prepare(const string& sql)
 uint64_t Connection::get_last_insert_id()
 {
   return sqlite3_last_insert_rowid(conn.get());
+}
+
+//--------------------------------------------------------------------------
+// Do an INSERT or UPDATE if it already exists (violates unique key)
+// Uses INSERT ... ON CONFLICT DO UPDATE
+// Each field in the row is inserted by name
+// update_row gives the list of fields from row which are updated (not
+// part of the unique key)
+// Note: All fields are escaped on insertion
+// Returns whether successful
+bool Connection::insert_or_update(const string& table, Row& row,
+                                  Row& update_row)
+{
+  ostringstream oss;
+  oss << "INSERT INTO " << table;
+  oss << " (" << row.get_fields() << ")";
+  oss << " VALUES (" << row.get_escaped_values() << ")";
+  oss << " ON CONFLICT (" << row.get_fields_not_in(update_row)
+      << ") DO UPDATE SET "
+      << row.get_escaped_assignments_limited_by(update_row);
+  return exec(oss.str());
 }
 
 }}} // namespaces
