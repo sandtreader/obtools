@@ -14,6 +14,9 @@
 #include "openssl/engine.h"
 #undef SSL
 
+// Temporary bodge to ignore deprecations in OpenSSL 3.0.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 // Definition of type for dynamic locks, outside namespaces
 struct CRYPTO_dynlock_value
 {
