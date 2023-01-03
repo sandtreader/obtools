@@ -27,11 +27,12 @@ public:
     Log::Summary log;
     log << "Creating connection " << serial << endl;
   }
-  virtual explicit operator bool() { return true; }
-  virtual bool exec(const string&) { return true; }
-  virtual Result query(const string&) { return Result(); }
-  virtual Statement prepare(const string&) { return Statement(); }
-  virtual uint64_t get_last_insert_id() { return 0; }
+  explicit operator bool() override { return true; }
+  bool exec(const string&) override { return true; }
+  Result query(const string&) override { return Result(); }
+  Statement prepare(const string&) override { return Statement(); }
+  uint64_t get_last_insert_id() override { return 0; }
+  string utc_timestamp() override { return "utc_timestamp()"; }
 
   ~FakeConnection()
   {
