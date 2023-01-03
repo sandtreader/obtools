@@ -11,6 +11,9 @@
 #include "ot-crypto.h"
 #include <memory>
 
+// Temporary bodge to ignore deprecation of AES_xx in OpenSSL 3.0.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 namespace ObTools { namespace Crypto {
 
 //--------------------------------------------------------------------------

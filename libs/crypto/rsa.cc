@@ -12,6 +12,9 @@
 
 namespace ObTools { namespace Crypto {
 
+// Temporary bodge to ignore deprecations in OpenSSL 3.0.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 //--------------------------------------------------------------------------
 // Get ciphertext size
 int RSA::cipher_size()
