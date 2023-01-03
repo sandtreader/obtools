@@ -11,6 +11,10 @@
 #include "ot-crypto.h"
 #include "ot-text.h"
 
+// Temporary bodge to ignore deprecation of HMAC_xx in OpenSSL 3.0.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 namespace ObTools { namespace Crypto {
 
 //--------------------------------------------------------------------------
@@ -90,3 +94,5 @@ HMAC::~HMAC()
 }
 
 }} // namespaces
+
+#pragma clang diagnostic pop
