@@ -14,6 +14,9 @@
 #include "ot-chan.h"
 #include "ot-crypto.h"
 
+// Temporary bodge to ignore deprecations in OpenSSL 3.0.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 namespace ObTools { namespace Crypto {
 
 //--------------------------------------------------------------------------
