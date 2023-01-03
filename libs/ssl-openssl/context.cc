@@ -13,6 +13,10 @@
 
 namespace ObTools { namespace SSL_OpenSSL {
 
+// Temporary bodge to ignore deprecation of SSL_CTX_xx in OpenSSL 3.0.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 //--------------------------------------------------------------------------
 // Constructor: Allocates context
 Context::Context()

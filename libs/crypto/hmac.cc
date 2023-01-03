@@ -94,5 +94,3 @@ HMAC::~HMAC()
 }
 
 }} // namespaces
-
-#pragma clang diagnostic pop
