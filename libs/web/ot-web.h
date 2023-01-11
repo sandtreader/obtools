@@ -383,6 +383,12 @@ public:
   //------------------------------------------------------------------------
   // Get a single cookie value, or empty if not set
   string get_cookie(const string& name) const;
+
+  //--------------------------------------------------------------------------
+  // Get a JWT payload from an Authorization: Bearer header
+  // Returns the payload object, or UNSET value if anything fails
+  // and logs accordingly.  Checks signature with the given secret
+  JSON::Value get_jwt_payload(const string& secret) const;
 };
 
 //--------------------------------------------------------------------------

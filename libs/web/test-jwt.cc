@@ -106,6 +106,46 @@ TEST(JWTTest, TestExpiryWhenNotExpired)
   EXPECT_FALSE(jwt.expired());
 }
 
+TEST(JWTTest, TestExtractionFromRequestAuthorizationBearerToken)
+{
+  Web::HTTPMessage request("POST", "http://server");
+  request.headers.put("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFpbSI6IkNMQUlNIn0.P-BD4ngX0SQm0b4s8SFjlwEXc2fABcrYKSfXXq7uNLw");
+  auto payload = request.get_jwt_payload("secret");
+  ASSERT_FALSE(!payload);
+  EXPECT_EQ("CLAIM", payload["claim"].as_str());
+}
+
+TEST(JWTTest, TestExtractionFromRequestAuthorizationBearerTokenFailsWithNoAuth)
+{
+  Web::HTTPMessage request("POST", "http://server");
+  auto payload = request.get_jwt_payload("secret");
+  ASSERT_TRUE(!payload);
+}
+
+TEST(JWTTest, TestExtractionFromRequestAuthorizationBearerTokenFailsWithBadAuth)
+{
+  Web::HTTPMessage request("POST", "http://server");
+  request.headers.put("authorization", "RANDOM");
+  auto payload = request.get_jwt_payload("secret");
+  ASSERT_TRUE(!payload);
+}
+
+TEST(JWTTest, TestExtractionFromRequestAuthorizationBearerTokenFailsWithBadJWT)
+{
+  Web::HTTPMessage request("POST", "http://server");
+  request.headers.put("authorization", "Bearer RANDOM");
+  auto payload = request.get_jwt_payload("secret");
+  ASSERT_TRUE(!payload);
+}
+
+TEST(JWTTest, TestExtractionFromRequestAuthorizationBearerTokenFailsWithBadSig)
+{
+  Web::HTTPMessage request("POST", "http://server");
+  request.headers.put("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFpbSI6IkNMQUlNIn0.P-BD4ngX0SQm0b4s8SFjlwEXc2fABcrYKSfXXq7uNLw");
+  auto payload = request.get_jwt_payload("GUESSING");
+  ASSERT_TRUE(!payload);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
