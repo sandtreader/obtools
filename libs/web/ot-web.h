@@ -870,6 +870,16 @@ public:
   string url;   // URL (patterns allowed)
 
   //------------------------------------------------------------------------
+  // Exception - handlers can throw this and server will log and return
+  // a suitable error
+  struct Exception: public runtime_error
+  {
+    int code;
+    Exception(int _code, const string& _error):
+      runtime_error(_error), code(_code) {}
+  };
+
+  //------------------------------------------------------------------------
   // Constructor
   URLHandler(const string& _url): url(_url) {}
 
