@@ -369,7 +369,12 @@ JSON::Value HTTPMessage::get_jwt_payload(const string& secret) const
       if (!!jwt)
       {
         if (jwt.verify(secret))
-          return jwt.payload;
+        {
+          if (jwt.expired())
+            log << "JWT expired\n";
+          else
+            return jwt.payload;
+        }
         else
           log << "Bad signature in JWT\n";
       }
