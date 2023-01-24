@@ -11,6 +11,9 @@
 #include "ot-crypto.h"
 #include <openssl/opensslv.h>
 
+// Temporary bodge to ignore deprecations in OpenSSL 3.0.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 // Make build with both 0.9.7 and 0.9.8
 #if OPENSSL_VERSION_NUMBER >= 0x908000L
 #define DES_CBLOCK_CAST(_x) ((DES_cblock *)(_x))

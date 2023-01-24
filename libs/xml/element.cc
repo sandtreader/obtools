@@ -48,6 +48,9 @@ void Element::superimpose(const Element& source, const string& identifier)
        p = source.attrs.begin(); p != source.attrs.end(); ++p)
     attrs[p->first] = p->second;
 
+  // Copy over text content, if any
+  if (!source.content.empty()) content = source.content;
+
   // Loop through children and add if not present in original, else
   // superimpose
   for (list<Element *>::const_iterator
@@ -940,6 +943,32 @@ bool Element::translate(map<string, string>& trans_map)
   // We know it's not empty - change name
   name = tp->second;
   return true;  // Leave me alone now
+}
+
+//--------------------------------------------------------------------------
+// Add a prefix (e.g. a namespace prefix) to all element names,
+// recursively, if it isn't already present
+void Element::add_prefix(const string& prefix)
+{
+  // Check if we already have it (if we have a name at all)
+  if (!name.empty() && name.compare(0, prefix.size(), prefix))
+    name = prefix + name;
+
+  for(auto child: children)
+    child->add_prefix(prefix);
+}
+
+//--------------------------------------------------------------------------
+// Remove a prefix (e.g. a namespace prefix) from all element names,
+// recursively
+void Element::remove_prefix(const string& prefix)
+{
+  // Check our name
+  if (!name.compare(0, prefix.size(), prefix))
+    name = string(name, prefix.size());
+
+  for(auto child: children)
+    child->remove_prefix(prefix);
 }
 
 //--------------------------------------------------------------------------

@@ -98,6 +98,10 @@ public:
   uint64_t get_last_insert_id() override;
 
   //------------------------------------------------------------------------
+  // Expression to get current datetime in UTC
+  string utc_timestamp() override { return "utc_timestamp()"; }
+
+  //------------------------------------------------------------------------
   // Destructor
   ~Connection();
 };

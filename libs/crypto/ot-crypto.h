@@ -18,10 +18,16 @@
 #include <map>
 #include <string.h>
 
+// Temporary bodge to ignore deprecation of all kinds of things in
+// OpenSSL 3.0.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 // This is rather ugly...  We want to use SSL as a namespace, but
 // OpenSSL defines it as a struct.  Hence we redefine SSL here to
 // expand to OpenSSL for the duration of the OpenSSL headers
 #define SSL OpenSSL
+
 #include <openssl/aes.h>
 #include <openssl/des.h>
 #include <openssl/rsa.h>
@@ -29,6 +35,7 @@
 #include <openssl/hmac.h>
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
+
 #undef SSL
 
 #include "ot-mt.h"
@@ -963,6 +970,8 @@ class CertificateStore
 
 //==========================================================================
 }} //namespaces
+
+#pragma clang diagnostic pop
 #endif // !__OBTOOLS_CRYPTO_H
 
 

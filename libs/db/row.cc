@@ -85,6 +85,23 @@ string Row::get_fields() const
 }
 
 //--------------------------------------------------------------------------
+// Get fields that are *not* in a suppressed fields row
+string Row::get_fields_not_in(const Row& suppressed_fields) const
+{
+  string result;
+  for(const auto& p: fields)
+  {
+    if (!suppressed_fields.has(p.first))
+    {
+      if (!result.empty()) result += ", ";
+      result += p.first;
+    }
+  }
+
+  return result;
+}
+
+//--------------------------------------------------------------------------
 // Get string with field values in order, separated by commas and spaces,
 // with assigment back to VALUES(name) - e.g. x=VALUES(x), y=VALUES(y)
 // (e.g. for INSERT .. ON DUPLICATE KEY UPDATE)
@@ -129,6 +146,26 @@ string Row::get_escaped_assignments() const
   {
     if (!result.empty()) result += ", ";
     result += p->first + " = " + p->second.as_quoted_string();
+  }
+
+  return result;
+}
+
+//--------------------------------------------------------------------------
+// Get string with field names and values in order with '=',
+// separated by commas and spaces, values delimited with single quotes
+// limited by another row (e.g. for ON CONFLICT ... DO UPDATE)
+string Row::get_escaped_assignments_limited_by(const Row& limit) const
+{
+  string result;
+  for(const auto& p: limit.fields)
+  {
+    auto q = fields.find(p.first);
+    if (q != fields.end())
+    {
+      if (!result.empty()) result += ", ";
+      result += p.first + " = " + q->second.as_quoted_string();
+    }
   }
 
   return result;

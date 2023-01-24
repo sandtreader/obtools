@@ -189,10 +189,25 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
             error(response, 400, "Bad WebSocket request");
         }
         // In all other cases call down to subclass implementation
-        else if (!handle_request(request, response, client, s, ss))
+        else
         {
-          log.error << "Handler failed - sending 500\n";
-          error(response, 500, "Server Failure");
+          try
+          {
+            if (!handle_request(request, response, client, s, ss))
+            {
+              log.error << "Handler failed - sending 500\n";
+              error(response, 500, "Server Failure");
+            }
+          }
+          catch (URLHandler::Exception& e)
+          {
+            error(response, e.code, e.what());
+          }
+          catch (exception& e)
+          {
+            log.error << "URL handler raised exception: " << e.what() << endl;
+            error(response, 500, "Internal error");
+          }
         }
       }
       else

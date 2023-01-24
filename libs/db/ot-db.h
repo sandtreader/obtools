@@ -320,6 +320,10 @@ public:
   string get_fields() const;
 
   //--------------------------------------------------------------------------
+  // Get fields that are *not* in a suppressed fields row
+  string get_fields_not_in(const Row& suppressed_fields) const;
+
+  //--------------------------------------------------------------------------
   // Get string with field values in order, separated by commas and spaces,
   // with assigment back to VALUES(name) - e.g. x=VALUES(x), y=VALUES(y)
   // (e.g. for INSERT .. ON DUPLICATE KEY UPDATE)
@@ -336,7 +340,13 @@ public:
   // (e.g. for UPDATE)
   string get_escaped_assignments() const;
 
-  //------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  // Get string with field names and values in order with '=',
+  // separated by commas and spaces, values delimited with single quotes
+  // limited by another row (e.g. for ON CONFLICT ... DO UPDATE)
+  string get_escaped_assignments_limited_by(const Row& limit) const;
+
+//------------------------------------------------------------------------
   // Get string with field names and values in order with '=', separated
   // by AND, values delimited with single quotes
   // (e.g. for WHERE)
@@ -834,6 +844,10 @@ public:
   }
 
   //------------------------------------------------------------------------
+  // Expression to get current datetime in UTC
+  virtual string utc_timestamp() = 0;
+
+  //------------------------------------------------------------------------
   // Virtual destructor
   virtual ~Connection() {}
 
@@ -916,7 +930,7 @@ public:
   // part of the unique key)
   // Note: All fields are escaped on insertion
   // Returns whether successful
-  bool insert_or_update(const string& table, Row& row, Row& update_row);
+  virtual bool insert_or_update(const string& table, Row& row, Row& update_row);
 
   //------------------------------------------------------------------------
   // INSERT into a join table with two foreign ID fields
@@ -1447,6 +1461,8 @@ struct AutoConnection
 
   static string escape(const string& s) { return FieldValue::escape(s); }
   static string unescape(const string& s) { return FieldValue::unescape(s); }
+
+  string utc_timestamp() { return conn?conn->utc_timestamp():""; }
 
   //------------------------------------------------------------------------
   // Destructor

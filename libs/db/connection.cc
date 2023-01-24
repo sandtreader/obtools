@@ -136,7 +136,7 @@ int Connection::insert(const string& sql,
   if (id_field.empty()) return exec(sql)?1:0;
 
   // Want ID back in transaction
-  if (!in_transaction && !exec("START TRANSACTION")) return 0;
+  if (!in_transaction && !exec("BEGIN")) return 0;
   if (!exec(sql))
   {
     if (!in_transaction) exec("ROLLBACK");  // Try to roll back
@@ -165,7 +165,7 @@ uint64_t Connection::insert64(const string& sql,
   if (id_field.empty()) return exec(sql)?1:0;
 
   // Want ID back in transaction
-  if (!in_transaction && !exec("START TRANSACTION")) return 0;
+  if (!in_transaction && !exec("BEGIN")) return 0;
   if (!exec(sql))
   {
     if (!in_transaction) exec("ROLLBACK");  // Try to roll back

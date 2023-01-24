@@ -167,6 +167,16 @@ public:
   // Gets the last insert id
   uint64_t get_last_insert_id() override;
 
+  //--------------------------------------------------------------------------
+  // Do an INSERT or UPDATE if it already exists (violates unique key)
+  // (see ot-db.h)
+  bool insert_or_update(const string& table, Row& row,
+                        Row& update_row) override;
+
+  //------------------------------------------------------------------------
+  // Expression to get current datetime in UTC
+  string utc_timestamp() override { return "datetime('now')"; }
+
   //------------------------------------------------------------------------
   // Destructor
   ~Connection()

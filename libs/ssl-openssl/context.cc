@@ -11,6 +11,9 @@
 #include "ot-log.h"
 #include "ot-text.h"
 
+// Temporary bodge to ignore deprecation of SSL_CTX_xx in OpenSSL 3.0.
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 namespace ObTools { namespace SSL_OpenSSL {
 
 //--------------------------------------------------------------------------
