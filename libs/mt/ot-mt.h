@@ -727,7 +727,7 @@ private:
     // Set realtime if requested
     if (realtime)
       t->set_priority(10, true);
-    spares.push_back(move(t));
+    spares.push_back(std::move(t));
   }
 
   // Fill pool to provide 'min' spares, but not more than 'max' in all
