@@ -383,6 +383,12 @@ public:
   //------------------------------------------------------------------------
   // Get a single cookie value, or empty if not set
   string get_cookie(const string& name) const;
+
+  //--------------------------------------------------------------------------
+  // Get a JWT payload from an Authorization: Bearer header
+  // Returns the payload object, or UNSET value if anything fails
+  // and logs accordingly.  Checks signature with the given secret
+  JSON::Value get_jwt_payload(const string& secret) const;
 };
 
 //--------------------------------------------------------------------------
@@ -868,6 +874,16 @@ class URLHandler
 {
 public:
   string url;   // URL (patterns allowed)
+
+  //------------------------------------------------------------------------
+  // Exception - handlers can throw this and server will log and return
+  // a suitable error
+  struct Exception: public runtime_error
+  {
+    int code;
+    Exception(int _code, const string& _error):
+      runtime_error(_error), code(_code) {}
+  };
 
   //------------------------------------------------------------------------
   // Constructor

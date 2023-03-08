@@ -99,7 +99,7 @@ class Shell
 
 protected:
   bool shut_down;              // Shut down requested
-  int slave_pid;               // PID of slave or 0 if we are the slave
+  int child_pid;               // PID of child or 0 if we are the child
 
   //------------------------------------------------------------------------
   // Main run function for child process
@@ -120,7 +120,7 @@ public:
     config_element(_config_element),
     default_log_file(_default_log_file),
     default_pid_file(_default_pid_file),
-    shut_down(false), slave_pid(0),
+    shut_down(false), child_pid(0),
     config(cerr, XML::PARSER_OPTIMISE_CONTENT
            | XML::PARSER_PRESERVE_WHITESPACE)
   {}
@@ -144,7 +144,7 @@ public:
   {
     trigger_shutdown = true;
 #if !defined(PLATFORM_WINDOWS)
-    if (slave_pid) kill(slave_pid, SIGTERM);
+    if (child_pid) kill(child_pid, SIGTERM);
 #endif
   }
 
@@ -154,7 +154,7 @@ public:
   {
     trigger_reload = true;
 #if !defined(PLATFORM_WINDOWS)
-    if (slave_pid) kill(slave_pid, SIGHUP);
+    if (child_pid) kill(child_pid, SIGHUP);
 #endif
   }
 
@@ -190,7 +190,7 @@ protected:
   //------------------------------------------------------------------------
   // Reconfigure function for child process
   // Does nothing by default - override to implement
-  // Called on reception of SIGHUP by master or child
+  // Called on reception of SIGHUP by parent or child
   virtual void reconfigure() {}
 
   //------------------------------------------------------------------------

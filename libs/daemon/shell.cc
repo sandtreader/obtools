@@ -201,7 +201,7 @@ int Shell::start(int argc, char **argv)
   }
 #endif
 
-  // Register signal handlers - same for both master and slave
+  // Register signal handlers - same for both parent and child
   the_shell = this;
   signal(SIGTERM, sigshutdown);
   signal(SIGINT,  sigshutdown); // quit from Ctrl-C
@@ -217,7 +217,7 @@ int Shell::start(int argc, char **argv)
   signal(SIGABRT, sigevil);
 
 #if !defined(PLATFORM_WINDOWS)
-  // Watchdog? Master/slave processes...
+  // Watchdog? Parent/child processes...
   bool enable_watchdog = config.get_value_bool("watchdog/@restart", true);
   int sleep_time = FIRST_WATCHDOG_SLEEP_TIME;
   if (go_daemon && enable_watchdog)
@@ -236,44 +236,44 @@ int Shell::start(int argc, char **argv)
         if (sleep_time > MAX_WATCHDOG_SLEEP_TIME)
           sleep_time = MAX_WATCHDOG_SLEEP_TIME;
 
-        log.error << "*** RESTARTING SLAVE ***\n";
+        log.error << "*** RESTARTING CHILD ***\n";
       }
       first = false;
 
-      log.summary << "Forking slave process\n";
-      slave_pid = fork();
+      log.summary << "Forking child process\n";
+      child_pid = fork();
 
-      if (slave_pid < 0)
+      if (child_pid < 0)
       {
-        log.error << "Can't fork slave process: " << strerror(errno) << endl;
+        log.error << "Can't fork child process: " << strerror(errno) << endl;
         continue;
       }
 
-      if (slave_pid)
+      if (child_pid)
       {
         // PARENT PROCESS
-        log.detail << "Slave process pid " << slave_pid << " forked\n";
+        log.detail << "Child process pid " << child_pid << " forked\n";
 
         // Wait for it to exit
         int status;
-        int died = waitpid(slave_pid, &status, 0);
+        int died = waitpid(child_pid, &status, 0);
 
         // Check for fatal failure
         if (died && !WIFEXITED(status))
         {
-          log.error << "*** Slave process " << slave_pid << " died ***\n";
+          log.error << "*** Child process " << child_pid << " died ***\n";
         }
         else
         {
           int rc = WEXITSTATUS(status);
           if (rc)
           {
-            log.error << "*** Slave process " << slave_pid
+            log.error << "*** Child process " << child_pid
                       << " exited with code " << rc << " ***\n";
           }
           else
           {
-            log.summary << "Slave process exited OK\n";  // Expected
+            log.summary << "Child process exited OK\n";  // Expected
             shut_down = true;
           }
         }
@@ -283,7 +283,7 @@ int Shell::start(int argc, char **argv)
       }
       else
       {
-        // SLAVE PROCESS
+        // CHILD PROCESS
         // Run subclass prerun before dropping privileges
         int rc = application.run_priv();
         if (rc) return rc;
@@ -298,7 +298,7 @@ int Shell::start(int argc, char **argv)
       }
     }
 
-    log.summary << "Master process exiting\n";
+    log.summary << "Parent process exiting\n";
     return 0;
   }
   else
@@ -386,7 +386,7 @@ int Shell::drop_privileges()
 // Shut down - indirectly called from SIGTERM handler
 void Shell::shutdown()
 {
-  // Stop our restart loop (master) and any loop in the slave
+  // Stop our restart loop (parent) and any loop in the child
   shut_down=true;
 }
 
@@ -418,7 +418,7 @@ void Shell::log_evil(int sig)
   }
 
   Log::Streams log;
-  log.error << "*** Signal received in " << (slave_pid?"master":"slave")
+  log.error << "*** Signal received in " << (child_pid?"parent":"child")
             << ": " << what << " (" << sig << ") ***\n";
 
   // Do a backtrace

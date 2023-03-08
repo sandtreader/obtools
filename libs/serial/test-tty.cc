@@ -20,27 +20,27 @@ using namespace ObTools;
 
 TEST(SerialTest, TestTTYOpen)
 {
-  const auto master_fd = posix_openpt(O_RDWR | O_NOCTTY);
-  ASSERT_GE(master_fd, 0) << "Could not open pseudoterminal";
-  ASSERT_EQ(0, grantpt(master_fd)) << "Could not grant pseudoterminal";
-  ASSERT_EQ(0, unlockpt(master_fd)) << "Could not unlock pseudoterminal";
-  const auto *slave_name = ptsname(master_fd);
-  ASSERT_TRUE(slave_name) << "Could not get slave pseudoterminal name";
+  const auto parent_fd = posix_openpt(O_RDWR | O_NOCTTY);
+  ASSERT_GE(parent_fd, 0) << "Could not open pseudoterminal";
+  ASSERT_EQ(0, grantpt(parent_fd)) << "Could not grant pseudoterminal";
+  ASSERT_EQ(0, unlockpt(parent_fd)) << "Could not unlock pseudoterminal";
+  const auto *child_name = ptsname(parent_fd);
+  ASSERT_TRUE(child_name) << "Could not get child pseudoterminal name";
   Serial::TTY tty;
-  EXPECT_TRUE(tty.open(slave_name));
-  close(master_fd);
+  EXPECT_TRUE(tty.open(child_name));
+  close(parent_fd);
 }
 
 TEST(SerialTest, TestTTYGetParameters)
 {
-  const auto master_fd = posix_openpt(O_RDWR | O_NOCTTY);
-  ASSERT_GE(master_fd, 0) << "Could not open pseudoterminal";
-  ASSERT_EQ(0, grantpt(master_fd)) << "Could not grant pseudoterminal";
-  ASSERT_EQ(0, unlockpt(master_fd)) << "Could not unlock pseudoterminal";
-  const auto *slave_name = ptsname(master_fd);
-  ASSERT_TRUE(slave_name) << "Could not get slave pseudoterminal name";
+  const auto parent_fd = posix_openpt(O_RDWR | O_NOCTTY);
+  ASSERT_GE(parent_fd, 0) << "Could not open pseudoterminal";
+  ASSERT_EQ(0, grantpt(parent_fd)) << "Could not grant pseudoterminal";
+  ASSERT_EQ(0, unlockpt(parent_fd)) << "Could not unlock pseudoterminal";
+  const auto *child_name = ptsname(parent_fd);
+  ASSERT_TRUE(child_name) << "Could not get child pseudoterminal name";
   Serial::TTY tty;
-  ASSERT_TRUE(tty.open(slave_name));
+  ASSERT_TRUE(tty.open(child_name));
   Serial::Parameters params;
   EXPECT_TRUE(tty.get_parameters(params));
   EXPECT_EQ(38400, params.in_speed);
@@ -65,19 +65,19 @@ TEST(SerialTest, TestTTYGetParameters)
   EXPECT_EQ(Serial::SpecialChars{}, params.special_chars);
   EXPECT_EQ(1, params.min_chars_for_non_canon_read);
   EXPECT_EQ(chrono::milliseconds{0}, params.non_canon_read_timeout);
-  close(master_fd);
+  close(parent_fd);
 }
 
 TEST(SerialTest, TestTTYSetParameters)
 {
-  const auto master_fd = posix_openpt(O_RDWR | O_NOCTTY);
-  ASSERT_GE(master_fd, 0) << "Could not open pseudoterminal";
-  ASSERT_EQ(0, grantpt(master_fd)) << "Could not grant pseudoterminal";
-  ASSERT_EQ(0, unlockpt(master_fd)) << "Could not unlock pseudoterminal";
-  const auto *slave_name = ptsname(master_fd);
-  ASSERT_TRUE(slave_name) << "Could not get slave pseudoterminal name";
+  const auto parent_fd = posix_openpt(O_RDWR | O_NOCTTY);
+  ASSERT_GE(parent_fd, 0) << "Could not open pseudoterminal";
+  ASSERT_EQ(0, grantpt(parent_fd)) << "Could not grant pseudoterminal";
+  ASSERT_EQ(0, unlockpt(parent_fd)) << "Could not unlock pseudoterminal";
+  const auto *child_name = ptsname(parent_fd);
+  ASSERT_TRUE(child_name) << "Could not get child pseudoterminal name";
   Serial::TTY tty;
-  ASSERT_TRUE(tty.open(slave_name));
+  ASSERT_TRUE(tty.open(child_name));
   Serial::Parameters params;
   params.in_speed = 9600;
   params.out_speed = 9600;
@@ -86,44 +86,44 @@ TEST(SerialTest, TestTTYSetParameters)
                       Serial::CharFlags::char_size_8;
   params.min_chars_for_non_canon_read = 1;
   EXPECT_TRUE(tty.set_parameters(params));
-  close(master_fd);
+  close(parent_fd);
 }
 
 TEST(SerialTest, TestTTYGetLine)
 {
-  const auto master_fd = posix_openpt(O_RDWR | O_NOCTTY);
-  ASSERT_GE(master_fd, 0) << "Could not open pseudoterminal";
-  ASSERT_EQ(0, grantpt(master_fd)) << "Could not grant pseudoterminal";
-  ASSERT_EQ(0, unlockpt(master_fd)) << "Could not unlock pseudoterminal";
-  const auto *slave_name = ptsname(master_fd);
-  ASSERT_TRUE(slave_name) << "Could not get slave pseudoterminal name";
+  const auto parent_fd = posix_openpt(O_RDWR | O_NOCTTY);
+  ASSERT_GE(parent_fd, 0) << "Could not open pseudoterminal";
+  ASSERT_EQ(0, grantpt(parent_fd)) << "Could not grant pseudoterminal";
+  ASSERT_EQ(0, unlockpt(parent_fd)) << "Could not unlock pseudoterminal";
+  const auto *child_name = ptsname(parent_fd);
+  ASSERT_TRUE(child_name) << "Could not get child pseudoterminal name";
   Serial::TTY tty;
-  ASSERT_TRUE(tty.open(slave_name));
+  ASSERT_TRUE(tty.open(child_name));
   const auto expected = string{"Hello World!"};
-  write(master_fd, expected.c_str(), expected.size());
-  write(master_fd, "\n", 1);
+  write(parent_fd, expected.c_str(), expected.size());
+  write(parent_fd, "\n", 1);
   auto actual = string{};
   EXPECT_EQ(Serial::TTY::GetLineResult::ok, tty.get_line(actual));
   EXPECT_EQ(expected, actual);
-  close(master_fd);
+  close(parent_fd);
 }
 
 TEST(SerialTest, TestTTYWriteLine)
 {
-  const auto master_fd = posix_openpt(O_RDWR | O_NOCTTY);
-  ASSERT_GE(master_fd, 0) << "Could not open pseudoterminal";
-  ASSERT_EQ(0, grantpt(master_fd)) << "Could not grant pseudoterminal";
-  ASSERT_EQ(0, unlockpt(master_fd)) << "Could not unlock pseudoterminal";
-  const auto *slave_name = ptsname(master_fd);
-  ASSERT_TRUE(slave_name) << "Could not get slave pseudoterminal name";
+  const auto parent_fd = posix_openpt(O_RDWR | O_NOCTTY);
+  ASSERT_GE(parent_fd, 0) << "Could not open pseudoterminal";
+  ASSERT_EQ(0, grantpt(parent_fd)) << "Could not grant pseudoterminal";
+  ASSERT_EQ(0, unlockpt(parent_fd)) << "Could not unlock pseudoterminal";
+  const auto *child_name = ptsname(parent_fd);
+  ASSERT_TRUE(child_name) << "Could not get child pseudoterminal name";
   Serial::TTY tty;
-  ASSERT_TRUE(tty.open(slave_name));
+  ASSERT_TRUE(tty.open(child_name));
   const auto expected = string{"Hello World!"};
   EXPECT_TRUE(tty.write_line(expected));
   auto actual = string(expected.size(), '\0');
-  read(master_fd, &actual[0], actual.size());
+  read(parent_fd, &actual[0], actual.size());
   EXPECT_EQ(expected, actual);
-  close(master_fd);
+  close(parent_fd);
 }
 
 } // anonymous namespace

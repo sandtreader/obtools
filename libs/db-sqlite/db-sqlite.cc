@@ -191,6 +191,9 @@ Connection::Connection(const string& file, const Time::Duration& timeout):
 
   // Set up a busy timeout
   sqlite3_busy_timeout(c, timeout.milliseconds());
+
+  // Turn on foreign key checks (really?!)
+  exec("PRAGMA foreign_keys = ON");
 }
 
 //--------------------------------------------------------------------------

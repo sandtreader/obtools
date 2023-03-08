@@ -352,6 +352,41 @@ string HTTPMessage::get_cookie(const string& name) const
   return values[name];
 }
 
+//--------------------------------------------------------------------------
+// Get a JWT payload from an Authorization: Bearer header
+// Returns the payload object, or UNSET value if anything fails
+// and logs accordingly.  Checks signature with the given secret
+JSON::Value HTTPMessage::get_jwt_payload(const string& secret) const
+{
+  Log::Error log;
+  const auto& auth = headers.get("authorization");
+  if (!auth.empty())
+  {
+    auto bits = Text::split(auth, ' ', true, 2);
+    if (bits.size() == 2 && bits[0] == "Bearer")
+    {
+      Web::JWT jwt(bits[1]);
+      if (!!jwt)
+      {
+        if (jwt.verify(secret))
+        {
+          if (jwt.expired())
+            log << "JWT expired\n";
+          else
+            return jwt.payload;
+        }
+        else
+          log << "Bad signature in JWT\n";
+      }
+      else log << "Can't parse Bearer token as JWT: " << bits[1] << endl;
+    }
+    else log << "Authorization isn't a Bearer token: " << auth << endl;
+  }
+  else log << "No Authorization header found\n";
+
+  return JSON::Value{};
+}
+
 }} // namespaces
 
 

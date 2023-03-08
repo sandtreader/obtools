@@ -137,24 +137,24 @@ config=${RPM_CONFIGDIR}/${CFG}
 
 pidfile=/var/run/${NAME}.pid
 lockfile=/var/lock/subsys/\$prog
-slavepid=
+childpid=
 
-setslavepid()
+setchildpid()
 {
   if [ -f \$pidfile ]; then
-    masterpid=\`cat \$pidfile\`
-    if [ "\$masterpid" != "" ]; then
-      slavepid=\`ps --ppid \$masterpid -o pid=|sed 's/ //g'\`
+    parentpid=\`cat \$pidfile\`
+    if [ "\$parentpid" != "" ]; then
+      childpid=\`ps --ppid \$parentpid -o pid=|sed 's/ //g'\`
     fi
   fi
 }
 
-killslavepid()
+killchildpid()
 {
-  if [ "\$slavepid" != "" ]; then
-    slaverunning=\`ps --pid \$slavepid -o pid=|sed 's/ //g'\`
-    if [ "\$slaverunning" = "\$slavepid" -a -d /proc/\$slavepid ]; then
-      kill -9 \$slavepid
+  if [ "\$childpid" != "" ]; then
+    childrunning=\`ps --pid \$childpid -o pid=|sed 's/ //g'\`
+    if [ "\$childrunning" = "\$childpid" -a -d /proc/\$childpid ]; then
+      kill -9 \$childpid
     fi
   fi
 }
@@ -172,9 +172,9 @@ start() {
 
 stop() {
   echo -n \$"Stopping ${NAMETAG}"
-  setslavepid
+  setchildpid
   killproc -p \$pidfile  ${NAME}
-  killslavepid
+  killchildpid
   retval=\$?
   echo
   [ \$retval -eq 0 ] && rm -f \$lockfile
