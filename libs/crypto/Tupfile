@@ -7,6 +7,6 @@
 NAME      = ot-crypto
 TYPE      = lib
 DEPENDS   = ot-mt ot-misc ot-text ot-gather ext-crypto
-PLATFORMS = posix
+PLATFORMS = posix web
 
 include_rules

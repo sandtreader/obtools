@@ -7,6 +7,6 @@
 NAME      = ot-ssl-openssl
 TYPE      = lib
 DEPENDS   = ot-ssl ot-crypto ext-pkg-openssl
-PLATFORMS = posix
+PLATFORMS = posix web
 
 include_rules

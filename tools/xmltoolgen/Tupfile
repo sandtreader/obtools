@@ -7,5 +7,6 @@
 NAME    = xmltoolgen
 TYPE    = exe
 DEPENDS = ot-toolgen
+PLATFORMS = posix
 
 include_rules

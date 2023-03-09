@@ -7,6 +7,6 @@
 NAME      = ot-web
 TYPE      = lib
 DEPENDS   = ot-xml ot-misc ot-ssl ot-crypto ot-json
-PLATFORMS = posix
+PLATFORMS = posix web
 
 include_rules

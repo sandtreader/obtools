@@ -139,8 +139,8 @@ elseif PLATFORM == "web" then
   QTRCC = ""
   WINDRES = ""
   LINKER = COMPILER
-  PLATFORM_CFLAGS = "-DPLATFORM_WEB -s DISABLE_EXCEPTION_CATCHING=0"
-  PLATFORM_LFLAGS = "-s DISABLE_EXCEPTION_CATCHING=0 -s FORCE_FILESYSTEM=1"
+  PLATFORM_CFLAGS = "-DPLATFORM_WEB -sDISABLE_EXCEPTION_CATCHING=0 -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_FREETYPE=1"
+  PLATFORM_LFLAGS = "-s DISABLE_EXCEPTION_CATCHING=0 -s FORCE_FILESYSTEM=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0"
   PLATFORM_LIB_PREFIX = ""
   PLATFORM_LIB_EXT = ".a"
   PLATFORM_SHARED_FLAGS = "-s SIDE_MODULE=1 -s EXPORT_ALL=1"
@@ -326,7 +326,9 @@ local dep_shared_libs = {}
 local ext_shared_libs = {}
 local dep_products = {}
 for index, dep in ipairs(full_deps) do
-  if string.sub(dep, 1, 4) == "ext-" then
+  -- Ignore ext- in Web build - doesn't need (and fails) explicit -l
+  -- and no pkg-config available
+  if string.sub(dep, 1, 4) == "ext-" and PLATFORM != "web" then
     if string.sub(dep, 5, 8) == "pkg-" then
       -- get info from pkg-config
       local pkg = string.sub(dep, 9)
@@ -585,6 +587,10 @@ end
 ----------------------------------------------------------------------------
 -- Package (Web)
 function package_web(products, dep_products)
+  if TYPE != "exe" then
+    return
+  end
+
   local inputs = tup.glob(PACKAGEDIR .. "/*")
   inputs += products
   inputs += dep_products

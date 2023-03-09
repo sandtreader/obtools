@@ -7,5 +7,6 @@
 NAME    = xmitoolgen
 TYPE    = exe
 DEPENDS = ot-toolgen
+PLATFORMS = posix
 
 include_rules

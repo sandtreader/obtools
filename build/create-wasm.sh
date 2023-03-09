@@ -22,6 +22,7 @@ do
   fi
 done
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-$DIR/emsdk/upstream/emscripten/tools/file_packager.py "$OUTFILE-$VERSION-$REVISION.data" --preload $PRELOADS --no-heap-copy --js-output="$OUTFILE-$VERSION-$REVISION.js"
+~/emsdk/upstream/emscripten/tools/file_packager.py "$OUTFILE-$VERSION-$REVISION.data" --preload $PRELOADS --js-output="$OUTFILE-$VERSION-$REVISION.js"
+
+cat "$OUTFILE.js" >> "$OUTFILE-$VERSION-$REVISION.js"
 

@@ -7,5 +7,6 @@
 NAME    = ot-toolgen
 TYPE    = lib
 DEPENDS = ot-xml ot-cppt
+PLATFORMS = posix
 
 include_rules
