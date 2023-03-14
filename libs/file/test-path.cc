@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <thread>
+#include <zconf.h>
 
 namespace {
 
@@ -128,7 +129,8 @@ TEST_F(PathTest, TestReadable)
   EXPECT_TRUE(File::Path("./").readable());
   EXPECT_TRUE(File::Path("read-only").readable());
   EXPECT_TRUE(File::Path("/").readable());
-  EXPECT_FALSE(File::Path("no-access").readable());
+  if (geteuid())  // Root can always read
+    EXPECT_FALSE(File::Path("no-access").readable());
   EXPECT_FALSE(File::Path("non-existant").readable());
 }
 
@@ -139,8 +141,11 @@ TEST_F(PathTest, TestWritable)
   EXPECT_TRUE(File::Path("read-writeable").writeable());
   EXPECT_TRUE(File::Path("non-existant").writeable());
   EXPECT_TRUE(File::Path("./non-existant").writeable());
-  EXPECT_FALSE(File::Path("read-only").writeable());
-  EXPECT_FALSE(File::Path("no-access").writeable());
+  if (geteuid())  // Root can always write
+  {
+    EXPECT_FALSE(File::Path("read-only").writeable());
+    EXPECT_FALSE(File::Path("no-access").writeable());
+  }
   EXPECT_FALSE(File::Path("nowhere/non-existant").writeable());
 }
 
