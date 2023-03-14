@@ -23,12 +23,12 @@ TEST(MACTests, TestMACValid)
 
   char line[81];
   fgets(line, sizeof(line)-1, f);
-  ASSERT_GT(strlen(line), 0);
+  // Allow this to gracefully exit if we have no addresses (e.g. in Docker)
+  if (strlen(line) < 7) return;  // 1.2.3.4
   line[strlen(line)-1] = 0; // chomp NL
   fclose(f);
   Net::TCPSocket socket;
   string mac = socket.get_mac(Net::IPAddress(line));
-  // Allow this to gracefully exit if we have no addresses (e.g. in Docker)
   if (mac.empty()) return;
   EXPECT_EQ(mac.size(), 17);
 
