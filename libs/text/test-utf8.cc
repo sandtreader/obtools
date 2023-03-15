@@ -66,6 +66,18 @@ TEST(UTF8Test, TestUTF8Decode)
   EXPECT_EQ(0x7fffffff, unicode[12]);
 }
 
+TEST(UTF8Test, TestUTF8DecodeBadUTF8)
+{
+  string utf8 = "test\340";  // \xE0
+  vector<wchar_t> unicode;
+  Text::UTF8::decode(utf8, unicode);
+  ASSERT_EQ(4, unicode.size());
+  EXPECT_EQ('t',        unicode[0]);
+  EXPECT_EQ('e',        unicode[1]);
+  EXPECT_EQ('s',        unicode[2]);
+  EXPECT_EQ('t',        unicode[3]);
+}
+
 TEST(UTF8Test, TestUTF8StripDiacritics)
 {
   vector<wchar_t> unicode;

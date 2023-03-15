@@ -108,6 +108,9 @@ void UTF8::decode(const string& utf8, vector<wchar_t>& unicode)
     if ((c & 0xF8) == 0xF8) { extra++; mask>>=1; }
     if ((c & 0xFC) == 0xFC) { extra++; mask>>=1; }
 
+    // Check for running off the end with broken UTF8
+    if (p+extra >= utf8.end()) break;
+
     // First character
     c &= mask;
 
