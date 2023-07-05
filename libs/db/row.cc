@@ -182,7 +182,10 @@ string Row::get_where_clause() const
       p!=fields.end(); ++p)
   {
     if (!result.empty()) result += " AND ";
-    result += p->first + " = " + p->second.as_quoted_string();
+    if (p->second.is_null())
+      result += p->first + " IS NULL";
+    else
+      result += p->first + " = " + p->second.as_quoted_string();
   }
 
   return result;
