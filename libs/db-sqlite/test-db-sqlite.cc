@@ -166,10 +166,102 @@ TEST_F(DBSQLiteTest, TestLastInsertId)
   trans.commit();
 }
 
+TEST_F(DBSQLiteTest, TestMultithreadingWithConnectionPerThread)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
+  auto conn = unique_ptr<DB::Connection>(factory.create());
+  ASSERT_TRUE(conn->exec("create table test (id int)"));
+
+  vector<thread> threads;
+
+  for(auto i=0; i<100; i++)
+  {
+    threads.push_back(thread{[&factory, i]()
+    {
+      auto conn = unique_ptr<DB::Connection>(factory.create());
+
+      for(auto j=0; j<10; j++)
+      {
+        // Half reading, half writing
+        if (i%2)
+        {
+          auto trans = DB::Transaction{*conn};
+          ASSERT_TRUE(conn->exec("insert into test (id) values (" +
+                                 Text::itos(10*i+j) + ")"));
+          trans.commit();
+        }
+        else
+        {
+          auto result = conn->query("select max(id) from test");
+          string value;
+          ASSERT_TRUE(result.fetch(value));
+        }
+      }
+    }});
+  }
+
+  for(auto& t: threads)
+    t.join();
+
+  string value;
+  auto result2 = conn->query("select max(id) from test");
+  ASSERT_TRUE(result2.fetch(value));
+  EXPECT_EQ("999", value);
+}
+
+TEST_F(DBSQLiteTest, TestMultithreadingWithSharedConnection)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
+  auto conn = unique_ptr<DB::Connection>(factory.create());
+  ASSERT_TRUE(conn->exec("create table test (id int)"));
+
+  vector<thread> threads;
+
+  for(auto i=0; i<100; i++)
+  {
+    threads.push_back(thread{[&conn, i]()
+    {
+      for(auto j=0; j<10; j++)
+      {
+        // Half reading, half writing
+        if (i%2)
+        {
+          auto trans = DB::Transaction{*conn};
+          ASSERT_TRUE(conn->exec("insert into test (id) values (" +
+                                 Text::itos(10*i+j) + ")"));
+          trans.commit();
+        }
+        else
+        {
+          auto result = conn->query("select max(id) from test");
+          string value;
+          ASSERT_TRUE(result.fetch(value));
+        }
+      }
+    }});
+  }
+
+  for(auto& t: threads)
+    t.join();
+
+  string value;
+  auto result2 = conn->query("select max(id) from test");
+  ASSERT_TRUE(result2.fetch(value));
+  EXPECT_EQ("999", value);
+}
+
+
 //--------------------------------------------------------------------------
 // Main
 int main(int argc, char **argv)
 {
+  if (argc > 1 && string(argv[1]) == "-v")
+  {
+    auto chan_out = new Log::StreamChannel{&cout};
+    auto level_out = new Log::LevelFilter{chan_out, Log::Level::debug};
+    Log::logger.connect(level_out);
+  }
+
   ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

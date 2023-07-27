@@ -6,3 +6,4 @@ create-rpm.sh
 create-nsis.sh
 create-wasm.sh
 build-*
+libs/build

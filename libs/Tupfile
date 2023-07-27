@@ -24,7 +24,6 @@ DEPENDS  = ot-access \
            ot-exec \
            ot-expr \
            ot-file \
-           ot-fdb \
            ot-g2d \
            ot-gather \
            ot-gen \
