@@ -922,6 +922,15 @@ public:
 };
 
 //==========================================================================
+// Host (host.cc)
+// Static access to hostname
+class Host
+{
+public:
+  static string get_hostname();
+};
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_NET_H
 
