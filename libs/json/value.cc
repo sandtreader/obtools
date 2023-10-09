@@ -57,10 +57,10 @@ void Value::write_string_to(ostream& out) const
         if (c > 0x7f)
         {
 #if defined(PLATFORM_WINDOWS)
-          out << "\\u" << setw(4) << setfill('0') << hex << c;
+          out << "\\u" << setw(4) << setfill('0') << hex << c << dec;
 #else
           if (c < 0x10000)
-            out << "\\u" << setw(4) << setfill('0') << hex << c;
+            out << "\\u" << setw(4) << setfill('0') << hex << c << dec;
           else
             out << "\\u++++";
 #endif
