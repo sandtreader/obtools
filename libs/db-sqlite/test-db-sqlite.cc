@@ -250,6 +250,49 @@ TEST_F(DBSQLiteTest, TestMultithreadingWithSharedConnection)
   EXPECT_EQ("999", value);
 }
 
+TEST_F(DBSQLiteTest, TestMultithreadingWithPooledConnectionPerThread)
+{
+  auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
+  DB::ConnectionPool pool(factory, 0, 5, Time::Duration("5s"));
+  DB::AutoConnection conn(pool);
+  ASSERT_TRUE(conn.exec("create table test (id int)"));
+
+  vector<thread> threads;
+
+  for(auto i=0; i<100; i++)
+  {
+    threads.push_back(thread{[&pool, i]()
+    {
+      DB::AutoConnection conn(pool);
+
+      for(auto j=0; j<10; j++)
+      {
+        // Half reading, half writing
+        if (i%2)
+        {
+          auto trans = DB::Transaction{conn};
+          ASSERT_TRUE(conn.exec("insert into test (id) values (" +
+                                Text::itos(10*i+j) + ")"));
+          trans.commit();
+        }
+        else
+        {
+          auto result = conn.query("select max(id) from test");
+          string value;
+          ASSERT_TRUE(result.fetch(value));
+        }
+      }
+    }});
+  }
+
+  for(auto& t: threads)
+    t.join();
+
+  string value;
+  auto result2 = conn.query("select max(id) from test");
+  ASSERT_TRUE(result2.fetch(value));
+  EXPECT_EQ("999", value);
+}
 
 //--------------------------------------------------------------------------
 // Main
