@@ -1,0 +1,13 @@
+#===========================================================================
+# Tupfile for ObTools::LLM library
+#
+# General interface to Large Language Models, with specific vendor versions
+#
+# Copyright (c) 2023 Paul Clark
+#===========================================================================
+
+NAME    = ot-llm
+TYPE    = lib
+DEPENDS = ot-log ot-time ot-json ot-misc ot-ssl-openssl ot-web
+
+include_rules

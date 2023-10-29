@@ -27,6 +27,7 @@ json/ot-json.h /usr/include/obtools
 lang/ot-lang.h /usr/include/obtools
 lex/ot-lex.h /usr/include/obtools
 lib/ot-lib.h /usr/include/obtools
+llm/ot-llm.h /usr/include/obtools
 log/ot-log.h /usr/include/obtools
 misc/ot-misc.h /usr/include/obtools
 msg/ot-msg.h /usr/include/obtools
@@ -69,6 +70,7 @@ init/libot-init.a /usr/lib/obtools/
 json/libot-json.a /usr/lib/obtools/
 lang/libot-lang.a /usr/lib/obtools/
 lex/libot-lex.a /usr/lib/obtools/
+llm/libot-llm.a /usr/lib/obtools/
 log/libot-log.a /usr/lib/obtools/
 misc/libot-misc.a /usr/lib/obtools/
 mt/libot-mt.a /usr/lib/obtools/

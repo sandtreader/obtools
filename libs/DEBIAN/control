@@ -11,6 +11,6 @@ Package: libot-dev
 Architecture: any
 Description: C++ utility libraries for server daemons
  Libraries for building high-performance network servers,
- with threading, database, XML, network, JSON, HTTP,
+ with threading, database, XML, network, JSON, HTTP, LLM,
  crypto, parsing etc.
 

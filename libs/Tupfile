@@ -35,6 +35,7 @@ DEPENDS  = ot-access \
            ot-lang \
            ot-lex \
            ot-lib \
+           ot-llm \
            ot-log \
            ot-misc \
            ot-msg \
@@ -56,7 +57,7 @@ DEPENDS  = ot-access \
            ot-xml
 
 PACKAGE  = $(NAME)
-VERSION  = 3.0.1
+VERSION  = 3.1.0
 REVISION = 1~dev1
 
 include_rules
