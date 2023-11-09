@@ -9,21 +9,21 @@
 #include "ot-llm.h"
 #include "ot-log.h"
 
+namespace ObTools { namespace LLM {
+
 namespace {
-  const auto openai_completion_url =
-    "https://api.openai.com/v1/chat/completions";
-  const auto openai_model = "gpt-4";
+  const string openai_api_url{"https://api.openai.com/v1"};
+  const auto openai_completion_url = openai_api_url+"/chat/completions";
+  const auto openai_completion_model = "gpt-4";
   const auto user_agent = "ObTools AI Agent";
   const auto connection_timeout = 15;
   const auto operation_timeout = 60;
 }
 
-namespace ObTools { namespace LLM {
-
 /// Constructor
 OpenAIInterface::OpenAIInterface(const string& _api_key):
   api_key(_api_key),
-  http_client(Web::URL(openai_completion_url), &ssl_context, user_agent,
+  http_client(Web::URL(openai_api_url), &ssl_context, user_agent,
               connection_timeout, operation_timeout)
 {
   http_client.enable_persistence();
@@ -34,7 +34,7 @@ JSON::Value OpenAIInterface::complete(const Context& context)
 {
   Log::Streams log;
   JSON::Value req_json(JSON::Value::OBJECT);
-  req_json.put("model", openai_model);
+  req_json.put("model", openai_completion_model);
   for(const auto& p: string_props) req_json.put(p.first, p.second);
   for(const auto& p: number_props) req_json.put(p.first, p.second);
 
