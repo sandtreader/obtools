@@ -59,7 +59,7 @@ TEST_F(OpenAITest, Test_simple_one_shot_context)
   context.add({ Context::Element::Role::prompt,
                 "Say hello" });
   auto completion = openai->complete(context).as_str();
-  ASSERT_EQ("Hello.", completion);
+  ASSERT_EQ("Hello", completion);
 }
 
 TEST_F(OpenAITest, Test_context_preserves_state)
@@ -74,7 +74,7 @@ TEST_F(OpenAITest, Test_context_preserves_state)
   context.add({ Context::Element::Role::prompt,
                 "What did you say?" });
   completion = openai->complete(context).as_str();
-  ASSERT_EQ("Hello.", completion);
+  ASSERT_EQ("Hello", completion);
 }
 
 int main(int argc, char **argv)
