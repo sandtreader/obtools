@@ -77,6 +77,26 @@ TEST_F(OpenAITest, Test_context_preserves_state)
   ASSERT_EQ("Hello", completion);
 }
 
+TEST_F(OpenAITest, Test_embedding)
+{
+  if (!openai) return;
+  try
+  {
+    auto embedding = openai->get_embedding("Wombats are go!");
+    ASSERT_EQ(1536, embedding.size());
+
+    // Just test the first few
+    EXPECT_NEAR(-0.0150698, embedding[0], 0.001);
+    EXPECT_NEAR(-0.0286509, embedding[1], 0.001);
+    EXPECT_NEAR(-0.0187523, embedding[2], 0.001);
+    EXPECT_NEAR(0.00158011, embedding[3], 0.001);
+  }
+  catch (Exception e)
+  {
+    FAIL() << e.error;
+  }
+}
+
 int main(int argc, char **argv)
 {
   if (argc > 1 && string(argv[1]) == "-v")

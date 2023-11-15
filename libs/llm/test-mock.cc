@@ -25,6 +25,22 @@ TEST(MockInterface, Test_reflection_of_context)
   EXPECT_EQ("I got 1 elements. The last one was 'FOO'", completion);
 }
 
+TEST(MockInterface, Test_embedding)
+{
+  MockInterface mock;
+  auto embedding = mock.get_embedding("Wombats are go!");
+  ASSERT_EQ(16, embedding.size());
+
+  // MD5 hash (from online tool) = 6b14e801 d913ebd2 6cc48a06 a2a51a68
+  Embedding expected{
+    0x6b,0x14,0xe8,0x01,
+    0xd9,0x13,0xeb,0xd2,
+    0x6c,0xc4,0x8a,0x06,
+    0xa2,0xa5,0x1a,0x68
+  };
+  EXPECT_EQ(expected, embedding);
+}
+
 int main(int argc, char **argv)
 {
   if (argc > 1 && string(argv[1]) == "-v")

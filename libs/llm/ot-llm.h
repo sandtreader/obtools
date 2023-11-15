@@ -51,6 +51,10 @@ struct Context
 };
 
 //==========================================================================
+// Embedding
+using Embedding = vector<double>;
+
+//==========================================================================
 // Interface exception
 struct Exception
 {
@@ -97,6 +101,9 @@ protected:
   // function it will be the function call
   virtual JSON::Value complete(const Context& context) = 0;
 
+  /// Get an embedding for the given text
+  virtual Embedding get_embedding(const string& text) = 0;
+
   /// Virtual destructor
   virtual ~Interface() {}
 };
@@ -116,6 +123,9 @@ class MockInterface: public Interface
 
   /// Get a completion with a given context
   JSON::Value complete(const Context& context) override;
+
+  /// Get an embedding for the given text
+  Embedding get_embedding(const string& text) override;
 };
 
 //==========================================================================
@@ -127,12 +137,17 @@ class OpenAIInterface: public Interface
   ObTools::SSL_OpenSSL::Context ssl_context;
   Web::HTTPClient http_client;
 
+  JSON::Value call_api(const string& url, const JSON::Value& req_json);
+
  public:
   /// Constructor
   OpenAIInterface(const string& _api_key);
 
   /// Get a completion with a given context
   JSON::Value complete(const Context& context) override;
+
+  /// Get an embedding for the given text
+  Embedding get_embedding(const string& text) override;
 };
 
 //==========================================================================

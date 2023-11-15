@@ -15,6 +15,8 @@ namespace {
   const string openai_api_url{"https://api.openai.com/v1"};
   const auto openai_completion_url = openai_api_url+"/chat/completions";
   const auto openai_completion_model = "gpt-4";
+  const auto openai_embedding_url = openai_api_url+"/embeddings";
+  const auto openai_embedding_model = "text-embedding-ada-002";
   const auto user_agent = "ObTools AI Agent";
   const auto connection_timeout = 15;
   const auto operation_timeout = 60;
@@ -32,7 +34,6 @@ OpenAIInterface::OpenAIInterface(const string& _api_key):
 /// Get a completion with a given context
 JSON::Value OpenAIInterface::complete(const Context& context)
 {
-  Log::Streams log;
   JSON::Value req_json(JSON::Value::OBJECT);
   req_json.put("model", openai_completion_model);
   for(const auto& p: string_props) req_json.put(p.first, p.second);
@@ -84,7 +85,98 @@ JSON::Value OpenAIInterface::complete(const Context& context)
     }
   }
 
-  Web::HTTPMessage request("POST", Web::URL(openai_completion_url));
+  auto resp_json = call_api(openai_completion_url, req_json);
+
+  const auto& choices = resp_json["choices"];
+  if (choices.a.empty())
+    throw Exception("No choices returned from OpenAI");
+
+  const auto& message = choices[0]["message"];
+  if (!message) throw new Exception("No message returned from OpenAI");
+  if (message["role"].as_str() != "assistant")
+    throw Exception("Response role was not assistant");
+
+  const auto& content = message["content"].as_str();
+
+  // Check for function call
+  const auto& fc = message["function_call"];
+  if (fc.type == JSON::Value::OBJECT)
+  {
+    // Find the function
+    const auto& fname = fc["name"].as_str();
+    if (fname.empty()) throw Exception("Function call has no name");
+    const auto it = functions.find(fname);
+    if (it == functions.end())
+      throw Exception("Unknown function called: "+fname);
+    const auto fn = it->second;
+
+    const auto& args_s = fc["arguments"].as_str();
+    if (args_s.empty()) throw Exception("Function call has no arguments");
+
+    istringstream iss_args(args_s);
+    JSON::Parser parser_args(iss_args); // Using the outer try/catch
+    const auto args = parser_args.read_value();
+
+    if (fn.callback)
+    {
+      // Call the function
+      fn.callback(args);
+
+      // !!! Allow a response from the function which we feed back?
+    }
+    else
+    {
+      // Mandatory function - return the args directly
+      return args;
+    }
+  }
+  else
+  {
+    // Content is only allowed to be empty if it was a function call
+    if (content.empty())
+      throw Exception("Empty content returned from OpenAI");
+  }
+
+  return JSON::Value(content);
+}
+
+/// Get an embedding for the given text
+Embedding OpenAIInterface::get_embedding(const string& text)
+{
+  JSON::Value req_json(JSON::Value::OBJECT);
+  req_json.put("model", openai_embedding_model);
+  req_json.put("input", text);
+
+  auto resp_json = call_api(openai_embedding_url, req_json);
+  const auto& data = resp_json["data"];
+  if (data.type != JSON::Value::ARRAY)
+    throw Exception("No data array returned by OpenAI embeddings");
+
+  for(const auto& dj: data.a)
+  {
+    if (dj["object"].as_str() == "embedding")
+    {
+      const auto& ej = dj["embedding"];
+      if (ej.type != JSON::Value::ARRAY)
+        throw Exception("Missing embedding in object from OpenAI embeddings");
+
+      Embedding embedding;
+      for(const auto& vj: ej.a)
+        embedding.push_back(vj.as_float());
+
+      return embedding;
+    }
+  }
+
+  throw Exception("No embedding object returned by OpenAI embeddings");
+}
+
+/// Call an OpenAI API endpoint, returning JSON
+JSON::Value OpenAIInterface::call_api(const string& url,
+                                      const JSON::Value& req_json)
+{
+  Log::Streams log;
+  Web::HTTPMessage request("POST", Web::URL(url));
   request.headers.put("Authorization", "Bearer "+api_key);
   request.headers.put("Content-Type", "application/json");
   request.body = req_json.str();
@@ -106,59 +198,7 @@ JSON::Value OpenAIInterface::complete(const Context& context)
     {
       istringstream iss(response.body);
       JSON::Parser parser(iss);
-      auto resp_json = parser.read_value();
-
-      const auto& choices = resp_json["choices"];
-      if (choices.a.empty())
-        throw Exception("No choices returned from OpenAI");
-
-      const auto& message = choices[0]["message"];
-      if (!message) throw new Exception("No message returned from OpenAI");
-      if (message["role"].as_str() != "assistant")
-        throw Exception("Response role was not assistant");
-
-      const auto& content = message["content"].as_str();
-
-      // Check for function call
-      const auto& fc = message["function_call"];
-      if (fc.type == JSON::Value::OBJECT)
-      {
-        // Find the function
-        const auto& fname = fc["name"].as_str();
-        if (fname.empty()) throw Exception("Function call has no name");
-        const auto it = functions.find(fname);
-        if (it == functions.end())
-          throw Exception("Unknown function called: "+fname);
-        const auto fn = it->second;
-
-        const auto& args_s = fc["arguments"].as_str();
-        if (args_s.empty()) throw Exception("Function call has no arguments");
-
-        istringstream iss_args(args_s);
-        JSON::Parser parser_args(iss_args); // Using the outer try/catch
-        const auto args = parser_args.read_value();
-
-        if (fn.callback)
-        {
-          // Call the function
-          fn.callback(args);
-
-          // !!! Allow a response from the function which we feed back?
-        }
-        else
-        {
-          // Mandatory function - return the args directly
-          return args;
-        }
-      }
-      else
-      {
-        // Content is only allowed to be empty if it was a function call
-        if (content.empty())
-          throw Exception("Empty content returned from OpenAI");
-      }
-
-      return JSON::Value(content);
+      return parser.read_value();
     }
     catch (JSON::Exception e)
     {

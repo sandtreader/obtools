@@ -27,5 +27,21 @@ JSON::Value MockInterface::complete(const Context& context)
   return JSON::Value(oss.str());
 }
 
+/// Get an embedding for the given text
+Embedding MockInterface::get_embedding(const string& text)
+{
+  // Return a tiny one which is just the doubled MD5 hash of the text
+  Embedding embedding;
+
+  Misc::MD5 md5;
+  unsigned char digest[16];
+  md5.sum(text, digest);
+
+  for(auto c: digest)
+    embedding.push_back(c);
+
+  return embedding;
+}
+
 }} // namespaces
 
