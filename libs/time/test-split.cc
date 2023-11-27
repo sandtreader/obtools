@@ -46,7 +46,9 @@ TEST(SplitTests, TestPaulsBirthday)
 
 TEST(SplitTests, TestSplitAroundEndOfYearBeforeLeapYear)
 {
-  test_split("2011-12-05", 2011, 12, 5);
+  // This is the earliest time on 2023-12-31 which will trigger the bug
+  test_split("2023-12-31T18:15:00Z", 2023, 12, 31, 18, 15, 0);
+  test_split("2023-12-31T23:59:59Z", 2023, 12, 31, 23, 59, 59);
 }
 
 TEST(SplitTests, TestDayBeforeLeapDay)
@@ -54,9 +56,16 @@ TEST(SplitTests, TestDayBeforeLeapDay)
   test_split("2012-02-28", 2012, 2, 28);
 }
 
-TEST(SplitTests, TestFirstDayOfLeapYear)
+TEST(SplitTests, TestFirstDaysOfLeapYear)
 {
-  test_split("2012-01-01", 2012, 1, 1);
+  test_split("2024-01-01", 2024, 1, 1);
+  test_split("2024-01-02", 2024, 1, 2);
+}
+
+TEST(SplitTests, TestLastDaysOfLeapYear)
+{
+  test_split("2024-12-31", 2024, 12, 31);
+  test_split("2025-01-01", 2025, 1, 1);
 }
 
 TEST(SplitTests, Test1900NotLeapYear)

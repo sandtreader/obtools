@@ -96,7 +96,10 @@ Split Stamp::split(internal_stamp_t ts)
 
   // Get estimate of years - near enough for NTP validity timeframe
   // Note keeping these in internal_stamp_t forces calcs lower down to be 64bit
-  auto years = static_cast<internal_stamp_t>(seconds/(365.24*DAY));
+  // ! Not at all clear why the -0.24*DAY is required, except it pushes
+  // timestamps after 31/12/23 18:15 into year 124, so the 'early' calculation
+  // can work below.
+  auto years = static_cast<internal_stamp_t>((seconds-0.24*DAY)/(365.24*DAY));
   auto leapdays = years/4;
   leapdays-=years/100;             // Chop off centuries
   leapdays+=(years+300)/400;       // Add back 400's, allowing for 1900 start
