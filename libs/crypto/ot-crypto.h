@@ -528,6 +528,11 @@ public:
   // Backwards compatibility stub
   string str(bool force_public = false) const;
 
+  //--------------------------------------------------------------------------
+  // Convert to DER format binary string (no pass phrase)
+  // force_public forces public key output from private key (see above)
+  string der(bool force_public = false) const;
+
   //------------------------------------------------------------------------
   // Check for (in)validity
   bool operator!() const { return !valid; }

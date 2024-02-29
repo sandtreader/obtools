@@ -180,6 +180,34 @@ string RSAKey::str(bool force_public) const
 { return str("", force_public); }
 
 //--------------------------------------------------------------------------
+// Convert to DER format binary string (no pass phrase)
+// force_public forces public key output from private key (see above)
+string RSAKey::der(bool force_public) const
+{
+  if (!valid) return "INVALID!";
+
+  // Create 'BIO'
+  BIO *bio = BIO_new(BIO_s_mem());
+  if (!bio) return "";
+
+  // Write key
+  if (is_private && !force_public)
+    i2d_RSAPrivateKey_bio(bio, rsa);
+  else
+    i2d_RSAPublicKey_bio(bio, rsa);
+
+  static_cast<void>(BIO_flush(bio));
+
+  // Get buffer
+  BUF_MEM *buf;
+  BIO_get_mem_ptr(bio, &buf);
+  string der(buf->data, buf->length);
+
+  BIO_free(bio);  // buf goes too
+  return der;
+}
+
+//--------------------------------------------------------------------------
 // >> operator to read key from istream
 istream& operator>>(istream& s, RSAKey& k)
 {
