@@ -764,7 +764,8 @@ protected:
   // Return true if OK, return false and optionally fill in response if not
   // If you return false and response.code is left as 200, the server will
   // automatically convert it to 403 Forbidden
-  virtual bool check_auth(const HTTPMessage& /*request*/,
+  // Can modify the request - e.g. by adding headers from a JWT
+  virtual bool check_auth(HTTPMessage& /*request*/,
                           HTTPMessage& /*response*/,
                           const SSL::ClientDetails& /*client*/)
   { return true; }
