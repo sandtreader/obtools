@@ -30,8 +30,8 @@ void RSAKey::create(int size, int exponent)
 {
   unique_ptr<BIGNUM, decltype(&BN_free)> exp{BN_new(), BN_free};
   BN_set_word(exp.get(), exponent);
-  RSA_generate_key_ex(rsa, size, exp.get(), nullptr);
-  if (rsa) valid = true;
+  rsa = RSA_new();
+  valid = RSA_generate_key_ex(rsa, size, exp.get(), nullptr) != 0;
 }
 
 //--------------------------------------------------------------------------
