@@ -158,6 +158,9 @@ bool Command::execute(const string& input, string& output_p)
     }
     else
     {
+      // Capture output, even if it fails
+      output_p = oss.str();
+
       int rc = WEXITSTATUS(status);
       if (rc)
       {
@@ -168,9 +171,6 @@ bool Command::execute(const string& input, string& output_p)
       else
       {
         log.detail << "Child process " << child << " returned OK\n";
-
-        // Capture output
-        output_p = oss.str();
         return true;
       }
     }
