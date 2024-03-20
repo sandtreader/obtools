@@ -125,7 +125,7 @@ bool Command::execute(const string& input, string& output_p)
     while (sent < length)
     {
       auto n = write(stdin_pipe[1], input.data()+sent, length-sent);
-      if (!n)
+      if (n <= 0)
       {
         log.error << "Problem writing text to pipe\n";
         return false;
