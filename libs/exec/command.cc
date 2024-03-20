@@ -121,8 +121,18 @@ bool Command::execute(const string& input, string& output_p)
 
     // Send it the input
     ssize_t length = input.size();
-    if (write(stdin_pipe[1], input.data(), length) != length)
-      log.error << "Problem writing text to pipe\n";
+    ssize_t sent = 0;
+    while (sent < length)
+    {
+      auto n = write(stdin_pipe[1], input.data()+sent, length-sent);
+      if (!n)
+      {
+        log.error << "Problem writing text to pipe\n";
+        return false;
+      }
+
+      sent += n;
+    }
 
     // Close it to indicate end
     close(stdin_pipe[1]);
