@@ -82,7 +82,7 @@ if [ `id -u` -eq 0 ]; then
   FAKEROOT=
 fi
 
-dpkg-buildpackage -uc -b $FAKEROOT -tc
+DEB_BUILD_OPTIONS=noautodbgsym dpkg-buildpackage -uc -b $FAKEROOT -tc
 
 for NAME in $NAMES
 do

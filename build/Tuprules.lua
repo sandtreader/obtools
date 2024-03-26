@@ -190,7 +190,6 @@ end
 -- Release settings
 if tup.getconfig("RELEASE") == "y" then
   CFLAGS = CFLAGS .. " -O2"
-  LFLAGS = LFLAGS .. " -s"
 end
 
 ----------------------------------------------------------------------------
