@@ -657,38 +657,12 @@ public:
 };
 
 //==========================================================================
-// UDP Socket (socket.cc)
-class UDPSocket: public Socket
+// Packet Socket (socket.cc)
+// Used for both UDP and Raw sockets
+class PacketSocket: public Socket
 {
 public:
-  //------------------------------------------------------------------------
-  // Constructor - allocates socket
-  UDPSocket();
-
-  //------------------------------------------------------------------------
-  // Constructor - allocates socket and binds to local port (UDP server)
-  UDPSocket(int port);
-
-  //------------------------------------------------------------------------
-  // Constructor - allocates socket and binds to local specific interface
-  // (UDP server) - note 'bool' not used, just to disambiguate with client
-  // enable reuse - allow the socket to be re-used (e.g. for multicast
-  //                listeners)
-  UDPSocket(EndPoint local, bool, bool reuse = false);
-
-  //------------------------------------------------------------------------
-  // Constructor - allocates socket and connects to remote port (UDP client)
-  // Use this to obtain local addressing for packets sent to this endpoint
-  UDPSocket(EndPoint remote);
-
-  //------------------------------------------------------------------------
-  // Constructor - allocates socket and binds to local specific interface
-  // and then connects to remote port (UDP client)
-  UDPSocket(EndPoint local, EndPoint remote);
-
-  //------------------------------------------------------------------------
-  // Enable broadcast on this socket
-  void enable_broadcast();
+  // Constructed in UDPSocket and RawSocket
 
   //------------------------------------------------------------------------
   // Raw datagram recv wrapper
@@ -739,7 +713,51 @@ public:
   // Throws SocketError on failure
   ssize_t sendmsg(struct iovec *gathers, int ngathers, int flags,
                   EndPoint endpoint);
+};
 
+//==========================================================================
+// UDP Socket (socket.cc)
+class UDPSocket: public PacketSocket
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor - allocates socket
+  UDPSocket();
+
+  //------------------------------------------------------------------------
+  // Constructor - allocates socket and binds to local port (UDP server)
+  UDPSocket(int port);
+
+  //------------------------------------------------------------------------
+  // Constructor - allocates socket and binds to local specific interface
+  // (UDP server) - note 'bool' not used, just to disambiguate with client
+  // enable reuse - allow the socket to be re-used (e.g. for multicast
+  //                listeners)
+  UDPSocket(EndPoint local, bool, bool reuse = false);
+
+  //------------------------------------------------------------------------
+  // Constructor - allocates socket and connects to remote port (UDP client)
+  // Use this to obtain local addressing for packets sent to this endpoint
+  UDPSocket(EndPoint remote);
+
+  //------------------------------------------------------------------------
+  // Constructor - allocates socket and binds to local specific interface
+  // and then connects to remote port (UDP client)
+  UDPSocket(EndPoint local, EndPoint remote);
+
+  //------------------------------------------------------------------------
+  // Enable broadcast on this socket
+  void enable_broadcast();
+};
+
+//==========================================================================
+// Raw Socket (socket.cc)
+class RawSocket: public PacketSocket
+{
+public:
+  //------------------------------------------------------------------------
+  // Constructor - allocates socket
+  RawSocket(int protocol);
 };
 
 //==========================================================================

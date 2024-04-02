@@ -768,6 +768,195 @@ void TCPSocket::write_nbo_int(uint32_t i)
 }
 
 //==========================================================================
+// Generic packet Socket (UDP or Raw)
+
+//--------------------------------------------------------------------------
+// Raw datagram recv wrapper
+ssize_t PacketSocket::crecv(void *buf, size_t len, int flags)
+{
+  ssize_t size;
+
+#if defined(PLATFORM_WINDOWS)
+  size = ::recv(fd, (char *)buf, len, flags);
+  if (size == SOCKET_ERROR) size = -1;
+#else
+  // Silently loop on EINTR
+  do
+  {
+    size = ::recv(fd, buf, len, flags);
+  }
+  while (size<0 && errno == EINTR);
+#endif
+
+  return size;
+}
+
+//--------------------------------------------------------------------------
+// Raw datagram send wrapper
+int PacketSocket::csend(const void *msg, size_t len, int flags)
+{
+  int res;
+
+#if defined(PLATFORM_WINDOWS)
+  res = ::send(fd, (const char *)msg, len, flags);
+  if (res == SOCKET_ERROR) res = -1;
+#else
+  // Silently loop on EINTR
+  do
+  {
+    res = ::send(fd, msg, len, flags);
+  }
+  while (res<0 && errno == EINTR);
+#endif
+
+  return res;
+}
+
+//--------------------------------------------------------------------------
+// Raw datagram recvfrom wrapper
+// If endpoint_p is non-null, sets it to the source of the
+// datagram
+ssize_t PacketSocket::crecvfrom(void *buf, size_t len, int flags,
+                             EndPoint *endpoint_p)
+{
+  struct sockaddr_in saddr;
+  socklen_t slen = sizeof(saddr);
+  ssize_t size;
+
+#if defined(PLATFORM_WINDOWS)
+  size = ::recvfrom(fd, (char *)buf, len, flags,
+                    (struct sockaddr *)&saddr, &slen);
+  if (size == SOCKET_ERROR) size = -1;
+#else
+  // Silently loop on EINTR
+  do
+  {
+    size = ::recvfrom(fd, buf, len, flags,
+                      reinterpret_cast<struct sockaddr *>(&saddr), &slen);
+  }
+  while (size<0 && errno == EINTR);
+#endif
+
+  if (size >= 0 && endpoint_p) *endpoint_p = EndPoint(saddr);
+
+  return size;
+}
+
+//--------------------------------------------------------------------------
+// Raw datagram sendto wrapper
+int PacketSocket::csendto(const void *msg, size_t len, int flags,
+                       EndPoint endpoint)
+{
+  struct sockaddr_in saddr;
+  endpoint.set(saddr);
+  int res;
+
+#if defined(PLATFORM_WINDOWS)
+  res = ::sendto(fd, (const char *)msg, len, flags,
+                  (struct sockaddr *)&saddr, sizeof(saddr));
+  if (res == SOCKET_ERROR) res = -1;
+#else
+  do
+  {
+    res = ::sendto(fd, msg, len, flags,
+                   reinterpret_cast<struct sockaddr *>(&saddr), sizeof(saddr));
+  }
+  while (res<0 && errno == EINTR);
+#endif
+
+  return res;
+}
+
+//--------------------------------------------------------------------------
+// Raw datagram sendmsg wrapper
+int PacketSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
+                        EndPoint endpoint)
+{
+  struct sockaddr_in saddr;
+  endpoint.set(saddr);
+  int res;
+
+#if defined(PLATFORM_WINDOWS)
+  assert(false); // #warning No idea if this works in Windows
+  (void)gathers;
+  (void)ngathers;
+  (void)flags;
+  return -99;
+#else
+  struct msghdr mh;
+  mh.msg_name = &saddr;
+  mh.msg_namelen = sizeof(saddr);
+  mh.msg_iov = gathers;
+  mh.msg_iovlen = ngathers;
+  mh.msg_control = 0;
+  mh.msg_controllen = 0;
+  mh.msg_flags = 0;
+
+  do
+  {
+    res = ::sendmsg(fd, &mh, flags);
+  }
+  while (res<0 && errno == EINTR);
+#endif
+
+  return res;
+}
+
+//--------------------------------------------------------------------------
+// Safe datagram recv wrapper
+// Throws SocketError on failure
+ssize_t PacketSocket::recv(void *buf, size_t len, int flags)
+{
+  ssize_t size = crecv(buf, len, flags);
+  if (size < 0) throw SocketError(errno);
+  return size;
+}
+
+//--------------------------------------------------------------------------
+// Safe datagram send wrapper
+// Throws SocketError on failure
+int PacketSocket::send(const void *buf, size_t len, int flags)
+{
+  int res = csend(buf, len, flags);
+  if (res < 0) throw SocketError(errno);
+  return res;
+}
+
+//--------------------------------------------------------------------------
+// Safe datagram recvfrom wrapper
+// If endpoint_p is non-null, sets them to the source of the datagram
+// Throws SocketError on failure
+ssize_t PacketSocket::recvfrom(void *buf, size_t len, int flags,
+                            EndPoint *endpoint_p)
+{
+  ssize_t size = crecvfrom(buf, len, flags, endpoint_p);
+  if (size < 0) throw SocketError(errno);
+  return size;
+}
+
+//--------------------------------------------------------------------------
+// Safe datagram sendto wrapper
+// Throws SocketError on failure
+ssize_t PacketSocket::sendto(const void *buf, size_t len, int flags,
+                          EndPoint endpoint)
+{
+  int res = csendto(buf, len, flags, endpoint);
+  if (res < 0) throw SocketError(errno);
+  return res;
+}
+
+//--------------------------------------------------------------------------
+// Safe datagram sendmsg wrapper
+// Throws SocketError on failure
+ssize_t PacketSocket::sendmsg(struct iovec *gathers, int ngathers, int flags,
+                          EndPoint endpoint)
+{
+  int res = csendmsg(gathers, ngathers, flags, endpoint);
+  if (res < 0) throw SocketError(errno);
+  return res;
+}
+
+//==========================================================================
 // UDP Socket
 
 //--------------------------------------------------------------------------
@@ -841,190 +1030,14 @@ void UDPSocket::enable_broadcast()
              sizeof(n));
 }
 
-//--------------------------------------------------------------------------
-// Raw datagram recv wrapper
-ssize_t UDPSocket::crecv(void *buf, size_t len, int flags)
-{
-  ssize_t size;
-
-#if defined(PLATFORM_WINDOWS)
-  size = ::recv(fd, (char *)buf, len, flags);
-  if (size == SOCKET_ERROR) size = -1;
-#else
-  // Silently loop on EINTR
-  do
-  {
-    size = ::recv(fd, buf, len, flags);
-  }
-  while (size<0 && errno == EINTR);
-#endif
-
-  return size;
-}
+//==========================================================================
+// Raw Socket
 
 //--------------------------------------------------------------------------
-// Raw datagram send wrapper
-int UDPSocket::csend(const void *msg, size_t len, int flags)
+// Constructor - allocates socket on the given protocol
+RawSocket::RawSocket(int protocol)
 {
-  int res;
-
-#if defined(PLATFORM_WINDOWS)
-  res = ::send(fd, (const char *)msg, len, flags);
-  if (res == SOCKET_ERROR) res = -1;
-#else
-  // Silently loop on EINTR
-  do
-  {
-    res = ::send(fd, msg, len, flags);
-  }
-  while (res<0 && errno == EINTR);
-#endif
-
-  return res;
-}
-
-//--------------------------------------------------------------------------
-// Raw datagram recvfrom wrapper
-// If endpoint_p is non-null, sets it to the source of the
-// datagram
-ssize_t UDPSocket::crecvfrom(void *buf, size_t len, int flags,
-                             EndPoint *endpoint_p)
-{
-  struct sockaddr_in saddr;
-  socklen_t slen = sizeof(saddr);
-  ssize_t size;
-
-#if defined(PLATFORM_WINDOWS)
-  size = ::recvfrom(fd, (char *)buf, len, flags,
-                    (struct sockaddr *)&saddr, &slen);
-  if (size == SOCKET_ERROR) size = -1;
-#else
-  // Silently loop on EINTR
-  do
-  {
-    size = ::recvfrom(fd, buf, len, flags,
-                      reinterpret_cast<struct sockaddr *>(&saddr), &slen);
-  }
-  while (size<0 && errno == EINTR);
-#endif
-
-  if (size >= 0 && endpoint_p) *endpoint_p = EndPoint(saddr);
-
-  return size;
-}
-
-//--------------------------------------------------------------------------
-// Raw datagram sendto wrapper
-int UDPSocket::csendto(const void *msg, size_t len, int flags,
-                       EndPoint endpoint)
-{
-  struct sockaddr_in saddr;
-  endpoint.set(saddr);
-  int res;
-
-#if defined(PLATFORM_WINDOWS)
-  res = ::sendto(fd, (const char *)msg, len, flags,
-                  (struct sockaddr *)&saddr, sizeof(saddr));
-  if (res == SOCKET_ERROR) res = -1;
-#else
-  do
-  {
-    res = ::sendto(fd, msg, len, flags,
-                   reinterpret_cast<struct sockaddr *>(&saddr), sizeof(saddr));
-  }
-  while (res<0 && errno == EINTR);
-#endif
-
-  return res;
-}
-
-//--------------------------------------------------------------------------
-// Raw datagram sendmsg wrapper
-int UDPSocket::csendmsg(struct iovec *gathers, int ngathers, int flags,
-                        EndPoint endpoint)
-{
-  struct sockaddr_in saddr;
-  endpoint.set(saddr);
-  int res;
-
-#if defined(PLATFORM_WINDOWS)
-  assert(false); // #warning No idea if this works in Windows
-  (void)gathers;
-  (void)ngathers;
-  (void)flags;
-  return -99;
-#else
-  struct msghdr mh;
-  mh.msg_name = &saddr;
-  mh.msg_namelen = sizeof(saddr);
-  mh.msg_iov = gathers;
-  mh.msg_iovlen = ngathers;
-  mh.msg_control = 0;
-  mh.msg_controllen = 0;
-  mh.msg_flags = 0;
-
-  do
-  {
-    res = ::sendmsg(fd, &mh, flags);
-  }
-  while (res<0 && errno == EINTR);
-#endif
-
-  return res;
-}
-
-//--------------------------------------------------------------------------
-// Safe datagram recv wrapper
-// Throws SocketError on failure
-ssize_t UDPSocket::recv(void *buf, size_t len, int flags)
-{
-  ssize_t size = crecv(buf, len, flags);
-  if (size < 0) throw SocketError(errno);
-  return size;
-}
-
-//--------------------------------------------------------------------------
-// Safe datagram send wrapper
-// Throws SocketError on failure
-int UDPSocket::send(const void *buf, size_t len, int flags)
-{
-  int res = csend(buf, len, flags);
-  if (res < 0) throw SocketError(errno);
-  return res;
-}
-
-//--------------------------------------------------------------------------
-// Safe datagram recvfrom wrapper
-// If endpoint_p is non-null, sets them to the source of the datagram
-// Throws SocketError on failure
-ssize_t UDPSocket::recvfrom(void *buf, size_t len, int flags,
-                            EndPoint *endpoint_p)
-{
-  ssize_t size = crecvfrom(buf, len, flags, endpoint_p);
-  if (size < 0) throw SocketError(errno);
-  return size;
-}
-
-//--------------------------------------------------------------------------
-// Safe datagram sendto wrapper
-// Throws SocketError on failure
-ssize_t UDPSocket::sendto(const void *buf, size_t len, int flags,
-                          EndPoint endpoint)
-{
-  int res = csendto(buf, len, flags, endpoint);
-  if (res < 0) throw SocketError(errno);
-  return res;
-}
-
-//--------------------------------------------------------------------------
-// Safe datagram sendmsg wrapper
-// Throws SocketError on failure
-ssize_t UDPSocket::sendmsg(struct iovec *gathers, int ngathers, int flags,
-                          EndPoint endpoint)
-{
-  int res = csendmsg(gathers, ngathers, flags, endpoint);
-  if (res < 0) throw SocketError(errno);
-  return res;
+  fd = socket(PF_INET, SOCK_RAW|SOCK_CLOEXEC, protocol);
 }
 
 }} // namespaces
