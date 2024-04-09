@@ -88,6 +88,18 @@ TEST(CBOR, Test8ByteNegativeIntegerOutput)
   EXPECT_EQ("3b7fffffffffffffff", Text::btox(Value((int64_t)LLONG_MIN).cbor()));
 }
 
+TEST(CBOR, TestBooleanOutput)
+{
+  EXPECT_EQ("f4", Text::btox(Value(Value::FALSE_).cbor()));
+  EXPECT_EQ("f5", Text::btox(Value(Value::TRUE_).cbor()));
+}
+
+TEST(CBOR, TestNullUndefinedOutput)
+{
+  EXPECT_EQ("f6", Text::btox(Value(Value::NULL_).cbor()));
+  EXPECT_EQ("f7", Text::btox(Value().cbor()));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

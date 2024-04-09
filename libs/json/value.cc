@@ -242,6 +242,24 @@ void Value::write_cbor_to(Channel::Writer& w) const
           w.write_nbo_64(-1-n);
         }
       }
+      break;
+
+    case Value::FALSE_:
+      w.write_byte(0xf4);
+    break;
+
+    case Value::TRUE_:
+      w.write_byte(0xf5);
+    break;
+
+    case Value::NULL_:
+      w.write_byte(0xf6);
+    break;
+
+    case Value::UNSET:
+      w.write_byte(0xf7);
+    break;
+
     default:;
   }
 }
