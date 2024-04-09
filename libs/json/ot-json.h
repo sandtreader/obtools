@@ -5,8 +5,7 @@
 //
 // JSON format reader/writer
 //
-// Copyright (c) 2016 Paul Clark.  All rights reserved
-// This code comes with NO WARRANTY and is subject to licence agreement
+// Copyright (c) 2016-2024 Paul Clark.
 //==========================================================================
 
 #ifndef __OBTOOLS_JSON_H
@@ -17,6 +16,7 @@
 #include <map>
 #include "ot-lex.h"
 #include "ot-text.h"
+#include "ot-chan.h"
 
 namespace ObTools { namespace JSON {
 
@@ -148,8 +148,8 @@ public:
   string str(bool pretty=false) const;
 
   //------------------------------------------------------------------------
-  // Output value as CBOR to the given stream
-  void write_cbor_to(ostream& s) const;
+  // Output value as CBOR to the given Channel
+  void write_cbor_to(Channel::Writer& w) const;
 
   //------------------------------------------------------------------------
   // Output value as a CBOR binary string

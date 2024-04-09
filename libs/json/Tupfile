@@ -6,6 +6,6 @@
 
 NAME    = ot-json
 TYPE    = lib
-DEPENDS = ot-lex ot-text
+DEPENDS = ot-lex ot-text ot-chan
 
 include_rules

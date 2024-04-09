@@ -185,8 +185,8 @@ string Value::str(bool pretty) const
 }
 
 //------------------------------------------------------------------------
-// Output value as CBOR to the given stream
-void Value::write_cbor_to(ostream& s) const
+// Output value as CBOR to the given channel
+void Value::write_cbor_to(Channel::Writer& w) const
 {
   switch (type)
   {
@@ -194,58 +194,52 @@ void Value::write_cbor_to(ostream& s) const
       if (n >= 0)
       {
         if (n < 24)
-          s.put(n);
+          w.write_byte(n);
         else if (n < 256)
         {
-          s.put(0x18);
-          s.put(n);
+          w.write_byte(0x18);
+          w.write_byte(n);
         }
         else if (n < 65536)
         {
-          s.put(0x19);
-          s.put(n >> 8);
-          s.put(n & 0xff);
+          w.write_byte(0x19);
+          w.write_nbo_16(n);
         }
         else if (n < 0x100000000L)
         {
-          s.put(0x1a);
-          for(int i=24; i>=0; i-=8)
-            s.put((n >> i) & 0xff);
+          w.write_byte(0x1a);
+          w.write_nbo_32(n);
         }
         else
         {
-          s.put(0x1b);
-          for(int i=56; i>=0; i-=8)
-            s.put((n >> i) & 0xff);
+          w.write_byte(0x1b);
+          w.write_nbo_64(n);
         }
         break;
       }
       else
       {
         if (n > -25)
-          s.put(0x20+(-1-n));
+          w.write_byte(0x20+(-1-n));
         else if (n > -257)
         {
-          s.put(0x38);
-          s.put(-1-n);
+          w.write_byte(0x38);
+          w.write_byte(-1-n);
         }
         else if (n > -65537)
         {
-          s.put(0x39);
-          s.put((-1-n) >> 8);
-          s.put((-1-n) & 0xff);
+          w.write_byte(0x39);
+          w.write_nbo_16(-1-n);
         }
         else if (n > -0x100000001L)
         {
-          s.put(0x3a);
-          for(int i=24; i>=0; i-=8)
-            s.put(((-1-n) >> i) & 0xff);
+          w.write_byte(0x3a);
+          w.write_nbo_32(-1-n);
         }
         else
         {
-          s.put(0x3b);
-          for(int i=56; i>=0; i-=8)
-            s.put(((-1-n) >> i) & 0xff);
+          w.write_byte(0x3b);
+          w.write_nbo_64(-1-n);
         }
       }
     default:;
@@ -256,9 +250,10 @@ void Value::write_cbor_to(ostream& s) const
 // Output value as a CBOR binary string
 string Value::cbor() const
 {
-  ostringstream oss;
-  write_cbor_to(oss);
-  return oss.str();
+  string s;
+  Channel::StringWriter w(s);
+  write_cbor_to(w);
+  return s;
 }
 
 //--------------------------------------------------------------------------
