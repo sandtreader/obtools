@@ -185,6 +185,37 @@ string Value::str(bool pretty) const
 }
 
 //------------------------------------------------------------------------
+// Output an integer with the given major type top 3 bits
+void Value::write_cbor_int_to(Channel::Writer& w, uint64_t v,
+                              unsigned char major_type) const
+{
+  auto first_byte = major_type << 5;
+
+  if (v < 24)
+    w.write_byte(first_byte | v);
+  else if (v < 256)
+  {
+    w.write_byte(first_byte | 0x18);
+    w.write_byte(v);
+  }
+  else if (v < 65536)
+  {
+    w.write_byte(first_byte | 0x19);
+    w.write_nbo_16(v);
+  }
+  else if (v < 0x100000000L)
+  {
+    w.write_byte(first_byte | 0x1a);
+    w.write_nbo_32(v);
+  }
+  else
+  {
+    w.write_byte(first_byte | 0x1b);
+    w.write_nbo_64(v);
+  }
+}
+
+//------------------------------------------------------------------------
 // Output value as CBOR to the given channel
 void Value::write_cbor_to(Channel::Writer& w) const
 {
@@ -192,57 +223,10 @@ void Value::write_cbor_to(Channel::Writer& w) const
   {
     case INTEGER:
       if (n >= 0)
-      {
-        if (n < 24)
-          w.write_byte(n);
-        else if (n < 256)
-        {
-          w.write_byte(0x18);
-          w.write_byte(n);
-        }
-        else if (n < 65536)
-        {
-          w.write_byte(0x19);
-          w.write_nbo_16(n);
-        }
-        else if (n < 0x100000000L)
-        {
-          w.write_byte(0x1a);
-          w.write_nbo_32(n);
-        }
-        else
-        {
-          w.write_byte(0x1b);
-          w.write_nbo_64(n);
-        }
-        break;
-      }
+        write_cbor_int_to(w, n, 0);
       else
-      {
-        if (n > -25)
-          w.write_byte(0x20+(-1-n));
-        else if (n > -257)
-        {
-          w.write_byte(0x38);
-          w.write_byte(-1-n);
-        }
-        else if (n > -65537)
-        {
-          w.write_byte(0x39);
-          w.write_nbo_16(-1-n);
-        }
-        else if (n > -0x100000001L)
-        {
-          w.write_byte(0x3a);
-          w.write_nbo_32(-1-n);
-        }
-        else
-        {
-          w.write_byte(0x3b);
-          w.write_nbo_64(-1-n);
-        }
-      }
-      break;
+        write_cbor_int_to(w, -1-n, 1);
+    break;
 
     case Value::FALSE_:
       w.write_byte(0xf4);
@@ -258,6 +242,11 @@ void Value::write_cbor_to(Channel::Writer& w) const
 
     case Value::UNSET:
       w.write_byte(0xf7);
+    break;
+
+    case Value::STRING:
+      write_cbor_int_to(w, s.size(), 3);
+      w.write(s);
     break;
 
     default:;

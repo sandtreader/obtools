@@ -100,6 +100,20 @@ TEST(CBOR, TestNullUndefinedOutput)
   EXPECT_EQ("f7", Text::btox(Value().cbor()));
 }
 
+TEST(CBOR, TestStringOutput)
+{
+  EXPECT_EQ("60", Text::btox(Value("").cbor()));
+  EXPECT_EQ("6161", Text::btox(Value("a").cbor()));
+  EXPECT_EQ("6449455446", Text::btox(Value("IETF").cbor()));
+  EXPECT_EQ("62225c", Text::btox(Value("\"\\").cbor()));
+  EXPECT_EQ("62c3bc", Text::btox(Value("\u00fc").cbor()));
+  EXPECT_EQ("63e6b0b4", Text::btox(Value("\u6c34").cbor()));
+
+  // Trigger 1 byte length (24)
+  EXPECT_EQ("7818313233343536373839303132333435363738393031323334",
+            Text::btox(Value("123456789012345678901234").cbor()));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
