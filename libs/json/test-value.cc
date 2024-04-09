@@ -22,6 +22,14 @@ TEST(Value, TestValidity)
   ASSERT_FALSE(!v);
 }
 
+TEST(Value, TestConstructBinary)
+{
+  vector<unsigned char> b{42, 99};
+  Value v(b);
+  EXPECT_EQ(Value::BINARY, v.type);
+  EXPECT_EQ("\x2a\x63", v.s);
+}
+
 TEST(Value, TestIsTrue)
 {
   Value nv;
@@ -190,6 +198,13 @@ TEST(Value, TestWritingStringEncoding)
 {
   Value value("\\\"\b\f\n\r\t\uabcd");
   ASSERT_EQ("\"\\\\\\\"\\b\\f\\n\\r\\t\\uabcd\"", value.str());
+}
+
+TEST(Value, TestWritingBinary)
+{
+  vector<unsigned char> b{42, 99};
+  Value value(b);
+  ASSERT_EQ("\"KmM=\"", value.str());
 }
 
 TEST(Value, TestWritingEmptyObject)
@@ -376,6 +391,22 @@ TEST(Value, TestCompareStrings)
   EXPECT_EQ(s1, s2);
   EXPECT_NE(s1, s3);
   EXPECT_NE(s1, u);
+}
+
+
+TEST(Value, TestCompareBinary)
+{
+  vector<unsigned char> b1{42, 99};
+  Value bv1(b1);
+  vector<unsigned char> b2{42, 99};
+  Value bv2(b2);
+  vector<unsigned char> b3{42};
+  Value bv3(b3);
+  Value u;
+
+  EXPECT_EQ(bv1, bv2);
+  EXPECT_NE(bv1, bv3);
+  EXPECT_NE(bv1, u);
 }
 
 TEST(Value, TestCompareObjects)

@@ -25,7 +25,8 @@ bool Value::operator==(const Value& v) const
   {
     case NUMBER:  return f == v.f;
     case INTEGER: return n == v.n;
-    case STRING:  return s == v.s;
+    case STRING:
+    case BINARY:  return s == v.s;
     case OBJECT:  return o == v.o;
     case ARRAY:   return a == v.a;
     default:      return true;
@@ -172,6 +173,12 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
     case ARRAY:   write_array_to(out, pretty, indent);  break;
     case TRUE_:   out << "true";                        break;
     case FALSE_:  out << "false";                       break;
+    case BINARY:
+    {
+      Text::Base64 base64;
+      out << '"' << base64.encode(s) << '"';
+    }
+    break;
   }
 }
 
@@ -242,6 +249,11 @@ void Value::write_cbor_to(Channel::Writer& w) const
 
     case Value::UNSET:
       w.write_byte(0xf7);
+    break;
+
+    case Value::BINARY:
+      write_cbor_int_to(w, s.size(), 2);
+      w.write(s);
     break;
 
     case Value::STRING:

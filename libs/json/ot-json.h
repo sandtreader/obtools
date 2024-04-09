@@ -46,12 +46,15 @@ public:
     OBJECT,  // Object with properties
     ARRAY,   // Array of values
     TRUE_,    // Boolean true
-    FALSE_    // Boolean value
+    FALSE_,   // Boolean value
+
+    // Additional types for CBOR
+    BINARY    // Binary data
   } type;
 
   double f = 0.0;
   int64_t n = 0;
-  string s;
+  string s;               // Used for STRING and BINARY
   map <string, Value> o;
   vector<Value> a;
 
@@ -66,6 +69,8 @@ public:
   Value(uint64_t _n): type(INTEGER), n(_n) {}
   Value(const string& _s): type(STRING), s(_s) {}
   Value(const char *_s): type(STRING), s(_s) {}
+  Value(const vector<unsigned char>& data):
+    type(BINARY), s(data.begin(), data.end()) {}
 
   //------------------------------------------------------------------------
   // Set a constructed property on an object value - returns the Value added

@@ -100,6 +100,17 @@ TEST(CBOR, TestNullUndefinedOutput)
   EXPECT_EQ("f7", Text::btox(Value().cbor()));
 }
 
+TEST(CBOR, TestBinaryOutput)
+{
+  vector<unsigned char> b{42, 99};
+  EXPECT_EQ("422a63", Text::btox(Value(b).cbor()));
+
+  vector<unsigned char> b24;
+  for(int i=0; i<24; i++) b24.push_back(i);
+  EXPECT_EQ("5818000102030405060708090a0b0c0d0e0f1011121314151617",
+            Text::btox(Value(b24).cbor()));
+}
+
 TEST(CBOR, TestStringOutput)
 {
   EXPECT_EQ("60", Text::btox(Value("").cbor()));
