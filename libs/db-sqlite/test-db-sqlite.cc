@@ -253,7 +253,7 @@ TEST_F(DBSQLiteTest, TestMultithreadingWithSharedConnection)
 TEST_F(DBSQLiteTest, TestMultithreadingWithPooledConnectionPerThread)
 {
   auto factory = DB::SQLite::ConnectionFactory(dbfile, timeout);
-  DB::ConnectionPool pool(factory, 0, 5, Time::Duration("5s"));
+  DB::ConnectionPool pool(factory, 0, 25, Time::Duration("10s"));
   DB::AutoConnection conn(pool);
   ASSERT_TRUE(conn.exec("create table test (id int)"));
 
