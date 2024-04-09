@@ -30,8 +30,6 @@ class Value
   void write_string_to(ostream& out) const;
   void write_object_to(ostream& out, bool pretty, int indent) const;
   void write_array_to(ostream& out, bool pretty, int indent) const;
-  void write_cbor_int_to(Channel::Writer& w, uint64_t v,
-                         unsigned char top_bits) const;
 
 public:
   static Value none;
@@ -192,6 +190,19 @@ public:
   //------------------------------------------------------------------------
   // Read a value
   Value read_value();
+};
+
+//==========================================================================
+// CBOR generator
+class CBOR
+{
+  static void write_cbor_int_to(Channel::Writer& w, uint64_t v,
+                                unsigned char top_bits);
+
+public:
+  //------------------------------------------------------------------------
+  // Output a JSON value as CBOR to the given Channel
+  static void encode(const Value& v, Channel::Writer& w);
 };
 
 //==========================================================================
