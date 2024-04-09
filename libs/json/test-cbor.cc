@@ -198,6 +198,42 @@ TEST(CBOR, TestObjectNestedInArrayOutput)
   EXPECT_EQ("826161a161626163", Text::btox(a.cbor()));
 }
 
+TEST(CBOR, TestEmptyIndefiniteArrayOutput)
+{
+  string s;
+  Channel::StringWriter w(s);
+
+  // Empty
+  CBOR::open_indefinite_array(w);
+  CBOR::close_indefinite_array(w);
+
+  EXPECT_EQ("9fff", Text::btox(s));
+}
+
+TEST(CBOR, TestNestedIndefiniteArraysOutput)
+{
+  string s;
+  Channel::StringWriter w(s);
+
+  // Nested [_ 1, [2, 3], [_ 4, 5]]
+  CBOR::open_indefinite_array(w);
+  CBOR::encode(Value(1), w);
+
+  Value a1(Value::ARRAY);
+  a1.add(2);
+  a1.add(3);
+  CBOR::encode(a1, w);
+
+  CBOR::open_indefinite_array(w);
+  CBOR::encode(Value(4), w);
+  CBOR::encode(Value(5), w);
+  CBOR::close_indefinite_array(w);
+
+  CBOR::close_indefinite_array(w);
+
+  EXPECT_EQ("9f018202039f0405ffff", Text::btox(s));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

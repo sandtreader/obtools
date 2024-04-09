@@ -100,4 +100,19 @@ void CBOR::encode(const Value& v, Channel::Writer& w)
   }
 }
 
+//------------------------------------------------------------------------
+// Open an indefinite array
+// Then continue to write any number of member values, and close it
+void CBOR::open_indefinite_array(Channel::Writer& w)
+{
+  w.write_byte(0x9f);
+}
+
+//------------------------------------------------------------------------
+// Close an indefinite array
+void CBOR::close_indefinite_array(Channel::Writer& w)
+{
+  w.write_byte(0xff);
+}
+
 }} // namespaces

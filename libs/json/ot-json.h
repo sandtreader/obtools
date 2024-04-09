@@ -203,6 +203,15 @@ public:
   //------------------------------------------------------------------------
   // Output a JSON value as CBOR to the given Channel
   static void encode(const Value& v, Channel::Writer& w);
+
+  //------------------------------------------------------------------------
+  // Open an indefinite array
+  // Then continue to write any number of member values, and close it
+  static void open_indefinite_array(Channel::Writer& w);
+
+  //------------------------------------------------------------------------
+  // Close an indefinite array
+  static void close_indefinite_array(Channel::Writer& w);
 };
 
 //==========================================================================
