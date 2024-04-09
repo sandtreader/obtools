@@ -345,7 +345,7 @@ public:
   /// \return Element::none if there isn't one
   /// \note Use valid() to check which you've got - e.g.:
   /// \code
-  ///     XML::Element& e = get_child(root, "foo");
+  ///     XML::Element& e = root.get_child("foo");
   ///     if (e.valid())
   ///       //Use e
   /// \endcode
