@@ -261,6 +261,22 @@ void Value::write_cbor_to(Channel::Writer& w) const
       w.write(s);
     break;
 
+    case Value::ARRAY:
+      write_cbor_int_to(w, a.size(), 4);
+      for(const auto& v: a)
+        v.write_cbor_to(w);
+    break;
+
+    case Value::OBJECT:
+      write_cbor_int_to(w, o.size(), 5);
+      for(const auto& it: o)
+      {
+        Value key(it.first);
+        key.write_cbor_to(w);
+        it.second.write_cbor_to(w);
+      }
+    break;
+
     default:;
   }
 }

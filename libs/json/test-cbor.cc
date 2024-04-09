@@ -125,6 +125,79 @@ TEST(CBOR, TestStringOutput)
             Text::btox(Value("123456789012345678901234").cbor()));
 }
 
+TEST(CBOR, TestArrayOutput)
+{
+  Value a(Value::ARRAY);
+  a.add(Value(42));
+  a.add(Value(Value::TRUE_));
+  a.add(Value("foo"));
+
+  EXPECT_EQ("83182af563666f6f", Text::btox(a.cbor()));
+  EXPECT_EQ("80", Text::btox(Value(Value::ARRAY).cbor()));
+}
+
+TEST(CBOR, TestNestedArrayOutput)
+{
+  Value a(Value::ARRAY);
+  a.add(1);
+
+  auto& a2 = a.add(Value::ARRAY);
+  a2.add(2);
+  a2.add(3);
+
+  auto& a3 = a.add(Value::ARRAY);
+  a3.add(4);
+  a3.add(5);
+
+  EXPECT_EQ("8301820203820405", Text::btox(a.cbor()));
+}
+
+TEST(CBOR, TestObjectOutput)
+{
+  Value o(Value::OBJECT);
+  o.put("a", Value(42));
+  o.put("b", Value(Value::TRUE_));
+  o.put("c", Value("foo"));
+
+  EXPECT_EQ("a36161182a6162f5616363666f6f", Text::btox(o.cbor()));
+}
+
+TEST(CBOR, TestNestedObjectOutput)
+{
+  Value o(Value::OBJECT);
+  o.put("a", Value(42));
+
+  auto& o2 = o.put("s", Value::OBJECT);
+  o2.put("b", Value(Value::TRUE_));
+  o2.put("c", Value("foo"));
+
+  EXPECT_EQ("a26161182a6173a26162f5616363666f6f", Text::btox(o.cbor()));
+}
+
+TEST(CBOR, TestArrayNestedInObjectOutput)
+{
+  Value o(Value::OBJECT);
+  o.put("a", Value(42));
+
+  auto& a = o.put("A", Value::ARRAY);
+  a.add(Value(Value::TRUE_));
+  a.add(Value("foo"));
+
+  // Note A comes before a
+  EXPECT_EQ("a2614182f563666f6f6161182a", Text::btox(o.cbor()));
+}
+
+TEST(CBOR, TestObjectNestedInArrayOutput)
+{
+  Value a(Value::ARRAY);
+  a.add("a");
+
+  auto& o = a.add(Value::OBJECT);
+  o.put("b", Value("c"));
+
+  EXPECT_EQ("826161a161626163", Text::btox(a.cbor()));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
