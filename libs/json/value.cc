@@ -191,20 +191,14 @@ string Value::str(bool pretty) const
   return oss.str();
 }
 
-//------------------------------------------------------------------------
-// Output value as CBOR to the given channel
-void Value::write_cbor_to(Channel::Writer& w) const
-{
-  CBOR::encode(*this, w);
-}
-
 //--------------------------------------------------------------------------
 // Output value as a CBOR binary string
 string Value::cbor() const
 {
   string s;
   Channel::StringWriter w(s);
-  write_cbor_to(w);
+  CBORWriter cw(w);
+  cw.encode(*this);
   return s;
 }
 

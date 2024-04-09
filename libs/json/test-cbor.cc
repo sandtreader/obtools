@@ -202,10 +202,11 @@ TEST(CBOR, TestEmptyIndefiniteArrayOutput)
 {
   string s;
   Channel::StringWriter w(s);
+  CBORWriter cw(w);
 
   // Empty
-  CBOR::open_indefinite_array(w);
-  CBOR::close_indefinite_array(w);
+  cw.open_indefinite_array();
+  cw.close_indefinite_array();
 
   EXPECT_EQ("9fff", Text::btox(s));
 }
@@ -214,22 +215,23 @@ TEST(CBOR, TestNestedIndefiniteArraysOutput)
 {
   string s;
   Channel::StringWriter w(s);
+  CBORWriter cw(w);
 
   // Nested [_ 1, [2, 3], [_ 4, 5]]
-  CBOR::open_indefinite_array(w);
-  CBOR::encode(Value(1), w);
+  cw.open_indefinite_array();
+  cw.encode(Value(1));
 
   Value a1(Value::ARRAY);
   a1.add(2);
   a1.add(3);
-  CBOR::encode(a1, w);
+  cw.encode(a1);
 
-  CBOR::open_indefinite_array(w);
-  CBOR::encode(Value(4), w);
-  CBOR::encode(Value(5), w);
-  CBOR::close_indefinite_array(w);
+  cw.open_indefinite_array();
+  cw.encode(Value(4));
+  cw.encode(Value(5));
+  cw.close_indefinite_array();
 
-  CBOR::close_indefinite_array(w);
+  cw.close_indefinite_array();
 
   EXPECT_EQ("9f018202039f0405ffff", Text::btox(s));
 }

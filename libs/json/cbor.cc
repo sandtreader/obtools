@@ -12,8 +12,7 @@ namespace ObTools { namespace JSON {
 
 //------------------------------------------------------------------------
 // Output an integer with the given major type top 3 bits
-void CBOR::write_cbor_int_to(Channel::Writer& w, uint64_t v,
-                             unsigned char major_type)
+void CBORWriter::write_int(uint64_t v, unsigned char major_type)
 {
   auto first_byte = major_type << 5;
 
@@ -42,16 +41,16 @@ void CBOR::write_cbor_int_to(Channel::Writer& w, uint64_t v,
 }
 
 //------------------------------------------------------------------------
-// Output a JSON value as CBOR to the given channel
-void CBOR::encode(const Value& v, Channel::Writer& w)
+// Output a JSON value as CBOR
+void CBORWriter::encode(const Value& v)
 {
   switch (v.type)
   {
     case Value::INTEGER:
       if (v.n >= 0)
-        write_cbor_int_to(w, v.n, 0);
+        write_int(v.n, 0);
       else
-        write_cbor_int_to(w, -1-v.n, 1);
+        write_int(-1-v.n, 1);
     break;
 
     case Value::FALSE_:
@@ -71,28 +70,28 @@ void CBOR::encode(const Value& v, Channel::Writer& w)
     break;
 
     case Value::BINARY:
-      write_cbor_int_to(w, v.s.size(), 2);
+      write_int(v.s.size(), 2);
       w.write(v.s);
     break;
 
     case Value::STRING:
-      write_cbor_int_to(w, v.s.size(), 3);
+      write_int(v.s.size(), 3);
       w.write(v.s);
     break;
 
     case Value::ARRAY:
-      write_cbor_int_to(w, v.a.size(), 4);
+      write_int(v.a.size(), 4);
       for(const auto& av: v.a)
-        encode(av, w);
+        encode(av);
     break;
 
     case Value::OBJECT:
-      write_cbor_int_to(w, v.o.size(), 5);
+      write_int(v.o.size(), 5);
       for(const auto& it: v.o)
       {
         Value key(it.first);
-        key.write_cbor_to(w);
-        encode(it.second, w);
+        encode(key);
+        encode(it.second);
       }
     break;
 
@@ -103,14 +102,14 @@ void CBOR::encode(const Value& v, Channel::Writer& w)
 //------------------------------------------------------------------------
 // Open an indefinite array
 // Then continue to write any number of member values, and close it
-void CBOR::open_indefinite_array(Channel::Writer& w)
+void CBORWriter::open_indefinite_array()
 {
   w.write_byte(0x9f);
 }
 
 //------------------------------------------------------------------------
 // Close an indefinite array
-void CBOR::close_indefinite_array(Channel::Writer& w)
+void CBORWriter::close_indefinite_array()
 {
   w.write_byte(0xff);
 }

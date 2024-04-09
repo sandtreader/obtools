@@ -153,10 +153,6 @@ public:
   string str(bool pretty=false) const;
 
   //------------------------------------------------------------------------
-  // Output value as CBOR to the given Channel
-  void write_cbor_to(Channel::Writer& w) const;
-
-  //------------------------------------------------------------------------
   // Output value as a CBOR binary string
   string cbor() const;
 };
@@ -194,24 +190,28 @@ public:
 
 //==========================================================================
 // CBOR generator
-class CBOR
+class CBORWriter
 {
-  static void write_cbor_int_to(Channel::Writer& w, uint64_t v,
-                                unsigned char top_bits);
+  Channel::Writer& w;
+  void write_int(uint64_t v, unsigned char top_bits);
 
 public:
   //------------------------------------------------------------------------
-  // Output a JSON value as CBOR to the given Channel
-  static void encode(const Value& v, Channel::Writer& w);
+  // Construct on a channel writer
+  CBORWriter(Channel::Writer& _w): w(_w) {}
+
+  //------------------------------------------------------------------------
+  // Output a JSON value as CBOR
+  void encode(const Value& v);
 
   //------------------------------------------------------------------------
   // Open an indefinite array
   // Then continue to write any number of member values, and close it
-  static void open_indefinite_array(Channel::Writer& w);
+  void open_indefinite_array();
 
   //------------------------------------------------------------------------
   // Close an indefinite array
-  static void close_indefinite_array(Channel::Writer& w);
+  void close_indefinite_array();
 };
 
 //==========================================================================
