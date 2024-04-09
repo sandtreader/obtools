@@ -184,6 +184,83 @@ string Value::str(bool pretty) const
   return oss.str();
 }
 
+//------------------------------------------------------------------------
+// Output value as CBOR to the given stream
+void Value::write_cbor_to(ostream& s) const
+{
+  switch (type)
+  {
+    case INTEGER:
+      if (n >= 0)
+      {
+        if (n < 24)
+          s.put(n);
+        else if (n < 256)
+        {
+          s.put(0x18);
+          s.put(n);
+        }
+        else if (n < 65536)
+        {
+          s.put(0x19);
+          s.put(n >> 8);
+          s.put(n & 0xff);
+        }
+        else if (n < 0x100000000L)
+        {
+          s.put(0x1a);
+          for(int i=24; i>=0; i-=8)
+            s.put((n >> i) & 0xff);
+        }
+        else
+        {
+          s.put(0x1b);
+          for(int i=56; i>=0; i-=8)
+            s.put((n >> i) & 0xff);
+        }
+        break;
+      }
+      else
+      {
+        if (n > -25)
+          s.put(0x20+(-1-n));
+        else if (n > -257)
+        {
+          s.put(0x38);
+          s.put(-1-n);
+        }
+        else if (n > -65537)
+        {
+          s.put(0x39);
+          s.put((-1-n) >> 8);
+          s.put((-1-n) & 0xff);
+        }
+        else if (n > -0x100000001L)
+        {
+          s.put(0x3a);
+          for(int i=24; i>=0; i-=8)
+            s.put(((-1-n) >> i) & 0xff);
+        }
+        else
+        {
+          s.put(0x3b);
+          for(int i=56; i>=0; i-=8)
+            s.put(((-1-n) >> i) & 0xff);
+        }
+      }
+    default:;
+  }
+}
+
+//--------------------------------------------------------------------------
+// Output value as a CBOR binary string
+string Value::cbor() const
+{
+  ostringstream oss;
+  write_cbor_to(oss);
+  return oss.str();
+}
+
 //--------------------------------------------------------------------------
 // Get a value from the given object property
 // Returns Value::none if this is not an object or property doesn't exist

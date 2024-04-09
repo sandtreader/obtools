@@ -146,6 +146,14 @@ public:
   //------------------------------------------------------------------------
   // Output value as a string, with optional prettiness
   string str(bool pretty=false) const;
+
+  //------------------------------------------------------------------------
+  // Output value as CBOR to the given stream
+  void write_cbor_to(ostream& s) const;
+
+  //------------------------------------------------------------------------
+  // Output value as a CBOR binary string
+  string cbor() const;
 };
 
 //--------------------------------------------------------------------------
