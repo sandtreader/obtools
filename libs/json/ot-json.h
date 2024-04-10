@@ -36,15 +36,15 @@ public:
 
   enum Type
   {
-    UNSET,   // Not set
-    NULL_,   // null
-    NUMBER,  // Floating point number
-    INTEGER, // Integer number - added for precision
-    STRING,  // Quoted string
-    OBJECT,  // Object with properties
-    ARRAY,   // Array of values
-    TRUE_,    // Boolean true
-    FALSE_,   // Boolean value
+    UNDEFINED, // Not set
+    NULL_,     // null
+    NUMBER,    // Floating point number
+    INTEGER,   // Integer number - added for precision
+    STRING,    // Quoted string
+    OBJECT,    // Object with properties
+    ARRAY,     // Array of values
+    TRUE_,     // Boolean true
+    FALSE_,    // Boolean value
 
     // Additional types for CBOR
     BINARY    // Binary data
@@ -57,7 +57,7 @@ public:
   vector<Value> a;
 
   // Constructors
-  Value(): type(UNSET) {}
+  Value(): type(UNDEFINED) {}
   Value(Type _type): type(_type) {}
   Value(float _f): type(NUMBER), f(_f) {}
   Value(double _f): type(NUMBER), f(_f) {}
@@ -84,7 +84,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check whether a value is valid - NB FALSE, NULL and 0 are still valid!
-  bool operator!() const { return type == UNSET; }
+  bool operator!() const { return type == UNDEFINED; }
 
   //------------------------------------------------------------------------
   // Check whether a value is true - TRUE or non-zero INTEGER accepted

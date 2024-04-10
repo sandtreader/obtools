@@ -49,6 +49,18 @@ Value CBORReader::decode()
       return Value(-1-read_int(initial_byte));
       break;
 
+    case 7:  // Floats & simple
+      switch (initial_byte & 0x1f)
+      {
+        case 20: return Value(Value::FALSE_);
+        case 21: return Value(Value::TRUE_);
+        case 22: return Value(Value::NULL_);
+        case 23: return Value();
+        default: throw Channel::Error(12, "Unhandled float/simple type "
+                                      +Text::itos(initial_byte & 0x1f));
+      }
+      break;
+
     default:
       throw Channel::Error(10, "Unhandled major type "+Text::itos(major_type));
   }

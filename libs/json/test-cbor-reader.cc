@@ -94,6 +94,18 @@ TEST(CBORReader, Test8ByteNegativeInteger)
   EXPECT_EQ("-9223372036854775808", decode("3b7fffffffffffffff"));
 }
 
+TEST(CBORReader, TestBoolean)
+{
+  EXPECT_EQ("false", decode("f4"));
+  EXPECT_EQ("true",  decode("f5"));
+}
+
+TEST(CBORReader, TestNullUndefined)
+{
+  EXPECT_EQ("null",      decode("f6"));
+  EXPECT_EQ("undefined", decode("f7"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

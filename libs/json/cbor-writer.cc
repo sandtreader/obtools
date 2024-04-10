@@ -67,7 +67,7 @@ void CBORWriter::encode(const Value& v)
       writer.write_byte(0xf6);
     break;
 
-    case Value::UNSET:
+    case Value::UNDEFINED:
       writer.write_byte(0xf7);
     break;
 
