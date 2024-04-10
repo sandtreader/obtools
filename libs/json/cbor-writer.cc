@@ -1,5 +1,5 @@
 //==========================================================================
-// ObTools::JSON: cbor.cc
+// ObTools::JSON: cbor-writer.cc
 //
 // CBOR encoder for JSON
 //
@@ -17,26 +17,28 @@ void CBORWriter::write_int(uint64_t v, unsigned char major_type)
   auto first_byte = major_type << 5;
 
   if (v < 24)
-    w.write_byte(first_byte | v);
+  {
+    writer.write_byte(first_byte | v);
+  }
   else if (v < 256)
   {
-    w.write_byte(first_byte | 0x18);
-    w.write_byte(v);
+    writer.write_byte(first_byte | 0x18);
+    writer.write_byte(v);
   }
   else if (v < 65536)
   {
-    w.write_byte(first_byte | 0x19);
-    w.write_nbo_16(v);
+    writer.write_byte(first_byte | 0x19);
+    writer.write_nbo_16(v);
   }
   else if (v < 0x100000000L)
   {
-    w.write_byte(first_byte | 0x1a);
-    w.write_nbo_32(v);
+    writer.write_byte(first_byte | 0x1a);
+    writer.write_nbo_32(v);
   }
   else
   {
-    w.write_byte(first_byte | 0x1b);
-    w.write_nbo_64(v);
+    writer.write_byte(first_byte | 0x1b);
+    writer.write_nbo_64(v);
   }
 }
 
@@ -54,29 +56,29 @@ void CBORWriter::encode(const Value& v)
     break;
 
     case Value::FALSE_:
-      w.write_byte(0xf4);
+      writer.write_byte(0xf4);
     break;
 
     case Value::TRUE_:
-      w.write_byte(0xf5);
+      writer.write_byte(0xf5);
     break;
 
     case Value::NULL_:
-      w.write_byte(0xf6);
+      writer.write_byte(0xf6);
     break;
 
     case Value::UNSET:
-      w.write_byte(0xf7);
+      writer.write_byte(0xf7);
     break;
 
     case Value::BINARY:
       write_int(v.s.size(), 2);
-      w.write(v.s);
+      writer.write(v.s);
     break;
 
     case Value::STRING:
       write_int(v.s.size(), 3);
-      w.write(v.s);
+      writer.write(v.s);
     break;
 
     case Value::ARRAY:
@@ -104,14 +106,14 @@ void CBORWriter::encode(const Value& v)
 // Then continue to write any number of member values, and close it
 void CBORWriter::open_indefinite_array()
 {
-  w.write_byte(0x9f);
+  writer.write_byte(0x9f);
 }
 
 //------------------------------------------------------------------------
 // Close an indefinite array
 void CBORWriter::close_indefinite_array()
 {
-  w.write_byte(0xff);
+  writer.write_byte(0xff);
 }
 
 }} // namespaces

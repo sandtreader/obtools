@@ -1,9 +1,9 @@
 //==========================================================================
-// ObTools::JSON: test-cbor.cc
+// ObTools::JSON: test-cbor-writer.cc
 //
-// Test harness for JSON CBOR output etc.
+// Test harness for JSON CBOR output
 // Test cases from RFC8949 Appendix A plus some edge cases
-
+//
 // Copyright (c) 2024 Paul Clark.
 //==========================================================================
 
@@ -15,7 +15,7 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::JSON;
 
-TEST(CBOR, TestTinyPositiveIntegerOutput)
+TEST(CBORWriter, TestTinyPositiveInteger)
 {
   EXPECT_EQ("00", Text::btox(Value(0).cbor()));
   EXPECT_EQ("01", Text::btox(Value(1).cbor()));
@@ -23,7 +23,7 @@ TEST(CBOR, TestTinyPositiveIntegerOutput)
   EXPECT_EQ("17", Text::btox(Value(23).cbor()));
 }
 
-TEST(CBOR, Test1BytePositiveIntegerOutput)
+TEST(CBORWriter, Test1BytePositiveInteger)
 {
   EXPECT_EQ("1818", Text::btox(Value(24).cbor()));
   EXPECT_EQ("1819", Text::btox(Value(25).cbor()));
@@ -31,21 +31,21 @@ TEST(CBOR, Test1BytePositiveIntegerOutput)
   EXPECT_EQ("18ff", Text::btox(Value(255).cbor()));
 }
 
-TEST(CBOR, Test2BytePositiveIntegerOutput)
+TEST(CBORWriter, Test2BytePositiveInteger)
 {
   EXPECT_EQ("190100", Text::btox(Value(256).cbor()));
   EXPECT_EQ("1903e8", Text::btox(Value(1000).cbor()));
   EXPECT_EQ("19ffff", Text::btox(Value(65535).cbor()));
 }
 
-TEST(CBOR, Test4BytePositiveIntegerOutput)
+TEST(CBORWriter, Test4BytePositiveInteger)
 {
   EXPECT_EQ("1a00010000", Text::btox(Value(65536).cbor()));
   EXPECT_EQ("1a000f4240", Text::btox(Value(1000000).cbor()));
   EXPECT_EQ("1affffffff", Text::btox(Value(0xffffffffUL).cbor()));
 }
 
-TEST(CBOR, Test8BytePositiveIntegerOutput)
+TEST(CBORWriter, Test8BytePositiveInteger)
 {
   EXPECT_EQ("1b0000000100000000", Text::btox(Value(0x100000000UL).cbor()));
   EXPECT_EQ("1b000000e8d4a51000", Text::btox(Value(1000000000000).cbor()));
@@ -55,7 +55,7 @@ TEST(CBOR, Test8BytePositiveIntegerOutput)
             Text::btox(Value((uint64_t)LLONG_MAX).cbor()));
 }
 
-TEST(CBOR, TestTinyNegativeIntegerOutput)
+TEST(CBORWriter, TestTinyNegativeInteger)
 {
   EXPECT_EQ("20", Text::btox(Value(-1).cbor()));
   EXPECT_EQ("29", Text::btox(Value(-10).cbor()));
@@ -63,44 +63,44 @@ TEST(CBOR, TestTinyNegativeIntegerOutput)
   EXPECT_EQ("37", Text::btox(Value(-24).cbor()));
 }
 
-TEST(CBOR, Test1ByteNegativeIntegerOutput)
+TEST(CBORWriter, Test1ByteNegativeInteger)
 {
   EXPECT_EQ("3863", Text::btox(Value(-100).cbor()));
   EXPECT_EQ("38ff", Text::btox(Value(-256).cbor()));
 }
 
-TEST(CBOR, Test2ByteNegativeIntegerOutput)
+TEST(CBORWriter, Test2ByteNegativeInteger)
 {
   EXPECT_EQ("390100", Text::btox(Value(-257).cbor()));
   EXPECT_EQ("3903e7", Text::btox(Value(-1000).cbor()));
   EXPECT_EQ("39ffff", Text::btox(Value(-65536).cbor()));
 }
 
-TEST(CBOR, Test4ByteNegativeIntegerOutput)
+TEST(CBORWriter, Test4ByteNegativeInteger)
 {
   EXPECT_EQ("3a00010000", Text::btox(Value(-65537).cbor()));
   EXPECT_EQ("3affffffff", Text::btox(Value(-4294967296).cbor()));
 }
 
-TEST(CBOR, Test8ByteNegativeIntegerOutput)
+TEST(CBORWriter, Test8ByteNegativeInteger)
 {
   EXPECT_EQ("3b0000000100000000", Text::btox(Value(-4294967297).cbor()));
   EXPECT_EQ("3b7fffffffffffffff", Text::btox(Value((int64_t)LLONG_MIN).cbor()));
 }
 
-TEST(CBOR, TestBooleanOutput)
+TEST(CBORWriter, TestBoolean)
 {
   EXPECT_EQ("f4", Text::btox(Value(Value::FALSE_).cbor()));
   EXPECT_EQ("f5", Text::btox(Value(Value::TRUE_).cbor()));
 }
 
-TEST(CBOR, TestNullUndefinedOutput)
+TEST(CBORWriter, TestNullUndefined)
 {
   EXPECT_EQ("f6", Text::btox(Value(Value::NULL_).cbor()));
   EXPECT_EQ("f7", Text::btox(Value().cbor()));
 }
 
-TEST(CBOR, TestBinaryOutput)
+TEST(CBORWriter, TestBinary)
 {
   vector<unsigned char> b{42, 99};
   EXPECT_EQ("422a63", Text::btox(Value(b).cbor()));
@@ -111,7 +111,7 @@ TEST(CBOR, TestBinaryOutput)
             Text::btox(Value(b24).cbor()));
 }
 
-TEST(CBOR, TestStringOutput)
+TEST(CBORWriter, TestString)
 {
   EXPECT_EQ("60", Text::btox(Value("").cbor()));
   EXPECT_EQ("6161", Text::btox(Value("a").cbor()));
@@ -125,7 +125,7 @@ TEST(CBOR, TestStringOutput)
             Text::btox(Value("123456789012345678901234").cbor()));
 }
 
-TEST(CBOR, TestArrayOutput)
+TEST(CBORWriter, TestArray)
 {
   Value a(Value::ARRAY);
   a.add(Value(42));
@@ -136,7 +136,7 @@ TEST(CBOR, TestArrayOutput)
   EXPECT_EQ("80", Text::btox(Value(Value::ARRAY).cbor()));
 }
 
-TEST(CBOR, TestNestedArrayOutput)
+TEST(CBORWriter, TestNestedArray)
 {
   Value a(Value::ARRAY);
   a.add(1);
@@ -152,7 +152,7 @@ TEST(CBOR, TestNestedArrayOutput)
   EXPECT_EQ("8301820203820405", Text::btox(a.cbor()));
 }
 
-TEST(CBOR, TestObjectOutput)
+TEST(CBORWriter, TestObject)
 {
   Value o(Value::OBJECT);
   o.put("a", Value(42));
@@ -162,7 +162,7 @@ TEST(CBOR, TestObjectOutput)
   EXPECT_EQ("a36161182a6162f5616363666f6f", Text::btox(o.cbor()));
 }
 
-TEST(CBOR, TestNestedObjectOutput)
+TEST(CBORWriter, TestNestedObject)
 {
   Value o(Value::OBJECT);
   o.put("a", Value(42));
@@ -174,7 +174,7 @@ TEST(CBOR, TestNestedObjectOutput)
   EXPECT_EQ("a26161182a6173a26162f5616363666f6f", Text::btox(o.cbor()));
 }
 
-TEST(CBOR, TestArrayNestedInObjectOutput)
+TEST(CBORWriter, TestArrayNestedInObject)
 {
   Value o(Value::OBJECT);
   o.put("a", Value(42));
@@ -187,7 +187,7 @@ TEST(CBOR, TestArrayNestedInObjectOutput)
   EXPECT_EQ("a2614182f563666f6f6161182a", Text::btox(o.cbor()));
 }
 
-TEST(CBOR, TestObjectNestedInArrayOutput)
+TEST(CBORWriter, TestObjectNestedInArray)
 {
   Value a(Value::ARRAY);
   a.add("a");
@@ -198,7 +198,7 @@ TEST(CBOR, TestObjectNestedInArrayOutput)
   EXPECT_EQ("826161a161626163", Text::btox(a.cbor()));
 }
 
-TEST(CBOR, TestEmptyIndefiniteArrayOutput)
+TEST(CBORWriter, TestEmptyIndefiniteArray)
 {
   string s;
   Channel::StringWriter w(s);
@@ -211,7 +211,7 @@ TEST(CBOR, TestEmptyIndefiniteArrayOutput)
   EXPECT_EQ("9fff", Text::btox(s));
 }
 
-TEST(CBOR, TestNestedIndefiniteArraysOutput)
+TEST(CBORWriter, TestNestedIndefiniteArrays)
 {
   string s;
   Channel::StringWriter w(s);

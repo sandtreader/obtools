@@ -192,13 +192,13 @@ public:
 // CBOR generator
 class CBORWriter
 {
-  Channel::Writer& w;
+  Channel::Writer& writer;
   void write_int(uint64_t v, unsigned char top_bits);
 
 public:
   //------------------------------------------------------------------------
   // Construct on a channel writer
-  CBORWriter(Channel::Writer& _w): w(_w) {}
+  CBORWriter(Channel::Writer& _writer): writer(_writer) {}
 
   //------------------------------------------------------------------------
   // Output a JSON value as CBOR
