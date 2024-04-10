@@ -122,6 +122,30 @@ TEST(CBORReader, TestString)
             decode("7818313233343536373839303132333435363738393031323334"));
 }
 
+TEST(CBORReader, TestArray)
+{
+  EXPECT_EQ("[]", decode("80"));
+  EXPECT_EQ("[42,true,\"foo\"]", decode("83182af563666f6f"));
+  EXPECT_EQ("[1,[2,3],[4,5]]", decode("8301820203820405"));
+}
+
+TEST(CBORReader, TestObject)
+{
+  EXPECT_EQ("{}", decode("a0"));
+  EXPECT_EQ("{\"a\":42,\"b\":true,\"c\":\"foo\"}",
+            decode("a36161182a6162f5616363666f6f"));
+  EXPECT_EQ("{\"a\":42,\"s\":{\"b\":true,\"c\":\"foo\"}}",
+            decode("a26161182a6173a26162f5616363666f6f"));
+}
+
+TEST(CBORReader, TestNestedThings)
+{
+  EXPECT_EQ("{\"A\":[true,\"foo\"],\"a\":42}",   // Note A < a
+            decode("a2614182f563666f6f6161182a"));
+  EXPECT_EQ("[\"a\",{\"b\":\"c\"}]",
+            decode("826161a161626163"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

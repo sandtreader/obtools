@@ -63,6 +63,30 @@ Value CBORReader::decode()
       return value;
     }
 
+    case 4:  // Array
+    {
+      auto len = read_int(initial_byte);
+      Value value(Value::ARRAY);
+      for(auto i=0u; i<len; i++)
+        value.a.push_back(decode());
+      return value;
+    }
+
+    case 5:  // Object
+    {
+      auto len = read_int(initial_byte);
+      Value value(Value::OBJECT);
+      for(auto i=0u; i<len; i++)
+      {
+        auto key = decode();
+        if (key.type == Value::STRING)
+          value.o[key.s] = decode();
+        else
+          throw Channel::Error(13, "Can't handle non-string CBOR object keys");
+      }
+      return value;
+    }
+
     case 7:  // Floats & simple
       switch (initial_byte & 0x1f)
       {
