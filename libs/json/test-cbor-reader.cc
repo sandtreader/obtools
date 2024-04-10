@@ -106,6 +106,22 @@ TEST(CBORReader, TestNullUndefined)
   EXPECT_EQ("undefined", decode("f7"));
 }
 
+TEST(CBORReader, TestBinary)
+{
+  EXPECT_EQ("\"KmM=\"", decode("422a63"));
+}
+
+TEST(CBORReader, TestString)
+{
+  EXPECT_EQ("\"\"", decode("60"));
+  EXPECT_EQ("\"a\"", decode("6161"));
+  EXPECT_EQ("\"IETF\"", decode("6449455446"));
+
+  // 1 byte length
+  EXPECT_EQ("\"123456789012345678901234\"",
+            decode("7818313233343536373839303132333435363738393031323334"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
