@@ -42,7 +42,11 @@ Value CBORReader::decode()
   switch (major_type)
   {
     case 0:  // Positive integer
-      return read_int(initial_byte);
+      return Value(read_int(initial_byte));
+      break;
+
+    case 1:  // Negative integer
+      return Value(-1-read_int(initial_byte));
       break;
 
     default:
