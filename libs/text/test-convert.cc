@@ -97,19 +97,21 @@ TEST(ConvertTest, TestFixedPointToString)
 
 TEST(ConvertTest, TestHexStringToBinaryBuffer)
 {
-  unsigned char buf[4] = {0, 0, 0, 0};
-  unsigned char expected[4] = {0xde, 0xad, 0xbe, 0xef};
-  Text::xtob("deadbeef", buf, sizeof(buf));
+  unsigned char buf[8];
+  unsigned char expected[] = {0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x99, 0x00};
+  auto n = Text::xtob("DEADbeef12349900", buf, sizeof(buf));
+  ASSERT_EQ(8, n);
   for (unsigned i = 0; i < sizeof(buf); ++i)
-    ASSERT_EQ(expected[i], buf[i]);
+    EXPECT_EQ(expected[i], buf[i]);
 }
 
 TEST(ConvertTest, TestHexStringToBinaryString)
 {
-  unsigned char expected[4] = {0xde, 0xad, 0xbe, 0xef};
-  auto binary = Text::xtob("deadbeef");
+  unsigned char expected[] = {0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x99, 0x00};
+  auto binary = Text::xtob("DEADbeef12349900");
+  ASSERT_EQ(8, binary.size());
   for (unsigned i = 0; i < binary.size(); ++i)
-    ASSERT_EQ(expected[i], (unsigned char)binary[i]);
+    EXPECT_EQ(expected[i], (unsigned char)binary[i]);
 }
 
 TEST(ConvertTest, TestBinaryToString)
