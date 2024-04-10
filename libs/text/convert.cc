@@ -243,4 +243,23 @@ unsigned int xtob(const string& hex, unsigned char *data,
   return length;
 }
 
+//--------------------------------------------------------------------------
+// Hex string to binary string
+string xtob(const string& hex)
+{
+  const char *s = hex.c_str();
+  string binary;
+  for(unsigned int i=0; i<hex.size()/2; i++)
+  {
+    char buf[3];
+    memcpy(buf, s+2*i, 2);
+    buf[2] = 0;
+    unsigned int n;
+    sscanf(buf, "%x", &n);
+    binary += static_cast<char>(n);
+  }
+
+  return binary;
+}
+
 }} // namespaces

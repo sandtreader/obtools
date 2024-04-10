@@ -95,13 +95,21 @@ TEST(ConvertTest, TestFixedPointToString)
   ASSERT_EQ("-12345678900", Text::ifixtos(-123456789, -2));
 }
 
-TEST(ConvertTest, TestStringToBinary)
+TEST(ConvertTest, TestHexStringToBinaryBuffer)
 {
   unsigned char buf[4] = {0, 0, 0, 0};
   unsigned char expected[4] = {0xde, 0xad, 0xbe, 0xef};
   Text::xtob("deadbeef", buf, sizeof(buf));
   for (unsigned i = 0; i < sizeof(buf); ++i)
     ASSERT_EQ(expected[i], buf[i]);
+}
+
+TEST(ConvertTest, TestHexStringToBinaryString)
+{
+  unsigned char expected[4] = {0xde, 0xad, 0xbe, 0xef};
+  auto binary = Text::xtob("deadbeef");
+  for (unsigned i = 0; i < binary.size(); ++i)
+    ASSERT_EQ(expected[i], (unsigned char)binary[i]);
 }
 
 TEST(ConvertTest, TestBinaryToString)

@@ -215,6 +215,23 @@ public:
 };
 
 //==========================================================================
+// CBOR parser
+class CBORReader
+{
+  Channel::Reader& reader;
+  uint64_t read_int(uint8_t initial_byte);
+
+public:
+  //------------------------------------------------------------------------
+  // Construct on a channel reader
+  CBORReader(Channel::Reader& _reader): reader(_reader) {}
+
+  //------------------------------------------------------------------------
+  // Read and decode a single CBOR value
+  JSON::Value decode();
+};
+
+//==========================================================================
 }} // namespaces
 
 #endif // !__OBTOOLS_JSON_H

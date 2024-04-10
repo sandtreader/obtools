@@ -206,6 +206,10 @@ string btox(const vector<uint8_t>& data);
 unsigned int xtob(const string& hex, unsigned char *data,
                   unsigned int max_length);
 
+//--------------------------------------------------------------------------
+// Hex string to binary string
+string xtob(const string& hex);
+
 //==========================================================================
 // Base64 encoder/decoder
 class Base64
