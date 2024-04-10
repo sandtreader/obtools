@@ -138,4 +138,15 @@ Value CBORReader::decode()
   }
 }
 
+//------------------------------------------------------------------------
+// Read the open of an indefinite array
+// Then continue to read any number of member values until you get BREAK
+// Returns whether the first byte is an indefinite array (0x9f)
+// Consumes a byte if it isn't - rewind the reader if you need to handle
+// definite arrays as well
+bool CBORReader::open_indefinite_array()
+{
+  return reader.read_byte() == 0x9f;
+}
+
 }} // namespaces

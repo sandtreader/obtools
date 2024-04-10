@@ -162,6 +162,38 @@ TEST(CBORReader, TestIndefiniteObjectReadInOneHit)
             decode("bf6161182a6173bf6162f5616363666f6fffff"));
 }
 
+TEST(CBORReader, TestReadingIndefiniteOpen)
+{
+  auto binary = Text::xtob("9f00");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+  ASSERT_TRUE(cr.open_indefinite_array());
+  ASSERT_FALSE(cr.open_indefinite_array());
+  EXPECT_EQ(2, sr.get_offset());
+}
+
+TEST(CBORReader, TestReadingIndefiniteArrayPieceWise)
+{
+  auto binary = Text::xtob("9f019f0203ff820405ff");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+
+  // Note this basically replicates what the reader does if you just
+  // do it in one hit without calling open_indefinite_array first, but
+  // of course you are in control
+  ASSERT_TRUE(cr.open_indefinite_array());
+
+  Value array(Value::ARRAY);
+  for(;;)
+  {
+    auto v = cr.decode();
+    if (v.type == Value::BREAK) break;
+    array.a.push_back(v);
+  }
+
+  EXPECT_EQ("[1,[2,3],[4,5]]", array.str());
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
