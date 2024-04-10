@@ -265,7 +265,7 @@ unsigned int xtob(const string& hex, unsigned char *data,
 // Hex string to binary string
 string xtob(const string& hex)
 {
-  const char *s = hex.c_str();
+  const char *s = hex.data();
   string binary;
   for(unsigned int i=0; i<hex.size()/2; i++)
   {
