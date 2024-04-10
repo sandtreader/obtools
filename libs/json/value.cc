@@ -179,6 +179,7 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
       out << '"' << base64.encode(s) << '"';
     }
     break;
+    case BREAK:     out << "BREAK";                       break;
   }
 }
 

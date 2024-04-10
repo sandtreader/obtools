@@ -47,7 +47,8 @@ public:
     FALSE_,    // Boolean value
 
     // Additional types for CBOR
-    BINARY    // Binary data
+    BINARY,    // Binary data
+    BREAK      // End of indefinite array - only used internally
   } type;
 
   double f = 0.0;

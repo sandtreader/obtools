@@ -65,26 +65,60 @@ Value CBORReader::decode()
 
     case 4:  // Array
     {
-      auto len = read_int(initial_byte);
-      Value value(Value::ARRAY);
-      for(auto i=0u; i<len; i++)
-        value.a.push_back(decode());
-      return value;
+      Value array(Value::ARRAY);
+      if (initial_byte == 0x9f)
+      {
+        // Indefinite
+        for(;;)
+        {
+          auto v = decode();
+          if (v.type == Value::BREAK) break;
+          array.a.push_back(v);
+        }
+      }
+      else
+      {
+        // Definite
+        auto len = read_int(initial_byte);
+        for(auto i=0u; i<len; i++)
+          array.a.push_back(decode());
+      }
+
+      return array;
     }
 
     case 5:  // Object
     {
-      auto len = read_int(initial_byte);
-      Value value(Value::OBJECT);
-      for(auto i=0u; i<len; i++)
+      Value object(Value::OBJECT);
+      if (initial_byte == 0xbf)
       {
-        auto key = decode();
-        if (key.type == Value::STRING)
-          value.o[key.s] = decode();
-        else
-          throw Channel::Error(13, "Can't handle non-string CBOR object keys");
+        // Indefinite
+        for(;;)
+        {
+          auto key = decode();
+          if (key.type == Value::BREAK) break;
+          if (key.type == Value::STRING)
+            object.o[key.s] = decode();
+          else
+            throw Channel::Error(13,
+                                 "Can't handle non-string CBOR object keys");
+        }
       }
-      return value;
+      else
+      {
+        // Definite
+        auto len = read_int(initial_byte);
+        for(auto i=0u; i<len; i++)
+        {
+          auto key = decode();
+          if (key.type == Value::STRING)
+            object.o[key.s] = decode();
+          else
+            throw Channel::Error(13,
+                                 "Can't handle non-string CBOR object keys");
+        }
+      }
+      return object;
     }
 
     case 7:  // Floats & simple
@@ -94,6 +128,7 @@ Value CBORReader::decode()
         case 21: return Value(Value::TRUE_);
         case 22: return Value(Value::NULL_);
         case 23: return Value();
+        case 31: return Value(Value::BREAK);
         default: throw Channel::Error(12, "Unhandled float/simple type "
                                       +Text::itos(initial_byte & 0x1f));
       }

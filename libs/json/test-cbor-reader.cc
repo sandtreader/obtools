@@ -146,6 +146,22 @@ TEST(CBORReader, TestNestedThings)
             decode("826161a161626163"));
 }
 
+TEST(CBORReader, TestIndefiniteArrayReadInOneHit)
+{
+  EXPECT_EQ("[]", decode("9fff"));
+  EXPECT_EQ("[42,true,\"foo\"]", decode("9f182af563666f6fff"));
+  EXPECT_EQ("[1,[2,3],[4,5]]", decode("9f019f0203ff820405ff"));
+}
+
+TEST(CBORReader, TestIndefiniteObjectReadInOneHit)
+{
+  EXPECT_EQ("{}", decode("bfff"));
+  EXPECT_EQ("{\"a\":42,\"b\":true,\"c\":\"foo\"}",
+            decode("bf6161182a6162f5616363666f6fff"));
+  EXPECT_EQ("{\"a\":42,\"s\":{\"b\":true,\"c\":\"foo\"}}",
+            decode("bf6161182a6173bf6162f5616363666f6fffff"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
