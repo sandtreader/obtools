@@ -170,20 +170,20 @@ LFLAGS = LFLAGS .. " --std=c++" .. CPPSTD .. " " .. PLATFORM_LFLAGS
 ----------------------------------------------------------------------------
 -- Debug settings
 if tup.getconfig("DEBUG") == "y" then
-  CFLAGS = CFLAGS .. " -ggdb3 -DDEBUG -D_GLIBCXX_DEBUG"
+  CFLAGS = CFLAGS .. " -ggdb3 -gdwarf-4 -DDEBUG -D_GLIBCXX_DEBUG"
 end
 
 ----------------------------------------------------------------------------
 -- Thread safety settings
 if tup.getconfig("DEBUGTHREAD") == "y" then
-  CFLAGS = CFLAGS .. " -ggdb3 -O2 -fsanitize=thread"
+  CFLAGS = CFLAGS .. " -ggdb3 -gdwarf-4 -O2 -fsanitize=thread"
   LFLAGS = LFLAGS .. " -fsanitize=thread"
 end
 
 ----------------------------------------------------------------------------
 -- Profiling settings
 if tup.getconfig("PROFILE") == "y" then
-  CFLAGS = CFLAGS .. " -ggdb3 -O2"
+  CFLAGS = CFLAGS .. " -ggdb3 -gdwarf-4 -O2"
 end
 
 ----------------------------------------------------------------------------
