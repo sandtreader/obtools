@@ -221,6 +221,27 @@ string btox(const vector<uint8_t>& data)
 }
 
 //--------------------------------------------------------------------------
+// Hex nybble to binary nybble
+inline unsigned char decode_nybble(char c)
+{
+  switch (c)
+  {
+    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+      return c-'a'+10;
+
+    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+      return c-'A'+10;
+
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      return c-'0';
+
+    default:
+      return 0;  // Safest?
+  }
+}
+
+//--------------------------------------------------------------------------
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
 unsigned int xtob(const string& hex, unsigned char *data,
@@ -229,18 +250,31 @@ unsigned int xtob(const string& hex, unsigned char *data,
   unsigned int length = hex.size()/2;
   if (length > max_length) length = max_length;
 
-  const char *s = hex.c_str();
+  const char *s = hex.data();
   for(unsigned int i=0; i<length; i++)
   {
-    char buf[3];
-    memcpy(buf, s+2*i, 2);
-    buf[2] = 0;
-    unsigned int n;
-    sscanf(buf, "%x", &n);
-    data[i] = static_cast<unsigned char>(n);
+    auto n = decode_nybble(*s++) << 4;
+    n |= decode_nybble(*s++);
+    data[i] = n;
   }
 
   return length;
+}
+
+//--------------------------------------------------------------------------
+// Hex string to binary string
+string xtob(const string& hex)
+{
+  const char *s = hex.data();
+  string binary;
+  for(unsigned int i=0; i<hex.size()/2; i++)
+  {
+    auto n = decode_nybble(*s++) << 4;
+    n |= decode_nybble(*s++);
+    binary += n;
+  }
+
+  return binary;
 }
 
 }} // namespaces

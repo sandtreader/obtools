@@ -145,11 +145,10 @@ TEST(Value, TestArraySize)
   ASSERT_EQ(0, nv.size());
 }
 
-TEST(Value, TestWritingUnsetThrows)
+TEST(Value, TestWritingUnset)
 {
   Value value;
-  ostringstream out;
-  ASSERT_THROW(out << value, JSON::Exception);
+  ASSERT_EQ("undefined", value.str());
 }
 
 TEST(Value, TestWritingNull)

@@ -164,21 +164,22 @@ void Value::write_to(ostream& out, bool pretty, int indent) const
 {
   switch (type)
   {
-    case UNSET:   throw Exception("Value is unset");
-    case NULL_:   out << "null";                        break;
-    case NUMBER:  out << f;                             break;
-    case INTEGER: out << n;                             break;
-    case STRING:  write_string_to(out);                 break;
-    case OBJECT:  write_object_to(out, pretty, indent); break;
-    case ARRAY:   write_array_to(out, pretty, indent);  break;
-    case TRUE_:   out << "true";                        break;
-    case FALSE_:  out << "false";                       break;
+    case UNDEFINED: out << "undefined";                   break;
+    case NULL_:     out << "null";                        break;
+    case NUMBER:    out << f;                             break;
+    case INTEGER:   out << n;                             break;
+    case STRING:    write_string_to(out);                 break;
+    case OBJECT:    write_object_to(out, pretty, indent); break;
+    case ARRAY:     write_array_to(out, pretty, indent);  break;
+    case TRUE_:     out << "true";                        break;
+    case FALSE_:    out << "false";                       break;
     case BINARY:
     {
       Text::Base64 base64;
       out << '"' << base64.encode(s) << '"';
     }
     break;
+    case BREAK:     out << "BREAK";                       break;
   }
 }
 

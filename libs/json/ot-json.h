@@ -36,18 +36,19 @@ public:
 
   enum Type
   {
-    UNSET,   // Not set
-    NULL_,   // null
-    NUMBER,  // Floating point number
-    INTEGER, // Integer number - added for precision
-    STRING,  // Quoted string
-    OBJECT,  // Object with properties
-    ARRAY,   // Array of values
-    TRUE_,    // Boolean true
-    FALSE_,   // Boolean value
+    UNDEFINED, // Not set
+    NULL_,     // null
+    NUMBER,    // Floating point number
+    INTEGER,   // Integer number - added for precision
+    STRING,    // Quoted string
+    OBJECT,    // Object with properties
+    ARRAY,     // Array of values
+    TRUE_,     // Boolean true
+    FALSE_,    // Boolean value
 
     // Additional types for CBOR
-    BINARY    // Binary data
+    BINARY,    // Binary data
+    BREAK      // End of indefinite array - only used internally
   } type;
 
   double f = 0.0;
@@ -57,7 +58,7 @@ public:
   vector<Value> a;
 
   // Constructors
-  Value(): type(UNSET) {}
+  Value(): type(UNDEFINED) {}
   Value(Type _type): type(_type) {}
   Value(float _f): type(NUMBER), f(_f) {}
   Value(double _f): type(NUMBER), f(_f) {}
@@ -84,7 +85,7 @@ public:
 
   //------------------------------------------------------------------------
   // Check whether a value is valid - NB FALSE, NULL and 0 are still valid!
-  bool operator!() const { return type == UNSET; }
+  bool operator!() const { return type == UNDEFINED; }
 
   //------------------------------------------------------------------------
   // Check whether a value is true - TRUE or non-zero INTEGER accepted
@@ -192,13 +193,13 @@ public:
 // CBOR generator
 class CBORWriter
 {
-  Channel::Writer& w;
+  Channel::Writer& writer;
   void write_int(uint64_t v, unsigned char top_bits);
 
 public:
   //------------------------------------------------------------------------
   // Construct on a channel writer
-  CBORWriter(Channel::Writer& _w): w(_w) {}
+  CBORWriter(Channel::Writer& _writer): writer(_writer) {}
 
   //------------------------------------------------------------------------
   // Output a JSON value as CBOR
@@ -212,6 +213,31 @@ public:
   //------------------------------------------------------------------------
   // Close an indefinite array
   void close_indefinite_array();
+};
+
+//==========================================================================
+// CBOR parser
+class CBORReader
+{
+  Channel::Reader& reader;
+  uint64_t read_int(uint8_t initial_byte);
+
+public:
+  //------------------------------------------------------------------------
+  // Construct on a channel reader
+  CBORReader(Channel::Reader& _reader): reader(_reader) {}
+
+  //------------------------------------------------------------------------
+  // Read and decode a single CBOR value
+  JSON::Value decode();
+
+  //------------------------------------------------------------------------
+  // Read the open of an indefinite array
+  // Then continue to read any number of member values until you get BREAK
+  // Returns whether the first byte is an indefinite array (0x9f)
+  // Consumes a byte if it isn't - rewind the reader if you need to handle
+  // definite arrays as well
+  bool open_indefinite_array();
 };
 
 //==========================================================================
