@@ -1,0 +1,46 @@
+<!-- Configuration file for ObTools REST Test -->
+<rest-test>
+  <!-- Logging level:
+
+         0 - Silence
+         1 - Errors only
+         2 - Session start/stop
+         3 - Details & intermediate changes
+         4 - Debug
+         5 - Everything imaginable 
+
+       Production builds are only capable of outputting to level 3  -->
+  <log level="3" timestamp="%a %d %b %H:%M:%*S [%*L]: "/>
+
+  <!-- Script to run -->
+  <script>
+
+    <!-- 5 threads, each running 10 instances -->
+    <replicate copies="5">
+      <log>Starting thread $copy</log>
+      <thread>
+	<replicate copies="10" spread="1">
+
+	  <!-- Scope required to hold independent session IDs -->
+	  <scope>
+
+            <repeat times="10">
+
+	      <!-- Open the client -->
+	      <open url="http://localhost:8080/test"/>
+
+              <!-- Get it -->
+              <get/>
+
+	      <!-- Shutdown client -->
+	      <close/>
+
+            </repeat>
+	  </scope>
+        </replicate>
+      </thread>
+    </replicate>
+  </script>
+
+</rest-test>
+

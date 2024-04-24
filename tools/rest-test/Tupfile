@@ -1,0 +1,15 @@
+#===========================================================================
+# Tupfile for ObTools REST Test Harness
+#
+# Copyright (c) 2024 Paul Clark
+#===========================================================================
+
+NAME     = ot-rest-test
+TYPE     = exe
+DEPENDS  = ot-script ot-cache ot-web
+
+PACKAGE  = $(NAME)
+VERSION  = 0.1.0
+REVISION = 1
+
+include_rules
