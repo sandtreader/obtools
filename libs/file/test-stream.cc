@@ -166,6 +166,7 @@ TEST_F(StreamTest, TestLargeBuffer)
 
   File::BufferedOutStream bos(test_file, data.size());
   bos.write(&data[0], data.size() - 10);
+  bos.close();
 
   File::Path path(test_file);
   ASSERT_TRUE(path.readable());
