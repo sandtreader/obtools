@@ -23,7 +23,7 @@ bool Connection::prepare_statement(const string& id, const string& sql)
   auto stmt = prepare(sql);
   if (!stmt)
     return false;
-  prepared_statements[id] = move(stmt);
+  prepared_statements[id] = std::move(stmt);
   return true;
 }
 
