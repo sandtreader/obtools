@@ -30,6 +30,27 @@ TEST(Tree, TreeReturnsResultOfHashFunc)
   EXPECT_EQ("one:two:three:four", tree.get_hash());
 }
 
+TEST(Tree, TraverseIsPreorderAcrossWholeTree)
+{
+  const auto leaves = vector<string>{
+    "one",
+    "two",
+    "three",
+    "four",
+  };
+  const auto tree = Tree<string>(test_hash_func, leaves);
+
+  string output;
+  tree.traverse_preorder([&output](const Node<string>& node)
+  {
+    output += node.get_hash() + "/";
+  });
+
+  EXPECT_EQ("one:two:three:four/one:two/one/two/three:four/three/four/",
+            output);
+}
+
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

@@ -26,6 +26,21 @@ TEST(Branch, BranchReturnsResultOfHashFunc)
   EXPECT_EQ("left:right", branch.get_hash());
 }
 
+TEST(Branch, TraverseHitsBranchLeftAndRight)
+{
+  unique_ptr<Node<string>> left_leaf = make_unique<Leaf<string>>("left");
+  unique_ptr<Node<string>> right_leaf = make_unique<Leaf<string>>("right");
+  const auto branch = Branch<string>(test_hash_func, left_leaf, right_leaf);
+
+  string output;
+  branch.traverse_preorder([&output](const Node<string>& node)
+  {
+    output += node.get_hash() + "/";
+  });
+
+  EXPECT_EQ("left:right/left/right/", output);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

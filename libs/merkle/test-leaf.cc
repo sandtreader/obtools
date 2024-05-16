@@ -20,6 +20,20 @@ TEST(Leaf, LeafReturnsGivenHash)
   EXPECT_EQ(hash, leaf.get_hash());
 }
 
+TEST(Leaf, TraverseJustHitsNode)
+{
+  const auto hash = string{"testHash"};
+  const auto leaf = Leaf<string>{hash};
+
+  string output;
+  leaf.traverse_preorder([&output](const Node<string>& node)
+  {
+    output += node.get_hash() + "/";
+  });
+
+  EXPECT_EQ("testHash/", output);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

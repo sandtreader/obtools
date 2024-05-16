@@ -31,6 +31,12 @@ class Node
 {
 public:
   virtual T get_hash() const = 0;
+
+  // Lambda function for tree traversal, taking a Node
+  using TraversalCallbackFunc = function<void(const Node<T>&)>;
+
+  virtual void traverse_preorder(
+                typename Node<T>::TraversalCallbackFunc callback) const = 0;
   virtual ~Node() {};
 };
 
@@ -50,6 +56,11 @@ public:
   T get_hash() const
   {
     return hash;
+  }
+
+  void traverse_preorder(typename Node<T>::TraversalCallbackFunc callback) const
+  {
+    callback(*this);
   }
 };
 
@@ -82,12 +93,20 @@ public:
     else
       return left->get_hash();
   }
+
+  void traverse_preorder(typename Node<T>::TraversalCallbackFunc callback) const
+  {
+    callback(*this);
+    if (left) left->traverse_preorder(callback);
+    if (right) right->traverse_preorder(callback);
+  }
 };
 
 //==========================================================================
 // Merkle Tree
 template<typename T>       // T = Hash type
-class Tree: public Node<T> {
+class Tree
+{
 private:
   unique_ptr<Node<T>> root;
 
@@ -129,6 +148,13 @@ public:
   {
     return root->get_hash();
   }
+
+  // Walk the tree from the root - preorder
+  void traverse_preorder(typename Node<T>::TraversalCallbackFunc callback) const
+  {
+    root->traverse_preorder(callback);
+  }
+
 };
 
 //==========================================================================
