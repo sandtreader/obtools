@@ -19,12 +19,14 @@ namespace ObTools { namespace Merkle {
 // Make our lives easier without polluting anyone else
 using namespace std;
 
-template <typename T>
-using HashFunc = T (*)(const T&, const T&);
+// Hash function template - takes left and right child hash and returns
+// the combined hash for a branch node
+template <typename T>      // T = Hash type
+using HashFunc = T (*)(const T& left_hash, const T& right_hash);
 
 //==========================================================================
 // Merkle Tree Node abstract class
-template <typename T>
+template <typename T>  // T = Hash type
 class Node
 {
 public:
@@ -34,7 +36,7 @@ public:
 
 //==========================================================================
 // Merkle Tree Leaf
-template <typename T>
+template <typename T>       // T = Hash type
 class Leaf: public Node<T>
 {
 private:
@@ -53,7 +55,7 @@ public:
 
 //==========================================================================
 // Merkle Tree Branch
-template <typename T>
+template <typename T>       // T = Hash type
 class Branch: public Node<T>
 {
 private:
@@ -84,21 +86,25 @@ public:
 
 //==========================================================================
 // Merkle Tree
-template<typename T>
+template<typename T>       // T = Hash type
 class Tree: public Node<T> {
 private:
   unique_ptr<Node<T>> root;
 
+  // Get the parent layer for a layer of nodes, connecting them up
+  // in the tree of Branches
   static vector<unique_ptr<Node<T>>> get_parent_nodes(
     const HashFunc<T> hash_func,
     vector<unique_ptr<Node<T>>>& nodes)
   {
     vector<unique_ptr<Node<T>>> parents;
     for (auto i = 0u; i < nodes.size() / 2; ++i)
-      parents.push_back(make_unique<Branch<T>>(hash_func, nodes[2 * i], nodes[2 * i + 1]));
+      parents.push_back(make_unique<Branch<T>>(hash_func, nodes[2 * i],
+                                               nodes[2 * i + 1]));
     return parents;
   }
 
+  // Build a tree from a vector of leaf hashes - returns the root node
   static unique_ptr<Node<T>> build_tree(
     const HashFunc<T> hash_func,
     const vector<T>& leaves)

@@ -1,10 +1,10 @@
 #===========================================================================
 # Tupfile for ObTools::Merkle library
 #
-# Copyright (c) 2024 Paul Clark. All rights reserved
+# Copyright (c) 2024 Paul Clark
 #===========================================================================
 
 NAME    = ot-merkle
-TYPE    = lib
+TYPE    = headers
 
 include_rules

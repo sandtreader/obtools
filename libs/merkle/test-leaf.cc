@@ -3,8 +3,7 @@
 //
 // Test harness for Merkle Leaf
 //
-// Copyright (c) 2024 Paul Clark.  All rights reserved
-// This code comes with NO WARRANTY and is subject to licence agreement
+// Copyright (c) 2024 Paul Clark
 //==========================================================================
 
 #include <gtest/gtest.h>
