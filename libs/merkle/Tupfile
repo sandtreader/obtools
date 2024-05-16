@@ -5,6 +5,7 @@
 #===========================================================================
 
 NAME    = ot-merkle
-TYPE    = headers
+DEPENDS = ot-crypto
+TYPE    = lib
 
 include_rules

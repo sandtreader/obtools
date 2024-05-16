@@ -132,6 +132,19 @@ public:
 };
 
 //==========================================================================
+// Common hash types
+namespace Hash
+{
+  // SHA256
+  struct SHA256
+  {
+    using hash_t = vector<uint8_t>;
+    static hash_t hash_func(const hash_t& left_hash,
+                            const hash_t& right_hash);
+  };
+}
+
+//==========================================================================
 }} // namespaces
 
 #endif // !__OBTOOLS_MERKLE_H
