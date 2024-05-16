@@ -18,6 +18,7 @@ TEST(Leaf, LeafReturnsGivenHash)
   const auto hash = string{"testHash"};
   const auto leaf = Leaf<string>{hash};
   EXPECT_EQ(hash, leaf.get_hash());
+  EXPECT_TRUE(leaf.is_leaf());
 }
 
 TEST(Leaf, TraverseJustHitsNode)

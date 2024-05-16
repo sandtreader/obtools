@@ -24,6 +24,7 @@ TEST(Branch, BranchReturnsResultOfHashFunc)
   unique_ptr<Node<string>> right_leaf = make_unique<Leaf<string>>("right");
   const auto branch = Branch<string>(test_hash_func, left_leaf, right_leaf);
   EXPECT_EQ("left:right", branch.get_hash());
+  EXPECT_FALSE(branch.is_leaf());
 }
 
 TEST(Branch, TraverseHitsBranchLeftAndRight)

@@ -30,6 +30,7 @@ template <typename T>  // T = Hash type
 class Node
 {
 public:
+  virtual bool is_leaf() const = 0;
   virtual T get_hash() const = 0;
 
   // Lambda function for tree traversal, taking a Node
@@ -52,6 +53,8 @@ public:
   Leaf(const T& _hash):
     hash(_hash)
   {}
+
+  bool is_leaf() const { return true; }
 
   T get_hash() const
   {
@@ -85,6 +88,8 @@ public:
   Branch(Branch&& b):
     hash_func{b.hash_func}, left{std::move(b.left)}, right{std::move(b.right)}
   {}
+
+  bool is_leaf() const { return false; }
 
   T get_hash() const
   {
