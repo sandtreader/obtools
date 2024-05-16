@@ -23,11 +23,10 @@ TEST(Tree, TreeReturnsResultOfHashFunc)
   const auto leaves = vector<string>{
     "one",
     "two",
-    "three",
-    "four",
+    "three"
   };
   const auto tree = Tree<string>(test_hash_func, leaves);
-  EXPECT_EQ("one:two:three:four", tree.get_hash());
+  EXPECT_EQ("one:two:three", tree.get_hash());
 }
 
 TEST(Tree, TraverseIsPreorderAcrossWholeTree)
@@ -35,8 +34,7 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTree)
   const auto leaves = vector<string>{
     "one",
     "two",
-    "three",
-    "four",
+    "three"
   };
   const auto tree = Tree<string>(test_hash_func, leaves);
 
@@ -46,7 +44,7 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTree)
     output += node.get_hash() + "/";
   });
 
-  EXPECT_EQ("one:two:three:four/one:two/one/two/three:four/three/four/",
+  EXPECT_EQ("one:two:three/one:two/one/two/three/three/",
             output);
 }
 

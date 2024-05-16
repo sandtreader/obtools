@@ -85,6 +85,12 @@ public:
   ):
     hash_func{_hash_func}, left{std::move(_left)}, right{std::move(_right)}
   {}
+  Branch(
+    HashFunc<T> _hash_func,
+    unique_ptr<Node<T>>& _left
+  ):
+    hash_func{_hash_func}, left{std::move(_left)}
+  {}
   Branch(Branch&& b):
     hash_func{b.hash_func}, left{std::move(b.left)}, right{std::move(b.right)}
   {}
@@ -122,9 +128,14 @@ private:
     vector<unique_ptr<Node<T>>>& nodes)
   {
     vector<unique_ptr<Node<T>>> parents;
-    for (auto i = 0u; i < nodes.size() / 2; ++i)
-      parents.push_back(make_unique<Branch<T>>(hash_func, nodes[2 * i],
-                                               nodes[2 * i + 1]));
+    for (auto i = 0u; i < nodes.size(); i+=2)
+    {
+      if (i+1 < nodes.size())  // Both left and right
+        parents.push_back(make_unique<Branch<T>>(hash_func, nodes[i],
+                                                 nodes[i + 1]));
+      else                     // Only left
+        parents.push_back(make_unique<Branch<T>>(hash_func, nodes[i]));
+    }
     return parents;
   }
 
