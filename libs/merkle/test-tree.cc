@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include "ot-merkle.h"
+#include "ot-text.h"
 
 using namespace std;
 using namespace ObTools;
@@ -56,10 +57,10 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTreeOf3)
   string output;
   tree.traverse_preorder([&output](const Node<string>& node)
   {
-    output += node.get_hash() + "/";
+    output += node.get_hash() + "(" + Text::itos(node.index) + ")/";
   });
 
-  EXPECT_EQ("one:two:three/one:two/one/two/three/three/",
+  EXPECT_EQ("one:two:three(0)/one:two(1)/one(3)/two(4)/three(2)/three(5)/",
             output);
 }
 
@@ -77,10 +78,10 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTreeOf5)
   string output;
   tree.traverse_preorder([&output](const Node<string>& node)
   {
-    output += node.get_hash() + "/";
+    output += node.get_hash() + "(" + Text::itos(node.index) + ")/";
   });
 
-  EXPECT_EQ("one:two:three:four:five/one:two:three:four/one:two/one/two/three:four/three/four/five/five/five/",
+  EXPECT_EQ("one:two:three:four:five(0)/one:two:three:four(1)/one:two(3)/one(7)/two(8)/three:four(4)/three(9)/four(10)/five(2)/five(5)/five(11)/",
             output);
 }
 
@@ -98,10 +99,10 @@ TEST(Tree, TraverseIsBreadthFirstAcrossWholeTreeOf5)
   string output;
   tree.traverse_breadth_first([&output](const Node<string>& node)
   {
-    output += node.get_hash() + "/";
+    output += node.get_hash() + "(" + Text::itos(node.index) + ")/";
   });
 
-  EXPECT_EQ("one:two:three:four:five/one:two:three:four/five/one:two/three:four/five/one/two/three/four/five/",
+  EXPECT_EQ("one:two:three:four:five(0)/one:two:three:four(1)/five(2)/one:two(3)/three:four(4)/five(5)/one(7)/two(8)/three(9)/four(10)/five(11)/",
             output);
 }
 

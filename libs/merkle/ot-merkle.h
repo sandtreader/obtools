@@ -31,6 +31,7 @@ template <typename T>  // T = Hash type
 class Node
 {
 public:
+  uint64_t index{0};  // In flattened complete tree 2i+1, 2i+2 scheme
   virtual bool is_leaf() const = 0;
   virtual T get_hash() const = 0;
 
@@ -40,6 +41,10 @@ public:
   virtual void traverse_preorder(
           const typename Node<T>::TraversalCallbackFunc& callback) const = 0;
   virtual void push_children(queue<Node<T>*>&) const {}
+
+  // Set index according to 2i+1, 2i+2 scheme
+  virtual void set_index(uint64_t _index) = 0;
+
   virtual ~Node() {};
 };
 
@@ -68,6 +73,8 @@ public:
   {
     callback(*this);
   }
+
+  void set_index(uint64_t _index) override { this->index = _index; }
 };
 
 //==========================================================================
@@ -121,6 +128,13 @@ public:
     if (left) queue.push(left.get());
     if (right) queue.push(right.get());
   }
+
+  void set_index(uint64_t _index) override
+  {
+    this->index = _index;
+    if (left) left->set_index(2*_index + 1);
+    if (right) right->set_index(2*_index + 2);
+  }
 };
 
 //==========================================================================
@@ -165,7 +179,9 @@ private:
 public:
   Tree(const HashFunc<T> hash_func, const vector<T>& leaves):
     root{build_tree(hash_func, leaves)}
-  {}
+  {
+    root->set_index(0);
+  }
   Tree(Tree&& t):
     root(std::move(t.root))
   {}
