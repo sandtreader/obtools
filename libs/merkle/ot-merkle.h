@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <vector>
+#include <queue>
 
 namespace ObTools { namespace Merkle {
 
@@ -38,6 +39,7 @@ public:
 
   virtual void traverse_preorder(
           const typename Node<T>::TraversalCallbackFunc& callback) const = 0;
+  virtual void push_children(queue<Node<T>*>&) const {}
   virtual ~Node() {};
 };
 
@@ -54,15 +56,15 @@ public:
     hash(_hash)
   {}
 
-  bool is_leaf() const { return true; }
+  bool is_leaf() const override { return true; }
 
-  T get_hash() const
+  T get_hash() const override
   {
     return hash;
   }
 
   void traverse_preorder(
-      const typename Node<T>::TraversalCallbackFunc& callback) const
+      const typename Node<T>::TraversalCallbackFunc& callback) const override
   {
     callback(*this);
   }
@@ -96,9 +98,9 @@ public:
     hash_func{b.hash_func}, left{std::move(b.left)}, right{std::move(b.right)}
   {}
 
-  bool is_leaf() const { return false; }
+  bool is_leaf() const override { return false; }
 
-  T get_hash() const
+  T get_hash() const override
   {
     if (right)
       return hash_func(left->get_hash(), right->get_hash());
@@ -107,11 +109,17 @@ public:
   }
 
   void traverse_preorder(
-      const typename Node<T>::TraversalCallbackFunc& callback) const
+      const typename Node<T>::TraversalCallbackFunc& callback) const override
   {
     callback(*this);
     if (left) left->traverse_preorder(callback);
     if (right) right->traverse_preorder(callback);
+  }
+
+  void push_children(queue<Node<T>*>& queue) const override
+  {
+    if (left) queue.push(left.get());
+    if (right) queue.push(right.get());
   }
 };
 
@@ -174,6 +182,22 @@ public:
     root->traverse_preorder(callback);
   }
 
+  // Walk the tree from the root - breadth first
+  virtual void traverse_breadth_first(
+      const typename Node<T>::TraversalCallbackFunc& callback) const
+  {
+    queue<Node<T>*> queue;
+    queue.push(root.get());
+
+    while (!queue.empty())
+    {
+      auto node = queue.front();
+      queue.pop();
+
+      callback(*node);
+      node->push_children(queue);
+    }
+  }
 };
 
 //==========================================================================

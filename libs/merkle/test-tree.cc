@@ -84,6 +84,27 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTreeOf5)
             output);
 }
 
+TEST(Tree, TraverseIsBreadthFirstAcrossWholeTreeOf5)
+{
+  const auto leaves = vector<string>{
+    "one",
+    "two",
+    "three",
+    "four",
+    "five"
+  };
+  const auto tree = Tree<string>(test_hash_func, leaves);
+
+  string output;
+  tree.traverse_breadth_first([&output](const Node<string>& node)
+  {
+    output += node.get_hash() + "/";
+  });
+
+  EXPECT_EQ("one:two:three:four:five/one:two:three:four/five/one:two/three:four/five/one/two/three/four/five/",
+            output);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
