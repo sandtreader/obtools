@@ -37,7 +37,7 @@ public:
   using TraversalCallbackFunc = function<void(const Node<T>&)>;
 
   virtual void traverse_preorder(
-                typename Node<T>::TraversalCallbackFunc callback) const = 0;
+          const typename Node<T>::TraversalCallbackFunc& callback) const = 0;
   virtual ~Node() {};
 };
 
@@ -61,7 +61,8 @@ public:
     return hash;
   }
 
-  void traverse_preorder(typename Node<T>::TraversalCallbackFunc callback) const
+  void traverse_preorder(
+      const typename Node<T>::TraversalCallbackFunc& callback) const
   {
     callback(*this);
   }
@@ -105,7 +106,8 @@ public:
       return left->get_hash();
   }
 
-  void traverse_preorder(typename Node<T>::TraversalCallbackFunc callback) const
+  void traverse_preorder(
+      const typename Node<T>::TraversalCallbackFunc& callback) const
   {
     callback(*this);
     if (left) left->traverse_preorder(callback);
@@ -166,7 +168,8 @@ public:
   }
 
   // Walk the tree from the root - preorder
-  void traverse_preorder(typename Node<T>::TraversalCallbackFunc callback) const
+  void traverse_preorder(
+      const typename Node<T>::TraversalCallbackFunc& callback) const
   {
     root->traverse_preorder(callback);
   }
