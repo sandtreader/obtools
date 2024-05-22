@@ -49,7 +49,7 @@ if ARCH == "" then
 end
 local CPPSTD = tup.getconfig("CPPSTD")
 if CPPSTD == nil or CPPSTD == "" then
-  CPPSTD = 14
+  CPPSTD = 17
 end
 
 local PLATFORM_GROUPS = {
