@@ -208,11 +208,11 @@ string btox(const string& data)
 
 //--------------------------------------------------------------------------
 // Binary to hex (simple, use Misc::Dumper for long blocks)
-string btox(const vector<uint8_t>& data)
+string btox(const vector<byte>& data)
 {
   ostringstream os;
   os << hex << setfill('0');
-  for (vector<uint8_t>::const_iterator p = data.begin(); p != data.end(); ++p)
+  for (vector<byte>::const_iterator p = data.begin(); p != data.end(); ++p)
   {
     os << setw(2) << static_cast<int>(*p);
   }

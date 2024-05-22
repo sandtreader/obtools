@@ -122,16 +122,16 @@ TEST(ConvertTest, TestBinaryToString)
 
 TEST(ConvertTest, TestBinaryVectorToString)
 {
-  vector<uint8_t> buf;
-  buf.push_back(0xde);
-  buf.push_back(0xad);
-  buf.push_back(0xbe);
-  buf.push_back(0xef);
-  vector<uint8_t> buf2;
-  buf2.push_back(0x00);
-  buf2.push_back(0x00);
-  buf2.push_back(0xbe);
-  buf2.push_back(0xef);
+  vector<byte> buf;
+  buf.push_back(byte{0xde});
+  buf.push_back(byte{0xad});
+  buf.push_back(byte{0xbe});
+  buf.push_back(byte{0xef});
+  vector<byte> buf2;
+  buf2.push_back(byte{0x00});
+  buf2.push_back(byte{0x00});
+  buf2.push_back(byte{0xbe});
+  buf2.push_back(byte{0xef});
 
   ASSERT_EQ("deadbeef", Text::btox(buf));
   ASSERT_EQ("0000beef", Text::btox(buf2));

@@ -70,6 +70,8 @@ public:
   Value(const char *_s): type(STRING), s(_s) {}
   Value(const vector<unsigned char>& data):
     type(BINARY), s(data.begin(), data.end()) {}
+  Value(const vector<byte>& data):
+    type(BINARY), s(reinterpret_cast<const char *>(data.data()), data.size()) {}
 
   //------------------------------------------------------------------------
   // Set a constructed property on an object value - returns the Value added
@@ -143,6 +145,15 @@ public:
   { return (type==NUMBER)?f:
       ((type==INTEGER)?n:
        ((type==STRING)?Text::stof(s):def)); }
+
+  //------------------------------------------------------------------------
+  // Read as a binary value
+  vector<byte> as_binary() const
+  { return type == BINARY
+      ? vector<byte>{
+            reinterpret_cast<const byte *>(&*s.begin()),
+            reinterpret_cast<const byte *>(&*s.end())}
+      : vector<byte>(); }
 
   //------------------------------------------------------------------------
   // Write the value to the given stream

@@ -646,6 +646,8 @@ public:
   //------------------------------------------------------------------------
   // Get result - writes DIGEST_LENGTH bytes to result
   void get_result(unsigned char *result);
+  void get_result(byte *result)
+  { get_result(reinterpret_cast<unsigned char *>(result)); }
 
   //------------------------------------------------------------------------
   // Get result as a hex string
@@ -701,6 +703,8 @@ public:
   //------------------------------------------------------------------------
   // Get result - writes DIGEST_LENGTH bytes to result
   void get_result(unsigned char *result);
+  void get_result(byte *result)
+  { get_result(reinterpret_cast<unsigned char *>(result)); }
 
   //------------------------------------------------------------------------
   // Get result as a hex string
