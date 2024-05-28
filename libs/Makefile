@@ -20,7 +20,7 @@ LIBSDIR = $(BUILDDIR)/lib
 
 # Tools & flags
 CC = clang++
-CFLAGS = --std=c++14 -pedantic -Wall -Wextra -Werror -fPIC -DPLATFORM_LINUX -O2
+CFLAGS = --std=c++17 -pedantic -Wall -Wextra -Werror -fPIC -DPLATFORM_LINUX -O2
 AR = ar
 IFLAGS = -I$(INCSDIR)
 
