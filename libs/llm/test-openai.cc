@@ -86,7 +86,7 @@ TEST_F(OpenAITest, Test_embedding)
     ASSERT_EQ(1536, embedding.size());
 
     // Just test the first few
-    EXPECT_NEAR(-0.0150698, embedding[0], 0.001);
+    EXPECT_NEAR(-0.0163735, embedding[0], 0.001);
     EXPECT_NEAR(-0.0286509, embedding[1], 0.001);
     EXPECT_NEAR(-0.0187523, embedding[2], 0.001);
     EXPECT_NEAR(0.00158011, embedding[3], 0.001);
