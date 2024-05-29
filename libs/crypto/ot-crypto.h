@@ -28,6 +28,7 @@
 // expand to OpenSSL for the duration of the OpenSSL headers
 #define SSL OpenSSL
 
+#include <openssl/evp.h>
 #include <openssl/aes.h>
 #include <openssl/des.h>
 #include <openssl/rsa.h>
@@ -978,23 +979,50 @@ class CertificateStore
 };
 
 //==========================================================================
+// EVP key
+// OpenSSL EVP key wrapper (only public currently)
+class EVPKey
+{
+public:
+  unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> evp_key;
+
+  //------------------------------------------------------------------------
+  // Type pseudo-enumeration
+  enum class Type: int {
+    X25519 = EVP_PKEY_X25519,
+    Ed25519 = EVP_PKEY_ED25519,
+    X448 = EVP_PKEY_X448,
+    Ed448 = EVP_PKEY_ED448,
+  };
+
+  //------------------------------------------------------------------------
+  // Public Key Constructor
+  EVPKey(Type type, const vector<byte>& key):
+    evp_key{EVP_PKEY_new_raw_public_key(
+        static_cast<int>(type), nullptr,
+        reinterpret_cast<const unsigned char *>(key.data()), key.size()),
+        EVP_PKEY_free}
+  {}
+  // Copy and assignment are banned!
+  EVPKey(const EVPKey&) = delete;
+  EVPKey& operator=(const EVPKey&) = delete;
+
+  //------------------------------------------------------------------------
+  // Public Key Constructor
+  bool is_valid() const { return evp_key.get(); }
+};
+
+//==========================================================================
+// EVP Functions
+namespace EVP {
+  //------------------------------------------------------------------------
+  // Verify signature
+  bool verify(const EVPKey& key, const vector<byte>& message,
+      const vector<byte>& signature);
+}
+
+//==========================================================================
 }} //namespaces
 
 #pragma clang diagnostic pop
 #endif // !__OBTOOLS_CRYPTO_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
