@@ -111,6 +111,15 @@ string Base64::encode(const string& binary, int split,
 }
 
 //--------------------------------------------------------------------------
+// Encode a binary vector - options as encode above
+string Base64::encode(const vector<byte>& binary, int split,
+                      const string& line_end)
+{
+  return encode(reinterpret_cast<const unsigned char *>(binary.data()),
+                binary.size(), split, line_end);
+}
+
+//--------------------------------------------------------------------------
 // Get length of binary block required for decode
 // This is a maximum estimate - real length may be less than this, but
 // will never be more
@@ -215,13 +224,29 @@ bool Base64::decode(const string& base64, uint64_t& n)
 bool Base64::decode(const string& base64, string& binary)
 {
   size_t max_length = binary_length(base64);
-  unsigned char *buf = new unsigned char[max_length];
+  auto buf = make_unique<unsigned char[]>(max_length);
 
-  size_t len = decode(base64, buf, max_length);
+  size_t len = decode(base64, buf.get(), max_length);
   if (len > max_length) return false;
 
-  binary.append(reinterpret_cast<const char *>(buf), len);
-  delete[] buf;
+  binary.append(reinterpret_cast<const char *>(&buf[0]), len);
+  return true;
+}
+
+//--------------------------------------------------------------------------
+// Decode base64 text into a binary buffer
+// Returns whether successful - if so, appends data to binary
+// Requires temporary buffer equal to the binary_length() of the string
+bool Base64::decode(const string& base64, vector<byte>& binary)
+{
+  size_t max_length = binary_length(base64);
+  auto buf = make_unique<unsigned char[]>(max_length);
+  size_t len = decode(base64, buf.get(), max_length);
+  if (len > max_length) return false;
+
+  binary.insert(binary.end(),
+                reinterpret_cast<const byte *>(&buf[0]),
+                reinterpret_cast<const byte *>(&buf[len]));
   return true;
 }
 

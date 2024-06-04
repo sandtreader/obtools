@@ -80,6 +80,25 @@ TEST(Value, TestAsFloat)
   ASSERT_EQ(99.9, nv.as_float(99.9));
 }
 
+TEST(Value, TestAsBinaryWithBinary)
+{
+  vector<unsigned char> b{42, 99};
+  Value v(b);
+  auto b2 = v.as_binary();
+  ASSERT_EQ(2, b2.size());
+  EXPECT_EQ(byte{42}, b2[0]);
+  EXPECT_EQ(byte{99}, b2[1]);
+}
+
+TEST(Value, TestAsBinaryWithString)
+{
+  Value v("KmM=");
+  auto b2 = v.as_binary();
+  ASSERT_EQ(2, b2.size());
+  EXPECT_EQ(byte{42}, b2[0]);
+  EXPECT_EQ(byte{99}, b2[1]);
+}
+
 TEST(Value, TestObjectSetter)
 {
   Value value(Value::OBJECT);

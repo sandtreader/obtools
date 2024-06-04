@@ -33,6 +33,29 @@ bool Value::operator==(const Value& v) const
   }
 }
 
+//------------------------------------------------------------------------
+// Read as a binary value, including Base64 strings
+vector<byte> Value::as_binary() const
+{
+  switch (type)
+  {
+    case BINARY:
+      return vector<byte>{reinterpret_cast<const byte *>(&*s.begin()),
+                          reinterpret_cast<const byte *>(&*s.end())};
+
+    case STRING:
+    {
+      Text::Base64 base64;
+      vector<byte> binary;
+      base64.decode(s, binary);
+      return binary;
+    }
+
+    default:
+      return vector<byte>();
+  }
+}
+
 //--------------------------------------------------------------------------
 // Escape the string and write to the output
 void Value::write_string_to(ostream& out) const

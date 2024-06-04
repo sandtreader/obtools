@@ -254,7 +254,12 @@ public:
   string encode(const string& binary, int split=76,
                 const string& line_end="\r\n");
 
-  //------------------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  // Encode a binary vector - options as encode above
+  string encode(const vector<byte>& binary, int split=76,
+                const string& line_end="\r\n");
+
+//------------------------------------------------------------------------
   // Get length of binary block required for decode
   // This is a maximum estimate - real length may be less than this, but
   // will never be more
@@ -277,6 +282,11 @@ public:
   // Requires temporary buffer equal to the binary_length() of the string
   bool decode(const string& base64, string& binary);
 
+  //--------------------------------------------------------------------------
+  // Decode base64 text into a binary buffer
+  // Returns whether successful - if so, appends data to binary
+  // Requires temporary buffer equal to the binary_length() of the string
+  bool decode(const string& base64, vector<byte>& binary);
 };
 
 //==========================================================================

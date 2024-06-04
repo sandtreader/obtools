@@ -148,12 +148,7 @@ public:
 
   //------------------------------------------------------------------------
   // Read as a binary value
-  vector<byte> as_binary() const
-  { return type == BINARY
-      ? vector<byte>{
-            reinterpret_cast<const byte *>(&*s.begin()),
-            reinterpret_cast<const byte *>(&*s.end())}
-      : vector<byte>(); }
+  vector<byte> as_binary() const;
 
   //------------------------------------------------------------------------
   // Write the value to the given stream
