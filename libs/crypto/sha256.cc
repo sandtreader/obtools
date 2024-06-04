@@ -85,6 +85,17 @@ string SHA256::digest(const void *data, size_t length)
 }
 
 //--------------------------------------------------------------------------
+// Digest of vector<byte>, returning vector<byte>
+vector<byte> SHA256::digest(const vector<byte>& data)
+{
+  vector<byte> buf(DIGEST_LENGTH);
+  ::SHA256(reinterpret_cast<const unsigned char *>(data.data()),
+           static_cast<unsigned long>(data.size()),
+           reinterpret_cast<unsigned char *>(buf.data()));
+  return buf;
+}
+
+//--------------------------------------------------------------------------
 // Digest returning hex string
 string SHA256::digest_hex(const void *data, size_t length)
 {

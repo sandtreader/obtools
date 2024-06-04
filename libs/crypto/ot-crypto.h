@@ -724,6 +724,10 @@ public:
   // Digest returning binary string
   static string digest(const void *data, size_t length);
 
+  //--------------------------------------------------------------------------
+  // Digest of vector<byte>, returning vector<byte>
+  static vector<byte> digest(const vector<byte>& data);
+
   //------------------------------------------------------------------------
   // Digest returning hex string
   static string digest_hex(const void *data, size_t length);
