@@ -114,6 +114,16 @@ TEST(ConvertTest, TestHexStringToBinaryString)
     EXPECT_EQ(expected[i], (unsigned char)binary[i]);
 }
 
+TEST(ConvertTest, TestHexStringToBinaryVector)
+{
+  unsigned char expected[] = {0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x99, 0x00};
+  vector<byte> binary;
+  Text::xtob("DEADbeef12349900", binary);
+  ASSERT_EQ(8, binary.size());
+  for (unsigned i = 0; i < binary.size(); ++i)
+    EXPECT_EQ((byte)expected[i], binary[i]);
+}
+
 TEST(ConvertTest, TestBinaryToString)
 {
   unsigned char buf[4] = {0xde, 0xad, 0xbe, 0xef};

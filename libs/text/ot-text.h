@@ -210,6 +210,10 @@ unsigned int xtob(const string& hex, unsigned char *data,
 // Hex string to binary string
 string xtob(const string& hex);
 
+//--------------------------------------------------------------------------
+// Hex string to binary byte vector - appends to vector
+void xtob(const string& hex, vector<byte>& data);
+
 //==========================================================================
 // Base64 encoder/decoder
 class Base64

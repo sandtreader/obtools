@@ -277,4 +277,17 @@ string xtob(const string& hex)
   return binary;
 }
 
+//--------------------------------------------------------------------------
+// Hex string to binary byte vector - appends to vector
+void xtob(const string& hex, vector<byte>& data)
+{
+  const char *s = hex.data();
+  for(unsigned int i=0; i<hex.size()/2; i++)
+  {
+    auto n = decode_nybble(*s++) << 4;
+    n |= decode_nybble(*s++);
+    data.push_back((byte)n);
+  }
+}
+
 }} // namespaces
