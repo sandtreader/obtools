@@ -410,6 +410,10 @@ public:
   // Get random binary bytes up to N bytes long
   void generate_binary(unsigned char *p, int n);
 
+  //--------------------------------------------------------------------------
+  // Generate 'n' bytes of binary into a vector<byte>
+  vector<byte> generate_binary(int n);
+
   //------------------------------------------------------------------------
   // Get a random hex string up to N bytes (N*2 hex digits) long
   string generate_hex(int n);

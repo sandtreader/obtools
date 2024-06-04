@@ -84,6 +84,15 @@ void Random::generate_binary(unsigned char *p, int n)
 }
 
 //--------------------------------------------------------------------------
+// Generate 'n' bytes of binary into a vector<byte>
+vector<byte> Random::generate_binary(int n)
+{
+  vector<byte> buf(n);
+  generate_binary(reinterpret_cast<unsigned char *>(buf.data()), n);
+  return buf;
+}
+
+//--------------------------------------------------------------------------
 // Get a random hex string up to N bytes long
 string Random::generate_hex(int n)
 {
