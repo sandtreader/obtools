@@ -240,6 +240,11 @@ public:
   // Throws Error on failure
   void write(const vector<unsigned char>& v);
 
+  //--------------------------------------------------------------------------
+  // Write a vector of bytes to the channel
+  // Throws Error on failure
+  void write(const vector<byte>& v);
+
   //------------------------------------------------------------------------
   // Write a single byte to the channel
   // Throws Error on failure
@@ -427,6 +432,8 @@ public:
     data(_data), length(_length) {}
   BlockReader(const vector<unsigned char>& v):
     data(&v[0]), length(v.size()) {}
+  BlockReader(const vector<byte>& v):
+    data(reinterpret_cast<const unsigned char *>(&v[0])), length(v.size()) {}
 
   // Read implementations
   virtual size_t basic_read(void *buf, size_t count);
@@ -450,6 +457,8 @@ public:
     data(_data), length(_length) {}
   BlockWriter(vector<unsigned char>& v):
     data(&v[0]), length(v.size()) {}
+  BlockWriter(vector<byte>& v):
+    data(reinterpret_cast<unsigned char *>(&v[0])), length(v.size()) {}
 
   // Write implementation
   virtual void basic_write(const void *buf, size_t count);

@@ -47,6 +47,14 @@ void Writer::write(const vector<unsigned char>& v)
 }
 
 //--------------------------------------------------------------------------
+// Write a vector of bytes to the channel
+// Throws Error on failure
+void Writer::write(const vector<byte>& v)
+{
+  basic_write(reinterpret_cast<const unsigned char *>(&v[0]), v.size());
+}
+
+//--------------------------------------------------------------------------
 // Write the given C string to the channel
 // Throws Error on failure
 void Writer::write(const char *p)
