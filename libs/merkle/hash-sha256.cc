@@ -6,7 +6,6 @@
 // Copyright (c) 2024 Paul Clark
 //==========================================================================
 
-#include <gtest/gtest.h>
 #include "ot-merkle.h"
 #include "ot-crypto.h"
 
