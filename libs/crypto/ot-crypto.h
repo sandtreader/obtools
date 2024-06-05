@@ -1036,7 +1036,10 @@ namespace EVP {
   using HashType = const char *;
   namespace Hash {
     const auto RIPEMD160 = "ripemd160";
+#if OPENSSL_VERSION_MAJOR > 3 || \
+    (OPENSSL_VERSION_MAJOR == 3 && OPENSSL_VERSION_MINOR >= 2)
     const auto KECCAK256 = "KECCAK-256";
+#endif
   };
 
   //------------------------------------------------------------------------

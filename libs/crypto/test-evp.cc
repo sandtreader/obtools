@@ -260,6 +260,8 @@ TEST(EVPTests, TestProducesCorrectRIPEMD160Hash)
   EXPECT_EQ(expected, EVP::hash(EVP::Hash::RIPEMD160, data));
 }
 
+#if OPENSSL_VERSION_MAJOR > 3 || \
+    (OPENSSL_VERSION_MAJOR == 3 && OPENSSL_VERSION_MINOR >= 2)
 TEST(EVPTests, TestProducesCorrectKECCAK256Hash)
 {
   const auto data = vector<byte>{
@@ -277,6 +279,7 @@ TEST(EVPTests, TestProducesCorrectKECCAK256Hash)
   };
   EXPECT_EQ(expected, EVP::hash(EVP::Hash::KECCAK256, data));
 }
+#endif
 
 int main(int argc, char **argv)
 {
