@@ -993,19 +993,20 @@ public:
   //------------------------------------------------------------------------
   // Type pseudo-enumeration
   enum class Type: int {
-    X25519 = EVP_PKEY_X25519,
-    Ed25519 = EVP_PKEY_ED25519,
-    X448 = EVP_PKEY_X448,
-    Ed448 = EVP_PKEY_ED448,
+    X25519 = NID_X25519,
+    Ed25519 = NID_ED25519,
+    X448 = NID_X448,
+    Ed448 = NID_ED448,
+    SECP256K1 = NID_secp256k1,
   };
+
+  Type type;
 
   //------------------------------------------------------------------------
   // Public Key Constructor
+  // Takes a key type and raw key data
   EVPKey(Type type, const vector<byte>& key):
-    evp_key{EVP_PKEY_new_raw_public_key(
-        static_cast<int>(type), nullptr,
-        reinterpret_cast<const unsigned char *>(key.data()), key.size()),
-        EVP_PKEY_free}
+    evp_key{init_key(type, key)}, type{type}
   {}
   // Copy and assignment are banned!
   EVPKey(const EVPKey&) = delete;
@@ -1014,6 +1015,11 @@ public:
   //------------------------------------------------------------------------
   // Public Key Constructor
   bool is_valid() const { return evp_key.get(); }
+
+private:
+  static unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> init_key(
+      Type type, const vector<byte>& key);
+
 };
 
 //==========================================================================
@@ -1021,6 +1027,9 @@ public:
 namespace EVP {
   //------------------------------------------------------------------------
   // Verify signature
+  // Defaults to no hashing for X25519/Ed25519/X448/Ed448
+  // SHA256 for SECP256K1
+  // Note: there is no current way to override the hashing method
   bool verify(const EVPKey& key, const vector<byte>& message,
       const vector<byte>& signature);
 }
