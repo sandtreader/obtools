@@ -30,4 +30,19 @@ bool verify(const EVPKey& key, const vector<byte>& message,
       message.size()) == 1;
 }
 
+//--------------------------------------------------------------------------
+// Hash data
+vector<byte> hash(HashType type, const vector<byte>& data)
+{
+  auto hash = vector<byte>(EVP_MAX_MD_SIZE);
+  auto hash_size = unsigned{0};
+  const auto hash_func = EVP_MD_fetch(nullptr, type, nullptr);
+  EVP_Digest(
+      reinterpret_cast<const void *>(data.data()), data.size(),
+      reinterpret_cast<unsigned char *>(hash.data()), &hash_size,
+      hash_func, nullptr);
+  hash.resize(hash_size);
+  return hash;
+}
+
 }}} // namespaces

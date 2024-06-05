@@ -244,6 +244,40 @@ TEST(EVPTests, TestVerfiesCorrectSECP256K1Signature)
   EXPECT_TRUE(EVP::verify(key, message, signature));
 }
 
+TEST(EVPTests, TestProducesCorrectRIPEMD160Hash)
+{
+  const auto data = vector<byte>{
+    byte{'H'}, byte{'e'}, byte{'l'}, byte{'l'}, byte{'o'}, byte{','},
+    byte{' '}, byte{'w'}, byte{'o'}, byte{'r'}, byte{'l'}, byte{'d'},
+    byte{'!'},
+  };
+  const auto expected = vector<byte>{
+    byte{0x58}, byte{0x26}, byte{0x2d}, byte{0x1f}, byte{0xbd}, byte{0xbe},
+    byte{0x45}, byte{0x30}, byte{0xd8}, byte{0x86}, byte{0x5d}, byte{0x35},
+    byte{0x18}, byte{0xc6}, byte{0xd6}, byte{0xe4}, byte{0x10}, byte{0x02},
+    byte{0x61}, byte{0x0f},
+  };
+  EXPECT_EQ(expected, EVP::hash(EVP::Hash::RIPEMD160, data));
+}
+
+TEST(EVPTests, TestProducesCorrectKECCAK256Hash)
+{
+  const auto data = vector<byte>{
+    byte{'H'}, byte{'e'}, byte{'l'}, byte{'l'}, byte{'o'}, byte{','},
+    byte{' '}, byte{'w'}, byte{'o'}, byte{'r'}, byte{'l'}, byte{'d'},
+    byte{'!'},
+  };
+  const auto expected = vector<byte>{
+    byte{0xb6}, byte{0xe1}, byte{0x6d}, byte{0x27}, byte{0xac}, byte{0x5a},
+    byte{0xb4}, byte{0x27}, byte{0xa7}, byte{0xf6}, byte{0x89}, byte{0x00},
+    byte{0xac}, byte{0x55}, byte{0x59}, byte{0xce}, byte{0x27}, byte{0x2d},
+    byte{0xc6}, byte{0xc3}, byte{0x7c}, byte{0x82}, byte{0xb3}, byte{0xe0},
+    byte{0x52}, byte{0x24}, byte{0x6c}, byte{0x82}, byte{0x24}, byte{0x4c},
+    byte{0x50}, byte{0xe4},
+  };
+  EXPECT_EQ(expected, EVP::hash(EVP::Hash::KECCAK256, data));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

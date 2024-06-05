@@ -1032,6 +1032,16 @@ namespace EVP {
   // Note: there is no current way to override the hashing method
   bool verify(const EVPKey& key, const vector<byte>& message,
       const vector<byte>& signature);
+
+  using HashType = const char *;
+  namespace Hash {
+    const auto RIPEMD160 = "ripemd160";
+    const auto KECCAK256 = "KECCAK-256";
+  };
+
+  //------------------------------------------------------------------------
+  // Hash some data
+  vector<byte> hash(HashType type, const vector<byte>& data);
 }
 
 //==========================================================================
