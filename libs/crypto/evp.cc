@@ -7,6 +7,8 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
+#if OPENSSL_VERSION_MAJOR >= 3
+
 #include "ot-crypto.h"
 
 namespace ObTools { namespace Crypto { namespace EVP {
@@ -46,3 +48,5 @@ vector<byte> hash(HashType type, const vector<byte>& data)
 }
 
 }}} // namespaces
+
+#endif // OpenSSL >= 3

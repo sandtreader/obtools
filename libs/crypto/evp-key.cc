@@ -7,6 +7,8 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
+#if OPENSSL_VERSION_MAJOR >= 3
+
 #include "ot-crypto.h"
 #include <openssl/param_build.h>
 #include <openssl/err.h>
@@ -49,3 +51,5 @@ unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> EVPKey::init_key(
 }
 
 }} // namespaces
+
+#endif // OpenSSL >= 3
