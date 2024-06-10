@@ -199,6 +199,7 @@ uint64_t xtoi64(const string& s);
 string btox(const unsigned char *data, unsigned int length);
 string btox(const string& data);
 string btox(const vector<byte>& data);
+string btox(const vector<uint8_t>& data);
 
 //--------------------------------------------------------------------------
 // Hex to binary

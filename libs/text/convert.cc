@@ -221,6 +221,17 @@ string btox(const vector<byte>& data)
 }
 
 //--------------------------------------------------------------------------
+// Binary to hex (simple, use Misc::Dumper for long blocks)
+string btox(const vector<uint8_t>& data)
+{
+  ostringstream os;
+  os << hex << setfill('0');
+  for (auto p = data.begin(); p != data.end(); ++p)
+    os << setw(2) << static_cast<int>(*p);
+  return os.str();
+}
+
+//--------------------------------------------------------------------------
 // Hex nybble to binary nybble
 inline unsigned char decode_nybble(char c)
 {
