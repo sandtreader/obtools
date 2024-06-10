@@ -7,16 +7,15 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
-#if OPENSSL_VERSION_MAJOR >= 3
-
 #include "ot-crypto.h"
+#if OPENSSL_VERSION_MAJOR >= 3
 
 namespace ObTools { namespace Crypto { namespace EVP {
 
 //--------------------------------------------------------------------------
 // Verify signature
 bool verify(const EVPKey& key, const vector<byte>& message,
-    const vector<byte>& signature)
+            const vector<byte>& signature)
 {
   auto mdctx = unique_ptr<EVP_MD_CTX, void (*)(EVP_MD_CTX *)>{
       EVP_MD_CTX_new(), EVP_MD_CTX_free};

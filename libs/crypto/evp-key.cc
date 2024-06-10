@@ -7,9 +7,9 @@
 // This code comes with NO WARRANTY and is subject to licence agreement
 //==========================================================================
 
-#if OPENSSL_VERSION_MAJOR >= 3
 
 #include "ot-crypto.h"
+#if OPENSSL_VERSION_MAJOR >= 3
 #include <openssl/param_build.h>
 #include <openssl/err.h>
 
