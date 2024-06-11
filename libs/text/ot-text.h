@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <array>
 #include <stdint.h>
 #include "ot-gen.h"
 
@@ -300,6 +301,27 @@ public:
 
   // Encode with no line splits
   string encode(const string& s) { return Base64::encode(s, 0); }
+};
+
+//==========================================================================
+// Base58 encoder/decoder
+class Base58
+{
+  array<int, 256> reverse_map;
+
+public:
+  //------------------------------------------------------------------------
+  // Constructor
+  Base58();
+
+  //--------------------------------------------------------------------------
+  // Encode a binary vector - options as encode above
+  string encode(const vector<byte>& binary);
+
+  //--------------------------------------------------------------------------
+  // Decode base64 text into a binary buffer
+  // Returns whether successful - if so, appends data to binary
+  bool decode(const string& base58, vector<byte>& binary);
 };
 
 //==========================================================================
