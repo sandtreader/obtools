@@ -366,6 +366,21 @@ public:
 };
 
 //==========================================================================
+// Bech32 encoder/decoder
+class Bech32
+{
+public:
+  //--------------------------------------------------------------------------
+  // Encode a binary vector with optinal prefix
+  static string encode(const vector<byte>& binary);
+
+  //--------------------------------------------------------------------------
+  // Decode base64 text into a binary buffer
+  // Returns whether successful - if so, appends data to binary
+  static bool decode(const string& bech32, vector<byte>& binary);
+};
+
+//==========================================================================
 // UTF8 encoder/decoder
 class UTF8
 {

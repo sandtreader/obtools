@@ -106,5 +106,20 @@ struct ConstExprMap {
 };
 
 //==========================================================================
+// Bit shift a value in a direction based on sign of value
+template <typename T>
+T shiftr(const T& value, int places)
+{
+  if (places >= 0) return value >> places;
+  else return value << abs(places);
+}
+template <typename T>
+T shiftl(const T& value, int places)
+{
+  if (places >= 0) return value << places;
+  else return value >> abs(places);
+}
+
+//==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_GEN_H
