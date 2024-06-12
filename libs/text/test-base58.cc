@@ -75,6 +75,18 @@ TEST(Base58Test, leading_zeros_decode)
   EXPECT_EQ("0000287fb4cd", Text::btox(binary));
 }
 
+TEST(Base58Test, bitcoin_address_decode_timing)
+{
+  string encoding("37tqtRHxT51P4UhhoKKQFmDdr1neagiCm4");
+
+  for(int i=0; i<1000; i++)
+  {
+    Text::Base58 base58;
+    vector<byte> binary;
+    ASSERT_TRUE(base58.decode(encoding, binary));
+  }
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
