@@ -248,25 +248,33 @@ inline unsigned char decode_nybble(char c)
       return c-'0';
 
     default:
-      return 0;  // Safest?
+      throw runtime_error("Bad Hex");
   }
 }
 
 //--------------------------------------------------------------------------
 // Hex to binary
 // Reads up to max_length bytes into data, returns number actually read
+// Returns 0 if any of the string is invalid hex
 unsigned int xtob(const string& hex, unsigned char *data,
                   unsigned int max_length)
 {
   unsigned int length = hex.size()/2;
   if (length > max_length) length = max_length;
 
-  const char *s = hex.data();
-  for(unsigned int i=0; i<length; i++)
+  try
   {
-    auto n = decode_nybble(*s++) << 4;
-    n |= decode_nybble(*s++);
-    data[i] = n;
+    const char *s = hex.data();
+    for(unsigned int i=0; i<length; i++)
+    {
+      auto n = decode_nybble(*s++) << 4;
+      n |= decode_nybble(*s++);
+      data[i] = n;
+    }
+  }
+  catch (runtime_error)
+  {
+    return 0;
   }
 
   return length;
@@ -274,31 +282,46 @@ unsigned int xtob(const string& hex, unsigned char *data,
 
 //--------------------------------------------------------------------------
 // Hex string to binary string
+// Returns "" if any of the string is invalid hex
 string xtob(const string& hex)
 {
-  const char *s = hex.data();
-  string binary;
-  for(unsigned int i=0; i<hex.size()/2; i++)
+  try
   {
-    auto n = decode_nybble(*s++) << 4;
-    n |= decode_nybble(*s++);
-    binary += n;
-  }
+    const char *s = hex.data();
+    string binary;
 
-  return binary;
+    for(unsigned int i=0; i<hex.size()/2; i++)
+    {
+      auto n = decode_nybble(*s++) << 4;
+      n |= decode_nybble(*s++);
+      binary += n;
+    }
+
+    return binary;
+  }
+  catch (runtime_error)
+  {
+    return string();
+  }
 }
 
 //--------------------------------------------------------------------------
 // Hex string to binary byte vector - appends to vector
+// Stops at any invalid hex
 void xtob(const string& hex, vector<byte>& data)
 {
-  const char *s = hex.data();
-  for(unsigned int i=0; i<hex.size()/2; i++)
+  try
   {
-    auto n = decode_nybble(*s++) << 4;
-    n |= decode_nybble(*s++);
-    data.push_back((byte)n);
+    const char *s = hex.data();
+    for(unsigned int i=0; i<hex.size()/2; i++)
+    {
+      auto n = decode_nybble(*s++) << 4;
+      n |= decode_nybble(*s++);
+      data.push_back((byte)n);
+    }
   }
+  catch (runtime_error)
+  {}
 }
 
 }} // namespaces
