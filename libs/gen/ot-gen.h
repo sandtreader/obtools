@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <algorithm>
 
 //==========================================================================
 // Additions to std
@@ -79,6 +80,29 @@ private:
   string& operator+= (const string&) { return *this; }
   string& operator+= (const char*) { return *this; }
   string& operator+= (char) { return *this; }
+};
+
+//==========================================================================
+// constexpr map template
+template <typename K, typename V, size_t S>
+struct ConstExprMap {
+  array<pair<K, V>, S> data;
+
+  constexpr V lookup(const K& key) const {
+    const auto it = find_if(begin(data), end(data),
+                            [&key](const auto &d) { return d.first == key; });
+    if (it == end(data))
+      throw std::range_error("Not found");
+    return it->second;
+  }
+
+  constexpr K reverse_lookup(const V& value) const {
+    const auto it = find_if(begin(data), end(data),
+                        [&value](const auto &d) { return d.second == value; });
+    if (it == end(data))
+      throw std::range_error("Not found");
+    return it->first;
+  }
 };
 
 //==========================================================================

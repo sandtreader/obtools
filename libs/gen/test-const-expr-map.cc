@@ -1,12 +1,12 @@
 //==========================================================================
 // ObTools::Text: test-const-expr-map.cc
 //
-// Test harness for Misc library ConstExprMap
+// Test harness for Gen library ConstExprMap
 //
 // Copyright (c) 2024 Paul Clark.  All rights reserved
 //==========================================================================
 
-#include "ot-misc.h"
+#include "ot-gen.h"
 #include <gtest/gtest.h>
 
 namespace {
@@ -26,7 +26,7 @@ static constexpr array<pair<int, int>, 10> data{{
   {8, 11},
   {9, 10},
 }};
-static constexpr Misc::ConstExprMap<int, int, 10> map{data};
+static constexpr Gen::ConstExprMap<int, int, 10> map{data};
 
 TEST(ConstExprMapTest, TestLookup)
 {
@@ -36,14 +36,6 @@ TEST(ConstExprMapTest, TestLookup)
 TEST(ConstExprMapTest, TestReverseLookup)
 {
   EXPECT_EQ(5, map.reverse_lookup(14));
-}
-
-TEST(ConstExprMapTest, TestRuntimeKeyLookup)
-{
-  auto random = Misc::Random();
-  const auto i = random.generate_up_to(10);
-
-  EXPECT_EQ(19 - i, map.lookup(i));
 }
 
 } // anonymous namespace
