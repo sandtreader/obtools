@@ -476,6 +476,55 @@ class CookieJar
 };
 
 //==========================================================================
+// JSON Web token
+// see https://jwt.io
+struct JWT
+{
+  string header_b64;
+  string payload_b64;
+  string signature_b64;
+
+  JSON::Value header;
+  JSON::Value payload;
+
+  //------------------------------------------------------------------------
+  // Empty constructor
+  JWT() {}
+
+  //------------------------------------------------------------------------
+  // Construct from a 3 part string for reading
+  JWT(const string& text);
+
+  //------------------------------------------------------------------------
+  // Construct from JSON payload for writing
+  JWT(const JSON::Value& _payload);
+
+  //------------------------------------------------------------------------
+  // Check basic structure from parsing
+  bool operator!() { return !header || !payload || signature_b64.empty(); }
+
+  //------------------------------------------------------------------------
+  // Verify signature
+  bool verify(const string& secret);
+
+  //------------------------------------------------------------------------
+  // Get expiry
+  Time::Stamp get_expiry();
+
+  //------------------------------------------------------------------------
+  // Check expiry
+  bool expired();
+
+  //------------------------------------------------------------------------
+  // Sign it
+  void sign(const string& secret);
+
+  //------------------------------------------------------------------------
+  // Get string version
+  string str();
+};
+
+//==========================================================================
 // HTTP Client class (http-client.cc)
 // Currently simple HTTP/1.0 client - one fetch per connection - but
 // interface allows for a persistent HTTP/1.1 socket later
@@ -506,6 +555,9 @@ private:
 
   // Cookie support
   CookieJar *cookie_jar;
+
+  // Authentication
+  JWT jwt;
 
   // Internals
   string get_response_body(const HTTPMessage& response) const;
@@ -578,6 +630,18 @@ public:
   //------------------------------------------------------------------------
   // Set cookie jar (referenced, not taken) = 0 to disable cookies
   void set_cookie_jar(CookieJar *jar) { cookie_jar = jar; }
+
+  //------------------------------------------------------------------------
+  // Set JWT
+  void set_jwt(const JWT& _jwt) { jwt = _jwt; }
+
+  //------------------------------------------------------------------------
+  // Get JWT expiry
+  Time::Stamp jwt_expiry() { return jwt.get_expiry(); }
+
+  //------------------------------------------------------------------------
+  // Check JWT exists
+  bool jwt_valid() { return !!jwt; }
 
   //------------------------------------------------------------------------
   // Basic operation - send HTTP message and receive HTTP response
@@ -1018,48 +1082,6 @@ class Cache
   void update();
 
 };
-
-//==========================================================================
-// JSON Web token
-// see https://jwt.io
-struct JWT
-{
-  string header_b64;
-  string payload_b64;
-  string signature_b64;
-
-  JSON::Value header;
-  JSON::Value payload;
-
-  //------------------------------------------------------------------------
-  // Construct from a 3 part string for reading
-  JWT(const string& text);
-
-  //------------------------------------------------------------------------
-  // Construct from JSON payload for writing
-  JWT(const JSON::Value& _payload);
-
-  //------------------------------------------------------------------------
-  // Check basic structure from parsing
-  bool operator!() { return !header || !payload || signature_b64.empty(); }
-
-  //------------------------------------------------------------------------
-  // Verify signature
-  bool verify(const string& secret);
-
-  //------------------------------------------------------------------------
-  // Check expiry
-  bool expired();
-
-  //------------------------------------------------------------------------
-  // Sign it
-  void sign(const string& secret);
-
-  //------------------------------------------------------------------------
-  // Get string version
-  string str();
-};
-
 
 //==========================================================================
 }} //namespaces

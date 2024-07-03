@@ -110,6 +110,17 @@ bool JWT::verify(const string& secret)
 }
 
 //------------------------------------------------------------------------
+// Get expiry
+Time::Stamp JWT::get_expiry()
+{
+  auto expiry = payload["exp"].as_int();
+  if (expiry)
+    return Time::Stamp(expiry);
+  else
+    return Time::Stamp();
+}
+
+//------------------------------------------------------------------------
 // Check expiry
 bool JWT::expired()
 {

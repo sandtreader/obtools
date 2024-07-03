@@ -127,6 +127,9 @@ int HTTPClient::do_fetch(HTTPMessage& request, HTTPMessage& response)
                         "Basic "+base64.encode(auth_user,0));
   }
 
+  // Add JWT if set
+  if (jwt_valid()) request.headers.put("Authorization", "Bearer "+jwt.str());
+
   // Add cookies if we have a jar
   if (cookie_jar) cookie_jar->add_cookies_to(request);
 
