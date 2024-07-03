@@ -990,10 +990,15 @@ class KeyPair
 public:
   //------------------------------------------------------------------------
   // Constructor functions
+  static unique_ptr<KeyPair> create_secp256k1(const vector<byte>& key);
   static unique_ptr<KeyPair> create_secp256k1_pub(const vector<byte>& key);
+  static unique_ptr<KeyPair> create_ed25519(const vector<byte>& key);
   static unique_ptr<KeyPair> create_ed25519_pub(const vector<byte>& key);
+  static unique_ptr<KeyPair> create_ec(const string& curve,
+                                       const vector<byte>& key);
   static unique_ptr<KeyPair> create_ec_pub(const string& curve,
                                            const vector<byte>& key);
+  static unique_ptr<KeyPair> create_ed(int type, const vector<byte>& key);
   static unique_ptr<KeyPair> create_ed_pub(int type, const vector<byte>& key);
 
   //------------------------------------------------------------------------
@@ -1005,6 +1010,11 @@ public:
   // Does no hashing of the message - verify only
   virtual bool verify(const vector<byte>& message,
                       const vector<byte>& signature) const = 0;
+
+  //------------------------------------------------------------------------
+  // Sign a message
+  // Does no hashing of the message - sign only
+  virtual vector<byte> sign(const vector<byte>& message) const = 0;
 
   virtual ~KeyPair() {}
 
