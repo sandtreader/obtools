@@ -983,68 +983,52 @@ class CertificateStore
 };
 
 //==========================================================================
-// EVP key
+// Key Pair (can be pub-only)
 // OpenSSL EVP key wrapper (only public currently)
-class EVPKey
+class KeyPair
 {
 public:
-  unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> evp_key;
+  //------------------------------------------------------------------------
+  // Constructor functions
+  static unique_ptr<KeyPair> create_secp256k1_pub(const vector<byte>& key);
+  static unique_ptr<KeyPair> create_ed25519_pub(const vector<byte>& key);
+  static unique_ptr<KeyPair> create_ec_pub(const string& curve,
+                                           const vector<byte>& key);
+  static unique_ptr<KeyPair> create_ed_pub(int type, const vector<byte>& key);
 
   //------------------------------------------------------------------------
-  // Type pseudo-enumeration
-  enum class Type: int {
-    X25519 = NID_X25519,
-    Ed25519 = NID_ED25519,
-    X448 = NID_X448,
-    Ed448 = NID_ED448,
-    SECP256K1 = NID_secp256k1,
-  };
+  // Is a valid key?
+  bool is_valid() const { return evp_key.get(); }
 
-  Type type;
+  //------------------------------------------------------------------------
+  // Verify signature
+  // Does no hashing of the message - verify only
+  virtual bool verify(const vector<byte>& message,
+                      const vector<byte>& signature) const = 0;
+
+  virtual ~KeyPair() {}
+
+protected:
+  unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> evp_key;
 
   //------------------------------------------------------------------------
   // Public Key Constructor
   // Takes a key type and raw key data
-  EVPKey(Type type, const vector<byte>& key):
-    evp_key{init_key(type, key)}, type{type}
-  {}
+  KeyPair(decltype(evp_key)& evp_key): evp_key{std::move(evp_key)} {}
   // Copy and assignment are banned!
-  EVPKey(const EVPKey&) = delete;
-  EVPKey& operator=(const EVPKey&) = delete;
-
-  //------------------------------------------------------------------------
-  // Public Key Constructor
-  bool is_valid() const { return evp_key.get(); }
-
-private:
-  static unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)> init_key(
-      Type type, const vector<byte>& key);
-
+  KeyPair(const KeyPair&) = delete;
+  KeyPair& operator=(const KeyPair&) = delete;
 };
 
 //==========================================================================
-// EVP Functions
-namespace EVP {
-  //------------------------------------------------------------------------
-  // Verify signature
-  // Defaults to no hashing for X25519/Ed25519/X448/Ed448
-  // SHA256 for SECP256K1
-  // Note: there is no current way to override the hashing method
-  bool verify(const EVPKey& key, const vector<byte>& message,
-      const vector<byte>& signature);
-
-  using HashType = const char *;
-  namespace Hash {
-    const auto RIPEMD160 = "ripemd160";
+// Hash Functions
+namespace Hash {
+  vector<byte> ripemd160(const vector<byte>& data);
+  vector<byte> sha512(const vector<byte>& data);
 #if OPENSSL_VERSION_MAJOR > 3 || \
     (OPENSSL_VERSION_MAJOR == 3 && OPENSSL_VERSION_MINOR >= 2)
-    const auto KECCAK256 = "KECCAK-256";
+  vector<byte> keccak256(const vector<byte>& data);
 #endif
-  };
-
-  //------------------------------------------------------------------------
-  // Hash some data
-  vector<byte> hash(HashType type, const vector<byte>& data);
 }
 
 //==========================================================================
