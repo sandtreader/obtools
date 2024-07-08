@@ -52,7 +52,7 @@ unique_ptr<KeyPair> KeyPair::create_ec(const string& curve,
       EVP_PKEY_new(), EVP_PKEY_free};
   auto pkey_p = pkey.get();
   if (EVP_PKEY_fromdata(
-        pkey_ctx.get(), &pkey_p, EVP_PKEY_PRIVATE_KEY, params.get()) <= 0)
+        pkey_ctx.get(), &pkey_p, EVP_PKEY_KEYPAIR, params.get()) <= 0)
     throw runtime_error("Failed to create key from data");
   return unique_ptr<KeyPair>{new KeyPairEC{pkey}};
 }
