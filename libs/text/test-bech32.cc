@@ -49,6 +49,12 @@ TEST(Bech32Test, TestDecode)
   EXPECT_EQ(expected, actual);
 }
 
+TEST(Bech32Test, TestBadDecode)
+{
+  vector<byte> actual;
+  ASSERT_FALSE(Text::Bech32::decode("BOGUS", actual));
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

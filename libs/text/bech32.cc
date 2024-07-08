@@ -74,20 +74,27 @@ string Bech32::encode(const vector<byte>& binary)
 // Returns whether successful - if so, appends data to binary
 bool Bech32::decode(const string& bech32, vector<byte>& binary)
 {
-  auto bytepos = uint8_t{0};
-  auto b = uint8_t{0};
-  for (const auto c: bech32)
+  try
   {
-    auto num = map.reverse_lookup(c);
-    b |= Gen::shiftl(num, 8 - (bytepos + 5));
-    if (bytepos + 5 >= 8)
+    auto bytepos = uint8_t{0};
+    auto b = uint8_t{0};
+    for (const auto c: bech32)
     {
-      binary.push_back(static_cast<byte>(b));
-      b = num << (8 - ((bytepos + 5) % 8));
+      auto num = map.reverse_lookup(c);
+      b |= Gen::shiftl(num, 8 - (bytepos + 5));
+      if (bytepos + 5 >= 8)
+      {
+        binary.push_back(static_cast<byte>(b));
+        b = num << (8 - ((bytepos + 5) % 8));
+      }
+      bytepos = (bytepos + 5) % 8;
     }
-    bytepos = (bytepos + 5) % 8;
+    return true;
   }
-  return true;
+  catch (range_error)
+  {
+    return false;
+  }
 }
 
 }} // namespaces
