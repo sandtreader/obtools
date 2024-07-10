@@ -37,10 +37,12 @@ unique_ptr<KeyPair> KeyPair::create_ed(int type, const vector<byte>& key)
 
 unique_ptr<KeyPair> KeyPair::create_ed_pub(int type, const vector<byte>& key)
 {
+  auto offset = (key.size() == 34) ? 2 : 0; // Skip over CBOR encapsulation
   auto evp_key = unique_ptr<EVP_PKEY, void (*)(EVP_PKEY *)>{
       EVP_PKEY_new_raw_public_key(
         static_cast<int>(type), nullptr,
-        reinterpret_cast<const unsigned char *>(key.data()), key.size()),
+        reinterpret_cast<const unsigned char *>(key.data())+offset,
+        key.size()-offset),
       EVP_PKEY_free};
   return unique_ptr<KeyPair>{new KeyPairEd{evp_key}};
 }
