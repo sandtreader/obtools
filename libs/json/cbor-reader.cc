@@ -121,6 +121,29 @@ Value CBORReader::decode()
       return object;
     }
 
+    case 6: // Semantic tags
+      {
+        auto type = initial_byte & 0x1f;
+        if (type > 23) type = reader.read_byte();
+        switch (type)
+        {
+          case 24: // embedded CBOR, for deferred decoding
+            {
+              // Grossly inefficient implementation
+              // Ideally would defer any decoding
+              const auto str = decode().cbor();
+              auto bin = vector<byte>(str.size());
+              transform(str.begin(), str.end(), bin.begin(),
+                  [] (const char c) {
+                    return reinterpret_cast<const byte &>(c);
+                  });
+              return Value{bin};
+            }
+          default:
+            throw Channel::Error(14, "Unhandled tag type " + Text::itos(type));
+        }
+      }
+
     case 7:  // Floats & simple
       switch (initial_byte & 0x1f)
       {

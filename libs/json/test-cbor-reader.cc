@@ -194,6 +194,12 @@ TEST(CBORReader, TestReadingIndefiniteArrayPieceWise)
   EXPECT_EQ("[1,[2,3],[4,5]]", array.str());
 }
 
+TEST(CBORReader, TestReadTagByteString)
+{
+  EXPECT_EQ("\"WCGDWBzTqRK7xp0Y+fh1TE95rcuu03OqZwNETUZf0xBHoAA=\"",
+            decode("d818582183581cd3a912bbc69d18f9f8754c4f79adcbaed373aa6703444d465fd31047a000"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
