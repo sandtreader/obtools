@@ -37,6 +37,10 @@ vector<byte> sha512(const vector<byte>& data)
 {
   return hash("SHA512", data);
 }
+vector<byte> sha3_256(const vector<byte>& data)
+{
+  return hash("SHA3-256", data);
+}
 #if OPENSSL_VERSION_MAJOR > 3 || \
     (OPENSSL_VERSION_MAJOR == 3 && OPENSSL_VERSION_MINOR >= 2)
 vector<byte> keccak256(const vector<byte>& data)

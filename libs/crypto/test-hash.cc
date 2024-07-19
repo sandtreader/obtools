@@ -30,6 +30,24 @@ TEST(HashTests, TestProducesCorrectRIPEMD160Hash)
   EXPECT_EQ(expected, Hash::ripemd160(data));
 }
 
+TEST(HashTests, TestProducesCorrectSHA3_256Hash)
+{
+  const auto data = vector<byte>{
+    byte{'H'}, byte{'e'}, byte{'l'}, byte{'l'}, byte{'o'}, byte{','},
+    byte{' '}, byte{'w'}, byte{'o'}, byte{'r'}, byte{'l'}, byte{'d'},
+    byte{'!'},
+  };
+  const auto expected = vector<byte>{
+    byte{0xf3}, byte{0x45}, byte{0xa2}, byte{0x19}, byte{0xda}, byte{0x00},
+    byte{0x5e}, byte{0xbe}, byte{0x9c}, byte{0x1a}, byte{0x1e}, byte{0xaa},
+    byte{0xd9}, byte{0x7b}, byte{0xbf}, byte{0x38}, byte{0xa1}, byte{0x0c},
+    byte{0x84}, byte{0x73}, byte{0xe4}, byte{0x1d}, byte{0x0a}, byte{0xf7},
+    byte{0xfb}, byte{0x61}, byte{0x7c}, byte{0xaa}, byte{0x0c}, byte{0x6a},
+    byte{0xa7}, byte{0x22},
+  };
+  EXPECT_EQ(expected, Hash::sha3_256(data));
+}
+
 #if OPENSSL_VERSION_MAJOR > 3 || \
     (OPENSSL_VERSION_MAJOR == 3 && OPENSSL_VERSION_MINOR >= 2)
 TEST(HashTests, TestProducesCorrectKECCAK256Hash)
