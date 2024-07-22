@@ -363,7 +363,7 @@ JSON::Value HTTPMessage::get_jwt_payload(const string& secret) const
   if (!auth.empty())
   {
     auto bits = Text::split(auth, ' ', true, 2);
-    if (bits.size() == 2 && bits[0] == "Bearer")
+    if (bits.size() == 2 && Text::tolower(bits[0]) == "bearer")
     {
       Web::JWT jwt(bits[1]);
       if (!!jwt)
