@@ -1034,6 +1034,7 @@ protected:
 // Hash Functions
 namespace Hash {
   vector<byte> ripemd160(const vector<byte>& data);
+  vector<byte> sha256(const vector<byte>& data);
   vector<byte> sha512(const vector<byte>& data);
   vector<byte> sha3_256(const vector<byte>& data);
 #if OPENSSL_VERSION_MAJOR > 3 || \

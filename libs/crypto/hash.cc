@@ -33,6 +33,10 @@ vector<byte> ripemd160(const vector<byte>& data)
 {
   return hash("ripemd160", data);
 }
+vector<byte> sha256(const vector<byte>& data)
+{
+  return hash("SHA256", data);
+}
 vector<byte> sha512(const vector<byte>& data)
 {
   return hash("SHA512", data);
