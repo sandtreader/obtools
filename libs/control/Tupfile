@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Control library
+#
+# Copyright (c) 2024 Paul Clark
+#===========================================================================
+
+NAME    = ot-control
+DEPENDS = 
+TYPE    = lib
+
+include_rules
