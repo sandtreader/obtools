@@ -44,13 +44,13 @@ public:
     k_p(_k_p), k_i(_k_i), k_d(_k_d) {}
 
   // Get/set set point
-  double get_set_point() { return set_point; }
+  double get_set_point() const { return set_point; }
   void set_set_point(double _set_point) { set_point = _set_point; }
 
   // Get parameters
-  double get_k_p() { return k_p; }
-  double get_k_i() { return k_i; }
-  double get_k_d() { return k_d; }
+  double get_k_p() const { return k_p; }
+  double get_k_i() const { return k_i; }
+  double get_k_d() const { return k_d; }
 
   // Set parameters
   void set_parameters(double _k_p, double _k_i = 0.0, double _k_d = 0.0)
