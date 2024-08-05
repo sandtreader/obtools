@@ -6,7 +6,6 @@
 // Copyright (c) 2024 Paul Clark
 //==========================================================================
 
-#include <gtest/gtest.h>
 #include "ot-control.h"
 
 namespace ObTools { namespace Control {
