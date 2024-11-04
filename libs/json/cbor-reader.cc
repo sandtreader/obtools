@@ -99,9 +99,11 @@ Value CBORReader::decode()
           if (key.type == Value::BREAK) break;
           if (key.type == Value::STRING)
             object.o[key.s] = decode();
+          else if (key.type == Value::INTEGER)
+            object.o[Text::itos(key.n)] = decode();
           else
             throw Channel::Error(13,
-                                 "Can't handle non-string CBOR object keys");
+                       "Can't handle non-string or integer CBOR object keys");
         }
       }
       else
@@ -113,9 +115,11 @@ Value CBORReader::decode()
           auto key = decode();
           if (key.type == Value::STRING)
             object.o[key.s] = decode();
+          else if (key.type == Value::INTEGER)
+            object.o[Text::itos(key.n)] = decode();
           else
             throw Channel::Error(13,
-                                 "Can't handle non-string CBOR object keys");
+                       "Can't handle non-string or integer CBOR object keys");
         }
       }
       return object;
