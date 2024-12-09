@@ -99,9 +99,11 @@ Value CBORReader::decode()
           if (key.type == Value::BREAK) break;
           if (key.type == Value::STRING)
             object.o[key.s] = decode();
+          else if (key.type == Value::INTEGER)
+            object.o[Text::itos(key.n)] = decode();
           else
             throw Channel::Error(13,
-                                 "Can't handle non-string CBOR object keys");
+                       "Can't handle non-string or integer CBOR object keys");
         }
       }
       else
@@ -113,13 +115,38 @@ Value CBORReader::decode()
           auto key = decode();
           if (key.type == Value::STRING)
             object.o[key.s] = decode();
+          else if (key.type == Value::INTEGER)
+            object.o[Text::itos(key.n)] = decode();
           else
             throw Channel::Error(13,
-                                 "Can't handle non-string CBOR object keys");
+                       "Can't handle non-string or integer CBOR object keys");
         }
       }
       return object;
     }
+
+    case 6: // Semantic tags
+      {
+        auto type = initial_byte & 0x1f;
+        if (type > 23) type = reader.read_byte();
+        switch (type)
+        {
+          case 24: // embedded CBOR, for deferred decoding
+            {
+              // Grossly inefficient implementation
+              // Ideally would defer any decoding
+              const auto str = decode().cbor();
+              auto bin = vector<byte>(str.size());
+              transform(str.begin(), str.end(), bin.begin(),
+                  [] (const char c) {
+                    return reinterpret_cast<const byte &>(c);
+                  });
+              return Value{bin};
+            }
+          default:
+            throw Channel::Error(14, "Unhandled tag type " + Text::itos(type));
+        }
+      }
 
     case 7:  // Floats & simple
       switch (initial_byte & 0x1f)

@@ -90,7 +90,23 @@ TEST(JWTTest, TestJSONSignStrAndReverify)
   EXPECT_TRUE(jwt.verify("secret"));
 }
 
-TEST(JWTTest, TestExpiryWhenExpired)
+TEST(JWTTest, TestGetExpiryWhenNotSet)
+{
+  JSON::Value payload(JSON::Value::OBJECT);
+  Web::JWT jwt(payload);
+  EXPECT_EQ(Time::Stamp(), jwt.get_expiry());
+}
+
+TEST(JWTTest, TestGetExpiryWhenSet)
+{
+  Time::Stamp bday("1967-01-29T06:00:00Z");
+  JSON::Value payload(JSON::Value::OBJECT);
+  payload.set("exp", bday.time());
+  Web::JWT jwt(payload);
+  EXPECT_EQ(bday, jwt.get_expiry());
+}
+
+TEST(JWTTest, TestExpiredWhenExpired)
 {
   JSON::Value payload(JSON::Value::OBJECT);
   payload.set("exp", time(NULL)-10);
@@ -98,7 +114,7 @@ TEST(JWTTest, TestExpiryWhenExpired)
   EXPECT_TRUE(jwt.expired());
 }
 
-TEST(JWTTest, TestExpiryWhenNotExpired)
+TEST(JWTTest, TestExpiredWhenNotExpired)
 {
   JSON::Value payload(JSON::Value::OBJECT);
   payload.set("exp", time(NULL)+10);
