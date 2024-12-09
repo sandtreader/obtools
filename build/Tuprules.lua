@@ -482,7 +482,7 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
   inputs += dep_shared_libs
   tup.definerule{
     inputs = inputs,
-    command = "^ LINK %o %f^ " .. LINKER .. " " .. LFLAGS ..
+    command = "^ LINK %o^ " .. LINKER .. " " .. LFLAGS ..
               " -Wl,--start-group " ..
               " %f " ..
               " -Wl,--end-group " ..
