@@ -5,7 +5,7 @@
 #===========================================================================
 
 NAME    = ot-g2d
-TYPE    = lib
+TYPE    = headers
 DEPENDS =
 
 include_rules

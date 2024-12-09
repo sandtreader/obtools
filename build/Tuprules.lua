@@ -369,7 +369,7 @@ function compile(source, dep_includes, ext_includes)
     command = "^ CC %f^ " .. COMPILER .. " " .. CFLAGS .. " " ..
               table.concat(dep_includes, " ") .. " " ..
               table.concat(ext_includes, " ") ..
-              " -c " .. source ..  " -o " .. output,
+              " -c %f -o %o",
     outputs = {output}
   }
   return output
@@ -381,8 +381,8 @@ function qtrcc(resource)
   local output = resource:gsub("%.(.-)$", ".cc")
   tup.definerule{
     inputs = {resource},
-    command = "^ QTRCC %f^ " .. QTRCC .. " " .. resource ..
-              " -o " .. output,
+    command = "^ QTRCC %f^ " .. QTRCC .. " %f " ..
+              " -o %o",
     outputs = {output}
   }
   return output
@@ -394,8 +394,8 @@ function windres(resource)
   local output = resource:gsub("%.(.-)$", ".res")
   tup.definerule{
     inputs = {resource},
-    command = "^ WINDRES %f^ " .. WINDRES .. " " .. resource ..
-              " -O coff -o " .. output,
+    command = "^ WINDRES %f^ " .. WINDRES .. " %f " ..
+              " -O coff -o %o",
     outputs = {output}
   }
   return output
@@ -407,8 +407,7 @@ function link_static_lib(name, objects)
   local output = PLATFORM_LIB_PREFIX .. name .. PLATFORM_LIB_EXT
   tup.definerule{
     inputs = objects,
-    command = "^ AR %o^ " .. ARCHIVER .. " crs " .. output .. " " ..
-              table.concat(objects, " "),
+    command = "^ AR %o^ " .. ARCHIVER .. " crs %o %f ",
     outputs = {output}
   }
   return output
@@ -431,7 +430,7 @@ function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
               " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
               " -Wl,--end-group" ..
               " " ..  table.concat(ext_shared_libs, " ") ..
-              opts .. " -o " .. output,
+              opts .. " -o %o",
     outputs = {output}
   }
   return output
@@ -459,7 +458,7 @@ function link_shared_lib_from_source(name, sources,
               " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
               " -Wl,--end-group" ..
               " " ..  table.concat(ext_shared_libs, " ") .. " " ..
-              opts .. " -o " .. output,
+              opts .. " -o %o",
     outputs = {output}
   }
   return output
@@ -483,12 +482,12 @@ function link_executable(name, objects, dep_static_libs, dep_shared_libs,
   inputs += dep_shared_libs
   tup.definerule{
     inputs = inputs,
-    command = "^ LINK %o^ " .. LINKER .. " " .. LFLAGS .. " " ..
-              table.concat(objects, " ") .. " " ..
-              " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
-              " -Wl,--end-group" ..
-              " " .. table.concat(ext_shared_libs, " ") ..
-              opts .. " -o " .. output,
+    command = "^ LINK %o %f^ " .. LINKER .. " " .. LFLAGS ..
+              " -Wl,--start-group " ..
+              " %f " ..
+              " -Wl,--end-group " ..
+              table.concat(ext_shared_libs, " ") ..
+              opts .. " -o %o",
     outputs = outputs
   }
   return output
@@ -502,7 +501,7 @@ function run_test(name, test_products, dep_shared_libs)
   inputs += dep_shared_libs
   tup.definerule{
     inputs = inputs,
-    command = "^ TEST " .. name .. "^ ./" .. name,
+    command = "^ TEST " .. name .. "^ ./%f",
     outputs = {}
   }
 end
