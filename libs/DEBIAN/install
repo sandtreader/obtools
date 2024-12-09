@@ -63,7 +63,6 @@ dns/libot-dns.a /usr/lib/obtools/
 exec/libot-exec.a /usr/lib/obtools/
 expr/libot-expr.a /usr/lib/obtools/
 file/libot-file.a /usr/lib/obtools/
-g2d/libot-g2d.a /usr/lib/obtools/
 gather/libot-gather.a /usr/lib/obtools/
 huffman/libot-huffman.a /usr/lib/obtools/
 init/libot-init.a /usr/lib/obtools/
