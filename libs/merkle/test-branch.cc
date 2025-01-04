@@ -13,16 +13,17 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::Merkle;
 
-string test_hash_func(const string& left, const string& right)
+string test_hash_func(const Node<string>& left, const Node<string>& right)
 {
-  return left + ":" + right;
+  return left.get_hash() + ":" + right.get_hash();
 }
 
 TEST(Branch, BranchReturnsResultOfHashFunc)
 {
   unique_ptr<Node<string>> left_leaf = make_unique<Leaf<string>>("left");
   unique_ptr<Node<string>> right_leaf = make_unique<Leaf<string>>("right");
-  const auto branch = Branch<string>(test_hash_func, left_leaf, right_leaf);
+  const auto branch = Branch<string, void, test_hash_func>(left_leaf,
+                                                           right_leaf);
   EXPECT_EQ("left:right", branch.get_hash());
   EXPECT_FALSE(branch.is_leaf());
 }
@@ -31,7 +32,8 @@ TEST(Branch, TraverseHitsBranchLeftAndRight)
 {
   unique_ptr<Node<string>> left_leaf = make_unique<Leaf<string>>("left");
   unique_ptr<Node<string>> right_leaf = make_unique<Leaf<string>>("right");
-  const auto branch = Branch<string>(test_hash_func, left_leaf, right_leaf);
+  const auto branch = Branch<string, void, test_hash_func>(left_leaf,
+                                                           right_leaf);
 
   string output;
   branch.traverse_preorder([&output](const Node<string>& node)

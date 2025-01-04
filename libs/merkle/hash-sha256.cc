@@ -13,9 +13,12 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::Merkle::Hash;
 
-SHA256::hash_t SHA256::hash_func(const SHA256::hash_t& left_hash,
-                                 const SHA256::hash_t& right_hash)
+SHA256::hash_t SHA256::hash_func(const Node<SHA256::hash_t, void>& left,
+                                 const Node<SHA256::hash_t, void>& right)
 {
+  const auto left_hash = left.get_hash();
+  const auto right_hash = right.get_hash();
+
   Crypto::SHA256 sha256;
   sha256.update(left_hash.data(), left_hash.size());
   sha256.update(right_hash.data(), right_hash.size());
