@@ -14,6 +14,16 @@ $xmlmesh_last_error = "";
 $xmlmesh_socket = null;  // Persistent socket within page only
 
 //------------------------------------------------------------------------
+// Switch XMLMesh host and/or port
+function xmlmesh_set_host($host, $port = 29167)
+{
+  global $xmlmesh_host, $xmlmesh_port, $xmlmesh_socket;
+  $xmlmesh_host = $host;
+  $xmlmesh_port = $port;
+  $xmlmesh_socket = null;  // Force reconnect
+}
+
+//------------------------------------------------------------------------
 //Internal - send/receive XML message, return (optional) result in response
 //Returns whether completed
 function _xmlmesh_transaction($subject, $request, &$response, $rsvp)
