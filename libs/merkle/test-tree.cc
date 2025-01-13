@@ -14,9 +14,9 @@ using namespace std;
 using namespace ObTools;
 using namespace ObTools::Merkle;
 
-string test_hash_func(const string& left, const string& right)
+string test_hash_func(const Node<string>& left, const Node<string>& right)
 {
-  return left + ":" + right;
+  return left.get_hash() + ":" + right.get_hash();
 }
 
 TEST(Tree, TreeOf3ReturnsResultOfHashFunc)
@@ -27,7 +27,7 @@ TEST(Tree, TreeOf3ReturnsResultOfHashFunc)
     "two",
     "three"
   };
-  const auto tree = Tree<string>(test_hash_func, leaves);
+  const auto tree = Tree<string, test_hash_func>(leaves);
   EXPECT_EQ("one:two:three", tree.get_hash());
 }
 
@@ -41,7 +41,7 @@ TEST(Tree, TreeOf5ReturnsResultOfHashFunc)
     "four",
     "five"
   };
-  const auto tree = Tree<string>(test_hash_func, leaves);
+  const auto tree = Tree<string, test_hash_func>(leaves);
   EXPECT_EQ("one:two:three:four:five", tree.get_hash());
 }
 
@@ -52,7 +52,7 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTreeOf3)
     "two",
     "three"
   };
-  const auto tree = Tree<string>(test_hash_func, leaves);
+  const auto tree = Tree<string, test_hash_func>(leaves);
 
   string output;
   tree.traverse_preorder([&output](const Node<string>& node)
@@ -73,7 +73,7 @@ TEST(Tree, TraverseIsPreorderAcrossWholeTreeOf5)
     "four",
     "five"
   };
-  const auto tree = Tree<string>(test_hash_func, leaves);
+  const auto tree = Tree<string, test_hash_func>(leaves);
 
   string output;
   tree.traverse_preorder([&output](const Node<string>& node)
@@ -94,7 +94,7 @@ TEST(Tree, TraverseIsBreadthFirstAcrossWholeTreeOf5)
     "four",
     "five"
   };
-  const auto tree = Tree<string>(test_hash_func, leaves);
+  const auto tree = Tree<string, test_hash_func>(leaves);
 
   string output;
   tree.traverse_breadth_first([&output](const Node<string>& node)
