@@ -307,12 +307,17 @@ public:
 // Base58 encoder/decoder
 class Base58
 {
+  char map[58];
   array<int, 256> reverse_map;
 
 public:
   //------------------------------------------------------------------------
-  // Constructor
+  // Constructor with standard alphabet
   Base58();
+
+  //------------------------------------------------------------------------
+  // Constructor with custom alphabet (58 characters)
+  Base58(const char *alphabet);
 
   //--------------------------------------------------------------------------
   // Encode a binary vector - options as encode above

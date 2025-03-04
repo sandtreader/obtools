@@ -44,6 +44,17 @@ TEST(Base58Test, leading_zeros_encode)
   EXPECT_EQ("11233QC4", base58.encode(binary));
 }
 
+TEST(Base58Test, custom_alphabet_encode)
+{
+  // Note same as standard with + instead of 2
+  Text::Base58 base58("1+3456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
+
+  string text("Hello World!");
+  vector<byte> binary;
+  for(auto c: text) binary.push_back((byte)c);
+  EXPECT_EQ("+NEpo7TZRRrLZSi+U", base58.encode(binary));
+}
+
 TEST(Base58Test, hello_world_decode)
 {
   Text::Base58 base58;
@@ -73,6 +84,18 @@ TEST(Base58Test, leading_zeros_decode)
   vector<byte> binary;
   ASSERT_TRUE(base58.decode(encoding, binary));
   EXPECT_EQ("0000287fb4cd", Text::btox(binary));
+}
+
+TEST(Base58Test, custom_alphabet_decode)
+{
+  // Note same as standard with + instead of 2
+  Text::Base58 base58("1+3456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
+  string encoding("+NEpo7TZRRrLZSi+U");
+  vector<byte> binary;
+  ASSERT_TRUE(base58.decode(encoding, binary));
+  string text;
+  for(auto b: binary) text += (char)b;
+  EXPECT_EQ("Hello World!", text);
 }
 
 TEST(Base58Test, bitcoin_address_decode_timing)

@@ -8,6 +8,7 @@
 
 #include "ot-text.h"
 #include <ctype.h>
+#include <cstring>
 
 namespace ObTools { namespace Text {
 
@@ -16,12 +17,23 @@ static const char base58_chars[] =
  "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 //------------------------------------------------------------------------
-// Constructor
+// Constructor with standard alphabet
 Base58::Base58()
 {
+  memcpy(map, base58_chars, sizeof(map));
   reverse_map.fill(-1);
   for (int i=0; i<58; ++i)
     reverse_map[static_cast<int>(base58_chars[i])] = i;
+}
+
+//------------------------------------------------------------------------
+// Constructor with custom alphabet (58 characters)
+Base58::Base58(const char *alphabet)
+{
+  memcpy(map, alphabet, sizeof(map));
+  reverse_map.fill(-1);
+  for (int i=0; i<58; ++i)
+    reverse_map[static_cast<int>(map[i])] = i;
 }
 
 //--------------------------------------------------------------------------
@@ -68,7 +80,7 @@ string Base58::encode(const vector<byte>& binary)
   result.reserve(zeroes + (b58.end() - it));
   result.assign(zeroes, '1');
   while (it != b58.end())
-    result += base58_chars[*(it++)];
+    result += map[*(it++)];
 
   return result;
 }
@@ -112,7 +124,7 @@ bool Base58::decode(const string& base58, vector<byte>& binary)
   int leading_zeros = 0;
   for (char c: base58)
   {
-    if (c == base58_chars[0])
+    if (c == map[0])
       ++leading_zeros;
     else
       break;
