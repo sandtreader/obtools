@@ -522,15 +522,6 @@ function package_linux(products, dep_products)
   local f = io.popen("lsb_release -s -i")
   local distro = string.gsub(f:read("*a"),"\n","")
   f:close()
-  if distro == "CentOS" then
-    suffix = ".rpm"
-    noarch = "noarch"
-    version_separator = "-"
-    arch_separator = "."
-    if ARCH == "amd64" then
-      ARCH = "x86_64"
-    end
-  end
 
   if ARCH == "all" then
     outputs += PACKAGE .. version_separator .. VERSION .. "-" .. REVISION ..
@@ -543,7 +534,7 @@ function package_linux(products, dep_products)
   tup.definerule{
     inputs = inputs,
     command = "^ PACKAGE %o^ " .. tup.getcwd() .. "/create-deb.sh " ..
-              VERSION .. " " .. REVISION .. " " .. PACKAGE,
+              VERSION .. " " .. REVISION .. " " .. PACKAGE .. " " .. " %o",
     outputs = outputs
   }
 end

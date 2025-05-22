@@ -6,24 +6,25 @@ DISTRO=$(lsb_release -s -i)
 
 VERSION=$1
 REVISION=$2
-NAMES=""
-NAME=""
-while [ "$#" -gt 2 ]
-do
-  if [ "$NAME" = "" ]
-  then
-    NAME=$3
-  fi
-  NAMES=$NAMES" "$3
-  shift
-done
+NAME=$3
+OUTPUT_FILE=$4
+
+# Output dir must be absolute because we're about to cd
+OUTPUT_DIR=$PWD/$(dirname $OUTPUT_FILE)
+echo Build package in $PWD to $OUTPUT_DIR
+
+# Copy both the source and current output to a temp dir and shift to that
+TMPDIR=$(mktemp -d)/build
+mkdir -p $TMPDIR
+cp -R * $TMPDIR
+cp -R $OUTPUT_DIR/* $TMPDIR
+cd $TMPDIR
 
 DEBDIR=debian
 
 CHANGELOG=$DEBDIR/changelog
 COMPAT=$DEBDIR/compat
 RULES=$DEBDIR/rules
-REMOVE=
 
 cp -r DEBIAN $DEBDIR
 
@@ -66,35 +67,13 @@ if [ -f /usr/local/bin/pseudo ]; then
   FAKEROOT=-rpseudo
 fi
 
-
-if [ "$DISTRO" = "CentOS" ]; then
-  FAKEROOT=-rfakeroot
-  sed  -i 's/^Build-Depends: debhelper (>= 9)/#Build-Depends:/g' debian/control
-  cat <<EOF >> $RULES
-override_dh_shlibdeps:
-override_dh_strip_nondeterminism:
-EOF
-
-  TOP_DIR=${PWD%%/.tup/*}
-fi
-
 if [ `id -u` -eq 0 ]; then
   FAKEROOT=
 fi
 
 DEB_BUILD_OPTIONS=noautodbgsym dpkg-buildpackage -uc -b $FAKEROOT -tc
 
-for NAME in $NAMES
-do
-  PACKAGE=${NAME}_${VERSION}-${REVISION}_*.deb
-  mv ../${PACKAGE} ./
-  rm ../${NAME}_${VERSION}-${REVISION}_*.changes
-  rm -f ../${NAME}_${VERSION}-${REVISION}_*.buildinfo
+PACKAGE=${NAME}_${VERSION}-${REVISION}_*.deb
+mv $TMPDIR/../$PACKAGE $OUTPUT_DIR/
 
-  if [ "$DISTRO" = "CentOS" ]; then
-    . $TOP_DIR/create-rpm.sh
-    rm $PACKAGE
-  fi
-done
-
-rm -rf $DEBDIR
+rm -rf $TMPDIR

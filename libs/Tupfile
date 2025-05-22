@@ -13,6 +13,7 @@ DEPENDS  = ot-access \
            ot-cache \
            ot-chan \
            ot-cli \
+           ot-control \
            ot-cppt \
            ot-crypto \
            ot-daemon \
@@ -37,6 +38,7 @@ DEPENDS  = ot-access \
            ot-lib \
            ot-llm \
            ot-log \
+           ot-merkle \
            ot-misc \
            ot-msg \
            ot-mt \
