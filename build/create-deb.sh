@@ -17,7 +17,11 @@ echo Build package in $PWD to $OUTPUT_DIR
 TMPDIR=$(mktemp -d)/build
 mkdir -p $TMPDIR
 cp -R * $TMPDIR
-cp -R $OUTPUT_DIR/* $TMPDIR
+
+# Copy only top-level build targets, in case there are subdirs with their
+# own builds (tup will complain we've read them if so)
+find $OUTPUT_DIR -maxdepth 1 -type f -exec cp {} $TMPDIR \;
+
 cd $TMPDIR
 
 DEBDIR=debian

@@ -426,8 +426,8 @@ function link_shared_lib(name, objects, dep_static_libs, dep_shared_libs,
   tup.definerule{
     inputs = inputs,
     command = "^ LINK %o^ " .. LINKER .. " " .. LFLAGS .. " " ..
-              table.concat(objects, " ") ..
-              " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
+              " -Wl,--start-group " ..
+              " %f " ..
               " -Wl,--end-group" ..
               " " ..  table.concat(ext_shared_libs, " ") ..
               opts .. " -o %o",
@@ -452,10 +452,10 @@ function link_shared_lib_from_source(name, sources,
     inputs = inputs,
     command = "^ LINK %o^ " .. LINKER .. " " .. CFLAGS ..
               " " .. LFLAGS .. " " ..
-              table.concat(sources, " ") .. " " ..
               table.concat(dep_includes, " ") .. " " ..
               table.concat(ext_includes, " ") ..
-              " -Wl,--start-group " .. table.concat(dep_static_libs, " ") ..
+              " -Wl,--start-group " ..
+              " %f " ..
               " -Wl,--end-group" ..
               " " ..  table.concat(ext_shared_libs, " ") .. " " ..
               opts .. " -o %o",
