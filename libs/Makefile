@@ -6,9 +6,10 @@
 all: core db extra
 
 # Library sections
-COREDIRS = access action aws cache chan cli crypto daemon dns exec expr \
-	   file gather gen hash huffman init json lang lex lib llm log misc \
-           msg mt net ring script soap ssl ssl-openssl text time tube web xml
+COREDIRS = access action alarm aws cache chan cli control crypto daemon dns \
+	   exec expr file gather gen hash huffman init json lang lex lib llm \
+	   log merkle misc msg mt net ring script soap ssl ssl-openssl text \
+           time tube web xml
 DBDIRS = db db-mysql db-pgsql db-sqlite
 EXTRADIRS = cppt gnuplot g2d netlink regen serial xmi
 
