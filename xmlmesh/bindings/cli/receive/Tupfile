@@ -8,5 +8,8 @@ NAME      = ot-xmlmesh-receive
 TYPE      = exe
 DEPENDS   = ot-xmlmesh-client
 PLATFORMS = linux
+PACKAGE  = ot-xmlmesh-receive
+VERSION  = 4.1.0
+REVISION = 1
 
 include_rules

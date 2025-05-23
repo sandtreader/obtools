@@ -18,9 +18,9 @@ TMPDIR=$(mktemp -d)/build
 mkdir -p $TMPDIR
 cp -R * $TMPDIR
 
-# Copy only top-level build targets, in case there are subdirs with their
-# own builds (tup will complain we've read them if so)
-find $OUTPUT_DIR -maxdepth 1 -type f -exec cp {} $TMPDIR \;
+# Copy output except for mocks and tests that might be built but not
+# packaged (this is awfully specific but I can't see a way round it generally)
+rsync --exclude="mocks" --exclude="tests" --exclude="modules" $OUTPUT_DIR/* $TMPDIR
 
 cd $TMPDIR
 
@@ -46,7 +46,7 @@ fi
 if [ ! -e $COMPAT ]
 then
   cat << EOF > $COMPAT
-9
+10
 EOF
 fi
 

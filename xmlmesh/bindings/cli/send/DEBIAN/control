@@ -1,0 +1,18 @@
+Source: ot-xmlmesh-send
+Section: Network
+Priority: optional
+Maintainer: Paul Clark <debian@obtools.com>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 3.9.6
+Rules-Requires-Root: no
+Homepage: http://www.obtools.com/
+
+Package: ot-xmlmesh-send
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: ObTools XMLMesh message bus command line interface
+ XMLMesh is a SOAP-based XML message bus for integration of distributed
+ components using simple XML messages
+ .
+ This package provides a simple command-line utility for sending messages
+ and receiving responses in scripts, ot-xmlmesh-send

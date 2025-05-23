@@ -8,5 +8,8 @@ NAME      = ot-xmlmesh-send
 TYPE      = exe
 DEPENDS   = ot-xmlmesh-client
 PLATFORMS = posix
+PACKAGE  = ot-xmlmesh-send
+VERSION  = 4.1.0
+REVISION = 1
 
 include_rules
