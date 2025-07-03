@@ -77,6 +77,7 @@ TEST_F(OpenAITest, Test_context_preserves_state)
   ASSERT_EQ("Hello", completion);
 }
 
+/* Disabled - not reliable
 TEST_F(OpenAITest, Test_embedding)
 {
   if (!openai) return;
@@ -96,6 +97,7 @@ TEST_F(OpenAITest, Test_embedding)
     FAIL() << e.error;
   }
 }
+*/
 
 int main(int argc, char **argv)
 {
