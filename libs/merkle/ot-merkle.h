@@ -114,10 +114,22 @@ template <class NodeT>
 void null_branch_data_aggregation_func(const NodeT&, const NodeT&) {}
 
 //==========================================================================
+// Default single child hash function is just the hash of the left child
+template <typename HashT, typename NodeT>
+HashT pass_through_single_child_hash(const NodeT& left)
+{
+  return left.get_hash();
+}
+
+//==========================================================================
 // Merkle Tree Branch
 template <typename NodeT>
 using BranchHashFuncT = decltype(((NodeT *)nullptr)->get_hash())
                         (*)(const NodeT& left, const NodeT& right);
+
+template <typename NodeT>
+using BranchSingleHashFuncT = decltype(((NodeT *)nullptr)->get_hash())
+                              (*)(const NodeT& left);
 
 template <typename NodeT>
 using BranchDataAggregationFuncT = decltype(((NodeT *)nullptr)->get_data())
@@ -126,7 +138,9 @@ using BranchDataAggregationFuncT = decltype(((NodeT *)nullptr)->get_data())
 template <typename HashT, typename DataT,
           BranchHashFuncT<Node<HashT, DataT>> BranchHashFunc,
           BranchDataAggregationFuncT<Node<HashT, DataT>>
-              BranchDataAggregationFunc = nullptr>
+            BranchDataAggregationFunc = nullptr,
+          BranchSingleHashFuncT<Node<HashT, DataT>> BranchSingleHashFunc
+            = pass_through_single_child_hash>
 class Branch: public Node<HashT, DataT>
 {
 private:
@@ -154,7 +168,7 @@ public:
     if (right)
       return BranchHashFunc(*left, *right);
     else
-      return left->get_hash();
+      return BranchSingleHashFunc(*left);
   }
 
   DataT get_data() const override
@@ -282,12 +296,14 @@ template<typename HashT, typename LeafDataT, typename DataT,
          LeafHashFuncT<HashT, LeafDataT> LeafHashFunc,
          BranchHashFuncT<Node<HashT, DataT>> BranchHashFunc,
          BranchDataAggregationFuncT<Node<HashT, DataT>>
-             BranchDataAggregationFunc>
+           BranchDataAggregationFunc,
+         BranchSingleHashFuncT<Node<HashT, DataT>> BranchSingleHashFunc
+           = pass_through_single_child_hash>
 using SumTree = GenericTree<LeafDataT, Node<HashT, DataT>,
                             Leaf<HashT, DataT, LeafDataT,
                                  LeafDataAggregationFunc, LeafHashFunc>,
                             Branch<HashT, DataT, BranchHashFunc,
-                                   BranchDataAggregationFunc>>;
+                                   BranchDataAggregationFunc, BranchSingleHashFunc>>;
 
 //==========================================================================
 // Common hash types
