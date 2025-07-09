@@ -383,6 +383,11 @@ public:
   // Decode base64 text into a binary buffer
   // Returns whether successful - if so, appends data to binary
   static bool decode(const string& bech32, vector<byte>& binary);
+
+  //--------------------------------------------------------------------------
+  // Decode bech32 text into a binary buffer as 5-bit data
+  // Returns whether successful - if so, appends data to binary
+  static bool decode_as_5_bit(const string& bech32, vector<uint8_t>& binary);
 };
 
 //==========================================================================

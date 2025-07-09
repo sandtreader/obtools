@@ -97,4 +97,24 @@ bool Bech32::decode(const string& bech32, vector<byte>& binary)
   }
 }
 
+//--------------------------------------------------------------------------
+// Decode bech32 text into a binary buffer as 5-bit data
+// Returns whether successful - if so, appends data to binary
+bool Bech32::decode_as_5_bit(const string& bech32, vector<uint8_t>& binary)
+{
+  try
+  {
+    for (const auto c: bech32)
+    {
+      auto num = map.reverse_lookup(c);
+      binary.push_back(num);
+    }
+    return true;
+  }
+  catch (range_error)
+  {
+    return false;
+  }
+}
+
 }} // namespaces
