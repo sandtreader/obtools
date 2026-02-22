@@ -84,6 +84,10 @@ void BufferedOutFileBuf::resize(uint64_t size)
 
 //--------------------------------------------------------------------------
 // Constructors
+// Note: gcov generates duplicate "base object constructor" variants for
+// classes inheriting from ostream; these are never called but show as
+// uncovered. GCOV_EXCL annotations suppress these false positives.
+// GCOV_EXCL_START - gcov duplicate "base object constructor" artifacts
 BufferedOutStream::BufferedOutStream():
   file_buf{0}
 {
@@ -98,6 +102,7 @@ BufferedOutStream::BufferedOutStream(const string& filename,
   init(&file_buf);
   OPEN(CPATH(filename), mode);
 }
+// GCOV_EXCL_STOP
 
 //==========================================================================
 // MultiOutFileBuf
@@ -138,12 +143,14 @@ streampos MultiOutFileBuf::seekoff(streamoff off, ios_base::seekdir way,
 
 //--------------------------------------------------------------------------
 // Constructors
+// GCOV_EXCL_START - gcov duplicate "base object constructor" artifact
 MultiOutStream::MultiOutStream():
   file_buf(file_bufs)
 {
   file_buf.pubsetbuf(0, 0);
   init(&file_buf);
 }
+// GCOV_EXCL_STOP
 
 //--------------------------------------------------------------------------
 // Test for file being open
@@ -184,7 +191,7 @@ void MultiOutStream::close()
   {
     it->pubsync();
     if (!it->close())
-      setstate(ios_base::failbit);
+      setstate(ios_base::failbit); // GCOV_EXCL_LINE - requires fd-level error
   }
   file_bufs.clear();
 }
@@ -229,12 +236,14 @@ streampos BufferedMultiOutFileBuf::seekoff(streamoff off,
 
 //--------------------------------------------------------------------------
 // Constructors
+// GCOV_EXCL_START - gcov duplicate "base object constructor" artifact
 BufferedMultiOutStream::BufferedMultiOutStream(uint64_t _buffer_size):
   file_buf{file_bufs}, buffer_size{_buffer_size}
 {
   file_buf.pubsetbuf(nullptr, 0);
   init(&file_buf);
 }
+// GCOV_EXCL_STOP
 
 //--------------------------------------------------------------------------
 // Set buffer size
@@ -286,7 +295,7 @@ void BufferedMultiOutStream::close()
   {
     it->pubsync();
     if (!it->close())
-      setstate(ios_base::failbit);
+      setstate(ios_base::failbit); // GCOV_EXCL_LINE - requires fd-level error
   }
   file_bufs.clear();
 }
