@@ -55,7 +55,7 @@ void Random::generate_binary(unsigned char *p, int n)
 #endif
 
     // Initialise from time — only reached when /dev/urandom unavailable
-    {  // LCOV_EXCL_START
+    {  // GCOV_EXCL_START
 #if defined(PLATFORM_WINDOWS)
       FILETIME ft;
       GetSystemTimeAsFileTime(&ft);
@@ -67,7 +67,7 @@ void Random::generate_binary(unsigned char *p, int n)
       w ^= tv.tv_sec ^ tv.tv_usec;
       z ^= tv.tv_usec;
 #endif
-    }  // LCOV_EXCL_STOP
+    }  // GCOV_EXCL_STOP
   }
 
   // Generate pseudo-random as a fallback

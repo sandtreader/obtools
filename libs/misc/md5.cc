@@ -33,7 +33,7 @@ namespace ObTools { namespace Misc {
 // Byte reverse a block of 4-byte integers
 // Note: this code is harmless on little-endian machines.
 // On little-endian (x86), the #define below replaces all calls with no-ops,
-// leaving this function body as dead code.  LCOV_EXCL_START
+// leaving this function body as dead code.  GCOV_EXCL_START
 void MD5::byte_reverse(char *buf, unsigned longs)
 {
   uint32_t t;
@@ -47,7 +47,7 @@ void MD5::byte_reverse(char *buf, unsigned longs)
   }
   while (--longs);
 }
-// LCOV_EXCL_STOP
+// GCOV_EXCL_STOP
 
 // Make null if byte order known to be little-endian already
 #if defined(__BYTE_ORDER) && defined (__LITTLE_ENDIAN) && \
@@ -80,7 +80,7 @@ void MD5::update(const char *buf, unsigned len)
   /* Update bitcount */
   t = ctx_bits[0];
   if ((ctx_bits[0] = t + (static_cast<uint32_t>(len) << 3)) < t)
-    ctx_bits[1]++;         /* Carry from low to high */  // LCOV_EXCL_LINE — requires >512MB input
+    ctx_bits[1]++;         /* Carry from low to high */  // GCOV_EXCL_LINE — requires >512MB input
   ctx_bits[1] += len >> 29;
 
   t = (t >> 3) & 0x3f;

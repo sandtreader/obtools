@@ -160,8 +160,8 @@ Value CBORReader::decode()
                                       +Text::itos(initial_byte & 0x1f));
       }
 
-    default:  // LCOV_EXCL_LINE — provably unreachable: major_type is 3 bits (0-7), all handled
-      throw Channel::Error(10, "Unhandled major type "+Text::itos(major_type));  // LCOV_EXCL_LINE
+    default:  // GCOV_EXCL_LINE — provably unreachable: major_type is 3 bits (0-7), all handled
+      throw Channel::Error(10, "Unhandled major type "+Text::itos(major_type));  // GCOV_EXCL_LINE
   }
 }
 

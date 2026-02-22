@@ -295,10 +295,15 @@ def parse_gcov_file(gcov_path):
     """Parse a .gcov file.  Returns (hit, miss, uncovered_lines).
 
     uncovered_lines is a list of (lineno, code) tuples.
+
+    Recognises GCOV_EXCL_LINE, GCOV_EXCL_START and GCOV_EXCL_STOP markers
+    in source comments to exclude lines from the miss count (similar to how
+    lcov handles LCOV_EXCL markers).
     """
     hit = 0
     miss = 0
     uncovered = []
+    in_excl_block = False
 
     with open(gcov_path) as f:
         for line in f:
@@ -309,13 +314,24 @@ def parse_gcov_file(gcov_path):
             lineno = parts[1].strip()
             code = parts[2].rstrip()
 
+            # Track exclusion blocks
+            if "GCOV_EXCL_START" in code:
+                in_excl_block = True
+            if "GCOV_EXCL_STOP" in code:
+                in_excl_block = False
+                continue
+
+            # Skip excluded lines
+            excluded = in_excl_block or "GCOV_EXCL_LINE" in code
+
             if count in ("-", ""):
                 continue
             if count == "#####":
-                miss += 1
-                stripped = code.strip()
-                if stripped and not stripped.startswith("//"):
-                    uncovered.append((lineno, stripped))
+                if not excluded:
+                    miss += 1
+                    stripped = code.strip()
+                    if stripped and not stripped.startswith("//"):
+                        uncovered.append((lineno, stripped))
             elif count.replace("*", "").isdigit():
                 n = int(count.replace("*", ""))
                 if n > 0:

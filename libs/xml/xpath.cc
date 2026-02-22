@@ -109,7 +109,7 @@ list<ELEMENT *>
     pos = delim+1;
   }
 
-  return el;  // LCOV_EXCL_LINE — provably unreachable: every iteration
+  return el;  // GCOV_EXCL_LINE — provably unreachable: every iteration
                // either returns or advances pos, and pos==size returns above
 }
 
