@@ -286,7 +286,7 @@ Duration Duration::clock()
                     static_cast<double>(ts.tv_nsec)/1.0e9);
 #endif
 
-  return Duration();
+  return Duration(); // GCOV_EXCL_LINE - fallback when CLOCK_MONOTONIC unavailable
 }
 
 //--------------------------------------------------------------------------

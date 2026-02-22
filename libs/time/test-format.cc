@@ -441,6 +441,54 @@ TEST(FormatTest, TestDateIntervalSubtractWeeks)
   EXPECT_EQ(1, split1.day);
 }
 
+//--------------------------------------------------------------------------
+// Parse edge cases to cover remaining error paths
+
+// ISO date-only, non-lenient → no T/space after date → returns false
+TEST(FormatTest, TestParseDateOnlyNonLenientFails)
+{
+  Time::Stamp s("2024-06-15");
+  EXPECT_FALSE(s.valid());
+}
+
+// ISO with HH:MM but no seconds, lenient → triggers read_part_f pos==size
+TEST(FormatTest, TestParseLenientHHMMNoSeconds)
+{
+  Time::Stamp s("2024-06-15T14:30", true);
+  EXPECT_TRUE(s.valid());
+  // Should parse as 14:30:00
+  string iso = s.iso();
+  EXPECT_TRUE(iso.find("14:30:00") != string::npos);
+}
+
+// ISO with non-digit char in seconds field → triggers read_part_f bad char
+TEST(FormatTest, TestParseISOBadSecondsChar)
+{
+  Time::Stamp s("2024-06-15T14:30:5X");
+  EXPECT_FALSE(s.valid());
+}
+
+// RFC822 with malformed time → triggers read_time failure in read_rfc_822
+TEST(FormatTest, TestParseRFC822BadTime)
+{
+  Time::Stamp s("Sun, 06 Nov 1994 XX:XX:XX GMT");
+  EXPECT_FALSE(s.valid());
+}
+
+// RFC850 with malformed time → triggers read_time failure in read_rfc_850
+TEST(FormatTest, TestParseRFC850BadTime)
+{
+  Time::Stamp s("Sunday, 06-Nov-94 XX:XX:XX GMT");
+  EXPECT_FALSE(s.valid());
+}
+
+// asctime with malformed time → triggers read_time failure in read_asctime
+TEST(FormatTest, TestParseAsctimeBadTime)
+{
+  Time::Stamp s("Sun Nov 6 XX:XX:XX 1994");
+  EXPECT_FALSE(s.valid());
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

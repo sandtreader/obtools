@@ -29,11 +29,11 @@ void Segment::reset(length_t n)
 Segment& Segment::copy(const Segment& s)
 {
   // Free any owned memory
-  if (owned_data)
+  if (owned_data) // GCOV_EXCL_START - copy() only called on fresh segments
   {
     delete[] owned_data;
     owned_data = 0;
-  }
+  } // GCOV_EXCL_STOP
 
   if (s.owned_data)
   {

@@ -48,6 +48,16 @@ TEST(LexEdgeTest, TestValidStringEscapes)
   EXPECT_EQ(Lex::Token::STRING, tok.type);
 }
 
+TEST(LexEdgeTest, TestDotNotFollowedByDigitIsSymbol)
+{
+  // A '.' not followed by a digit should be treated as a symbol
+  istringstream iss(".abc");
+  Lex::Analyser lex(iss);
+  Lex::Token tok = lex.read_token();
+  EXPECT_EQ(Lex::Token::SYMBOL, tok.type);
+  EXPECT_EQ(".", tok.value);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
