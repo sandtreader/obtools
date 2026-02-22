@@ -108,6 +108,14 @@ TEST(UTF8Test, TestUTF8StripDiacriticsFallback)
   ASSERT_EQ("?", stripped);
 }
 
+TEST(UTF8Test, TestUTF8EncodeFromWcharPointer)
+{
+  // Test the wchar_t* overload (utf8.cc line 72-80)
+  wchar_t unicode[] = { 0x41, 0x42, 0xC9, 0 };  // "AB" + accented E
+  string utf8 = Text::UTF8::encode(unicode);
+  EXPECT_EQ("AB\xC3\x89", utf8);
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

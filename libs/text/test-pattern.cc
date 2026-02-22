@@ -76,6 +76,23 @@ TEST(PatternTest, TestStarCombinedCapturePatternMatch)
   EXPECT_EQ("world", captures[1]);
 }
 
+TEST(PatternTest, TestStringCaptureOverload)
+{
+  // Test the string overload with matches vector (pattern.cc line 154-157)
+  vector<string> matches;
+  ASSERT_TRUE(Text::pattern_match(string("Hello *!"), string("Hello world!"),
+                                  matches));
+  ASSERT_EQ(1, matches.size());
+  EXPECT_EQ("world", matches[0]);
+}
+
+TEST(PatternTest, TestUnclosedBracketFallsThrough)
+{
+  // Unclosed [ has no matching ], triggers goto dft — treat [ as literal
+  ASSERT_TRUE(Text::pattern_match("[", "["));
+  ASSERT_FALSE(Text::pattern_match("[", "a"));
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

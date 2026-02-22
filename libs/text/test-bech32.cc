@@ -55,6 +55,16 @@ TEST(Bech32Test, TestBadDecode)
   ASSERT_FALSE(Text::Bech32::decode("BOGUS", actual));
 }
 
+TEST(Bech32Test, TestDecodeAs5Bit)
+{
+  // Encode some data, then decode as 5-bit
+  const auto data = vector<byte>{ byte{0x01}, byte{0x02} };
+  auto encoded = Text::Bech32::encode(data);
+  vector<uint8_t> decoded;
+  ASSERT_TRUE(Text::Bech32::decode_as_5_bit(encoded, decoded));
+  EXPECT_FALSE(decoded.empty());
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

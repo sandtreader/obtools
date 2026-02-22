@@ -147,8 +147,8 @@ Value Parser::read_value()
         else
           throw Exception(string("Misplaced symbol ")+token.value);
 
-      default:
-        throw Exception("Unrecognised token ");
+      default:  // GCOV_EXCL_LINE — Lex::Analyser only produces END/NUMBER/STRING/NAME/SYMBOL
+        throw Exception("Unrecognised token ");  // GCOV_EXCL_LINE
     }
   }
   catch (const Lex::Exception& e)

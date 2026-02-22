@@ -284,7 +284,10 @@ void Parser::read_end_tag(xmlchar c, istream &s)
   else
   {
     // Stack empty - complain but ignore it
-    error("End-tag found but no elements open");
+    // Provably unreachable: the parse loop exits (done=true) as soon as
+    // the element stack empties after a close-tag, so we can never reach
+    // another end-tag with an empty stack.
+    error("End-tag found but no elements open");  // GCOV_EXCL_LINE
   }
 }
 

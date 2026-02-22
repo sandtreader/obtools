@@ -118,6 +118,38 @@ int main(int argc, char **argv)
 }
 ```
 
+### Code Coverage
+
+Line-level code coverage can be measured for any library using `build/run-coverage.py`. The script uses `g++` with `--coverage` and `gcov` — no external tools beyond the standard toolchain.
+
+```bash
+# Basic coverage report
+build/run-coverage.py xml
+
+# Show uncovered lines
+build/run-coverage.py xml -v
+
+# Show per-function coverage
+build/run-coverage.py xml -f
+
+# Combine both
+build/run-coverage.py json -v -f
+```
+
+The script automatically:
+- Builds the core libraries via Make (if not already built)
+- Resolves transitive link dependencies by parsing each library's `Tupfile` `DEPENDS` line recursively
+- Compiles the library's `.cc` source files with `--coverage` instrumentation
+- Builds and runs every `test-*.cc` file found in the library directory
+- Reports per-file line coverage and totals
+- Auto-detects or builds Google Test from source if not installed
+
+**Prerequisites**: `g++`, `gcov` (included with `build-essential`). Google Test is auto-provisioned if missing.
+
+**Output directory**: Coverage artefacts are written to `/tmp/obtools-coverage/` and cleaned up from the working tree automatically.
+
+**Interpreting results**: The `const` overloads of methods (e.g., `get_child() const` vs `get_child()`) share identical logic, so tests typically exercise only one variant. This means ~90% line coverage on a well-tested library is normal — the remaining ~10% is usually `const` duplicates, error-recovery paths, and rarely-reached branches.
+
 ## Code Conventions
 
 ### File Naming

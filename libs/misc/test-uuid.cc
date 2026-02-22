@@ -93,6 +93,37 @@ TEST(UUIDTest, TestValidity)
   EXPECT_EQ(false, !uuid);
 }
 
+TEST(UUIDTest, TestDefaultConstructorIsAllZeros)
+{
+  UUID uuid;
+  EXPECT_FALSE(static_cast<bool>(uuid));
+}
+
+TEST(UUIDTest, TestRawStringConstruction)
+{
+  // 16-byte raw string — not hex or UUID format
+  string raw(16, '\x01');
+  UUID uuid(raw);
+  for (int i = 0; i < 16; i++)
+    EXPECT_EQ(0x01, uuid[i]);
+}
+
+TEST(UUIDTest, TestBadLengthStringConstruction)
+{
+  // Length != 16, 32, or 36 falls through to default (zeros)
+  UUID uuid("short");
+  EXPECT_FALSE(static_cast<bool>(uuid));
+}
+
+TEST(UUIDTest, TestStreamOperator)
+{
+  UUID uuid{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10};
+  ostringstream oss;
+  oss << uuid;
+  EXPECT_EQ("01020304-0506-0708-090a-0b0c0d0e0f10", oss.str());
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

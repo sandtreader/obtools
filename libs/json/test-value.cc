@@ -477,6 +477,90 @@ TEST(Value, TestCompareArrays)
   EXPECT_NE(a1, u);
 }
 
+TEST(Value, TestConstGetProperty)
+{
+  Value value(Value::OBJECT);
+  value.set("foo", 42);
+  const Value& cv = value;
+
+  const Value& v = cv.get("foo");
+  EXPECT_EQ(Value::INTEGER, v.type);
+  EXPECT_EQ(42, v.n);
+
+  const Value& nv = cv.get("bar");
+  EXPECT_TRUE(!nv);
+
+  // Non-object returns none
+  const Value ci(42);
+  const Value& nv2 = ci.get("x");
+  EXPECT_TRUE(!nv2);
+}
+
+TEST(Value, TestConstGetIndex)
+{
+  Value value(Value::ARRAY);
+  value.add(42);
+  value.add("hello");
+  const Value& cv = value;
+
+  const Value& v = cv.get(0u);
+  EXPECT_EQ(Value::INTEGER, v.type);
+  EXPECT_EQ(42, v.n);
+
+  const Value& nv = cv.get(99u);
+  EXPECT_TRUE(!nv);
+
+  // Non-array returns none
+  const Value ci(42);
+  const Value& nv2 = ci.get(0u);
+  EXPECT_TRUE(!nv2);
+}
+
+TEST(Value, TestOperatorStream)
+{
+  Value value(Value::OBJECT);
+  value.set("foo", 1);
+  ostringstream oss;
+  oss << value;
+  // operator<< uses pretty print
+  EXPECT_EQ("{\n  \"foo\": 1\n}\n", oss.str());
+}
+
+TEST(Value, TestAsBinaryOnNonBinaryNonString)
+{
+  Value v(42);
+  auto b = v.as_binary();
+  EXPECT_TRUE(b.empty());
+
+  Value nv;
+  auto b2 = nv.as_binary();
+  EXPECT_TRUE(b2.empty());
+}
+
+TEST(Value, TestWritingBreak)
+{
+  Value v(Value::BREAK);
+  EXPECT_EQ("BREAK", v.str());
+}
+
+TEST(Value, TestConstructBinaryFromByteVector)
+{
+  vector<byte> b{byte{0x01}, byte{0x02}};
+  Value v(b);
+  EXPECT_EQ(Value::BINARY, v.type);
+  EXPECT_EQ(2, v.s.size());
+}
+
+TEST(Value, TestWritingSupplementaryUnicode)
+{
+  // U+1F600 (grinning face) encodes as UTF-8: F0 9F 98 80
+  // On non-Windows this should produce \\u++++
+  string emoji = "\xF0\x9F\x98\x80";
+  Value v(emoji);
+  string result = v.str();
+  EXPECT_NE(string::npos, result.find("\\u++++"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

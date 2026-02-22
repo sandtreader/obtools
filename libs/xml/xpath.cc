@@ -109,7 +109,8 @@ list<ELEMENT *>
     pos = delim+1;
   }
 
-  return el;
+  return el;  // GCOV_EXCL_LINE — provably unreachable: every iteration
+               // either returns or advances pos, and pos==size returns above
 }
 
 //--------------------------------------------------------------------------

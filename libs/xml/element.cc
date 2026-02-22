@@ -311,7 +311,7 @@ Element& Element::add_xml(const string& xml, ostream& serr, int parse_flags)
       children.push_back(root);
       return *root;
     }
-    else return none;
+    else return none;  // GCOV_EXCL_LINE — unreachable: successful parse always has a root
   }
   catch (const ParseFailed&)
   {
