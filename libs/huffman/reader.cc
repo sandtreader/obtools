@@ -53,8 +53,8 @@ bool MultiReader::read_mapping(MultiMapping& mapping)
     if (sin.eof() || sin.fail())
       return false;
 
-    if (sin.gcount() < 1)
-      continue;
+    if (sin.gcount() < 1) // GCOV_EXCL_LINE - getline sets eof/fail first
+      continue;           // GCOV_EXCL_LINE
 
     line.resize(sin.gcount() - 1);
     got_line = true;

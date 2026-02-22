@@ -206,8 +206,8 @@ namespace
     if (length < 2)
       return OT_BAD_DATA;
 
-    if (pos + length > size)
-      return OT_BAD_DATA;
+    if (pos + length > size) // GCOV_EXCL_LINE - caller always passes size-pos
+      return OT_BAD_DATA;   // GCOV_EXCL_LINE
 
     string s(text, pos, length);
     int dp_count = 0;

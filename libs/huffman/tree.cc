@@ -100,8 +100,8 @@ bool MultiTree::populate_from(MultiReader& reader)
     // Creates new tree if necessary
     Tree& tree = trees[mm.index];
 
-    if (!tree.add_mapping(mm))
-      return false;
+    if (!tree.add_mapping(mm))      // GCOV_EXCL_LINE - add_mapping always succeeds
+      return false;                 // GCOV_EXCL_LINE
   }
   return true;
 }
