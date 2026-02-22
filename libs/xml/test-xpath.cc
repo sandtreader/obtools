@@ -433,6 +433,116 @@ TEST_F(XPathTest, TestConstXPathGetElements)
   EXPECT_EQ(3, static_cast<int>(items.size()));
 }
 
+TEST_F(XPathTest, TestConstXPathGetElement)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  const XML::Element *e = xpath.get_element("server");
+  ASSERT_NE(nullptr, e);
+  EXPECT_EQ("server", e->name);
+
+  EXPECT_EQ(nullptr, xpath.get_element("nonexistent"));
+}
+
+TEST_F(XPathTest, TestConstXPathGetValueBoolDefault)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  // "debug" contains "true" -> T -> true
+  EXPECT_TRUE(xpath.get_value_bool("server/debug"));
+  // "nonexistent" -> empty -> return default
+  EXPECT_FALSE(xpath.get_value_bool("nonexistent"));
+  EXPECT_TRUE(xpath.get_value_bool("nonexistent", true));
+  // "directory" contains "test" -> starts with 't' -> true
+  EXPECT_TRUE(xpath.get_value_bool("directory"));
+  // "server/timeout" contains "30" -> not T/Y -> false (default case)
+  EXPECT_FALSE(xpath.get_value_bool("server/timeout"));
+}
+
+TEST_F(XPathTest, TestConstXPathGetValueHex)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  EXPECT_EQ(255u, xpath.get_value_hex("server/hexval"));
+  EXPECT_EQ(0u, xpath.get_value_hex("nonexistent"));
+  EXPECT_EQ(16u, xpath.get_value_hex("nonexistent", 16));
+}
+
+TEST_F(XPathTest, TestConstXPathGetValueInt64)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  EXPECT_EQ(5000000000ULL, xpath.get_value_int64("server/bignum"));
+  EXPECT_EQ(0ULL, xpath.get_value_int64("nonexistent"));
+  EXPECT_EQ(99ULL, xpath.get_value_int64("nonexistent", 99));
+}
+
+TEST_F(XPathTest, TestConstXPathGetValueHex64)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  EXPECT_EQ(0xffffffff00ULL, xpath.get_value_hex64("server/bighex"));
+  EXPECT_EQ(0ULL, xpath.get_value_hex64("nonexistent"));
+  EXPECT_EQ(42ULL, xpath.get_value_hex64("nonexistent", 42));
+}
+
+TEST_F(XPathTest, TestConstXPathGetValueReal)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  EXPECT_DOUBLE_EQ(0.75, xpath.get_value_real("server/ratio"));
+  EXPECT_DOUBLE_EQ(0.0, xpath.get_value_real("nonexistent"));
+  EXPECT_DOUBLE_EQ(1.5, xpath.get_value_real("nonexistent", 1.5));
+}
+
+TEST_F(XPathTest, TestConstXPathGetValueInt)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  EXPECT_EQ(30, xpath.get_value_int("server/timeout"));
+  EXPECT_EQ(0, xpath.get_value_int("nonexistent"));
+  EXPECT_EQ(42, xpath.get_value_int("nonexistent", 42));
+}
+
+TEST_F(XPathTest, TestConstXPathIndexedAccess)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  EXPECT_EQ("first", xpath.get_value("item"));
+  EXPECT_EQ("second", xpath.get_value("item[2]"));
+  EXPECT_EQ("third", xpath.get_value("item[3]"));
+  EXPECT_EQ("", xpath.get_value("item[4]"));
+}
+
+TEST_F(XPathTest, TestConstXPathRootPath)
+{
+  const XML::Element& const_root = *root;
+  XML::ConstXPathProcessor xpath(const_root);
+
+  // Path "/" returns the root element's content
+  auto elems = xpath.get_elements("/");
+  EXPECT_EQ(1, static_cast<int>(elems.size()));
+}
+
+//==========================================================================
+// XPathProcessor::add_element with nonexistent path returns 0
+//==========================================================================
+
+TEST_F(XPathTest, TestAddElementByNameNonexistent)
+{
+  XML::XPathProcessor xpath(*root);
+  XML::Element *ne = xpath.add_element("nonexistent", "child");
+  EXPECT_EQ(nullptr, ne);
+}
+
 //==========================================================================
 // Default-constructed processor tests
 //==========================================================================

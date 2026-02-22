@@ -1428,6 +1428,196 @@ TEST(ParserTest, TestLenientParsing)
   EXPECT_NE(string::npos, content.find("&&"));
 }
 
+//--------------------------------------------------------------------------
+// Parser error/edge case tests
+//--------------------------------------------------------------------------
+
+TEST(ParserTest, TestParseDoctypeSkipped)
+{
+  // <!DOCTYPE ...> should be skipped via skip_to_gt
+  string xml = "<!DOCTYPE html><root/>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_EQ("root", parser.get_root().name);
+}
+
+TEST(ParserTest, TestParseWeirdComment)
+{
+  // <!-X triggers the weird comment path (dash then non-dash)
+  string xml = "<!-X bad stuff><root/>";
+  ostringstream err;
+  XML::Parser parser(err);
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_NE(string::npos, err.str().find("Weird comment"));
+  EXPECT_EQ("root", parser.get_root().name);
+}
+
+TEST(ParserTest, TestParseIllegalEndTag)
+{
+  // End tag starting with non-name-start character (not alnum, ':', '_')
+  string xml = "<root></ >";
+  ostringstream err;
+  XML::Parser parser(err);
+  EXPECT_THROW(parser.read_from(xml), XML::ParseFailed);
+}
+
+TEST(ParserTest, TestParseLenientBareAngleBracket)
+{
+  // In lenient mode, a bare < not followed by a name-start (alnum/:/_)
+  // is kept as text. Use a character like '!' which is NOT name-start.
+  // Need PRESERVE_WHITESPACE so the content reader gets invoked properly.
+  string xml = "<root>< stuff</root>";
+  XML::Parser parser(XML::PARSER_BE_LENIENT
+                     | XML::PARSER_OPTIMISE_CONTENT
+                     | XML::PARSER_PRESERVE_WHITESPACE);
+  ASSERT_NO_THROW(parser.read_from(xml));
+  string content = *parser.get_root();
+  EXPECT_NE(string::npos, content.find("<"));
+}
+
+TEST(ParserTest, TestParseNonLenientBareAngleBracket)
+{
+  // Without lenient mode, a bare < followed by non-name-start is fatal
+  string xml = "<root>< stuff</root>";
+  ostringstream err;
+  XML::Parser parser(err, XML::PARSER_PRESERVE_WHITESPACE);
+  EXPECT_THROW(parser.read_from(xml), XML::ParseFailed);
+  EXPECT_NE(string::npos, err.str().find("Illegal tag"));
+}
+
+TEST(ParserTest, TestParseDuplicateAttribute)
+{
+  string xml = "<root attr=\"1\" attr=\"2\"/>";
+  ostringstream err;
+  XML::Parser parser(err);
+  EXPECT_THROW(parser.read_from(xml), XML::ParseFailed);
+}
+
+TEST(ParserTest, TestParseEndTagWithEmptyStack)
+{
+  // An end tag when the element stack is empty (after root is closed)
+  // This triggers the "End-tag found but no elements open" error
+  string xml = "<root/></extra>";
+  ostringstream err;
+  XML::Parser parser(err);
+  // The parser should encounter the extra end tag
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_NE(string::npos, err.str().find("End-tag"));
+}
+
+TEST(ParserTest, TestParseUnrecognisedEntity)
+{
+  string xml = "<root>&bogus;</root>";
+  ostringstream err;
+  XML::Parser parser(err);
+  EXPECT_THROW(parser.read_from(xml), XML::ParseFailed);
+}
+
+TEST(ParserTest, TestParseLenientBareAmpersand)
+{
+  // In lenient mode, a bare & not followed by alpha is kept as text
+  string xml = "<root>a&1b</root>";
+  XML::Parser parser(XML::PARSER_BE_LENIENT | XML::PARSER_OPTIMISE_CONTENT);
+  ASSERT_NO_THROW(parser.read_from(xml));
+  string content = *parser.get_root();
+  EXPECT_NE(string::npos, content.find("&"));
+}
+
+TEST(ParserTest, TestParseNonLenientBareAmpersand)
+{
+  string xml = "<root>a&1b</root>";
+  ostringstream err;
+  XML::Parser parser(err);
+  EXPECT_THROW(parser.read_from(xml), XML::ParseFailed);
+}
+
+TEST(ParserTest, TestParseUtf8TwoByte)
+{
+  // &#xA9; = copyright sign (U+00A9, 2-byte UTF-8: C2 A9)
+  string xml = "<root>&#xA9;</root>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  string content = *parser.get_root();
+  EXPECT_EQ("\xC2\xA9", content);
+}
+
+TEST(ParserTest, TestParseUtf8ThreeByte)
+{
+  // &#x20AC; = Euro sign (U+20AC, 3-byte UTF-8: E2 82 AC)
+  string xml = "<root>&#x20AC;</root>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  string content = *parser.get_root();
+  EXPECT_EQ("\xE2\x82\xAC", content);
+}
+
+TEST(ParserTest, TestDetachRootNull)
+{
+  XML::Parser parser;
+  // No document parsed - detach_root returns 0
+  EXPECT_EQ(nullptr, parser.detach_root());
+}
+
+TEST(ParserTest, TestParseDefaultNamespace)
+{
+  // Test default xmlns namespace mapping
+  string xml = "<root xmlns=\"urn:test\"><child/></root>";
+  XML::Parser parser;
+  parser.fix_namespace("urn:test", "");
+  ASSERT_NO_THROW(parser.read_from(xml));
+  XML::Element& root = parser.get_root();
+  EXPECT_EQ("root", root.name);
+  EXPECT_EQ("child", root.get_child("child").name);
+}
+
+TEST(ParserTest, TestParseNamespaceRemovePrefix)
+{
+  // Map namespace to empty prefix (strip prefix entirely)
+  string xml = "<ns:root xmlns:ns=\"urn:test\"><ns:child/></ns:root>";
+  XML::Parser parser;
+  parser.fix_namespace("urn:test", "");
+  ASSERT_NO_THROW(parser.read_from(xml));
+  XML::Element& root = parser.get_root();
+  EXPECT_EQ("root", root.name);
+  EXPECT_EQ("child", root.get_child("child").name);
+}
+
+TEST(ParserTest, TestParseCommentWithNewlines)
+{
+  // Comment with newlines and -- sequences within
+  string xml = "<root><!-- line1\nline2\n--\nline3 --><child/></root>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_TRUE(parser.get_root().get_child("child").valid());
+}
+
+TEST(ParserTest, TestParseContentUnexpectedEnd)
+{
+  // Content that ends without closing tag - triggers "Unexpected end of stream"
+  string xml = "<root>hello";
+  ostringstream err;
+  XML::Parser parser(err);
+  EXPECT_THROW(parser.read_from(xml), XML::ParseFailed);
+}
+
+TEST(ParserTest, TestParsePIWithNewlines)
+{
+  // Processing instruction with newlines
+  string xml = "<?xml\nversion=\"1.0\"\n?><root/>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_EQ("root", parser.get_root().name);
+}
+
+TEST(ParserTest, TestParseSkipToGtWithNewlines)
+{
+  // DOCTYPE with embedded newlines exercises skip_to_gt line counting
+  string xml = "<!DOCTYPE\nhtml\nSYSTEM \"foo\">\n<root/>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_EQ("root", parser.get_root().name);
+}
+
 TEST(ParserTest, TestParseLineNumbers)
 {
   string xml = "<root>\n<child/>\n</root>";
@@ -1449,6 +1639,103 @@ TEST(ParserTest, TestParseParentPointers)
 
   XML::Element& grandchild = child.get_child("grandchild");
   EXPECT_EQ(&child, grandchild.parent);
+}
+
+//==========================================================================
+// Const overload tests - exercise the const versions of methods
+//==========================================================================
+
+TEST(ElementConstOverloadTest, TestConstGetChildByIndex)
+{
+  XML::Element root("root");
+  root.add("first");
+  root.add("second");
+  root.add("third");
+
+  const XML::Element& croot = root;
+  EXPECT_EQ("first", croot.get_child(0).name);
+  EXPECT_EQ("second", croot.get_child(1).name);
+  EXPECT_EQ("third", croot.get_child(2).name);
+  EXPECT_FALSE(croot.get_child(3).valid());
+}
+
+TEST(ElementConstOverloadTest, TestConstGetChildElement)
+{
+  string xml = "<foo>text<bar/> <splat/></foo>\n";
+  XML::Parser parser(XML::PARSER_PRESERVE_WHITESPACE);
+  parser.read_from(xml);
+  const XML::Element& e = parser.get_root();
+  EXPECT_EQ("bar", e.get_child_element(0).name);
+  EXPECT_EQ("splat", e.get_child_element(1).name);
+  EXPECT_FALSE(e.get_child_element(2).valid());
+}
+
+TEST(ElementConstOverloadTest, TestConstGetChildByName)
+{
+  XML::Element root("root");
+  root.add("alpha");
+  root.add("beta");
+  root.add("alpha", "second");
+
+  const XML::Element& croot = root;
+  EXPECT_TRUE(croot.get_child("alpha").valid());
+  EXPECT_EQ("second", croot.get_child("alpha", 1).content);
+  EXPECT_FALSE(croot.get_child("alpha", 2).valid());
+  EXPECT_FALSE(croot.get_child("gamma").valid());
+}
+
+TEST(ElementConstOverloadTest, TestConstGetDescendant)
+{
+  XML::Element root("root");
+  XML::Element& mid = root.add("middle");
+  mid.add("target", "found");
+
+  const XML::Element& croot = root;
+  const XML::Element& target = croot.get_descendant("target");
+  ASSERT_TRUE(target.valid());
+  EXPECT_EQ("found", target.content);
+  EXPECT_FALSE(croot.get_descendant("nonexistent").valid());
+}
+
+TEST(ElementConstOverloadTest, TestConstGetDescendants)
+{
+  XML::Element root("root");
+  root.add("item", "top");
+  XML::Element& sub = root.add("container");
+  sub.add("item", "nested");
+
+  const XML::Element& croot = root;
+  auto items = croot.get_descendants("item");
+  EXPECT_EQ(2, static_cast<int>(items.size()));
+}
+
+TEST(ElementConstOverloadTest, TestConstGetDescendantsWithPruning)
+{
+  XML::Element root("root");
+  root.add("item", "top");
+  XML::Element& container = root.add("container");
+  container.add("item", "nested");
+
+  const XML::Element& croot = root;
+  auto items = croot.get_descendants("item", "container");
+  EXPECT_EQ(1, static_cast<int>(items.size()));
+}
+
+//==========================================================================
+// Text-node element write test (nameless element with content)
+//==========================================================================
+
+TEST(ElementSerializationTest, TestWriteTextNode)
+{
+  // A nameless element is a text node - its content is written directly
+  XML::Element root("root");
+  auto *text = new XML::Element();
+  text->content = "hello world";
+  root.add(text);
+
+  // The root should serialise with the text node content visible
+  string s = root.to_string();
+  EXPECT_NE(string::npos, s.find("hello world"));
 }
 
 } // anonymous namespace
