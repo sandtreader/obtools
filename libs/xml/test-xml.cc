@@ -1584,8 +1584,18 @@ TEST(ParserTest, TestParseNamespaceRemovePrefix)
 
 TEST(ParserTest, TestParseCommentWithNewlines)
 {
-  // Comment with newlines and -- sequences within
+  // Comment with newlines - exercises line counting in skip_comment
   string xml = "<root><!-- line1\nline2\n--\nline3 --><child/></root>";
+  XML::Parser parser;
+  ASSERT_NO_THROW(parser.read_from(xml));
+  EXPECT_TRUE(parser.get_root().get_child("child").valid());
+}
+
+TEST(ParserTest, TestParseCommentDashThenNewline)
+{
+  // A single dash followed by newline inside a comment hits the
+  // "else if (c == '\n') line++" path after a non-double-dash
+  string xml = "<root><!-- text -\n more --><child/></root>";
   XML::Parser parser;
   ASSERT_NO_THROW(parser.read_from(xml));
   EXPECT_TRUE(parser.get_root().get_child("child").valid());
