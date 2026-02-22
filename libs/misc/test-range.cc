@@ -447,6 +447,50 @@ TEST(RangeSetTest, TestDump)
   ASSERT_EQ(expected, actual.str());
 }
 
+TEST(RangeSetTest, TestStreamOperator)
+{
+  Misc::UInt64RangeSet rs;
+  rs.insert(10, 5);
+  rs.insert(20, 3);
+  ostringstream oss;
+  oss << rs;
+  string output = oss.str();
+  EXPECT_NE(string::npos, output.find("10"));
+}
+
+TEST(RangeSetTest, TestSetUnionOperator)
+{
+  Misc::UInt64RangeSet rs1;
+  rs1.insert(0, 5);
+  Misc::UInt64RangeSet rs2;
+  rs2.insert(10, 5);
+  auto result = rs1 + rs2;
+  EXPECT_TRUE(result.contains(0, 5));
+  EXPECT_TRUE(result.contains(10, 5));
+}
+
+TEST(RangeSetTest, TestSetDifferenceOperator)
+{
+  Misc::UInt64RangeSet rs1(20);
+  rs1.insert(0, 20);
+  Misc::UInt64RangeSet rs2;
+  rs2.insert(5, 5);
+  auto result = rs1 - rs2;
+  EXPECT_TRUE(result.contains(0, 5));
+  EXPECT_TRUE(result.contains(10, 10));
+  EXPECT_FALSE(result.contains(5, 5));
+}
+
+TEST(RangeSetTest, TestIntersectionOperator)
+{
+  Misc::UInt64RangeSet rs1(20);
+  rs1.insert(0, 15);
+  Misc::UInt64RangeSet rs2(20);
+  rs2.insert(10, 10);
+  auto result = rs1 ^ rs2;
+  EXPECT_TRUE(result.contains(10, 5));
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

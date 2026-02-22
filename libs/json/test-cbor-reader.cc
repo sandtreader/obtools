@@ -200,6 +200,68 @@ TEST(CBORReader, TestReadTagByteString)
             decode("d818582183581cd3a912bbc69d18f9f8754c4f79adcbaed373aa6703444d465fd31047a000"));
 }
 
+TEST(CBORReader, TestDefiniteMapWithIntegerKey)
+{
+  // Map {42: "hello"} — key is positive integer 42 (0x182a),
+  // value is string "hello" (0x6568656c6c6f)
+  // a1 = map of 1 item, 182a = uint 42, 6568656c6c6f = "hello"
+  auto result = decode("a1182a6568656c6c6f");
+  EXPECT_EQ("{\"42\":\"hello\"}", result);
+}
+
+TEST(CBORReader, TestIndefiniteMapWithIntegerKey)
+{
+  // Indefinite map {42: "hello"} — bf...ff
+  auto result = decode("bf182a6568656c6c6fff");
+  EXPECT_EQ("{\"42\":\"hello\"}", result);
+}
+
+TEST(CBORReader, TestDefiniteMapWithBooleanKeyThrows)
+{
+  // Map with boolean key (f4 = false) — not string or integer
+  // a1 = map of 1, f4 = false, 01 = value 1
+  auto binary = Text::xtob("a1f401");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+  EXPECT_THROW(cr.decode(), Channel::Error);
+}
+
+TEST(CBORReader, TestIndefiniteMapWithBooleanKeyThrows)
+{
+  // Indefinite map with boolean key
+  auto binary = Text::xtob("bff401ff");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+  EXPECT_THROW(cr.decode(), Channel::Error);
+}
+
+TEST(CBORReader, TestUnhandledSemanticTagThrows)
+{
+  // Tag 32 — d8 20, then a string "hello"
+  auto binary = Text::xtob("d8206568656c6c6f");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+  EXPECT_THROW(cr.decode(), Channel::Error);
+}
+
+TEST(CBORReader, TestUnhandledFloatSimpleThrows)
+{
+  // Simple value 16 (0xf0 = major 7, additional info 16)
+  auto binary = Text::xtob("f0");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+  EXPECT_THROW(cr.decode(), Channel::Error);
+}
+
+TEST(CBORReader, TestReservedAdditionalInfoThrows)
+{
+  // Additional info 28 (0x1c) in positive integer: 0x1c
+  auto binary = Text::xtob("1c");
+  Channel::StringReader sr(binary);
+  CBORReader cr(sr);
+  EXPECT_THROW(cr.decode(), Channel::Error);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

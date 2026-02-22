@@ -79,11 +79,91 @@ TEST(PropertyListTests, TestFromEnvironment)
   EXPECT_TRUE(pl.has("PATH"));
 }
 
+TEST(PropertyListTests, TestGetReal)
+{
+  Misc::PropertyList pl;
+  pl.add("pi", "3.14159");
+  EXPECT_DOUBLE_EQ(3.14159, pl.get_real("pi"));
+  EXPECT_DOUBLE_EQ(0.0, pl.get_real("missing"));
+  EXPECT_DOUBLE_EQ(9.9, pl.get_real("missing", 9.9));
+}
+
+TEST(PropertyListTests, TestDump)
+{
+  Misc::PropertyList pl;
+  pl.add("foo", "one");
+  pl.add("bar", "two");
+  ostringstream oss;
+  pl.dump(oss);
+  string output = oss.str();
+  EXPECT_NE(string::npos, output.find("foo"));
+  EXPECT_NE(string::npos, output.find("one"));
+}
+
+TEST(PropertyListTests, TestDumpWithCustomPrefixSeparator)
+{
+  Misc::PropertyList pl;
+  pl.add("x", "1");
+  ostringstream oss;
+  pl.dump(oss, ">> ", ": ");
+  string output = oss.str();
+  EXPECT_NE(string::npos, output.find(">> x: 1"));
+}
+
+TEST(PropertyListTests, TestStreamOperator)
+{
+  Misc::PropertyList pl;
+  pl.add("k", "v");
+  ostringstream oss;
+  oss << pl;
+  EXPECT_NE(string::npos, oss.str().find("k"));
+}
+
+TEST(PropertyListTests, TestCopyFromMap)
+{
+  map<string, string> m;
+  m["a"] = "1";
+  m["b"] = "2";
+  Misc::PropertyList pl(m);
+  EXPECT_EQ("1", pl["a"]);
+  EXPECT_EQ("2", pl["b"]);
+}
+
+TEST(PropertyListTests, TestAssignFromMap)
+{
+  map<string, string> m;
+  m["x"] = "y";
+  Misc::PropertyList pl;
+  pl = m;
+  EXPECT_EQ("y", pl["x"]);
+}
+
+TEST(PropertyListTests, TestAddUint64)
+{
+  Misc::PropertyList pl;
+  pl.add("big", uint64_t{12345678901234567890ULL});
+  EXPECT_EQ("12345678901234567890", pl["big"]);
+}
+
+TEST(PropertyListTests, TestInterpolationEscapedSemicolon)
+{
+  Misc::PropertyList pl;
+  pl.add("x", "val");
+  // $; should produce a literal semicolon
+  EXPECT_EQ("val;", pl.interpolate("$x$;"));
+}
+
+TEST(PropertyListTests, TestInterpolationNonAlphanumAfterDollar)
+{
+  Misc::PropertyList pl;
+  // $! — the ! is not alphanum or $ or ; so default case reinserts "$!"
+  EXPECT_EQ("$!", pl.interpolate("$!"));
+  EXPECT_EQ("hello$!world", pl.interpolate("hello$!world"));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-
 

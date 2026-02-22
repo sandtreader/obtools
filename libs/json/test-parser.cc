@@ -243,6 +243,28 @@ TEST(Parser, TestUnclosedArrayFails)
   ASSERT_THROW(value = parser.read_value(), JSON::Exception);
 }
 
+TEST(Parser, TestObjectInvalidSymbolSeparatorFails)
+{
+  // After property value, a non-comma/non-brace symbol triggers
+  // "Expected , or }" (parser.cc line 65)
+  string s("{ \"a\": 1 : \"b\": 2 }");
+  istringstream input(s);
+  Parser parser(input);
+  Value value;
+  ASSERT_THROW(value = parser.read_value(), JSON::Exception);
+}
+
+TEST(Parser, TestArrayInvalidSymbolSeparatorFails)
+{
+  // After array element, a non-comma/non-bracket symbol triggers
+  // "Expected , or ]" (parser.cc line 102)
+  string s("[1 : 2]");
+  istringstream input(s);
+  Parser parser(input);
+  Value value;
+  ASSERT_THROW(value = parser.read_value(), JSON::Exception);
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

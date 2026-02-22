@@ -170,6 +170,41 @@ TEST(ConvertTest, TestBinaryVectorToString)
   ASSERT_EQ("0000beef", Text::btox(buf2));
 }
 
+TEST(ConvertTest, TestBinaryStringToHex)
+{
+  string data = "\xde\xad\xbe\xef";
+  EXPECT_EQ("deadbeef", Text::btox(data));
+}
+
+TEST(ConvertTest, TestBinaryUint8VectorToHex)
+{
+  vector<uint8_t> buf{0xde, 0xad, 0xbe, 0xef};
+  EXPECT_EQ("deadbeef", Text::btox(buf));
+}
+
+TEST(ConvertTest, TestFloatToStringWithWidth)
+{
+  EXPECT_EQ("0012345.68", Text::ftos(12345.6789, 10, 2, true));
+}
+
+TEST(ConvertTest, TestFixedPointToStringPositive)
+{
+  EXPECT_EQ("1.23", Text::ifixtos(123, 2));
+  EXPECT_EQ("0.01", Text::ifixtos(1, 2));
+}
+
+TEST(ConvertTest, TestNegativeIntToString)
+{
+  EXPECT_EQ("-42", Text::itos(-42));
+}
+
+TEST(ConvertTest, TestFixedPointToStringZeroDecimalPlaces)
+{
+  // decimal_places=0 triggers early return (convert.cc line 73-74)
+  EXPECT_EQ("42", Text::ifixtos(42, 0));
+  EXPECT_EQ("-7", Text::ifixtos(-7, 0));
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)
