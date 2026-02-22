@@ -429,16 +429,18 @@ bool Configuration::write()
   File::OutStream f(tfn);
   if (!f)
   {
+    // GCOV_EXCL_START — OS-level file creation failure
     serr << "Config: can't create " << tfn << " for update: "
          << strerror(errno) << endl;
     return false;
+    // GCOV_EXCL_STOP
   }
 
   f << parser.get_root();
 
   if (!f.good())
   {
-    // Writing to the stream failed. Log error and clean up
+    // GCOV_EXCL_START — OS-level write failure
     serr << "Config: Failed writing new content to temporary file "
          << tfn << ": " << strerror(errno) << endl;
     f.close();
@@ -446,6 +448,7 @@ bool Configuration::write()
     tempfile.erase();
     return false;
   }
+  // GCOV_EXCL_STOP
 
   f.close();
 
@@ -454,10 +457,12 @@ bool Configuration::write()
   File::Path destfile(fn);
   if (!tempfile.rename(destfile))
   {
+    // GCOV_EXCL_START — OS-level rename failure
     serr << "Config: Can't rename " << tempfile << " to " << destfile << ": "
          << strerror(errno) << endl;
     tempfile.erase();
     return false;
+    // GCOV_EXCL_STOP
   }
 
   return true;
