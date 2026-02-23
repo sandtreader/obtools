@@ -56,8 +56,10 @@ void regenbuf::close()
   ofstream outfile(newfn.c_str());
   if (!outfile)
   {
+    // GCOV_EXCL_START - requires filesystem to fail creating temp file
     cerr << "Can't create temporary file " << newfn << endl;
     return;
+    // GCOV_EXCL_STOP
   }
 
   // If userfile not readable, just spool buffer straight out
@@ -81,8 +83,10 @@ void regenbuf::close()
 
   if (rename(newfn.c_str(), fn.c_str()))
   {
+    // GCOV_EXCL_START - requires rename(2) to fail
     cerr << "Rename of " << newfn << " to " << fn << " failed - "
          << strerror(errno) << endl;
+    // GCOV_EXCL_STOP
   }
 }
 
@@ -92,7 +96,7 @@ void regenbuf::close()
 int regenbuf::overflow(int c)
 {
   if (c==EOF)
-    close();
+    close(); // GCOV_EXCL_LINE - unbuffered streambuf never receives EOF via overflow
   else
     buffer += static_cast<char>(c);
 

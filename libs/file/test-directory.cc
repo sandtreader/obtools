@@ -77,6 +77,74 @@ TEST(DirectoryTest, TestRecursiveDirectoryInspect)
   EXPECT_FALSE(test_dir.exists());
 }
 
+//--------------------------------------------------------------------------
+// Directory::ensure on already-existing directory
+TEST(DirectoryTest, TestEnsureAlreadyExists)
+{
+  auto d = File::Directory{"/tmp/obtools-test-ensure-exists"};
+  ASSERT_TRUE(d.ensure(true));
+  // Call ensure again - mkdir fails but directory exists
+  EXPECT_TRUE(d.ensure(false));
+  d.erase();
+}
+
+//--------------------------------------------------------------------------
+// Directory::exists()
+TEST(DirectoryTest, TestDirectoryExists)
+{
+  EXPECT_TRUE(File::Directory("/tmp").exists());
+  EXPECT_FALSE(File::Directory("/nonexistent_xyz_99").exists());
+}
+
+//--------------------------------------------------------------------------
+// Directory::empty()
+TEST(DirectoryTest, TestDirectoryEmpty)
+{
+  auto d = File::Directory{"/tmp/obtools-test-empty-dir"};
+  d.ensure(true);
+  EXPECT_TRUE(d.empty());
+
+  // Add a file to make it non-empty
+  File::Path p(d, "file.txt");
+  p.touch();
+  EXPECT_FALSE(d.empty());
+
+  d.erase();
+}
+
+//--------------------------------------------------------------------------
+// Directory::extend(const Path&)
+TEST(DirectoryTest, TestDirectoryExtendWithPath)
+{
+  File::Directory d("/foo");
+  d.extend(File::Path("bar"));
+  EXPECT_EQ("/foo/bar", d.str());
+
+  File::Directory d2("/foo");
+  d2.extend(File::Path("/bar"));
+  EXPECT_EQ("/foo/bar", d2.str());
+}
+
+//--------------------------------------------------------------------------
+// Glob::erase()
+TEST(DirectoryTest, TestGlobErase)
+{
+  auto d = File::Directory{"/tmp/obtools-test-glob-erase"};
+  d.ensure(true);
+
+  File::Path(d, "a.tmp").touch();
+  File::Path(d, "b.tmp").touch();
+  ASSERT_TRUE(File::Path(d, "a.tmp").exists());
+  ASSERT_TRUE(File::Path(d, "b.tmp").exists());
+
+  File::Glob glob("/tmp/obtools-test-glob-erase/*.tmp");
+  EXPECT_TRUE(glob.erase());
+
+  EXPECT_FALSE(File::Path(d, "a.tmp").exists());
+  EXPECT_FALSE(File::Path(d, "b.tmp").exists());
+  d.erase();
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

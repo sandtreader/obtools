@@ -241,6 +241,192 @@ TEST_F(BufferedMultiStreamTest, TestWriteBuffers)
   }
 }
 
+//--------------------------------------------------------------------------
+// BufferedOutStream default constructor + open
+TEST_F(StreamTest, TestBufferedOutStreamDefaultConstructor)
+{
+  const string test_file(test_dir + "/default-ctor");
+  const char data[] = "hello";
+
+  File::BufferedOutStream bos;
+  EXPECT_FALSE(bos.is_open());
+  bos.set_buffer_size(4);
+  bos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  EXPECT_TRUE(bos.is_open());
+  bos.write(data, sizeof(data));
+  bos.close();
+  EXPECT_FALSE(bos.is_open());
+
+  File::Path path(test_file);
+  string str;
+  ASSERT_TRUE(path.read_all(str));
+  ASSERT_STREQ(data, str.c_str());
+}
+
+//--------------------------------------------------------------------------
+// BufferedOutFileBuf resize
+TEST_F(StreamTest, TestBufferedOutFileBufResize)
+{
+  const string test_file(test_dir + "/resize");
+  const char data[] = "resize-test-data";
+
+  File::BufferedOutStream bos(test_file, 8);
+  EXPECT_EQ(8u, bos.get_buffer_size());
+
+  // Resize larger
+  bos.set_buffer_size(16);
+  EXPECT_EQ(16u, bos.get_buffer_size());
+
+  bos.write(data, sizeof(data));
+  bos.close();
+
+  File::Path path(test_file);
+  string str;
+  ASSERT_TRUE(path.read_all(str));
+  ASSERT_STREQ(data, str.c_str());
+}
+
+//--------------------------------------------------------------------------
+// MultiOutStream default constructor, is_open, close
+TEST_F(MultiStreamTest, TestMultiOutStreamLifecycle)
+{
+  const string test_file1(test_dir + "/multi1");
+  const string test_file2(test_dir + "/multi2");
+  const char data[] = "multi-data";
+
+  File::MultiOutStream mos;
+  EXPECT_FALSE(mos.is_open());
+  mos.open(test_file1.c_str(), ios_base::out | ios_base::trunc);
+  mos.open(test_file2.c_str(), ios_base::out | ios_base::trunc);
+  EXPECT_TRUE(mos.is_open());
+  mos.write(data, sizeof(data));
+  mos.close();
+  EXPECT_FALSE(mos.is_open());
+
+  string str;
+  File::Path(test_file1).read_all(str);
+  EXPECT_STREQ(data, str.c_str());
+  str.clear();
+  File::Path(test_file2).read_all(str);
+  EXPECT_STREQ(data, str.c_str());
+}
+
+//--------------------------------------------------------------------------
+// MultiOutStream open_back failure
+TEST_F(MultiStreamTest, TestMultiOutStreamOpenBackFailure)
+{
+  File::MultiOutStream mos;
+  EXPECT_FALSE(mos.open_back("/nonexistent/dir/file.txt",
+                              ios_base::out | ios_base::trunc));
+}
+
+//--------------------------------------------------------------------------
+// BufferedMultiOutStream set_buffer_size, is_open, tellp
+TEST_F(BufferedMultiStreamTest, TestBufferedMultiStreamSetBufferSize)
+{
+  const string test_file(test_dir + "/bmos-resize");
+  const char data[] = "buffered-multi";
+
+  File::BufferedMultiOutStream mos{4};
+  EXPECT_FALSE(mos.is_open());
+  mos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  EXPECT_TRUE(mos.is_open());
+
+  mos.set_buffer_size(8);
+  EXPECT_EQ(8u, mos.get_buffer_size());
+
+  mos.write(data, sizeof(data));
+  EXPECT_EQ(sizeof(data), mos.tellp());
+  mos.close();
+
+  string str;
+  File::Path(test_file).read_all(str);
+  ASSERT_STREQ(data, str.c_str());
+}
+
+//--------------------------------------------------------------------------
+// BufferedMultiOutStream open_back failure
+TEST_F(BufferedMultiStreamTest, TestBufferedMultiStreamOpenBackFailure)
+{
+  File::BufferedMultiOutStream mos{4};
+  EXPECT_FALSE(mos.open_back("/nonexistent/dir/file.txt",
+                              ios_base::out | ios_base::trunc));
+}
+
+//--------------------------------------------------------------------------
+// MultiOutStream single char write (triggers overflow)
+TEST_F(MultiStreamTest, TestMultiOutStreamOverflow)
+{
+  const string test_file(test_dir + "/overflow");
+
+  File::MultiOutStream mos;
+  mos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  mos.put('X');
+  mos.close();
+
+  string str;
+  File::Path(test_file).read_all(str);
+  EXPECT_EQ("X", str);
+}
+
+//--------------------------------------------------------------------------
+// BufferedMultiOutStream single char write (triggers overflow)
+TEST_F(BufferedMultiStreamTest, TestBufferedMultiStreamOverflow)
+{
+  const string test_file(test_dir + "/bmos-overflow");
+
+  File::BufferedMultiOutStream mos{4};
+  mos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  mos.put('Y');
+  mos.close();
+
+  string str;
+  File::Path(test_file).read_all(str);
+  EXPECT_EQ("Y", str);
+}
+
+//--------------------------------------------------------------------------
+// BufferedOutFileBuf resize to zero and resize smaller
+TEST_F(StreamTest, TestBufferedOutFileBufResizeToZero)
+{
+  const string test_file(test_dir + "/resize-zero");
+  const char data[] = "data";
+
+  File::BufferedOutStream bos;
+  bos.set_buffer_size(8);
+  EXPECT_EQ(8u, bos.get_buffer_size());
+  bos.set_buffer_size(0);
+  EXPECT_EQ(0u, bos.get_buffer_size());
+
+  bos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  bos.write(data, sizeof(data));
+  bos.close();
+
+  string str;
+  File::Path(test_file).read_all(str);
+  ASSERT_STREQ(data, str.c_str());
+}
+
+TEST_F(StreamTest, TestBufferedOutFileBufResizeSmaller)
+{
+  const string test_file(test_dir + "/resize-smaller");
+  const char data[] = "data";
+
+  File::BufferedOutStream bos;
+  bos.set_buffer_size(16);
+  EXPECT_EQ(16u, bos.get_buffer_size());
+  bos.set_buffer_size(4);
+  EXPECT_EQ(4u, bos.get_buffer_size());
+
+  bos.open(test_file.c_str(), ios_base::out | ios_base::trunc);
+  bos.write(data, sizeof(data));
+  bos.close();
+
+  string str;
+  File::Path(test_file).read_all(str);
+  ASSERT_STREQ(data, str.c_str());
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv)

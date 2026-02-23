@@ -191,6 +191,234 @@ TEST_F(PathTest, TestGetIDFromGroupName)
   EXPECT_EQ(65534, File::Path::group_name_to_id("nogroup"));
 }
 
+//--------------------------------------------------------------------------
+// Pure string/computation tests - no filesystem
+TEST_F(PathTest, TestDir)
+{
+  File::Directory d = File::Path("/foo/bar/baz").dir();
+  EXPECT_EQ("/foo/bar", d.str());
+}
+
+TEST_F(PathTest, TestExtendWithPath)
+{
+  File::Path p("/foo");
+  p.extend(File::Path("bar"));
+  EXPECT_EQ("/foo/bar", p.str());
+
+  File::Path p2("/foo");
+  p2.extend(File::Path("/bar"));
+  EXPECT_EQ("/foo/bar", p2.str());
+}
+
+TEST_F(PathTest, TestExpandOnLinux)
+{
+  // On Linux, expand() is a no-op
+  File::Path p("/some/path");
+  EXPECT_EQ("/some/path", p.expand().str());
+}
+
+TEST_F(PathTest, TestFixSlashesOnLinux)
+{
+  // On Linux, fix_slashes() is a no-op
+  File::Path p("/some/path");
+  p.fix_slashes();
+  EXPECT_EQ("/some/path", p.str());
+}
+
+TEST_F(PathTest, TestItoo)
+{
+  EXPECT_EQ("755", File::Path::itoo(0755));
+  EXPECT_EQ("644", File::Path::itoo(0644));
+  EXPECT_EQ("0", File::Path::itoo(0));
+}
+
+TEST_F(PathTest, TestOtoi)
+{
+  EXPECT_EQ(0755, File::Path::otoi("755"));
+  EXPECT_EQ(0644, File::Path::otoi("644"));
+  EXPECT_EQ(0, File::Path::otoi("0"));
+}
+
+TEST_F(PathTest, TestSanitiseLeaf)
+{
+  EXPECT_EQ("hello_world_", File::Path::sanitise_leaf("hello world!"));
+  EXPECT_EQ("safe.name_txt", File::Path::sanitise_leaf("safe.name_txt"));
+  EXPECT_EQ("a-b+c.d_e", File::Path::sanitise_leaf("a-b+c.d_e"));
+  EXPECT_EQ("___", File::Path::sanitise_leaf("@#$"));
+}
+
+TEST_F(PathTest, TestOstreamOperator)
+{
+  File::Path p("/foo/bar");
+  ostringstream oss;
+  oss << p;
+  EXPECT_EQ("/foo/bar", oss.str());
+}
+
+//--------------------------------------------------------------------------
+// Filesystem tests using /tmp
+
+TEST_F(PathTest, TestRealpathSuccess)
+{
+  File::Path p("/tmp");
+  File::Path rp = p.realpath();
+  EXPECT_FALSE(rp.str().empty());
+}
+
+TEST_F(PathTest, TestRealpathFailure)
+{
+  File::Path p("/nonexistent_path_xyz_123");
+  File::Path rp = p.realpath();
+  EXPECT_TRUE(!rp);
+}
+
+TEST_F(PathTest, TestSetLastModified)
+{
+  string tmp = "/tmp/obtools-test-mtime";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  time_t target = 1000000;
+  EXPECT_TRUE(p.set_last_modified(target));
+  EXPECT_EQ(target, p.last_modified());
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestSetMode)
+{
+  string tmp = "/tmp/obtools-test-mode";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  EXPECT_TRUE(p.set_mode(0755));
+  EXPECT_EQ(0100755, p.mode());
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestOwnerAndGroup)
+{
+  string tmp = "/tmp/obtools-test-owner";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  // Owner and group should be valid (non-zero or zero for root)
+  uid_t o = p.owner();
+  gid_t g = p.group();
+  // Just verify they return without error (value depends on user)
+  (void)o;
+  (void)g;
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestSetOwnershipByUidGid)
+{
+  // set_ownership with uid/gid - we can at least test with current owner
+  string tmp = "/tmp/obtools-test-chown";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  EXPECT_TRUE(p.set_ownership(p.owner(), p.group()));
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestSetOwnershipByValidNames)
+{
+  // set_ownership with valid user/group string names
+  string tmp = "/tmp/obtools-test-chown-names";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  // Use current user/group names
+  string uname = File::Path::user_id_to_name(p.owner());
+  string gname = File::Path::group_id_to_name(p.group());
+  EXPECT_TRUE(p.set_ownership(uname, gname));
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestSetOwnershipByNameInvalid)
+{
+  // Bad user/group names should return false
+  string tmp = "/tmp/obtools-test-chown-bad";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  EXPECT_FALSE(p.set_ownership("nonexistent_user_xyz", "nonexistent_group_xyz"));
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestRenameFile)
+{
+  string src = "/tmp/obtools-test-rename-src";
+  string dst = "/tmp/obtools-test-rename-dst";
+  File::Path sp(src);
+  sp.touch();
+  ASSERT_TRUE(sp.exists());
+
+  EXPECT_TRUE(sp.rename(File::Path(dst)));
+  EXPECT_FALSE(sp.exists());
+  EXPECT_TRUE(File::Path(dst).exists());
+  unlink(dst.c_str());
+}
+
+TEST_F(PathTest, TestWriteAllByteVector)
+{
+  string tmp = "/tmp/obtools-test-write-vec";
+  File::Path p(tmp);
+  vector<unsigned char> data = {'H', 'e', 'l', 'l', 'o'};
+  EXPECT_EQ("", p.write_all(data));
+
+  string contents;
+  EXPECT_TRUE(p.read_all(contents));
+  EXPECT_EQ("Hello", contents);
+  unlink(tmp.c_str());
+}
+
+TEST_F(PathTest, TestEraseRegularFile)
+{
+  string tmp = "/tmp/obtools-test-erase-file";
+  File::Path p(tmp);
+  p.touch();
+  ASSERT_TRUE(p.exists());
+
+  EXPECT_TRUE(p.erase());
+  EXPECT_FALSE(p.exists());
+}
+
+TEST_F(PathTest, TestReadAllNonexistent)
+{
+  File::Path p("/tmp/obtools-nonexistent-xyz-123");
+  string s;
+  EXPECT_FALSE(p.read_all(s));
+  // s contains error message
+  EXPECT_FALSE(s.empty());
+}
+
+TEST_F(PathTest, TestGetNameFromInvalidUserID)
+{
+  EXPECT_EQ("UNKNOWN", File::Path::user_id_to_name(99999999));
+}
+
+TEST_F(PathTest, TestGetNameFromInvalidGroupID)
+{
+  EXPECT_EQ("UNKNOWN", File::Path::group_id_to_name(99999999));
+}
+
+TEST_F(PathTest, TestGetIDFromInvalidUserName)
+{
+  EXPECT_EQ(-1, File::Path::user_name_to_id("nonexistent_user_xyz_99"));
+}
+
+TEST_F(PathTest, TestGetIDFromInvalidGroupName)
+{
+  EXPECT_EQ(-1, File::Path::group_name_to_id("nonexistent_group_xyz_99"));
+}
+
 TEST_F(PathTest, TestTouchCreate)
 {
   string p = "touch-create";

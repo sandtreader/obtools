@@ -426,11 +426,11 @@ bool Path::erase() const
     {
       const auto& dir = dirs.top();
       auto d = opendir(dir.c_str());
-      if (!d)
+      if (!d) // GCOV_EXCL_START - requires permission/race to trigger
       {
         result = false;
         break;
-      }
+      } // GCOV_EXCL_STOP
 
       auto subdirs = false;
       // Note: readdir is meant to be thread-safe in all modern implementations
@@ -460,9 +460,9 @@ bool Path::erase() const
               unlink(f.c_str());
             }
             break;
-          default:
+          default: // GCOV_EXCL_START - requires FIFO/socket in directory
             result = false;
-            break;
+            break; // GCOV_EXCL_STOP
         }
       }
       closedir(d);

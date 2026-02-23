@@ -131,7 +131,7 @@ void Processor::strip_eol()
       if (c!='\n') sin.unget();
       return;
     }
-  }
+  } // GCOV_EXCL_LINE - for(;;) only exits via return
 }
 
 //--------------------------------------------------------------------------
@@ -193,7 +193,7 @@ void Processor::process()
             // Output unwanted characters as text, and retry
             output_text(tr_normal.get_token().c_str());
             if (!used_char) goto retry;
-            break;
+            break; // GCOV_EXCL_LINE - TOKEN_INVALID always has !used_char
         }
         break;
 
@@ -228,7 +228,7 @@ void Processor::process()
               // Pass mistaken token through as normal, retry unused
               sout << tr_code.get_token();
               if (!used_char) goto retry;
-              break;
+              break; // GCOV_EXCL_LINE - TOKEN_INVALID always has !used_char
           }
 
           break;
@@ -262,7 +262,7 @@ void Processor::process()
               // Pass mistaken token through verbatim, retry unused
               sout << tr_expr.get_token();
               if (!used_char) goto retry;
-              break;
+              break; // GCOV_EXCL_LINE - TOKEN_INVALID always has !used_char
           }
           break;
 
@@ -292,7 +292,7 @@ void Processor::process()
             case TOKEN_INVALID:
               // Swallow mistake, but retry unused
               if (!used_char) goto retry;
-              break;
+              break; // GCOV_EXCL_LINE - TOKEN_INVALID always has !used_char
           }
           break;
     }

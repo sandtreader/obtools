@@ -20,7 +20,7 @@ namespace ObTools { namespace File {
 Glob::Glob(const string& pattern)
 {
   if (glob(pattern.c_str(), 0, 0, &result))
-    throw(Error(strerror(errno)));
+    throw(Error(strerror(errno))); // GCOV_EXCL_LINE - requires glob syscall error
 }
 
 //--------------------------------------------------------------------------
@@ -31,7 +31,7 @@ bool Glob::erase() const
   {
     Path path(*it);
     if (!path.erase())
-      return false;
+      return false; // GCOV_EXCL_LINE - requires specific file to fail erase
   }
   return true;
 }

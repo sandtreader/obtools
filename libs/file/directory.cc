@@ -46,7 +46,7 @@ bool Directory::ensure(bool parents, int mode) const
   int result = ::mkdir(c_str(), mode);
   // Someone else beat us to it maybe!
   if (result)
-    return exists();
+    return exists(); // GCOV_EXCL_LINE - race condition guard
   else
     return true;
 #endif

@@ -55,7 +55,7 @@ void AssociationEnd::build_refs()
                                           "UML:AssociationEnd.type");
 
   if (!participant)
-    reader.error("Can't get participant in AssociationEnd id ", id);
+    reader.error("Can't get participant in AssociationEnd id ", id); // GCOV_EXCL_LINE
 
   // Fix up Classifier's associations list to point back to me
   participant->association_ends.push_back(this);
