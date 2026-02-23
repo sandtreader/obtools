@@ -59,10 +59,10 @@ string Bech32::encode(const vector<byte>& binary)
   while (bitpos < numbits)
   {
     uint8_t num = 0x1F &
-        Gen::shiftr(static_cast<uint8_t>(binary[bitpos / 8]),  3 - bitpos % 8) +
-        ((bitpos % 8) > 3 && ((1 + bitpos / 8) < binary.size())
-         ? static_cast<uint8_t>(binary[1 + (bitpos / 8)]) >> (11 - bitpos % 8)
-         : 0);
+        (Gen::shiftr(static_cast<uint8_t>(binary[bitpos / 8]),  3 - bitpos % 8) +
+         ((bitpos % 8) > 3 && ((1 + bitpos / 8) < binary.size())
+          ? static_cast<uint8_t>(binary[1 + (bitpos / 8)]) >> (11 - bitpos % 8)
+          : 0));
     result.push_back(map.lookup(num));
     bitpos += 5;
   }
@@ -91,7 +91,7 @@ bool Bech32::decode(const string& bech32, vector<byte>& binary)
     }
     return true;
   }
-  catch (range_error)
+  catch (const range_error&)
   {
     return false;
   }
@@ -111,7 +111,7 @@ bool Bech32::decode_as_5_bit(const string& bech32, vector<uint8_t>& binary)
     }
     return true;
   }
-  catch (range_error)
+  catch (const range_error&)
   {
     return false;
   }

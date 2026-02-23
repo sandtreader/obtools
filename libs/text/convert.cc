@@ -272,7 +272,7 @@ unsigned int xtob(const string& hex, unsigned char *data,
       data[i] = n;
     }
   }
-  catch (runtime_error)
+  catch (const runtime_error&)
   {
     return 0;
   }
@@ -299,7 +299,7 @@ string xtob(const string& hex)
 
     return binary;
   }
-  catch (runtime_error)
+  catch (const runtime_error&)
   {
     return string();
   }
@@ -320,7 +320,7 @@ void xtob(const string& hex, vector<byte>& data)
       data.push_back((byte)n);
     }
   }
-  catch (runtime_error)
+  catch (const runtime_error&)
   {}
 }
 

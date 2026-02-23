@@ -191,6 +191,7 @@ def compile_sources(lib_dir, inc_dir, cov_dir):
         obj = os.path.join(cov_dir, base.replace(".cc", ".o"))
         result = run(
             ["g++", "--std=c++17", "-pedantic", "-Wall", "-Wextra", "-Werror",
+             "-Wno-unknown-pragmas",
              "--coverage", "-fprofile-arcs", "-ftest-coverage",
              f"-I{inc_dir}", "-c", src, "-o", obj],
             capture_output=True, text=True,
@@ -221,7 +222,7 @@ def build_tests(lib_dir, inc_dir, cov_dir, obj_files, gtest_inc, gtest_lib,
         bin_path = os.path.join(cov_dir, base)
         cmd = [
             "g++", "--std=c++17", "-pedantic", "-Wall", "-Wextra", "-Werror",
-            "--coverage",
+            "-Wno-unknown-pragmas", "--coverage",
             f"-I{inc_dir}", f"-I{gtest_inc}",
             test_src,
         ] + obj_files + [
