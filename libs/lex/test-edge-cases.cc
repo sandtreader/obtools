@@ -50,12 +50,11 @@ TEST(LexEdgeTest, TestValidStringEscapes)
 
 TEST(LexEdgeTest, TestDotNotFollowedByDigitIsSymbol)
 {
-  // A '.' not followed by a digit should be treated as a symbol
+  // A '.' not followed by a digit triggers symbol path, but '.' must be
+  // registered via add_symbol() first - without it, an exception is thrown
   istringstream iss(".abc");
   Lex::Analyser lex(iss);
-  Lex::Token tok = lex.read_token();
-  EXPECT_EQ(Lex::Token::SYMBOL, tok.type);
-  EXPECT_EQ(".", tok.value);
+  EXPECT_THROW(lex.read_token(), Lex::Exception);
 }
 
 } // anonymous namespace

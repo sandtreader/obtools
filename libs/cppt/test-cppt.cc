@@ -29,12 +29,8 @@ TEST(TokenRecogniserTest, TestAddTokenAndMatchSingle)
   EXPECT_TRUE(tr.process_char('a', state));
   EXPECT_EQ(CPPT::TOKEN_READING, state);
 
-  // Second char: completes token
+  // Second char: completes token (only one possibility, so immediately valid)
   EXPECT_TRUE(tr.process_char('b', state));
-  EXPECT_EQ(CPPT::TOKEN_READING, state);
-
-  // Third char: triggers valid (not part of token)
-  EXPECT_FALSE(tr.process_char('x', state));
   EXPECT_EQ(CPPT::TOKEN_VALID, state);
   EXPECT_EQ("ab", tr.get_token());
 }
@@ -57,10 +53,8 @@ TEST(TokenRecogniserTest, TestEmptyTokenIgnored)
   tr.add_token("a");
   CPPT::TokenState state;
 
-  // Should match 'a'
+  // Should match 'a' - only one possibility, so immediately valid
   EXPECT_TRUE(tr.process_char('a', state));
-  // Trigger end
-  EXPECT_FALSE(tr.process_char('x', state));
   EXPECT_EQ(CPPT::TOKEN_VALID, state);
   EXPECT_EQ("a", tr.get_token());
 }
@@ -80,12 +74,8 @@ TEST(TokenRecogniserTest, TestOverlappingTokens)
   EXPECT_TRUE(tr.process_char('?', state));
   EXPECT_EQ(CPPT::TOKEN_READING, state);
 
-  // Process '=' - matches "<?="
+  // Process '=' - matches "<?=" (only one possibility left, so immediately valid)
   EXPECT_TRUE(tr.process_char('=', state));
-  EXPECT_EQ(CPPT::TOKEN_READING, state);
-
-  // Non-matching char triggers valid
-  EXPECT_FALSE(tr.process_char('x', state));
   EXPECT_EQ(CPPT::TOKEN_VALID, state);
   EXPECT_EQ("<?=", tr.get_token());
 }

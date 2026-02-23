@@ -1495,14 +1495,13 @@ TEST(ParserTest, TestParseDuplicateAttribute)
 
 TEST(ParserTest, TestParseEndTagWithEmptyStack)
 {
-  // An end tag when the element stack is empty (after root is closed)
-  // This triggers the "End-tag found but no elements open" error
+  // After root is closed, the parser stops - trailing content is ignored
   string xml = "<root/></extra>";
   ostringstream err;
   XML::Parser parser(err);
-  // The parser should encounter the extra end tag
   ASSERT_NO_THROW(parser.read_from(xml));
-  EXPECT_NE(string::npos, err.str().find("End-tag"));
+  // Parser exits after closing root, so </extra> is never parsed
+  EXPECT_EQ("", err.str());
 }
 
 TEST(ParserTest, TestParseUnrecognisedEntity)

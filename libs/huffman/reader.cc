@@ -42,12 +42,12 @@ namespace
 bool MultiReader::read_mapping(MultiMapping& mapping)
 {
   string line;
-  line.resize(256);
 
   bool got_line(false);
 
   while (!got_line)
   {
+    line.resize(256);
     sin.getline(&line[0], line.size());
 
     if (sin.eof() || sin.fail())
@@ -57,6 +57,11 @@ bool MultiReader::read_mapping(MultiMapping& mapping)
       continue;           // GCOV_EXCL_LINE
 
     line.resize(sin.gcount() - 1);
+
+    // Skip blank lines
+    if (line.empty())
+      continue;
+
     got_line = true;
   }
 
