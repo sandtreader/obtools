@@ -9,6 +9,7 @@
 
 #include "ot-misc.h"
 #include <gtest/gtest.h>
+#include <iomanip>
 
 namespace {
 

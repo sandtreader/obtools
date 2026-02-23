@@ -224,14 +224,10 @@ TEST(HashTableTest, TestFillToCapacity)
 {
   Hash::Table<uint32_t, uint16_t, int16_t, int32_t> table(1, 8);
   // Total capacity is 2^1 * 8 = 16
-  bool all_added = true;
   for (int i = 0; i < 16; i++)
   {
     if (!table.add(i, i))
-    {
-      all_added = false;
       break;
-    }
   }
 
   // Verify all that were added can be looked up
