@@ -179,8 +179,8 @@ void Writer::write_le_32(uint32_t i)
 // Throws Error on failure
 void Writer::write_le_64(uint64_t i)
 {
-  write_nbo_32(static_cast<uint32_t>(i & 0xFFFFFFFF));
-  write_nbo_32(static_cast<uint32_t>(i >> 32));
+  write_le_32(static_cast<uint32_t>(i & 0xFFFFFFFF));
+  write_le_32(static_cast<uint32_t>(i >> 32));
 }
 
 //--------------------------------------------------------------------------

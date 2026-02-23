@@ -92,6 +92,26 @@ Dependencies are resolved transitively by `build/Tuprules.lua` via `Tuppath.lua`
 - **Running tests**: Tests run automatically during debug builds when `CONFIG_TEST=y`
 - Tests are compiled and executed as part of the Tup build pipeline — a failing test fails the build
 
+### Running Tests Without Tup
+
+`build/run-tests.py` compiles and runs tests for any library without needing Tup. It auto-builds libraries via Make, resolves transitive dependencies from Tupfiles, and auto-provisions Google Test if not installed.
+
+```bash
+# Run all tests for a library
+build/run-tests.py xml
+
+# Run a specific test file
+build/run-tests.py chan test-chan-rw
+
+# Run tests for ALL libraries
+build/run-tests.py --all
+
+# Show compile errors for skipped tests
+build/run-tests.py crypto -v
+```
+
+**After modifying any library code or test file, always run `build/run-tests.py <library>` to verify.** Tests that need external system libraries (OpenSSL, SQLite, etc.) are automatically skipped if the libraries are not installed.
+
 ### Test File Structure
 
 ```cpp

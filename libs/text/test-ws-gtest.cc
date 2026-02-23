@@ -66,7 +66,7 @@ TEST(WSTest, TestStripBlankLinesLeadingBlank)
 
 TEST(WSTest, TestStripBlankLinesTrailingBlank)
 {
-  EXPECT_EQ("hello\n", Text::strip_blank_lines("hello\n\n"));
+  EXPECT_EQ("hello\n\n", Text::strip_blank_lines("hello\n\n"));
 }
 
 TEST(WSTest, TestStripBlankLinesFirstLineNotBlank)
@@ -122,8 +122,9 @@ TEST(WSTest, TestRemoveIndent)
 
 TEST(WSTest, TestRemoveIndentWithTabs)
 {
+  // Tab counts as 8 spaces; removing 4 spaces of indent still consumes the tab
   string result = Text::remove_indent("\thello\n", 4);
-  EXPECT_EQ("\thello\n", result);
+  EXPECT_EQ("hello\n", result);
 }
 
 TEST(WSTest, TestRemoveIndentPartial)

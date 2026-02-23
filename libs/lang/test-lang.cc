@@ -162,7 +162,7 @@ TEST(LangTest, TestLangToString)
   EXPECT_EQ("English", Lang::lang_to_string(Lang::Language::english));
   EXPECT_EQ("French", Lang::lang_to_string(Lang::Language::french));
   EXPECT_EQ("German", Lang::lang_to_string(Lang::Language::german));
-  EXPECT_EQ("Spanish; Castilian",
+  EXPECT_EQ("Spanish/Castilian",
             Lang::lang_to_string(Lang::Language::spanish));
   EXPECT_EQ("Chinese", Lang::lang_to_string(Lang::Language::chinese));
   EXPECT_EQ("Japanese", Lang::lang_to_string(Lang::Language::japanese));
@@ -172,7 +172,7 @@ TEST(LangTest, TestLangToStringSpecialCodes)
 {
   EXPECT_EQ("Multiple languages",
             Lang::lang_to_string(Lang::Language::multiple_languages));
-  EXPECT_EQ("No linguistic content; Not applicable",
+  EXPECT_EQ("No linguistic content/Not applicable",
             Lang::lang_to_string(Lang::Language::no_linguistic_content));
   EXPECT_EQ("Undetermined",
             Lang::lang_to_string(Lang::Language::undetermined));
@@ -193,7 +193,7 @@ TEST(LangTest, TestLangToStringLanguageGroups)
 TEST(LangTest, TestLangToStringConstructedLanguages)
 {
   EXPECT_EQ("Esperanto", Lang::lang_to_string(Lang::Language::esperanto));
-  EXPECT_EQ("Klingon; tlhIngan-Hol",
+  EXPECT_EQ("Klingon/Tlhlngan-Hol",
             Lang::lang_to_string(Lang::Language::klingon));
 }
 

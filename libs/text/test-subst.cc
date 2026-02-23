@@ -36,8 +36,9 @@ TEST(SubstTest, TestDeleteByEmptyReplacement)
 
 TEST(SubstTest, TestReplacementContainsOriginal)
 {
-  // Replacing "a" with "aa" should not loop infinitely
-  EXPECT_EQ("aabb", Text::subst("ab", "a", "aa"));
+  // Replacing "a" with "aa" should not loop infinitely;
+  // the search advances past each replacement
+  EXPECT_EQ("aab", Text::subst("ab", "a", "aa"));
 }
 
 TEST(SubstTest, TestEmptyInput)

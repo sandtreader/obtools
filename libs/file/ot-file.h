@@ -91,6 +91,10 @@ public:
   Path(const Path& _o): path(_o.path) {}
 
   //------------------------------------------------------------------------
+  // Copy assignment
+  Path& operator=(const Path&) = default;
+
+  //------------------------------------------------------------------------
   // Constructor from string
   Path(const string& _path): path(_path) {}
 
