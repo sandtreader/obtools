@@ -45,7 +45,7 @@ void Parameter::build_refs()
 
   type = get_classifier_property("type", "UML:Parameter.type");
   if (!type)
-    reader.error("Can't get type of parameter ", id);
+    reader.error("Can't get type of parameter ", id); // GCOV_EXCL_LINE
 }
 
 //--------------------------------------------------------------------------

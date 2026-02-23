@@ -110,6 +110,7 @@ bool Element::get_bool_property(const string& attr_name,
 //--------------------------------------------------------------------------
 // Gets UML element integer 'property' as above
 // Returns default if not available, 0 if not a number
+// GCOV_EXCL_START - currently unused in the codebase
 bool Element::get_int_property(const string& attr_name,
                                const string& subelement_name,
                                int def)
@@ -118,6 +119,7 @@ bool Element::get_int_property(const string& attr_name,
   if (v.empty()) return def;
   return atoi(v.c_str());
 }
+// GCOV_EXCL_STOP
 
 //--------------------------------------------------------------------------
 // Gets a reference 'property', either from given attribute of source
@@ -151,7 +153,7 @@ string Element::get_idref_property(const string& attr_name,
   {
     // If subsubelement not given, go for this one
     if (subsubelement_name.empty())
-      return sube.get_attr("xmi.idref");
+      return sube.get_attr("xmi.idref"); // GCOV_EXCL_LINE - always called with subsubelement
     else
     {
       // Try to open subsubelement
@@ -267,14 +269,14 @@ void Element::print(ostream& sout, int indent)
 
 //--------------------------------------------------------------------------
 // Element destructor
-Element::~Element()
+Element::~Element() // GCOV_EXCL_LINE - gcov virtual destructor variant
 {
   // Delete subelements through virtual destructor
   for(list<Element *>::iterator p=subelements.begin();
       p!=subelements.end();
       p++)
     delete *p;
-}
+} // GCOV_EXCL_LINE - gcov virtual destructor variant
 
 
 
