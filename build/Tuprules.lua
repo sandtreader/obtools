@@ -510,6 +510,26 @@ end
 -- Package (Linux)
 function package_linux(products, dep_products)
   local inputs = tup.glob(PACKAGEDIR .. "/*")
+
+  -- Parse all DEBIAN files to find source files that dpkg-buildpackage needs
+  for _, deb_file in ipairs(inputs) do
+    local f = io.open(deb_file, "r")
+    if f then
+      for line in f:lines() do
+        if not line:match("^#") and not line:match("^%s*$") then
+          local src = line:match("^(%S+)")
+          if src then
+            local found = tup.glob(src)
+            if #found > 0 then
+              inputs += found
+            end
+          end
+        end
+      end
+      f:close()
+    end
+  end
+
   inputs += products
   inputs += dep_products
   local outputs = {}
@@ -519,7 +539,7 @@ function package_linux(products, dep_products)
   local version_separator = "_"
   local arch_separator = "_"
 
-  local f = io.popen("lsb_release -s -i")
+  f = io.popen("lsb_release -s -i")
   local distro = string.gsub(f:read("*a"),"\n","")
   f:close()
 
@@ -531,10 +551,15 @@ function package_linux(products, dep_products)
                arch_separator ..  ARCH .. suffix
   end
 
+  local debian_files = tup.glob(PACKAGEDIR .. "/*")
+  local debian_list = table.concat(debian_files, " ")
+  local product_list = table.concat(products, " ")
+
   tup.definerule{
     inputs = inputs,
     command = "^ PACKAGE %o^ " .. tup.getcwd() .. "/create-deb.sh " ..
-              VERSION .. " " .. REVISION .. " " .. PACKAGE .. " " .. " %o",
+              VERSION .. " " .. REVISION .. " " .. PACKAGE ..
+              " %o -- " .. debian_list .. " -- " .. product_list,
     outputs = outputs
   }
 end
