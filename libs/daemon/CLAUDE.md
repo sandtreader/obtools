@@ -53,3 +53,17 @@ Process(const string& name, const string& version,
         const string& default_config_file, const string& config_element,
         const string& default_log_file, const string& default_pid_file);
 ```
+
+## Privilege dropping
+
+If started as root, after `run_priv()` the Shell changes to
+`<security user="..." group="..."/>` from config (either optional) via:
+
+```cpp
+// Empty string on success, else error message
+string change_user_and_group(const string& username, const string& groupname);
+```
+
+Group defaults to the user's primary group; supplementary groups are reset
+to the user's (`initgroups`), or just the group if no user, so root's are
+not kept.

@@ -260,6 +260,19 @@ public:
 };
 #endif
 
+#if !defined(PLATFORM_WINDOWS)
+//==========================================================================
+// Privilege dropping
+
+//--------------------------------------------------------------------------
+// Change to the given user and/or group by name (either may be empty) -
+// must be root to do anything.
+// group defaults to the user's primary group; supplementary groups are set
+// to the user's (initgroups), or just the group if no user
+// Returns empty string on success, else an error message
+string change_user_and_group(const string& username, const string& groupname);
+#endif
+
 //==========================================================================
 }} //namespaces
 #endif // !__OBTOOLS_DAEMON_H

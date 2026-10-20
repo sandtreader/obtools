@@ -58,6 +58,13 @@ int main(int argc, char **argv)
 6. `reconfigure()` — called on SIGHUP
 7. `cleanup()` — called on shutdown
 
+### Privilege dropping
+
+If started as root, the daemon changes user/group after `run_priv()`
+according to `<security user="..." group="..."/>` in the config.  The group
+defaults to the user's primary group, and supplementary groups are reset to
+the user's own (or just the group if no user), so root's are not kept.
+
 ## Build
 
 ```

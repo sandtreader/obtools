@@ -20,6 +20,8 @@
 #include <execinfo.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
 #else
 #include <dbghelp.h>
 typedef __p_sig_fn_t sighandler_t;
@@ -319,6 +321,53 @@ int Shell::start(int argc, char **argv)
 #endif
 }
 
+#if !defined(PLATFORM_WINDOWS)
+//--------------------------------------------------------------------------
+// Change to the given user and/or group by name (either may be empty)
+// Returns empty string on success, else an error message
+string change_user_and_group(const string& username, const string& groupname)
+{
+  // Look up names first so we don't change anything if either is unknown
+  uid_t uid = 0;
+  gid_t gid = 0;
+  if (!username.empty())
+  {
+    auto pw = getpwnam(username.c_str());
+    if (!pw) return "Can't find user " + username;
+    uid = pw->pw_uid;
+    gid = pw->pw_gid;  // Default to user's primary group
+  }
+
+  if (!groupname.empty())
+  {
+    auto gr = getgrnam(groupname.c_str());
+    if (!gr) return "Can't find group " + groupname;
+    gid = gr->gr_gid;
+  }
+
+  if (!username.empty())
+  {
+    // Set group and supplementary groups first - needs to still be root
+    if (setgid(gid))
+      return string("Can't change group: ") + strerror(errno);
+    if (initgroups(username.c_str(), gid))
+      return string("Can't set supplementary groups: ") + strerror(errno);
+    if (setuid(uid))
+      return string("Can't change user: ") + strerror(errno);
+  }
+  else if (!groupname.empty())
+  {
+    // Group only - just that group, drop any others
+    if (setgid(gid))
+      return string("Can't change group: ") + strerror(errno);
+    if (setgroups(1, &gid))
+      return string("Can't set supplementary groups: ") + strerror(errno);
+  }
+
+  return "";
+}
+#endif
+
 //--------------------------------------------------------------------------
 // Drop privileges if required
 // Returns 0 on success, rc if not
@@ -334,47 +383,39 @@ int Shell::drop_privileges()
     string username = config["security/@user"];
     string groupname = config["security/@group"];
 
-    // Set group first - needs to still be root
+    // Log what we're changing to - group defaults to user's primary
     if (!groupname.empty())
     {
-      int gid = File::Path::group_name_to_id(groupname);
-
-      if (gid >= 0)
-      {
+      auto gr = getgrnam(groupname.c_str());
+      if (gr)
         log.summary << "Changing to group " << groupname
-                    << " (" << gid << ")\n";
-        if (setgid(static_cast<gid_t>(gid)))
-        {
-          log.error << "Can't change group: " << strerror(errno) << endl;
-          return 2;
-        }
-      }
-      else
+                    << " (" << gr->gr_gid << ")\n";
+    }
+    else if (!username.empty())
+    {
+      auto pw = getpwnam(username.c_str());
+      if (pw)
       {
-        log.error << "Can't find group " << groupname << "\n";
-        return 2;
+        auto gr = getgrgid(pw->pw_gid);
+        log.summary << "Changing to group "
+                    << (gr ? gr->gr_name : "(unnamed)")
+                    << " (" << pw->pw_gid << ")\n";
       }
     }
 
     if (!username.empty())
     {
-      int uid = File::Path::user_name_to_id(username);
-
-      if (uid >= 0)
-      {
+      auto pw = getpwnam(username.c_str());
+      if (pw)
         log.summary << "Changing to user " << username
-                    << " (" << uid << ")\n";
-        if (setuid(static_cast<uid_t>(uid)))
-        {
-          log.error << "Can't change user: " << strerror(errno) << endl;
-          return 2;
-        }
-      }
-      else
-      {
-        log.error << "Can't find user " << username << "\n";
-        return 2;
-      }
+                    << " (" << pw->pw_uid << ")\n";
+    }
+
+    auto error = change_user_and_group(username, groupname);
+    if (!error.empty())
+    {
+      log.error << error << endl;
+      return 2;
     }
   }
 
