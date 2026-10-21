@@ -13,12 +13,31 @@
 #include <sys/types.h>
 #if !defined(PLATFORM_WINDOWS)
 #include <sys/wait.h>
+#include <fcntl.h>
 #endif
 #include <errno.h>
 #include <string.h>
 #include <sstream>
 
 namespace ObTools { namespace Exec {
+
+#if !defined(PLATFORM_WINDOWS)
+//--------------------------------------------------------------------------
+// Create a pipe with both ends close-on-exec
+// Returns 0 if OK, as pipe()
+static int cloexec_pipe(int fds[2])
+{
+#if defined(__linux__)
+  return pipe2(fds, O_CLOEXEC);
+#else
+  // Not atomic, but as good as we can do without pipe2()
+  if (pipe(fds)) return -1;
+  fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+  fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+  return 0;
+#endif
+}
+#endif
 
 //==========================================================================
 // Capture thread class - captures output from a pipe and reflects it to
@@ -85,7 +104,11 @@ bool Command::execute(const string& input, string& output_p)
   int stdout_pipe[2];
   int stderr_pipe[2];
 
-  if (pipe(stdin_pipe) || pipe(stdout_pipe) || pipe(stderr_pipe))
+  // Close-on-exec, so children of other threads forking at the same time
+  // don't inherit them - which would stop the child seeing EOF on stdin,
+  // or us on stdout.  dup2() onto 0-2 in the child clears it on those
+  if (cloexec_pipe(stdin_pipe) || cloexec_pipe(stdout_pipe)
+   || cloexec_pipe(stderr_pipe))
   {
     log.error << "Can't create pipes: " << strerror(errno) << endl;
     return false;
