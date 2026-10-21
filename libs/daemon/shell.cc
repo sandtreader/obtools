@@ -438,7 +438,11 @@ void Shell::reload()
   Log::Streams log;
   log.summary << "SIGHUP received\n";
   if (config.read(config_element))
+  {
+    // Process <include> in config, as at startup
+    config.process_includes();
     application.read_config(config);
+  }
   else
     log.error << "Failed to re-read config, using existing" << endl;
   application.reconfigure();
