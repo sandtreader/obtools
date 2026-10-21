@@ -529,6 +529,24 @@ class MessageTransport: public ObTools::Message::Transport<CONTEXT>
 };
 
 //==========================================================================
+// HTTP(S) server options for a SOAP Message Interface - one thread per
+// connection, so max_threads limits concurrent (including idle keep-alive)
+// connections
+struct ServerOptions
+{
+  int backlog{5};        // Listen backlog
+  int min_spare{1};      // Spare threads kept ready
+  int max_threads{10};   // Maximum threads (connections served at once)
+  int timeout{90};       // Idle keep-alive timeout, seconds
+
+  //------------------------------------------------------------------------
+  // Read from a <server> or <ssl-server> element's optional attributes
+  // backlog, min-spare, max-threads and timeout; missing or non-positive
+  // values (other than min-spare, which may be 0) leave the defaults
+  void read(const XML::Element& server_e);
+};
+
+//==========================================================================
 // SOAP Message Interface, configured from standard <soap> element
 template<class CONTEXT>
 class MessageInterface
@@ -557,8 +575,16 @@ public:
       // Default to localhost only
       Net::EndPoint addr(Net::IPAddress(xpath.get_value("server/@address",
                                                         "localhost")), hport);
-      log.summary << "Starting HTTP SOAP server at " << addr << endl;
-      http_server = new Web::SimpleHTTPServer(addr, server_name);
+      ServerOptions options;
+      options.read(xpath.get_element("server") ? *xpath.get_element("server")
+                                                : XML::Element::none);
+      log.summary << "Starting HTTP SOAP server at " << addr << " ("
+                  << options.max_threads << " threads)" << endl;
+      http_server = new Web::SimpleHTTPServer(addr, server_name,
+                                              options.backlog,
+                                              options.min_spare,
+                                              options.max_threads,
+                                              options.timeout);
 
       // Add a message transport to message broker
       broker.add_transport(new MessageTransport<CONTEXT>(context,
@@ -577,8 +603,16 @@ public:
         // Default to localhost only
         Net::IPAddress ip(xpath.get_value("ssl-server/@address", "localhost"));
         Net::EndPoint addr(ip, hport);
-        log.summary << "Starting HTTPS SOAP server at " << addr << endl;
-        https_server = new Web::SimpleHTTPServer(ssl_ctx, addr, server_name);
+        ServerOptions options;
+        options.read(xpath.get_element("ssl-server")
+                     ? *xpath.get_element("ssl-server") : XML::Element::none);
+        log.summary << "Starting HTTPS SOAP server at " << addr << " ("
+                    << options.max_threads << " threads)" << endl;
+        https_server = new Web::SimpleHTTPServer(ssl_ctx, addr, server_name,
+                                                 options.backlog,
+                                                 options.min_spare,
+                                                 options.max_threads,
+                                                 options.timeout);
 
         // Add a message transport to message broker
         broker.add_transport(new MessageTransport<CONTEXT>(context,
