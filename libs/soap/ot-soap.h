@@ -538,11 +538,15 @@ struct ServerOptions
   int min_spare{1};      // Spare threads kept ready
   int max_threads{10};   // Maximum threads (connections served at once)
   int timeout{90};       // Idle keep-alive timeout, seconds
+  int compress_min{1024};  // Minimum response size to gzip, bytes; 0 = off
+  int compress_level{6};   // gzip compression level 1-9
 
   //------------------------------------------------------------------------
   // Read from a <server> or <ssl-server> element's optional attributes
   // backlog, min-spare, max-threads and timeout; missing or non-positive
   // values (other than min-spare, which may be 0) leave the defaults
+  // Also compress-min (0 or more) and compress-level (1-9); other values
+  // leave the defaults
   void read(const XML::Element& server_e);
 };
 
@@ -586,6 +590,11 @@ public:
                                               options.max_threads,
                                               options.timeout);
 
+      // Compress responses - never progressive, so safe
+      if (options.compress_min > 0)
+        http_server->enable_compression(options.compress_min,
+                                        options.compress_level);
+
       // Add a message transport to message broker
       broker.add_transport(new MessageTransport<CONTEXT>(context,
                                                          *http_server));
@@ -613,6 +622,11 @@ public:
                                                  options.min_spare,
                                                  options.max_threads,
                                                  options.timeout);
+
+        // Compress responses - never progressive, so safe
+        if (options.compress_min > 0)
+          https_server->enable_compression(options.compress_min,
+                                           options.compress_level);
 
         // Add a message transport to message broker
         broker.add_transport(new MessageTransport<CONTEXT>(context,

@@ -389,6 +389,12 @@ public:
   // Returns the payload object, or UNSET value if anything fails
   // and logs accordingly.  Checks signature with the given secret
   JSON::Value get_jwt_payload(const string& secret) const;
+
+  //------------------------------------------------------------------------
+  // Check whether the Accept-Encoding header(s) accept the given content
+  // coding (e.g. "gzip"), as RFC 9110: listed with q>0, or not listed and
+  // '*' listed with q>0.  x-gzip is an alias of gzip.  False if no header
+  bool accepts_encoding(const string& coding) const;
 };
 
 //--------------------------------------------------------------------------
@@ -400,6 +406,27 @@ istream& operator>>(istream& s, HTTPMessage& msg);
 // << operator to write HTTPMessage to ostream
 // e.g. cout << url;
 ostream& operator<<(ostream& s, const HTTPMessage& msg);
+
+//==========================================================================
+// Gzip compression (gzip.cc) - not available on the web platform
+struct GZip
+{
+  //------------------------------------------------------------------------
+  // Compress 'in' into 'out' as a gzip stream, with zlib level 1-9
+  // Returns whether successful
+  static bool compress(const string& in, string& out, int level = 6);
+};
+
+//--------------------------------------------------------------------------
+// Gzip compress a response body in place if the request accepts it, the
+// body is at least min_size bytes (0 disables), the request is not HEAD,
+// the response has no Content-Encoding, Content-Length or
+// Transfer-Encoding and its Content-Type isn't already compressed
+// (images other than SVG, video, audio, zip, gzip) (compression.cc)
+// Adds Content-Encoding: gzip and Vary: Accept-Encoding
+// Returns whether it was compressed
+bool compress_response(const HTTPMessage& request, HTTPMessage& response,
+                       size_t min_size, int level = 6);
 
 //==========================================================================
 // Representation of a cookie (cookies.cc)
@@ -804,6 +831,8 @@ private:
   string cors_origin;  // Pattern for Access-Control-Allow-Origin header
   map<string, string> response_headers;  // Headers to add on responses
   bool websocket_enabled{false};
+  size_t compress_min_size{0};  // Minimum body size to compress, 0 = off
+  int compress_level{6};        // zlib compression level 1-9
 
   //------------------------------------------------------------------------
   // Implementation of worker process method
@@ -926,6 +955,16 @@ public:
   //------------------------------------------------------------------------
   // Enable WebSocket upgrade
   void enable_websocket() { websocket_enabled = true; }
+
+  //------------------------------------------------------------------------
+  // Enable gzip compression of response bodies of at least min_size bytes
+  // when the client accepts it.  Off by default - don't enable if a
+  // subclass streams data after the response in generate_progressive
+  void enable_compression(size_t min_size = 1024, int level = 6)
+  {
+    compress_min_size = min_size;
+    compress_level = level;
+  }
 
   //------------------------------------------------------------------------
   // Virtual destructor

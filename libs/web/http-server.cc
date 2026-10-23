@@ -230,6 +230,16 @@ void HTTPServer::process(SSL::TCPSocket& s, const SSL::ClientDetails& client)
           log.debug << "Body:\n" << response.body << endl;
         )
 
+      // Compress if enabled and acceptable
+      if (compress_min_size)
+      {
+        const auto size = response.body.size();
+        if (compress_response(request, response, compress_min_size,
+                              compress_level))
+          log.detail << "Compressed response " << size << " -> "
+                     << response.body.size() << " bytes\n";
+      }
+
       // Send out response
       // Suppress body if a HEAD request - saves simple handlers having to
       // worry about it

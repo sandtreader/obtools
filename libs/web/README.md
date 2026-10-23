@@ -16,6 +16,7 @@ Part of the [ObTools](https://github.com/sandtreader/obtools) library collection
 - **WebSocket**: client and server frame-level protocol handling
 - **HTTP caching**: URL-based cache with configurable update intervals
 - **CORS**: configurable cross-origin resource sharing
+- **Compression**: optional gzip of server responses (Accept-Encoding)
 
 ## Dependencies
 
@@ -24,6 +25,7 @@ Part of the [ObTools](https://github.com/sandtreader/obtools) library collection
 - `ot-ssl` - SSL/TLS support
 - `ot-crypto` - Cryptographic operations (HMAC for JWT)
 - `ot-json` - JSON (for JWT payloads)
+- `zlib` (`ext-pkg-zlib`) - gzip compression (not on web platform)
 
 ## Quick Start
 
@@ -422,6 +424,7 @@ cache.forget(Web::URL("https://example.com/old.json"));
 | `handle_websocket(req, client, sock, stream)` | Virtual: WebSocket handler |
 | `set_cors_origin(pattern)` | Enable CORS |
 | `add_response_header(name, value)` | Add default response header |
+| `enable_compression(min_size, level)` | Gzip responses of at least min_size bytes if accepted (off by default; not with progressive) |
 | `add(handler)` / `remove(handler)` | (SimpleHTTPServer) Register URL handlers |
 
 ### JWT

@@ -387,6 +387,43 @@ JSON::Value HTTPMessage::get_jwt_payload(const string& secret) const
   return JSON::Value{};
 }
 
+//--------------------------------------------------------------------------
+// Check whether the Accept-Encoding header(s) accept the given content
+// coding, as RFC 9110
+bool HTTPMessage::accepts_encoding(const string& coding) const
+{
+  // Headers read from the wire have lower-cased names
+  auto values = headers.get_all_splitting("Accept-Encoding");
+  values.splice(values.end(), headers.get_all_splitting("accept-encoding"));
+
+  const auto canonical = [](string c)
+  {
+    c = Text::tolower(Text::canonicalise_space(c));
+    return c == "x-gzip" ? string("gzip") : c;
+  };
+
+  const auto wanted = canonical(coding);
+  auto explicit_q = -1.0;
+  auto wildcard_q = -1.0;
+  for(const auto& value: values)
+  {
+    const auto bits = Text::split(value, ';');
+    auto q = 1.0;
+    for(auto i=1u; i<bits.size(); i++)
+    {
+      const auto param = Text::tolower(Text::remove_space(bits[i]));
+      if (!param.compare(0, 2, "q=")) q = Text::stof(param.substr(2));
+    }
+
+    const auto c = canonical(bits[0]);
+    if (c == wanted) explicit_q = q;
+    else if (c == "*") wildcard_q = q;
+  }
+
+  if (explicit_q >= 0) return explicit_q > 0;
+  return wildcard_q > 0;
+}
+
 }} // namespaces
 
 

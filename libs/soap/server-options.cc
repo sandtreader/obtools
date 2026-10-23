@@ -27,6 +27,13 @@ void ServerOptions::read(const XML::Element& server_e)
   // min-spare may be 0
   const auto spare = server_e.get_attr_int("min-spare", -1);
   if (spare >= 0) min_spare = spare;
+
+  // compress-min may be 0 (disabled)
+  const auto cmin = server_e.get_attr_int("compress-min", -1);
+  if (cmin >= 0) compress_min = cmin;
+
+  const auto clevel = server_e.get_attr_int("compress-level", 0);
+  if (clevel >= 1 && clevel <= 9) compress_level = clevel;
 }
 
 }} // namespaces

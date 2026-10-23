@@ -23,7 +23,7 @@ The project uses **Tup** as its primary build system with Lua-based rules. A leg
 
 ```bash
 sudo apt install build-essential tup clang git pkg-config debhelper dh-exec
-sudo apt install libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev
+sudo apt install libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev zlib1g-dev
 # For MariaDB: libmariadb-dev-compat instead of libmysqlclient-dev
 ```
 

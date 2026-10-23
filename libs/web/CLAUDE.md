@@ -5,7 +5,7 @@
 `ObTools::Web` is an HTTP client/server library with URL handling, MIME headers, cookies, JWT, WebSocket, and caching. Lives under `namespace ObTools::Web`.
 
 **Header:** `ot-web.h`
-**Dependencies:** `ot-xml`, `ot-misc`, `ot-ssl`, `ot-crypto`, `ot-json`
+**Dependencies:** `ot-xml`, `ot-misc`, `ot-ssl`, `ot-crypto`, `ot-json`, `ext-pkg-zlib` (not on web)
 **Platforms:** posix, web
 
 ## Key Classes
@@ -23,6 +23,7 @@
 | `JWT` | JSON Web Token parse/sign/verify |
 | `WebSocketFrame` | WebSocket frame read/write |
 | `WebSocketServer` | WebSocket message handling |
+| `GZip` | Gzip compression (zlib; not on web platform) |
 | `Cache` | HTTP cache with update checking |
 
 ## URL
@@ -93,6 +94,18 @@ void set_cookie(const string& name, const string& value,
 void get_cookies(map<string,string>& values) const;
 string get_cookie(const string& name) const;
 JSON::Value get_jwt_payload(const string& secret) const;
+bool accepts_encoding(const string& coding) const;  // Accept-Encoding, RFC 9110 q-values
+```
+
+## Compression
+
+```cpp
+static bool GZip::compress(const string& in, string& out, int level=6);
+// Gzip response body in place if request accepts gzip, body >= min_size
+// (0 = off), not HEAD, no Content-Encoding/Content-Length/Transfer-Encoding
+// and Content-Type not already compressed; adds Content-Encoding, Vary
+bool compress_response(const HTTPMessage& request, HTTPMessage& response,
+                       size_t min_size, int level=6);
 ```
 
 ## HTTPClient
@@ -145,6 +158,9 @@ HTTPServer(SSL::Context *ctx, int port=80, ...);
 void set_cors_origin(const string& pattern="*");
 void add_response_header(const string& name, const string& value);
 void enable_websocket();
+// gzip responses >= min_size if accepted - off by default, don't use with
+// generate_progressive
+void enable_compression(size_t min_size=1024, int level=6);
 
 // Override these:
 virtual bool handle_request(const HTTPMessage& request, HTTPMessage& response,

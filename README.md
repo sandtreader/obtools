@@ -56,7 +56,7 @@ The libraries also have a basic Makefile, which may simplify your CI system.
 To build ObTools you'll need the following packages on top of the standard Ubuntu 20.04 or Debian 10 install:
 
        $ sudo apt install build-essential tup clang git pkg-config debhelper dh-exec
-       $ sudo apt install libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev
+       $ sudo apt install libssl-dev libsqlite3-dev libmysqlclient-dev libpq-dev libnl-genl-3-dev zlib1g-dev
 
 If using another or older distribution which doesn't have Tup, you can build it yourself from the [Tup sources](http://gittup.org/tup/).  Why Tup?  It's blindingly fast and intelligent - I used to have a set of arcane [recursive Makefiles](https://www.cse.iitb.ac.in/~soumen/teach/1999.2A.CS699/make.html) which took ages and you could never quite trust for deep library changes - not any more!
 

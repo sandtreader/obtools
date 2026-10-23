@@ -30,6 +30,8 @@ TEST(ServerOptionsTest, TestDefaults)
   EXPECT_EQ(1, options.min_spare);
   EXPECT_EQ(10, options.max_threads);
   EXPECT_EQ(90, options.timeout);
+  EXPECT_EQ(1024, options.compress_min);
+  EXPECT_EQ(6, options.compress_level);
 }
 
 TEST(ServerOptionsTest, TestReadNone)
@@ -50,6 +52,25 @@ TEST(ServerOptionsTest, TestReadAll)
   EXPECT_EQ(0, options.min_spare);
   EXPECT_EQ(50, options.max_threads);
   EXPECT_EQ(30, options.timeout);
+}
+
+TEST(ServerOptionsTest, TestReadCompression)
+{
+  auto options = read_options(
+    "<server port='7080' compress-min='4096' compress-level='1'/>");
+  EXPECT_EQ(4096, options.compress_min);
+  EXPECT_EQ(1, options.compress_level);
+
+  // 0 disables compression
+  options = read_options("<server compress-min='0'/>");
+  EXPECT_EQ(0, options.compress_min);
+
+  // Bad values leave the defaults: negative sizes, levels outside 1-9
+  options = read_options("<server compress-min='-1' compress-level='0'/>");
+  EXPECT_EQ(1024, options.compress_min);
+  EXPECT_EQ(6, options.compress_level);
+  options = read_options("<server compress-level='10'/>");
+  EXPECT_EQ(6, options.compress_level);
 }
 
 TEST(ServerOptionsTest, TestBadValuesIgnored)
