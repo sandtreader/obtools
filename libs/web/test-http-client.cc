@@ -9,6 +9,7 @@
 
 #include "ot-web.h"
 #include <gtest/gtest.h>
+#include <thread>
 
 namespace {
 
@@ -21,6 +22,52 @@ TEST(HTTPClientTest, TestHTTPSWithNoSSLFailsRequests)
   Web::HTTPClient http(url);  // Note no ssl_ctx
   string body;
   EXPECT_EQ(-1, http.get(url, body));
+}
+
+TEST(HTTPClientTest, TestCustomContentTypePOST)
+{
+  Net::TCPSingleServer server(0);
+  int port = server.local().port;
+
+  string seen_content_type;
+  string seen_body;
+
+  thread server_thread([&]() {
+    Net::TCPSocket *sock = server.wait(5);
+    if (!sock) return;
+
+    Net::TCPStream stream(*sock);
+    Web::HTTPMessage request;
+    if (!request.read(stream, true))
+    {
+      delete sock;
+      return;
+    }
+
+    seen_content_type = request.headers.get("content-type");
+    seen_body = request.body;
+
+    Web::HTTPMessage response(200, "OK");
+    response.body = "{\"status\":\"ok\"}";
+    response.headers.put("content-type", "application/json");
+    response.write(stream);
+    stream.flush();
+
+    delete sock;
+  });
+
+  Web::URL url("http://127.0.0.1:" + to_string(port) + "/echo");
+  Web::HTTPClient client(url);
+  string response_body;
+
+  EXPECT_EQ(200, client.post(url, "{\"hello\":\"world\"}", response_body,
+                            "application/json"));
+  EXPECT_EQ("{\"status\":\"ok\"}", response_body);
+
+  server_thread.join();
+
+  EXPECT_EQ("application/json", seen_content_type);
+  EXPECT_EQ("{\"hello\":\"world\"}", seen_body);
 }
 
 } // anonymous namespace
