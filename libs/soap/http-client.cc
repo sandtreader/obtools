@@ -8,7 +8,6 @@
 //==========================================================================
 
 #include "ot-soap.h"
-#include "ot-rest.h"
 #include "ot-log.h"
 
 namespace ObTools { namespace SOAP {
@@ -59,29 +58,3 @@ int HTTPClient::post(Web::URL& url, const string& soap_action,
 }
 
 }} // namespaces
-
-namespace ObTools { namespace REST {
-
-// Simple POST operation on a URL
-int HTTPClient::post(const Web::URL& url, const string& request_body,
-                     string& response_body, const string& content_type)
-{
-  Web::HTTPMessage request("POST", url);
-  request.body = request_body;
-
-  request.headers.put("Content-Type", content_type);
-
-  Web::HTTPMessage response;
-  int result = do_fetch(request, response);
-  if (result) return result;
-
-  if (response.code < 300)
-    response_body = response.body;
-
-  return response.code;
-}
-
-}} // namespaces
-
-
-
