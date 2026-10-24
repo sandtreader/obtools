@@ -79,9 +79,16 @@ int status = client.get(Web::URL("/data"), body);
 if (status == 200)
   cout << body << endl;
 
-// POST request
+// POST request with the default form content type
 string response;
 int status = client.post(Web::URL("/submit"), "{\"key\":\"value\"}", response);
+
+// POST request with an explicit JSON content type
+string json_response;
+int json_status = client.post(Web::URL("/submit"),
+                              "{\"key\":\"value\"}",
+                              json_response,
+                              "application/json");
 
 // DELETE request
 int status = client.del(Web::URL("/item/42"), body);
@@ -405,7 +412,8 @@ cache.forget(Web::URL("https://example.com/old.json"));
 | Method | Returns | Description |
 |--------|---------|-------------|
 | `get(url, body)` | `int` | HTTP GET, returns status |
-| `post(url, body, response)` | `int` | HTTP POST |
+| `post(url, body, response)` | `int` | HTTP POST (default `application/x-www-form-urlencoded`) |
+| `post(url, body, response, content_type)` | `int` | HTTP POST with explicit `Content-Type` header |
 | `put(url, ct, is, response)` | `int` | HTTP PUT |
 | `del(url, body)` | `int` | HTTP DELETE |
 | `fetch(req, resp)` | `bool` | Full request/response |
