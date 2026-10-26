@@ -1,0 +1,11 @@
+#===========================================================================
+# Tupfile for ObTools::Redis library
+#
+# Copyright (c) 2026 Paul Clark. All rights reserved
+#===========================================================================
+
+NAME    = ot-redis
+TYPE    = lib
+DEPENDS = ot-net ot-mt ot-time
+
+include_rules

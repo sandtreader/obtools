@@ -44,6 +44,7 @@ DEPENDS  = ot-access \
            ot-mt \
            ot-net \
            ot-netlink \
+           ot-redis \
            ot-regen \
            ot-ring \
            ot-script \

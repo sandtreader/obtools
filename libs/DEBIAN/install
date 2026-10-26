@@ -36,6 +36,7 @@ msg/ot-msg.h /usr/include/obtools
 mt/ot-mt.h /usr/include/obtools
 net/ot-net.h /usr/include/obtools
 netlink/ot-netlink.h /usr/include/obtools
+redis/ot-redis.h /usr/include/obtools
 regen/ot-regen.h /usr/include/obtools
 script/ot-script.h /usr/include/obtools
 serial/ot-serial.h /usr/include/obtools
@@ -79,6 +80,7 @@ misc/libot-misc.a /usr/lib/obtools/
 mt/libot-mt.a /usr/lib/obtools/
 net/libot-net.a /usr/lib/obtools/
 netlink/libot-netlink.a /usr/lib/obtools/
+redis/libot-redis.a /usr/lib/obtools/
 regen/libot-regen.a /usr/lib/obtools/
 script/libot-script.a /usr/lib/obtools/
 serial/libot-serial.a /usr/lib/obtools/
