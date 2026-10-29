@@ -318,29 +318,15 @@ int HTTPClient::simple(const string& op, const URL& url, string& body)
 int HTTPClient::post(const URL& url, const string& request_body,
                      string& response_body)
 {
-  HTTPMessage request("POST", url);
-  request.body = request_body;
-
-  // Set standard form content-type
-  request.headers.put("Content-Type", "application/x-www-form-urlencoded");
-
-  HTTPMessage response;
-  int result(0);
-  if ((result = do_fetch(request, response)))
-  {
-    response_body = "Connection failed";
-    return -result;
-  }
-
-  response_body = get_response_body(response);
-  return response.code;
+  return post(url, request_body, "application/x-www-form-urlencoded",
+              response_body);
 }
 
 //--------------------------------------------------------------------------
 // Simple POST operation on a URL but provide content type
 // Returns result code, fills in response_body if provided, reason code if not
-int HTTPClient::post(const Web::URL& url, const string& request_body,
-                     string& response_body, const string& content_type)
+int HTTPClient::post(const Web::URL& url, const string& request_body, 
+                      const string& content_type, string& response_body)
 {
   HTTPMessage request("POST", url);
   request.body = request_body;
