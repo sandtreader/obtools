@@ -411,7 +411,7 @@ cache.forget(Web::URL("https://example.com/old.json"));
 |--------|---------|-------------|
 | `get(url, body)` | `int` | HTTP GET, returns status |
 | `post(url, body, response)` | `int` | HTTP POST (default `application/x-www-form-urlencoded`) |
-| `post(url, body, response, content_type)` | `int` | HTTP POST with explicit `Content-Type` header |
+| `post(url, body, content_type, response)` | `int` | HTTP POST with explicit `Content-Type` header |
 | `put(url, ct, is, response)` | `int` | HTTP PUT |
 | `del(url, body)` | `int` | HTTP DELETE |
 | `fetch(req, resp)` | `bool` | Full request/response |
