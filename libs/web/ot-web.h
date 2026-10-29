@@ -683,8 +683,8 @@ public:
   //------------------------------------------------------------------------
   // Simple POST operation on a URL but provide content type
   // Returns result code, fills in response_body if provided,
-  // reason code if not
-  int post(const URL& url, const string& request_body, string& response_body, const string& content_type);
+  // reason code if not 
+  int post(const URL& url, const string& request_body, const string& content_type, string& response_body);
 
   //------------------------------------------------------------------------
   // Simple PUT operation on a URL
