@@ -18,8 +18,10 @@ namespace {
   const auto anthropic_messages_url = anthropic_api_url+"/messages";
   const auto anthropic_version = "2026-10-21";
   // On a refusal by the model's safety classifiers, the API runs the request
-  // again on a model it chooses for the refusal's category
+  // again on a model it chooses for the refusal's category; but not for a
+  // Haiku, which has no fallback (the parameter would do nothing)
   const auto anthropic_beta = "server-side-fallback-2026-07-01";
+  const string no_fallback_prefix{"claude-haiku"};
   const auto default_model = "claude-opus-5-5";
   const int64_t default_max_tokens = 16000;
   const auto user_agent = "ObTools AI Agent";
@@ -188,7 +190,9 @@ JSON::Value AnthropicInterface::build_request(const Context& context) const
 
   if (!output_config.o.empty()) req_json.put("output_config", output_config);
 
-  req_json.put("fallbacks", "default");
+  if (req_json["model"].as_str().compare(0, no_fallback_prefix.size(),
+                                         no_fallback_prefix))
+    req_json.put("fallbacks", "default");
   return req_json;
 }
 
@@ -271,7 +275,8 @@ JSON::Value AnthropicInterface::call_api(const string& url,
   Web::HTTPMessage request("POST", Web::URL(url));
   request.headers.put("x-api-key", api_key);
   request.headers.put("anthropic-version", anthropic_version);
-  request.headers.put("anthropic-beta", anthropic_beta);
+  if (!!req_json["fallbacks"])
+    request.headers.put("anthropic-beta", anthropic_beta);
   request.headers.put("Content-Type", "application/json");
   request.body = req_json.str();
 

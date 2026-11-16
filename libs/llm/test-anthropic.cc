@@ -144,6 +144,18 @@ TEST(AnthropicRequest, Test_properties_map_and_sampling_ones_are_dropped)
   EXPECT_FALSE(!!req["effort"]);
 }
 
+TEST(AnthropicRequest, Test_no_fallback_for_haiku)
+{
+  // (Haiku has no server-side fallback: the parameter would do nothing)
+  AnthropicInterface claude("test-key");
+  claude.set_property("model", "claude-haiku-5-5");
+  Context context;
+  context.add({ Role::prompt, "Hi" });
+  auto req = claude.build_request(context);
+  EXPECT_EQ("claude-haiku-5-5", req["model"].as_str());
+  EXPECT_FALSE(!!req["fallbacks"]);
+}
+
 TEST(AnthropicRequest, Test_mandatory_function_asks_for_structured_output)
 {
   AnthropicInterface claude("test-key");
