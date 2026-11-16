@@ -1,6 +1,6 @@
 # ObTools::LLM
 
-Abstraction layer for Large Language Model APIs, with OpenAI and mock implementations. Supports completions, embeddings, and function calling.
+Abstraction layer for Large Language Model APIs, with Anthropic (Claude), OpenAI and mock implementations. Supports completions, embeddings (OpenAI and mock only), and function calling.
 
 Part of the [ObTools](https://github.com/sandtreader/obtools) library collection.
 
@@ -24,6 +24,31 @@ ctx.add({LLM::Context::Element::Role::prompt,
 // Get completion
 JSON::Value response = llm.complete(ctx);
 ```
+
+### Anthropic (Claude)
+
+```cpp
+LLM::AnthropicInterface llm("sk-ant-your-api-key");
+llm.set_property("model", "claude-opus-5-5");  // the default
+llm.set_property("effort", "low");             // low ... max: lower answers sooner
+JSON::Value response = llm.complete(ctx);
+```
+
+Calls the Messages API (`https://api.anthropic.com/v1/messages`, API version
+`2026-10-21`). Instructions become the system prompt; consecutive prompts or
+responses are merged into one turn, blank ones dropped, and a short user turn
+is added where the API needs one (it starts and ends with the user).
+`temperature`, `top_p` and `top_k` are dropped: the API refuses them. A
+function registered without a callback is asked for as structured output (its
+schema the response's) and its arguments returned, as OpenAI's forced function
+call; those with callbacks are offered as tools and called as the model uses
+them. On a refusal by Claude's safety classifiers the API runs the request
+again on a fallback model it chooses (`fallbacks: "default"`); a refusal it
+can't recover from throws `Exception`. There are no embeddings:
+`get_embedding()` throws.
+
+The live tests in `test-anthropic.cc` run only with `ANTHROPIC_API_KEY` set
+(Tup doesn't pass it through, so a build never calls the API).
 
 ### Embeddings
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-`ObTools::LLM` provides an abstraction layer for Large Language Model APIs, with OpenAI and mock implementations. Lives under `namespace ObTools::LLM`.
+`ObTools::LLM` provides an abstraction layer for Large Language Model APIs, with Anthropic (Claude), OpenAI and mock implementations. Lives under `namespace ObTools::LLM`.
 
 **Header:** `ot-llm.h`
 **Dependencies:** `ot-log`, `ot-time`, `ot-json`, `ot-misc`, `ot-ssl-openssl`, `ot-web`
@@ -12,6 +12,7 @@
 | Class | Purpose |
 |-------|---------|
 | `Interface` | Abstract LLM interface |
+| `AnthropicInterface` | Anthropic/Claude implementation (Messages API) |
 | `OpenAIInterface` | OpenAI/GPT implementation |
 | `MockInterface` | Mock for testing (reflects context, MD5 embeddings) |
 | `Context` | Conversation context (instructions, prompts, responses) |
@@ -48,6 +49,25 @@ void register_function(const string& name, const string& description,
 virtual JSON::Value complete(const Context& context) = 0;
 virtual Embedding get_embedding(const string& text) = 0;
 ```
+
+## AnthropicInterface
+
+```cpp
+AnthropicInterface(const string& api_key);
+JSON::Value build_request(const Context& context) const;   // the request JSON
+JSON::Value read_response(const JSON::Value& resp) const;  // text, or mandatory fn's args
+JSON::Value complete(const Context& context) override;     // claude-opus-5-5 by default
+Embedding get_embedding(const string& text) override;      // throws: no embeddings
+```
+
+Properties: `model`, `effort` (into `output_config.effort`), `max_tokens`
+(16000 by default); `temperature`, `top_p`, `top_k` dropped (refused by the
+API). A function without a callback becomes `output_config.format` (JSON
+schema, every object given `additionalProperties: false`), since the current
+models refuse a forced tool call; functions with callbacks become `tools`.
+Sends `fallbacks: "default"` with the `server-side-fallback-2026-07-01` beta;
+throws on `stop_reason: "refusal"`, and on structured output cut short at
+`max_tokens`.
 
 ## OpenAIInterface
 

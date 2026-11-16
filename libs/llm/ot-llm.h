@@ -151,6 +151,42 @@ class OpenAIInterface: public Interface
 };
 
 //==========================================================================
+/// Anthropic interface (Claude, through the Messages API)
+// Properties: "model" (claude-opus-5-5 by default), "effort" (low, medium,
+// high, xhigh or max: how hard it thinks; the model's default if unset) and
+// "max_tokens"; temperature and the other sampling properties are dropped
+// (the API refuses them).  A function with no callback is asked for as
+// structured output, its schema the response's, and returned parsed; those
+// with callbacks are offered as tools, and called as the model uses them.
+class AnthropicInterface: public Interface
+{
+  string api_key;
+
+  ObTools::SSL_OpenSSL::Context ssl_context;
+  Web::HTTPClient http_client;
+
+  JSON::Value call_api(const string& url, const JSON::Value& req_json);
+
+ public:
+  /// Constructor
+  AnthropicInterface(const string& _api_key);
+
+  /// The request for a completion with a given context
+  JSON::Value build_request(const Context& context) const;
+
+  /// Read a completion from the API's response: the text, or with a
+  /// mandatory function, its arguments; tools used have their callbacks
+  /// called.  Throws Exception on a refusal or a truncated answer
+  JSON::Value read_response(const JSON::Value& resp_json) const;
+
+  /// Get a completion with a given context
+  JSON::Value complete(const Context& context) override;
+
+  /// Embeddings aren't offered by Anthropic: throws Exception
+  Embedding get_embedding(const string& text) override;
+};
+
+//==========================================================================
 }} // namespaces
 
 #endif // !__OBTOOLS_LLM_H
