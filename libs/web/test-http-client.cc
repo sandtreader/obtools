@@ -60,8 +60,8 @@ TEST(HTTPClientTest, TestCustomContentTypePOST)
   Web::HTTPClient client(url);
   string response_body;
 
-  EXPECT_EQ(200, client.post(url, "{\"hello\":\"world\"}", response_body,
-                            "application/json"));
+  EXPECT_EQ(200, client.post(url, "{\"hello\":\"world\"}", "application/json",
+                            response_body));
   EXPECT_EQ("{\"status\":\"ok\"}", response_body);
 
   server_thread.join();
