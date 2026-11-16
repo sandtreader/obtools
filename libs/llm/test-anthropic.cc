@@ -161,6 +161,11 @@ TEST(AnthropicRequest, Test_mandatory_function_asks_for_structured_output)
             format["schema"]["additionalProperties"].type);
   EXPECT_EQ("string",
             format["schema"]["properties"]["say"]["type"].as_str());
+  // (Every property required, all of them: see closed() in anthropic.cc.)
+  const auto& required = format["schema"]["required"];
+  ASSERT_EQ(2u, required.a.size());
+  EXPECT_EQ("end", required[0].as_str());
+  EXPECT_EQ("say", required[1].as_str());
   EXPECT_FALSE(!!req["tools"]);
 }
 

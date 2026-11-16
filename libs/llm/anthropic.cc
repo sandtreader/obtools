@@ -45,13 +45,23 @@ namespace {
   }
 
   // A schema as structured output takes it: every object closed to
-  // properties it doesn't list
+  // properties it doesn't list, and requiring all those it does.  (The
+  // answer's properties come in the schema's order, which our JSON writes
+  // alphabetically; left optional, the model skipped them for one that
+  // came later, then wrote them inside that one's string, sometimes
+  // looping there till it ran out of tokens.)
   JSON::Value closed(const JSON::Value& schema)
   {
     JSON::Value s = schema;
     if (s.type != JSON::Value::OBJECT) return s;
     if (s["type"].as_str() == "object" && !s["additionalProperties"])
       s.put("additionalProperties", JSON::Value(JSON::Value::FALSE_));
+    if (s["properties"].type == JSON::Value::OBJECT)
+    {
+      auto& required = s.put("required", JSON::Value::ARRAY);
+      for(const auto& it: s["properties"].o)
+        required.add(it.first);
+    }
     for(auto& it: s["properties"].o)
       it.second = closed(it.second);
     if (s["items"].type == JSON::Value::OBJECT)
