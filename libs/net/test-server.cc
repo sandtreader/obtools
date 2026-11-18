@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 #include "ot-net.h"
 #include <stdlib.h>
+#include <cerrno>
 
 using namespace std;
 
@@ -64,6 +65,31 @@ TEST(TCPServerTests, TestServerExits)
   server.shutdown();
 
   cout << "Exiting\n";
+}
+
+//--------------------------------------------------------------------------
+// A server that is listening has no start error
+TEST(TCPServerTests, TestListeningServerHasNoStartError)
+{
+  TestServer server(11112);
+  EXPECT_EQ(0, server.get_start_error());
+  EXPECT_FALSE(!server);
+  server.shutdown();
+}
+
+//--------------------------------------------------------------------------
+// A server whose port is already in use says why it isn't listening
+TEST(TCPServerTests, TestPortInUseGivesStartError)
+{
+  TestServer first(11113);
+  ASSERT_EQ(0, first.get_start_error());
+
+  TestServer second(11113);
+  EXPECT_EQ(EADDRINUSE, second.get_start_error());
+  EXPECT_TRUE(!second);
+
+  second.shutdown();
+  first.shutdown();
 }
 
 //--------------------------------------------------------------------------

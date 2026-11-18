@@ -201,6 +201,11 @@ public:
 };
 
 EchoServer server(8080);
+if (!server)  // couldn't listen - e.g. port in use
+{
+  cerr << "Can't listen: " << strerror(server.get_start_error()) << endl;
+  return 2;
+}
 server.run();  // blocks, handles connections with thread pool
 ```
 
@@ -301,7 +306,7 @@ string hostname = Net::Host::get_hostname();
 |-------|-------------|
 | `TCPClient` | Constructors with endpoint/timeout/local binding, `get_server()` |
 | `TCPSingleServer` | `wait(timeout)` returns connected socket |
-| `TCPServer` | `run()`, `process()` (pure virtual), `verify()`, `shutdown()` |
+| `TCPServer` | `run()`, `process()` (pure virtual), `verify()`, `shutdown()`, `get_start_error()` |
 | `TCPServerThread` | Background thread wrapper for TCPServer |
 | `TCPStream` | iostream wrapper for TCPSocket |
 

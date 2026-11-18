@@ -17,6 +17,7 @@
 | `Fault` | SOAP fault (error response) |
 | `HTTPClient` | SOAP-over-HTTP client (extends `Web::HTTPClient`) |
 | `URLHandler` | Abstract SOAP URL handler |
+| `MessageInterface<CONTEXT>` | HTTP/HTTPS SOAP servers from `<soap>` config, feeding a `Message::Broker` |
 
 ## Message
 
@@ -37,3 +38,17 @@ string to_string() const;
 HTTPClient(Net::EndPoint server, SSL::Context *ctx=nullptr);
 int post(const URL& url, Message& request, Message& response);
 ```
+
+## MessageInterface
+
+```cpp
+MessageInterface(CONTEXT& context, const XML::Element& config,  // <soap>
+                 Message::Broker<CONTEXT>& broker, const string& server_name,
+                 SSL::Context *ssl_ctx=0);
+bool is_listening() const;   // all servers created are listening (true if none);
+                             // ones that can't are logged as errors ("Can't listen...")
+void set_cors_origin(const string& pattern="*");
+void shutdown();
+```
+
+Config: `<server port= address=.../>` (HTTP), `<ssl-server port= address=.../>` (HTTPS, only created if `ssl_ctx` given); address defaults to `localhost`.

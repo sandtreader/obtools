@@ -14,6 +14,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <cstring>
 #include "ot-xml.h"
 #include "ot-web.h"
 #include "ot-msg.h"
@@ -560,6 +561,19 @@ class MessageInterface
   Web::SimpleHTTPServer *https_server;
   Net::TCPServerThread *https_server_thread;
 
+  // Log an error if the given server failed to start listening
+  static void log_if_not_listening(const Web::SimpleHTTPServer& server,
+                                   const string& type,
+                                   const Net::EndPoint& addr)
+  {
+    if (!server)
+    {
+      Log::Streams log;
+      log.error << "Can't listen for " << type << " SOAP at " << addr
+                << ": " << strerror(server.get_start_error()) << endl;
+    }
+  }
+
 public:
   //------------------------------------------------------------------------
   // Constructor
@@ -589,6 +603,7 @@ public:
                                               options.min_spare,
                                               options.max_threads,
                                               options.timeout);
+      log_if_not_listening(*http_server, "HTTP", addr);
 
       // Compress responses - never progressive, so safe
       if (options.compress_min > 0)
@@ -622,6 +637,7 @@ public:
                                                  options.min_spare,
                                                  options.max_threads,
                                                  options.timeout);
+        log_if_not_listening(*https_server, "HTTPS", addr);
 
         // Compress responses - never progressive, so safe
         if (options.compress_min > 0)
@@ -638,6 +654,17 @@ public:
       else
         log.error << "SSL server requested but no SSL context established\n";
     }
+  }
+
+  //------------------------------------------------------------------------
+  // Whether all the servers we created are listening - true if none were
+  // configured; an SSL server requested without an SSL context isn't
+  // created, so doesn't count
+  bool is_listening() const
+  {
+    if (http_server && !*http_server) return false;
+    if (https_server && !*https_server) return false;
+    return true;
   }
 
   //------------------------------------------------------------------------

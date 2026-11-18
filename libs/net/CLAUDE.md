@@ -133,6 +133,8 @@ Subclass and implement `process()`. Uses a thread pool.
 ```cpp
 TCPServer(int port, int backlog=5, int min_spare=1, int max_threads=10);
 TCPServer(EndPoint address, int backlog=5, int min_spare=1, int max_threads=10);
+operator!() const;                                        // not listening?
+int get_start_error() const;                              // errno if listen failed (e.g. EADDRINUSE), else 0
 void run();                                               // run main loop (blocks)
 virtual bool verify(EndPoint) const;                      // client filter (default: accept all)
 virtual void process(TCPSocket& s, EndPoint client) = 0;  // handle connection

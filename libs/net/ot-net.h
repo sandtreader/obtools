@@ -861,6 +861,7 @@ private:
   int backlog;
   MT::ThreadPool<TCPWorkerThread> threadpool;
   bool alive;
+  int start_error;  // errno from failing to listen, 0 if OK
 
   void start();
 
@@ -870,14 +871,22 @@ public:
   TCPServer(int _port, int _backlog=5,
             int min_spare=1, int max_threads=10):
     TCPSocket(), address(IPAddress(inaddr_any), _port), backlog(_backlog),
-    threadpool(min_spare, max_threads), alive(true) { start(); }
+    threadpool(min_spare, max_threads), alive(true), start_error(0)
+  { start(); }
 
   //------------------------------------------------------------------------
   // Constructor with specified address (specific binding)
   TCPServer(EndPoint _address, int _backlog=5,
             int min_spare=1, int max_threads=10):
     TCPSocket(), address(_address), backlog(_backlog),
-    threadpool(min_spare, max_threads), alive(true) { start(); }
+    threadpool(min_spare, max_threads), alive(true), start_error(0)
+  { start(); }
+
+  //------------------------------------------------------------------------
+  // Get the error (errno) from failing to start listening - e.g.
+  // EADDRINUSE if the port is already in use - or 0 if listening OK
+  // (when it failed, the socket is also closed, so !server is true)
+  int get_start_error() const { return start_error; }
 
   //------------------------------------------------------------------------
   // Run server

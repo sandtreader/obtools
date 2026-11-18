@@ -9,13 +9,16 @@
 
 #include "ot-net.h"
 #include <memory>
+#include <errno.h>
 
 #if defined(PLATFORM_WINDOWS)
 #include <io.h>
 #define SOCKCLOSE closesocket
+#define SOCKERRNO WSAGetLastError()
 #else
 #include <unistd.h>
 #define SOCKCLOSE close
+#define SOCKERRNO errno
 #endif
 
 namespace ObTools { namespace Net {
@@ -26,6 +29,7 @@ void TCPServer::start()
 {
   if (fd == INVALID_FD)
   {
+    start_error = SOCKERRNO ? SOCKERRNO : EBADF;
     alive = false;
     return;
   }
@@ -44,6 +48,7 @@ void TCPServer::start()
   // (which might be INADDR_ANY from our constructor
   if (!bind(address))
   {
+    start_error = SOCKERRNO;  // before close() can change it
     TCPSocket::close();
     alive = false;
     return;
@@ -52,6 +57,7 @@ void TCPServer::start()
   // Start listing with backlog
   if (::listen(fd, backlog))
   {
+    start_error = SOCKERRNO;  // before close() can change it
     TCPSocket::close();
     alive = false;
   }
